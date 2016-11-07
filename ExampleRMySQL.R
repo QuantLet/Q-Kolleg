@@ -1,4 +1,4 @@
-# R code for Getting Access data into R using RMySQL
+# R code to import data from a database into R using RMySQL
 
 
 #################################################################
