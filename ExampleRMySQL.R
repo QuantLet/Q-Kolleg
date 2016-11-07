@@ -24,20 +24,22 @@ con = dbConnect(drv=MySQL(),
                 user="root", password = "qwertz",
                 dbname = "world", host = "localhost")
 
-# List with tables in connection
+# list with tables in connection
 dbListTables(con)
 
-# List variables in specific table
+# list variables in specific table
 dbListFields(con, "city")
 
-# run a query
-
+# run a query:
+# specify query
 qry = "SELECT * FROM city"
+# send query
 rs1 = dbSendQuery(con, qry)
+# fetch query and import in R as data.frame
 data = fetch(rs1)
 class(data)
 
-# Free resources associated with rs1
+# free resources associated with rs1
 dbClearResult(rs1)
 
 
