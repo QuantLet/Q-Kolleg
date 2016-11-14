@@ -2,7 +2,7 @@ rm(list = ls())
 graphics.off()
 
 
-libraries = c("tm", "RMySQL", "SnowballC","wordcloud" )
+libraries = c("tm", "RMySQL", "SnowballC","wordcloud","slam","reshape2" ,"ggplot2")
 lapply(libraries,function(x)if(!(x %in% installed.packages())){install.packages(x)})
 lapply(libraries,require,quietly=TRUE,character.only=TRUE)
 
@@ -16,7 +16,9 @@ class(corpus)
 class(corpus[[1]])
 corpus[1]
 corpus[[1]]
+inspect(corpus)
 
+head(corpus)
 # data preprocessing
 # use lower case letters, remove punctuation, remove numbers
 corpus = tm_map(corpus, tolower)
@@ -53,7 +55,25 @@ findAssocs(tdm, "trading",0.3)
 
 
 ### wordcloud with words, that appear at least for 100 times
-wordfreq = findFreqTerms(tdm, lowfreq=100)
-termFrequency <- rowSums(as.matrix(tdm[wordfreq,])) 
+wordfreq = findFreqTerms(tdm.common, lowfreq=100)
+termFrequency <- rowSums(as.matrix(tdm.common[wordfreq,])) 
 wordcloud(words=names(termFrequency),freq=termFrequency,min.freq=3,max.words=50,random.order=T,colors=c("red","green","blue","purple","orange"))
+
+# convert tdm in a matrix. needs less space
+tdm.dense = as.matrix(tdm.common)
+
+tdm.dense = melt(tdm.dense, value.name = "count")
+head(tdm.dense)
+
+# make a plot
+ggplot(tdm.dense, aes(x = Docs, y = Terms, fill = log10(count))) 
+geom_tile(colour = "white") 
+scale_fill_gradient(high="#FF0000" , low="#FFFFFF")
+ylab("") 
+theme(panel.background = element_blank())
+theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+
+
+### problem: document name disappeared. need to take care for document names
+
 
