@@ -54,19 +54,19 @@ graphics.off()
 ### RMySQL (remote database)
 #################################################################
   # Establish connection with a public database
-  drv <- dbDriver("MySQL") 
-  con <- dbConnect(drv, dbname = "ensembl_mart_84", user = "anonymous", 
+  drv = dbDriver("MySQL") 
+  con = dbConnect(drv, dbname = "ensembl_mart_84", user = "anonymous", 
                         host = "martdb.ensembl.org", port = 5316) 
 
 # Checking the tables
-  tables <- dbListTables(con)
+  tables = dbListTables(con)
   length(tables)
   # tables[substr(tables, 1, 4) == "oana"]
   # oanatinus_gene_ensembl__gene__main seems interesting
 
 # Long, explicit way of running a query
   qry1  = "SELECT * FROM  oanatinus_gene_ensembl__gene__main"
-  qry2 = "SELECT * FROM oanatinus_gene_ensembl__go_GO__dm"
+  qry2  = "SELECT * FROM oanatinus_gene_ensembl__go_GO__dm"
 
   rs1  = dbSendQuery(con, qry1)
   data = fetch(rs1)
