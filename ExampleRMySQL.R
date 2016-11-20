@@ -82,3 +82,31 @@ graphics.off()
 
 # Close connections
   dbDisconnect(con)
+    
+###############################################################
+### RMySQL (populate database)
+###############################################################
+drv = dbDriver("MySQL") 
+con = dbConnect(drv, dbname = "Q-Kolleg", 
+                   user = "username", password = "password",
+                   host = "neyman.wiwi.hu-berlin.de", port = 3306)
+  
+# Create a table called abstracts, if it doesn't yet exist in the database:
+## Note: this command has been run already, and therefore is superfluous now
+if(!(abstracts %in% dbListTable(con))){
+  popqry = "CREATE TABLE abstracts (abstext VARCHAR(3000))"
+  dbSendQuery(con, popqry)         # Tell database to create a table called abstracts
+  dbListTables(con)                # [1] "abstracts"
+  
+  ## Load text files into the "abstracts"-table of the database
+    for(docname in list.files()){
+      loadqry = paste0("LOAD DATA LOCAL INFILE '", docname, "' INTO TABLE abstracts FIELDS terminated by '\r'")
+      dbExecute(con, loadqry)
+    }
+}
+    
+# Now that the table has been filled, lets extract its content:
+allabstracts = dbGetQuery(con, "SELECT * FROM abstracts")
+
+# Close the connection:
+dbDisconnect(con)
