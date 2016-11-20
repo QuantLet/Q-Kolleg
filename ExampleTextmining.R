@@ -7,7 +7,7 @@ if(!("cldr" %in% install.packages())){
   }
 
 # Load required packages:
-libraries = c("tm", "RMySQL", "SnowballC","wordcloud","slam","reshape2" ,"ggplot2")
+libraries = c("tm", "cldr", "RMySQL", "SnowballC","wordcloud","slam","reshape2" ,"ggplot2")
 lapply(libraries,function(x)if(!(x %in% installed.packages())){install.packages(x)})
 lapply(libraries, require, quietly = TRUE, character.only = TRUE)
 
