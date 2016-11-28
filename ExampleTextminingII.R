@@ -22,7 +22,7 @@ setwd("C:/Users/Johannes/Dropbox/Digital_Economics")
 ## Get data:
   drv = dbDriver("MySQL") 
   con = dbConnect(drv, dbname = "Q-Kolleg", 
-                  user = "stoiberj2.hub", password = "",
+                  user = "stoiberj2.hub", password = "Im9A#5r?",
                   host = "neyman.wiwi.hu-berlin.de", port = 3306)
 
   # extract the table abstracts
@@ -74,61 +74,93 @@ setwd("C:/Users/Johannes/Dropbox/Digital_Economics")
     removeSparseTerms(tdm,0.6)$dimnames$Terms
 
 #################################################
-# conduct here#
+# cluster analysis
 #################################################
 # how many clusters may we have? 
 en.abstracts$jel[1:20]
-# extract first 3 characters from projectcode
+# extract first 1/3 characters from projectcode
 p.code = substring(en.abstracts$projectcode, 1,3)
 
+is.letter = function(x) grepl("[[:alpha:]]", x)
+is.number = function(x) grepl("[[:digit:]]", x)
 
-
-is.letter <- function(x) grepl("[[:alpha:]]", x)
-is.number <- function(x) grepl("[[:digit:]]", x)
 # check the 3rd character. if it is a letter, than delete. else not. 
 p.code[which(is.letter(substr(p.code,3,3))==TRUE)] = substr(p.code[which(is.letter(substr(p.code,3,3))==TRUE)],1,2)
-p.code = as.factor(p.code)
+p.code  = as.factor(p.code)
+
+# a further cluster approach. take only the letters from the project groups.
 p2.code = as.factor(substr(as.character(p.code),1,1))
+
 # number of clusters:
-cl = length(sort(unique(p.code)))
+cl1 = length(sort(unique(p.code)))
+cl2 = length(sort(unique(p2.code)))
 
 
 # extract dtm from and save as matrix object. Use sparse one
-m = as.matrix(removeSparseTerms(dtm,0.9))
+# apply log transformation and compare without transformation
+lm = log(1 + as.matrix(removeSparseTerms(dtm,0.9)))
+m  = as.matrix(removeSparseTerms(dtm,0.9))
 #compute distance between document vectors
-d <- dist(m)
+d  = dist(m)
+ld = dist(lm)
+
 
 # PCA
-pca = prcomp(m, center=TRUE, scale=TRUE)
-summary(pca) 
-plot(pca, type="l")
-scree(m, factors=FALSE)
+# PCA
+pca  = prcomp(m, center=TRUE, scale=TRUE)
+lpca = prcomp(lm, center=TRUE, scale=TRUE)
+
+# screplot
+plot(pca$sdev^2, ylim=c(0.5,3), ylab="Eigenvalues of components", xlab="component number")
+points(lpca$sdev^2, col= "red")
+abline(h=1)
+
+
+# density plot for those with higher eigenvalues than 1
+ev = length(which(pca$sdev > 1))
+plot(density(prcomp(m, center =  TRUE, scale = TRUE)$x[,1:ev]), main="")
+lines(density((prcomp(lm, center=TRUE, scale=TRUE)$x[,1:ev])), col="red")
 
 
 
-#run hierarchical clustering using Ward's method
-groups <- hclust(d,method="ward.D")
+
+# 1st two pc and 5 project groups i ncolors
+plot(pca$x[,c(1,2)],  col=p2.code, main = "PC1 vs PC2 on TDM")
+plot(pca$x[,c(3,4)],  col=p2.code, main = "PC3 vs PC4 on TDM")
+plot(lpca$x[,c(1,2)], col=p2.code, main = "PC1 vs PC2 on transformed TDM")
+plot(lpca$x[,c(3,4)], col=p2.code, main = "PC3 vs PC4 on transformed TDM")
+
+
+
+# go furhter with transformed matrix
+#run hierarchical clustering using Ward's method.
+groups <- hclust(ld,method="ward.D")
+
 #plot dendogram, use hang to ensure that labels fall below tree
 plot(groups, hang=-1)
-rect.hclust(groups,5)
-hier.clust = cutree(groups, 5)
-clustm = table(hier.clust, p.code)
-image(t(clustm[nrow(clustm):1,] ), axes=FALSE, zlim=c(-4,4), col = rainbow(10))
-plot(pca$x[,1:2], col=cutree(groups, 38), main="38 Cluster")
-plot(pca$x[,1:2], col=cutree(groups, 5), main="5 Cluster")
+rect.hclust(groups, cl2)
+table(cutree(groups, 4), p2.code)
 
+# plot PC1 vs PC2, color as given by the 5 found clusters
+plot(lpca$x[,1:2], col=cutree(groups, 4), main="4 Cluster")
 
 
 ### k-means
-#k means algorithm, 2 clusters, 100 starting configurations
-kfit <- kmeans(d, length(unique(p.code)), nstart=100)
-kfit2 <- kmeans(d, length(unique(p2.code)), nstart = 100)
-
+#k means algorithm, 100 starting configurations
+kfit <- kmeans(ld, 4, nstart=100)
 #plot - need library cluster
-clusplot(m, kfit$cluster, color=T, shade=T, lines=0)
-clusplot(m, kfit2$cluster, color = T, shade = T, lines = 0)
-table(kfit2$cluster, p2.code)
-table(kfit$cluster, p.code)
+clusplot(lm, kfit$cluster, color=T, shade=T,  lines=0)
+table(kfit$cluster, p2.code)
 
-plot(pca$x[,1:2], col= kfit$cluster, main="38 cluster")
-plot(pca$x[,1:2], col= kfit2$cluster, main="5 cluster")
+plot(lpca$x[,1:2], col= kmeans(ld, 5, nstart=100)$cluster, main="5 cluster")
+
+
+# cake diagram from table
+par(mfrow=c(2,2))
+for ( i in i:4){
+pie(table(kfit$cluster, p2.code)[,i], col= c(1:4), 
+    main=paste("Project ",levels(p2.code)[i],sep=""))
+}
+dev.off()
+i=1
+
