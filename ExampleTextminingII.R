@@ -156,11 +156,6 @@ plot(lpca$x[,1:2], col= kmeans(ld, 5, nstart=100)$cluster, main="5 cluster")
 
 
 # cake diagram from table
-par(mfrow=c(2,2))
-for ( i in i:4){
-pie(table(kfit$cluster, p2.code)[,i], col= c(1:4), 
-    main=paste("Project ",levels(p2.code)[i],sep=""))
-}
-dev.off()
-i=1
+paper.id = names(which(kfit$cluster==1))
+en.abstracts$title[en.abstracts$number %in% paper.id]
 
