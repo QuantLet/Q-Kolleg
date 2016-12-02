@@ -63,9 +63,19 @@ library(RMySQL)
      stemstring = lapply(lapply(stems, `[`, "stem"),
                           function(x){paste(x$stem, collapse = " ")}
                           )
+     # lowercase, strip white space & remove "abstracts" from text:
+     dbprep = function(strings){
+       strings = lapply(strings, tolower)
+       strings = lapply(strings, function(x){trimws(x, "both")})
+       strings = lapply(strings, function(x){gsub("abstract", "", x)})
+       return(strings)
+     }
+     lemmastring = dbprep(lemmastring)
+     stemstring = dbprep(stemstring)
+  
   ## Get the tree-tagged results in a suitable shape for the database:
      lemmadf = as.data.frame(lemmastring, stringsAsFactors = F)
-     stemdf = as.data.frame(stemstring, stringsAsFActors = F)
+     stemdf  = as.data.frame(stemstring,  stringsAsFActors = F)
      treetagg_res = data.frame(t(lemmadf), t(stemdf), stringsAsFactors = F)
      names(treetagg_res) = c("lemma", "stem")
      rownames(treetagg_res) = NULL
