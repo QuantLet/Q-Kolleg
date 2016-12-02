@@ -2,6 +2,7 @@ library(koRpus)
 library(tm)
 library(SnowballC)
 library(RMySQL)
+library(cldr)
 
 ## Define functions for stemming & lemmatization
   # The actual lemma & stemming function. Requires installation of
@@ -22,7 +23,7 @@ library(RMySQL)
   cleantags = function(dirty){
     clean = kRp.filter.wclass(dirty, corp.rm.class = "nonpunct")
     clean = kRp.filter.wclass(clean, corp.rm.class = "stopword")
-    clean = within(clean@TT.res, lemma[lemma == "<unknown>"] = token[lemma == "<unknown>"])
+    clean = within(clean@TT.res, lemma[lemma == "<unknown>"] <- token[lemma == "<unknown>"])
     deletion = c("number", "symbol", "possesive", "punct", "sentc")
     clean = clean[!(clean$wclass %in% deletion),]
     return(clean)
@@ -32,16 +33,28 @@ library(RMySQL)
     return(cleantags(treetagged(docname)))
   }
 
-  # Clean working directory from empty .txt files:
-  rm_empty_files = function(){
+  # Clean working directory from empty and non-english .txt files:
+  align_abstracts = function(){
     docs = list.files(pattern = "*.txt")
-    inds = file.size(docs) <= 5
-    file.remove(docs[inds])
+    abstracts = dbGetQuery(con, "SELECT * FROM abstracts")
+    langs = detectLanguage(abstracts$abs)
+    noneng = which(langs$detectedLanguage != "ENGLISH")
+    file.remove(docs[noneng])
+    author_etc = abstracts[-noneng,-ncol(abstracts)]
+    return(author_etc)
   }
   
+## Connect to database. Use info from abstracts-table to detect languages
+ ## and remove empty and non-english abstracts
+  drv = MySQL()
+  con = dbConnect(drv, dbname = "Q-Kolleg", 
+                  user = "schroedk.hub", password = "",
+                  host = "neyman.wiwi.hu-berlin.de", port = 3306)
+  source("/Users/Ken/Q-Kolleg/Webscraping.R")
+  
 ## Use the above functions to lemmatize and stem the text:
-  # Remove empty text files from the working directory:
-  rm_empty_files()
+  # Remove empty and non-english text files from the working directory:
+  author_etc = align_abstracts()
   
   # Lemmatize and stem the text-documents:
   lemstems = list()
@@ -67,25 +80,20 @@ library(RMySQL)
      dbprep = function(strings){
        strings = lapply(strings, tolower)
        strings = lapply(strings, function(x){trimws(x, "both")})
-       strings = lapply(strings, function(x){gsub("abstract", "", x)})
+       strings = lapply(strings, function(x){gsub("abstract ", "", x)})
        return(strings)
      }
      lemmastring = dbprep(lemmastring)
      stemstring = dbprep(stemstring)
   
   ## Get the tree-tagged results in a suitable shape for the database:
-     lemmadf = as.data.frame(lemmastring, stringsAsFactors = F)
-     stemdf  = as.data.frame(stemstring,  stringsAsFActors = F)
-     treetagg_res = data.frame(t(lemmadf), t(stemdf), stringsAsFactors = F)
-     names(treetagg_res) = c("lemma", "stem")
-     rownames(treetagg_res) = NULL
+     lemmadf = as.data.frame(lemmastring, stringsAsFactors = F, row.names = "lemma")
+     stemdf  = as.data.frame(stemstring,  stringsAsFActors = F, row.names = "stem")
+     treetagg_res = data.frame(author_etc, t(lemmadf), t(stemdf), 
+                               stringsAsFactors = F, row.names = F)
+     treetagg_res$row_names = NULL
   
 ## Save the treetag-results in our database:
-   drv = MySQL()
-   con = dbConnect(drv, dbname = "Q-Kolleg", 
-                    user = "schroedk.hub", password = "",
-                    host = "neyman.wiwi.hu-berlin.de", port = 3306)
-  
   # Create a new table with  in the database, called treetag
     dbWriteTable(con, name = "treetagger", value = treetagg_res, 
                  overwrite = T, row.names = F)
