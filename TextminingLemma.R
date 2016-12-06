@@ -4,7 +4,7 @@ library(cluster)
 
 ## Get the data in place:
   con = dbConnect(MySQL(), dbname = "Q-Kolleg", 
-                  user = "schroedk.hub", password = "",
+                  user = "schroedk.hub", password = "..",
                   host = "neyman.wiwi.hu-berlin.de", port = 3306)
 
   dbtt = dbGetQuery(con, "SELECT * FROM treetagger")
@@ -29,7 +29,7 @@ library(cluster)
     }
  
   # Remove sparse terms:
-    small_dtm = function(corpus, threshold = 0.95, ...){
+    small_dtm = function(corpus, threshold = 0.99, ...){
       removeSparseTerms(sparse_dtm(corpus, ...), sparse = threshold)
     }
 
@@ -86,3 +86,9 @@ library(cluster)
      # table predictions vs. project codes (kmeans)
      kmeans_fit = lapply(kfit, table, rough_pcode)
         
+
+## No need for PCA while doing kmeans
+## Idea: Project on first 3 principal component in 3D
+## Idea: Multidimensional scaling for projection, instead of PCA
+## TFIDF
+## Background: word2vec
