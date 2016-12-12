@@ -69,9 +69,11 @@ library(RMySQL)
     # dfcontent will contain all scraped data:
     dfcontent = as.data.frame(content, stringsAsFactors = F)
     dfcontent$abstracts = r_abs
+    
     # turn around the order, that id 1 is always Paper 2005-001
     dfcontent = cbind("id"= 1:dim(dfcontent)[1],
                       dfcontent[(dim(dfcontent)[1]:1),])
+   
     # date in date format
     dfcontent$date=  as.Date(dfcontent$date, format="%d.%m.%Y")
     
