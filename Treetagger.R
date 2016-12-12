@@ -7,9 +7,9 @@ library(cldr)
 ## Define functions for stemming & lemmatization
   # The actual lemma & stemming function. Requires installation of
   # Treetagger (see: http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/)
-  treetagged = function(docname){
+  treetagged = function(docname, objorfile = "file"){
     treetag(docname, 
-      treetagger = "manual", format = "file",
+      treetagger = "manual", format = objorfile,
       lang = "en",
       apply.sentc.end = TRUE, 
       encoding = "Latin1",
