@@ -8,15 +8,16 @@ library(cldr)
  # Requires installation of
  # Treetagger (see: http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/)
 
-source("Treetagger_HF.R")
+
+## load helperfunctions
+source("helperfunctions_Q-Kolleg.R")
+
 ## Connect to database. Use info from abstracts-table to detect languages
- ## and remove empty and non-english abstracts
+## and remove empty and non-english abstracts
   drv = MySQL()
   con = dbConnect(drv, dbname = "Q-Kolleg", 
                   user = "schroedk.hub", password = "",
                   host = "neyman.wiwi.hu-berlin.de", port = 3306)
-  
-  #source("/Users/Ken/Q-Kolleg/Webscraping.R")
   
 ## Use the above functions to lemmatize and stem the text:
   # Remove empty and non-english text files from the working directory:
@@ -34,8 +35,9 @@ source("Treetagger_HF.R")
   stems  = lapply(lemstems, `[`, "stem") 
 
 ## Since we want to also compare this lemmatization to stemming
-  ## in a tdm context, we'll put it all together again....
-  ## Also, this result will be used to store in the database.
+## in a tdm context, we'll put it all together again....
+## Also, this result will be used to store in the database.
+  
      lemmastring = lapply(lapply(lemmas, `[`, "lemma"), 
                            function(x){paste(x$lemma, collapse = " ")}
                            )
@@ -46,21 +48,23 @@ source("Treetagger_HF.R")
      lemmastring = dbprep(lemmastring)
      stemstring = dbprep(stemstring)
   
-  ## Get the tree-tagged results in a suitable shape for the database:
+     # Get the tree-tagged results in a suitable shape for the database:
      lemmadf = as.data.frame(lemmastring, stringsAsFactors = F, row.names = "lemma")
      stemdf  = as.data.frame(stemstring,  stringsAsFActors = F, row.names = "stem")
      
-     treetagg_res = data.frame(author_etc, t(lemmadf), t(stemdf), 
-                               stringsAsFactors = F, row.names = F)
-     treetagg_res$row_names = NULL
-     
-## tree-tagged results prepared as dataframe to be added to db
-   # take care for order:
-   ord = dim(lemmadf)[1]:1
-   treetagg_result = cbind("id" = rev(ord), author_etc, "lem" = t(lemmadf)[ord,], "stem" = t(stemdf)[ord,]) 
-     
+     # tree-tagged results prepared as dataframe to be added to db
+     # take care for order:
+     ord = dim(lemmadf)[1]:1
+     treetagg_result = cbind("id" = rev(ord),
+                             author_etc[rev(ord),],
+                             "lem" = t(lemmadf)[ord,],
+                             "stem" = t(stemdf)[ord,]) 
+   
+
 ## Save the treetag-results in our database:
-   dbSendQuery(con, "
+  # Create new table treetagger if does not exist right now
+  if(!("treetagger" %in% dbListTables(con))){
+     dbSendQuery(con, "
                CREATE TABLE treetagger
                (id INT,
                number VARCHAR(20),
@@ -72,8 +76,9 @@ source("Treetagger_HF.R")
                lemma VARCHAR(2000),
                stem  VARCHAR(2000)
                PRIMARY KEY (id));")
-  
-  # Create a new table with  in the database, called treetag
+   } 
+     
+  # Add information to db-table treetagger
     dbWriteTable(con, name = "treetagger", value = treetagg_result,
                  append=T, overwrite = F, row.names = F)
     

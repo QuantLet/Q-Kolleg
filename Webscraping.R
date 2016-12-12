@@ -5,6 +5,10 @@ library(stringr)
 library(XML)
 library(RMySQL)
 
+# load helperfunctions
+source("helperfunctions_Q-Kolleg.R")
+
+
 ### Scrape the text data from RDC-page: ###
 
 ## Get the table-info from the RDC-page:
@@ -23,18 +27,18 @@ library(RMySQL)
   content = content[[1]]
 
   # Some page specific manipulations:
-    content = content[-nrow(content), ]
-    colnames(content) = c("number", "title", "authors", "projectcode", 
-                           "date", "jel", "abstract", "download", 
-                           "quantlets", "empty")
-    cols = ncol(content)
-    content = content[, -((cols-3):cols)]
-    content = lapply(content, str_replace_all, "\r\n", "")
+  content = content[-nrow(content), ]
+  colnames(content) = c("number", "title", "authors", "projectcode", 
+                        "date", "jel", "abstract", "download", 
+                        "quantlets", "empty")
+  cols = ncol(content)
+  content = content[, -((cols-3):cols)]
+  content = lapply(content, str_replace_all, "\r\n", "")
   
 ## Get the abstracts to local directory:
   # Create a folder called "Abstracts" in the working directory:
-    dir.create("Abstracts")
-    setwd(paste0(getwd(), "/Abstracts"))
+  dir.create("Abstracts")
+  setwd(paste0(getwd(), "/Abstracts"))
     
   # Get the URLs and parse them:
   fromhere = paste0("http://sfb649.wiwi.hu-berlin.de/fedc/DP_abstract.php?id=SFB649DP", 
@@ -42,8 +46,6 @@ library(RMySQL)
   doc = lapply(fromhere, function(x){htmlParse(x, encoding = "Latin-1")})
   
   # Get the body of the HTML-files
-  totext = function(x){
-    xpathApply(x, "//body//text()", xmlValue)[[1]]}
   plain.text = lapply(doc, totext)
   
   # Take them all together, concatenate and save them:
@@ -53,49 +55,39 @@ library(RMySQL)
     cat(whichones[[i]], file = savehere[i])
   }
 
-# Pad the filenames with zeros (e.g. 1 ==> 001, 23 ==> 023):
+## Pad the filenames with zeros (e.g. 1 ==> 001, 23 ==> 023):
   alldocs = list.files()
   file.rename(alldocs, str_pad(alldocs, 7, side = "left", pad = "0"))
   
 ## Create a data.frame containing table-data AND abstracts in one:
-  # Read & clean the abstracts:
-    readit = function(x){
-      raw = paste0(readLines(x), collapse = "\r")
-      str_replace_all(raw, "\r", " ")
-    }
-
-    r_abs = sapply(list.files(), readit)
+  r_abs = sapply(list.files(), readit)
   
-    # dfcontent will contain all scraped data:
-    dfcontent = as.data.frame(content, stringsAsFactors = F)
-    dfcontent$abstracts = r_abs
+  # dfcontent will contain all scraped data:
+  dfcontent = as.data.frame(content, stringsAsFactors = F)
+  dfcontent$abstracts = r_abs
     
-    # turn around the order, that id 1 is always Paper 2005-001
-    dfcontent = cbind("id"= 1:dim(dfcontent)[1],
-                      dfcontent[(dim(dfcontent)[1]:1),])
+  # turn around the order, that id 1 is always Paper 2005-001
+  dfcontent = cbind("id"= 1:dim(dfcontent)[1],
+                    dfcontent[(dim(dfcontent)[1]:1),])
    
-    # date in date format
-    dfcontent$date=  as.Date(dfcontent$date, format="%d.%m.%Y")
+  # date in date format
+  dfcontent$date = as.Date(dfcontent$date, format="%d.%m.%Y")
     
-## dfcontent is a dataframe containing all data, including a primary key ##
+## dfcontent is a dataframe containing all data, including unique identfier 
+## Add to remote database
+## Save information in Q-Kolleg db
 
-## delete the files, if not needed at your system.
-   # make sure that directory is Abstracts as set above!
-   unlink(list.files(), recursive = TRUE, force=TRUE)
-    
-    
-## Populating a remote database. Save information in Q-Kolleg
-
-# Establish connection:
+  # Establish connection:
   drv = dbDriver("MySQL") 
   con = dbConnect(drv, dbname = "Q-Kolleg", 
                   user = "schroedk.hub", password = "O9rVnS%J",
                   host = "neyman.wiwi.hu-berlin.de", port = 3306)
     
-# Create table called abstracts, if it doesn't yet exist in the database:
-
+  # Create table called abstracts, if it doesn't yet exist in the database,
+  # else an error messeage appears
+  if (!("abstracts" %in% dbListTables(con))){
   dbSendQuery(con, "
-               CREATE TABLE abstracts 
+              CREATE TABLE abstracts 
                 (id INT,
                 number VARCHAR(20),
                 title  VARCHAR(300),
@@ -105,15 +97,19 @@ library(RMySQL)
                 jel  VARCHAR(30),
                 abstracts VARCHAR(2000),
                 PRIMARY KEY (id));")
-
-# add data into table
+  }
+  
+  # add data into table
   dbWriteTable(con, name = "abstracts",
               value = dfcontent,
               row.names=F, append=TRUE, overwrite=FALSE)
 
-# Check info on columns in abstracts
-dbGetQuery(con, "DESCRIBE abstracts")
-
-dbDisconnect(con)
-rm(list=ls())
+  # Check info on columns in abstracts
+  dbGetQuery(con, "DESCRIBE abstracts")
+  
+  # close DB connection
+  dbDisconnect(con)
+  
+  # remove created variables
+  rm(list=ls())
   
