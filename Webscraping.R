@@ -3,6 +3,7 @@ library(magrittr)
 library(rvest)
 library(stringr)
 library(XML)
+library(RMySQL)
 
 ### Scrape the text data from RDC-page: ###
 
@@ -68,6 +69,49 @@ library(XML)
     # dfcontent will contain all scraped data:
     dfcontent = as.data.frame(content, stringsAsFactors = F)
     dfcontent$abstracts = r_abs
-  
-## dfcontent is a dataframe containing all data ##
+    # turn around the order, that id 1 is always Paper 2005-001
+    dfcontent = cbind("id"= 1:dim(dfcontent)[1],
+                      dfcontent[(dim(dfcontent)[1]:1),])
+    # date in date format
+    dfcontent$date=  as.Date(dfcontent$date, format="%d.%m.%Y")
+    
+## dfcontent is a dataframe containing all data, including a primary key ##
+
+## delete the files, if not needed at your system.
+   # make sure that directory is Abstracts as set above!
+   unlink(list.files(), recursive = TRUE, force=TRUE)
+    
+    
+## Populating a remote database. Save information in Q-Kolleg
+
+# Establish connection:
+  drv = dbDriver("MySQL") 
+  con = dbConnect(drv, dbname = "Q-Kolleg", 
+                  user = "schroedk.hub", password = "O9rVnS%J",
+                  host = "neyman.wiwi.hu-berlin.de", port = 3306)
+    
+# Create table called abstracts, if it doesn't yet exist in the database:
+
+  dbSendQuery(con, "
+               CREATE TABLE abstracts 
+                (id INT,
+                number VARCHAR(20),
+                title  VARCHAR(300),
+                authors VARCHAR(300),
+                projectcode VARCHAR(30),
+                date DATE,
+                jel  VARCHAR(30),
+                abstracts VARCHAR(2000),
+                PRIMARY KEY (id));")
+
+# add data into table
+  dbWriteTable(con, name = "abstracts",
+              value = dfcontent,
+              row.names=F, append=TRUE, overwrite=FALSE)
+
+# Check info on columns in abstracts
+dbGetQuery(con, "DESCRIBE abstracts")
+
+dbDisconnect(con)
+rm(list=ls())
   
