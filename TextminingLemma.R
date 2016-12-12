@@ -4,7 +4,7 @@ library(cluster)
 
 ## Get the data in place:
   con = dbConnect(MySQL(), dbname = "Q-Kolleg", 
-                  user = "schroedk.hub", password = "..",
+                  user = "schroedk.hub", password = "******",
                   host = "neyman.wiwi.hu-berlin.de", port = 3306)
 
   dbtt = dbGetQuery(con, "SELECT * FROM treetagger")
@@ -36,9 +36,6 @@ library(cluster)
   # Perform log(1 + x):
     log_x = function(termdoc){log(1 + as.matrix(termdoc))}
     
-  # Perform PCA:
-    do_pca = function(termdoc){prcomp(termdoc, center = T, scale = T)}
-    
   # Inspect the terms present in the Document-Term-Document 
     getfreq = function(dtm){
       freqs = colSums(as.matrix(dtm))
@@ -67,14 +64,10 @@ library(cluster)
   
     # Inspect the terms left in the Doc-Term-Matrix and their frequencies: 
       freqs = lapply(TDM, getfreq)
-    
-  # Run PCA
-    PCA = lapply(TDM, do_pca)
-    PCA = lapply(PCA, reduced_dim_pca)  # Keep PCs that contain 66.6% of variation
 
 ## CLUSTERING  ##
     # Compute distance between document vectors:
-    d = lapply(PCA, function(x){dist(as.matrix(x))})
+    d = lapply(TDM, function(x){dist(as.matrix(x))})
       
   ## Hierarchical clustering using Ward's method.
      group = lapply(d, hclust, method = "ward.D")
