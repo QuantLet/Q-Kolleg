@@ -1,14 +1,3 @@
-library(httr)
-library(magrittr)
-library(rvest)
-library(stringr)
-library(XML)
-library(RMySQL)
-
-# load helperfunctions
-source("helperfunctions_Q-Kolleg.R")
-
-
 ### Scrape the text data from RDC-page: ###
 
 ## Get the table-info from the RDC-page:
@@ -37,8 +26,9 @@ source("helperfunctions_Q-Kolleg.R")
   
 ## Get the abstracts to local directory:
   # Create a folder called "Abstracts" in the working directory:
+  setwd(path)
   dir.create("Abstracts")
-  setwd(paste0(getwd(), "/Abstracts"))
+  setwd(paste0(path, "/Abstracts"))
     
   # Get the URLs and parse them:
   fromhere = paste0("http://sfb649.wiwi.hu-berlin.de/fedc/DP_abstract.php?id=SFB649DP", 
@@ -109,7 +99,3 @@ source("helperfunctions_Q-Kolleg.R")
   
   # close DB connection
   dbDisconnect(con)
-  
-  # remove created variables
-  rm(list=ls())
-  
