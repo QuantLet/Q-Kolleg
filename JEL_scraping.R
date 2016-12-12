@@ -1,10 +1,4 @@
-library(httr)
-library(magrittr)
-library(rvest)
-library(stringr)
-library(XML)
-source("JEL_scraping_HF.R")
-source("Treetagger_HF.R")
+
 
 wiki <- POST("https://en.wikipedia.org/wiki/JEL_classification_codes")
 
