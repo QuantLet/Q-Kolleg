@@ -3,26 +3,10 @@ library(magrittr)
 library(rvest)
 library(stringr)
 library(XML)
+source("JEL_scraping_HF.R")
+source("Treetagger_HF.R")
 
 wiki <- POST("https://en.wikipedia.org/wiki/JEL_classification_codes")
-
-clean_html <- function(htmltext){
-  htmltext <- htmltext[substr(htmltext, 0, 3) == "JEL"]
-  htmltext <- gsub("JEL: *", "", htmltext)
-  htmltext <- gsub("* – *", " ", htmltext)
-  htmltext <- htmltext[order(htmltext)]
-}
-
-clean_headers <- function(htmltext){
-  htmltext <- gsub("* Subcategories\\[edit\\]", "", htmltext)
-  htmltext <- gsub(" JEL:", "", htmltext)
-  nrchars <- nchar(htmltext)
-  headers <- substr(htmltext, nrchars, nrchars)
-  htmltext <- paste0(headers, " ", htmltext)
-  htmltext <- substr(htmltext, 0, nrchars)
-  htmltext <- htmltext[-c(1, length(htmltext)-1, length(htmltext))]
-  return(htmltext)
-}
 
 # The most detailed descriptions at A13-level
 wikiJEL1 <- read_html(wiki) %>%
@@ -69,3 +53,19 @@ wikiJEL3 <- clean_headers(wikiJEL3)
 # Putting them all together:
 JEL <- c(wikiJEL1, wikiJEL2, wikiJEL3)
 JEL <- JEL[order(JEL)]
+
+# Get the data in the right shape and format (2 columns, 20 rows):
+JEL <- str_split_fixed(JEL, " ", 2)
+JEL[,1] <- substr(JEL[,1], 0, 1)
+JEL <- as.data.frame(JEL)
+colnames(JEL) <- c("code", "descr"); JEL$descr <- as.character(JEL$descr)
+
+JEL <- aggregate(JEL$descr, by = list(JEL$code), 
+                  FUN = function(x){paste0(x, collapse = " ")})
+colnames(JEL) <- c("code", "descr")
+
+### Lemmatize the dictionary:
+  lemdict <- lapply(JEL$descr, function(x){lemmastem(as.vector(x), objorfile = "obj")})
+  lemdict2 <- lemdict["lemma"]
+  test <- dbprep(lemdict)
+  

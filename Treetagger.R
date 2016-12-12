@@ -4,46 +4,11 @@ library(SnowballC)
 library(RMySQL)
 library(cldr)
 
-## Define functions for stemming & lemmatization
-  # The actual lemma & stemming function. Requires installation of
-  # Treetagger (see: http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/)
-  treetagged = function(docname, objorfile = "file"){
-    treetag(docname, 
-      treetagger = "manual", format = objorfile,
-      lang = "en",
-      apply.sentc.end = TRUE, 
-      encoding = "Latin1",
-      TT.options = list(path = "/Users/Ken/Treetagger", 
-                        preset = "en"),
-      stopwords = tm::stopwords("en"),
-      stemmer = SnowballC::wordStem)
-  }
+## Note: 
+ # Requires installation of
+ # Treetagger (see: http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/)
 
-  # Cleaning the tagged object from symbols, stopwords, etc.
-  cleantags = function(dirty){
-    clean = kRp.filter.wclass(dirty, corp.rm.class = "nonpunct")
-    clean = kRp.filter.wclass(clean, corp.rm.class = "stopword")
-    clean = within(clean@TT.res, lemma[lemma == "<unknown>"] <- token[lemma == "<unknown>"])
-    deletion = c("number", "symbol", "possesive", "punct", "sentc")
-    clean = clean[!(clean$wclass %in% deletion),]
-    return(clean)
-  }
-
-  lemmastem = function(docname){
-    return(cleantags(treetagged(docname)))
-  }
-
-  # Clean working directory from empty and non-english .txt files:
-  align_abstracts = function(){
-    docs = list.files(pattern = "*.txt")
-    abstracts = dbGetQuery(con, "SELECT * FROM abstracts")
-    langs = detectLanguage(abstracts$abs)
-    noneng = which(langs$detectedLanguage != "ENGLISH")
-    file.remove(docs[noneng])
-    author_etc = abstracts[-noneng,-ncol(abstracts)]
-    return(author_etc)
-  }
-  
+source("Treetagger_HF.R")
 ## Connect to database. Use info from abstracts-table to detect languages
  ## and remove empty and non-english abstracts
   drv = MySQL()
@@ -77,12 +42,6 @@ library(cldr)
                           function(x){paste(x$stem, collapse = " ")}
                           )
      # lowercase, strip white space & remove "abstracts" from text:
-     dbprep = function(strings){
-       strings = lapply(strings, tolower)
-       strings = lapply(strings, function(x){trimws(x, "both")})
-       strings = lapply(strings, function(x){gsub("abstract ", "", x)})
-       return(strings)
-     }
      lemmastring = dbprep(lemmastring)
      stemstring = dbprep(stemstring)
   
