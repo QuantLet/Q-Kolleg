@@ -54,10 +54,10 @@ source("helperfunctions_Q-Kolleg.R")
      
      # tree-tagged results prepared as dataframe to be added to db
      # take care for order:
-     ord = dim(lemmadf)[1]:1
+     ord = dim(lemmadf)[2]:1
      treetagg_result = cbind("id" = rev(ord),
                              author_etc[rev(ord),],
-                             "lem" = t(lemmadf)[ord,],
+                             "lemma" = t(lemmadf)[ord,],
                              "stem" = t(stemdf)[ord,]) 
    
 
@@ -74,7 +74,7 @@ source("helperfunctions_Q-Kolleg.R")
                date DATE,
                jel  VARCHAR(30),
                lemma VARCHAR(2000),
-               stem  VARCHAR(2000)
+               stem  VARCHAR(2000),
                PRIMARY KEY (id));")
    } 
      

@@ -20,8 +20,6 @@ totext = function(x){
   # input x is a list containing text from the html files
   xpathApply(x, "//body//text()", xmlValue)[[1]]
   }
-## end of function
-
 
 ## Read & clean the abstracts:
 readit = function(x){
@@ -29,8 +27,6 @@ readit = function(x){
   raw = paste0(readLines(x), collapse = "\r")
   str_replace_all(raw, "\r", " ")
   }
-## end of function
-
 
 ###############################################################################
 ##     2. Functions for Preprocessing - Treetagger.R                         ##
@@ -56,7 +52,6 @@ treetagged = function(docname, objorfile = "file"){
           stopwords = tm::stopwords("en"),
           stemmer = SnowballC::wordStem)
   }
-## end of function
 
 ## Cleaning the tagged object from symbols, stopwords, etc.
 cleantags = function(dirty){
@@ -67,14 +62,12 @@ cleantags = function(dirty){
   clean = clean[!(clean$wclass %in% deletion),]
   return(clean)
   }
-## end of function
 
 
 ## Combine the above two functions:
 lemmastem = function(docname, ...){
   return(cleantags(treetagged(docname, ...)))
-}
-# end fo function
+  }
 
 
 ## Clean working directory from empty and non-english .txt files.
@@ -89,8 +82,8 @@ align_abstracts = function(){
   file.remove(docs[dropit])
   author_etc = abstracts[-dropit,-ncol(abstracts)]
   return(author_etc)
-}
-## end of function
+  }
+
 
 ## Convert to lower case; strip white space; remove "abstract":
 dbprep = function(strings){
@@ -98,8 +91,7 @@ dbprep = function(strings){
   strings = lapply(strings, function(x){trimws(x, "both")})
   strings = lapply(strings, function(x){gsub("abstract ", "", x)})
   return(strings)
-}
-## end of function
+  }
 
 
 ###############################################################################
@@ -114,7 +106,7 @@ clean_html = function(htmltext){
   htmltext = gsub("JEL: *", "", htmltext)
   htmltext = gsub("* - *", " ", htmltext)
   htmltext = htmltext[order(htmltext)]
-}
+  }
 
 # Clean the html text for first hierarchy JEL-codes:
 # First hierarchy is e.g. A
@@ -127,4 +119,13 @@ clean_headers = function(htmltext){
   htmltext = substr(htmltext, 0, nrchars)
   htmltext = htmltext[-c(1, length(htmltext)-1, length(htmltext))]
   return(htmltext)
-}
+  }
+
+# Removes some of the superfluous words in the JEL-descriptions:
+remove_terms <- function(strings, badterms){
+  badterms <- paste0(badterms, " ")
+  for(i in 1:length(badterms)){
+    strings <- gsub(badterms[i], "", strings)
+  }
+  return(strings)
+  }
