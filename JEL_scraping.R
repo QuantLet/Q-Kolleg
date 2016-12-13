@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 library(httr)
 library(magrittr)
 library(rvest)
@@ -5,6 +6,7 @@ library(stringr)
 library(XML)
 library(koRpus)
 library(RMySQL)
+=======
 
 setwd("/Users/Ken/Q-Kolleg")
 source("helperfunctions_Q-Kolleg.R")

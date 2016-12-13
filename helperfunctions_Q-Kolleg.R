@@ -1,11 +1,12 @@
 ###############################################################################
 ##                                                                           ##
-##     This File provides Helper Functions for The whole Procedure           ##
+##     This file provides helper functions for the whole procedure           ##
 ##                                                                           ##
-##     1. Functions used in Webscraping                                      ##
-##     2. Functions for Treetagger - Preporcessing                           ##
+##     1. Functions used in webscraping                                      ##
+##     2. Functions for treetagger - preporcessing                           ##
 ##     3. Functions used for JEL code scraping                               ##
-##  
+##     4.  Functions for dictionary classification                           ##
+##     5. Functions for textmining procedure                                 ##
 ##
 ##
 ###############################################################################
@@ -73,6 +74,7 @@ lemmastem = function(docname, ...){
 ## Clean working directory from empty and non-english .txt files.
 ## Does not need any input
 align_abstracts = function(){
+  setwd(paste0(path, "/Abstracts"))
   docs = list.files(pattern = "*.txt")
   small = which(file.size(docs) < 5)
   abstracts = dbGetQuery(con, "SELECT * FROM abstracts")
@@ -95,7 +97,7 @@ dbprep = function(strings){
 
 
 ###############################################################################
-##     3.  Functions used for JEL code scraping                              ##
+##     3.  Functions used for JEL code scraping - JEL_scraping.R             ##
 ###############################################################################
 
 ## Clean the html text for second and third hierarchy JEL-codes:
@@ -126,13 +128,15 @@ remove_terms <- function(strings, badterms){
   badterms <- paste0(badterms, " ")
   for(i in 1:length(badterms)){
     strings <- gsub(badterms[i], "", strings)
-  }
+    }
   return(strings)
   }
 
-######################################################
-###  Functions for dictionary classification:
-######################################################
+
+###############################################################################
+##     4.  Functions for   - Dictionary_Classification.R                     ##
+###############################################################################
+
 # Check how often a word occurs in a given dictionary:
   word_nr_match <- function(doc, dictionary){
     sum(sapply(doc, function(x){grepl(x, dictionary, fixed = T)}))
@@ -183,3 +187,49 @@ remove_terms <- function(strings, badterms){
     return(hitrate)
   }
   
+
+
+###############################################################################
+##     5. Functions for textmining procedure                                 ##
+###############################################################################
+
+# functions that help to detect letters and numbers in character string
+is.letter = function(x){grepl("[[:alpha:]]", x)}
+is.number = function(x){grepl("[[:digit:]]", x)}
+
+# function to extract the project code
+get_pcode <- function(projectcode){
+  p.code = substr(projectcode, 1, 3)   
+  letters = which(is.letter(substr(p.code,3,3)) == TRUE)
+  p.code[letters] = substr(p.code[letters],1,2)
+  return(p.code)
+  }
+
+
+## Bunch of functions for later manipulations:
+  # Create Document-Term-Matrix:
+  sparse_dtm = function(corpus, ...){
+    DocumentTermMatrix(corpus, control = list(...))
+  }
+  
+  # Remove sparse terms:
+  small_dtm = function(corpus, threshold = 0.99, ...){
+    removeSparseTerms(sparse_dtm(corpus, ...), sparse = threshold)
+  }
+  
+  # Perform log(1 + x):
+  log_x = function(termdoc){log(1 + as.matrix(termdoc))}
+  
+  # Inspect the terms present in the Document-Term-Document 
+  getfreq = function(dtm){
+    freqs = colSums(as.matrix(dtm))
+    return(freqs[order(-freqs)])
+  }
+  
+  # Dimensionality reducer:
+  reduced_dim_pca = function(pca, thresh = 0.66){
+    keep = sum((cumsum(pca$sdev)/length(pca$sdev)) < thresh)
+    return(pca$x[,1:keep])
+  }
+
+
