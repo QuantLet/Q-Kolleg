@@ -2,14 +2,14 @@
 
 ## Get the data in place:
   con = dbConnect(MySQL(), dbname = "Q-Kolleg", 
-                  user = "schroedk.hub", password = "O9rVnS%J",
+                  user = "schroedk.hub", password = "..",
                   host = "neyman.wiwi.hu-berlin.de", port = 3306)
 
   dbtt = dbGetQuery(con, "SELECT * FROM treetagger")
   dbDisconnect(con)
 ## Also get the project code in the right place:
   pcode = get_pcode(dbtt$projectcode)
-  rough_pcode <- as.factor(substr(pcode, 1, 1))
+  rough_pcode = as.factor(substr(pcode, 1, 1))
     
 
 ## Start text mining and plotting:

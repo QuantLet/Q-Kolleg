@@ -7,7 +7,7 @@ source("helperfunctions_Q-Kolleg.R")
     # Connect to the database:
     drv = MySQL()
     con = dbConnect(drv, dbname = "Q-Kolleg", 
-                user = "schroedk.hub", password = "O9rVnS%J",
+                user = "schroedk.hub", password = "..",
                 host = "neyman.wiwi.hu-berlin.de", port = 3306)
     # Fetch the data:
     dictionaries = dbGetQuery(con, "SELECT * FROM dictionary")
