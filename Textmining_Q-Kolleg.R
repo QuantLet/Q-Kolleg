@@ -1,5 +1,9 @@
 ### Textmining procedure ###
 
+source("helperfunctions_Q-Kolleg.R")
+library(tm)
+library(RMySQL)
+
 ## Get the data in place:
   con = dbConnect(MySQL(), dbname = "Q-Kolleg", 
                   user = "schroedk.hub", password = "..",
@@ -15,16 +19,17 @@
 ## Start text mining and plotting:
   # Get different types of Doc-Term-Matrix of the lemmatized corpus:
     # Note that for the non-binary weighted matrices, a log transformation is applied:
-    TDM_lemma             = log_x(small_dtm(Corpus(VectorSource(dbtt$lemma))))
-    TDM_lemma_bin         = small_dtm(Corpus(VectorSource(dbtt$lemma)), 
-                                       weighting = weightBin)
-    TDM_lemma_bin_capped  = small_dtm(Corpus(VectorSource(dbtt$lemma)), threshold = 0.99,
-                                       weighting = weightBin, 
+  lemmatized <- Corpus(VectorSource(dbtt$lemma))
+    TDM_lemma             = log_x(small_dtm(lemmatized))
+    TDM_lemma_bin         = small_dtm(lemmatized, weighting = weightBin)
+    TDM_lemma_bin_capped  = small_dtm(lemmatized, weighting = weightBin, 
                                        bounds = list(global = c(1, 175)))
-    TDM_lemma_capped      = log_x(small_dtm(Corpus(VectorSource(dbtt$lemma)), threshold = 0.99,
+    TDM_lemma_capped      = log_x(small_dtm(lemmatized,
                                        bounds = list(global = c(1,75))))
+    TFIDF_lemma           = small_dtm(lemmatized, weighting = weightTfIdf)
     
-    TDM = list(TDM_lemma, TDM_lemma_bin, TDM_lemma_bin_capped, TDM_lemma_capped)
+    TDM = list(TDM_lemma, TDM_lemma_bin, TDM_lemma_bin_capped, 
+               TDM_lemma_capped, TFIDF_lemma)
   
     # Inspect the terms left in the Doc-Term-Matrix and their frequencies: 
       freqs = lapply(TDM, getfreq)
@@ -42,5 +47,3 @@
      kfit = lapply(d, function(x){kmeans(x, 4, nstart = 100)$cluster})
      # table predictions vs. project codes (kmeans)
      kmeans_fit = lapply(kfit, table, rough_pcode)
-        
-
