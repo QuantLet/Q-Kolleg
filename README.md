@@ -8,7 +8,8 @@ Files:
 - The "Treetagger.R" file removes non-english abstracts and applies natural language processing on the remaining ones. As a result, a new table with name "treetagger" is added to the Q-Kolleg database, with stemmed and  lemmatized versions of the abstracts.
 - The "JEL_scraping.R" file scrapes information on JEL Codes from Wikipedia and constructs a dictionary and saves the dictionaries in a new table called "dictionary" in the Q-Kolleg database. 
 - The "Textmining_Q-Kolleg.R" file performs textmining in the preliminary way that we have seen in the beginning of the course.
-- The "Dictionary_Classification.R" file gets the JEL-dictionaries from the database and matches the abstracts with those JEL-dictionaries.
+    It clusters the data and attempts to find clusters that coincide with project codes.
+- The "Dictionary_Classification.R" file gets the JEL-dictionaries from the database and matches the abstracts with those JEL-dictionaries. It attempts to classify abstracts with a JEL code.
 
 
 
