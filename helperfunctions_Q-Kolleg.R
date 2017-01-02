@@ -169,7 +169,7 @@ remove_terms <- function(strings, badterms){
 
 # Get some summary statistics of the classified list:
   summarize <- function(classifiedlist){
-    sapply(levels(lemdict$JELcode), function(x){sum(classifiedlist == x)})
+    sapply(dictionaries$JELcode, function(x){sum(classifiedlist == x)})
   }
 
 # Extract the letters from the RDC-based JEL-codes:
