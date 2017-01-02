@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 library(httr)
 library(magrittr)
 library(rvest)
@@ -6,7 +5,7 @@ library(stringr)
 library(XML)
 library(koRpus)
 library(RMySQL)
-=======
+
 
 setwd("/Users/Ken/Q-Kolleg")
 source("helperfunctions_Q-Kolleg.R")
@@ -83,7 +82,8 @@ source("helperfunctions_Q-Kolleg.R")
   # Remove whitespace, to lower case, unwanted words
     lemdict = dbprep(lemdict)
     lemdict = remove_terms(lemdict, 
-                           badterms = c("general", "introductory", "unclassified"))
+                           badterms = c("general", "introductory", "unclassified",
+                                        "economics", "economist", "economic"))
     lemdict = cbind(levels(JEL$code), as.data.frame(lemdict, stringsAsFactors = F))
     lemdict = cbind(wikiJEL3, lemdict)
     names(lemdict) = c("description", "JELcode", "dict")
@@ -92,7 +92,7 @@ source("helperfunctions_Q-Kolleg.R")
   # Connect to the database:
   drv = MySQL()
   con = dbConnect(drv, dbname = "Q-Kolleg", 
-                  user = "schroedk.hub", password = "..",
+                  user = "schroedk.hub", password = "O9rVnS%J",
                   host = "neyman.wiwi.hu-berlin.de", port = 3306)
   
   # Create table if not existent yet:
