@@ -5,7 +5,7 @@
 ##     1. Functions used in webscraping                                      ##
 ##     2. Functions for treetagger - preporcessing                           ##
 ##     3. Functions used for JEL code scraping                               ##
-##     4.  Functions for dictionary classification                           ##
+##     4. Functions for dictionary classification                            ##
 ##     5. Functions for textmining procedure                                 ##
 ##
 ##
@@ -124,10 +124,10 @@ clean_headers = function(htmltext){
   }
 
 # Removes some of the superfluous words in the JEL-descriptions:
-remove_terms <- function(strings, badterms){
-  badterms <- paste0(badterms, " ")
+remove_terms = function(strings, badterms){
+  badterms = paste0(badterms, " ")
   for(i in 1:length(badterms)){
-    strings <- gsub(badterms[i], "", strings)
+    strings = gsub(badterms[i], "", strings)
     }
   return(strings)
   }
@@ -138,52 +138,52 @@ remove_terms <- function(strings, badterms){
 ###############################################################################
 
 # Check how often a word occurs in a given dictionary:
-  word_nr_match <- function(doc, dictionary){
+  word_nr_match = function(doc, dictionary){
     sum(sapply(doc, function(x){grepl(x, dictionary, fixed = T)}))
   }
 
 # Calculate the sum of occurances for all words in a document
 # in a given dictionary:
-  doc_sum_match <- function(onedoc, onedict){
+  doc_sum_match = function(onedoc, onedict){
     sum(sapply(onedoc, word_nr_match, onedict))
   }
 
 # Extend above to all dictionaries (all words in one doc, all dictionaries)
-  doc_all_dicts <- function(onedoc, alldicts){
+  doc_all_dicts = function(onedoc, alldicts){
     sapply(alldicts, doc_sum_match, onedoc = onedoc)
   }
 
 # Extract the JEL-code that corresponds to the best matching dictionary
 # for a given document: Choose randomly if multiple dictionary have max.
 # matching criteria. 
-  max_jel <- function(onedoc, alldicts, jelcodes){
-    match_dict <- doc_all_dicts(onedoc, alldicts)
-    bestdict <- which(match_dict == max(match_dict))
+  max_jel = function(onedoc, alldicts, jelcodes){
+    match_dict = doc_all_dicts(onedoc, alldicts)
+    bestdict = which(match_dict == max(match_dict))
     return(jelcodes[bestdict])
   }
 
 # Do max_jel() for all documents:
-  alldocs_alldicts <- function(alldocs, ...){
+  alldocs_alldicts = function(alldocs, ...){
     lapply(alldocs, max_jel, ...)
   }
 
 # Get some summary statistics of the classified list:
-  summarize <- function(classifiedlist){
+  summarize = function(classifiedlist){
     sapply(levels(lemdict$JELcode), function(x){sum(classifiedlist == x)})
   }
 
 # Extract the letters from the RDC-based JEL-codes:
-  getletters <- function(x){
+  getletters = function(x){
     na.omit(unlist(strsplit(unlist(x), "[^a-zA-Z]+")))
   }
   
 # Calculate the percentage of time in which the real and predicted
   # labels coincide: hit rate.
-  performance <- function(realcodes, predcodes){
+  performance = function(realcodes, predcodes){
     # realcodes and predcodes may contain more than one JEL-code
-    intersection <- mapply(function(x, y) intersect(x, y), predcodes, realcodes)
-    hits <- sum(sapply(intersection, function(x){length(x) != 0})) 
-    hitrate <- hits / length(predcodes)
+    intersection = mapply(function(x, y) intersect(x, y), predcodes, realcodes)
+    hits = sum(sapply(intersection, function(x){length(x) != 0})) 
+    hitrate = hits / length(predcodes)
     return(hitrate)
   }
   
@@ -198,7 +198,7 @@ is.letter = function(x){grepl("[[:alpha:]]", x)}
 is.number = function(x){grepl("[[:digit:]]", x)}
 
 # function to extract the project code
-get_pcode <- function(projectcode){
+get_pcode = function(projectcode){
   p.code = substr(projectcode, 1, 3)   
   letters = which(is.letter(substr(p.code,3,3)) == TRUE)
   p.code[letters] = substr(p.code[letters],1,2)
