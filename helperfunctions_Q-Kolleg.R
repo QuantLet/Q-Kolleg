@@ -138,27 +138,39 @@ remove_terms = function(strings, badterms){
 ###############################################################################
 
 # Check how often a word occurs in a given dictionary:
-  word_nr_match = function(doc, dictionary){
-    sum(sapply(doc, function(x){grepl(x, dictionary, fixed = T)}))
+  word_nr_match = function(doc, dictionary, binary = FALSE){
+    hits = sum(sapply(doc, function(x){grepl(x, dictionary, fixed = T)}))
+    if(binary){
+      hits = sum(hits > 0)
+    }
+    return(hits)
   }
 
 # Calculate the sum of occurances for all words in a document
 # in a given dictionary:
-  doc_sum_match = function(onedoc, onedict){
-    sum(sapply(onedoc, word_nr_match, onedict))
+  doc_sum_match = function(onedoc, onedict, correct = FALSE, ...){
+    docsummatch = sum(sapply(onedoc, word_nr_match, onedict, ...))
+    if(correct){
+      docsummatch = docsummatch / log(words_in_dict(onedict))
+    }
+    return(docsummatch)
   }
 
+  words_in_dict = function(dict){
+    sapply(gregexpr("\\W+", dict), length) + 1
+  }
+  
 # Extend above to all dictionaries (all words in one doc, all dictionaries)
-  doc_all_dicts = function(onedoc, alldicts){
-    sapply(alldicts, doc_sum_match, onedoc = onedoc)
+  doc_all_dicts = function(onedoc, alldicts, ...){
+    sapply(alldicts, doc_sum_match, onedoc = onedoc, ...)
   }
 
 # Extract the JEL-code that corresponds to the best matching dictionary
 # for a given document: Choose randomly if multiple dictionary have max.
 # matching criteria. 
-  max_jel = function(onedoc, alldicts, jelcodes){
-    match_dict = doc_all_dicts(onedoc, alldicts)
-    bestdict = which(match_dict == max(match_dict))
+  max_jel = function(onedoc, alldicts, jelcodes, ...){
+    match_dict = doc_all_dicts(onedoc, alldicts, ...)
+    bestdict = order(-match_dict)
     return(jelcodes[bestdict])
   }
 
@@ -169,7 +181,7 @@ remove_terms = function(strings, badterms){
 
 # Get some summary statistics of the classified list:
   summarize = function(classifiedlist){
-    sapply(levels(lemdict$JELcode), function(x){sum(classifiedlist == x)})
+    sapply(levels(lemdict$JELcode), function(x){sum(x %in% classifiedlist)})
   }
 
 # Extract the letters from the RDC-based JEL-codes:
@@ -177,17 +189,58 @@ remove_terms = function(strings, badterms){
     na.omit(unlist(strsplit(unlist(x), "[^a-zA-Z]+")))
   }
   
+# Get the n-th best prediction:
+  nth_hit = function(pred_labels, from_to = c(1, 1)){
+    lapply(pred_labels, function(x){x[from_to[1]:from_to[2]]})
+  }
+  
 # Calculate the percentage of time in which the real and predicted
   # labels coincide: hit rate.
-  performance = function(realcodes, predcodes){
+  performance = function(realcodes, predcodes, from_to = c(1, 1)){
     # realcodes and predcodes may contain more than one JEL-code
+    predcodes = nth_hit(predcodes, from_to = from_to)
     intersection = mapply(function(x, y) intersect(x, y), predcodes, realcodes)
     hits = sum(sapply(intersection, function(x){length(x) != 0})) 
     hitrate = hits / length(predcodes)
     return(hitrate)
   }
-  
 
+  # Get the performance development of the best labels to worst labels:
+  performance_dev_single = function(realcodes, predcodes){
+    sapply(1:20, function(x){
+      performance(realcodes, predcodes, from_to = c(x, x))})
+  }
+  
+  # Get the accumulated performance development of adding an x-th label
+  performance_cumul = function(realcodes, predcodes){
+    sapply(1:20, function(x){
+      performance(realcodes, predcodes, from_to = c(1, x))
+    })
+  }
+  
+  # Plot the development of the hits for the n-th best dictionary match:
+  performance_plot = function(realcodes, predcodes1, predcodes2, predcodes3, cumul = TRUE){
+    if(cumul){
+      perform1 = performance_cumul(realcodes, predcodes1)
+      perform2 = performance_cumul(realcodes, predcodes2)
+      perform3 = performance_cumul(realcodes, predcodes3)
+    } else{
+      perform1 = performance_dev_single(realcodes, predcodes1)
+      perform2 = performance_dev_single(realcodes, predcodes2)
+      perform3 = performance_dev_single(realcodes, predcodes3)
+    }
+    par(mar = c(5.1, 4.1, 4.1, 13.1), xpd = TRUE)
+    plot(perform1, type = "b", col = "red", ylim = c(0, 1), pch = 16,
+         xlab = "n-th best match", ylab = "% containing correct label",
+         lwd = 1.2, main = "performance development, dictionary approach")
+    legend("bottomright", inset = c(-0.2, 0), legend = c("No correction, dupes",
+                      "Correction, dupes",
+                      "Correction, no dupes"), lwd = 0.9,
+           col = c("blue", "red", "green"), bty = "n")
+    lines(perform2, col = "green", type = "b", pch = 16)
+    lines(perform3, col = "blue", type = "b", pch = 16)
+  }
+  
 
 ###############################################################################
 ##     5. Functions for textmining procedure                                 ##
