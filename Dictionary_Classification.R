@@ -1,22 +1,24 @@
 library(RMySQL)
 source("helperfunctions_Q-Kolleg.R")
 
-
 ####  START USING THE DICTIONARIES:
-  ## Get the data from the database:
+  
+## Get the data from the database:
     # Connect to the database:
     drv = MySQL()
     con = dbConnect(drv, dbname = "Q-Kolleg", 
-                user = "schroedk.hub", password = "O9rVnS%J",
+                user = "schroedk.hub", password = "..",
                 host = "neyman.wiwi.hu-berlin.de", port = 3306)
     # Fetch the data:
     dictionaries = dbGetQuery(con, "SELECT * FROM dictionary")
     dbtt = dbGetQuery(con, "SELECT * FROM treetagger")
     texts = transform(dbtt, splitwords = I(strsplit(as.character(lemma), " ")))
+    keyword_dict = dbGetQuery(con, "SELECT * FROM keyworddict")
 
   ## Get the letter of the most common JEL code:
   JELraw = sapply(dbtt$jel, getletters)
   
+## Do the classification for different settings:
   ## Classify all documents with duplicate words in dictionary:
   dict_classified = alldocs_alldicts(texts$splitwords, 
                                       dictionaries$dict, 
@@ -41,7 +43,17 @@ source("helperfunctions_Q-Kolleg.R")
                                            correct = FALSE,
                                            binary = FALSE)
   
+  ## Classify all document with the JEL keyword dictionary:
+  classified_jelkeyword = alldocs_alldicts(texts$splitwords,
+                                           keyword_dict$clean_keys_unique,
+                                           dictionaries$JELcode,
+                                           correct = FALSE,
+                                           binary = FALSE)
+    ## We should ignore the classes A and Y ("none specified keywords") 
+  
+## Asses the performance of the classifiers:
   ## Plot the performance of the classifiers:
   performance_plot(JELraw, dict_classified, classified_unique_dict, classified_unique_raw)
 
-
+  ## Check the performance of the jel-keyword dictionary (still needs work!)
+  performance_dev_single(JELraw, classified_jelkeyword)
