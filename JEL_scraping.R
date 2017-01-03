@@ -92,7 +92,7 @@ source("helperfunctions_Q-Kolleg.R")
   # Connect to the database:
   drv = MySQL()
   con = dbConnect(drv, dbname = "Q-Kolleg", 
-                  user = "schroedk.hub", password = "O9rVnS%J",
+                  user = "schroedk.hub", password = "..",
                   host = "neyman.wiwi.hu-berlin.de", port = 3306)
   
   # Create table if not existent yet:
@@ -108,3 +108,4 @@ source("helperfunctions_Q-Kolleg.R")
   # Add information to db-table dictionary
     dbWriteTable(con, name = "dictionary", value = lemdict,
                  append=T, overwrite = F, row.names = F)
+    dbDisconnect(con)
