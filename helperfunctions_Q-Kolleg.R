@@ -232,4 +232,12 @@ get_pcode <- function(projectcode){
     return(pca$x[,1:keep])
   }
 
+# function to compute pc with selection how much of variance is explained
+  pca.man = function(X,tau=.1){
+    pca = prcomp(X,center=TRUE, scale=TRUE)
+    var = pca$sdev^2
+    idx = which(cumsum(var)/sum(var) > tau)[1]
+    pca$idx = idx
+    return(pca)
+  }
 
