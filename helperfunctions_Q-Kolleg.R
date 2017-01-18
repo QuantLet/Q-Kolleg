@@ -248,6 +248,7 @@ remove_terms = function(strings, badterms){
 
 # functions that help to detect letters and numbers in character string
 is.letter = function(x){grepl("[[:alpha:]]", x)}
+keep.letter = function(x){gsub("[^[:alpha:]]", "", x)}
 is.number = function(x){grepl("[[:digit:]]", x)}
 
 # function to extract the project code
