@@ -1,0 +1,1896 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2011-048
+Large Vector Auto Regressions
+Song Song * Peter J. Bickel *
+* University of California, USA
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Large Vector Auto Regressions
+Song Song, Peter J. Bickel 
+July 31, 2011
+Abstract One popular approach for nonstructural economic and financial forecasting is to include a large number of economic and financial variables, which has been shown to lead to significant improvements for forecasting, for example, by the dynamic factor models. A challenging issue is to determine which variables and (their) lags are relevant, especially when there is a mixture of serial correlation (temporal dynamics), high dimensional (spatial) dependence structure and moderate sample size (relative to dimensionality and lags). To this end, an integrated solution that addresses these three challenges simultaneously is appealing. We study the large vector auto regressions here with three types of estimates. We treat each variable's own lags different from other variables' lags, distinguish various lags over time, and is able to select the variables and lags simultaneously. We first show the consequences of using Lasso type estimate directly for time series without considering the temporal dependence. In contrast, our proposed method can still produce an estimate as efficient as an oracle under such scenarios. The tuning parameters are chosen via a data driven "rolling scheme" method to optimize the forecasting performance. A macroeconomic and financial forecasting problem is considered to illustrate its superiority over existing estimators. Keywords: Time Series, Vector Auto Regression, Regularization, Lasso, Group Lasso, Oracle estimator JEL classification: C13, C14, C32, E30, E40, G10
+1 Introduction
+Macroeconomic forecasting is one of the central tasks in Economics. Broadly speaking, there are two approaches, structural and nonstructural forecasting. Structural forecasting, which aligns itself with
+University of California, Berkeley. Email: songsong@stat.berkeley.edu University of California, Berkeley. Email: bickel@stat.berkeley.edu
+1
+
+economic theory, and hence rises and falls with that, recedes following the decline of Keynesian theory. In recent years, new dynamic stochastic general equilibrium theory has been developed, and structural macroeconomic forecasting is poised for resurgence. Nonstructural forecasting, in contrast, attempts to exploit the reduced-form correlations in observed macroeconomic time series, has little reliance on economic theory, has always been working well and continues to be improved. Various univariate and multivariate time series analyzing techniques have been proposed, e.g. the auto regression (AR), moving average (MA), autoregressive moving average (ARMA), generalized autoregressive conditional heteroskedasticity (GARCH), vector auto regression (VAR) models among many others. A very challenging issue for this nonstructural approach is to determine which variables and (their) lags are relevant. If we omit some "important" variables by mistake, it potentially creates an omitted variable bias with adverse consequences for both structural analysis and forecasting. For example, Christiano et al. (1999) points out that the positive reaction of prices in response to a monetary tightening, the so-called price puzzle, is an artefact resulting from the omission of forward-looking variables, such as the commodity price index. Recently, Ban´bura et al. (2010) shows that, when using the cross-sectional dimension related shrinkage, the forecasting performance of small monetary vector auto regression can be improved by adding additional macroeconomic variables and sectoral information. To illustrate this, we consider an example of interest rate forecasting. Nowadays people primarily use univariate or multivariate time series models, e.g. the Vasicek, CIR, Jump-Diffusion, Regime-Switching, and time-varying coefficients models, all of which are mostly based on the information from the interest rate time series itself. However, in practice, the central bank (Fed) bases their decisions of interest rate adjustment (as a monetary policy instrument) heavily on the national macroeconomic situation by taking many macro and financial measures into account. Bringing in this additional spatial (over the space of variables instead of from a geographic point of view; also used in future for convenience) information will therefore help improve its forecasting performance. Another example about the interactions between macroeconomics and finance comes from modeling credit defaults by also using macroeconomic information, since variation in aggregate default rates over time presumably reflects changes in general economic conditions also. Figlewski et al. (2006) find credit events are significantly affected by macroeconomic factors. Not only macroeconomics could affect finance, finance could also affect macroeconomics. For example, the economic crisis typically starts from the stock market crash. All of these call for an integrated analysis of macroeconomics and finance. Thus recently there has been a growing trend of using large panel macroeconomic and financial time series for forecasting, impulse response study and structural analysis, Forni et al. (2000), Stock and Watson (2002a), Stock and Watson (2002b), also seen at Forni et al. (2005), Stock and Watson (2005b), Giannone et al.
+2
+
+(2005), and Ban´bura et al. (2010) for latest advancements. Besides its presence in empirical macroeconomics, high dimensional data, where information often
+scatters through a large number of interrelated time series, is also attracting increasing attention in many other fields of economics and finance. In neuro-economics and behavioral finance, one uses high dimensional functional magnetic resonance imaging data (fMRI) to analyze the brain's response to certain risk related stimuli as well as identifying its activation area, Worsley et al. (2002) and Mysickov´a et al. (2011). In quantitative finance, one studies the dynamics of the implied volatility surface for risk management, calibration and pricing purposes, Fengler et al. (2007). Other examples and research fields for very large dimensional time series include mortality analysis, Lee and Carter (1992); bond portfolio risk management or derivative pricing, Nelson and Siegel (1987) and Diebold and Li (2006); international economy (many countries); industrial economy (many firms); quantitative finance (many assets) analysis among many others.
+On the methodology side, if people still use either low dimensional (multivariate) time series techniques on a few subjectively (or from some background knowledge) selected variables or high dimensional "static" methods which are initially designed for independent data, they might either disregard potentially relevant information (temporal dynamics and spatial dependence) to produce suboptimal forecasts, or bring in additional risk. Examples include the already mentioned prize puzzle and interest rate forecasting problems. The more scattered and dynamic the information is, the severer this loss becomes. This modeling becomes more challenging under the situation that macroeconomic data we typically deal with has only low frequencies, e.g. monthly or yearly. For example, the popularly used dataset introduced by Stock and Watson (2005a) contains 131 monthly macro indicators covering a broad range of categories including income, industrial production, capacity, employment and unemployment, consumer prices, producer prices, wages, housing starts, inventories and orders, stock prices, interest rates for different maturities, exchange rates and money aggregates and so on. The time span is from January 1959 to December 2003 (so T = 540). In summary, we can see that the challenge of modeling high dimensional time series, especially the macroeconomic ones, comes from a mixture of serial correlation (temporal dynamics), high dimensional (spatial) dependence structure and moderate sample size (relative to dimensionality and lags). To this end, an integrated solution addressing these three challenges simultaneously is appealing.
+To circumvent this problem, dynamic factor models have been considered to be quite successful recently in the analysis of large panels of time series data, Forni et al. (2000), Stock and Watson (2002a), Stock and Watson (2002b), also seen at Forni et al. (2005), Giannone et al. (2005), Park et al. (2009) and Song et al. (2010) (nonstationary case). They rely on the assumption that the bulk
+3
+
+of dynamics interrelations within a large dataset can be explained and represented by a few common factors (low dimensional time series). Less general models in the literature include static factor models proposed by Stock and Watson (2002a), Stock and Watson (2002b) and exact factor model suggested by Sargent and Sims (1977) and Geweke (1977).
+Compared with the well studied dynamic factor models through the use of dynamic principal component analysis, the vector auto regressive (VAR) models have several natural advantages. For example, compared with the dynamic factor models' typical 2-step estimation procedure: dimension reduction first and low dimensional time series modeling, the VAR approach is able to model the high dimensional time series in one step, which may lead to greater efficiency. It also allows variable-tovariable relationship (impulse response) analysis and facilitates corresponding interpretation, which is not feasible in the factor modeling setup since the variables are "represented" by the corresponding factors. Historically, the VAR models are not appropriate for analyzing high dimensional time series because they involve the estimation of too many (J2P , where J is the dimensionality and P is the number of lags) parameters. Thus they are primarily implemented on relatively low dimensional situations, e.g. the Baysian VARs (BVAR) by Doan et al. (1984) or still through the idea of factor modeling, e.g. the factor-augmented VAR (FAVAR) by Bernanke et al. (2005). However, based on recent advances in variable selection, shrinkage and regularization theory from Tibshirani (1996), Zou (2006) and Yuan and Lin (2006), large unrestricted vector auto regression becomes an alternative for the analysis of large dynamic systems. Therefore, the VAR framework can also be applied to empirical problems that require the analysis of more than a handful of time series. Mol et al. (2008) and Ban´bura et al. (2010) proceed that from the Bayesian point of view. Chudik and Pesaran (2007) consider the case that P = 1 and both J and T are large through some "neighboring" procedure, which can be viewed as a special case of the "segmentized grouping" as we study here (details in Subsection 2.4). In the univariate case (J = 1), Wang et al. (2007) studies the regression coefficient and autoregressive order shrinkage and selection via the lasso when P is large and T is small (relative to P ).
+In this article, we will study the large vector auto regressions when J, P   and T is moderate (relative to JP ). Comparing to prior works in (large) vector auto regressions, the novelty of this article lies in the following perspectives. First, from the variable selection and regularization point of view, the theoretical properties of many existing methods have been established under the independent scenario, which is rarely met in practice and contradicts the original time series setup (if used directly). Disregarding the serial correlation in variable selection and regularization can be dangerous in the sense that various risk bounds in fact depend on the degree of time dependence, as we will
+4
+
+illustrate later. We propose a new methodology to address this serial correlation (time dependence) issue together with high dimensionality and moderate sample size, which enables us to obtain the consistency of variable selection even under the dependent scenario, i.e. to reveal the equilibrium among them. Second , our method is able to do variable selection and lag selection simultaneously. In previous literature, variable selection is usually carried out first, and then the corresponding estimate's performances w.r.t. different number of lags are compared through some information criteria to select the "optimal" number of lags. By doing so, we neglect the "interaction" between variable selection and lag selection. Additionally, when the number of the lag's candidates to be searched over is large, it is also computationally inefficient, due to the cost of the repeated variable selection procedures. Third , we differentiate the variable of interest's own lags (abbreviated as own lags afterwards) from the ones of other variables (abbreviated as others' lags afterwards). Their relative weights are also allowed to be varied when predicting different variables, while in other literature, they are assumed to stay the same. This is due to the fact that the dynamic of some variables is driven by itself, while for a different variable, it might be driven by the dynamics of others. When we include a vast number of macroeconomic and financial time series, assuming the same weight seems to be too restrictive. Fourth, our method is based on a more computationally efficient approach, which mostly uses the existing packages, e.g. the LARS (least angle regression) package, developed by Efron et al. (2004), while most other works in the literature go through the Bayesian approach that requires the choice of priors.
+The rest of the article is organized as follows. In the next section, we present the main ingredients of the large vector autoregressive model (Large VAR) together with several corresponding estimation procedures and comparisons among them. The estimates' properties are presented in Section 3. In Section 4, the method is applied to the motivating macroeconomic forecasting problem, which shows that it outperforms some major existing method. Section 5 contains concluding remarks with discussions about relaxing some assumptions. All technical proofs are sketched in the appendix.
+2 The Large VAR Model and Its Estimation
+In this section, we introduce the model with three different estimates first, then discuss the data driven choice of hyperparameters to optimize the forecasting performance, provide a numerical algorithm, and finally summarize comparisons among these three estimates.
+5
+
+2.1 The Model
+
+Assume that the high dimensional time series {Ytj}tT=1,Jj=1 is generated from
+
+Yt = Yt-1B1 + . . . + Yt-P BP + Ut
+
+ 
+
+  
+
+
+
+YT YT -1 YT -2 . . . YT -P B1 UT
+
+ 
+
+  
+
+
+
+ 
+
+YT -1
+
+ 
+
+=
+
+ 
+
+YT -2
+
+YT -3
+
+...
+
+YT -1-P
+
+ 
+
+B2
+
++ 
+
+UT -1
+
+ 
+
+ 
+
+  
+
+
+
+...
+
+... ... ... ...
+
+... ...
+
+T ×J
+Y = XB + U,
+
+T ×JP
+(compact form)
+
+JP ×J
+
+T ×J
+
+(1) (2)
+
+where
+· Y = (YT , . . . , Y1 ) with Yt = (Yt1, . . . , YtJ );
+· X = (XT , . . . , X1 ) (the lags of Y ) with Xt = (Yt-1, . . . , Yt-P ) ;
+· B1, . . . , BP are J ×J autoregressive matrices, where P is the number of lags, B = (B1, . . . , BP ) is the J P × J matrix containing all coefficients {Bpij}pP=1,Ji=1J,j=1, and B··j, Bp·j, B·i·, Bpi· is the jth column of B and Bp, ith row of B and Bp respectively;
+· U = (UT , . . . , U1 ) , where Ut is a J-dimensional noise and independent of Xt.
+All Yt, Xt and Ut are assumed to have mean zero. The J × J covariance matrix of Ut, Cov(Ut), is assumed to be independent of t. Here we assume Cov(Ut) to be diagonal, say IJJ . In our case, it is justified by the fact that the variables in the panel we will consider for estimation are standardized and demeaned. Similar assumption is also carried out in Mol et al. (2008). The relaxation allowing nonzero off-diagonal entries is discussed in Section 5.
+We can see that given large J and P , we have to estimate a total of J2P parameters, which is much larger than the moderate number of observations JT , i.e. JP T . Consequently, ordinary least squares estimation is not feasible. Additionally, due to the structural change points in the macro and financial data (although not explored in this paper), the effective number of observations used for estimation could be much smaller than the original T . Thus we can see that on one hand, we do not want to impose any restrictions on the parameters and attain some general representations; on the other hand, it is known that making the model unnecessarily complex can degrade the efficiency of the resulting parameter estimate and yield less accurate predictions, as well as making interpretation and variable selection difficult. Hence, to avoid over fitting, regularization and variable selection are necessary. In the following, we are going to discuss the estimation procedure with different kinds of
+6
+
+regularization (illustrated in Figure 1). Before moving on, we incorporate the following very mild
+
+belief, as also considered in Ban´bura et al. (2010): the more recent lags should provide more reliable
+
+information than the more distant ones, which tries to strike a balance between attaining model
+
+simplicity and keeping the historic information.
+
+   
+
+······
+
+·0····
+
+······
+
+   
+
+ 
+
+0
+
+·
+
+0
+
+0
+
+0
+
+0
+
+ 
+
+ 
+
+·
+
+·
+
+·
+
+·
+
+·
+
+·
+
+ 
+
+ 
+
+0
+
+·
+
+0
+
+·
+
+·
+
+·
+
+ 
+
+   
+
+ 
+
+·
+
+·
+
+·
+
+·
+
+·
+
+·
+
+ 
+
+ 
+
+·
+
+0
+
+·
+
+·
+
+·
+
+·
+
+ 
+
+ 
+
+·
+
+·
+
+·
+
+·
+
+·
+
+·
+
+ 
+
+   
+
+ 
+
+·
+
+·
+
+·
+
+0
+
+·
+
+·
+
+ 
+
+ 
+
+0
+
+·
+
+·
+
+·
+
+·
+
+·
+
+ 
+
+ 
+
+·
+
+·
+
+·
+
+·
+
+·
+
+·
+
+ 
+
+   
+
+ 
+
+·
+
+·
+
+·
+
+·
+
+·
+
+·
+
+ 
+
+ 
+
+·
+
+·
+
+·
+
+·
+
+·
+
+·
+
+ 
+
+ 
+
+0
+
+0
+
+0
+
+·
+
+·
+
+·
+
+ 
+
+   
+
+·····0
+
+0·····
+
+······
+
+Figure 1: Illustration of three different types of estimates.
+
+2.2 Universal Grouping
+
+Without loss of generality, we start from considering one coefficient matrix, say Bp with entries {Bpij, 1 i, j J}. Inspired by Ban´bura et al. (2010), we note the fact that the dynamic of some variable is driven by itself, while for a different variable, it might be driven by the dynamics of
+
+others. Consequently, we treat the variables' own lags (diagonal terms of Bp) different from others' lags (off-diagonal terms of Bp) and impose different regularizations for them. We assume that the off-diagonal coefficients of Bp are not only sparse, but also have the same sparsity pattern across
+
+different columns, which we call group sparsity. Thus we base our selection solution on group Lasso
+
+techniques (Yuan and Lin (2006)) for the off-diagonal terms and Lasso techniques (Tibshirani (1996))
+
+for the diagonal terms here. We use Bpj-j to denote the vector composed of {Bpji}i=j and W-j to denote the (J - 1) × (J - 1) diagonal matrix diag[w1, . . . , wj-1, wj+1, . . . , wJ ] where wi is the positive real-valued weight associated with the ith variable for 1 i J. It is included here primarily for
+
+practical implementation since if wi is chosen as the Std(Yi), it is equivalent (subsection 2.6 for details) to standardize the predictors so that they all have zero mean and unit variance, Tibshirani (1996),
+
+which is also preferable for comparisons to prior works.
+
+Specifically, given the above notations, we use the group Lasso type penalty
+
+J j=1
+
+Bpj-j W-j
+
+2 and
+
+Lasso type penalty µ
+
+J j=1
+
+wj |Bpjj |
+
+to
+
+impose
+
+regularizations
+
+on
+
+other
+
+regressors'
+
+lags
+
+and
+
+predicted
+
+variables' own lags respectively and have the following penalty for the Bp matrix:
+
+JJ
+Bpj-jW-j 2 + µ wj|Bpjj|
+j=1 j=1
+
+C p- ,
+
+(3)
+
+7
+
+with some generic constant C.
+
+· The hyperparameter µ controls the extent to which others' lags are less (more) "important" than the own lags. When µ is large, the penalty assigned to own lags is larger than to others' lags. As a result, it is more likely that the off-diagonal entries are shrunk to 0 instead of the diagonal ones, which corresponds to the case that the variable's dynamic is driven by itself, and vice versa when µ is small.
+
+· The item p- reflects different regularization for different lags (over time). It becomes smaller when p gets larger. This is consistent with the previous belief: the more recent lags should provide more reliable information than the more distant ones. Thus as a result, large amounts of shrinkage are towards the more distant lags, whereas small amounts of shrinkage are towards the more recent ones. The hyperparameter  governs the relative importance of distant lags w.r.t. the more recent ones. Other decreasing functions of p, e.g. f (p) = log(p)-, f (p) = exp(p)- could also be used. However, we do not consider a general representation (and use a data driven way to estimate f (1), . . . , f (p), . . . , f (P ) correspondingly) to avoid too many tuning parameters, especially when P  .
+
+Since we have P coefficient matrices B1, . . . , BP , summing (3) up over p (after multiplying p on both
+
+sides) yields
+
+P p=1
+
+J j=1
+
+p
+
+Bpj-j W-j
+
+2+µ
+
+P p=1
+
+J j=1
+
+pwj
+
+|Bpjj
+
+|
+
+CP . If we couple this to the
+
+quadratic loss {2J(T - P )}-1
+
+T t=P +1
+
+Yt
+
+- Xt
+
+B
+
+2 2
+
+through
+
+Lagrange
+
+multipliers,
+
+we
+
+have
+
+equation
+
+(4):
+
+==µ
+
+T
+
+min{J(T - P )}-1 B
+
+Yt
+
+t=P +1
+
+T
+
+min{J(T - P )}-1 B
+
+Yt
+
+t=P +1
+
+PJ
+
+PJ
+
+- Xt
+
+B
+
+2 2
+
++
+
+
+
+p Bpj-j W-j 2 + µ
+
+p wj |Bpjj |
+
+p=1 j=1
+
+p=1 j=1
+
+PJ
+
+PJ
+
+- Xt
+
+B
+
+2 2
+
++
+
+
+
+p Bpj-j W-j 2 + 
+
+pwj|Bpjj| (4)
+
+p=1 j=1
+
+p=1 j=1
+
+with hyperparameters ,  and . We call this estimate B^ the universal grouping estimate. As
+
+the number of variables J increases, the autocoefficients should be shrunk more in order to avoid
+
+over-fitting, as already discussed by Mol et al. (2008).
+
+Using the group Lasso type regularization for the off-diagonal terms actually poses some strong
+
+assumptions on the underlying structure, which is not realistic from an economic point of view.
+
+Remark 2.2.1 First, we just have one hyperparameter µ (µ = /) to control the relative weights
+
+between own lags and others' lags. This means that the weights between own's lags and others' lags
+
+are the same across different dimensions which is hardly met in practice. Correspondingly, when
+
+we select the "optimal" µ to optimize the forecasting performance, we are actually optimizing the
+
+8
+
+averaged forecasting performance for all J variables instead of the variable of particular interest. This might produce suboptimal forecasts. Ban´bura et al. (2010) considers a special case that own lags are always more "important" than others' lags, which might be less general than ours. Remark 2.2.2 Second , using the L2 norm Bpj-jW-j 2 might shrink all off-diagonal terms in the same row ({Bpj·}·=j) to zero simultaneously, which implicitly means that, for the jth corresponding variable, we assume it is either significant for all the other J - 1 variables or not for any other J - 1 variables at all. This is, again, too strong from an economic point of view.
+
+2.3 No Grouping
+
+To amend the deficiencies of the universal grouping estimate, we estimate the autocoefficient matrix
+
+B column by column instead of all at once. Without loss of generality, we consider the jth column
+
+B··j here. Since B··j is a vector, we can use the Lasso type penalties for both own lags and others' lags. By following similar ideas and abbreviations in subsection 2.2, we have equation (5) to get B^··j:
+
+=j =j µj
+
+T
+
+min(T - P )-1
+B··j
+
+(Ytj - Xt B··j)2 + j
+
+t=P +1
+
+PP
+pwi|Bpij| + uj pwj|Bpjj|
+
+p=1 i=j
+
+p=1
+
+T PP
+
+min(T
+B··j
+
+- P )-1
+
+(Ytj
+
+t=P +1
+
+- Xt
+
+B··j )2
+
++ j
+
+p=1
+
+i=j
+
+pwi|Bpij| + j pwj|Bpjj|
+p=1
+
+(5)
+
+with hyperparameters j, j and . The subindex j is added to j and j to emphasize that they could vary when estimating different B··j's, 1 j J. We call this estimate B^ = (B^··1, . . . , B^··J ) the no grouping estimate.
+Remark 2.3.1 Because of different µj's (µj = j/j) for different columns' estimates B^··j, we allow individualized weights between own lags and others' lags and could tune j's and j's to produce optimal forecasting performance for each variable of interest, say the jth. Remark 2.3.2 Also for
+
+the same reason, we could get rid of the disadvantage that all off-diagonal terms in one row might be
+
+shrunk to 0 simultaneously.
+
+For simplicity of notation, we drop the common subindex j and write Ytj = yt, B··j = , Bpij = ci, i = j, Bpjj = dp, j = , j = , and (5) becomes:
+
+T PP
+
+min QT () = min(T - P )-1 
+
+(yt - Xt )2 + 
+
+pwi|ci| +  pwp|dp|
+
+t=P +1
+
+p=1 i=j
+
+p=1
+
+T
+
+P (J-1)
+
+P
+
+= min(T - P )-1 
+
+(yt - Xt )2 + i
+
+|ci| + p |dp|
+
+t=P +1
+
+i=1 p=1
+
+(6)
+
+with i = pwi and p = pwp.
+
+9
+
+2.4 Segmentized Grouping
+
+Since the large panel of macroeconomic and financial data sets usually have some natural "segment" structure, e.g. multiple interest rate time series w.r.t. different maturities, different number of employees w.r.t. different industrial sectors, different price indices w.r.t. different goods etc, if we take this information into account instead of estimating B either all at once or column by column, we could also do it segment by segment. Without loss of generality, we consider the ith segment B··Ni. Ni is the index set for the ith segment and Ni = |Ni| denotes the cardinality of the set Ni. YtNi is the corresponding part of Yt . We also use WNi to denote the Ni × Ni diagonal matrix with diagonal entries {wi}iNi and WNi-j to denote the (Ni - 1) × (Ni - 1) diagonal matrix with diagonal entries {wi}iNi,i=j .
+Under this situation, we have: own lags, others' (in the same segment) lags and others' (outside the segment) lags for the estimation of the ith segment's corresponding autoregressive coefficients B··Ni. Also following similar ideas and abbreviations in subsection 2.2, we have the following estimation equation:
+
++Ni +Ni
+
+P p=1
+P p=1
+
+minB··Ni {Ni(T - P )}-1
+
+T t=P +1
+
+YtNi - Xt B··Ni
+
+2 2
+
+j/Ni p Bpj·WNi 2 + µ1Ni
+
+P p=1
+
+pwj
+
+|Bpjj
+
+|
+
++
+
+µ2Ni
+
+P p=1
+
+jNi p Bpj-j WNi-j 2
+
+minB··Ni {Ni(T - P )}-1
+
+T t=P +1
+
+YtNi - Xt B··Ni
+
+2 2
+
+j/Ni p Bpj·WNi 2 + Ni
+
+P p=1
+
+pwj
+
+|Bpjj
+
+|
+
++
+
+Ni
+
+P p=1
+
+jNi p Bpj-j WNi-j 2 (7)
+
+with hyperparameters Ni, Ni, Ni, , Ni = Niµ1Ni and Ni = Niµ2Ni, i = 1, . . . , I where I is the overall number of segments. We call this estimate B^ = (B^··N1, . . . , B^··NI ) the segmentized grouping estimate.
+Chudik and Pesaran (2007) consider the case P = 1 and T is large (relative to J) through some "neighboring" procedure, which can be viewed as a special case of the "segmentized grouping" we studied here.
+
+2.5 Forecast Evaluation and Choice of Parameters
+The three penalization methods discussed above critically depend on penalty parameter selection for their performance in model selection, parameter estimation and prediction accuracy. Here we have hyper-parameters ,  (universal grouping), j, j, 1 j J (universal grouping), i, i, i, 1 i I and , and choose them via a data driven "rolling scheme". To simulate real-time forecasting, we conduct an out-of-sample experiment. Let T0 and T1 denote the beginning and the end of the
+10
+
+Choice of Parameters: Forecasting Optimization
+
+| |P |
+
+X
+Y
+B^
+
+|P | |
+3| (t) | yj(;tj;(;t))
+
+olling heme
+Figure 2: Illustration of the Rolling Scheme
+; ;     cbeovaamsleupdautotienodnas(Msatm)iS,npFtleheEqeu^rj(;eaihnst;p^fiooe;rncm^t)i(va5==et)il,oyaaT.nrnTg1udhmptehitnpITeoo(h0tini-;m+stt;eeeIsp)tt-n.itam=RhTTaeT1Mtah0ede(SoyfpFfoj(o;Etrtihenj;jc(e;tah(;j;stett))shs;tiavm)raea=yrtijcae;tobMjmolef(Sp'tstuF)hft)oEee2rdje(o;chnia(n;e0s-;)tssitime)spoidl-aaernhoesatpedidriftbo.yreOycuaj(,stt,|t-o,(itf)s-)
+sample forecast accuracy is measured in terms of mean squared forecMastSeFrErojr;h(MSFE):
+
+hireMt mSFulEtij(p,h,le,E)st=epTE1-heT0d1-fhor+e1Tts=1t-T0hin(ysj(t,te,+h,|d)(to) f-ryej,tu+hr|si(vt)e)2ly.
+
+We report results for MSFE relative to the benchmark (random walk with drift) model's (abbreviated
+
+as M SF Ej(,0h)), as also considered by Ban´bura et al. (2010), i.e.
+
+RM SF Ej(,h,,)
+
+=
+
+M SF Ej(,h,,) M SF Ej(,0h)
+
+.
+
+The parameters are estimated using the observations from the most recent 10 years (rolling scheme)
+
+as illustrated in Figure 2. The parameters are set to yield a desired fit for the variable(s) of inter-
+
+est from T0 to T1. In other words, to obtain the desired magnitude of fit, the search is performed
+
+over a grid of ,  and  to minimize
+
+J j=1
+
+RM
+
+S
+
+F
+
+Ej(,h,,)
+
+(universal
+
+grouping);
+
+j, j
+
+and
+
+
+
+to
+
+minimize RM SF Ej(,h,,) (no grouping); i, i, i and  to minimize jNi RM SF Ej(,h,,,) (segmen-
+
+tized grouping) respectively. Due to computational cost, we prefix  to be 1 or 2 first, and then
+
+do the search of 's and 's over loose grids. For the nice performing 's and 's, we search over
+
+denser grids around them afterwards. The parfor command in Matlab is used to facilitate parallel
+
+computations to fasten this process. Also, using the least angle regression package provided at www-
+
+stat.stanford.edu/tibs/glmnet-matlab, makes the computation time together with the parameter
+
+selection very moderate in our experience.
+
+2.6 Algorithm
+Motivated by the adaptive lasso procedure, Zou (2006), if we define 11
+
+· P = diag[1, 2, . . . , P ]  IJ×J , where diag[1, 2, . . . , P ] is the diagonal matrix with diagonal entries {1-, 2-, . . . , P -},  is the Kronecker product and IJ×J is the J × J identity matrix;
+· W = IP ×P  diag[w1, w2, . . . , wJ ]; · X~ = X W-1P-1 and B~ = PWB and note the fact that X B in (2) is the same as X W-1P-1PWB = X~ B~, we have the following estimation procedure (the proof is very simple and hence is omitted): (1) Generate X~ = X W-1P-1;
+
+(2) Corresponding to the three different estimates (4), (5) and (7), solve:
+
+T
+
+PJ
+
+PJ
+
+min{J(T - P )}-1 B~ t=P +1
+
+Yt
+
+- X~t
+
+B~
+
+2 2
+
++
+
+
+
+p=1 j=1
+
+B~pj-j 2 + 
+
+|B~pjj |,
+
+p=1 j=1
+
+T PP
+
+min(T
+B~··j
+
+- P )-1
+
+(Ytj
+
+t=P +1
+
+- X~t
+
+B~··j )2
+
++ j
+
+p=1
+
+i=j
+
+|B~pij| + j
+p=1
+
+|B~pjj |,
+
+T PP
+
+min{Ni(T - P )}-1
+
+B··Ni
+
+t=P +1
+
+YtNi - Xt B~··Ni
+
+2 2
+
++
+
+Ni
+
+p=1 j/Ni
+
+B~pj·
+
+2 + Ni
+
+|B~pjj |
+
+p=1
+
+P
+
++ Ni
+
+B~pj-j 2; ;
+
+p=1 jNi
+
+(8) (9)
+(10)
+
+(3) Output B^ = W-1P-1B~^ with B~^ minimizing (8) (universal grouping), B~^ = (B^~··1, . . . , B^~··J ), B~^··j minimizing (9) (no grouping); B^~ = (B^~··N1, . . . , B^~··NI ), B~^··Ni minimizing (10) (segmentized
+grouping).
+
+At Step (2), motivated by Wang et al. (2007), as we have more than one penalty terms (mixed
+
+Lasso and group Lasso), we could iterate between penalties to solve it as the standard (group) Lasso
+
+problem. For the "no grouping" estimate, by noting that j = µjj and j
+the estimation procedure above is equivalent to:
+
+P p=1
+
+|B~pjj |
+
+=
+
+j
+
+P p=1
+
+|µj
+
+B~pjj |,
+
+(1) Generate X~ = X W -1P-1 with W = IP ×P  diag[w1, w2, wj-1, ujwj, wj+1, . . . , wJ ] for estimating B··j, 1 j J;
+
+(2) Corresponding to (9), solve:
+
+T PJ
+
+min(T
+B~··j
+
+- P )-1
+
+(Ytj
+
+t=P +1
+
+- X~t
+
+B~··j )2
+
++ j
+
+p=1
+
+i=1
+
+|B~pij |;
+
+(11)
+
+12
+
+(3) Output B^ = W -1P-1B^~ with B~^ = (B^~··1, . . . , B^~··J ), B^~··j minimizing (9) (no grouping).
+At Step (2), we could avoid iterating between multiple penalties and just solve it as the standard Lasso, e.g. by using the least angle regression package provided at www-stat.stanford.edu/tibs/glmnetmatlab.
+In "large J, small T " paradigms, to get parsimonious models, shrinkage with penalization in model selection can shrink insignificant regression coefficients towards zero exactly, but at the same time, significant coefficients are shrunk as well though they are retained in selected working models, Wainwright (2009) and Huang et al. (2008). To this end, we only use our method for the variable (and lag) selection, but not for estimation, Chernozhukov et al. (2011). Thus, we implement the ordinary least squares estimation for the selected variables (and lags) from (8), (9) and (10) w.r.t. three different estimates.
+2.7 Comparison
+Now it is a matter of what kind of regularization techniques among these three choices to use in practice. First, as already discussed in Remark 2.2.1 and 2.3.1, from the allowing individualized (for the variable of particular interest) weights between own lags and others' lags and individualized forecasting performance optimization point of view, the "no grouping" approach is the best, the "universal grouping" one is the worst, and the "segmentized grouping" one is in between. Second , as in Remark 2.2.2 and 2.3.2, from whether all off-diagonal autocoefficients in one row are shrunk to zero point of view, the "no grouping" one is still favored. Third , as in subsection 2.5, the tuning parameters w.r.t. the universal grouping, no grouping or segmentized grouping estimates are selected to optimize the averaged forecasting performance for all variables, the specific variable's forecasting performance or the averaged forecasting performance for the variables in the same segment respectively. When different variables' time series have very distinct patterns, this individualized optimization is preferred. Fourth, for the estimation of large coefficient matrices, due to the strong group-sparse assumption on the underlying structure as mentioned in subsection 2.2, the group lasso type estimator actually has a sharper theoretical risk bound, Huang and Zhang (2009) for more details. In particular, they show that group Lasso is more robust to noise due to the stability associated with group structure and thus requires a smaller sample size to satisfy the sparse eigenvalue condition required in modern sparsity analysis. And the universal grouping estimate is also more computationally efficient since the whole autocoefficient matrix is estimated at once. However, note that the statistical error is a combination of modeling error and estimation error. Even though the group Lasso type estimate might have smaller
+13
+
+estimation error, due to the strong assumption to the underlying structure, the overall risk might not be smaller, as we discussed in subsection 2.2. Moreover, the typical macroeconomic data has low frequency, i.e. monthly. Thus the computational cost is not a severe problem since we only need to update the model once per month at most. Due to all these, we suggest the no grouping estimate for practical implementation as a compromise between flexibility and realization of assumptions. For this reason and technical simplicities, we mainly study the theoretical properties of the no grouping estimate as defined in (6) afterwards.
+
+3 Estimates' Properties
+In this section, we first show that, under the time series setup, if we just use the classic Lasso estimator, the risk bound will depend on the time dependence level as in Theorem 3.1. To circumvent this problem, through reweighting over time, our estimate in (6) can still produce an estimator, which is shown in Theorem 3.2 and 3.3, to be equivalent to an appropriate oracle. The techniques of the proofs are closely built upon those in Lounici et al. (2009), Bickel et al. (2009), Lounici (2008) and Wang et al. (2007).
+
+3.1 Dependence Matters?
+
+Now we will illustrate how the temporal dependence level affects the risk bounds of the Lasso type estimator. For technical simplicities, we consider the univariate AR(P ) (or MA(P )) model with P  , i.e. J = 1 for equations (1) and (2):
+
+et = xt11 + . . . , xtP P + t = xt  + t,
+
+(12)
+
+with the regressors (xt1, . . . , xtP ) = xTt , the coefficients (1, . . . , P ) =  and the error term t. We also define x as a T × P matrix with the t, pth entry as xtp and e = (e1, . . . , eT ) . xtp = et-p (or t-p) corresponds to the AR(P ) (or MA(P )) model. In this situation, since there are no "others lags" (J = 1) and  is a vector, the standard Lasso estimator ^ is defined through:
+
+T
+
+min(T - P )-1 
+
+(et - xt )2 + 2  1.
+
+t=P +1
+
+(13)
+
+We assume there is a true coefficient  for (12) and define M () =
+
+p p=1
+
+1(p
+
+=
+
+0)
+
+and
+
+M (^)
+
+=
+
+p p=1
+
+1(^p
+
+=
+
+0).
+
+Before
+
+moving
+
+on,
+
+we
+
+recall
+
+the
+
+fractional
+
+cover
+
+theory
+
+based
+
+definition
+
+first,
+
+which
+
+was introduced by Janson (2004) and can be viewed as a generalization of m-dependency. Given a
+
+set T and random variables Vt, t  T , we say:
+
+14
+
+· A subset T of T is independent if the corresponding random variables {Vt}tT are independent.
+· A family {Tj}j of subsets of T is a cover of T if j Tj = T .
+· A family {(Tj, wj)}j of pairs (Tj, wj), where Tj  T and wj  [0, 1] is a fractional cover of T if j wj1Tj 1T , i.e. j:tTj wj 1 for each t  T .
+· A (fractional) cover is proper if each set Tj in it is independent.
+· X (T ) is the size of the smallest proper cover of T , i.e. the smallest m such that T is the union of m independent subsets.
+· X (T ) is the minimum of j wj over all proper fractional covers {(Tj, wj)}j. Notice that, in spirit of these notations, X (T ) and X (T ) depend not only on T but also on the family {Vt}tT . Further note that X (T ) 1 (unless T = ) and that X (T ) = 1 if and only if the variables Vt, t  T are independent, i.e. X (T ) is a measure of the dependence structure of {Vt}tT . For example, if Vt only depends on Vt-1, . . . , Vt-k but is independent of all {Vs}s<t-k, we will have k + 1 independent sets:
+
+T1 = {V1, V(k+1)+1, V2(k+1)+1, . . .}, T2 = {V2, V(k+1)+2, V2(k+1)+2, . . .},
+... Tk+1 = {Vk+1, V(k+1)+(k+1), V2(k+1)+(k+1), . . .},
+
+s.t.
+
+k+1 j=1
+
+Tj
+
+=
+
+T
+
+.
+
+So
+
+X (T
+
+)
+
+=
+
+k
+
++1
+
+(if
+
+k
+
++1
+
+<
+
+T ).
+
+Before stating the first main result of this section, we make the following two assumptions.
+
+ASSUMPTION 3.1 With a high probability q,  p, the random variables xtp and t satisfy
+
+| txtp|
+
+bt and
+
+T
+
+T -1
+
+bt2
+
+t=1
+
+C
+
+for some constants bt, C > 0, t = 1, . . . , T .
+
+ASSUMPTION 3.2 There exists a positive number  = (s) such that
+
+min |x |2 : |R| T |R|2
+
+s,   RP \{0}, Rc 1 3 R 1
+
+,
+
+where Rc denotes the complement of the set of indices R, R denotes the vector formed by the
+
+coordinates of the vector  w.r.t. the index set R.
+
+15
+
+Assumption 3.2 is the restricted eigenvalue assumption from Bickel et al. (2009), which is essentially
+
+a restriction on the eigenvalues of the Gram matrix T = x x/T as a function of sparsity s. To see this, recall the definitions of restricted eigenvalues and restricted correlations in Bickel et al. (2009):
+
+min(u) = min zRP :1 M(z)
+
+u
+
+z
+
+T |z|22
+
+z
+
+,
+
+max(u) = max zRP :1 M(z)
+
+u
+
+z
+
+T |z|22
+
+z
+
+,
+
+m1,m2 = max
+
+f1 xI1 xI2 f2 T |f1|2|f2|2
+
+:
+
+I1
+
+1 z P, 1 z P, I2 = , |Ii|
+
+mi, fi  RIi\{0}, i = 1, 2 ,
+
+where |Ii| denotes the cardinality of Ii and xIi is the T × |Ii| submatrix of x obtained by removing
+
+from x the columns that do not correspond to the indices in Ii. Lemma 4.1 in Bickel et al. (2009)
+
+shows that if the restricted eigenvalue of the Gram matrix T satisfies min(2s) > 3s,2s for some
+
+integer 1 s P/2, Assumption 3.2 holds.
+
+We can now state our first main result.
+
+THEOREM 3.1 Consider the model (12) for P 3, T 1 and random variables Vt = txtp, t  T . Let the random variables xtp and t satisfy Assumption 3.1 for any p, all diagonal elements of the matrix x x/T euqal to 1, and M () s. Furthermore, let  be defined as in Assumption 3.2, and max be the maximum eigenvalue of the matrix X X/T . Let  = X (T )(log P )1+ C /T ,  > 0. Then with probability at least q(1 - P - ), for any solution ^ of (13), we have:
+
+T -1 x(^ - ) 2 16sX (T )(log P )1+ C /T 2,
+
+^ -  1
+
+16 16s X (T )(log P )1+ C /T /2, M (^) 642maxs/2.
+
+(14) (15) (16)
+
+Before explaining the results, we would like to discuss some related results first. Suppose x in (12)
+
+has full rank P and t is N(0, 2). Consider the least squares estimate (P T ) ^OLS = (xx )-1xe.
+
+Then from standard least squares theory, we know that the prediction error xT (^OLS - ) 22/2 is
+
+p2-distributed, i.e.
+
+E
+
+xT (^OLS - )
+
+2 2
+
+=
+
+2 P.
+
+TT
+
+(17)
+
+In the sparse situation if t is N(0, 2) (different from our case), Corollary 6.2 of Bu¨hlmann and van de
+
+Geer (2011) shows that the Lasso estimate obeys the following oracle inequality:
+
+xT (^Lasso - )
+
+2 2
+
+T
+
+C0
+
+
+
+2
+
+log T
+
+P
+
+M
+
+(
+
+)
+
+(18)
+
+with a large probability and some constant C0. The additional log P factor here could be seen as the price to pay for not knowing the set {p, p = 0}, Donoho and Johnstone (1994).
+
+16
+
+Similar to the i.i.d. Gaussian situation discussed above, the term s(log P )1+ in (20) could be interpreted as the price to pay for not knowing the set {p, p = 0}. Here we have (log P )1+ instead of log P because we deviate from the typical i.i.d. Gaussian situation and establish the result under the more general Assumption 3.1, which could be thought as the "finite second moment" condition. And the  term is the price to pay for this deviation.
+For the case of xtp = t-p (MA(P ) model), by the definition of X (T ) and Vt, if k = max{p, s.t.p = 0, p+1 = p+2 = . . . = P = 0}), we have X (T ) = k + 1 (if k + 1 < T ). The RHS of (14) becomes 16s(k + 1)(log P )1+ /T 2. For the case of xtp = et-p (AR(P ) model), which is equivalent to MA() and X (T ) T , the RHS of (14) becomes 16s(log P )1+ /2. Thus X (T ) could be interpreted as a measure on how many past lags Vt depends on. Additionally, when the time dependence level increases, by the definition of the Gram matrix,  will decrease since it characterizes how strong xt1, . . . , xtP depend on each other. Still using the MA(k) example considered above,  could be thought as a measure on how strong et depends on et-1, . . . , et-k, which is a complement of the measure of X (T ) on the time dependence level. In both cases (MA(P ) or AR(P )), Theorem 3.1 states that if we use the standard Lasso estimate directly for the time series, the bounds get larger when the dependence level (X (T )) increases and  decreases. In other words, the bound is minimized when X (T ) = 1, which corresponds to the independent situation in the literature. When X (T ) reaches T , it will be offset by the T in the denominator. Thus the risk bound does not decrease when T increases. The intuition behind is clear: if the dependence level is strong, then the additional information brought by a "new" observation will be effectively less, i.e. the overall information from {Vt}Tt=1 will be less correspondingly, which will result in increasing estimates' risk bounds. Consequently, we expect the selection not to be stable and to be very sensitive to minor perturbation of the data. In this sense, we do not expect variable selection to provide results that lead to clearer economic interpretation than principal components or Ridge regression.
+3.2 Consistency of Selection
+To study the oracle properties of the estimator in (6), we assume that there is a correct model with the regression and autoregression coefficients  = (c , d ) = (c1, . . . , cP (J-1), d1, . . . , dP ) . Furthermore, we assume that there are a total of p0 P (J - 1) non-zero other-lag coefficients and q0 P non-zero own-lag coefficients. For convenience, we define S1 = {1 i P (J - 1), ci = 0}, S^1 = {1 i P (J - 1), c^i = 0}, S2 = {1 p P, dp = 0} and S^2 = {1 p P, d^p = 0}. Then, the sets S1 and S2 contain the indices of the significant others-lag and own-lag coefficients respectively, and their complements S1c and S2c contain the indices of the insignificant coefficients. Next, let
+17
+
+cS1 denote the p0 × 1 significant other-lag coefficient vector with c^S1 being its associated estimator.
+
+Moreover, other related parameters and their corresponding estimators are analogously defined (e.g.
+
+c S1c
+
+,
+
+c^S1c
+
+,
+
+dS2
+
+,
+
+d^S2
+
+,
+
+d S2c
+
+,
+
+d^S2c
+
+).
+
+Finally, let 1
+
+= (cS1 , dS2 )
+
+and 2
+
+=
+
+(cS1c ,
+
+d S2c
+
+)
+
+with corresponding estimates
+
+^1, ^2. To facilitate the study, we also introduce the notations
+
+aT d=ef max(i, p, i  S1, p  S2), bT d=ef min(i, p, i  S1c, p  S2c),
+
+where i and p are functions of T . To investigate the theoretical properties of ^, we introduce the following conditions:
+
+A1 The sequence {Xt} is independent of t (t d=ef Utj);
+
+A2 All roots of polynomial 1 -
+
+P p=1
+
+dpzp
+
+are
+
+outside
+
+the
+
+unit
+
+circle;
+
+A3 t has finite fourth-order moment, i.e. E(t4) < ;
+
+A4 j, Ytj (as components of the covariate Xt) is strictly stationary and ergodic with finte second-
+order moment (i.e. E Ytj 2 < ). 
+The technical conditions above are typically used to assure the T -consistency and asymptotic nor-
+
+mality of the unpenalized least squares estimator.
+
+We also rewrite equation (6) as
+
+T
+
+P (J-1)
+
+P
+
+min QT () = min 
+
+(yt - Xt )2 + T
+
+i|ci| + T p|dp|
+
+t=P +1
+
+i=1 p=1
+
+(19)
+
+by multiplying 2(T - P ) and writing T - P as T without confusion. Define
+
+T t=P
+
++1
+
+(yt
+
+- Xt
+
+)2
+
+as
+
+LT (), xtT = (Xj,t, X2j,t, . . . , XJj,t), the own lags corresponding to the coefficients c, and zt = Xt \xt ,
+
+others' lags corresponding to the coefficients d respectively. Then Xt  = xt c + zt d.
+
+We first investigate the consistency of the estimator of (6).
+
+LEMMA 3.1 Assume that aT = O(1) as T  . Then, under conditions (A1-A4),  a local minimizer  of (6) s.t.
+ -  = Op(T -1/2 + aT ).
+The proof is given in the appendix. Lemma 3.1 implies that, if the tuning parameters associated with the significant regressors converge to 0 at a speed faster than T -1/2, then there is a local minimizer
+ of (6), which is T -consistent. Next, we show that, if the tuning parameters associated with the insignificant regressors shrink to 0 slower than T -1/2, then their coefficients can be estimated exactly as 0 with probability tending to 1.
+
+18
+
+ THEOREM 3.2 (Consistency of Selection) Assume that bT T   and - = O(T -1/2), then
+P(2 = 0)  1.
+
+Theorem 3.2 shows that our method can produce a sparse solution for insignificant coefficients con
+sistently. Furthermore, this theorem, together with Lemma 3.1, indicates that the T -consistent
+estimator must satisfy P(2 = 0)  1 when the tuning parameters fulfill the appropriate conditions.
+Finally, we obtain the asymptotic distribution of this estimator.
+
+ THEOREM 3.3 Assume that aT T  0 and bT T  . Then, under conditions (A1-A4), the
+
+"nonzero" components 1 of the local minimizer  in Lemma 3.1 satisfies
+
+(1
+
+-
+
+ 1) T
+
+d
+
+N(0, -0 1),
+
+P(S^1 = S1)  1, P(S^2 = S2)  1,
+where 0 is the submatrix of  corresponding to 1,  = diag(B, C), B = E(xtxt ) and C = E(ztzt ). 
+Theorem 3.3 implies that, if the tuning parameters satisfy the conditions aT T  0 and bT T  , then, asymptotically, the resulting estimator can be as efficient as the oracle estimator. And our method can produce a sparse solution for significant coefficients consistently.
+Since consistency of selection is established here, if we use the ordinary least squares estimation for the selected variables, we can avoid the log term on (18) and (14).
+
+4 Application
+We use the dataset of Stock and Watson (2005a) for illustration. This dataset contains 131 monthly macro indicators covering a broad range of categories including income, industrial production, capacity, employment and unemployment, consumer prices, producer prices, wages, housing starts, inventories and orders, stock prices, interest rates for different maturities, exchange rates, money aggregates and so on. The time span is from January 1959 to December 2003. We apply logarithms to most of the series except those already expressed in rates. The variables of special interest include a measure of real economic activity, a measure of prices and a monetary policy instrument. As in Christiano et al. (1999), we use employment as an indicator of real economic activity measured by the number of employees on non-farm payrolls (EMPL). The level of prices is measured by the consumer price index (CPI) and the monetary policy instrument is the Federal Funds Rate (FFR). All 131
+19
+
+P = 1 P = 4 P = 7 P = 13 P = 25 BVAR EMPL 0.3333 0.3336 0.3338 0.3341 0.3335 0.46 h = 1 CPI 0.3623 0.3618 0.3613 0.3621 0.3623 0.50 FFR 0.4279 0.4281 0.4281 0.4284 0.4287 0.75 EMPL 0.5191 0.5188 0.5192 0.5191 0.5189 0.38 h = 3 CPI 0.4990 0.4992 0.4986 0.4995 0.4996 0.40 FFR 0.4615 0.4614 0.4619 0.4617 0.4628 0.94 EMPL 0.4730 0.4730 0.4735 0.4729 0.4736 0.50 h = 6 CPI 0.4880 0.4874 0.4884 0.4885 0.4891 0.40 FFR 0.5237 0.5242 0.5243 0.5243 0.5250 1.29 EMPL 0.4997 0.4991 0.4992 0.4997 0.5002 0.78 h = 12 CPI 0.4689 0.4687 0.4689 0.4694 0.4686 0.44 FFR 0.4201 0.4199 0.4201 0.4200 0.4216 1.93
+Table 1: RMSFE w.r.t. different choices of h and P .
+variables' lags are used as regressors. As discussed earlier, because of the stationary requirement of our method, the series are transformed to obtain stationarity so that many of the series are (2nd order) differences of the raw data series (or logarithm of the raw series).
+We evaluate the forecast performance over the period from T0 = January 70 to T1 = December 03 and for forecast horizons up to one year (h = 1, 3, 6, 12). The order of the VAR is set to be P = 1, 4, 7, 13, 25. The resulting performance is summarized in Table 1 with comparisions to the ones of Ban´bura et al. (2010) listed under the "BVAR" column. As we can see, unlike the information criteria based on lag selection techniques, the RMSFE is very robust to the initial choice of P , which primarily benefits from the "re-weighting over lags" technique (p-) we used before. For this specific data set, P = 1 seems enough. But in general, since we never know the true value of lags, we can include a large enough P at the beginning to allow flexibility without worrying about over fitting. Moreover, for the one-step-ahead forecast, our method outperforms for EMPL, CPI and FFR, while when h 3, it outperforms mainly for EMPL and FFR, especially for the latter one. This results from the fact that different time series might have quite different behaviors, so if we just have the "universal" penalty parameter for all of them as in Ban´bura et al. (2010), the corresponding forecasting performance might not be optimized. For reference purpose, we also provide the factor-augmented vector autoregressive results of Bernanke et al. (2005) in Figure 3.
+20
+
+LARGE BAYESIAN VARS
+
+81
+
+hD1 hD3 hD6 h D 12
+
+EMPL CPI FFR
+EMPL CPI FFR
+EMPL CPI FFR
+EMPL CPI FFR
+
+Table III. FAVAR, relative MSFE, 1971­2003
+
+FAVAR 1 factor
+
+p D 13
+
+p D BIC
+
+BVAR
+
+FAVAR 3 factors
+
+p D 13
+
+p D BIC
+
+BVAR
+
+1.36 0.54 0.70 3.02 0.52 0.65 1.10 0.57 0.65 2.39 0.52 0.58 1.86 0.98 0.89 2.40 0.97 0.85
+1.13 0.55 0.68 2.11 0.50 0.61 0.80 0.49 0.55 1.44 0.44 0.49 1.62 1.12 1.03 3.08 1.16 0.99
+1.33 0.73 0.87 2.52 0.63 0.77 0.74 0.52 0.55 1.18 0.46 0.50 2.07 1.31 1.40 3.28 1.45 1.27
+1.15 0.98 0.92 3.16 0.84 0.83 0.95 0.58 0.70 1.98 0.54 0.64 2.69 1.43 1.93 7.09 1.46 1.69
+
+LARGE
+BVAR
+0.46 0.50 0.75
+0.38 0.40 0.94
+0.50 0.40 1.29
+0.78 0.44 1.93
+
+Notes: The table reports MSFE for the FAVAR model relative to that from the benchmark model (random walk with
+drift) Fforigemuprleoym3e:ntR(EeMsuPLl)t,sCPoIfanBdeferdneraalnfkunedsertatea(lF.FR(2) f0o0r 5di)ffearenntdforBecaasn´t bhourirzoanseht. FaAlV.A(R2i0nc1lu0d)es 1 or
+3 factors and the three variables of interest. The system is estimated by OLS with number of lags fixed to 13 or chosen by the BIC and by applying Bayesian shrinkage. For comparison the results from large Bayesian VAR are also provided.
+5 Concluding Remarks and Discussions Let us rewrite the VAR of equation (1) in its error correction form:
+
+To summarize, in th1isYat rDticcle, Iwne fiAr1st s.h. .owAtphaYtt u1 nCdBe1r1tYhte1tCim. .e. sCerBipes11seYttuppC, 1ifCwute still u8se the classic
+
+Lasso type estAimVaAtRori,ntfihrestrdisifkfebreonucensdimwpillilesinthcereraesstericwtihonenItnheAt1ime. .d. epAepndDen0c.eWlevfeolloinwcrDeoaasnes, however,
+et al. (1984) and set a prior that shrinks 5 D In A1 . . . Ap to zero. This can be understood
+our methodacso`uinledxascttidllifafecrheniecivneg'tahned cinonthseisltiteenractyureofit visaruisauballley simelpelcetmioennteud nbdyearddsiuncghthsecfeonllaorwiion;gsecond, our
+dummy observations (cf. Section 2):
+method is able to do variable selection and lag selection simultaneously, and is rather robust to the
+
+initial choice of YladgDs;dtiahgird1, 1w, .e. .a,llonwn i/ndividXudaDlize1d1ðwp eighditasg b1etw1,e.e. n. , onwnn /and0noðt1hers' la9gs. All these
+
+have been ctohneTfihcraemseheyodpferebpxyaarcattmhdeeitfefrerereanlccoefosnrtareoncldsa, sfatosirntghgeopedesergftrooere1mo,afwnsehcreianpikpnargoteah:cheastphreegcvoaiseoesuotsof snzeoecrotshiowrinnekaaapgnpedr.oTachcoheme at a low
+
+computationpaarlamcoestetr.
+in principle
+
+i aims at capturing the average level of variable yit. Although the parameters should be set using only prior knowledge, we follow common practice5 and set the parameter
+
+Some isseuqeusal wtoethdeosanmoptle eaxveprlaogreeofhyeirt.eOiunrcalpupdroeacnhoinssttoasteitoanaloroistey,prrioarnwkithtestD, 1c0oin. Ttehgeroavteioranll and causal
+shrinkage is again selected so as to match the fit of the small specification estimated by OLS.
+
+test. For a typTiacballe mIVacrreopoerctsonreosmultisc fdroamta tsheet,fotrheceasntoenvsatlauattiioonaorfittyhecosmpeceisficfraotiomn sweiathsotnhealistuym, bouf siness cycle
+
+coefficient prior. They show that, qualitatively, results do not change for the smaller models,
+and econombicutdiemvperolovpe msigennitfisc.anItnly sfpoirrithteoMf SEDonIUgMetaandl. L(A2R01G0E),sptehciisficmatoiotnisv.aItnespaurtsictuolara,dthde aponoornstationary
+
+results for the federal funds rate discussed in Table I are now improved. Both the MEDIUM and
+component ULARGtoE emqoudaetlsioonutp(2er)foarms btheelorwandom walk forecasts at all the horizons considered. Overall,
+
+the sum of coefficient prior improves forecast accuracy, confirming the findings of Robertson and
+
+Tallman (1999).
+
+Yt = Zt + XtB + Ut,
+
+5 See, for example, Sims and Zha (1998).
+where Zt = (Z1(t), . . . , ZR(t)) contains R basis functions of time consisting of Fourier series with
+
+Copyright  2009 John Wiley & Sons, Ltd.
+
+J. Appl. Econ. 25: 71­92 (2010)
+
+different frequencies and segment by segment ortho-normal polynomials withDOcIo: r1r0.e1s00p2o/janeding R × J
+
+coefficient matrix , and Xt, B are the same as in equation (1). Studying this extended model deserves further investigation and will be presented in a separate paper. If we want to consider the rank test,
+
+cointegration and causal test, what we need for this high dimensional time series is not the ones in
+
+the univariate case, but the high dimensional simultaneous tests, which might be much more difficult.
+
+Heteroscedasticity with Cross-section Correlations.
+
+We consider Cov(Ut) =  with nonzero off-diagonal entries in . Assume that we have a consistent estimate ^ for  (which is another challenging task since  is a J × J matrix) with Cholesky decomposition ^ = C C, where C is an upper triangular matrix with inverse D (which is also an
+
+21
+
+upper triangular matrix). Without loss of generality, assume all diagonal entries of ^ , C and D are equal to 1. Transform the original Xt by D to generate X~t (X~t = XtD) s.t. Cov(UtD) = I. Under this situation, we are no longer selecting the original variables, but linear transformations of them.
+Thus we must show that this does not affect the inference. We have
+~1x~t1 + ~2x~t2 + . . . + ~J x~tJ
+J -1
+=~1xt1 + ~2(d12xt1 + xt2) + . . . + ~J ( djJ xtj + xtJ )
+j=1 JJ
+=(~1 + ~jd1j)xt1 + (~2 + ~jd2j)xt2 + . . . + ~J xtJ .
+j=2 j=3
+If the off-diagonal entries of D, {dij}i<j, are much smaller than the diagonal entries 1, it is likely that the selected nonzero sets of ~'s (or c~, d~) are the same as the selected nonzero sets S^1 and S^2 of 's, which have been shown to be the same as the oracle ones, Theorem 3.2 and 3.3. By the definition of D, this means that the off-diagonal entries of C, ^ and  should also be much smaller than their
+diagonal entries 1, e.g. the cross-section correlations must be weak enough, which aligns with the case
+for dynamic factor models, Forni et al. (2000).
+
+Acknowledgement The main results of this paper were first presented at the annual Winter Meeting of the Econometric Society, Denver, Jan, 2011. We are grateful for seminar participants' many interesting comments on several versions of the paper. In particular, I would like to thank Prof Peter Bickel for sponsoring my stay at the University of California, Berkeley. This work is also partially supported by Deutsche Forschungsgemeinschaft via SFB 649 "O¨ konomisches Risiko", Humboldt-Universita¨t zu Berlin from May, 2011 to Oct, 2011, which is greatly acknowledged. We would also like to thank Prof Marta Ban´bura, Prof Domenico Giannone and Prof Lucrezia Reichlin for sharing the codes of BVAR.
+
+6 Appendix
+
+Proof of Theorem 3.1 The proof of this theorem is based on the ones of Lemma 3.1 and Theorem
+
+3.1 in Lounici et al. (2009) up to a modification of the bound on P(Ac) with random event A =
+
+max1 p P
+
+T t=1
+
+tXtp
+
+T , where n, M and T there are equivalent to T, P and 1 here respectively.
+
+22
+
+The intermediate results in the proof of Theorem 3.1 in Lounici et al. (2009) show that
+T -1 X(B - B) 2 16s2/2, B - B 16 16s/2, M (B) 642maxs/2.
+
+We have:
+T
+P(Ac) = P max tXtp > T 1pP t=1
+
+TT
+P P tXtp > T d=ef P P Vt > T .
+t=1 t=1
+
+(20) (21) (22)
+
+Then, by the (extended) Mcdiarmid inequality, see Theorem 2.1 of Janson (2004), with random
+
+vectors {Vt}tT=1, we have
+
+P(Ac)
+
+T
+P P Vt > T
+t=1
+
+P exp
+
+-
+
+X
+
+
+
+(T
+
+2 )
+
+T
+
+t
+
+b2t /T
+
+P -
+
+with  = X (T )(log P )1+ C /T ,  > 0, which, together with (20), (21) and (22), leads to (14),
+
+(15) and (16).
+
+Proof of Lemma 3.1 The proofs are closely built upon those of Wang et al. (2007). Let  =
+
+(u , v ) , u = (u1, . . . , uP (J-1)) , v = (v1, . . . , vP ) , T = T -1/2 + an and { + T  :  the ball around . Then, for  = e, we have
+
+e} be
+
+DT () = QT ( + T ) - QT ()
+
+= LT ( + T ) - LT () + T i(|ci + T ui| - ci ) + T j(|dj + T vj| - dj )
+
+iS1
+
+jS2
+
+= LT ( + T ) - LT () - T T i|ui| - T T j|vj|
+
+iS1
+
+jS2
+
+= LT ( + T ) - LT () - T T2 p0e - T T2 q0e
+
+= LT ( + T ) - LT () - T T2 (p0 + q0)e.
+
+(23)
+
+Furthermore,
+
+LT ( + T ) - LT () =
+
+{ut - aT zt v - aT u xt}2 - ut2
+
+tt
+
+= a2T {(zt v)2 + u xtxt u}
+t
+
+-2aT utzt v
+t
+
++2aT2 zt vu xt.
+t
+
+23
+
+(24) (25) (26)
+
+By employing the martingale central limit theorem and the ergodic theorem, we can show that (24)
+
+= T a2T {  + Op(1)}, (25) =  Op(T a2T ) and (26) = T aT2 Op(1) = Op(T aT2 ). Because (24) dominates the terms (25), (26) and T T2 (p0 + q0)e in equation (23), for any given > 0, there is a large constant e such that
+
+P[ inf QT ( + T ) > QT ()] 1 - .  =e
+This implies that, with probability at least 1 - , there is a local minimizer in the ball { + T  :  e}, Bickel et al. (1998) and Fan and Li (2001). Consequently, there is a local minimizer of
+QT () such that ^ -  = Op(T ). This completes the proof.
+
+Proof of Theorem 3.2 The proof is essentially the same as those of Theorem 2 of Zou (2006) and Wang et al. (2007). For i  S1c, assume that there is a local minimizer ^ with c^i = 0. By the KKT optimality condition, we have
+
+0
+
+=
+
+LT (^) ci
+
++
+
+T isgn(c^i)
+
+=
+
+LT () ci
+
++
+
+T i(^
+
+-
+
+){1
+
++
+
+Op(1)}
+
++
+
+T isgn(c^i),
+
+(27)
+
+where i denotes the ith row of  and i  S1c. By employing the central limit theorem, the first term
+
+in equation (27) is of order Op(T 1/2). Furthermore, the condition in Theorem 3.2 implies that its 
+second term is also of order Op(T 1/2). Both are dominated by T i since bT T  . Therefore, the
+
+sign of equation (27) is dominated by the sign of c^i. Thus (27) can not be equal to 0. Consequently, we must have c^i = 0 in probability. Analogously, we can show that P(d^S2c = 0)  1. This completes the proof.
+
+Proof of Theorem 3.3 Applying Lemma 3.1 and Theorem 3.2, we have P(2 = 0)  1. Hence, the
+
+minimizer of QT () is the same as that of QT (1) with probability tending to 1. This implies that the estimator ^1 satisfies the equation
+
+QT (1)
+
+= 0.
+
+(28)
+
+1 1=^1
+
+According
+
+to
+
+Lemma
+
+3.1,
+
+^1
+
+is
+
+ T -consistent.
+
+Thus, the Taylor series expansion of equation (28)
+
+yields
+
+0
+
+=
+
+1 T
+
+LT (^1) 1
+
++
+
+ g(^1) T
+
+=
+
+1 T
+
+LT (1) 1
+
++
+
+ g(1) T
+
++
+
+ 0 T (^1
+
+-
+
+1)
+
++
+
+Op(1),
+
+where g is the first-order derivative of the penalty function
+
+i|ci| + j|dj|,
+
+iS1
+
+jS2
+
+24
+
+and
+
+g(^1)
+
+= g(1)
+
+when
+
+T
+
+is
+
+sufficiently
+
+large.
+
+Furthermore,
+
+it
+
+can
+
+be
+
+easily
+
+shown
+
+that
+
+ g(1) T
+
+=
+
+Op(1), which implies that
+
+ (^1 - 1) T
+
+=
+
+0-1 T
+
+LT (1) 1
+
++
+
+Op(1)
+
+d N(0, 0-1).
+
+The next step is to show P(S^1 = S1)  1 and P(S^2 = S2)  1. i  S1 and p  S2, the asymptotic normality result indicates that c^i p ci and d^p p dp, where p stands for convergence in probability. Thus P(i  S^1)  1 and P(p  S^2)  1. It suffices to show that i / S1 and p / S2, P(i  S^1)  0 and P(p  S^2)  0, which have been shown by Theorem 3.2. This completes the proof.
+
+References
+Ban´bura, M., Giannone, D., and Reichlin, L. (2010). Large bayesian vector auto regressions. Journal of Applied Econometrics, 25(1):71­92.
+Bernanke, B., Boivin, J., and Eliasz, P. S. (2005). Measuring the effects of monetary policy: A factor-augmented vector autoregressive (favar) approach. The Quarterly Journal of Economics, 120(1):387­422.
+Bickel, P. J., Klaassen, C. A. J., Ritov, Y., and Wellner, J. (1998). Efficient and adaptive estimation for semiparametric models, 2nd edition. Springer Verlag.
+Bickel, P. J., Ritov, Y., and Tsybakov, A. B. (2009). Simultaneous analysis of Lasso and Dantzig selector. Annals of Statists, 37(4):1705­1732.
+Bu¨hlmann, P. and van de Geer, S. (2011). Statistics for High-Dimensional Data: Methods, Theory and Applications. Heidelberg: Springer Verlag.
+Chernozhukov, V., Belloni, A., and Hasen, C. (2011). Estimation and inference methods for highdimensional sparse econometric models. Submitted.
+Christiano, L., Eichenbaum, M., and Evans, C. (1999). Monetary policy shocks: What have we learned and to what end? Handbook of Macroeconomics, 1(1):65­148.
+Chudik, A. and Pesaran, M. (2007). Infinite dimensional vars and factor models. Cambridge Working Papers in Economics 0757, Faculty of Economics, University of Cambridge.
+
+25
+
+Diebold, F. X. and Li, C. (2006). Forecasting the term structure of government bond yields. Journal of Econometrics, 130:337­364.
+Doan, T., Litterman, R., and Sims, C. (1984). Forecasting and conditional projection using realistic prior distributions. Econometric Reviews, 3(1):1­100.
+Donoho, D. L. and Johnstone, I. M. (1994). Ideal spatial adaptation by wavelet shrinkage. Biometrika, 81(3):pp. 425­455.
+Efron, B., Hastie, T., Johnstone, L., and Tibshirani, R. (2004). Least angle regression. Annals of Statistics, 32:407­499.
+Fan, J. and Li, R. (2001). Variable selection via nonconcave penalized likelihood and its oracle properties. Journal of the American Statistical Association, 96(456):1348­1360.
+Fengler, M. R., H¨ardle, W., and Mammen, E. (2007). A semiparametric factor model for implied volatility surface dynamics. Journal of Financial Econometrics, 5(2):189­218.
+Figlewski, S., Frydman, H., and Liang, W. (2006). Modeling the effect of macroeconomic factors on corporate default and credit rating transitions. NYU Stern Finance Working Paper No. FIN-06-007. Available at SSRN: http://ssrn.com/abstract=934438.
+Forni, M., Hallin, M., Lippi, M., and Reichlin, L. (2000). The generalized dynamic-factor model: Identification and estimation. The Review of Economics and Statistics, 82(4):540­554.
+Forni, M., Hallin, M., Lippi, M., and Reichlin, L. (2005). The generalized dynamic factor model: One-sided estimation and forecasting. Journal of the American Statistical Association, 100:830­ 840.
+Geweke, J. (1977). The dynamic factor analysis of economic time series. Latent Variables in Socio-Economic Models, eds. D. J. Aigner and A. S. Goldberg, Amsterdam: North-Holland, pages 365­383.
+Giannone, D., Reichlin, L., and Sala, L. (2005). Monetary policy in real time. In NBER Macroeconomics Annual 2004, Volume 19, NBER Chapters, pages 161­224. National Bureau of Economic Research, Inc.
+Huang, J., Ma, S., and Zhang, C. (2008). Adaptive lasso for sparse highdimensional regression. Statistica Sinica, 18:1603­1618.
+26
+
+Huang, J. and Zhang, T. (2009). The Benefit of Group Sparsity. ArXiv e-prints.
+Janson, S. (2004). Large deviations for sums of partly dependent random variables. Random Structures Algorithms, 24(3):234­248.
+Lee, R. D. and Carter, L. (1992). Modeling and forecasting the time series of u.s. mortality. Journal of the American Statistical Association, 87(419):659­671.
+Lounici, K. (2008). Sup-norm convergence rate and sign concentration property of lasso and dantzig estimators. Electronic Journal of Statistics, 2:90­102.
+Lounici, K., Pontil, M., Tsybakov, A. B., and van de Geer, S. (2009). Taking advantage of sparsity in multi-task learning. Proceedings of Conference on Learning Theory (COLT) 2009.
+Mol, C. D., Giannone, D., and Reichlin, L. (2008). Forecasting using a large number of predictors: Is bayesian shrinkage a valid alternative to principal components? Journal of Econometrics, 146(2):318 ­ 328.
+Mysickov´a, A., Song, S., Mohr, P. N., Heekeren, H. R., and Ha¨rdle, W. K. (2011). Risk patterns and correlated brain activities. Working paper.
+Nelson, C. R. and Siegel, A. F. (1987). Parsimonious modeling of yield curves. Journal of Business, 60:473­489.
+Park, B. U., Mammen, E., Ha¨rdle, W., and Borak, S. (2009). Time series modelling with semiparametric factor dynamics. Journal of the American Statistical Association, 104(485):284­298.
+Sargent, T. J. and Sims, C. A. (1977). Business cycle modeling without pretending to have too much a priori economic theory. Working Papers 55, Federal Reserve Bank of Minneapolis.
+Song, S., Ha¨rdle, W., and Ritov, Y. (2010). Dynamic factor models for high dimensional nonstationary time series. Under revision.
+Stock, J. H. and Watson, M. W. (2002a). Forecasting using principal components from a large number of predictors. Journal of the American Statistical Association, 97:1167­1179.
+Stock, J. H. and Watson, M. W. (2002b). Macroeconomic forecasting using diffusion indexes. Journal of Business & Economic Statistics, 20(2):147­62.
+Stock, J. H. and Watson, M. W. (2005a). An empirical comparison of methods for forecasting using many predictors. Manuscript, Princeton University.
+27
+
+Stock, J. H. and Watson, M. W. (2005b). Implications of dynamic factor models for VAR analysis. NBER Working Papers 11467, National Bureau of Economic Research, Inc. available at http://ideas.repec.org/p/nbr/nberwo/11467.html.
+Tibshirani, R. (1996). Regression shrinkage and selection via the Lasso. Journal of the Royal Statistical Society, Series B, 58(1):267­288.
+Wainwright, M. J. (2009). Sharp thresholds for high-dimensional and noisy sparsity recovery using l1-constrained quadratic programming (lasso). IEEE Trans. Inf. Theor., 55:2183­2202.
+Wang, H., Li, G., and Tsai, C.-L. (2007). Regression coefficient and autoregressive order shrinkage and selection via the lasso. Journal Of The Royal Statistical Society Series B, 69(1):63­78.
+Worsley, K., Liao, C., Aston, J., Petre, V., Duncan, G., Morales, F., and Evans, A. (2002). A general statistical analysis for fmri data. NeuroImange, 15:1­15.
+Yuan, M. and Lin, Y. (2006). Model selection and estimation in regression with grouped variables. Journal of the Royal Statistical Society, Series B, 68(1):49­67.
+Zou, H. (2006). The adaptive lasso and its oracle properties. Journal of the American Statistical Association, 101:1418­1429.
+28
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Localising temperature risk" by Wolfgang Karl Härdle, Brenda López Cabrera, Ostap Okhrin and Weining Wang, January 2011.
+002 "A Confidence Corridor for Sparse Longitudinal Data Curves" by Shuzhuan Zheng, Lijian Yang and Wolfgang Karl Härdle, January 2011.
+003 "Mean Volatility Regressions" by Lu Lin, Feng Li, Lixing Zhu and Wolfgang Karl Härdle, January 2011.
+004 "A Confidence Corridor for Expectile Functions" by Esra Akdeniz Duran, Mengmeng Guo and Wolfgang Karl Härdle, January 2011.
+005 "Local Quantile Regression" by Wolfgang Karl Härdle, Vladimir Spokoiny and Weining Wang, January 2011.
+006 "Sticky Information and Determinacy" by Alexander Meyer-Gohde, January 2011.
+007 "Mean-Variance Cointegration and the Expectations Hypothesis" by Till Strohsal and Enzo Weber, February 2011.
+008 "Monetary Policy, Trend Inflation and Inflation Persistence" by Fang Yao, February 2011.
+009 "Exclusion in the All-Pay Auction: An Experimental Investigation" by Dietmar Fehr and Julia Schmid, February 2011.
+010 "Unwillingness to Pay for Privacy: A Field Experiment" by Alastair R. Beresford, Dorothea Kübler and Sören Preibusch, February 2011.
+011 "Human Capital Formation on Skill-Specific Labor Markets" by Runli Xie, February 2011.
+012 "A strategic mediator who is biased into the same direction as the expert can improve information transmission" by Lydia Mechtenberg and Johannes Münster, March 2011.
+013 "Spatial Risk Premium on Weather Derivatives and Hedging Weather Exposure in Electricity" by Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+014 "Difference based Ridge and Liu type Estimators in Semiparametric Regression Models" by Esra Akdeniz Duran, Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+015 "Short-Term Herding of Institutional Traders: New Evidence from the German Stock Market" by Stephanie Kremer and Dieter Nautz, March 2011.
+016 "Oracally Efficient Two-Step Estimation of Generalized Additive Model" by Rong Liu, Lijian Yang and Wolfgang Karl Härdle, March 2011.
+017 "The Law of Attraction: Bilateral Search and Horizontal Heterogeneity" by Dirk Hofmann and Salmai Qari, March 2011.
+018 "Can crop yield risk be globally diversified?" by Xiaoliang Liu, Wei Xu and Martin Odening, March 2011.
+019 "What Drives the Relationship Between Inflation and Price Dispersion? Market Power vs. Price Rigidity" by Sascha Becker, March 2011.
+020 "How Computational Statistics Became the Backbone of Modern Data Science" by James E. Gentle, Wolfgang Härdle and Yuichi Mori, May 2011.
+021 "Customer Reactions in Out-of-Stock Situations ­ Do promotion-induced phantom positions alleviate the similarity substitution hypothesis?" by Jana Luisa Diels and Nicole Wiebach, May 2011.
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Extreme value models in a conditional duration intensity framework" by Rodrigo Herrera and Bernhard Schipp, May 2011.
+023 "Forecasting Corporate Distress in the Asian and Pacific Region" by Russ Moro, Wolfgang Härdle, Saeideh Aliakbari and Linda Hoffmann, May 2011.
+024 "Identifying the Effect of Temporal Work Flexibility on Parental Time with Children" by Juliane Scheffel, May 2011.
+025 "How do Unusual Working Schedules Affect Social Life?" by Juliane Scheffel, May 2011.
+026 "Compensation of Unusual Working Schedules" by Juliane Scheffel, May 2011.
+027 "Estimation of the characteristics of a Lévy process observed at arbitrary frequency" by Johanna Kappus and Markus Reiß, May 2011.
+028 "Asymptotic equivalence and sufficiency for volatility estimation under microstructure noise" by Markus Reiß, May 2011.
+029 "Pointwise adaptive estimation for quantile regression" by Markus Reiß, Yves Rozenholc and Charles A. Cuenod, May 2011.
+030 "Developing web-based tools for the teaching of statistics: Our Wikis and the German Wikipedia" by Sigbert Klinke, May 2011.
+031 "What Explains the German Labor Market Miracle in the Great Recession?" by Michael C. Burda and Jennifer Hunt, June 2011.
+032 "The information content of central bank interest rate projections: Evidence from New Zealand" by Gunda-Alexandra Detmers and Dieter Nautz, June 2011.
+033 "Asymptotics of Asynchronicity" by Markus Bibinger, June 2011. 034 "An estimator for the quadratic covariation of asynchronously observed
+Itô processes with noise: Asymptotic distribution theory" by Markus Bibinger, June 2011. 035 "The economics of TARGET2 balances" by Ulrich Bindseil and Philipp Johann König, June 2011. 036 "An Indicator for National Systems of Innovation - Methodology and Application to 17 Industrialized Countries" by Heike Belitz, Marius Clemens, Christian von Hirschhausen, Jens Schmidt-Ehmcke, Axel Werwatz and Petra Zloczysti, June 2011. 037 "Neurobiology of value integration: When value impacts valuation" by Soyoung Q. Park, Thorsten Kahnt, Jörg Rieskamp and Hauke R. Heekeren, June 2011. 038 "The Neural Basis of Following Advice" by Guido Biele, Jörg Rieskamp, Lea K. Krugel and Hauke R. Heekeren, June 2011. 039 "The Persistence of "Bad" Precedents and the Need for Communication: A Coordination Experiment" by Dietmar Fehr, June 2011. 040 "News-driven Business Cycles in SVARs" by Patrick Bunk, July 2011. 041 "The Basel III framework for liquidity standards and monetary policy implementation" by Ulrich Bindseil and Jeroen Lamoot, July 2011. 042 "Pollution permits, Strategic Trading and Dynamic Technology Adoption" by Santiago Moreno-Bromberg and Luca Taschini, July 2011. 043 "CRRA Utility Maximization under Risk Constraints" by Santiago MorenoBromberg, Traian A. Pirvu and Anthony Réveillac, July 2011.
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+044 "Predicting Bid-Ask Spreads Using Long Memory Autoregressive Conditional Poisson Models" by Axel Groß-Klußmann and Nikolaus Hautsch, July 2011.
+045 "Bayesian Networks and Sex-related Homicides" by Stephan Stahlschmidt, Helmut Tausendteufel and Wolfgang K. Härdle, July 2011.
+046 "The Regulation of Interdependent Markets", by Raffaele Fiocco and Carlo Scarpa, July 2011.
+047 "Bargaining and Collusion in a Regulatory Model", by Raffaele Fiocco and Mario Gilli, July 2011.
+048 "Large Vector Auto Regressions", by Song Song and Peter J. Bickel, August 2011.
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

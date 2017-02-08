@@ -1,0 +1,1135 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2010-018
+Time varying Hierarchical Archimedean Copulae
+Wolfgang Karl H‰rdle* Ostap Okhrin*
+Yarema Okhrin**
+* Humboldt-Universit‰t zu Berlin, Germany ** Universit‰t Augsburg, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+Time varying Hierarchical Archimedean Copulae
+Wolfgang Karl H®ardle, Ostap Okhrin, Yarema Okhrinß
+17th February 2010
+Abstract:
+There is increasing demand for models of time-varying and non-Gaussian dependencies for multivariate time-series. Available models suffer from the curse of dimensionality or restrictive assumptions on the parameters and the distribution. A promising class of models are the hierarchical Archimedean copulae (HAC) that allow for non-exchangeable and non-Gaussian dependency structures with a small number of parameters. In this paper we develop a novel adaptive estimation technique of the parameters and of the structure of HAC for time-series. The approach relies on a local change point detection procedure and a locally constant HAC approximation. Typical applications are in the financial area but also recently in the spatial analysis of weather parameters. We analyse the time varying dependency structure of stock indices and exchange rates. We find that for stock indices the copula parameter changes dynamically but the hierarchical structure is constant over time. Interestingly in our exchange rate example both structure and parameters vary dynamically.
+Keywords: copula; multivariate distribution; Archimedean copula; adaptive estimation. JEL Classification: C13, C14, C50.
+The financial support from the Deutsche Forschungsgemeinschaft via SFB 649 "Okonomisches Risiko", Humboldt-Universit®at zu Berlin is gratefully acknowledged.
+C.A.S.E. - Center for Applied Statistics and Economics, Ladislaus von Bortkiewicz Chair of Statistics of Humboldt-Universita®t zu Berlin, Spandauer Straﬂe 1, D-10178 Berlin, Germany and National Central University, Department of Finance, No. 300, Jhongda Rd., Jhongli City, Taoyuan County 32001, Taiwan (R.O.C.). Email: haerdle@wiwi.hu-berlin.de.
+C.A.S.E. - Center for Applied Statistics and Economics, Ladislaus von Bortkiewicz Chair of Statistics of Humboldt-Universit®at zu Berlin, Spandauer Straﬂe 1, D-10178 Berlin, Germany. Email: ostap.okhrin@wiwi.hu-berlin.de
+ßDepartment of Statistics, University of Augsburg, D-86135 Augsburg, Germany. Email: yarema.okhrin@wiwi.uni-augsburg.de
+1
+
+1 Introduction
+The key difference between univariate and multivariate time series analysis is the fact that the future dynamics is affected not only by the univariate past but also by crosssectional dependencies. These dependencies are not constant and vary in time. Their dynamics, form and strength are important in many applications. Risk diversification, asset allocation, financial spillovers illustrate this importance. The most straightforward and therefore well established approach to modeling dependencies is via the correlation (or covariance) matrix. The correlation matrix uniquely characterises the dependency, if the data is driven, for example, by a multivariate normal distribution. Similar arguments also hold for arbitrary elliptical distributions (as the multivariate ). Due to its simplicity the covariance matrix became the standard parametrisation of dependency. In many applications the dependency structure varies over time. Time varying conditional volatilities are modeled using e.g. GARCH-type processes. For a recent review of multivariate GARCH processes, including DCC, CCC, BEKK, among others, we refer to Silvennoinen and Tera®svirta (2009). These models though still assume parameters of the process that are constant over an entire estimation period. Such approach has been challenged even in the univariate case as the growing literature demonstrates, see Lamoureux and Lastrapes (1990). In practice, however, it is likely that the parameters characterising the dependency change with time in possibly a nonstationary manner.
+Another disadvantage of covariance-based dependency modeling is the fact that it fails to capture important types of data features. First, covariances are measures of linear dependence and therefore fail to represent nonlinear relationships. As an alternative approach one may consider other measures such as Kendall's or Spearman's , see Joe (1997). However, the extensions of these measures to higher dimensions is problematic, see e.g. Schmid and Schmidt (2006). Second, elliptical distributions postulate symmetric dependency, i.e. the strength of the relationship is the same for high and low values. This is, however, in some applications a too restrictive assumption. Third, the covariance matrix ≠ used as a parameter of the multivariate normal distribution ≠ fails to fit heavy tails typical for asset returns. An approach which, partially solves these problems, is based on copulae, proposed by Sklar and reviewed in Joe (1997) and Nelsen (2006). Copulae allow us to model dependency separately from marginal distributions and provide better fit for heavy tails, asymmetries, etc.
+Time-varying copulae were considered recently by Patton (2004), Rodriguez (2007) and Giacomini, H®ardle and Spokoiny (2009). Patton (2004) considers an asset-allocation prob-
+2
+
+lem with a time-varying parameter of bivariate copulae. Rodriguez (2007) studies financial contagion using switching-parameter bivariate copulae. In contrary to these papers Giacomini et al. (2009) use a novel method based on local adaptive estimation discussed in Spokoiny (2010). The idea of that approach is to determine a period of homogeneity where the parameter of a low-dimensional Archimedean copula can be approximated by a constant.
+The online instantaneous selection of high dimensional dependency structures via multivariate copulae is still an open problem. Here we tackle this problem via multivariate hierarchical Archimedean copulae. Detailed analysis of this copula class is given in Okhrin, Okhrin and Schmid (2009). In contrary to simple Archimedean copulae, the HAC is characterised not only by its parameters, but also by the structure. The time-varying dependency therefore affects structure and parameters simultaneously. The variability of the parameters implies that the dependency becomes stronger or weaker; variability of the structure implies that there is a change not only in the strength of the dependency, but also in its form. The proposed technique allows us to determine the periods with local constant structure and parameters. It is based on the selection of an appropriate interval out of a set of candidate intervals. The procedure requires the calculation of a sequence of critical values (by simulations) that are used in testing local homogeneity. Local homogeneity is checked via a test against a change point alternative.
+To assess the performance of the developed methodology we perform extensive simulations and empirical studies. Within the simulation study we show that this novel technique quickly reacts to shifts in the structure and in the parameters. The varying estimation window allows to increase the precision of the estimators in stable periods, but simultaneously to react quickly to changes if they occur. The detection delay clearly demonstrates the effectiveness of the procedure compared to a rolling window estimation. In the empirical study we demonstrate one example with changes only in parameters and the second example with changes both in parameters and in structure.
+The paper is structured as follows. In the next section we give a short theoretical background of HAC with estimation and grouping techniques. Section 3 extends the local adaptive estimation procedures to copulae. Sections 4 and 5 deal with applications to simulated and real data.
+3
+
+2 Hierarchical Archimedean Copulae
+
+The advantage of the copula is that it allows to split the multivariate distribution into the margins and a pure dependency component: it captures the dependency between variables eliminating the impact of the marginal distributions. Formally copulae where introduced in Sklar (1959). The main result states that if is an arbitrary -dimensional continuous distribution function of the random variables 1, . . . , , then the associated copula is unique and defined as a continuous function : [0, 1]  [0, 1] which satisfies the equality
+
+( 1, . . . , ) = { 1-1( 1), . . . , -1( )}, 1, . . . ,  [0, 1],
+
+where
+
+-1 1
+
+(),
+
+.
+
+.
+
+.
+
+,
+
+-1() are the quantile functions of the corresponding marginal dis-
+
+tributions 1( 1), . . . , ( ). If belongs to the class of elliptical distributions, then
+
+this results in a so called elliptical copula. Note, however, that this copula cannot be
+
+given explicitly, because the distribution function and the inverse marginal distribu-
+
+tions usually have only integral representations. One of the classes that overcomes this
+
+drawback of elliptical copulae is the class of Archimedean copulae
+
+( 1, . . . , ) = { -1( 1) +    + -1( )}, 1, . . . ,  [0, 1],
+
+(1)
+
+where  = { : [0; )  [0, 1]  (0) = 1, () = 0; (-1) ( )  0; = 1, . . . , }. The function is called the generator of the copula and commonly depends on a single parameter . For example, the Gumbel generator is given by = exp(- 1/ ) for 0 
+< , 1  < . The generator is required to be -monotone, i.e. differentiable up to the order - 2, with (-1) ( )( )  0, = 0, . . . , - 2 for any  [0, ) and with (-1) -2 ( -2)( ) being nondecreasing and convex on [0, ) (e.g. McNeil and Neslehov¥a (2009)). For simplicity we make a stronger assumption that is a completely monotone function, i.e. (-1) ( )( )  0 for all  0. A detailed review of the properties of Archimedean copulae can be found in McNeil and Neslehova¥ (2009) and Joe (1996).
+
+A disadvantage of Archimedean copulae is the fact that the rendered dependency is symmetric with respect to the permutation of variables, i.e. the distribution is exchangeable. Moreover, the multivariate dependency structure is somewhat stiff, since it depends on a single parameter of the generator function . The Hierarchical Archimedean Copulae (HAC) overcome this problem by considering the compositions of simple Archimedean
+
+4
+
+1 2 u4 3 u3 u1 u2
+
+1 2 3 u1 u2 u3 u4
+
+Figure 1: Fully and partially nested copulae of dimension = 4 with structures = (((12)3)4) on the left and = ((12)(34)) on the right
+
+copulae. For example, the special case of HAC fully nested copula can be given by
+
+( 1, . . . , ) = =
+
+1{ 2( 1, . . . ,
+
+-1),
+
+}=
+
+1{
+
+-1 1
+
+
+
+2( 1, . . . ,
+
+-1) + 1-1(
+
+)}
+
+1{
+
+-1 1
+
+
+
+2( -2 1(
+
+3( 1, . . . ,
+
+-2)) + -2 1(
+
+-1)) + -1 1(
+
+)}. (2)
+
+The composition can be applied recursively using different segmentations of variables leading to more complex HACs. For notational convenience let the expression = {(. . . ( 1 . . . 1) . . . (. . . ) . . . )} denote the structure of a HAC, where   {1, . . . , } is a reordering of the indices of the variables. denotes the structure of subcopulae with
+= . Further let the -dimensional hierarchical Archimedean copula be denoted by ( 1, . . . , ; , ), where the set of copula parameters. For example the fully nested HAC (2) can be expressed as
+
+( 1, . . . , ; = , ) = { 1, . . . , ; (( -1) ), ( 1, . . . , -1)}
+
+=
+
+-1,
+
+-1 (
+
+-1 -1,
+
+
+-1
+
+{ 1, . . . ,
+
+-1; (( -2)( - 1)), ( 1, . . . ,
+
+-2)}
+
++
+
+-1 -1,
+
+(
+-1
+
+)),
+
+where = {(. . . (12)3) . . . ) )}. In Figure 1 we present the fully nested HAC with structure = (((12)3)4) and partially nested with = ((12)(34)) in dimension = 4.
+
+HAC are thoroughly analysed in Joe (1997), Whelan (2004), Savu and Trede (2006), Embrechts, Lindskog and McNeil (2003).
+
+Note that generators within a HAC can come either from a single generator family or from different generator families. If 's belong to the same family, then the complete monotonicity of  +1 imposes some constraints on the parameters 1, . . . , -1. Theorem 4.4 of McNeil (2008) provides sufficient conditions on the generator functions to
+
+5
+
+guarantee that is a copula. It holds that if  for = 1, . . . , - 1 and  +1 has a completely monotone derivative for = 1, . . . , - 2 then is a copula. For the majority of the generators a feasible HAC requires decreasing parameters from the lowest to the highest level. However, in the case of different families within a single HAC, the condition of complete monotonicity is not always fulfilled.
+In general the structure of the HAC can be arbitrary. On the one hand this makes it a very flexible and simultaneously parsimonious distribution model. If we use the same single-parameter generator function on each level, but with a different value of , we may specify the whole distribution with - 1 parameters. From this point of view, the HAC approach can be seen as a alternative to covariance driven models. On the other hand for each HAC not only the parameters are unknown, but also the structure has to be determined. One possible procedure is to enumerate and to estimate all possible HACs. Using a suitable goodness-of-fit test we then determine the optimal structure. This approach is however unrealistic in practice even in moderate dimensions. Okhrin, Okhrin and Schmid (2009) suggest a computationally efficient procedure, which allows to estimate the HAC recursively.
+We constrain the discussion to binary copulae, i.e. at each level of the hierarchy only two variables are joined together. Joining more than two variables dramatically increases the number of formal candidate distributions and the needed computational power. At the lowest level we fit a bivariate copula to every couple of the variables. The estimation procedure is discussed below. We select the couple of variables with strongest fit and denote the respective estimator of the parameter at the first level by ^1 and the set of indices of the variables by 1. The selected couple is joined together to define the pseudovariables {( 1); ^1, 1}. At the next level we proceed in the same way by considering the remaining variables and the new pseudo-variable. The considered procedure allows us to determine the estimated structure of the copula.
+The multi-stage maximum-likelihood estimation is a convenient tool for recursive estimation. At the first stage we estimate the marginal distributions either parametrically or nonparametrically. At the next stage we estimate the parameter of the copula at the first level assuming that the marginal distributions are known. At further stages the next level copula parameter is estimated assuming that the margins as well as the copula parameters at lower levels are known.
+Let = ( 1, . . . , ) be the parameters of copulae starting with the lowest up to the
+6
+
+highest level. The multistage ML estimator ^ of = ( , ) solves the system
+
+(
+
+1
+
+
+
+ 1
+
+,
+
+.
+
+.
+
+.
+
+,
+
+ 
+
+,
+
+ 
+
++1 1
+
+,
+
+.
+
+.
+
+.
+
+,
+
+ 
+
++
+
+)
+
+= 0,
+
+
+
+where  =
+
+(X ), for = 1, . . . , + ,
+
+(3)
+
+=1
+
+(X ) = log ( , ), for = 1, . . . , , = 1, . . . , ,
+
+([
+
+]
+
+)
+
++ (X ) = log { ( , )}  ; , { }=1,...,
+
+(,)
+
+
+
+for = 1, . . . , , = 1, . . . , .
+
+where ^ () is an estimator of the marginal cdf . If we estimate the margins parametrically then ^ () = (, ^ ). The marginal density ^() is estimated accordingly. Chen
+and Fan (2006) and Okhrin et al. (2009) provide asymptotic behavior of the estimates.
+
+3 Inhomogeneous Dependence
+Numerous models were proposed for time-varying correlation structure, with the multivariate GARCH model among the most popular. In these models the correlations are defined as functions of (lagged) explanatory variables which may influence the variation in the current dependency structure (measured via correlation). This implies that the conditional correlation changes at each moment of time, but the parameters of the conditioning functions are assumed to be constant. This approach suffers from two important drawbacks. First, the estimation of this type of the models is tedious because of the large number of parameters to be estimated. Second, there is evidence that the parameters do change with time, see e.g. Lamoureux and Lastrapes (1990). Neglecting this fact may lead to inconsistent estimators.
+In order to cope with the time varying dependency structure we propose a parsimonious alternative that is based on a local constant HAC approximation. With a once and for all calculated set of critical values we determine periods of homogeneity instantaneously at each time point. Corresponding theory and applications may be found in C`izek, H®ardle and Spokoiny (2009), Mercurio and Spokoiny (2004) and Chen, H®ardle and Jeong (2008). The method can be virtually applied to any dependency model. However, applied to HACs, it allows us to control not only for the periods with constant parameters, but also for the periods with constant structure. Moreover, the method is applicable not
+7
+
+only to abrupt changes in the dependency, but also to smooth transitions in the model parameters.
+
+Let and denote the time varying but unknown copula structure and parameters. The idea is to select for each time point 0 an interval at which and can be well approximated by constant  and . The discrepancy between two copulae (; , ) and
+(; , ) is measured by the Kullback-Leibler divergence :
+
+{
+
+(; , ),
+
+(;
+
+,
+
+)} = E ,  log
+
+(; , (; ,
+
+) )
+
+where is the copula density, see Nelsen (2006). The aim is to select as close as possible
+
+to the so-called "oracle" choice interval. Define the "oracle" choice  of the interval as
+
+the largest interval = [ 0 - ; 0], for which the small modelling bias condition (SMB) is fulfilled
+
+
+
+ ( , )=
+
+{ (; , ), (; , )}  , for some   0, , .
+
+
+
+(4)
+
+The unknown local constant copula parameter (at point 0) can be best estimated on the largest interval argmax  ( , ) = [ 0 - ; 0] fulfilling (4). This means, that the model , can be well approximated by locally constant , on interval . Methods of estimation of the HAC discussed in Okhrin et al. (2009) maximise the ML with respect to the structure and parameters , what leads to the best parametric fit to the underlying model on , defined by ~ , ~ . Recall that the Kullback-Leibler divergence plays a particular role in the analysis and estimation of misspecified models, see White (1982). In the case of minimising  ( , ) with respect to the length of the interval , we minimise the loss caused by the ignorance of the time variation in the copula.
+
+Note, that the true time-varying parameters and are unknown. Therefore also the "oracle" choice  is unknown. In a data-driven algorithm based on the Local Change Point (LCP) detection procedure, see Spokoiny (2010), we sequentially test whether =  and the structure of the HAC =  is constant within some interval . Here the aim of the LCP technique is not to detect a change point, but rather to conveniently determine the period of constant dependency. Alternative techniques can be found in e.g. C`izek et al. (2009).
+
+The risk arising in the estimation of locally constant copulae under the SMB is bounded.
+Let ( , ) denote the log-likelihood function based on the HAC with the parameters and . Following C`izek et al. (2009) let ~ and ~ be any estimators on an interval . If
+
+8
+
+the SMB holds for some , and then
+
+{}
+
+E,
+
+log
+
+1
+
++
+
+(~
+
+,
+
+~ )- ( ,
+
+( )
+
+,
+
+)
+
+ 1 + ,
+
+(5)
+
+where  ( , ) is an upper bound satisfying
+
+E , (~ , ~ ) - ( , )   ( , )
+
+which is called a "propagation condition". We set = 0.5 since this choice is also proposed in the literature. The bound given in (5) tells us that the risk in an estimated local constant model (under SMB) differs from the risk in the true constant model by an amount of .
+
+The LCP is based on sequentially testing the hypotheses of homogeneity on intervals . We select with = -1, 0, 1, . . . as the sequence of intervals  +1, starting with
+= 1. If there are no change points in   -1 then we accept as an interval with constant copula parameter and structure. At the next step we take +1 and test it for homogeneity. We repeat the steps until rejection or the largest possible interval is accepted, leading to an interval ^.
+
+Two sources of errors occur in practical applications. Let  denote the oracle choice.
+This implies that for ( < ) the SMB holds. The first type of error ("false alarm") occurs if ^ < . In this case the estimation is based on a shorter data period and therefore implies higher variability. Let ^ and ^ be the respective estimators and ~ and ~ denote
+the corresponding fixed-sample estimators on . Under the SMB condition on  and assuming that max   E , (~ , ~ ) - ( , )   ( , ), we obtain by Theorem 4.2 of C`izek et al. (2009)
+
+{}
+
+E,
+
+log
+
+1+
+
+(~^, ~^) - ( (, )
+
+,
+
+)
+
+ 1 + ,
+
+{}
+
+E,
+
+log
+
+1
+
++
+
+(~^,
+
+~^) 
+
+- (
+
+(^^, ,)
+
+^^)
+
+ 1 + .
+
+(6)
+
+The inequalities (6) say, that if we observe a false alarm at the step ^ < , then the estimation risk measured by (~^, ~^) - (^^, ^^) is of the same order as the risk of a pure parametric estimation with fixed interval given by ^.
+The second type of the error arises if ^ > . Outside the oracle interval we are exploiting data which does not support the SMB condition. This implies that the bounds in (6)
+9
+
+increase. Theorem 4.3 of C`izek et al. (2009) provides general bounds for the adaptive
+
+estimator, showing that
+
+E
+
+,
+
+{
+
+log
+
+1
+
++
+
+(~
+
+,
+
+~ ) - (^^, (, )
+
+^^)
+
+}{
+
+ 1 +  + log
+
+1
+
++
+
+
+
+(
+
+
+,
+
+} ),
+
+(7)
+
+where ^ are the critical values of the test for homogeneity and are defined below. This statement implies that the copula based on ^^ and ^^ belongs with high probability to the confidence interval of the oracle copula with ~  and ~ .
+
+3.1 Local test of homogeneity
+
+A local homogeneity test can now be performed. Let us fix some 0 and let = [ 0 - , 0] be an interval candidate and be a set of interval points within . We estimate the copula parameter and the structure from observations in , assuming the homogeneous model within , i.e. using the notation from the previous section ^ 0 = ~ and ^ 0 = ~ . The null hypothesis 0 means that   : = , = i.e. the observations in follow the model with the dependence parameter and the structure . The alternative (change point) hypothesis 1 claims that   : = 1 and = 1 for  = [ , 0] and
+= 2 = 1 or = 2 = 1 for  = [ 0 - , ), i.e. either the parameter or the whole structure changed spontaneously at some intermediate point of the interval . In other words
+
+0 :   , = , = ,   =  = [ , 0]  [ 0 - , ) 1 :   , = 1, = 1;   = [ , 0],
+and = 2 = 1 or = 2 = 1,   = [ 0 - , ).
+If  ( , ) and  ( 1, 1) +  ( 2, 2) are the log-likelihood functions corresponding to 0 and 1 respectively, the likelihood ratio test for the single change point with known
+fixed location is given by
+
+, = max { ( 1, 1) +  ( 2, 2)} - max  ( , )
+
+1, 1, 2, 2
+
+,
+
+= + -.
+
+Since the point is unknown, one defines the test statistics:
+
+= max
+
+
+,.
+
+10
+
+0 - +1
++1
+
+0-
+
+0 - -1
+-1
+
+0
+
++1
+Figure 2: Interval Selection
+It tests the homogeneity hypothesis in against a change point alternative with unknown location (in the set ). The decision rule of the test requires to compare with the critical value . The critical value depends on the interval , the dimension and the parameter of the copula. We reject the hypothesis of homogeneity if > . To run the test several parameters have to be specified. This includes the choice of the interval candidates ( ) and internal points = for each of this intervals and the choice of the critical values = . One possible example of the implementation is based on the choice of the interval candidates ( ) in form of a geometric grid. If the length of the interval 1 if fixed at 1, then we define 0 = 1 1 and -1 = 2 1 for 1 > 2  (0, 1) and = [ 1 -1] for = 1, 2, . . . , and > 1, where [ ] means the integer part of . Further we set = [ 0 - , 0] and = [ 0 - -1, 0 - -2] for = 1, 2, . . . , , see Figure 2.
+For each particular copula model and for each sequence of intervals the critical values are determined from simulations. Under the null hypothesis of homogeneous dependence, the adaptive estimator should coincide with the largest allowed interval . However, if the estimated interval is ^ with ^ < then the test rejects a correct null hypothesis. The critical values are therefore determined not from the classical level condition, but relying on the precision of the parameter estimators. If ^ is small the volatility of the parameter estimator is high. This implies that false decisions with small ^ stronger deteriorate the impact of the test of homogeneity. To overcome this problem we select the critical values
+to ensure that E , (~ , ~ ) - (^ , ^ )   ( , ),
+where = /  and  ( , ) = max (~ , ~ ) - ( , ) . The parameter plays the role of the level of significance and influences the sensitivity of the procedure to inhomogeneity. This means, that large values of lead to larger critical values, and small
+to smaller.
+11
+
+In this paper we used the sequential choice of critical values discussed in Spokoiny (2009). Assuming situation after steps of the algorithm we distinguish between two cases. In the first, change point is detected at some step   and in the other case no change point is detected. Following notation in Spokoiny (2009), let  be the event meaning the rejection of the null hypothesis at step 
+
+ = { 1  1, . . . , -1  -1,  > },
+
+and
+
+(^
+
+,^
+
+)
+
+=
+
+(~-1,
+
+~
+-1
+
+)
+
+on
+
+
+
+for
+
+
+
+=
+
+1, . . . ,
+
+. By Monte-Carlo simulations from some
+
+fixed parametric models discussed in Section 4 we found sequentially such a minimal value
+
+of that ensures the following inequality
+
+max
+= ,...,
+
+E
+
+, (~ , ~ ) - (~-1, ~-1) I() 
+
+ ( , ) /
+
+,
+
+where I is the indicator function. For  = 1 this inequality depends only on 1 in 1 = { 1 > 1}. For every   2 we take 1, . . . , -1 being fixed from previous step, what means, that  is controlled only by . is fixed throughout the study and equals = 0.5.
+
+4 Simulation Study
+
+How fast reacts the LCP to shifts in the parameters and/or in the structure? We consider
+
+a 3-dimensional HAC with Gumbel generators and uniform margins. To simulate from
+
+a HAC we used the algorithm of McNeil (2008). We consider samples of size 400, where
+
+a change in parameters and structure occurs at = 200. The parameter changes are
+
+modeled as:
+
+  ( 1, 2, 3; , ) = 
+  ( 1, 2, 3; , ) = 
+
+{ 1, ( 2, 3; 1 = 3.33); 2 = 1.43} for 1   200, { 1, ( 2, 3; 1 = 2.00); 2 = 1.43} for 200 <  400;
+(8)
+{ 1, ( 2, 3; 1 = 3.33); 2 = 1.43} for 1   200, { 1, ( 2, 3; 1 = 3.33); 2 = 2.00} for 200 <  400.
+(9)
+
+Via model (8) we investigate the sensitivity of a downward jump in 1, while (9) is designed for study of an upward jump in 2. The initial parameters 1 = 3.33 and 2 = 1.43 correspond to the Kendall 's equal to 0.7 and 0.3 respectively. In (8) 1 decreases to 0.5
+
+12
+
+zk 02468
+zk 02468
+
+2 4 6 8 10 k
+
+2 4 6 8 10 k
+
+Figure 3: Simulated critical values of the 3-dimensional HAC as a function of with the parameters of the geometric grid set to 0 = 20 (left) and 0 = 40 (right). and 1 are fixed and equal 0.5 and 0.1 respectively, while 2 varies with 2 = 0.1 (solid black), 2 = 0.3 (dashed black), 2 = 0.5 (dotted black), 2 = 0.7 (solid grey), 2 = 0.9 (dashed grey).
+
+from 0.7, while in (9) 2 increases to 0.5 from 0.3. Note, that in both cases the difference between the parameters becomes smaller.
+
+The change point in the structure is modeled in a similar way
+
+  ( 1, 2, 3; , ) = 
+
+{ 1, ( 2, 3; 1 = 3.33); 2 = 1.43} { ( 1, 2; 1 = 3.33), 3; 2 = 1.43}
+
+for 1   200, (10) for 200 <  400.
+
+Our technique is implemented with a family of interval candidates of a geometric grid form defined by 0 = 20, 40 and = 1.25. The values of 0 and have turned out to provide stable results, which is confirmed in the literature cited earlier. Note that the simulated critical values are indifferent to the form of the initial structure 1 = ((12)3) or 2 = (1(23)), but depend on the parameters. Using the fact that for the Gumbel copula the parameter  [1; ) is unbounded from above, we define the grid based on the Kendall's by
+= ( 1, 2) = { ( 1), ( 2)},
+where
+{ 1, 2}  {0.1, 0.3, 0.5, 0.7, 0.9}2, 1  2.
+This grid in correlation space corresponds to the grid in parameter space given by { 1, 2}  {1.11, 1.43, 2, 3.33, 10}2, 1  2. Thus, we simulate from copulae { 1, ( 2, 3; 1 =
+13
+
+3.33); 2 = 1.43}, { 1, ( 2, 3; 1 = 2.00); 2 = 1.43}, etc. The case 1 = 2 corresponds to the simple 3-dimensional Archimedean copula ( 1, 2, 3, 1). To estimate
+= 1, . . . , = 10 we simulate = 10000 samples of size = [ 0 ] + 1 using the same geometric grid of the intervals. Figure 3 shows the behavior of the critical values as a function for different values of 2.
+In each change point model we simulate = [ 0 ] + 400 observations, where the first [ 0 ] values are used as a prerun for model estimation. For each = 0 starting from [ 0 ] + 1 we apply the LCP to the recent observations, i.e. we determine the interval with constant dependency and estimate the corresponding HAC. The results are shown in Figures 5, 6 and 7. 0 is set to 20 in the left column and to 40 in the rights column, is set to 0.5. The solid lines show the average values, the dashed line the median values and the grey areas show the interval containing 95 of 100 replications.
+The shifts in the first parameter for (8) and in the second parameter for (9) are plotted in the first rows of Figures 5 and 6 respectively. The Figure 7 illustrates the application of LCP to the change-point model (10), where in the first row we show the changes in the structure and in the second row the changes in the parameters. For all three types of the shift, we observe that the average estimated parameter or structure smoothly moves from the value before the shift to the value after the shift. The delay reaction naturally depends on 0. Smaller 0 value let our procedure react more quickly to changes. On the other hand the precision of the estimation decreases with decreasing sample size.
+The last two rows of all three figures show the dynamics of the average length of the estimated interval of homogeneity and the behavior of the maximum-likelihood. The estimation is initiated with the shortest available interval of homogeneity. Since the copula is stable and more observations become available, the length of the interval increases to the largest allowed value. After the shift the length of the interval decreases and increases only after the change-point leaves the smallest allowed interval.
+The detection ability of the proposed procedure is conveniently characterized by the detection delay. Denote by the size of the jump at time = 200, i.e. = - , -1 with
+= 1 for the model (8) and = 2 for the model (9) The detection delay at rule  [0, 1] is defined by
+( , , ) = min{  : ^  , -1 + } -
+and shows the number of steps needed to detect the fraction of the jump in the true . For the model (10) we just look for the time point after = 200 where the structure
+14
+
+model
+
+0 = 20
+
+0 = 40
+
+Q1 Med. Mean Q3 SD Q1 Med. Mean Q3 SD
+
+0.25 0.00 9.0 13.20 20.00 14.23 8.00 28.5 30.87 50.25 24.14
+
+(8) 0.50 8.75 25.0 25.02 35.00 19.41 36.75 50.0 52.58 63.25 26.47
+
+0.75 19.00 31.0 35.19 47.00 25.77 50.00 63.5 72.71 87.00 35.18
+
+0.25 2.00 8.0 11.74 19.25 12.00 8.00 21.0 22.65 31.25 18.59
+
+(9) 0.50 12.00 18.0 20.86 28.00 13.52 28.00 37.0 39.83 46.25 20.09
+
+0.75 16.75 27.0 30.75 39.00 22.51 37.00 52.5 59.53 73.75 31.83
+
+(10) 15.00 18.0 17.78 21.00 5.23 28.00 32.0 32.45 37.00 5.90
+
+Table 1: Detection delay statistics for LCP, = 0.5.
+
+rolling window
+
+model
+
+Q1 Med. Mean
+
+Q3 SD
+
+0.25 6.25 35.5 39.57 64.50 34.52
+
+(8) 0.50 51.00 75.5 76.64 103.00 38.16
+
+0.75 85.25 113.0 109.70 128.20 35.90
+
+0.25 10.00 26.0 26.69 40.25 19.12
+
+(9) 0.50 36.75 57.5 55.90 74.75 24.38
+
+0.75 77.00 95.5 95.53 112.50 29.82
+
+(10) 0.25 68.00 75.5 75.53 84.25 11.40
+
+Table 2: Detection delay statistics for rolling window.
+
+15
+
+2 = (1(23)) is obtained for the first time
+( ) = min{  : ^ = -1} - .
+Spokoiny (2010) argued that the detection delays are proportional to the probability of the error of type II. Table 1 represents the descriptive statistics of the detection delay for different models (8), (9) and (10),  {0.25, 0.5, 0.75} and 0  {20, 40}. To detect half of the shift in the parameters, the procedure needs 20 to 25 observations for 0 = 20 and 40 to 50 observations for 0 = 40. The detection ability of the procedure for the changes in the structure is similar. Additionally we observe that the mean of detection delay is higher for upward jumps than for downward jumps. The mathematical reason for this is explained below. Table 2 contains the detection delays for the rolling window estimation. To make the comparison fair we set the length of the estimation window equal to the average length of the intervals of homogeneity in the LCP procedure. We observe that the flexible choice of the interval of homogeneity leads to substantially shorter detection delays, compared to the rolling estimation.
+To get more insight into the detection delay we consider the difference
+[ { 0; (0.1, 0.2)}, { 0; ( 1, 2)}] - [ { 0; ( 1, 2)}, { 0; (0.1, 0.2)}], (11)
+where ( 1, 2) denotes the vector of parameters corresponding to the Kendall 's given by 1 and 2. The first term in (11) denotes the KL divergence between the true copula with ( 1, 2) and the misspecified copula with the same structure 0 but with (0.1, 0.2). 1 and 2 take values between zero and one. Thus we observe in general an increase in the parameters from the true values (0.1; 0.2) to the misspecified values ( 1; 2). In the second term in (11) the situation is opposite and we observe a decrease of the copula parameters from the true values ( 1, 2) to the misspecified values (0.1, 0.2). The difference in (11) is plotted in Figure 4. The KL divergence is larger for increasing parameters and the difference becomes larger with increasing 1 and 2. This explains why the adaptive detection procedure based on the KL divergence reacts faster to an increase in parameters than to a decrease.
+16
+
+KL difference
+
+tau1
+
+10
+8
+6 1.0
+4 0.8
+0.6 0.4 2 0.2 0 0.0 0.0 0.2 0.4 0.6 0.8 1.0
+tau2
+Figure 4: The difference between the KL divergences for misspecified models in (11).
+17
+
+0.8 1.0 1.2 1.4 1.6 1.8 50 100 150 200 250 300 0.2 0.4 0.6 0.8
+
+
+
+length
+
+18
+
+ml
+
+0 100 200 300 400 0 100 200 300 400
+Figure 5: The average estimated parameters, the length of the interval of homogeneity and the ML criteria on the intervals of homogeneity for the model (8). The solid line depicts the average, the dashed line the median and grey shaded are the 90% confidence interval for the respective variables over 100 replications. The shift occurs at the observation 200. 0 is set to 20 for the left panel and to 40 for the right panel, = 0.5.
+
+0.4 0.6 0.8 1.0 1.2 1.4 50 100 150 200 250 300 0.2 0.4 0.6 0.8
+
+
+
+length
+
+19
+
+ml
+
+0 100 200 300 400 0 100 200 300 400
+Figure 6: The average estimated parameters, the length of the interval of homogeneity and the ML criteria on the intervals of homogeneity for the model (9). The solid line depicts the average, the dashed line the median and grey shaded are the 90% confidence interval for the respective variables over 100 replications. The shift occurs at the observation 200. 0 is set to 20 for the left panel and to 40 for the right panel, = 0.5.
+
+0.2 0.4 0.6 0.8 ((1.2).3) ((1.3).2) ((2.3).1)
+
+structure
+
+
+
+length 150 250
+
+20
+
+50
+
+ml 0.8 1.2
+
+0.4
+
+0 100 200 300 400 0 100 200 300 400
+Figure 7: The average estimated structure, parameters, the length of the interval of homogeneity and the ML criteria on the intervals of homogeneity for the model (10). The solid line depicts the average, the dashed line the median and grey shaded are the 90% confidence interval for the respective variables over 100 replications. The shift occurs at the observation 200. 0 is set to 20 for the left panel and to 40 for the right panel, = 0.5.
+
+5 Empirical Study
+
+We now apply the developed local estimation procedure to multivariate data on stock indices and exchange rates. The data on indices contains the daily returns values for Dow Jones (DJ), DAX and NIKKEI, while the second data set consists of the daily values for the exchange rates JPN/EUR, GBP/EUR and USD/EUR. Both data sets are taken from DataStream. The indices are obtained for the period [31.12.1986; 14.09.2009] resulting in 5903 observations, where exchange rates cover the period [4.1.1999; 14.8.2009], resulting in 2771 observations.
+
+To eliminate the intertemporal conditional heteroscedasticity we fit to each marginal time series of log-returns a univariate GARCH(1,1) process
+
+,=
+
+,+
+
+,
+
+, with
+
+2 ,
+
+=
+
++
+
+2 ,
+
+-1
+
++
+
+(
+
+, -1 -
+
+, -1)2
+
+(12)
+
+and > 0,  0,  0, + < 1. The estimates of the parameters are given in Table 3. The parameters in (12) are significant. The table contains the -values of the Box-Ljung test with 12 lags and Kolmogorov-Smirnov test applied to the residuals. The residuals exhibit the typical behavior: they are not normally distributed, which motivates nonparametric estimation of the margins. From the results of the Box-Ljung test we conclude that the autocorrelation of the residuals is strongly significant only for GBP/EUR rate and DJ. After this intertemporal correction we work only with the residuals.
+
+5.1 Rolling Window Estimation
+The dependency variation is measured by Kendall and Pearson's correlation coefficients: Figure 8 shows the behavior both coefficients calculated in a rolling window of width
+= 250. Their dynamic behavior is similar, but not identical. This opens the door for a time varying copula based model. A key difference between the plots for indices and the exchange rates, it that the correlation paths do not intersect for the indices, but do intersect for the exchange rates. This implies that there is a change in the order of the bivariate dependencies at the intersection points of the lines for the exchange rates. Thus we may expect that the structure of HAC stays constant for the indices, but varies for the exchange rates.
+To give a justification for the use of a copula-based distribution to model the residuals, we estimate additionally alternative parametric models using rolling window of the same
+21
+
+^
+
+^
+
+^
+
+^ BL
+
+KS
+
+DAX
+
+6.94e-04 4.17e-06
+
+0.11
+
+0.87 0.23 3.35e-05
+
+(1.39e-04) (5.29e-07) (8.90e-03) (9.39e-03)
+
+DJ 5.96e-04 3.09e-06 0.11 0.87 0.02 1.58e-07
+
+(1.11e-04) (3.38e-07) (8.50e-03) (9.40e-03)
+
+NIKKEI 5.62e-04 3.01e-06 0.11 0.88 0.78 2.45e-13
+
+(1.45e-04) (5.18e-07) (8.90e-03) (8.71e-03)
+
+JPY
+
+4.85e-05 2.99e-07
+
+0.06
+
+0.94 0.73 1.70e-05
+
+(1.15e-04) (1.02e-07) (7.49e-03) (7.64e-03)
+
+GBP
+
+6.34e-05 1.44e-07
+
+0.06
+
+0.93 0.01 2.10e-04
+
+(7.39e-05) (5.11e-08) (8.75e-03) (9.12e-03)
+
+USD
+
+1.76e-04 1.19e-07
+
+0.03
+
+0.97 0.87 1.65e-03
+
+(1.10e-04) (5.92e-08) (4.14e-03) (4.28e-03)
+
+Table 3: Results of the fitting of univariate GARCH(1,1) to exchange rates and to indices. The standard deviation of the parameters are given in parentheses. The last two columns provide the -values of the Box-Ljung test (BL) for autocorrelations with 12 lags and Kolmogorov-Smirnov test (KS) for normality applied to the residuals.
+
+width. We consider the binary HAC with Gumbel generator; the 3-dimensional Gaussian and 3-dimensional simple Archimedean copula. The maximum-likelihood (ML) and the Bayes information criterion are used as goodness-of-fit measures.
+
+The BIC criterion is computed by
+
+= -2 + 2 log( ), where is the number of
+
+the parameters to be estimated and ML is the corresponding maximum-likelihood criteria.
+
+Since the number of unknown parameters in the nonparametric case is unknown, it is
+
+incorrect to compare the models with nonparametrically and parametrically estimated
+
+margins using BIC. In such cases we consider only the parameters of the copula function.
+
+Figure 9 illustrates the dynamics of BIC for three multivariate models.
+
+We verify if the variation in the dependency can be linked to some characteristics of the
+
+distribution. The dots in Figure 9 depict the time-points of changes in the bivariate HAC
+
+estimated using rolling window procedure. There is no visible relationship between the
+
+dynamics of the model fit measured by BIC and the changes in the structures. The thin
+
+grey line shows the dynamics of the ^ - ^ -12, where ^ denotes the matrix of copula
+
+parameters estimated at the time point 
+
+and   2 denotes the
+
+2 matrix norm. It is
+
+defined as A2 =
+
+(AA), where
+
+is the largest eigenvalue of the matrix
+
+22
+
+Kendall's corelation 0.0 0.2 0.4 0.6 0.8
+
+Pearson's corelation 0.0 0.2 0.4 0.6 0.8 1.0
+
+1986 1990 1993 1996 1999 2002 2005 2008
+
+1986 1990 1993 1996 1999 2002 2005 2008
+
+Kendall's corelation 0.0 0.1 0.2 0.3 0.4 0.5 0.6
+
+Pearson's corelation 0.0 0.2 0.4 0.6 0.8
+
+1999
+
+2001
+
+2003
+
+2005
+
+2007
+
+2009
+
+1999
+
+2001
+
+2003
+
+2005
+
+2007
+
+2009
+
+Figure 8: Rolling window estimators of Pearson's (left) and Kendall's (right) correlation coefficients between the GARCH(1,1) residuals of indices (top) and exchange rates (bottom). For the indices: DAX and NIKKEI (solid line), DAX and DJ (dashed line), DJ and NIKKEI (dotted line). For the exchange rates: JPY and USD (solid line), JPY and GBP (dashed line), GBP and USD (dotted line). The width of the rolling window is set to 250 observations.
+
+AA. Similarly as for BIC, there is no clear relationship between the changes in the structure and the variation in copula parameters. This implies that there is no obvious way how can we exploit the results from rolling window estimation to determine the intervals with homogeneous dependency.
+
+5.2 Local window estimation
+The previous section provided evidence on two important issues. First, the univariate marginal distributions are not normal and the joint distribution can be better modelled using a HAC based distribution. Second, the dependency is not constant and varies with time. Since we model the dependency by HAC, this implies that either the structure of
+23
+
+0 0.03 0.06 0.09 0.12 0.15 0.18 0.21 0.23 0.26
+
+0
+
+HAC
+
+AC
+
+Gauss
+
+||X||2 q rolling
+
+-200
+
+-400
+
+BIC
+
+-600
+
+-800
+
+0 0.04 0.09 0.13 0.18 0.22 0.27 0.31 0.36 0.4
+
+1986 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009
+Date
+
+HAC
+
+AC
+
+Gauss
+
+||X||2 q rolling
+
+0
+
+-100
+
+-200
+
+BIC
+
+-300
+
+-400
+
+-500
+
+1999
+
+qq
+2000
+
+q
+2001
+
+2002
+
+qqqq qq
+2003
+
+q
+2004
+Date
+
+q qqqqq
+2005
+
+qqq q qqq qq
+2006
+
+qq
+
+q
+
+2007
+
+2008
+
+2009
+
+Figure 9: Rolling window estimator of BIC for HAC-based, based on simple Archimedean copula and multivariate normal distributions for indices (top) and exchange rates (bottom). The width of the rolling window is 250 observations. The grey line shows the variation of 2 norm of the difference in the parameter matrices of the copulae. The dots mark the changes in the structure of binary copula using rolling window estimation.
+
+24
+
+HAC or the copula parameters are time-dependent. In this section we apply the local window procedure to compute a robust estimator of HAC.
+The setup of our procedure is chosen as follows. The set of 's defining the length of and is determined by a geometric grid with = [ 0 ] for = 1, 2, . . . , . The
+starting value are set to 0 = 40, = 0.5 and = 1.25, where [ ] denotes the integer part of . The critical values are taken from the simulation study. The structure estimated from the whole data sample is given for the indices by  = (DAX DJ)2.954 NIKKEI1.222 and for the exchange rates  = (JPY USD)1.588 GBP1.418.
+Figure 10 and Figure 11 illustrate the results of the application. The upper plots show the changes in the structure. The structure ((1.2).3) is very robust for the indices, showing no shifts over the whole period. This fact is supported by the rolling window estimation of the correlation coefficients in the previous section. Moreover, this structure coincides with the structure estimated from the full sample. In the analysis of exchange rates we observe numerous shifts in the structure. There are intervals with stable structure and with frequently changing structure. The latter periods correspond to the intervals where the dependencies between different pairs of variables are similar. In this case the procedure can hardly distinguish between different, but similar structures. The second two pictures show the parameters estimators over the intervals of homogeneity. The grey line depicts the larger parameter, while the black line depicts the smaller parameter. The intersection point of two lines imply a change in the structure. We see that the algorithm captures even relatively small changes in parameters. The figure for the indices exhibits that the parameters become more distant with time. However, for the exchange rates the parameters show a stable comovement over the whole sample with minor drifts.
+The third pictures indicate the dynamics of the ML criteria over the intervals of homogeneity. Recall that the local window procedure is based on the stability of the fit measured by maximum-likelihood. The overall fit of the HAC increases in time for the indices, but decreases for the exchange rates. Note, that neither the changes in the structure nor changes in the parameters can explain the variation in the ML. However, the overlapping of both shifts closely follows the drift in the ML criteria. The bottom figures present the length of the intervals of homogeneity. For the indices the intervals drops to 0 = 40 after a larger drift in the parameters, but steadily increases to the maximum of = 300 over stable periods. For the exchange rates the intervals of homogeneity are shorter. This is due to the fact that the decreases of the intervals of homogeneity are caused both by the changes in the structure and the shifts in the parameters. This renders shorter intervals,
+25
+
+but with similar steady increases over stable periods.
+The analysis of the figures reveals two different behaviors of the distribution for indices and the exchange rates. For the indices the LCP procedure detects a clear transition in the parameters under virtually constant structure. However, for the exchange rates the local window estimation detects numerous changes in the structure keeping the variation in parameters low. Thus the suggested procedure is successful in both estimation of the structure and estimation of the parameters. Additionally this implies that the change in the distribution is substantial and cannot be neglected.
+6 Conclusions
+We propose a method of estimating the time-varying dependencies. The joint distribution of multivariate observations is modeled by a Hierarchical Archimedean copula. Using the Local Change Point detection procedure we determine the intervals with homogeneous dependency structure and homogeneous copula parameters. In contrary to non-copulabased distributions, where the functional form of the dependency is fixed, the adaptive estimation procedure allows for variations in the form of the copula. The procedure was evaluated in an extensive simulation study and compared to the classical rolling window estimation. Application to real data disclosed interesting features of the dynamics of dependencies.
+References
+Chen, X. and Fan, Y. (2006). Estimation and model selection of semiparametric copulabased multivariate dynamic models under copula misspesification, Journal of Econometrics 135: 125≠154.
+Chen, Y., H®ardle, W. and Jeong, S.-O. (2008). Nonparametric risk management with generalized hyperbolic distributions, Journal of the American Statistical Association 103(483): 910≠923.
+Embrechts, P., Lindskog, F. and McNeil, A. J. (2003). Modeling dependence with copulas and applications to risk management, in S. T. Rachev (ed.), Handbook of Heavy Tailed Distributions in Finance, Elsevier, North-Holland.
+26
+
+((2.3).1)
+
+structure
+((1.3).2)
+
+((1.2).3)
+
+
+0.0 0.2 0.4 0.6 0.8
+
+ML
+0.5 1.0 1.5
+
+length
+100 150 200 250 300
+
+1986
+
+1988
+
+1989
+
+1990
+
+1991
+
+1992
+
+1993
+
+1994
+
+1995
+
+1996
+
+1997 1998
+Date
+
+1999
+
+2000
+
+2001
+
+2002
+
+2003
+
+2004
+
+2005
+
+2006
+
+2007
+
+2008
+
+Figure 10: Changes in the structure, changes in the parameters and variation of the maximum-likelihood over the intervals of homogeneity for DJ, NIKKEI and DAX modeled with binary Gumbel HAC. 0 is set to 40 and = 0.5.
+
+27
+
+((2.3).1)
+
+structure
+((1.3).2)
+
+((1.2).3)
+
+
+0.0 0.2 0.4 0.6 0.8
+
+length ML
+100 150 200 250 300 0.0 0.2 0.4 0.6 0.8 1.0
+
+1999
+
+2000
+
+2001
+
+2002
+
+2003
+Date
+
+2004
+
+2005
+
+2006
+
+2007
+
+2008
+
+Figure 11: Changes in the structure, changes in the parameters and variation of the maximum-likelihood over the intervals of homogeneity for JPY, GBP, EUR modeled with binary Gumbel HAC. 0 is set to 40 and = 0.5.
+
+28
+
+Giacomini, E., H®ardle, W. K. and Spokoiny, V. (2009). Inhomogeneous dependence modeling with time-varying copulae, Journal of Business and Economic Statistics 27(2): 224≠234.
+Joe, H. (1996). Families of -variate distributions with given margins and ( - 1)/2 bivariate dependence parameters, in L. Ru®schendorf, B. Schweizer and M. Taylor (eds), Distribution with fixed marginals and related topics, IMS Lecture Notes ≠ Monograph Series, Institute of Mathematical Statistics.
+Joe, H. (1997). Multivariate Models and Dependence Concepts, Chapman & Hall, London.
+Lamoureux, C. G. and Lastrapes, W. D. (1990). Persistence-in-variance, structural change and the GARCH model, Journal of Business and Economic Statistics 8: 225≠234.
+McNeil, A. J. (2008). Sampling nested Archimedean copulas, Journal Statistical Computation and Simulation 78(6): 567≠581.
+McNeil, A. J. and Neslehov¥a, J. (2009). Multivariate Archimedean copulas, -monotone functions and 1 norm symmetric distributions, Annals of Statistics 37(5b): 3059≠ 3097.
+Mercurio, D. and Spokoiny, V. (2004). Statistical inference for time-inhomogeneous volatility models, Annals of Statistics 32(2): 577≠602.
+Nelsen, R. B. (2006). An Introduction to Copulas, Springer Verlag, New York.
+Okhrin, O., Okhrin, Y. and Schmid, W. (2009). On the structure and estimation of hierarchical Archimedean copulas. under revision in Journal of Econometrics.
+Patton, A. J. (2004). On the out-of-sample importance of skewness and asymmetric dependence for asset allocation, Journal of Financial Econometrics 2: 130≠168.
+Rodriguez, J. C. (2007). Measuring financial contagion: a copula approach, Journal of Empirical Finance 14: 401≠423.
+Savu, C. and Trede, M. (2006). Hierarchical Archimedean copulas, Discussion paper, University of Muenster.
+Schmid, F. and Schmidt, R. (2006). Multivariate extensions of Spearman's rho and related statistics, Statistics and Probability Letters 77(4): 407≠416.
+29
+
+Silvennoinen, A. and Ter®asvirta, T. (2009). Multivariate GARCH models, in T. G. Andersen, R. A. Davis, J.-P. Kreiﬂ and T. Mikosch (eds), Handbook of Financial Time Series, Springer-Verlag, Berlin Heidelberg, pp. 201≠233.
+Sklar, A. (1959). Fonctions d¥e repartition ¥a n dimension et leurs marges, Publ. Inst. Stat. Univ. Paris 8: 299≠231.
+Spokoiny, V. (2009). Multiscale local change point detection with applications to valueat-risk, The Annals of Statistics 37(3): 1405≠1436.
+Spokoiny, V. (2010). Local Parametric Methods in Nonparametric Estimation, Springer Verlag, Berlin, Heidelberg. forthcoming.
+C`izek, P., H®ardle, W. and Spokoiny, V. (2009). Adaptive pointwise estimation in time-inhomogeneous conditional heteroscedasticity models, Econometrics Journal 12(2): 248≠271.
+Whelan, N. (2004). Sampling from Archimedean copulas, Quantitative Finance 4: 339≠ 352.
+White, H. (1982). Maximum likelihood estimation of misspecified models, Econometrica 50: 1≠25.
+30
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Volatility Investing with Variance Swaps" by Wolfgang Karl H‰rdle and Elena Silyakova, January 2010.
+002 "Partial Linear Quantile Regression and Bootstrap Confidence Bands" by Wolfgang Karl H‰rdle, Ya'acov Ritov and Song Song, January 2010.
+003 "Uniform confidence bands for pricing kernels" by Wolfgang Karl H‰rdle, Yarema Okhrin and Weining Wang, January 2010.
+004 "Bayesian Inference in a Stochastic Volatility Nelson-Siegel Model" by Nikolaus Hautsch and Fuyu Yang, January 2010.
+005 "The Impact of Macroeconomic News on Quote Adjustments, Noise, and Informational Volatility" by Nikolaus Hautsch, Dieter Hess and David Veredas, January 2010.
+006 "Bayesian Estimation and Model Selection in the Generalised Stochastic Unit Root Model" by Fuyu Yang and Roberto Leon-Gonzalez, January 2010.
+007 "Two-sided Certification: The market for Rating Agencies" by Erik R. Fasten and Dirk Hofmann, January 2010.
+008 "Characterising Equilibrium Selection in Global Games with Strategic Complementarities" by Christian Basteck, Tijmen R. Daniels and Frank Heinemann, January 2010.
+009 "Predicting extreme VaR: Nonparametric quantile regression with refinements from extreme value theory" by Julia Schaumburg, February 2010.
+010 "On Securitization, Market Completion and Equilibrium Risk Transfer" by Ulrich Horst, Traian A. Pirvu and GonÁalo Dos Reis, February 2010.
+011 "Illiquidity and Derivative Valuation" by Ulrich Horst and Felix Naujokat, February 2010.
+012 "Dynamic Systems of Social Interactions" by Ulrich Horst, February 2010.
+013 "The dynamics of hourly electricity prices" by Wolfgang Karl H‰rdle and Stefan Tr¸ck, February 2010.
+014 "Crisis? What Crisis? Currency vs. Banking in the Financial Crisis of 1931" by Albrecht Ritschl and Samad Sarferaz, February 2010.
+015 "Estimation of the characteristics of a LÈvy process observed at arbitrary frequency" by Johanna Kappusl and Markus Reiﬂ, February 2010.
+016 "Honey, I'll Be Working Late Tonight. The Effect of Individual Work Routines on Leisure Time Synchronization of Couples" by Juliane Scheffel, February 2010.
+017 "The Impact of ICT Investments on the Relative Demand for HighMedium-, and Low-Skilled Workers: Industry versus Country Analysis" by Dorothee Schneider, February 2010.
+018 "Time varying Hierarchical Archimedean Copulae" by Wolfgang Karl H‰rdle, Ostap Okhrin and Yarema Okhrin, February 2010.
+
+

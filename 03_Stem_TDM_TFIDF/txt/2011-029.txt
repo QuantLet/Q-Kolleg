@@ -1,0 +1,1116 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2011-029
+Pointwise adaptive estimation for quantile
+regression
+Markus Reiß* Yves Rozenholc** Charles A. Cuenod***
+* Humboldt-Universität zu Berlin, Germany ** Université Paris René Descartes, France *** George Pompidou Hospital Paris, France
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Pointwise adaptive estimation for quantile regression
+Markus Reiß  Yves Rozenholc  Charles A. Cuenod 
+Abstract A nonparametric procedure for quantile regression, or more generally nonparametric M-estimation, is proposed which is completely data-driven and adapts locally to the regularity of the regression function. This is achieved by considering in each point M-estimators over different local neighbourhoods and by a local model selection procedure based on sequential testing. Non-asymptotic risk bounds are obtained, which yield rate-optimality for large sample asymptotics under weak conditions. Simulations for different univariate median regression models show good finite sample properties, also in comparison to traditional methods. The approach is the basis for denoising CT scans in cancer research.
+AMS Classification. Primary 62G08; secondary 62G20, 62G35, 62F05, 62P10. JEL Classification. C14, C31. Keywords and Phrases. M-estimation, median regression, robust estimation, local model selection, unsupervised learning, local bandwidth selection, median filter, Lepski procedure, minimax rate, image denoising.
+Institut fu¨r Mathematik, Humboldt-Universita¨t, Unter den Linden 6, D-10099 Berlin, Germany, mreiss@mathematik.hu-berlin.de (corresponding author) Financial support from the Deutsche Forschungsgemeinschaft via SFB 649 "O¨ konomisches Risiko", Humboldt-Universita¨t zu Berlin, is gratefully acknowledged.
+Universit´e Paris Ren´e Descartes, yves.rozenholc@univ-paris5.fr George Pompidou Hospital Paris, charles-andre.cuenod@egp.aphp.fr
+1
+
+1 Introduction
+
+1.1 Motivation and background
+We consider a generalized regression model
+
+Yi = g(xi) + i, i = 1, . . . , n,
+
+with (i) i.i.d., x1, . . . , xn in the design space X and g : X  R. We shall work conditionally on the design x1, . . . , xn such that it can be deterministic or random. The problems we have in view are those of nonparametric quantile estimation and of nonparametric estimation of g using estimators dealing with heavy-tailed noise (i). Both is highly relevant in applications, our main application here will be median regression for image denoising. In the spirit of classical M-estimation (Huber 1964) we therefore consider g(xi) as the location parameter in the observation Yi, assuming
+
+argminmR E[(i - m)] = 0
+
+(1.1)
+
+for some convex function  : R  R+ with (0) = 0. We shall assume that g(xi) is uniquely defined by argminmR E[(Yi - m)], which is true in all cases of interest. If the Yi have Lebesgue densities, then often an equivalent description is given by the first order condition E[ (i)] = 0 where  denotes the (weak) derivative. Standard examples are (x) = x2/2 for the classical mean regression model (E[i] = 0), (x) = |x| for the median regression model (P(i 0) = P(i 0) = 1/2) and the intermediate case (x) = x2/2 for |x| k and (x) = k|x| - k2/2 for |x| k with some k > 0 for the Huber estimator (E[min(max(i, -k), k)] = 0). The quantile regression model is obtained for (x) = |x| + (2 - 1)x (P(i 0) =  with quantile   (0, 1)), see e.g. Koenker (2005). Let us mention that the framework also contains local-
+likelihood location estimation when  is taken as the negative log-likelihood
+with the well-known special cases of mean regression for Gaussian noise and
+median regression for Laplace noise. Note that the convexity of  is in this case
+equivalent to a log-concave error distribution.
+The function g is not supposed to satisfy a global smoothness criterion, but we aim at estimating it locally in each point x  X as efficiently as possible. The risk will then depend on local regularity properties, which we do not assume
+to be known. For spatially inhomogeneous functions, in the presence of jumps
+or for image denoising pointwise adaptive methods are much more appropriate
+than global smoothing methods. In classical mean regression local adaptiv-
+ity can be achieved using wavelet thresholding or kernels with locally varying
+bandwidths, see Lepski et al. (1997) for a discussion. In this ideal situation a
+data-driven choice among linear empirical quantities is performed. M-estimators
+are typically nonlinear and the standard approaches do not necessarily transfer
+directly. Brown et al. (2008), for example, use an intermediate data binning
+and then apply wavelet thresholding to the binned data for median regression.
+On the other hand, Hall and Jones (1990), Portnoy (1997) and van de Geer
+(2003) consider kernels, smoothing splines and more general M -estimation for
+quantile regression, but they all use global methods for choosing the tuning
+
+2
+
+parameters like cross-validation or penalisation. Their drawback is that they do not perform well for spatially inhomogeneous signals like images with edges. In Yu and Jones (1998) local linear quantile regression is proposed with local bandwidth choices based on heuristic Gaussian approximations, yet lacking a theoretical foundation. Here, we develop a generic algorithm to select optimally among local M-estimators. In contrast to classical model selection, we do not only rely on the estimator values themselves to define a data-driven selection criterion. This has significant advantages in the present case of nonlinear base estimators.
+
+1.2 Main results
+Subsequently, we assume that  is fixed according to the problem at hand and we use the corresponding sample versions to construct base estimators for the (generalized) regression function g. Since we shall care about robustness, we measure the error in pointwise Lr-moment loss for any r > 0. In the spirit of classical nonparametrics, we implicitly assume that g can be approximated by a constant locally around a given point x  X . The statistical challenge is to select adaptively the right neighbourhood U of x where a local M -estimator is applied. Let us write
+
+m(Yi, xi  U ) := arginfµR
+
+(Yi - µ)
+
+i:xiU
+
+(1.2)
+
+for the location estimator on the set U  X . If the minimizer is not unique, we
+
+just select one of them (e.g., a version of the sample median for |U | even). Note
+
+that an extension to general local polynomial or more general local-likelihood
+
+estimation is straightforward, but this is not the focus of the present work.
+
+For each point x let a family of nested neighbourhoods U0  U1  · · ·  UK be
+
+given and set
+
+~k := m(Yi, xi  Uk).
+
+(1.3)
+
+Then the family (~k)0 k K forms the class of base estimators and we aim at selecting the best estimator of  := g(x) in this family. Note that in general we
+
+shall use the design (xi) and the point x in order to define the (Uk), ensuring that U0 and all Uk+1 \ Uk contain at least one point xi. The leading example throughout this paper will be the classical windowed median filter as follows.
+
+1.1 Example. Let the design space be X = [0, 1] with equidistant design points xi = i/n and take (x) = |x|. Consider the symmetric windows Uk = [x-hk, x+hk] generated by some bandwidths 0 h0 < h1 < · · · < hK . Then ~k is the median filter, e.g. studied by Truong (1989) or Arias-Castro and Donoho
+(2009).
+
+Specified to this example with a geometric grid of bandwidths (hk), our main non-asymptotic risk bound in Theorem 3.8 yields for our data-driven choice k^ the following deviation bound from an oracle-type choice k, cf. Example 3.10:
+
+Eg[|~k^ - ~k |r] C( + zkr ) E0[|~k - 0|r],
+
+3
+
+where C > 0 is some (explicitly computable) constant,  > 0 a parameter of the method and zk a (known) critical value. This bound reflects the philosophy of the method: In the excess risk bound for the data-driven choice k^ we pay at most a multiple of the oracle stochastic error, i.e. the risk when g = 0. While the non-asymptotic result is very general, it does not concisely convey the size of the error. Therefore, we quantify the asymptotic risk in the setting of equidistant design xi = i/n, a locally s-H¨older continuous function g and some mild assumptions on the possible bandwidths as
+Eg[|~k^ - g(x)|r]1/r C (log(n)/n)s/(2s+1)
+with a constant C > 0, see Theorem 4.7. This is the minimax adaptive rate even for Gaussian errors, but holds true for any zero median noise (i) with finite moments of order r > 0. In particular, the so-called payment for pointwise adaptation is logarithmic in n, which is necessary even in the Gaussian setup, and does not increase for heavy-tailed noise. This new and surprising result is due to the robustness of the median and relies technically on moderate deviation bounds. The general approach presented here permits to extend these adaptive minimax results to general nonparametric M-estimation. This is Corollary 4.4 where mainly the moderate deviation bound in Assumption 4.1(c) needs to be checked, see also Section 4.2 for a discussion.
+1.3 Outline
+We present our procedure to select optimally among local M-estimators in Section 2. In Sections 3 and 4 we derive exact and asymptotic error bounds and the latter give optimal minimax rates for adaptive pointwise risk over H¨older classes. Specified to median regression, Theorem 4.7 gives optimal locally adaptive risk bounds under almost no conditions on the noise distribution. The simulations in Section 5 show that our procedure has convincing finite sample properties. Moreover, they confirm that Lepski's classical method applied to local median estimators suffers from oversmoothing because changes in the signal are not detected early enough due to the robustness of the median. Finally, the procedure has been implemented to denoise dynamical CT image sequences in Section 6, which is of key interest when assessing tumor therapies. The fundamental idea of our approach is developed from a toy model of testing in the Appendix, Section 7, where also a technical proof has been moved.
+2 The procedure
+2.1 Main ideas
+Let us start by considering the Lepski (1990) method for selecting among (~k)0 k K , given the mean regression model with E[i] = 0 and E[i2] < . Note that the base estimators are then ordered according to decreasing variances: Var(~k) Var(~k-1). On the other hand, the bias is usually increasing with increasing neighbourhoods Uk. This is not always the case (for example, think of local means for a linear g), but true in particular for the worst case bias over
+4
+
+smoothness classes like H¨older balls of functions. Lepski's method can be understood as a multiple testing procedure where the hypothesis H0(k) : g|Uk   that g is constant on Uk is tested against the alternative of significant deviations. Always assuming that H0(0) is true, we test sequentially whether H0(k + 1) is acceptable provided that the hypotheses H0( ) have been accepted for all
+k. Once the test of an H0(k + 1) is rejected, we select the base estimator ~k corresponding to the last accepted hypothesis. The main point is thus to prop-
+erly define the single significance tests for H0(k + 1). Lepski's method accepts H0(k + 1) if |~k+1 - ~ | z(k+1) holds for all k with suitable critical values z(k+1) > 0.
+In practice, Lepski's method often leads to oversmoothing, which is even more
+conspicuous for robust M -estimators where the change in the signal is noticed
+far too late, cf. Section 5. A very intuitive idea is therefore to replace the test for H0(k + 1) : g|Uk+1   at stage k 1 by a test for H0(k + 1) : g|Uk+1\Uk  . Provided H0( ), k, have been accepted, both test descriptions amount to the same assertion. The new description, however, leads in the case of M -estimators
+to more powerful constructions of the decision procedure, based on an estimator for g on the difference Uk+1 \ Uk between consecutive neighbourhoods: we ask whether the observations Yi in the new points xi  Uk+1 \ Uk are homogeneous with those in U for k. This means that our tests reject if the empirical
+location in the additional data
+
+~(k+1)\k := m(Yi, xi  Uk+1 \ Uk)
+
+(2.1)
+
+satisfies with certain critical values z(k+1) > 0:
+
+ k : |~(k+1)\k - ~ | > z(k+1).
+
+(2.2)
+
+It is necessary to perform the testing for all k and not only with = k to
+avoid that the signal slowly drifts away as the neighbourhoods grow. In most cases, though, H0(k + 1) will be rejected because the new piece ~(k+1)\k is not in line with ~k: due to the smaller variance of ~k compared to ~ , < k, this last test is the most powerful. It is then interesting to observe that for linear m the test statistic ~(k+1)\k - ~k is just a multiple of ~k+1 - ~k. Consequently, for mean regression with linear base estimators our method will not differ much
+from Lepski's method, whereas the generally nonlinear M-estimators are treated
+in a significantly different way. More insight why our tests for H0(k + 1) are often more powerful and natural is provided by a two-sample toy model which
+is discussed in Appendix 7.
+
+2.2 The selection algorithm
+We aim at selecting the best estimator among the family {~k | k = 0, . . . , K}. Considering the law P0 generated by the pure noise setting g  0, we introduce the stochastic error levels
+
+sj := E0[|~j |r]1/r, skj := E0[|~(k+1)\k - ~j |r]1/r.
+
+(2.3)
+
+5
+
+We apply the following sequential procedure for prescribed critical values (zj )j=0,...,K-1 and set zK := 1:
+· initialize k := 0;
+· repeat if for all j = 0, . . . , k
+|~(k+1)\k - ~j | zj skj + zk+1sk+1
+then increase k else stop until k = K; · put k^ := k and ^ := ~k^. This algorithm to determine k^ can be cast in one formula:
+k^ := inf k 0 j k : |~(k+1)\k - ~j| > zjskj + zk+1sk+1  K, ^ := ~k^. (2.4)
+3 Error analysis
+We analyse the excess risk between our data-driven estimator ^ and an optimal oracle-type estimator ~k. In our sequential procedure the two errors of stopping too early or late are estimated separately and then put together. While stopping late is controlled by the construction of the stopping rule, the error of stopping early is bounded using a prescription of the critical values in the pure noise situation. The asymptotic analysis in the next section will then provide the order of the quantities when n  .
+3.1 Propagation and stopping late
+We need a very natural monotonicity property of the M -estimator.
+3.1 Assumption. The location estimator in (1.2) satisfies for any set S and any partition S = j Sj with pairwise disjoint sets Sj:
+minj m(Yi, xi  Sj) m(Yi, xi  S) maxj m(Yi, xi  Sj).
+Moreover, we have for any c, ci 0:
+m(Yi + ci, xi  S) m(Yi, xi  S), m(Yi + c, xi  S) = m(Yi, xi  S) + c.
+For any reasonable specific choice Assumption 3.1 should be satisfied. In particular, this is true for the sample quantile where we take for N data points Yi the mean (Y( N ) + Y( N +1))/2 of the order statistics (a malevolent choice would be for example to choose the first order statistic among the two that is irrational). If  is strictly convex, then the M-estimator is uniquely defined and the properties always hold:
+6
+
+3.2 Lemma. If the function  is strictly convex, then Assumption 3.1 is satisfied.
+
+Proof. Starting with the first inequality, let us write mT as short-hand for m(Yi, xi  T ), T  X . Denoting by +, - the right- and left-handed derivatives of the convex function , the functions +, - are strictly increasing with +(x) < -(y) +(y) for all x < y and
+
+-(Yi - mT ) 0,
+xiT
+If mS < mSj were true for all j, then
+
++(Yi - mT )
+xiT
+
+0.
+
+-(Yi - mS) >
+
++(Yi - mSj ) 0,
+
+xiS
+
+j xiSj
+
+which contradicts the minimizing property of mS. Hence, mS minj mSj holds and a symmetric argument shows ms maxj mSj . For the inequality in the second display we have by definition and by strict
+monotonicity of +
+
++(Yi + ci - mS)
+
++(Yi - mS) 0.
+
+xiS
+
+xiS
+
+This implies m(Yi + ci, xi  S) mS. The shift identity in this display follows by uniqueness immediately from the definition.
+
+3.3 Proposition. Grant Assumption 3.1 and consider ^ from (2.4). Then we have for any k = 0, . . . , K - 1
+
+|^ - ~k|1(k^ > k)
+
+max
+j =k+1,...,K -1
+
+zksjk + zj+1sj+1
+
+.
+
+3.4 Remark. This result is true '-wise', that is, it does not depend on the
+noise realisation. It is built into the construction of the selection procedure, see also Lepski (1990). It is intuitive because when we stop later than at k, then only because the local M-estimators have not differed significantly from ~k; the propagation of the error remains under control.
+
+Proof. From Assumption 3.1 we infer for > k
+
+|~ - ~k|
+
+max
+k+1 j
+
+|~j\(j-1) - ~k|.
+
+We therefore obtain on the event {k^ > k} by construction
+
+|^ - ~k|
+
+j=km+a1x,...,k^|~j\(j-1) - ~k|
+
+max
+j =k+1,...,K -1
+
+zksjk + zj+1sj+1
+
+.
+
+7
+
+3.5 Example. For geometrically decreasing stochastic error levels sk in (2.3), in particular for the median filter from Example 1.1 with bandwidths hk = h0qk, we have sjk sk for j > k, where A(p) B(p) means A(p) cB(p) with a constant c > 0 independent of the parameters p involved. The late stopping error is of order zkrsrk, provided the critical values (zk) are non-increasing. This will imply that the error due to stopping later than some optimal k is increased by at most the order of zkr:
+Eg[|^ - |r1(k^ > k)] Eg[|~k - |r] + zkr srk (1 + zkr ) Eg[|~k - |r].
+The inequality E0[|~k|r] Eg[|~k - |r] used here means that the stochastic error (g = 0) is less than the overall error. Its lengthy proof is based on the explicit median distribution for (g(xi) + i)xiUk , but is omitted.
+
+3.2 Critical values and stopping early
+
+As the preceding analysis shows, small critical values (zk) lead to small errors caused by stopping late. On the other hand, the (zk) should not be too small in order to control the error of stopping early. To this end, we shall require a
+condition on the critical values (zk) in the pure noise situation under P0, that is for constant g  0. In fact, we face a multiple testing problem, but with an
+estimation-type loss function. For some confidence parameter  > 0 we select zk > 0, k = 0, . . . , K - 1, such that the condition
+
+K -1
+E0 |~j|r1 
+j=0
+
+j : |~(j+1)\j - ~ | > z sj
+
+sKr
+
+(3.1)
+
+is satisfied. In order to obtain a unique prescription for each zk that equilibrates the errors for different stopping times of the algorithm, we can select the (zk) sequentially. We choose z0 such that
+
+K -1
+E0 |~j |r1 |~(j+1)\j - ~0| > z0sj0
+j=0
+
+ K
+
+srK
+
+and then each zk for given z0, . . . , zk-1 such that
+
+K -1
+E0 |~j|r1 |~(j+1)\j - ~k| > zksjk,  < k : |~(j+1)\j - ~ |
+
+j=k
+
+ K
+
+srK
+
+.
+
+z sj (3.2)
+
+Summing the left-hand sides over k = 0, . . . , K - 1, we obtain exactly (3.1). To
+
+determine the (zk) in practice, we simulate in Monte Carlo iterations the pure noise case g  0 and calculate for each k the error when the algorithm stops
+
+before the (theoretically optimal) index K due to a rejected test involving zk.
+
+The
+
+critical
+
+values
+
+are
+
+determined
+
+such
+
+that
+
+this
+
+error
+
+equals
+
+(at
+
+most)
+
+ K
+
+sKr
+
+.
+
+For this calibration step the original algorithm of Section 2.2 is taken, only
+
+modified by using zjskj instead of zjskj + zk+1sk+1 in the testing parts.
+
+8
+
+The selection rule for the critical values in Lepski's procedure is the focus in the work by Spokoiny and Vial (2009). The idea is to transfer properties from the pure noise situation to the general nonparametric specification by bounding the likelihood between the two observation models. This approach, the so-called small modeling bias condition, could be applied here as well and will give similar results. On a practical level, the difference is that there the moment order is enlarged from r to 2r in the calibration step, while here the term zk+1sk+1 is added to the testing values zjskj from the calibration. In the asymptotic analysis we do not lose powers in the logarithmic factor, as is the case for the small modeling bias ansatz, and we attain optimal rates over Ho¨lder balls, cf. Section 4. Moreover, for robustness reasons, we do not want to require higher moment bounds for the error variables and the likelihood. Let us also mention that in the case of a misspecified noise distribution (which is at the origin of robust statistics) Condition (3.1) holds with some other parameter . The non-asymptotic risk bounds will show a linear dependence in  so that the error can still be controlled. The asymptotic analysis in Proposition 4.3 will provide admissible critical values zk  log n under moment and moderate deviation bounds on the M-estimator over (i)1 i N for large N which for bounded influence functions is a very weak requirement, see Section 4.2 below.
+
+3.6 Definition. Given the regression function g, introduce its variation on Uk
+
+Vk(g) := sup |g(y1) - g(y2)|
+y1,y2Uk
+
+and consider the oracle-type index
+
+k := min{k = 0, . . . , K - 1 | Vk+1(g) > zk+1sk+1}  K.
+This definition implies that for all k k the maximal bias Vk(g) of ~k is less than its stochastic error level sk from (2.3) times the critical value zk. The next result, when specialised to k = k, means intuitively that the error due to stopping before k can be bounded in terms of the stochastic error of ~k, involving the critical value zk as a factor. Let us also mention here that the rationale for the choice zK = 1 in the algorithm of Section 2.2 is to equilibrate maximal bias and stochastic error at step k = K - 1.
+
+3.7 Proposition. Grant Assumption 3.1 and use the definition in (2.4) and the condition in (3.1) for some  > 0. Then we have for any k = 0, . . . , k and
+r > 0 such that all error levels in (2.3) are finite:
+
+E |^ - ~k|r1(k^ < k) (3r-1  1)(zkr + 1 + )srk.
+
+Proof. We shall write k^(g), ~k(g) etc. to indicate that k^, ~k etc. depend on the underlying regression function g. We shall need the inequality
+
+|~j(g) - ~k(g)| |~j(0) - ~k(0)| + Vk(g) for j < k
+
+(3.3)
+
+9
+
+which follows by Assumption 3.1 from
+
+~j(g) - ~k(g) = m(g(xi) + i, xi  Uj) - m(g(xi) + i, xi  Uk)
+
+m i + sup g(x), xi  Uj
+xUj
+
+-m
+
+i
+
++
+
+inf
+xUk
+
+g(x),
+
+xi
+
+
+
+Uk
+
+m(i,
+
+xi
+
+
+
+Uj )
+
++
+
+sup
+xUj
+
+g(x)
+
+-
+
+m(i,
+
+xi
+
+
+
+Uk )
+
+-
+
+inf
+xUk
+
+g(x)
+
+~j(0) - ~k(0) + Vk(g)
+
+and by a symmetric argument for ~k(g) - ~j(g). By definition of k and using the condition on the (zk) as well as (3.3) for ~j and ~(j+1)\j, we obtain for all k k
+
+E |^(g) - ~k(g)|r1(k^(g) < k)
+k-1
+= E |~j(g) - ~k(g)|r1(k^(g) = j)
+j=0
+k-1
+E (Vk(g) + |~j(0)| + |~k(0)|)r1(k^(g) = j)
+j=0
+
+(3r-1  1) Vk(g)r + E[|~k(0)|r]+
+
+k-1
+E |~j(0)|r1 
+j=0
+
+j : |~(j+1)\j(g) - ~ (g)| > z sj + zj+1sj+1
+
+(3r-1  1) zkrsrk + srk+
+
+k-1
+E |~j(0)|r1 
+j=0
+
+j : |~(j+1)\j(0) - ~ (0)| + Vj+1(g) > z sj + zj+1sj+1
+
+(3r-1  1) zkrskr + skr + srK .
+
+The result follows from the isotonic decay of (sk).
+
+3.3 Total risk bound
+
+3.8 Theorem. Consider ^ from (2.4) and critical values (zk) such that Condition (3.1) is satisfied and (zksk) is non-increasing in k. Then under Assumption 3.1 the following excess risk estimate holds for all k k and r > 0 such that
+all error levels in (2.3) are finite:
+
+Eg[|^ - ~k|r]
+
+(3r-1  1)
+
+(2zkr
+
++
+
+1
+
++
+
+)srk
+
++
+
+zkr
+
+max
+j =k+1,...,K -1
+
+srjk
+
+.
+
+Proof. For the late-stopping error Proposition 3.3 and the decay of (zksk) give
+
+|^ - ~k|r1(k^ > k) (2r-1  1) mj>akx(zkrsjrk + zjr+1sjr+1)
+
+(2r-1  1)zkr
+
+skr
+
++
+
+max
+j>k
+
+sjrk
+
+.
+
+Add the early-stopping error from Proposition 3.7.
+
+10
+
+3.9 Remarks.
+(a) The decay of (zksk) is imposed to facilitate the result. Moreover, it is quite natural since sk is of the order |Uk|-1/2 (|Uk|: number of observations in Uk) while the critical values zk usually decrease as well, compare Proposition 4.3 and the discussion thereafter.
+(b) Concerning the moment r > 0 required, we remark that r is in general much larger than the maximal finite moment of the noise (i). In the proof of Proposition 4.6 for example we derive that the median has finite moments three times larger than (i) for sample size at least five, which for the Cauchy distribution would already give r  3!
+3.10 Example (continued). For geometrically increasing bandwidths (hk) we obtain sjk sk for j > k and thus
+E[|^ - ~k |r] ( + zkr )skr .
+The factor  + zkr is the term we pay for adaptation.
+4 Asymptotic risk
+4.1 General result
+We shall derive convergence rates for n   of the critical values (zk). All quantities in the procedure may depend on n, but we still write Uk, K and zk instead of Uk(n), K(n), zk(n). The notation A B will always mean A(n) cB(n) with some c > 0 independent of n and A  B is short for A B and B A. We work under the following assumption whose validity under mild conditions will be derived in the next subsection.
+4.1 Assumption.
+(a) The cardinalities Nk of the neighbourhoods Uk grow with geometric order:
+q1Nk Nk+1 q2Nk for all k = 0, . . . K - 1
+for some fixed q2 q1 > 1 and with N1/ log(NK )  , NK  n as n  .
+(b) For all sufficiently large N we have
+E[|m(i, i = 1, . . . , N )|r]1/r  E[|m(i, i = 1, . . . , N )|2r]1/2r  N -1/2.
+(c) For all N   with N N -1/2  0 a moderate deviations bound applies: there is some c > 0 such that
+lim sup ecN2 P N 1/2|m(i, i = 1, . . . , N )| > N < .
+N 
+The following asymptotic bounds follow directly from the definitions:
+11
+
+4.2 Lemma. Assumption 4.1(b) implies sj  Nj-1/2 and Nj-1/2  (Nk+1 - Nk)-1/2 skj Nj-1/2  (Nk+1 - Nk)-1/2. Assumption 4.1(a) then yields for kj
+sj  skj  Nj-1/2.
+Under Assumption 4.1 critical values of the same order as in the Gaussian case suffice:
+
+4.3 Proposition. Grant Assumption 4.1 and suppose   (0, 1). We can choose
+
+zk2 =  2r log(sk/sK ) + log(-1) + log(K) , k = 0, . . . , K - 1,
+
+with  > 0 a sufficiently large constant in order to satisfy Condition (3.2). For K  log n this yields asymptotically zk  log n.
+Proof. Let j k. For n sufficiently large Assumption 4.1(c) together with the asymptotics zksjk (log(NK )Nk-1)1/2  0 (using Assumption 4.1(a,b) and Lemma 4.2) yields
+
+P0(|~(j+1)\j - ~k| > zksjk) P0(|~(j+1)\j| > zksjk/2) + P0(|~k| > zksjk/2) exp(-czk2sj2k(Nj+1 - Nj)/4) + exp(-czk2s2jkNk/4).
+
+By Lemma 4.2 there is another constant c > 0 such that for large zk
+P0(|~(j+1)\j - ~k| > zksjk) exp(-c zk2).
+Our choice of zk with  sufficiently large guarantees exp(-c zk2/2) = o((sK/sk)rK-2) for large K. We therefore more than satisfy (3.1) and the construction in (3.2) provided n is sufficiently large:
+
+K -1
+E0 |~j|r1(|~(j+1)\j - ~k| > zksjk)
+j=k
+K -1
+E0 |~j |2r]1/2 P0(|~(j+1)\j - ~k| > zksjk)1/2
+j=k
+K -1
+sjr exp(-c zk2/2)
+j=k
+= o (K - k)srk(sK /sk)rK-2 = o sKr .
+K
+
+For K  log N we obtain log(NK/Nk) zk2  log n.
+
+(K - k) log q2
+
+log N and thus
+
+12
+
+Note that the chosen critical values zk are decreasing in k, which has the desirable effect that we do not permit stopping at an early stage with the same probability as stopping at higher indices k. Moreover, this guarantees that zksk is non-increasing in k, the hypothesis in Theorem 3.8. From Theorem 3.8 we therefore obtain the following asymptotic risk bound.
+4.4 Corollary. Grant Assumptions 3.1 and 4.1 and let K  log n. Choosing the critical values as in Proposition 4.3 gives
+Eg[|^ - g(x)|r] (log n)r/2 Eg[|~k - |r].
+4.5 Example (continued). Let us specify to s-H¨older continuous g : [0, 1]  R, equidistant design and kernel estimators with geometrically increasing bandwidths hk = h0qk, K  log(n). Then we can choose zk  log(n) and the index k satisfies Vk (f )2  h2ks  (nhk )-1 log(n), that is hk  (log(n)/n)1/(2s+1) and zk sk  (log(n)/n)s/(2s+1).
+
+4.2 Specific models
+
+The preceding asymptotic analysis was based on Assumption 4.1 where part (a) can be ensured by construction whereas parts (b) and (c) depend on the noise model and the choice of M-estimator. The most severe restriction will usually be the moderate deviation property of Assumption 4.1(c). In the case where the law of the error variable i is absolutely continuous, this property holds by Corollary 2.1 in Arcones (2002) under the following conditions:
+
+(a) E[(i + h) - (i)] = V h2 + o(h2) for some V > 0 and |h|  0;
+
+(b)  is Lebesgue-almost everywhere differentiable with derivative  ;
+
+(c) there are ,  > 0 such that E[exp(| (i)|)] and E[exp( sup|h| |(i + h) - (i) - h (i)|/h)] are finite.
+
+For mean regression (x) = x2 we have V = 1 and  (i) = 2i such that a finite exponential moment for i is required. For median regression the result applies with V = f(0)/2 and  (i) = sgn(i) and because of ||i +h|-|i|-h sgn(i)| 2h no moment bound is required. The same is true for any robust statistic with bounded influence function, in particular for the Huber estimator and general quantile estimators. Arcones (2002) discusses that an exponential tail estimate for  (i) is also necessary to obtain a moderate deviation bound, which might be a serious drawback when using Lepski's method with linear non-robust base estimators. For the median the requirements are not difficult to verify directly. Assumption 4.1(b) is for example established by Chu and Hotelling (1955), who show that for f continuously differentiable around zero, f(0) > 0, r  N and Z  N (0, 1):
+
+lim
+N 
+
+N
+
+r
+
+E[med(1
+
+,
+
+.
+
+.
+
+.
+
+,
+
+N
+
+)2r
+
+]
+
+=
+
+(2f(0))-r
+
+E[Z
+
+2r
+
+].
+
+Using a coupling result, we can establish Assumption 4.1(b,c) under even more general conditions, see Section 7.2 for a proof:
+
+13
+
+4.6 Proposition. Assume that the i have a Lebesgue density f which is
+
+Lipschitz continuous at zero and satisfies
+
+0 -
+
+f(x)
+
+dx
+
+=
+
+1/2,
+
+f(0)
+
+>
+
+0,
+
+E[|i|r] < . Noting med() := med(1, . . . , N ), N odd, we have
+
+N 5 : E[|med()|r]  N -r/2 and E[|med()|2r]  N -r
+
+as well as for N   with N = o(N 1/2) lim sup P 2N 1/2f(0)|med()| > N exp(N2 /8)
+N 
+
+2.
+
+Specifying to the median regression case, we gather the results obtained in Corollary 4.4, Example 4.5 and Proposition 4.6 to obtain the following asymptotic optimality result.
+
+4.7 Theorem. Suppose that g : [0, 1]  R is Cs-H¨older continuous with s  (0, 1] in a neighbourhood of x  (0, 1), that the design is equidistant xi = i/n and that the error variables i have median zero (median regression model). Choose a geometrical range of bandwidths hk = h0qk with some h0 > 0, q > 1, k = 0, . . . , K and K  log n and consider the adaptive choice ^n among the corresponding local median filters ~k, applied in windows of size hk around x. Then for any r > 0 such that E[|i|r] <  we have
+Eg[|^n - g(x)|r]1/r (log(n)/n)s/(2s+1).
+
+This is the classical minimax rate for pointwise adaptive estimation in the onedimensional s-H¨older continuous case, see Lepski et al. (1997) for the Gaussian case. Here, we have derived the same rate for pointwise adaptive M -estimation under very weak conditions on the error distribution. It should be stressed that also for heavy-tailed distributions we only have to pay a logarithmic factor to achieve local adaptivity. This is due to the fact that the sample median as robust statistics concentrates well around the true location.
+
+5 Simulation results
+We illustrate our procedure by an implementation for median regression on X = [-1, 1] and the estimation of the regression function at x = 0. We simulate n = 200 equidistant observations (Yi) with standardized errors (i) (E[i] = 0, Var(i) = 1) that are (a) Laplace, (b) normal and (c) Student t-distributed with three degrees of freedom. The location is each time estimated by local sample means as well as by local sample medians. As neighbourhoods we take symmetric intervals Uk around zero containing 5k/4k-1 data points. This gives K = 17 different base estimators. The calibration of the procedure is performed for Laplace distributed errors with r = 2 and  = 1. The variances sj, sjk of the sample means are calculated exactly and those of the sample medians are approximated by their asymptotic values (which are quite close to Monte Carlo values). The critical values (zk) are chosen according to the prescription in (3.1). This is achieved in both cases, mean and median estimators, by using the choice in Proposition 4.3 with values
+
+14
+
+Figure 1: Example 1 with Laplace noise: A typical realisation and a box plot of the sample errors in 1000 Monte Carlo runs.
+ that are calibrated by 10000 Monte Carlo runs for the pure noise situation. It turned out that this gives almost equally sized error contributions for the different values zk, as postulated in (3.2). The same calibration principle was applied for the original Lepski procedure with mean and median estimators. As a first example we take a simple change point problem by considering the regression function g(x) = 0 for |x| 0.2 and g(x) = 2 for |x| > 0.2, which can be considered as a toy model for edge detection in image restauration or for structural breaks in econometrics. In Figure 1 we show a typical data set in the Laplace case (a) together with box plots for the absolute error of the different methods in 1000 Monte Carlo repetitions: local means with Lepski's and with our method (RR), local medians with Lepski's and with our method (RR) and the oracle method, which is just the sample median over [-0.2, 0.2] = {x : g(x) = 0}. For exactly the same methods, especially still calibrated to Laplace errors, Figure 2 presents the results for Gaussian and heavy-tailed Student t(3) errors. It is obvious that in all cases Lepski's method applied to sample medians as base estimators works quite badly. This is due to the fact that this method stops far too late: the sample median over the complete intervals Uk does not really 'notice' the jump in the data. In fact, in the Laplace simulation study the oracle k = 10 is selected by this method in less than 1% of the cases while most often (65%) the selection is k = 12 which yields the 1.5 times larger window U12 = [-0.29, 0.29]. The methods using the sample mean estimators perform reasonably well and especially both very similarly. Still, they are clearly beaten by our median based procedure in cases (a) and (c) where the median is the more efficient location estimator. It is remarkable here that we nearly achieve the risk of the oracle median estimator. Even in the Gaussian case (b) the linear procedures have only minor advantages. Finally, we notice the robustness property that the calibration with the wrong error distribution in Figure 2 does
+15
+
+Figure 2: Box plot of the sample errors in 1000 Monte Carlo runs for Gaussian (left) and Student t(3) noise (right).
+
+not seriously affect the results. In a second example we consider the smooth regression function g(x) = 2x(x + 1). Because we are estimating locally around x = 0, this is a caricature of a C2-function with g (0) = 2 and g (0) = 4. Figure 3 shows again a typical data set and boxplots for the different methods in 1000 Monte Carlo runs under Laplace errors. This time the oracle choice is the window [-0.39, 0.39]. Our median based procedure outperforms the others where the advantage over the mean-based approaches is again mainly due to the relative efficiency gain of size 1/ 2 induced by the base estimators in the Laplace model. This gain, though, is not at all visible when using Lepski's method for selecting among the sample medians. The results for the error distributions (b) and (c) resemble those of the first example, we confine ourselves to summarizing the numerical results for all examples in the following table (our method in capitals), each time stating the Monte Carlo median of the absolute error:
+
+Ex. Mean Lepski Mean Median Lepski Median Median Oracle
+
+1a 0.1446 0.1450
+
+0.2871 0.0897
+
+0.0763
+
+1b 0.1640 0.1630
+
+0.2795 0.1647
+
+0.1325
+
+1c 0.0982 0.0978
+
+0.3012 0.0596
+
+0.0560
+
+2a 0.1846 0.1924
+
+0.3051 0.1246
+
+0.1005
+
+2b 0.1808 0.1886
+
+0.3430 0.1586
+
+0.1241
+
+2c 0.2102 0.2126
+
+0.2455 0.1047
+
+0.0822
+
+Further simulation experiments confirm this picture. Especially for lower values of the moment r our median-based procedure is very efficient, while sometimes for r = 2 the mean-based procedures profit from less severe outliers in the Monte Carlo runs. In all these experiments the location is equally described by mean and median and we mainly see the efficiency gain of the sample median
+
+16
+
+Figure 3: Example 2 with Laplace noise. A typical realisation and a box plot of the sample errors in 1000 Monte Carlo runs.
+for non-Gaussian noise. For general quantile regression, however, linear methods do not apply and the standard Lepski procedures based on the nonlinear base estimators will perform badly. Our approach gives significantly better results. The error reductions by a factor of two and more, achieved in the median procedures above, confirm this very clearly.
+6 Application
+The proposed procedure is applied to denoise images used in the surveillance of cancer therapies. In Dynamic Contrast Enhanced Computer Tomography (DCE-CT) a contrast agent is injected in the human body and its diffusion over time is observed which is specific for different kinds of cell tissues and allows thus the surveillance of cancer therapies. For medical reasons the dose of contrast agent is kept small which leads to a poor signal-to-noise ratio. An analysis of residuals shows that the observational noise is well modeled by the Laplace distribution. Moreover, sometimes human movements produce significant outliers. Therefore local median estimation is employed. Especially for dynamical image sequences, the denoising is remarkably successful when the same spatial neighbourhoods are used over the whole observation period. This means that at each voxel location xi a vector-valued intensity function g : X  RK is observed under vector-valued noise i. The vector g(xi) encodes the intensity at time points (t1, . . . , tK) recorded at spatial location xi. Our previously developed procedure perfectly applies to this situation, we just need a testing procedure between vector-valued local M-estimators. Details of the experimental setup and the estimation procedure are discussed in Rozenholc et al. (2009) and we merely give a rough description of the setting. A multiresolution test procedure is applied to compare different vector estimates. In a first pre-selection step for each voxel xi we disregard voxels that are signif-
+17
+
+Figure 4: Axial CT image of the abdomen centered on a liver metastasis. This image is part of a dynamic series, it has been acquired after 25 seconds, during the arterial phase. Left: original. Right: denoised version.
+icantly different from xi and construct then circular neighbourhoods around xi consisting only of non-rejected voxels. This allows geometrically richer neighborhood structures that in practice adapt well to the structure. Mathematically, the analysis of the algorithm remains the same when conditioning on the result of this first pre-selection. For the present example we dispose of a DCE-CT sequence of K = 53 recordings of 512 × 512-pixel images in the upper abdomen of a cancer patient. In Figure 4 the original image at time step 23 is depicted together with the result of our denoising procedure. The noise reduction is remarkable while fine structures like edges are well preserved and not smoothed out. The residuals in Figure 5(left) show some artefacts due to human body movements and CT radial artefacts, which our procedure removed as well. In Figure 5(right) a zoom into Figure 4(right) is shown together with the sequence of neighbourhoods constructed for one voxel inside the cancerogeneous tissue. The effect of the pre-selection step is clearly visible by the geometrically adaptive form of the neighbourhoods. Further results, in particular the denoised dynamics in certain voxels and an application to automatic clustering of cell tissues are reported in Rozenholc et al. (2009). The generality of our procedure has the potential to provide statistical solutions in many further applications where spatial inhomogeneity and robustness are key issues.
+7 Appendix
+7.1 Analysis of a toy model
+To provide some insight why our tests for H0(k + 1) are often more powerful and natural, let us consider a toy model of two neighbourhoods U1  U2 with a piecewise constant quantile regression function g equal to µ1 on U1 and to µ2 on U2\U1. The procedure therefore reduces to a test of the hypothesis H0 : µ2 = µ1. Putting  = µ2 - µ1 we face a two-sample location test on H0 :  = 0 where the first sample Y1, . . . , Yn (from U1) is i.i.d. with density f and the
+18
+
+32
+1 4
+
+Figure 5: Left: residuals as difference between the original and the denoised version (see Figure 4). Right: zoom into the denoised version showing a vertebra (1), the aorta (2), the liver (3) and a tumor (4). Around a selected voxel, marked by the white dot/arrow, the first four data-driven neigbourhoods (in order: red, yellow, green and blue) are shown.
+
+second independent sample Yn+1, . . . , Y2n (from U2 \ U1) is i.i.d. with density f (· - ). We introduce m~ 1 := q^(Yi, i = 1, . . . , n), m~ 2 := q^(Yi, i = 1, . . . , 2n) and m~ 2\1 := q^(Yi, i = n + 1, . . . , 2n), the sample quantiles over the first, joint and second sample, respectively. The test in Lepski's method rejects if TL := 2|m~ 1 - m~ 2| is large, while we propose to reject if TW := |m~ 1 - m~ 2\1| is large.
+The rationale for our approach is that the sample -quantile is the maximum likelihood estimator for the location family with f (x) = 2(1 - )e-|x|+(2-1)x.
+Classical testing theory then reveals our test as the Wald test using the max-
+imum likelihood estimator for the location and establishes its asymptotic effi-
+ciency (a similarly efficient likelihood ratio test is less explicit here). For general
+noise distributions this is only a pseudo-likelihood approach, but we are still
+able to derive its superiority.
+
+7.1 Proposition. Let f : R  R+ be a Lipschitz continuous density, F its
+
+distribution function and consider the -quantile q,   (0, 1). Assume that
+
+f (q) > 0 and f (q + h) + f (q - h) - 2f (q) = o(h) hold for h  0 (e.g.
+
+f differentiable or just symmetric at q). If Y1, . . . , Yn  f , Yn+1, . . . , Y2n 
+
+f (· - ) are independently distributed, then we obtain for n  
+
+ n m~ 2\1 - m~ 1 - 
+
+ N (0, W2 ),
+
+ n 2 m~ 2 - m~ 1
+
+-
+
+ N (0, L2 )
+
+with variances W2
+
+=
+
+2(1-) f 2(q)
+
+and L2
+
+=
+
+W2
+
++
+
+f
+
+2 (q
+
+)
+
+||
+
++
+
+o()
+
+for 
+
+
+
+0,
+
+L2
+
+=
+
+W2
+
++
+
+2(1-) f (q)
+
+||
+
++
+
+o()
+
+for
+
+
+
+
+
+0.
+
+
+
+Proof. The asymptotic normality of the sample quantile n(q^(Y1, . . . , Yn) -
+
+q)  N (0, (1-)/f 2(q)) is well known (van der Vaart 1998, Corollary 21.5)
+
+and implies by independence the first asymptotic result.
+
+Since the sample quantiles in the second case are not independent, we consider
+
+their joint distribution using empirical processes. Let us write F for the cumulative distribution function of f = f (· - ) and denote by B1, B2 two
+
+19
+
+independent standard Brownian bridges. Then empirical process theory yields by independence
+
+ n
+
+1 n
+
+n
+
+1([Yi,
+
+))
+
+-
+
+F,
+
+1 n
+
+2n
+
+1([Yi, )) - F
+
+ (B1  F, B2  F).
+
+i=1 i=n+1
+
+The joint sample quantile q^(Yi, i = 1, . . . , 2n) satisfies in terms of the empirical distribution functions F n and Fn of the two samples
+
+F n + Fn 2
+
+q^(Yi, i = 1, . . . , 2n)
+
+= .
+
+Hence, it can be expressed as the functional (F n + Fn)-1(2) of (F n, Fn), assuming that the inverse is defined properly (e.g. giving the mean of all admis-
+sible values). Combining two-dimensional versions of Theorem 20.8 and Lemma
+21.4 of van der Vaart (1998), we infer
+
+ n q^(Yi, i = 1, . . . , n) - q, q^(Yi, i = 1, . . . , 2n) - q - /2 
+
+- (B1  F/f )  F -1(), -(B1  F + B2  F)/(f + f)  (F + F)-1(2) .
+
+ Consequently, n(2(q^(Yi, i = 1, . . . , 2n) - q^(Yi, i = 1, . . . , n)) - ) is asymptotically normal with mean zero and variance (put q := (F + F)-1(2))
+
+L2 = 4 E
+
+-
+
+B1(F (q)) f (q)
+
++ +
+
+B2(F (q - f (q - )
+
+))
+
++
+
+B1() f (q)
+
+2
+
+=
+
+4(1 - ) f 2(q)
+
++
+
+4F (q)(1
+
+-
+
+F (q)) + 4F (q - )(1 - (f (q) + f (q - ))2
+
+F (q
+
+-
+
+))
+
+-
+
+8(  (f (q)
+
+F (q) - F (q)) + f (q - ))f (q)
+
+While L2 = W2 for  = 0 is straight-forward, the behaviour as   0 is analysed using q = q + /2 + O(2), obtained from the Lipschitz continuity of f , and a fortiori
+
+f (q) + f (q - ) = 2f (q) + o(),
+
+obtained from the second difference bound on f . This gives
+
+L2
+
+=
+
+W2
+
+-
+
+8((/2)f (q)1( < 0) - 2f (q)2
+
+(/2)f (q))
+
++
+
+o()
+
+and hence the assertion.
+
+This result shows that under H0 :  = 0, the test statistics TL and TW are
+
+asymptotically identically distributed, whereas TL has a larger asymptotic vari-
+
+ance under the alternative than TW . The relative deterioration
+
+L2 -W2 W2
+
+is of
+
+order f (q)|| which can be interpreted as a signal-to-noise ratio. The deteri-
+
+oration is thus only negligible if the signal-to-noise ratio is small. Especially in
+
+20
+
+image denoising we face significant signal differences  at edges while we do not dispose of a very large number n of observed pixels such that this deterioration is clearly visible, see also Example 1 in Section 5. In addition to this improvement of results, the new tests are also easier to analyse and calibrate by using the independence of the noise on disjoint domains.
+
+7.2 Proof of Proposition 4.6
+
+We shall only consider the case of odd N = 2m + 1. Under the conditions of the proposition Brown et al. (2008) show the following result.
+
+7.2 Theorem. For all m 0 the sample 1, . . . , 2m+1 can be realised on
+
+the same probability space as a standard normal random variable Z such that
+
+med() := med(i, i = 1, . . . , 2m + 1) satisfies
+
+med() -
+
+Z
+
+4(2m + 1)f(0)
+
+C
+
+ 1 + Z2 if |Z|  2m + 1,
+
+2m + 1
+
+where , C > 0 are constants depending on f, but independent of m.
+
+The construction and the inequality of the theorem yield with some constant
+
+C >0
+
+E[|med()|2r 1(|Z |
+
+  2m + 1)]
+
+(2r-1  1) E
+
+4(2m + 1)f(0)2
+
+-r |Z |2r
+
++
+
+C 2r (2m+1)2r
+
+1 + Z2
+
+2r
+
+C (2m + 1)-r.
+
+On the other hand, because of i  Lr we have for z   that the cdf satisfies F(-z) |z|-r and 1 - F(z) |z|-r. From the formula for the density of
+
+med()
+
+fm(z) =
+
+2m + 1 m+1
+
+(m + 1)f(z)F(z)m(1 - F(z))m
+
+we therefore infer that med() L3r for m 2 is finite and uniformly bounded.
+
+Hence, the Ho¨lder inequality gives
+
+E[|med()|2r1(|Z
+
+|
+
+>
+
+  2m
+
++
+
+1)]
+
+E[|med()|3r
+
+]2/3
+
+P(|Z
+
+|
+
+>
+
+  2m
+
++
+
+1)1/3,
+
+which by Gaussian tail estimates is of order exp(-2(2m + 1)/6) and thus for m   asymptotically negligible. This gives the upper moment bound for med(), the lower bound follows symmetrically. The r-th moment is bounded by even simpler arguments. The second assertion follows via quantile coupling from
+
+P
+
+P
+
+4(2m + 1)f(0)|med()| > m
+
+|Z |
+
++
+
+ C (1
+2m+1
+
++
+
+Z2)
+
+> m 
+
++P
+
+ |Z| >  2m + 1
+
+P(2|Z| > m) + P(|Z| >  2m + 1)
+
+2 exp(-m2 /8).
+
+21
+
+Acknowledgement
+We are grateful for constructive remarks and questions by two referees and one associate editor that helped to improve the quality of the paper.
+References
+Arcones, M. A. (2002). Moderate Deviations for M -estimators. Test 11(2), 465-500.
+Arias-Castro, E. and D. Donoho (2009). Does median filtering truly preserve edges better than linear filtering?, Annals of Statistics 37(3), 1172­ 1206.
+Brown, L. D., T. Cai and H. Zhou (2008). Robust nonparametric estimation via wavelet median regression. Annals of Statistics 36(5), 2055­2084.
+Chu, J. T. and H. Hotelling (1955). The moments of the sample median. Annals of Math. Statistics 26(4), 593­606.
+Hall, P. and M. C. Jones (1990). Adaptive M -estimation in nonparametric regression. Annals of Statistics 18(4), 1712­1728.
+Huber, P. J. (1964). Robust estimation of a location parameter. Annals of Mathematical Statistics 35(1), 73­101.
+Koenker, R. (2005). Quantile Regression. Econometric Society Monographs 38, Cambridge University Press.
+Lepskii, O. V. (1990). A problem of adaptive estimation in Gaussian white noise. Theory Probab. Appl. 35(3), 454­466. Translated from Teor. Veroyatnost. i Primenen. 35(3) (1990), 459­470.
+Lepski, O., E. Mammen and V. Spokoiny (1997). Optimal spatial adaptation to inhomogeneous smoothness: an approach based on kernel estimates with variable bandwidth selectors. Annals of Statistics 25(3), 929­947.
+Massart, P. (2005). Concentration inequalities and model selection. Ecole d'Et´e de Probabilit´es de Saint-Flour XXXIII ­ 2003, Lecture Notes in Mathematics 1896, Springer, Berlin.
+Portnoy, S. (1997). Local asymptotics for quantile smoothing splines. Annals of Statistics 25(1), 414­434.
+Rozenholc, Y., M. Reiß, D. Balvay and C.-A. Cuenod (2009). Growing time-homogeneous neighbourhoods for denoising and clustering dynamic contrast enhanced-CT sequences, Preprint Universit´e Paris V, available under http://www.math-info.univ-paris5.fr/ rozen/RRBC-preprint/last-version.pdf.
+Spokoiny, V. and C. Vial (2009). Parameter tuning in pointwise adaptation using a propagation approach, Annals of Statistics 37(5b), 2783­2807.
+22
+
+Truong, Y.K. (1989). Asymptotic Properties of Kernel Estimators Based on Local Medians, Annals of Statistics 17(2), 606­617.
+Tsybakov, A. B. (2004). Optimal aggregation of classifiers in statistical learning. Annals of Statistics 32(1) 135­166.
+van de Geer, S. (2003). Adaptive quantile regression, in Recent Trends in Nonparametric Statistics (Eds. M.G. Akritas and D.N. Politis), Elsevier Science, 235­250.
+van der Vaart, A. (1998). Asymptotic Statistics, Cambridge University Press.
+Yu, K. and M.C. Jones (1998). Local linear quantile regression. J. Amer. Stat. Assoc. 93(441), 228­237.
+23
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Localising temperature risk" by Wolfgang Karl Härdle, Brenda López Cabrera, Ostap Okhrin and Weining Wang, January 2011.
+002 "A Confidence Corridor for Sparse Longitudinal Data Curves" by Shuzhuan Zheng, Lijian Yang and Wolfgang Karl Härdle, January 2011.
+003 "Mean Volatility Regressions" by Lu Lin, Feng Li, Lixing Zhu and Wolfgang Karl Härdle, January 2011.
+004 "A Confidence Corridor for Expectile Functions" by Esra Akdeniz Duran, Mengmeng Guo and Wolfgang Karl Härdle, January 2011.
+005 "Local Quantile Regression" by Wolfgang Karl Härdle, Vladimir Spokoiny and Weining Wang, January 2011.
+006 "Sticky Information and Determinacy" by Alexander Meyer-Gohde, January 2011.
+007 "Mean-Variance Cointegration and the Expectations Hypothesis" by Till Strohsal and Enzo Weber, February 2011.
+008 "Monetary Policy, Trend Inflation and Inflation Persistence" by Fang Yao, February 2011.
+009 "Exclusion in the All-Pay Auction: An Experimental Investigation" by Dietmar Fehr and Julia Schmid, February 2011.
+010 "Unwillingness to Pay for Privacy: A Field Experiment" by Alastair R. Beresford, Dorothea Kübler and Sören Preibusch, February 2011.
+011 "Human Capital Formation on Skill-Specific Labor Markets" by Runli Xie, February 2011.
+012 "A strategic mediator who is biased into the same direction as the expert can improve information transmission" by Lydia Mechtenberg and Johannes Münster, March 2011.
+013 "Spatial Risk Premium on Weather Derivatives and Hedging Weather Exposure in Electricity" by Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+014 "Difference based Ridge and Liu type Estimators in Semiparametric Regression Models" by Esra Akdeniz Duran, Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+015 "Short-Term Herding of Institutional Traders: New Evidence from the German Stock Market" by Stephanie Kremer and Dieter Nautz, March 2011.
+016 "Oracally Efficient Two-Step Estimation of Generalized Additive Model" by Rong Liu, Lijian Yang and Wolfgang Karl Härdle, March 2011.
+017 "The Law of Attraction: Bilateral Search and Horizontal Heterogeneity" by Dirk Hofmann and Salmai Qari, March 2011.
+018 "Can crop yield risk be globally diversified?" by Xiaoliang Liu, Wei Xu and Martin Odening, March 2011.
+019 "What Drives the Relationship Between Inflation and Price Dispersion? Market Power vs. Price Rigidity" by Sascha Becker, March 2011.
+020 "How Computational Statistics Became the Backbone of Modern Data Science" by James E. Gentle, Wolfgang Härdle and Yuichi Mori, May 2011.
+021 "Customer Reactions in Out-of-Stock Situations ­ Do promotion-induced phantom positions alleviate the similarity substitution hypothesis?" by Jana Luisa Diels and Nicole Wiebach, May 2011.
+SFB 649, Ziegelstraße 13a, D-10117 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Extreme value models in a conditional duration intensity framework" by Rodrigo Herrera and Bernhard Schipp, May 2011.
+023 "Forecasting Corporate Distress in the Asian and Pacific Region" by Russ Moro, Wolfgang Härdle, Saeideh Aliakbari and Linda Hoffmann, May 2011.
+024 "Identifying the Effect of Temporal Work Flexibility on Parental Time with Children" by Juliane Scheffel, May 2011.
+025 "How do Unusual Working Schedules Affect Social Life?" by Juliane Scheffel, May 2011.
+026 "Compensation of Unusual Working Schedules" by Juliane Scheffel, May 2011.
+027 "Estimation of the characteristics of a Lévy process observed at arbitrary frequency" by Johanna Kappus and Markus Reiß, May 2011.
+028 "Asymptotic equivalence and sufficiency for volatility estimation under microstructure noise" by Markus Reiß, May 2011.
+029 "Pointwise adaptive estimation for quantile regression" by Markus Reiß, Yves Rozenholc and Charles A. Cuenod, May 2011.
+SFB 649, Ziegelstraße 13a, D-10117 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

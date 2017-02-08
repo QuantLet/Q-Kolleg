@@ -1,0 +1,1088 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2005-011
+FFT Based Option Pricing
+Szymon Borak* Kai Detlefsen* Wolfgang Härdle*
+* CASE - Center for Applied Statistics and Economics, Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+1 FFT based option pricing
+Szymon Borak, Kai Detlefsen, and Wolfgang H¨ardle
+JEL classification codes: G12
+1.1 Acknowledgement
+We gratefully acknowledge financial support by the Deutsche Forschungsgemeinschaft and the Sonderforschungsbereich 649 "O¨ konomisches Risiko".
+1.2 Introduction
+The Black-Scholes formula, one of the major breakthroughs of modern finance, allows for an easy and fast computation of option prices. But some of its assumptions, like constant volatility or log-normal distribution of asset prices, do not find justification in the markets. More complex models, which take into account the empirical facts, often lead to more computations and this time burden can become a severe problem when computation of many option prices is required, e.g. in calibration of the implied volatility surface. To overcome this problem Carr and Madan (1999) developed a fast method to compute option prices for a whole range of strikes. This method and its application are the theme of this chapter. In Section 1.3, we briefly discuss the Merton, Heston and Bates models concentrating on aspects relevant for the option pricing method. In the following section, we present the method of Carr and Madan which is based on the fast Fourier transform (FFT) and can be applied to a variety of models. We also consider briefly some further developments and give a short introduction to the FFT algorithm. In the last section, we apply the method to the three analyzed
+
+2 1 FFT based option pricing
+models, check the results by Monte Carlo simulations and comment on some numerical issues.
+
+1.3 Modern pricing models
+
+The geometric Brownian motion (GBM) is the building block of modern finance. In particular, in the Black-Scholes model the underlying stock price is assumed to follow the GBM dynamics:
+
+dSt = rStdt + StdWt, which, applying It^o's lemma, can be written as:
+
+(1.1)
+
+St = S0 exp
+
+r
+
+-
+
+2 2
+
+t + Wt
+
+.
+
+(1.2)
+
+The empirical facts, however, do not confirm model assumptions. Financial returns exhibit much fatter tails than in the Black-Scholes model (1.1), e.g. the common big returns that are larger than six-standard deviations should appear less than once in a million years if the Black-Scholes framework were accurate. Squared returns, as a measure of volatility, display positive autocorrelation over several days, which contradicts the constant volatility assumption. Nonconstant volatility can be observed as well in the option markets where "smiles" and "skews" in implied volatility occur. These properties of financial time series lead to more refined models. We introduce three such models in the following paragraphs.
+
+1.3.1 Merton Model
+If an important piece of information about the company becomes public it may cause a sudden change in the company's stock price. The information usually comes at a random time and the size of its impact on the stock price may be treated as a random variable. To cope with these observations Merton (1976) proposed a model that allows discontinuous trajectories of asset prices. The
+
+1.3 Modern pricing models
+
+3
+
+model extends (1.1) by adding jumps to the stock price dynamics:
+
+dSt St
+
+=
+
+rdt + dWt
+
++
+
+dZt,
+
+(1.3)
+
+where Zt is a compound Poisson process with a log-normal distribution of jump sizes. The jumps follow a (homogeneous) Poisson process Nt with intensity , which is independent of Wt. The log-jump sizes Yi  N (µ, 2) are i.i.d random variables with mean µ and variance 2, which are independent of both Nt and Wt.
+The model becomes incomplete which means that there are many possible ways to choose a risk-neutral measure such that the discounted price process is a martingale. Merton proposed to change the drift of the Wiener process and to leave the other ingredients unchanged. The asset price dynamics is then given by:
+
+Nt
+St = S0 exp µM t + Wt + Yi ,
+i=1
+
+where
+
+µM
+
+=
+
+r - 2
+
+- {exp(µ +
+
+2 2
+
+)
+
+-
+
+1}.
+
+Jump
+
+components
+
+add
+
+mass
+
+to
+
+the
+
+tails of the returns distribution. Increasing  adds mass to both tails, while a
+
+negative/positive µ implies relatively more mass in the left/right tail.
+
+For the purpose of Section 1.5 it is necessary to introduce the characteristic
+
+function
+
+(cf )
+
+of
+
+Xt
+
+=
+
+ln
+
+St S0
+
+:
+
+Xt (z) = exp t
+
+-
+
+2z 2
+
+2
+
++
+
+iµM z
+
++
+
+
+
+e- 2 z 2 /2+iµz -1
+
+,
+
+(1.4)
+
+where Xt = µM t + Wt +
+
+Nt i=1
+
+Yi.
+
+1.3.2 Heston Model
+
+Another possible modification of (1.1) is to substitute the constant volatility parameter  with a stochastic process. This leads to the so-called "stochastic volatility" models, where the price dynamics is driven by:
+
+dSt St
+
+=
+
+rdt + vtdWt,
+
+4 1 FFT based option pricing
+
+where vt is another unobservable stochastic process. There are many possible ways of choosing the variance process vt. Hull and White (1987) proposed to use geometric Brownian motion:
+
+dvt vt
+
+=
+
+c1dt + c2dWt.
+
+(1.5)
+
+However, geometric Brownian motion tends to increase exponentially which
+
+is an undesirable property for volatility. Volatility exhibits rather a mean
+
+reverting behavior. Therefore a model based on an Ornstein-Uhlenbeck-type
+
+process:
+
+dvt = ( - vt)dt + dWt,
+
+(1.6)
+
+was suggested by Stein and Stein (1991). This process, however, admits negative values of the variance vt.
+
+These deficiencies were eliminated in a stochastic volatility model introduced by Heston (1993):
+
+dSt St
+dvt
+
+= =
+
+rdt + vtdWt(1), ( - vt)dt + vtdWt(2),
+
+(1.7)
+
+where the two Brownian components Wt(1) and Wt(2) are correlated with rate :
+
+Cov dWt(1), dWt(2) = dt.
+
+(1.8)
+
+The term vt in equation 1.8 simply ensures positive volatility. When the process touches the zero bound the stochastic part becomes zero and the non-
+stochastic part will push it up.
+
+Parameter  measures the speed of mean reversion,  is the average level of volatility and  is the volatility of volatility. In (1.7) the correlation  is typically negative, what is known as the "leverage effect". Empirical studies of the financial returns confirm that volatility is negatively correlated with the returns, Cont (2001).
+
+The risk neutral dynamics is given in a similar way as in the Black-Scholes
+
+model. For the logarithm equation:
+
+of
+
+the
+
+asset price process
+
+Xt
+
+=
+
+ln
+
+St S0
+
+one obtains
+
+the
+
+1.3 Modern pricing models
+
+5
+
+The cf is given by:
+
+dXt =
+
+r
+
+-
+
+1 2
+
+vt
+
+dt + vtdWt(1).
+
+Xt (z)
+
+=
+
+exp{
+
+t(-iz) 2
+
++
+
+iztr
+
++
+
+izx0}
+
+(cosh
+
+t 2
+
++
+
+-iz 
+
+sinh
+
+)t
+2
+
+2 2
+
+·
+
+exp
+
+-
+
+
+
+(z2 + iz)v0
+
+coth
+
+t 2
+
++
+
+
+
+-
+
+iz
+
+,
+
+(1.9)
+
+where  = 2(z2 + iz) + ( - iz)2, and x0 and v0 are the initial values for the log-price process and the volatility process, respectively.
+
+1.3.3 Bates Model
+
+The Merton and Heston approaches were combined by Bates (1996), who proposed a model with stochastic volatility and jumps:
+
+dSt St
+dvt
+
+= =
+
+rdt + vtdWt(1) + dZt, ( - vt)dt + vtdWt(2),
+
+Cov(dWt(1), dWt(2)) =  dt.
+
+(1.10)
+
+As in (1.3) Zt is a compound Poisson process with intensity  and log-normal
+
+distribution of jump jump size then ln(1
+
+sizes + J)
+
+independent of Wt(1) (and
+
+
+
+N (ln(1 + k)
+
+-
+
+1 2
+
+2,
+
+
+
+2)
+
+Wt(2)). If for some
+
+J k¯.
+
+denotes Under
+
+the the
+
+risk neutral probability one obtains the equation for the logarithm of the asset
+
+price:
+
+dXt
+
+=
+
+(r
+
+-
+
+k
+
+-
+
+1 2
+
+vt
+
+)dt
+
++
+
+vtdWt(1)
+
++
+
+Z~t,
+
+where Z~t is a compound Poisson process with normal distribution of jump magnitudes.
+
+Since the jumps are independent of the diffusion part in (1.10), the characteristic function for the log-price process can be obtained as:
+
+6 1 FFT based option pricing
+
+where:
+
+Xt (z) = XDt (z)XJ t (z),
+
+XDt (z)
+
+=
+
+exp
+
+t(-iz) 2
+
++
+
+izt(r
+
+-
+
+k)
+
++
+
+izx0
+
+2
+
+cosh
+
+t 2
+
++
+
+-iz 
+
+sinh
+
+t 2
+
+2
+
+·
+
+exp
+
+-
+
+
+
+(z2 + iz)v0
+
+coth
+
+t 2
+
++
+
+
+
+-
+
+iz
+
+is the diffusion part cf and
+
+(1.11)
+
+XJ t (z)
+
+=
+
+exp{t(e-2
+
+z2
+
+/2+i(ln(1+k)-
+
+1 2
+
+2
+
+)z
+
+-
+
+1)},
+
+(1.12)
+
+is the jump part cf. Note that (1.9) and (1.11) are very similar. The difference
+
+lies in the shift k (risk neutral correction). Formula (1.12) has a similar
+
+structure as the jump part in (1.4), however, µ is substituted with ln(1 + k) -
+
+1 2
+
+2.
+
+1.4 Option Pricing with FFT
+In the last section, three asset price models and their characteristic functions were presented. In this section, we describe a numerical approach for pricing options which utilizes the characteristic function of the underlying instrument's price process. The approach has been introduced by Carr and Madan (1999) and is based on the FFT. The use of the FFT is motivated by two reasons. On the one hand, the algorithm offers a speed advantage. This effect is even boosted by the possibility of the pricing algorithm to calculate prices for a whole range of strikes. On the other hand, the cf of the log price is known and has a simple form for many models considered in literature while the density is often not known in the closed form.
+The approach assumes that the cf of the log-price is given analytically. The basic idea of the method is to develop an analytic expression for the Fourier transform of the option price and to get the price by Fourier inversion. As the
+
+1.4 Option Pricing with FFT
+
+7
+
+Fourier transform and its inversion work for square-integrable functions (see Plancherel's theorem, e.g. in Rudin (1991)) we do not consider directly the option price but a modification of it.
+
+Let CT (k) denote the price of a European call option with maturity T and strike K = exp(k):
+
+
+
+CT (k) =
+
+e-rT (es - ek)qT (s)ds,
+
+k
+
+where qT is the risk-neutral density of sT = log ST . The function CT is not square-integrable because CT (k) converges to S0 for k  -. Hence, we consider a modified function:
+
+cT (k) = exp(k)CT (k),
+
+(1.13)
+
+which is square-integrable for a suitable  > 0. The choice of  may depend on the model for St. The Fourier transform of cT is defined by:
+
+
+
+T (v) =
+
+eivkcT (k)dk.
+
+-
+
+The expression for T can be computed directly after an interchange of integrals:
+
+T (v) = =
+
+
+
+eivk eke-rT (es - ek)qT (s)dsdk
+
+-
+
+k
+
+s
+
+e-rT qT (s)
+
+(ek+s - e(+1)k)eivkdkds
+
+-
+
+-
+
+=
+
+ -
+
+e-rT
+
+qT
+
+(s)(
+
+e(+1+iv)s  + iv
+
+-
+
+e(+1+iv)s  + 1 + iv
+
+)ds
+
+=
+
+e-rT T (v - ( + 2 +  - v2 + i(2
+
+1)i) + 1)v
+
+,
+
+where T is the Fourier transform of qT . A sufficient condition for cT to be square-integrable is given by T (0) being finite. This is equivalent to
+E(ST+1) < .
+A value  = 0.75 fulfills this condition for the models of Section 1.3. With this choice, we follow Schoutens et al. (2003) who found in an empirical study
+
+8 1 FFT based option pricing
+
+that this value leads to stable algorithms, i.e. the prices are well replicated for many model parameters.
+
+Now, we get the desired option price in terms of T using Fourier inversion
+
+CT (k)
+
+=
+
+exp(-k) 
+
+
+e-ivk  (v )dv .
+0
+
+This integral can be computed numerically as:
+
+CT (k)
+
+
+
+exp(-k) 
+
+N -1
+e-ivjk(vj ),
+
+j=0
+
+(1.14)
+
+where vj = j, j = 0, . . . , N - 1, and  > 0 is the distance between the points of the integration grid.
+Lee (2004) has developed bounds for the sampling and truncation errors of this approximation. Formula (1.14) suggests to calculate the prices using the FFT, which is an efficient algorithm for computing the sums
+
+N -1
+
+wu =
+
+e-i
+
+2 N
+
+j
+
+u
+
+xj
+
+,
+
+for
+
+u = 0, . . . , N
+
+- 1.
+
+j=0
+
+(1.15)
+
+To see why this is the case see Example 1 below, which illustrates the basic idea of the FFT. In general, the strikes near the spot price are of interest because such options are traded most frequently. We consider thus an equidistant spacing of the log-strikes around the log spot price s0:
+
+ku
+
+=
+
+-
+
+1 2
+
+N
+
+
+
++
+
+
+
+u
+
++
+
+s0,
+
+for
+
+u = 0, . . . , N
+
+- 1,
+
+(1.16)
+
+where  > 0 denotes the distance between the log strikes. Substituting these log-strikes yields for u = 0, . . . , N - 1:
+
+CT (ku)
+
+
+
+exp(-k) 
+
+N -1
+
+e-i
+
+ju
+
+ei{(
+
+1 2
+
+N
+
+
+
+-s0
+
+)vj
+
+}
+
+(vj
+
+)
+
+.
+
+j=0
+
+Now, the FFT can be applied to
+
+xj
+
+=
+
+ei{(
+
+1 2
+
+N
+
+
+
+-s0
+
+)vj
+
+}
+
+(vj
+
+),
+
+for
+
+j
+
+= 0, . . . , N
+
+- 1,
+
+1.4 Option Pricing with FFT
+
+9
+
+provided that
+
+
+
+=
+
+2 N
+
+.
+
+(1.17)
+
+This constraint leads, however, to the following trade-off: the parameter N controls the computation time and thus is often determined by the computational setup. Hence the right hand side may be regarded as given or fixed. One would like to choose a small  in order to get many prices for strikes near the spot price. But the constraint implies then a big  giving a coarse grid for integration. So we face a trade-off between accuracy and the number of interesting strikes.
+
+Example 1
+
+The FFT is an algorithm for computing (1.15). Its popularity stems from its remarkable speed: while a naive computation needs N 2 operations the FFT
+requires only N log(N ) steps. The algorithm was first published by Cooley and
+Tukey (1965) and since then has been continuously refined. We illustrate the
+original FFT algorithm for N = 4. Writing u and j as binary numbers:
+
+u = 2u1 + u0, j = 2j1 + j0,
+
+with u1, u0, j1, j0  {0, 1} u = (u1, u0), j = (j1, j0) the formula (1.15) is given as:
+
+11
+
+w(u1,u0) =
+
+x(j1,j0)W (2u1+u0)(2j1+j0),
+
+j0=0 j1=0
+
+where W = e-2i/N . Because of
+
+W (2u1+u0)(2j1+j0) = W 2u0j1 W (2u1+u0)j0 ,
+
+we get
+
+11
+w(u1,u0) = ( x(j1,j0), W 2u0j1 )W (2u1+u0)j0 .
+j0=0 j1=0
+
+10 1 FFT based option pricing
+
+Now, the FFT can be described by the following three steps
+
+1
+
+w(1u0,j0) =
+
+x(j1,j0)W 2u0j1 ,
+
+j1 =0
+
+1
+
+w(2u0,u1) =
+
+w(1u0,j0)W (2u1+u0)j0 ,
+
+j0 =0
+
+w(u1,u0) = w(2u0,u1).
+
+While a naive computation of (1.15) requires 42 = 16 complex multiplications the FFT needs only 4 log(4) = 8 complex multiplications. This explains the speed of the FFT because complex multiplications are the most time consuming operations in this context.
+
+1.5 Applications
+In this section, we apply the FFT option pricing algorithm of Section 1.4 to the models described in Section 1.3. Our aim is to demonstrate the remarkable speed of the FFT algorithm by comparing it to Monte Carlo simulations. Moreover, we present an application of the fast option pricing algorithm to the calibration of implied volatility (IV) surfaces. In Figure 1.1 we present the IV surface of DAX options on January 4th, 1999 where the red points are the observed implied volatilities and the surface is fitted with the Nadaraya-Watson kernel estimator. For analysis of IV surfaces consult Fengler et al. (2002).
+In order to apply the FFT-based algorithm we need to know the characteristic function of the risk neutral density which has been described in Section 1.3 for the Merton, Heston, and Bates models. Moreover, we have to decide on the parameters , N , and  of the algorithm. Schoutens et al. (2003) used  = 0.75 in a calibration procedure for the Eurostoxx 50 index data. We follow their approach and set  to this value. The computation time depends on the parameter N which we set to 512. As the number of grid points of the numerical integration is also given by N , this parameter in addition determines the accuracy of the prices. For parameter , which determines the distance of the points of the integration grid, we use 0.25. A limited simulation study showed that the FFT algorithm is not sensitive to the choice of , i.e. small changes in  gave similar results. In Section 1.4, we have already discussed the relation between these parameters.
+
+1.5 Applications
+
+11
+
+0.53
+0.48
+0.43
+0.38
+0.33
+0.40 0.58 0.77 0.95 1.13
+
+1.96 1.56 1.17 0.78 0.39
+
+Figure 1.1: Implied volatility surface of DAX options on January 4, 1999. STFfft01.xpl
+
+For comparison, we computed the option prices also by Monte Carlo simulations with 500 time steps and 5000 repetitions. Such simulations are a convenient way to check the results of the FFT-based algorithm. The calculations are based on the following parameters: the price of the underlying asset is S0 = 100, time to maturity T = 1, and the interest rate r = 0.02. For demonstration we choose the Heston model with parameters:  = 10,  = 0.2,  = 0.7,  = -0.5 and v0 = 0.2. To make our comparison more sound we also calculate prices with the analytic formula. In the left panel of Figure 1.2 we show the prices of European call options as a function of the strike price K. As the prices obtained with the analytical formula are close to the prices obtained with the FFT-based method and the Monte Carlo prices oscillate around them, this figure confirms that the pricing algorithm works correctly. The different values of the Monte Carlo prices are mainly due to the random nature of this technique. One needs to use even more time steps and repetitions to get better results. The minor differences between the analytical and FFT-based prices
+
+12
+Option prices in the Heston model
+
+1 FFT based option pricing
+(Analytical - FFT)/Analytical [%]
+
+MAPE -0.2 -0.1 0
+
+option price 20 25
+
+15
+
+80 90 100 110 120 strike price
+
+80 90 100 110 120 strike price
+
+Figure 1.2: Left panel: European call option prices obtained by Monte Carlo simulations (filled circles), analytical formula (crosses) and the FFT method (solid line) for the Heston model. Right panel: Percentage differences between analytical and FFT prices.
+STFfft02.xpl
+
+come form the fact that the latter method gives the exact values only on the grid (1.16) and between the grid points one has to use some interpolation method to approximate the price of the option. This problem can be more clearly observed in the right panel of Figure 1.2, where percentage differences between the analytical and FFT prices are presented. In order to preserve the great speed of the algorithm we simply use linear interpolation between the grid points. This approach, however, slightly overestimates the true prices since the call option price is a convex function of the strike. It can be clearly seen that near the grid points the prices obtained by both methods coincide, while between the grid points the FFT-based algorithm generates higher prices than the analytical solution.
+Although these methods yield similar results they need different computation time.
+In Table 1.1 we compare the speed of C++ implementations of the Monte Carlo and the FFT methods. We calculate Monte Carlo prices for 20 different strikes
+
+1.5 Applications
+
+13
+
+Table 1.1: The computation times in seconds for the FFT method and the Monte Carlo method for three different models. Monte Carlo prices were calculated for 20 different strikes, with 500 time steps and 5000 repetitions.
+
+Model
+Merton Heston Bates
+
+FFT
+0.01 0.01 0.01
+
+MC
+31.25 34.41 37.53
+
+for each of the three models. The speed superiority of the FFT-based method is clearly visible. It is more than 3000 times faster than the Monte Carlo issues.
+As an application of the fast pricing algorithm we consider the problem of model calibration. Given option prices observed in the market we look for model parameters that can reproduce the data well. Normally, the market prices are given by an implied volatility surface which represent the implied volatility of option prices for different strikes and maturities. The calibration can then be done for the implied volatilities or for the option prices. This decision depends on the problem considered. As a measure of the fit one can use the Mean Squared Error (MSE):
+
+MSE
+
+=
+
+number
+
+1 of
+
+options
+
+options
+
+(market price market
+
+model price2
+
+price)2 ,
+
+(1.18)
+
+but other choices like the Mean Absolute Percentage Error (MAPE) or Mean Absolute Error (MAE) are also possible:
+
+M AP E
+
+=
+
+number
+
+1 of
+
+options
+
+|
+
+market price market
+
+model price
+
+price
+
+|,
+
+options
+
+M AE
+
+=
+
+number
+
+1 of
+
+options
+
+| market price - model price | .
+
+options
+
+Moreover, the error function can be modified by weights if some regions of the implied volatility surface are more important or some observations should be ignored completely.
+
+14 1 FFT based option pricing
+The calibration results in a minimization problem of the error function M SE. This optimization can be carried out by different algorithms like simulated annealing, the Broyden-Fletcher-Goldfarb-Shanno-algorithm, the Nelder-Mead simplex algorithm or Monte Carlo Markov Chain methods. An overview of optimization methods can be found in C´izkova´ (2003). As minimization algorithms normally have to compute the function to be minimized many times an efficient algorithm for the option prices is essential. The FFT-based algorithm is fairly efficient as is shown in Table 1.1. Moreover, it returns prices for a whole range of strikes at one maturity. This is an additional advantage because for the calibration of an implied volatility surface one needs to calculate prices for many different strikes and maturities.
+As an example we present the results for the Bates model calibrated to the IV surface of DAX options on January 4th, 1999. The data set, which can be found in MD*Base, contains 236 option prices for 7 maturities (for each maturity there is a different number of strikes). We minimize (1.18) with respect to 8 parameters of the Bates model: , , k, , , , , v0. Since the function (1.18) has many local minima, we use the simulated annealing minimization method, which offers the advantage to search for a global minimum, combined with the Nelder-Mead simplex algorithm. As a result we obtaine the following estimates
+for the model parameters:  = 0.13,  = 0.0004, k = -0.03,  = 4.23,  = 0.17,  = 1.39,  = -0.55, v0 = 0.10, and the value of M SE is 0.00381. In Figure 1.3 we show the resulting fits of the Bates model to the data for 4 different maturities. The red circles are implied volatilities observed in the market on the time to maturities T = 0.21, 0.46, 0.71, 0.96 and the blue lines are implied volatilities calculated from the Bates model with the calibrated parameters. In the calibration we used all data points. As the FFT-based algorithm computes prices for the whole range of strikes the biggest impact on the speed of calibration has the number of used maturities, while the total number of observations has only minor influence on the speed.
+On the one hand, the Carr-Madan algorithm offers a great speed advantage but on the other hand its applications are restricted to European options. The Monte Carlo approach instead works for a wider class of derivatives including path dependent options.
+Thus, this approach has been modified in different ways. The accuracy can be improved by using better integration rules. Carr and Madan (1999) considered also the Simpson rule which leads ­ taking (1.17) into account ­ to the following
+
+1.5 Applications
+Time to maturity T=0.2110
+
+Time to maturity T=0.4603
+
+15
+
+implied volatility 0.1 0.2 0.3 0.4 0.5 0.6
+
+implied volatility 0.1 0.2 0.3 0.4 0.5 0.6
+
+0
+
+0
+
+3000
+
+4000
+
+5000 strike
+
+6000
+
+7000
+
+Time to maturity T=0.7096
+
+3000
+
+4000
+
+5000 strike
+
+6000
+
+7000
+
+Time to maturity T=0.9589
+
+implied volatility 0.1 0.2 0.3 0.4 0.5 0.6
+
+implied volatility 0.1 0.2 0.3 0.4 0.5 0.6
+
+0
+
+0
+
+4000
+
+5000 strike
+
+6000
+
+3000
+
+4000
+
+5000 strike
+
+6000
+
+7000
+
+Figure 1.3: The observed implied volatilities of DAX options on January 4, 1999 (circles) and fitted Bates model (line) for 4 different maturity strings.
+STFfft03.xpl
+
+formula for the option prices:
+
+CT (ku)
+
+
+
+exp(-k) 
+
+N
+
+-1
+
+e-ijuei{(
+
+1 2
+
+N
+
+ -s0 )vj
+
+}(vj
+
+)
+
+ 3
+
+{3
+
++
+
+(-1)j
+
+- I(-j
+
+=
+
+0)}.
+
+j=0
+
+16 1 FFT based option pricing
+This representation again allows a direct application of the FFT to compute the sum.
+An alternative to the original Carr-Madan approach is to consider instead of (1.13) other modifications of the call prices. For example, Cont and Tankov (2004) used the (modified) time value of the options:
+c~T (k) = CT (k) - max(1 - ek-rT , 0).
+Although this method also requires the existence of  satisfying E(ST+1) <  the parameter does not enter into the final pricing formula. Thus, it is not necessary to choose any value for . This freedom of choice of  makes the approach easier to implement. On the other hand, option price surfaces that are obtained with this method often have a peak for small maturities and strikes near the spot. This special form differs from the surfaces typically observed in the market. The peak results from the non-differentiability of the intrinsic value at the spot. Hence, other modifications of the option prices have been considered that make the modified option prices differentiable (Cont and Tankov, 2004).
+The calculation of option prices by the FFT-based algorithm leads to different errors. The truncation error results from substituting the infinite upper integration limit by a finite number. The sampling error comes from evaluating the integrand only at grid points. Lee (2004) gives bounds for these errors and discusses error minimization strategies. Moreover, he presents and unifies extensions of the original Carr-Madan approach to other payoff classes. Besides the truncation and the sampling error, the implementation of the algorithm often leads to severe roundoff errors because of the complex form of the characteristic function for some models. To avoid this problem, which often occurs for long maturities, it is necessary to transform the characteristic function.
+Concluding, we can say that the FFT-based option pricing method is a technique that can be used whenever time constraints are important. However, in order to avoid severe pricing errors its application requires careful decisions regarding the choice of the parameters and the particular algorithm steps used.
+
+Bibliography
+Bates, D., (1996). Jump and Stochastic Volatility: Exchange Rate Processes Implicit in Deutsche Mark Options, Review of Financial Studies, 9: 69­ 107.
+Carr, P. and Madan, D. (1999). Option valuation using the fast Fourier transform, Journal of Computational Finance, 2, 61­73.
+C´izkova´, L., (2003) Numerical Optimization Methods in Econometrics, in Rodriguez Poo J.M. Computer-Aided Introduction to Econometrics, 287­328.
+Cooley, J. and Tukey, J. (1965). An algorithm for the machine calculation of complex Fourier series, Math. Comput., 19, 297­301.
+Cont, R., (2001). Empirical properties of assets returns: Stylized facts and statistical issues, Quant. Finance, 1: 1-14.
+Cont, R., Tankov, P. (2004). Financial Modelling With Jump Processes,Chapman & Hall/CRC.
+Fengler, M. , H¨ardle, W. and Schmidt, P. (2002). The Analysis of Implied Volatilities, in W. H¨ardle, T. Kleinow, G.Stahl Applied Quantitative Finance, 127­144.
+Heston, S., (1993). A closed-form solution for options with stochastic volatility with applications to bond and currency options, Review of Financial Studies, 6: 327-343.
+Hull, J. and White, A. (1987). The pricing on option on assets with stochastic volatilities, Journal of Finance , 42, 281­300.
+Lee, R., (2004). Option pricing by transform methods: extensions, unification and error control, Journal of Computational Finance, 7.
+
+18 Bibliography
+Merton, R., (1976). Option pricing when underlying stock returns are discontinuous, J. Financial Economics, 3: 125-144.
+Rudin, W., (1991). Functional Analysis, McGrawHill.
+Schoutens, W. , Simons, E. and Tistaert, J. (2003). A Perfect Calibration! Now What? UCS Technical Report, Catholic University Leuven.
+Stein, E. and Stein, J. (1991). Stock price distribution with stochastic volatility: An analytic approach, Review of Financial Studies, 4, 727­752.
+
+SFB 649 Discussion Paper Series
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Nonparametric Risk Management with Generalized Hyperbolic Distributions" by Ying Chen, Wolfgang Härdle and Seok-Oh Jeong, January 2005.
+002 "Selecting Comparables for the Valuation of the European Firms" by Ingolf Dittmann and Christian Weiner, February 2005.
+003 "Competitive Risk Sharing Contracts with One-sided Commitment" by Dirk Krueger and Harald Uhlig, February 2005.
+004 "Value-at-Risk Calculations with Time Varying Copulae" by Enzo Giacomini and Wolfgang Härdle, February 2005.
+005 "An Optimal Stopping Problem in a Diffusion-type Model with Delay" by Pavel V. Gapeev and Markus Reiß, February 2005.
+006 "Conditional and Dynamic Convex Risk Measures" by Kai Detlefsen and Giacomo Scandolo, February 2005.
+007 "Implied Trinomial Trees" by Pavel Cízek and Karel Komorád, February 2005.
+008 "Stable Distributions" by Szymon Borak, Wolfgang Härdle and Rafal Weron, February 2005.
+009 "Predicting Bankruptcy with Support Vector Machines" by Wolfgang Härdle, Rouslan A. Moro and Dorothea Schäfer, February 2005.
+010 "Working with the XQC" by Wolfgang Härdle and Heiko Lehmann, February 2005.
+011 "FFT Based Option Pricing" by Szymon Borak, Kai Detlefsen and Wolfgang Härdle, February 2005.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

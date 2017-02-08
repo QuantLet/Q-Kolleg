@@ -1,0 +1,6588 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2013-024
+Pruning in Perturbation DSGE Models - Guidance from Nonlinear Moving
+Average Approximations
+Hong Lan* Alexander Meyer-Gohde*
+* Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Pruning in Perturbation DSGE Models
+Guidance from Nonlinear Moving Average Approximations 
+
+Hong Lan 
+
+Alexander Meyer-Gohde§
+
+This Version: May 2, 2013
+
+Abstract
+
+We derive recursive representations of nonlinear moving average (NLMA) perturbations of DSGE models. As the stability of higher order NLMA representations follows directly from stability at first order, these recursive representations provide rigorous support for the practice of pruning that is becoming widespread. Our recursive representation differs from pruned perturbations in that it centers the approximation and its coefficients at the approximation of the stochastic steady state consistent with the order of approximation. We compare our algorithm with six different pruning algorithms at second and third order, documenting the differences between these six algorithms and standard (non pruned) state space perturbations at first, second, and third order in a unified notation compatible with the popular software package Dynare. While our third order algorithm is the most accurate, the gains over two alternate algorithms are modest, suggesting that this choice is unlikely to be a potential source of error.
+
+JEL classification: C52, C63, E30
+
+Keywords: Perturbation; DSGE; nonlinear; pruning
+
+We are grateful to Rhys Bidder, Michael Burda, Ken Judd, and Michael Reiter for useful discussions and to Fang
+Duan and Noa Tamir for excellent research assistance. This research was supported by the DFG through the SFB 649 "Economic Risk". Any and all errors are entirely our own.
+Humboldt-Universita¨t zu Berlin, Institut fu¨r Wirtschaftstheorie II, Spandauer Straße 1, 10178 Berlin, Germany; Tel.: +49-30-2093 1466; E-Mail:lanhong@cms.hu-berlin.de
+§Humboldt-Universita¨t zu Berlin, Institut fu¨r Wirtschaftstheorie II, Spandauer Straße 1, 10178 Berlin, Germany;
+Tel.: +49-30-2093 5720; E-Mail: alexander.meyer-gohde@wiwi.hu-berlin.de
+
+1 Introduction
+Locally approximated models that are stable at first order can produce explosive simulations when approximated at second or higher order. This is troublesome as higher order approximations are needed to capture salient features of the macroeconomy.1 The instability induced by higher order simulations is caused by the accumulation of nonlinear terms higher than the order of approximation that add additional instable steady states to the approximation. Judd, Maliar, and Maliar (2011) offer one solution to generate stable simulations efficiently. Another solution offered by the literature is to maintain the local, perturbation approach, but to "prune" these higher order terms and restore the desired stability. This later approach has the additional advantage of enabling the application of GMM and SMM to these nonlinear settings2 as well as a decomposition of theoretical moments into orders of approximation and risk adjustment.3
+The nonlinear moving average perturbations of Lan and Meyer-Gohde (2012b) produce approximations that are stable at all orders of approximations when the first order approximation is stable. In this study, we derive recursive representations of infinite moving average approximations, providing endogenously pruned algorithms for nonlinear simulations. While the pruning of nonlinear perturbations introduced by Kim, Kim, Schaumburg, and Sims (2008), and indeed the different algorithms to implement pruning, has proliferated in the recent literature, Den Haan and De Wind (2012) and Lombardo (2012) have objected, calling this methodology ad hoc, and RugeMurcia (2012) has noted the nontrivial nature of extending Kim, Kim, Schaumburg, and Sims's (2008) second order algorithm to higher orders. We provide theoretical support for pruning algorithms, interpreting them as recursive formulations of nonlinear moving average approximations.
+We compare our nonlinear moving average based recursive algorithm to the pruning algorithms of (at second order) Kim, Kim, Schaumburg, and Sims (2008) and Den Haan and De Wind (2012) and of (at third order) Andreasen (2012), Ferna´ndez-Villaverde, Guerro´n-Quintana, RubioRam´irez, and Uribe (2011), Den Haan and De Wind (2012), and Dynare,4 providing the literature
+1As noted by Ruge-Murcia (2012), Ferna´ndez-Villaverde, Guerro´n-Quintana, Rubio-Ram´irez, and Uribe (2011), Andreasen (2012), and van Binsbergen, Ferna´ndez-Villaverde, Koijen, and Rubio-Ram´irez (2012), capturing the timevarying shifts in risk premia or precautionary behavior requires at least a third order approximation.
+2See Ruge-Murcia (2012) and Andreasen, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2012). 3See Lan and Meyer-Gohde (2013). 4This is an undocumented algorithm at third order by Michel Juillard. On Dynare, see Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot (2011).
+1
+
+with an overview of the various algorithms in a unified notation. Additionally, we compare all the algorithms with standard (non pruned) perturbations at first through third order and with the exact solution when known or a highly accurate projection solution when unknown.
+We run three horse races to compare the various pruning algorithms beyond theoretical considerations. First, we choose the Brock and Mirman (1972) log preference and complete depreciation case of the stochastic neoclassical growth model.5 Second, we evaluate the algorithms in Burnside's (1998) asset pricing model. Finally, we examine the performance of the different algorithms in Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao's (2012) model with recursive preferences and stochastic volatility. The first two models possess closed form solutions and we measure the distance of the various pruning algorithms as well as the unpruned perturbations to the exact solution in terms of average, mean square, and maximal error. While the last model has no closed form solution and needs to be approximated, we follow Caldara, Ferna´ndez-Villaverde, RubioRam´irez, and Yao (2012) and choose the Chebyshev polynomial approximation as the reference solution of the model to examine the performance of the different algorithms. The most accurate pruning algorithms are those that can be derived directly from a moving average approximation or Lombardo's (2012) matched perturbation, with our algorithm performing marginally better according to several criteria we use to compare the algorithms. Algorithms, however, that drop terms of the order of approximation or add higher order terms suffer in terms of accuracy.
+The paper is organized as follows. The family of models we will be analyzing is presented with the nonlinear moving average solution form in section 2. We derive the recursive representation of the nonlinear moving average approximation in section 3, and present the various pruning algorithms in a unified notation in section 4. We examine Lombardo's (2012) matched perturbation algorithm separately in section 5. The numerical performance of the different algorithms are analyzed using Brock and Mirman's (1972) neoclassical stochastic growth model and Burnside's (1998) asset pricing model in section 6, and in section 6.3 we report the numerical performance of these algorithms in a neoclassical stochastic growth model with recursive preferences and stochastic volatility. Section 7 concludes.
+5See McCallum (1989).
+2
+
+2 Model Class
+We begin by introducing our class of models, a standard system of (nonlinear) second order expec-
+tational difference equations. We then present the solution as a policy function that directly maps
+from realization of the exogenous shocks to the endogenous variables of interest, and approximate
+the solution with a Taylor series. Adopting Dynare's typology of all the endogenous variables, we
+differ from Lan and Meyer-Gohde (2012b) and present the class of models and the approximations
+of its solution out to third order in a computationally efficient notation.
+2.1 Problem Statement
+We analyze a family of discrete-time rational expectations models given by (1) 0 = Et [ f (ytf+w1dendo, yt , yts-ta1te, t )] f is an (neq × 1) vector valued function, continuously M-times (the order of approximation to be introduced subsequently) differentiable in all its arguments; yt is an (ny × 1) vector of endogenous variables divided following, e.g. Dynare,6 additionally into two subvectors, ytf wdendo and ytstate, (n f wdendo × 1) and (ns × 1) respectively, commensurate with the presence of elements of yt with subscripts t + 1 and t - 1 in the system of equations; the vector of exogenous shocks t is of dimension (ne × 1) and it is assumed that there are as many equations as endogenous variables (neq = ny). t is assumed independently and identically distributed7 such that E(t) = 0 and E(t[m]) exists and is finite for all m up to and including the order of approximation to be introduced subsequently.8
+As is usual in perturbation methods, we introduce an auxiliary parameter   [0, 1] to scale the risk in the model. The value  = 1 corresponds to the "true" stochastic model under study and  = 0 represents the deterministic version of the model.9 Following Anderson, Levin, and
+6See Villemot (2011) and Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot (2011). 7Thus in practice, any exogenous serial correlation must be incorporated into the vector yt , which is why this vector might be more properly labeled endogenous and exogenous variables. We maintain this practice of the literature for brevity. 8The notation t [m] represents Kronecker powers, t [m] is the m'th fold Kronecker product of t with itself: t  t · · ·  t . For simulations, of course, more specific decisions regarding the distribution of the exogenous pro-
+m times
+cesses will have to be made. Kim, Kim, Schaumburg, and Sims (2008, p. 3402) emphasize that distributional assumptions like these are not entirely local assumptions. Dynare (Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot 2011) assumes normality of the underlying shocks.
+9Our formulation follows Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot's (2011) Dynare,
+3
+
+Swanson (2006, p. 4), we do not scale {t, t-1, . . .} -- the realizations of the exogenous shocks up to (including) t -- with , as they are known with certainty at t. The perturbation parameter does not enter the problem statement explicitly, but only implicitly through the policy functions, and its role will become clear as we introduce the solution form and its approximation.
+Fleming (1971) and Jin and Judd (2002) emphasize that the use of  to transition from the deterministic to the stochastic model depends crucially on the two models being "close," in the sense that the underlying risk scaled by  is "small," as a stochastic perturbation like this is singular in that it changes the underlying order of the problem, see Judd (1998, ch. 13). Kim, Kim, Schaumburg, and Sims (2008) note the importance of the "underlying assumption" of sufficient differentiability within a neighborhood of  = 0 and Anderson, Levin, and Swanson (2006) simply make the explicit assumption that the policy function, the solution to be introduced the following subsection, is analytic within a domain that encompasses  = 0 and  = 1, enabling its representation in  by a Taylor series evaluated anywhere within that domain. Deriving explicit conditions for the model with  = 1 to be sufficiently close to the  = 0 model is beyond the scope of our study here and we follow the literature by assuming that a local approach to  remains valid as we transition to the stochastic model.
+2.2 Nonlinear Moving Average Solution Form
+Let the policy function take the causal one-sided infinite sequence of shocks as its state vector following Lan and Meyer-Gohde (2012b) given by (2) yt = y(, t, t-1, . . .), g : R+ × Rne × Rne × · · ·  Rny Note that  enters as a separate argument. As the scale of risk changes, so too will the policy function y itself change. Time invariance and scaling the risk associated with future shocks give us (3) yt-1 = y-(, t-1, t-2, . . .) (4) yt+1 = y+(, t+1, t, t-1, . . .), where t+1  t+1 The notation, y, y-, and y+, was adopted in Lan and Meyer-Gohde (2012b) to keep track of the source (through yt, yt-1, and yt+1 respectively) of any given partial derivative of the policy function
+Anderson, Levin, and Swanson's (2006) PerturbationAIM and Juillard (2011). This is not the only way to perturb the model: Lombardo (2010), for example, scales the entire history of shocks {t , t-1, . . .} along with the unrealized future shocks. See section 5 for further discussion.
+4
+
+necessary in calculations. Likewise, we append a tilde to y at t + 1 as we did  at t + 1 in deference to time t conditioning in the equilibrium conditions (1); from the time t perspective of (1), t+1 is a random variable, hence yt+1 as well, whereas t, t-1, . . . and hence yt and yt-1 are realizations of random variables. These notational issues will play only a minor role here, as we will take the calculations of Lan and Meyer-Gohde (2012b) as given. Due to the assumption of time invariance, y, y-, and y+ are the same function differing only in the timing of their arguments. The term t+1 in (4) is the source of risk, via t+1, that we are perturbing with .
+With the policy function of the form (2), (3) and (4), we can write (1) as 0 = Et f y+ f wdendo(, t+1, t , . . .), y(, t, t-1, . . .), y-state(, t-1, t-2, . . .), t
+(5) = F(, t, t-1, . . .) a function with arguments  and and the infinite history of innovations {t- j}j=0.10
+2.3 Nonlinear Moving Average Approximation
+We will approximate the solution, (2), as a Taylor series in the infinite state vector (i.e., a Volterra series) expanded around a deterministic steady state, y, the time invariant fixed point in y of (5), with all shocks, past and present, set to zero and all risk regarding the future eliminated ( = 0) Definition 2.1. Deterministic Steady State Let y  Rny be a vector such that (6) 0 = f y f wdendo, y, ystate, 0 = f (x) = F (0, 0, . . .) Furthermore, y = y(0, 0, . . .) is the solution (2) evaluated at the deterministic steady state.
+Analogously, we define the stochastic or "risky" steady state as the stationary point in the absence of past and present shocks but the risk of future shocks11 Definition 2.2. Stochastic Steady State
+10Note that t+1 is not an argument of F as it is the variable of integration inside the expectations. I.e.,
+
+F(, , t , t-1, . . .) =
+
+f y+ f wdendo(, t+1, t , . . .), y(, t , t-1, . . .), y-state(, t-1, t-2, . . .), t  (t+1) dt+1
+
+
+
+where  is the support and  the p.d.f. of t+1. Thus, when  = 0, t+1 is no longer an argument of f and the integral (and hence the expectations operator) is superfluous, yielding the deterministic version of the model.
+11This definition parallels to that of Coeurdacier, Rey, and Winant (2011) within the state space context. See section
+4 for our state space definition of this concept.
+
+5
+
+Let ystoch = y(1, 0, 0, . . .)  Rny be a vector such that
+
+(7) 0 = Et f y+ f wdendo(1, t+1, 0, . . .), ystoch, ystoch,state, 0 = F (1, 0, . . .)
+
+Assuming the  = 1 model is sufficient close to its deterministic,  = 0 counterpart, the stochas-
+
+tic steady state can be approximated by expanding 0 = F (1, 0, . . .) in  around the deterministic,
+
+that is,  = 0, steady state in definition 2.1.
+
+Since y is a vector valued function, its partial derivatives form a hypercube. We use the method
+
+of Lan and Meyer-Gohde (2012b) that differentiates conformably with the Kronecker product,
+
+allowing us to maintain standard linear algebraic structures to derive our results.
+
+Definition 2.3. Matrix Derivatives Let A(B) : Rs×1  Rp×q be a matrix-valued function that maps an s × 1 vector B into an p × q
+
+matrix A(B), the derivative structure of A(B) with respect to B is defined as
+
+(8)
+
+AB  DBT {A} 
+
+ b1
+
+...
+
+ bs
+
+A
+
+where bi denotes i'th row of vector B, T indicates transposition; n'th derivatives are
+
+(9)
+
+ABn  D(BT )n{A} 
+
+ b1
+
+...
+
+ [n] bs
+
+A
+
+Adopting the abbreviated notation above, we write yni1i2···im as the partial derivative, eval-
+
+uated at the deterministic steady state, of y with respect to  for n times and with respect to
+
+tT-i1, tT-i2, · · · , tT-im. Thus, we can then write the M-th order Taylor approximation of the pol-
+
+icy function (2) as
+
+    (10)
+
+yt
+
+=
+
+M m=0
+
+1 m!
+
+
+
+
+
+···
+
+i1=0 i2=0 im=0
+
+M-m n=0
+
+1 n!
+
+yni1
+
+i2···im
+
+n
+
+(t-i1  t-i2  · · ·  t-im)
+
+where we refer to Lan and Meyer-Gohde (2012b) for further details.
+
+This nonlinear moving average, or Volterra series with kernels
+
+Mn=-0m
+
+1 n!
+
+yni1···im
+
+n
+
+,
+
+directly
+
+maps the exogenous innovations to endogenous variables up the M-th order. The kernels at m
+
+collects all the coefficients associated with the m'th fold Kronecker products of exogenous inno-
+
+vations i1, i2, ... and im periods ago. Importantly, the outer sum indicates that an approximation of any given order is linear in all the kernels up to and including the order in question; thus, the
+
+approximation is linearly recursive.12 For a given set of indices, i1, i2, ... and im, the sum over n gathering terms in powers of the perturbation parameter , adjusts the kernel for risk up to the
+
+12The terminology is Lombardo's (2010). See section 5 for a comparison with the method advocated by him.
+
+6
+
+n-th order,13 thereby enabling a classification of the contributions of risk to the model alongside polynomial nonlinearity.
+The nonlinear moving average constructs an approximation in the (countable) sequence space as opposed to the (measurable) function space sought in the standard state space set up. Thus, by construction, the approximation will be bounded for bounded sequences of inputs, whereas iterations on approximations in the standard function space in general cannot. Differently, the nonlinear moving average can be derived by "solving out" an "invertible" nonlinear state space representation following Priestly (1988, p. 25), which is only defined within the region of convergence of the state space representation. By jumping straight to the nonlinear moving average representation and allowing shocks from distributions with infinite support, we are, from this perspective, imposing a region of convergence with an infinite radius on the nonlinear state space policy function. That is, we achieve stability by assumption and the construction of our approximation is only valid when this assumption holds.14
+3 Recursive Representation of Nonlinear Moving Averages
+As shown in Lan and Meyer-Gohde (2012b), nonlinear moving average perturbations are linear in the kernels (or sums of product spaces in the history of shocks) which inherit the stability properties of the approximation at first order and whose coefficients can be expressed recursively similarly to the linear case explored by Taylor (1986). We will now show that the recursivity in parameters leads to recursive representations in the endogenous variables themselves, but in an order dependent manner consistent with pruning algorithms in the literature, as we will explore in detail in section 4.
+3.1 First Order Recursive Approximation
+The first order approximation of the policy function takes the form
+(11) yt(1) = y +  yit-i, i = 0, 1, 2, . . . i=0 13A similar interpretation for standard state space policy functions can be found in section 4 and Lan and MeyerGohde (2012a) for multivariate and Judd and Mertens (2012) for univariate expansions.
+14See Jin and Judd (2002) for an example of when this would not hold.
+7
+
+where the superscript (1) on yt implies this is the first order of approximation. y¯ denotes the deter-
+ministic steady state value of the vector yt. The partial derivative yi is a linear convergent recursion
+(See the Appendix.) with a saddle-stable matrix  as the coefficient on its homogenous part. For
+notational ease in deriving the recursive representation of the previous equation, we define (12) dyt(1)  yt(1) - y¯
+It follows that
+(13) dyt(1) =  yit-i i=0 Anticipating the derivations of higher order recursive representations, we first derive a recursive
+
+representation for the increment and then, using this increment, express the first order approxima-
+
+tion recursively. This is obviously unnecessary at first order, as this recursive representation is a standard result, see, e.g., Uhlig (1999), but will fix ideas for the more involved higher order
+
+recursive representations. The increment of the first order approximation dyt(1) can be expressed recursively, as we sum-
+
+marize in the following Proposition 3.1. The first order increment, dyt(1), can be expressed as a linear function of its own
+
+past and the current realizations of exogenous shocks
+
+(14)
+
+dyt(1) = dyt(-1)1state + 0t
+
+Proof. See the Appendix.
+
+Accordingly, the first order approximation can likewise be expressed recursively Proposition 3.2. The first order approximation of yt , denoted yt(1), can be expressed recursively
+
+through
+
+(15) yt(1) = y + dyt(1)
+
+where (16)
+
+dyt(1) = yzdzt(1), dzt(1) =
+
+dyt(-1)1state t
+
+Proof. This is an immediate consequence of the definition of the increment in (12).
+
+Thus recovering the state-space policy function in linear settings--see, e.g., Uhlig (1999)--and
+
+reiterating the equivalence at first order of moving average representations­see Taylor (1986)-- with state space methods. Note the coefficient  in (14) is the homogenous coefficient of the recursion of yi.
+
+8
+
+3.2 Second Order Recursive Approximation
+
+The second order approximation of the policy function takes the form
+
+  (17)
+
+yt(2)
+
+=
+
+y¯ +
+
+1 2 y2
+
+
++ yit-i
+i=0
+
++
+
+1 2
+
+
+y j,i(t- j
+j=0 i=0
+
+ t-i)
+
+For the derivation of the recursive representation of the previous equation, we define the second
+
+order increment as the difference between the first and second order approximation, subtracting the
+
+constant risk adjustment of the second order
+
+(18)
+
+dyt(2)
+
+
+
+yt(2)
+
+-
+
+1 2 y2
+
+-
+
+yt(1)
+
+Inserting (11) and (17) in the previous equation yields the moving averaging representation of
+
+the second order increment
+
+ (19)
+
+dyt(2)
+
+=
+
+1 2
+
+
+y j,i(t- j
+j=0 i=0
+
+ t-i)
+
+The increment of the second order approximation can be expressed recursively, as we summa-
+
+rize in the following Proposition 3.3. The second order increment, dyt(2), can be expressed as a linear function of its
+
+own past and products of terms of lower order according to the following recursion
+
+(20)
+
+dyt(2)
+
+- dyt(-2)1state
+
+=
+
+1 2
+
+22dyts-ta1te[2] + 220
+
+dyt(-1)1state  t
+
++ 00t[2]
+
+Proof. See the Appendix.
+
+Combining the increment definitions and recursive representations at first and second order, we
+
+construct the following second order recursive formula for yt Proposition 3.4. The second order approximation of yt, denoted yt(2), can be expressed recursively
+
+through (21) where (22)
+
+yt(2)
+
+=
+
+y
+
++
+
+1 2 y2
+
++
+
+dyt(1)
+
++
+
+dyt(2)
+
+dyt(1) = yzdzt(1), dzt(1) =
+
+dyt(-1)1state t
+
+(23)
+
+dyt(2)
+
+=
+
+yyst at e d yt(-2)1st at e
+
++
+
+1 2
+
+yz2 dzt(1)[2]
+
+Proof.
+
+Combine (18)
+
+and
+
+(12) to express yt(2)
+
+as
+
+a
+
+linear function of the constants y and
+
+1 2
+
+y2
+
+and
+
+the first and second order increments dyt(1) and dyt(2). Expressing the the first order increment in
+
+terms of the vector dzt(1) and rearranging the coefficient matrices accordingly15 yields the desired
+
+15 This can be implemented using Koning, Neudecker, and Wansbeek's (1991) block Kronecker product. See the
+
+9
+
+result.
+
+The second order recursive approximation (21) preserves the natural decomposition into order
+
+of approximation embedded in its nonlinear moving average counterpart (17) -- Moving to the second order, y2 adjusts the first order approximation for the variance of future shocks, and dyt(2) for the second order effects of the realized shocks. While (21) is an equivalent rewriting of (17) and
+
+therefore accordingly stable, its stability can be seen by examining the linearly recursive structure of the second order increment. As a recursion in the variables, dyt(2) in (20) shares the same
+coefficient with (14) on its homogenous part. The inhomogeneous part, consisting of the first order
+
+increment and the shocks only, inherits the stability from the previous order of approximation.
+
+Besides stability, the second order recursive approximation (21) is centered at the second order
+
+approximation of stochastic steady state in definition 2.2 given by
+
+(24)
+
+y(2)stoch
+
+=
+
+y
+
++
+
+1 2 y2
+
+To see this, note that in the absence of the past and present shocks, (13) and (19) imply that
+
+both the first and second order increments are zero, leaving the approximation centered at the
+
+deterministic steady state value plus the risk adjustment for the variance of future shocks. Likewise,
+
+F
+
+(,
+
+0,
+
+.
+
+.
+
+.)
+
+
+
+F
+
+(0,
+
+0,
+
+.
+
+.
+
+.)
+
++
+
+1 2
+
+F2
+
+(0,
+
+0,
+
+.
+
+.
+
+.)
+
+has
+
+two
+
+nonzero
+
+terms
+
+up
+
+to
+
+second
+
+order
+
+that
+
+are
+
+solved
+
+by
+
+y
+
+and
+
+1 2
+
+y2
+
+respectively.
+
+3.3 Third Order Recursive Approximation
+
+The third order approximation of the policy function takes the form
+
+  (25)
+
+yt(3)
+
+=y +
+
+1 2 y2
+
++
+
+1 6 y3
+
++
+
+1 2
+
+ i=0
+
+yi + y2,i
+
+t-i
+
++
+
+1 2
+
+
+y j,i(t- j
+j=0 i=0
+
+ t-i)
+
+  +
+
+1 6
+
+ k=0
+
+ j=0
+
+ i=0
+
+yk,
+
+j,i(t-k
+
+
+
+t-
+
+j
+
+
+
+t-i)
+
+To derive the recursive representation at third order, we define the third order increment as
+
+the difference between the second and third order approximation, subtracting the constant risk
+
+adjustment of the third order
+
+(26)
+
+dyt(3)
+
+=
+
+yt(3)
+
+-
+
+1 6 y3
+
+-
+
+yt(2)
+
+Inserting (25) and (17) in the previous equation yields the moving average representation of
+
+Appendix.
+
+10
+
+the third order increment
+
+   (27)
+
+dyt(3)
+
+=
+
+1 2
+
+
+y2,it-i
+i=0
+
++
+
+1 6
+
+ k=0
+
+
+yk, j,i(t-k
+j=0 i=0
+
+ t- j
+
+ t-i)
+
+The increment of the third order approximation can be expressed recursively, as we summarize
+
+in the following
+
+Proposition 3.5. The third order increment, dyt(3), can be expressed as a linear function of its own
+
+past and products of terms of lower order according to the following recursion
+
+dyt(3)
+
+-
+
+dyt(-3)1state
+
+=1 6
+
+333,1dyt(-1)1state[3] + 000t[3]
+
++ 22
+
+dyt(-2)1state  dyt(-1)1state
+
++ 20
+
+dyt(-2)1state  t
+
+(28)
+
++1 2
+
+300
+
+dyt(-1)1state  t[2]
+
++ 330,1
+
+dyt(-1)1state[2]  t
+
++ 20t + 21dyt(-1)1state
+
+Proof. See the Appendix.
+
+Combining the increment definitions and recursive representations at first, second and third
+
+order, we construct the following third order recursive formula for yt Proposition 3.6. The third order approximation of yt , denoted yt(3), can be expressed recursively
+
+through (29) where (30)
+
+yt(3)
+
+=
+
+y
+
++
+
+1 2 y2
+
++
+
+1 6
+
+y3
+
++
+
+dyt(1)
+
++
+
+dyt(2)
+
++
+
+dyt(3)
+
+dyt(1) = yzdzt(1), dzt(1) =
+
+dyt(-1)1state t
+
+(31)
+
+dyt(2)
+
+=
+
+yyst at e d yt(-2)1st at e
+
++
+
+1 2
+
+yz2 dzt(1)[2]
+
+(32)
+
+dyt(3)
+
+=
+
+yystate dyt(-3)1state
+
++
+
+1 6
+
+yz3 dzt(1)[3]
+
++
+
+1 2
+
+y2zdzt(1)
+
++
+
+yystatez
+
+dyt(-2)1state  dzt(-1)1
+
+Proof.
+
+Combine (26), (18), and (12) to express yt(3) as a linear function of the constants y and
+
+1 2
+
+y2
+
+and the first through third order increments dyt(1), dyt(2), and dyt(3). Expressing the the first order
+
+increment in terms of the vector dzt(1) and rearranging the coefficient matrices accordingly16 yields
+
+the desired result.
+
+The third order recursive approximation (29) follows the pattern of lower orders and can be
+
+decomposed into order of approximation and risk adjustment. In the third order, y3 adjusts the second order approximation for the skewness of future shocks. The third order increment, dyt(3),
+adjusts the approximation for the third order effects of the realized shocks and opens the first order
+
+increment to the variance of future shocks, delivering a time-varying risk adjustment term.
+16This can be done using the Block Kronecker product, see footnote 15.
+
+11
+
+As in the second order case, (29) is an equivalent rewriting of its moving average counterpart
+
+(25) and accordingly stable. The stability is also implied by the linearly recursive structure of the third order increment dyt(3) in (28). This recursion shares the same homogenous coefficient
+with the recursions of the first and second order increments. Its inhomogeneous part, consisting of
+
+shocks and the increments of the first and second order only, inherits the stability from the previous
+
+order of approximation.
+
+As was the case in the second order, (29) is centered at the third order approximation of stochas-
+
+tic steady state in definition 2.2
+
+(33)
+
+y(3)stoch
+
+=
+
+y
+
++
+
+1 2 y2
+
++
+
+1 6 y3
+
+as can be verified analogously to the second order case.
+
+The third order increment can be decomposed into a time varying risk adjustment increment,
+
+dyt(3)risk, and a third order amplification increment, dyt(3)amp. Both of which can be expressed
+
+recursively, as we summarize in the following
+
+Corollary 3.7. The third order increment can be decomposed into two separate increments, dyt(3)  dyt(3)risk + dyt(3)amp, both of which can be expressed as linear functions of their own past and
+
+products of terms of lower order according to the following recursions
+
+(34) (35)
+
+dyt(3)risk
+
+=
+
+dyt(-3)1state,risk
+
++
+
+1 2
+
+20t + 21dyt(-1)1state
+
+d yt(3)am p
+
+=d yt(-3)1st at e,am p
+
++
+
+1 6
+
+333,1dyt(-1)1state[3] + 000t[3]
+
++ 22 dyt(-2)1state  dyt(-1)1state + 20 dyt(-2)1state  t
+
+(36)
+
++1 2
+
+300
+
+dyt(-1)1state  t[2]
+
++ 330,1
+
+dyt(-1)1state[2]  t
+
+Proof. See the Appendix.
+
+This decomposition clearly separates the nonlinear time varying effects in a third order approximation that arise from higher order (quadratic and cubic) deterministic terms and the linear time varying risk adjustment terms. Thus, enabling a readily identifiable differentiation between, e.g., time varying precautionary motives and asymmetric responses to shocks.
+
+12
+
+4 Pruning Abounds
+
+In this section, we present the state space solution as a policy function that maps from the endogenous variable in the past and the realization of current shock into the endogenous variable itself, to the class of models introduced in section 2 and approximate the solution with a Taylor series.17 Simulating such an approximation of second or higher order may generate explosive time paths as noted by Aruoba, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2006, p. 2479) and Kim, Kim, Schaumburg, and Sims (2008, p. 3408), as additional, higher order nonlinear terms accumulate. While various pruning algorithms for the second and third order approximation have been provided by the literature to restore the desired stability, a comparison between these algorithms has yet to be made.18 We present these pruning algorithms in a unified notation, and compare them to the nonlinear moving average based recursive algorithm derived in section 3.
+
+4.1 State Space Perturbation Foundations
+
+The state space counterpart19 to the nonlinear moving average solution form of section 2 is given
+
+by
+
+(37) yt = g(, zt), g : R+ × Rnz  Rny
+
+where  scales risk and the state vector zt given by20
+
+(38)
+
+zt =
+
+yts-ta1te t
+
+ Rnz×1, where nz = ny + ne
+
+Assuming time invariance of the policy function and using g~ to denote yt+1, inserting into the
+
+problem statement (1), and scaling risk give
+
+(39)
+
+0 = Et
+
+f
+
+g~
+
+,
+
+g(, zt) t+1
+
+, g(, zt), zt
+
+= F(, zt)
+
+a function with arguments  and zt.21 The Taylor series approximation of the state space solution
+
+(2) will be developed around a deterministic steady state, which alternatively but equivalently to
+
+17This nonlinear state space perturbation literature was initiated by Gaspar and Judd (1997), Judd and Guu (1997),
+and Judd (1998, ch. 13). 18Den Haan and De Wind (2012) compare their version of the pruning algorithm with standard perturbations and
+their own "perturbation plus' algorithm, yet do not compare to other pruning algorithms. 19Our formulation follows Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot's (2011) Dynare,
+Anderson, Levin, and Swanson's (2006) PerturbationAIM and Juillard (2011). Jin and Judd's (2002) or Schmitt-Grohe´
+and Uribe's (2004) model classes can be rearranged to fit (5) as we will discuss below. 20Note that we are recycling notation from the previous section by using zt in analogy to dzt there. 21Note that t+1 is not an argument of F as discussed in section 2.
+
+13
+
+definition 2.1 can be defined as
+
+Definition 4.1. Deterministic Steady State
+
+Let y  Rny be a vector such that
+
+(40)
+
+0 = F(0, z), where z =
+
+y 0
+
+solving (39) in the absence of both risk ( = 0) and shocks (t = 0).
+
+The policy function evaluated at the deterministic steady state is thus y = g(0, z) and, assuming
+
+(37) is CM with respect to all its arguments, we can write a Taylor series approximation of yt =
+
+g(, zt) at a deterministic steady state as
+
+ (41)
+
+yt
+
+=
+
+M j=0
+
+1 j!
+
+M- j i=0
+
+1 i!
+
+gz
+
+j i
+
+i
+
+(zt - z)[ j]
+
+where gzji  Rny×nzj is the partial derivative of the vector function g with respect to the state
+
+vector zt j times and the perturbation parameter  i times evaluated at the deterministic steady
+
+state. Here
+
+Mi=-0
+
+j
+
+1 i!
+
+yz
+
+j
+
+i
+
+i
+
+collects all the coefficients associated with the j'th fold Kronecker
+
+product of the state vector, (zt - z). Higher orders of  adjust the Taylor series coefficients for risk
+
+by successively opening the coefficients to higher moments in the distribution of future shocks.
+
+Out to third order and for  = 1, (41) is given, where only terms with nonzero coefficients have
+
+been included, by (42)
+
+yt(1) = y + gz zt(1) - z
+
+at first,
+
+(43)
+
+yt(2)
+
+=
+
+y
+
++
+
+1 2
+
+g2
+
++
+
+gz
+
+zt(2) - z
+
++
+
+1 2
+
+gz2
+
+zt(2) - z [2]
+
+at second, and
+
+(44)
+
+yt(3)
+
+=
+
+y
+
++
+
+1 2
+
+g2
+
++
+
+1 6
+
+g3
+
++
+
+gz
+
++
+
+1 2
+
+g2z
+
+zt(3) - z
+
++
+
+1 2
+
+gz2
+
+zt(3) - z
+
+[2]
+
++
+
+1 6 gz3
+
+at third.
+
+zt(3) - z [3]
+
+Stationary points, or steady states, of y in approximations will play a key role in understanding
+
+the differences between many of the pruning algorithms we will examine. Standard linear ap-
+
+proximations are certainty equivalent and their stationary points are the deterministic steady states
+
+of definition 2.1 (or equivalently definition 4.1). By extension, one might expect or desire22 an
+
+M'th order pruned perturbation to have as a stationary point the M'th order approximation of the
+
+22See Evers (2010) and Den Haan and De Wind (2012).
+
+14
+
+stochastic steady state. Accordingly and analogously to definition 2.2, we define the stochastic
+
+or "risky" steady state as the stationary point in the absence of past shocks but the risk of future
+
+shocks, which in the state space setting here is given by
+
+Definition 4.2. Stochastic Steady State
+
+Let ystoch = g(1, zstoch)  Rny be a vector such that
+
+(45)
+
+0 = Et
+
+f
+
+g~ f wdendo
+
+1,
+
+gstate(1, zstoch) t+1
+
+, g(1, zstoch), z
+
+= F(1, zstoch), where zstoch =
+
+ystoch 0
+
+As in section 2 for the nonlinear moving average representation, the stochastic steady state can
+
+be approximated by expanding 0 = F(, z) in  around the deterministic steady state, assuming
+
+the  = 1 model is sufficient close to its deterministic,  = 0 counterpart. Notice that unlike
+
+the nonlinear moving average, the state space formulation, 0 = F(, z), is complicated by the
+
+additional argument, z the steady state of the state vector--itself a function of , being equal to the
+
+deterministic steady state when  = 0 and the stochastic steady state when  = 1.
+
+4.2 Second Order Pruning
+When iterating on the second order approximation of (43), the quadratic term will generate nonlinear terms of successively higher order, see Kim, Kim, Schaumburg, and Sims (2008). These accumulated terms can lead to explosive time paths and Kim, Kim, Schaumburg, and Sims (2008) suggested pruning these higher order terms by operating the quadratic on the first order simulated time path, restoring stability. The algorithms presented here all agree on this point, but differ on the the constant risk adjustment term that enters in the approximation. Throughout the rest of this section and in section 5, we recycle the notation dyt(n) (where n denotes the order of approximation) and dzt(1) from section 3 and redefine them in each and every pruning algorithm we will be introducing.
+
+4.2.1 Kim, Kim, Schaumburg, and Sims's (2008) Pruning Algorithm
+Kim, Kim, Schaumburg, and Sims (2008) were the first to formulate a pruning algorithm for the second order approximation, (43).23
+23In Dynare--see Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot (2011), the initial value of the first order term, say dy(01)state, need not be set equal to the deterministic steady state and can be set to any arbitrary value. Whether this corresponds to a second order accurate approximation of an arbitrary initial value has not, to our
+
+15
+
+Lemma 4.3 (Kim, Kim, Schaumburg, and Sims's (2008) Second Order Pruning Algorithm). (46) yt(2) = y + dyt(1) + dyt(2)
+
+where (47)
+
+dyt(1) = gzdzt(1), dzt(1) =
+
+dyt(-1)1state t
+
+(48)
+
+dyt(2)
+
+=
+
+gyst at e d yt(-2)1st at e
+
++
+
+1 2
+
+g2 + gz2dzt(1)[2]
+
+Apart from replacing the second order base of the two-fold Kronecker power with its first
+
+order counterpart dzt(1) to restore stability in simulation, this algorithm transitions deterministically
+
+to a second order approximation to the stochastic steady state of definition 4.2. I.e., setting the
+
+initial value of y0 to its deterministic steady state value y and simulating forward with all shock
+
+realizations set to zero, the constant risk correction term g2 is accumulated at each iteration as it
+
+is a component of dyt(2), and therefore keeps accumulating along with the iteration, pushing the
+
+algorithm
+
+away
+
+from
+
+y,
+
+past
+
+y
+
++
+
+1 2
+
+g2
+
+,
+
+and
+
+to
+
+y
+
++
+
+(I
+
+-
+
+gy)-1
+
+1 2
+
+g2
+
+.
+
+4.2.2 Den Haan and De Wind's (2012) Second Order Pruning Algorithm
+
+Den Haan and De Wind (2012) formulated the following alternative second order pruning algo-
+
+rithm motivated by the observation that the steady state of the second order approximation does not coincide with the second order approximation of the (stochastic) steady state,24
+
+Lemma 4.4 (Den Haan and De Wind's (2012) Second Order Pruning Algorithm).
+
+(49)
+
+yt(2)
+
+=
+
+y
+
++
+
+1 2 g2
+
++
+
+dyt(2)
+
+where (50)
+
+dyt(1) = gzdzt(1), dzt(1) =
+
+dyt(-1)1state t
+
+(51)
+
+dyt(2) = gz
+
+dyt(-2)1state t
+
++
+
+1 2
+
+gz2
+
+dzt(1)[2]
+
+While pruning the quadratic term in the same way as Kim, Kim, Schaumburg, and Sims's
+
+(2008) algorithm does, this algorithm does not transition deterministically, but remains at ystoch(2) =
+
+y
+
++
+
+1 2
+
+g2 .
+
+It
+
+restores
+
+this
+
+consistency
+
+by
+
+excluding
+
+g2
+
+from
+
+its
+
+dyt(2),
+
+and
+
+therefore
+
+prevents
+
+g2
+
+from accumulating in simulation. However, this point is not a second order approximation of the
+
+knowledge, been proven. 24See also Evers (2010) for more on this and other consistency points.
+
+16
+
+stochastic steady state in definition 4.2 and its appropriateness as a centering point of the algorithm is unclear.
+
+4.2.3 Comparison of Second Order Pruning Algorithms
+
+As noted also by Den Haan and De Wind (2012), Kim, Kim, Schaumburg, and Sims's (2008)
+
+pruning
+
+algorithm
+
+transitions
+
+from
+
+y+
+
+1 2
+
+g2
+
+to
+
+some
+
+other
+
+steady
+
+state
+
+when
+
+dyt(1)
+
+is
+
+initialized
+
+at zero.25 As we state in the following proposition, Kim, Kim, Schaumburg, and Sims's (2008)
+
+pruning
+
+algorithm
+
+transitions
+
+to
+
+y
+
++
+
+1 2
+
+y2
+
+,
+
+the
+
+second
+
+order
+
+approximation
+
+of
+
+the
+
+stochastic
+
+steady
+
+state (see definition 2.2) using nonlinear moving average policy functions. Additionally, all other
+
+coefficients (and hence all coefficients that are not partials with respect to ) are identical in all
+
+three algorithms.
+
+Proposition 4.5 (Deterministic Equivalence, Risk Sensitive Nonequivalence with Section 3). The
+
+algorithms in lemmata 4.3 and 4.4 and in proposition 3.4 are identical in all coefficients except for
+
+the
+
+constant
+
+term
+
+involving
+
+1 2
+
+g2
+
+(or
+
+1 2
+
+y2
+
+).
+
+As a consequence, when all shock realizations are zero in all periods,
+
+·
+
+the
+
+algorithm
+
+in
+
+lemma
+
+4.4
+
+will
+
+remain
+
+at
+
+y
+
++
+
+1 2
+
+g2
+
+·
+
+the
+
+algorithm
+
+in
+
+lemma
+
+4.3
+
+will
+
+transition
+
+from
+
+y
+
++
+
+1 2
+
+g2
+
+to
+
+y
+
++
+
+(I
+
+-
+
+gy)-1
+
+1 2
+
+g2
+
+·
+
+the
+
+algorithm
+
+in
+
+proposition
+
+3.4
+
+will
+
+remain
+
+at
+
+y
+
++
+
+1 2
+
+y2
+
+·
+
+(I
+
+- gy)-1 g2
+
+=
+
+1 2
+
+y2
+
+Proof. See the Appendix.
+
+Thus, asymptotically, Kim, Kim, Schaumburg, and Sims's (2008) pruning algorithm and our second order recursive nonlinear moving average (see proposition 3.4) converge deterministically, as the former converges to the latter.
+
+4.3 Higher Order Pruning
+The third order approximation (44) contains quadratic and cubic terms, both of which are sources
+of potential instability. As noted by Ruge-Murcia (2012), the pruning concept proposed by Kim,
+25That is, when the first order approximation is started at the deterministic steady state. It is noteworthy that Kim, Kim, Schaumburg, and Sims's (2008) pruning algorithm as implemented by Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot's (2011) Dynare lets the user initialize dyt(1) arbitrarily, whether this translates to second order accurate initial values is relegated to future study.
+
+17
+
+Kim, Schaumburg, and Sims (2008) at second order does not generalize straightforwardly to higher orders. Indeed, at third order, we find discrepancies between pruning algorithms in how they prune the cubic term. While these differences are in line with Lombardo (2012) and Den Haan and De Wind's (2012) critique that pruning is an ad hoc procedure, our nonlinear moving average based recursive algorithm can be viewed as a theoretical support for pruning and guidance in terms of choosing the way of reconstructing the potentially instable nonlinear terms consistent with the original, unpruned nonlinear approximation.
+
+4.3.1 Andreasen's (2012) Algorithm26
+
+This algorithm27 chooses to keep both the quadratic and cubic term in the unpruned third order
+
+approximation, (44). It prunes the quadratic term by replacing it with the Kronecker product of the
+
+first order approximation. The cubic term is replaced by the first order approximation raising to
+
+the three-fold Kronecker power, and the Kronecker product of the pruned quadratic term and the
+
+first order approximation.
+
+Lemma 4.6 (Andreasen's (2012) and Third Order Pruning Algorithm). (52) yt(3) = y + dyt(1) + dyt(2) + dyt(3)
+
+where (53)
+
+dyt(1) = gzdzt(1), dzt(1) =
+
+dyt(-1)1state t
+
+(54)
+
+dyt(2)
+
+=
+
+gyst at e d yt(-2)1st at e
+
++
+
+1 2
+
+g2 + gz2dzt(1)[2]
+
+(55)
+
+dyt(3)
+
+=
+
+gyst at e d yt(-3)1st at e
+
++
+
+1 6
+
+g3 + gz3 dzt(1)[3]
+
++
+
+1 2
+
+g2z
+
+d
+
+zt(1)
+
++
+
+gystatez
+
+dyt(-2)1state  dzt(-1)1
+
+This algorithm is, we argue, the third order equivalent to Kim, Kim, Schaumburg, and Sims
+
+(2008), because its differences to our nonlinear moving average algorithm are third order analogs
+
+(owing to cumulative risk sensitive adjustments) to the differences between Kim, Kim, Schaum-
+
+26Downloaded on January 11,
+
+2013 as ForWeb NewKeynesianModel.zip
+
+from http://ideas.repec.org/c/red/ccodes/11-84.html as linked through
+
+http://www.economicdynamics.org/RED15.htm. The file simulate 3rd kron.m contains the the follow-
+
+ing algorithm and is preceded by the header
+
+% By Martin M. Andreasen, April 22 2010
+
+% This function simulates the model when solved up to third order.
+
+% The pruning scheme is used. 27See also Andreasen, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2012), for an implementation to time series prop-
+
+erties and further documentation of this algorithm.
+
+18
+
+burg, and Sims's (2008) and our algorithm at second order.
+
+Proposition 4.7 (Deterministic Equivalence, Risk Sensitive Nonequivalence with Section 3). The
+
+algorithms in lemma 4.6 and in 3.6 are identical in all coefficients except for terms involving ,
+
+1 2
+
+g2
+
+(or
+
+1 2
+
+y2
+
+),
+
+1 6
+
+g3
+
+(or
+
+1 6
+
+y3
+
+),
+
+and
+
+1 2
+
+g2z
+
+(or
+
+1 2
+
+y2z
+
+).
+
+As a consequence, when all shock realizations are zero in all periods,
+
+·
+
+the
+
+algorithm
+
+in
+
+lemma
+
+4.6
+
+will
+
+transition
+
+from
+
+y
+
++
+
+1 2
+
+g2
+
++
+
+1 6
+
+g3
+
+to
+
+y
+
++
+
+(I
+
+-
+
+gy)-1
+
+1 2
+
+g2
+
++
+
+1 6
+
+g3
+
+·
+
+the
+
+algorithm
+
+in
+
+proposition
+
+3.4
+
+will
+
+remain
+
+at
+
+y
+
++
+
+1 2
+
+y2
+
++
+
+1 6
+
+y3
+
+· (I - gy)-1
+
+1 2
+
+g2
+
++
+
+1 6
+
+g3
+
+=
+
+1 2
+
+y2
+
++
+
+1 6
+
+y3
+
+Proof. See the Appendix.
+
+Skewed risk adjustments deterministically accumulate along with the second order risk adjustments for variance. At third order, the differences in instantaneous second order risk adjustments for variance are interacted with the vector of states, leading to differences in the time varying response to risk posited by the two algorithms.
+
+4.3.2 Ferna´ndez-Villaverde, Guerro´n-Quintana, Rubio-Ram´irez, and Uribe's (2011) Algorithm28
+
+This algorithm keeps both the quadratic and cubic term in the unpruned third order approximation,
+
+(44), as well. While it again prunes the quadratic term by replacing it with the Kronecker product
+
+of the first order approximation, this algorithm prunes the cubic term by replacing it with the
+
+first order approximation raising to the three-fold Kronecker power only, and does not include
+
+the Kronecker product of the pruned quadratic term and the first order approximation like the
+
+Andreasen's (2012) algorithm does.
+
+Lemma 4.8 (Ferna´ndez-Villaverde, Guerro´n-Quintana, Rubio-Ram´irez, and Uribe's (2011) Third
+
+Order Pruning Algorithm). (56)
+
+yt(3) = y + dyt(3)
+
+where (57)
+
+dyt(1) = gzdzt(1), dzt(1) =
+
+dyt(-1)1state t
+
+28Downloaded on January 11, 2013 as 20090428 data.zip from http://www.aeaweb.org/articles.php?doi=10.1257/aer.101 The file code AERirf moments.m contains the the following algorithm and is dated December, 2010.
+
+19
+
+(58)
+
+dyt(3) = gz
+
+dyt(-3)1state t
+
++1 2
+
+g2 + gz2dzt(-1)1[2]
+
++1 6
+
+g3 + gz3 dzt(1)[3] + 3g2zdzt(1)
+
+This
+
+algorithm,
+
+like
+
+the
+
+previous
+
+one,
+
+will
+
+transition
+
+from
+
+y
+
++
+
+1 2
+
+g2
+
++
+
+1 6
+
+g3
+
+to
+
+y+
+
+(I
+
+-
+
+gy)-1
+
+1 2
+
+g2
+
++
+
+1 6
+
+g3
+
+as the two constant risk adjustment terms, g2 and g3, are included in its dyt(3) and therefore will
+
+keep accumulating in iteration.
+
+4.3.3 Michel Juillard's Algorithm29
+
+This algorithm keeps both the quadratic and cubic term of the unpruned third order approxima-
+
+tion, (44), pruning the quadratic term by replacing it with the Kronecker product of the first order
+
+approximation just like the previous two algorithms. When pruning the cubic term, it raises the
+
+first order approximation to the three-fold Kronecker power as the previous two algorithms do.
+
+However, this algorithm then multiplies (in Kronecker) its pruned second order term with the en-
+
+dogenous state space of the first order approximation, differing from Andreasen's (2012) algorithm
+
+who multiplies (in Kronecker) its pruned second order term with the exogenous state space (vector
+
+of shocks t) as well. Lemma 4.9 (Michel Juillard's Third Order Pruning Algorithm). (59) yt(3) = y + dyt(1) + dyt(2) + dyt(3)
+
+where (60)
+
+dyt(1) = gzdzt(1), dzt(1) =
+
+dyt(-1)1state t
+
+(61)
+
+dyt(2)
+
+=
+
+gyst at e d yt(-2)1st at e
+
++
+
+1 2
+
+g2 + gz2dzt(1)[2]
+
+(62)
+
+dyt(3)
+
+=
+
+gyst at e d yt(-3)1st at e
+
++
+
+1 6
+
+g3 + gz3dzt(1)[3]
+
++
+
+1 2
+
+g2zdzt(1)
+
++
+
+g(ystate)2
+
+dyt(-1)1state  dyt(-2)1state
+
+This
+
+algorithm,
+
+like
+
+the
+
+previous
+
+two,
+
+will
+
+transition
+
+from
+
+y
+
++
+
+1 2
+
+g2
+
++
+
+1 6
+
+g3
+
+to
+
+y
+
++ (I
+
+-
+
+gy)-1
+
+1 2
+
+g2
+
++
+
+1 6
+
+g3
+
+as the two constant risk adjustment terms, g2 and g3, are included in its dyt(3) and therefore will
+
+keep accumulating in iteration.
+
+29Downloaded as dynare-2013-01-10-win.exe from http://www.dynare.org/snapshot/windows/ on January 11, 2013. Thank you to Michel Juillard for drawing our attention to this undocumented feature in Dynare.
+
+20
+
+4.3.4 Den Haan and De Wind's (2012) Third Order Pruning Algorithm
+
+This algorithm keeps both the quadratic and cubic term of the unpruned third order approxima-
+
+tion, (44), pruning the quadratic term by replacing it with the Kronecker product of the first order
+
+approximation just like the previous three algorithms. When pruning the cubic term, it raises the
+
+first order approximation to the three-fold Kronecker power as the previous three algorithms do.
+
+However, unlike Michel Juillard's algorithm who multiplies (in Kronecker) its pruned quadratic
+
+term with the endogenous state space of the first order approximation, and Andreasen's (2012)
+
+algorithm who multiplies (in Kronecker) its pruned quadratic term with the first order approxima-
+
+tion, this algorithm raises the pruned second order term to the second-fold Kronecker power. This
+
+introduces terms of fourth order, which is responsible for the relative reduction in accuracy com-
+
+pared to the other third order algorithms, as we shall document. Additionally, the time-varying risk
+
+adjustment at third order is applied retroactively to the first order approximation, see Den Haan and
+
+De Wind (2012, p. 1490) and Andreasen, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2012, p. 9).
+
+It is conceivable that a large enough risk adjustment could thus introduce instability into their first
+
+order approximation.
+
+Lemma 4.10 (Den Haan and De Wind's (2012) Third Order Pruning Algorithm).
+
+(63)
+
+yt(3)
+
+=
+
+y
+
++
+
+1 2
+
+g2
+
++
+
+1 6 g3
+
++
+
+dyt(3)
+
+where
+
+(64)
+
+dyt(1) =
+
+gystate
+
++
+
+1 2 g2ystate
+
+dyt(-1)1state +
+
+g
+
++
+
+1 2
+
+g2
+
+t
+
+(65)
+
+dyt(2) =
+
+gystate
+
++
+
+1 2 g2ystate
+
+dyt(-2)1state +
+
+1 2
+
+gz2
+
+d
+
+zt(1)[2]
+
+,
+
+dzt(1)
+
+=
+
+dyt(-1)1state t
+
+dyt(3) =
+
+gystate
+
++
+
+1 2 g2ystate
+
+dyt(-3)1state +
+
+g
+
++
+
+1 2
+
+g2
+
+t
+
+(66)
+
++
+
+1 2
+
+gz2
+
+d
+
+zt(2)[2]
+
++
+
+1 6
+
+gz3
+
+d
+
+zt(1)
+
+[3]
+,
+
+dzt(2)
+
+=
+
+dyt(-2)1state t
+
+Unlike the previous three algorithms, this algorithm like its second order counterpart does not
+
+have
+
+a
+
+deterministic
+
+transition,
+
+remaining
+
+at
+
+y
+
++
+
+1 2
+
+g2
+
++
+
+1 6
+
+g3
+
+.
+
+Again,
+
+this
+
+point
+
+is
+
+not
+
+a
+
+third
+
+order
+
+approximation of the stochastic steady state in definition 4.2 and its appropriateness as a centering
+
+point of the algorithm is unclear.
+
+21
+
+5 Lombardo's (2012) Matched Perturbation Algorithm
+
+Lombardo (2012) presents a method based on "matched perturbations," see Holmes (1995), that
+
+delivers higher order stable recursive state space approximations that are linearly recursive in the
+
+order of nonlinear terms. All of these features are shared by our method based on nonlinear moving
+
+averages as presented in section 3 as well as many of the various pruning algorithms examined
+
+in section 4. In this section, we will determine whether Lombardo's (2012) method justifies a
+
+particular pruning method of section 4 or whether it produces an independent method as did our
+
+nonlinear moving average in section 3. To match his setup, we must redefine the problem statement
+
+above slightly30 by defining
+
+(67)
+
+z~t 
+
+yts-ta1te t
+
+and replacing zt in (39)
+
+(68)
+
+0 = Et
+
+f
+
+g~
+
+,
+
+g(, z~t) t+1
+
+, g(, z~t), z~t
+
+= F~ (, zt)
+
+still a function with arguments  and zt.31 Essentially Lombardo (2012) uses  to expand from
+
+the deterministic steady state to the stochastic dynamic solution, whereas the formulation we have
+
+used above following Jin and Judd (2002) and others uses  to expand the deterministic dynamic solution to the stochastic dynamic solution;32 when  = 1, however, both approaches are equiva-
+
+lent.
+
+To third order, the Taylor series approximation or standard perturbation of the solution to (68),
+
+where only terms with nonzero coefficients have been included, is given by
+
+(69)
+
+yt
+
+=
+
+y
+
++
+
+1 2 g2
+
++
+
+1 6
+
+g3
+
++
+
+gz
+
++
+
+1 2 g2z
+
+(z~t
+
+-
+
+z)
+
++
+
+1 2
+
+gz2
+
+(z~t
+
+-
+
+z)[2]
+
++
+
+1 6
+
+gz3
+
+(z~t
+
+-
+
+z)[3]
+
+Lombardo (2012) gives the following procedure for deriving matched perturbations or series
+
+expansions of the foregoing: guess that the solution is of the linearly recursive (in order) form,
+
+where we have adapted his procedure to our notation, (70) yt - y = dyt(1) + 2dyt(2) + 3dyt(3) + . . .
+
+30Note, the following perturbation setup is widely used, see Schmitt-Grohe´ and Uribe (2004) and others, but iden-
+tical to the statement used above for  = 1. Unlike the other methods presented above, however, Lombardo's (2012)
+matched perturbation method cannot be readily adapted to alternative problem statements. 31Note that t+1 is not an argument of F as discussed previously. 32 See also Den Haan and De Wind (2012), who state in their supplemental Appendix that Lombardo's (2012)
+method "does not describe any transition dynamics" when  = 0.
+
+22
+
+insert the guess into (69)
+
+dyt(1)
+
++ 2dyt(2)
+
++ 3dyt(3)
+
+=
+
+1 2
+
+g2
+
+2
+
++
+
+1 6
+
+g3
+
+3
+
++
+
+gz
+
++
+
+1 2
+
+g2z2
+
+dyt(-1)1state + 2dyt(-2)1state + 3dyt(-3)1state + . . . t
+
++
+
+1 2
+
+gz2
+
+dyt(-1)1state + 2dyt(-2)1state + 3dyt(-3)1state + . . . [2] t
+
+(71)
+
++
+
+1 6
+
+gz3
+
+dyt(-1)1state + 2dyt(-2)1state + 3dyt(-3)1state + . . . [3] t
+
+and "equat[e] like powers" (Holmes 1995, p. 27) in , which gives
+
+(72) dyt(1) = gzzt(1), dzt(1) = dyt(-1)1statet
+
+(73)
+
+dyt(2)
+
+=
+
+gyst at e d yt(-2)1st at e
+
++
+
+1 2
+
+g2 + gz2dzt(1)[2]
+
+(74)
+
+dyt(3)
+
+=
+
+gyst at e d yt(-3)1st at e
+
++
+
+1 6
+
+g3 + gz3dzt(1)[3]
+
++
+
+1 2
+
+g2z
+
+zt(1)
+
++
+
+gystatez
+
+dyt(-2)1state  dzt(1)
+
+and Lombardo's (2012) second order series expansion approximation for the stochastic ( = 1)
+
+case is (75)
+
+yt = y + dyt(1) + dyt(2)
+
+and at third order (76)
+
+yt = y + dyt(1) + dyt(2) + 3dyt(3)
+
+Lombardo's (2012) method recovers Kim, Kim, Schaumburg, and Sims's (2008) pruning al-
+
+gorithm at second order and Andreasen's (2012) algorithm at third order, as we summarize in the
+
+following
+
+Proposition 5.1 (Equivalence of Series Expansion and Pruning). Lombardo's (2012) method of
+
+series expansion is identical to
+
+· the algorithm in lemma 4.3 at second order
+
+· the algorithm in lemma 4.6 at third order
+
+Proof. By inspection.
+
+While Lombardo (2012) identifies the first equivalence, the equivalence at third order is ap-
+parently new. Indeed, Lombardo (2012, p. 12) seems to imply that his series expansion at third
+order would yield the algorithm in lemma 4.8, which does not include the cross product term dyt(-2)1state  dzt(1) as in the algorithm of lemma 4.6. This would be mistaken, as we have shown above. We conclude that Lombardo's (2012) method provides a rigorous foundation for the vari-
+
+23
+
+ants of pruning that are complete up to the order of approximation. Yet, as shown in propositions 4.5 and 4.7, these pruning algorithms (and hence Lombardo's (2012) method as well) differ from the recursive algorithms in section 3 in terms that adjust for risk, centering the approximation at the deterministic model and its lack of risk adjustment.
+
+6 Applications to Production and Asset Pricing
+
+In this section, we compare the numerical performance of the various pruning algorithms presented
+
+in section 4. A version of the stochastic neoclassical growth model and the asset pricing model in
+
+Burnside (1998) are chosen as the benchmarks to run the horse races, as both of the two models
+
+possess closed-form solution and widely used in evaluating the numerical performance of solution
+
+methods for DSGE models.
+
+We employ three criteria for comparing models
+
+(77)
+
+E1
+
+=
+
+1 T
+
+T t=1
+
+xtapprox. - xttrue xttrue
+
+(78)
+
+E2
+
+=
+
+1 T
+
+T t=1
+
+xtapprox. - xttrue
+
+2
+
+(79)
+
+E = max
+
+xtapprox. - xttrue xttrue
+
+measuring the distance of the various pruning algorithms, including the nonlinear moving average
+
+based recursive algorithm, as well as the unpruned perturbations to the true solution in terms of
+
+average, mean square and maximal error at second and third order.
+
+6.1 The Discrete Brock and Mirman (1972) Neoclassical Growth Model
+In this section, we examine a version of the stochastic neoclassical growth model, case of log preferences in consumption and full depreciation, with a known solution to compare methods. This model has been used in numerous studies comparing numerical techniques and is a natural benchmark.
+The model is populated by an infinitely lived representative household seeking to maximize its expected discounted lifetime utility given by
+
+(80) E0  tln (Ct) t=0
+
+24
+
+where Ct is consumption, and   (0, 1) the discount factor, subject to (81) Ct + Kt = eZt Kt-1
+
+where Kt is the capital stock accumulated today for productive purposes tomorrow, Zt a stochastic productivity process,   [0, 1] the capital share, and note that we have assumed complete depre-
+
+ciation. Maximization delivers the following first order condition
+
+(82)
+
+1 Ct
+
+= Et
+
+1 Ct+1
+
+eZt+1
+
+Kt-1
+
+an intertemporal Euler condition equalizing the expected present-discounted utility value of post-
+
+poning consumption one period to its utility value today.
+
+In this log preferences and complete capital depreciation case, a well-known closed-form solu-
+
+tion for the policy functions exists given by
+
+Kt = eZt Kt-1 (83) Ct = (1 - ) eZt Kt-1
+
+Additionally, we will assume that productivity is described by
+
+(84) Zt = ZZt-1 + Z,t, Z,t  N 0, (Z)2
+
+with |Z| < 1 and Z,t the innovation with standard deviation Z. We use  as a scaling factor that when equal to one, gives the standard deviation of the technology process as Z, which we set to a
+
+standard calibration value.
+
+As the model is loglinear, we could redefine the variables in terms of logarithms--e.g., exp (c^t)  Ct--and a first-order approximation of either the state space or infinite moving average policy function, see Lan and Meyer-Gohde (2012b), would deliver (83). However, to study the properties
+
+of simulations generated by the methods compared above, we will compute perturbations in the
+
+the level variables using our method derived in section 3 and compare it with the standard state
+
+space perturbation and the "pruned" state space perturbations of Kim, Kim, Schaumburg, and Sims
+
+(2008) for second order and Andreasen (2012) for third order summarized in the previous section.
+
+[Table 1 about here.]
+
+In figures 1, 2, and 3, we plot the E1, E2, and E accuracy of the different perturbation and pruning methods out to third order for Kt measured relative to (83) for values of , thereby scaling up the standard deviation of the technology process, from one to fifty. We run 100 simulations of 10,000 periods and report the average result for E1 and E2 and the maximum for E.
+
+25
+
+[Figure 1 about here.]
+[Table 2 about here.]
+For E1 and E2, a clear patter emerges. Increasing the order of approximation increases the accuracy of the approximation. The exceptions are provided by the second and third order perturbations after  equal to seven and forty respectively reflecting explosive simulations after these values, as well as the third order pruning algorithm in lemma 4.10 that disappointingly is roughly as accurate as the first order approximation. Tables 2 and 4 confirm the results in Den Haan and De Wind (2012), regarding the accuracy of perturbation and pruning in the log preference and full depreciation special case of the neoclassical growth model.33
+[Figure 2 about here.]
+[Table 3 about here.]
+At second order, all three pruning algorithms deliver numerically identical simulations. This follows directly from proposition 4.5, recognizing that the model of this section is certainty equivalent in its nonlinear form. Consequently at third order, our method in 3.6 is numerically identical to the method in lemma 4.6.
+[Figure 3 about here.]
+[Table 4 about here.]
+Figures 4 and 5 display subsets of two simulations with large differences in different algorithms. Note that both the first order perturbation and the third order algorithm of Den Haan and De Wind (2012) yield negative values for capital in these cases.34 The second order perturbation and pruning algorithms fall above and the third order perturbation and other pruning algorithms slightly below the exact value.
+33They report in their Table 1 (Den Haan and De Wind 2012, p. 1492) that for Z = 0.1 and otherwise identical calibration as we have chosen here E1 and E errors for a first order of 8.00E-1 and 7.61E-1, second order perturbation of 1.90E-2 and 3.10E-1, and second order pruning of 2.00E-2 and 4.79E-1, which corresponds to a factor of  = 14 and lines up roughly with the results we report. Likewise their E1 and E errors with Z = 0.2 for a first order of 8.00E-1 and 7.61E-1, second order perturbation of 1.90E-2 and 3.10E-1, and second order pruning of 2.00E-2 and 4.79E-1 are comparable to our results.
+34Though, all the algorithms we compare here are capable of the same due to their local nature.
+26
+
+[Figure 4 about here.]
+
+[Figure 5 about here.]
+
+Figure 6 shows an example explosive time path that the pruning algorithms guard against. A shock around the 70th period pushes the third order perturbation beyond a threshold, setting it on an unrecoverable upward explosion. This inaccuracy obviously dominates all other differences between the varying algorithms in this simulation.
+[Figure 6 about here.]
+
+6.2 The Asset Pricing Model of Burnside (1998)
+
+An agent maximizes her expected discounted lifetime utility from consumption
+
+(85)
+
+E0
+
+ t=0
+
+t
+
+Ct1- 1-
+
+subject to the period budget constraint
+
+(86) Ct + Pt St = (Dt + Pt ) St-1
+
+where St is the end of period holding of the single asset, which is priced Pt at t and pays Dt dividends per unit held at the beginning of the period. Combining the agent's first order condition
+
+with market clearing delivers (87)
+
+vt = Et e(1-)xt+1 (1 + vt+1)
+
+where vt  Pt/Dt is the price dividend ratio and xt  ln (Dt/Dt-1) is the log dividend difference.
+
+Assuming that
+
+(88) xt = (1 - ) µ - xt-1 + t , t i.i.d. N 0, 2
+
+Burnside (1998) derives a closed form solution given by35
+
+
+(90) vt =  i exp [ai + bi (xt - µ)]
+
+i=1
+
+where
+
+(91)
+
+ai
+
+=
+
+iµ
+
++
+
+1 2
+
+2
+
+(1
+
+2 - )2
+
+i
+
+-
+
+2
+
+1
+
+ -
+
+
+
+1 - i
+
++
+
+2
+
+1 1
+
+- 2i - 2
+
+35To ensure convergence
+
+(89)
+
+ exp
+
+µ
+
++
+
+1 2
+
+2
+
+(1
+
+2 - )2
+
+<1
+
+27
+
+and (92) where   (1 - ).
+
+bi
+
+=
+
+
+
+1
+
+ -
+
+
+
+1 - i
+
+We compare the different pruning algorithms relative to this closed form solution for the dif-
+
+ferent parameterizations used in Collard and Juillard (2001), corresponding to different levels of
+
+patience, of persistence and volatility of the log dividend difference process, and of curvature in
+
+the utility function. For each parameterization, we run 100 simulations of 10,000 periods each and
+
+present the relative errors of vt according to the three criteria--average (E1), mean square (E2),
+
+and maximum (E)--in tables 6 through 8.
+
+[Table 5 about here.]
+
+As Collard and Juillard (2001) observed for the linear approximation, all algorithms tend to deteriorate in accuracy as the log dividend difference process becomes more highly persistent ( increases) or volatile ( increases), or risk aversion is increased ( decreases). This follows naturally from the local nature of all the approximations considered here, as increasing either of the two shock process parameters increases the cumulative variance of the process and increasing risk aversion makes the agent's policy functions more sensitive to the exogenous process.
+
+[Table 6 about here.]
+
+In general, increasing the order of approximation increases the accuracy of approximation. According to the E1 criterium, see table 6, increasing the order of approximation (here from second to third order) can, however, lead to a deterioration in the quality of approximation in the case of very risk averse ( = -5 and  = -10) or very patient ( = 0.99) agents. While this result is not robust to the choice of criteria (the E2 and E criteria do not display a loss in accuracy with an increase in order), this reiterates that there is no guarantee that a Taylor approximation will converge monotonically to the true policy function, even if the latter is analytic such that convergence is assured in the limit of an infinite order Taylor expansion.36
+
+[Table 7 about here.]
+36See Judd (1998) and Lombardo (2010).
+
+28
+
+For a given order of approximation, most algorithms perform identically at each order of approximation. This is due to the lack of endogenous propagation in the fully forward looking model of Burnside (1998), making an accumulation of risk adjustments in steady states and slope coefficients impossible. The exception is again the third order algorithm of Den Haan and De Wind (2012) in lemma 4.10, which was only as accurate as the first order approximation as measured with E. Indeed, when the log dividend difference process is highly persistent ( = 0.9) or the agent is highly impatient ( = 0.5), it is even less accurate than the first order approximation according to E. More interesting is that the algorithm of lemma 4.10 is identical to the other third order algorithms for all three measures (E1, E2, and E) when either log dividend growth is not serially correlated ( = 0) or the agent has an intertemporal elasticity of substitution of unity ( = 1   = 0). In both of these cases, the true policy function is a constant37 and even all second and third order approximations coincide. This follows as the shock, t, was assumed normally distributed, leading to y3 = 0 and the second order term y2 is identical for all algorithms, following proposition 4.5, due to the absence of propagation (gy = 0) in this case.
+[Table 8 about here.]
+Both Burnside's (1998) and Brock and Mirman's (1972) models admit known closed form solutions, enabling a precise investigation of the properties of the different pruning algorithms. However both lack important features of nonlinear models (internal propagation in Burnside's (1998) case and certainty nonequivalence in Brock and Mirman's (1972)) that one would like these pruning algorithms to cover. Accordingly, we will turn to our final model, a highly nonlinear variant of the neoclassical growth model due to Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012), and abandon a closed form baseline solution, as none is known, for a highly accurate global projection solution as a baseline.
+37Substituting either  = 0 or  = 0 into (92) delivers bi = 0, i and, hence, (90) becomes
+
+(93) vt =  i exp ai i=1
+where ai is as given in (91).
+29
+
+6.3 Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao's (2012) Model with Recursive Preferences and Stochastic Volatility
+
+In this section, we examine Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao's (2012)
+
+stochastic neoclassical growth model with recursive preferences and stochastic volatility. We do so
+
+as the previous two models have lacked either risk sensitivity (the model of section 6.1 is certainty equivalent)38 or endogenous state variables to propagate risk adjustments (the model of section 6.2
+
+is entirely forward looking in endogenous variables). As noted by Caldara, Ferna´ndez-Villaverde,
+
+Rubio-Ram´irez, and Yao (2012), the model incorporates more nonlinearities and therefore imposes
+
+a challenge on different solution algorithms. Due to the absence of closed-form solution, the model
+
+needs to be approximated. We choose the Chebyshev polynomial approximation as the true solu-
+
+tion to run the three horse races again since it achieves a very high level of accuracy as reported by
+
+Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012).
+
+As the first two welfare theorems hold in their model, we move right to the social planner's
+
+problem, in which the planner maximizes the expected discounted lifetime utility of a representa-
+
+tive household given by the recursive preferences
+
+1-
+
+(95)
+
+Ut = max
+ct ,lt
+
+(1 - )
+
+ct (1 - lt )1-
+
+ +  Et Ut1+-1
+
+ 1 1- 
+
+where ct is consumption, lt labor,   (0, 1) the discount factor,  a labor supply parameter,  risk
+
+aversion, and
+
+(96)
+
+
+
+=
+
+1-
+
+1
+
+-
+
+1 
+
+where  is the elasticity of intertemporal substitution. The social planner faces the resource con-
+
+straint (97) ct + kt = ezt kt-1lt1- + (1 - ) kt-1 with kt being capital,  its share and  its depreciation rate, and zt a mean reverting productivity process given by
+
+(98) zt = zzt-1 + zet tz, tz  N (0, 1)
+
+38Judd, Maliar, and Maliar (2011, p. 197) rearrange (82) as
+
+(94)
+
+Kt = Et
+
+
+
+Ct Ct+1
+
+eZt+1
+
+Kt
+
+and note that the integrand under the conditional expectations on the left hand side is equal to Kt for all values of Zt+1.
+
+30
+
+with |z| < 1 a persistence parameter, z the homoskedastic volatility of zt, and t a stochastic volatility process contributing conditional heteroskedasticity to zt given by
+(99) t = t-1 + t, t  N (0, 1)
+
+with || < 1 a persistence parameter and  the standard deviation of innovations to the volatility
+
+process, t.
+
+The first order conditions are the intratemporal condition
+
+(100)
+
+1 -  ct  1 - lt
+
+= (1 - ) ezt kt-1lt-
+
+and the intertemporal condition
+
+(101)
+
+1 = Et mt+1 ezt+1 kt-1lt1- + 1 - 
+
+where the pricing kernel is given by
+
+(102)
+
+mt+1
+
+=.
+
+Vt /ct+1 Vt /ct
+
+=
+
+ ct ct+1
+
+1-
+ct+1 (1 - lt+1)1- 
+1-
+ct (1 - lt)1- 
+
+Ut1+-1 Et [Ut+1]1-
+
+1-
+
+1 
+
+The presence of Ut+1 in the pricing kernel necessitates the inclusion of the value function evaluated
+
+at the optimum (103)
+
+1-
+Ut = (1 - ) ct (1 - lt)1-  +  Et Ut1+-1
+
+ 1 1- 
+
+along with the first order conditions, the resource constraint (97), and the exogenous driving force
+
+(98) and its volatility (99) to characterize an equilibrium.
+
+Following Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012), we will also track
+
+two asset prices, the gross return on capital
+
+(104)
+
+Rt = ezt kt--11lt1- + 1 - 
+
+and the gross risk-free rate
+
+(105)
+
+1 = Et mt+1Rtf
+
+In contrast to the first two models, Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao's
+
+(2012) model has no known analytic solution to serve as a baseline for comparing the different
+
+pruning algorithms. However, they show that a projection solution with Chebyshev polynomial
+
+basis functions consistently achieves a high degree of accuracy across different parameterizations
+
+and for a large range in the state space. With this result, we take their Chebyshev projection as our
+
+baseline for comparison.
+
+31
+
+[Table 9 about here.]
+We parameterize the model as in Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012) and will examine a baseline and an extreme calibration. The parameters that stay fixed across both calibrations are in table 9 and are standard values that reflect post-war US data.39 The differences between the baseline and extreme parameterizations can be found in table 10 and are in the value of risk aversion ( = 5 versus 40), in the homoskedastic volatility in the productivity process (z = 0.007 versus 0.021), and in the standard deviation of the stochastic volatility process ( = 0.06 versus 0.1). The values for the extreme parameterization are purposely set at the edge of credulity to introduce a very large amount of nonlinearity into the model to test the different algorithms.
+[Table 10 about here.]
+For each calibration, we run 100 simulations of 10,000 periods each and present the relative errors of kt, ct, lt, it, yt, Rtf , and Rt, according to the three criteria--average (E1), mean square (E2), and maximum (E). For the baseline calibration, the results can be found in tables 11 through 13 and for the extreme calibration, the results can be found in tables 14 through 16.
+[Table 11 about here.]
+Broadly speaking, increasing the order of approximation increases the accuracy of the approximation. This is not, however, true for the non pruned perturbations, which frequently perform worse at third than at second order (see lt through Rt in tables 11 and 12) Under the same two E1 and E2 criteria, the pruned algorithms actually perform better than the non pruned algorithms. This stands in contrast to the results reported in Den Haan and De Wind (2012) and is likewise a combination of the different models and their choice of pruning algorithm; the latter is consistently outperformed by the other pruning algorithms.
+[Table 12 about here.]
+39Note that the value of  here yields a deterministic steady state value of l = 1/3, correcting Caldara, Ferna´ndezVillaverde, Rubio-Ram´irez, and Yao's (2012, p. 197) Table 1, which mistakenly reported  equal to 0.357, the value of  stated on the same page.
+32
+
+As the model of Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012) is risk sensitive and has internal propagation, the three second order algorithms will differ, see proposition 4.5. The second order pruned series are more accurate than their non pruned counterparts, with Den Haan and De Wind's (2012) second order algorithm performing worst. At third order, time varying risk corrections enter the algorithms, which are crucial for the dynamics under stochastic volatility and recursive preferences, see, e.g., Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012).
+[Table 13 about here.]
+For the third order, all of the pruning algorithms perform comparably except for that of Den Haan and De Wind (2012), detailed in lemma 4.10, which performs markedly poorer. To blame are the terms of fourth order introduced into their third order algorithm and the imposition of third order risk correction on the first order transition, which comprise the major differences to the other algorithms. The algorithm of lemma 4.8--Ferna´ndez-Villaverde, Guerro´n-Quintana, RubioRam´irez, and Uribe's (2011) algorithm, while more accurate than Den Haan and De Wind's (2012), is inferior according to all three criteria and for all the variables considered here.Thus, the cross terms (products of the second and first order approximations) mentioned in Lombardo (2012) are important contributors to the accuracy of third order pruning algorithms. The algorithm of lemma 4.9 sheds some light on which cross terms might be most important; it contains only the product of the second order approximation of endogenous variables with the first order endogenous state space--neglecting the cross products with the first order exogenous state space--yet is generally only marginally worse than the two top performing third order algorithms and, for some cases, is even the most accurate algorithm (kt in table 11 and ct and it in table 13).
+[Table 14 about here.]
+Our nonlinear moving average (see proposition 3.6) and Andreasen's (2012) third order pruning algorithm (see lemma 4.6) are the two top performing algorithms. Simply enumerating the cases where one or the other performs better as displayed in tables 11 through 13, our nonlinear moving average displays superior performance 50% more often. Interestingly, in those cases where these two algorithms display different average mean squared deviations (the measure E2 displayed in table 12), it is always our nonlinear moving average that is on top. Indeed, as measured at full
+33
+
+double precision,40 our nonlinear moving average is uniformly superior according to the mean square criterium. This must be tempered, however, as the differences in accuracy between the two algorithms for the model here are marginal.
+[Table 15 about here.]
+The results for the extreme calibration parallel those of our baseline calibration, higher order leads to more accuracy, Den Haan and De Wind's (2012) pruning algorithms are generally the least accurate second order and the least accurate third order algorithms, and the inclusion of more cross products in third order pruning algorithms improves accuracy. For the average and maximum criteria, tables 14 and 16 respectively, all algorithms are about one order of magnitude less accurate than under the baseline calibration (for the mean square criterium in table 15 the loss is about two orders of magnitude). The evidence in favor of our nonlinear moving average is now more clear cut: it is the most accurate algorithm in 16 cases in tables 14 through 16 (compared to Andreasen's (2012) 3, the next most accurate) and is the most accurate for all variables according to the mean square criterium, see table 15.
+[Table 16 about here.]
+In sum for all three models we have examined here, there is compelling evidence that the third order nonlinear moving average, expressed recursively in proposition 3.6, is the highest performing algorithm among the perturbation and pruning algorithms we have examined here. Yet, the gains are modest at best compared with the third order algorithms in lemmata 4.6 and 4.9 and, e.g., in the absence of risk sensitivity or endogenous propagation, the algorithms coincide.
+7 Conclusion
+We have derived a recursive representation from the nonlinear moving average approximation of Lan and Meyer-Gohde (2012b). That this recursive algorithm inherits stability from first order invites comparison with so-called pruning algorithms in the literature that purport to do the same. We document six different pruning algorithms from the literature at second and third order and
+40The full tables, along with the algorithms, are available online. We stopped at two digit accuracy here to minimize clutter.
+34
+
+show that even with its closest counterparts, at second order the algorithm of Kim, Kim, Schaumburg, and Sims (2008) and at third the algorithm of Andreasen (2012), differences remain in that our algorithm centers the approximation and its coefficients at the stochastic steady state as approximated up to the order in question. Hence our algorithm gives a stable approximation taking into account steady state risk adjustments, whereas our closest counterparts center their algorithms at the deterministic steady state making the interpretation of the risk adjustment components more difficult.
+Numerically, we compare the six algorithms with our second and third order recursive representations and the first through third order standard perturbations for accuracy. We choose three models to test the algorithms in: the Brock and Mirman (1972) special case of the stochastic neoclassical growth model, Burnside's (1998) asset pricing model, and the model of Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012) with recursive preferences and stochastic volatility. The first two have known closed form solutions but are not rich enough to capture the differences from the propagation of risk adjustments--the Brock and Mirman's (1972) is certainty equivalent and Burnside's (1998) lacks endogenous state variables--leading many algorithms to be identical; the last model is highly risk sensitive and has endogenous propagation, but does not possess a known closed form solution forcing us to rely on another approximation as a baseline.
+In general, the differences are modest, with the major difference coming with the increase of order of approximation. The exception is the algorithm of Den Haan and De Wind (2012), which at third order performs more comparably to a first order approximation. We do not find evidence that much accuracy in simulations is lost by choosing a pruning algorithm to guarantee stability. On the contrary, pruned series are often more accurate than the standard perturbation. This is not surprising as the two most accurate algorithms are not ad-hoc pruning algorithms, but theoretically justified nonlinear moving average perturbations (see Lan and Meyer-Gohde (2012b)) or matched perturbations (see Lombardo (2012)).
+35
+
+References
+ADJEMIAN, S., H. BASTANI, M. JUILLARD, F. MIHOUBI, G. PERENDIA, M. RATTO, AND S. VILLEMOT (2011): "Dynare: Reference Manual, Version 4," Dynare Working Papers 1, CEPREMAP.
+ANDERSON, G. S. (2010): "A Reliable and Computationally Efficient Algorithm for Imposing the Saddle Point Property in Dynamic Models," Journal of Economic Dynamics and Control, 34(3), 472­489.
+ANDERSON, G. S., A. LEVIN, AND E. SWANSON (2006): "Higher-Order Pertubation Solutions to Dynamic Discrete-Time Rational Expectations Models," Federal Reserve Bank of San Francisco Working Paper Series 2006-01.
+ANDREASEN, M. M. (2012): "On the Effects of Rare Disasters and Uncertainty Shocks for Risk Premia in Non-Linear DSGE Models," Review of Economic Dynamics, 15(3), 295­316.
+ANDREASEN, M. M., J. FERNA´ NDEZ-VILLAVERDE, AND J. RUBIO-RAM´IREZ (2012): "The Pruned State-Space System for Non-Linear DSGE Models: Theory and EMpirical Applications," Mimeo December.
+ARUOBA, S. B., J. FERNA´ NDEZ-VILLAVERDE, AND J. F. RUBIO-RAM´IREZ (2006): "Comparing Solution Methods for Dynamic Equilibrium Economies," Journal of Economic Dynamics and Control, 30(12), 2477­2508.
+BROCK, W., AND L. MIRMAN (1972): "Optimal Economic Growth and Uncertainty: The Discounted Case," Journal of Economic Theory, 4(3), 479­513.
+BURNSIDE, C. (1998): "Solving Asset Pricing Models with Gaussian Shocks," Journal of Economic Dynamics and Control, 22(3), 329­340.
+CALDARA, D., J. FERNA´ NDEZ-VILLAVERDE, J. RUBIO-RAM´IREZ, AND W. YAO (2012): "Computing DSGE Models with Recursive Preferences and Stochastic Volatility," Review of Economic Dynamics, 15(2), 188­206.
+COEURDACIER, N., H. REY, AND P. WINANT (2011): "The Risky Steady State," American Economic Review, 101(3), 398­401.
+COLLARD, F., AND M. JUILLARD (2001): "Accuracy of Stochastic Pertubation Methods: The Case of Asset Pricing Models," Journal of Economic Dynamics and Control, 25(6-7), 979­999.
+DEN HAAN, W. J., AND J. DE WIND (2012): "Nonlinear and Stable Perturbation-Based Approximations," Journal of Economic Dynamics and Control, 36(10), 1477­1497.
+DEN HAAN, W. J., AND J. DE WIND (2012): "Nonlinear and stable perturbation-based approximations," Journal of Economic Dynamics and Control, 36(10), 1477­1497.
+EVERS, M. P. (2010): "A Self-Consistent Perturbation Procedure For Solving Dynamic Stochastic General Equilibrium Models," Mimeo January.
+36
+
+FERNA´ NDEZ-VILLAVERDE, J., P. A. GUERRO´ N-QUINTANA, J. RUBIO-RAM´IREZ, AND M. URIBE (2011): "Risk Matters: The Real Effects of Volatility Shocks," American Economic Review, 101(6), 2530­61.
+FLEMING, W. (1971): "Stochastic Control for Small Noise Intensities," SIAM Journal of Control, 9(3), 473517.
+GASPAR, J., AND K. L. JUDD (1997): "Solving Large-Scale Rational-Expectations Models," Macroeconomic Dynamics, 1(01), 45­75.
+HANSEN, G. D. (1985): "Indivisible Labor and the Business Cycle," Journal of Monetary Economics, 16(3), 309­327.
+HOLMES, M. H. (1995): Introduction to Perturbation Methods. Springer, New York.
+JIN, H.-H., AND K. L. JUDD (2002): "Pertubation Methods for General Dynamic Stochastic Models," Mimeo April.
+JUDD, K. L. (1998): Numerical Methods in Economics. MIT Press, Cambridge, MA.
+JUDD, K. L., AND S.-M. GUU (1997): "Asymptotic Methods for Aggregate Growth Models," Journal of Economic Dynamics and Control, 21(6), 1025­1042.
+JUDD, K. L., L. MALIAR, AND S. MALIAR (2011): "Numerically Stable and Accurate Stochastic Simulation Approaches for Solving Dynamic Economic Models," Quantitative Economics, 2(2), 173­210.
+JUDD, K. L., AND T. M. MERTENS (2012): "Equilibrium Existence and Approximation of Incomplete Market Models with Substantial Heterogeneity," Mimeo March.
+JUILLARD, M. (2011): "Local Approximation of DSGE Models around the Risky Steady State," Mimeo October.
+KIM, J., S. KIM, E. SCHAUMBURG, AND C. A. SIMS (2008): "Calculating and Using SecondOrder Accurate Solutions of Discrete Time Dynamic Equilibrium Models," Journal of Economic Dynamics and Control, 32(11), 3397­3414.
+KONING, R. H., H. NEUDECKER, AND T. WANSBEEK (1991): "Block Kronecker Products and the vecb Operator," Linear Algebra and Its Applications, 149, 165­184.
+LAN, H., AND A. MEYER-GOHDE (2012a): "Existence and Uniqueness of Perturbation Solutions to DSGE Models," Mimeo August.
+(2012b): "Solving DSGE Models with a Nonlinear Moving Average," Mimeo July.
+(2013): "Decomposing Risk in Dynamic Stochastic General Equilibrium," SFB 649 Discussion Paper 2013-022 April.
+LOMBARDO, G. (2010): "On Approximating DSGE Models by Series Expansions," Working Paper Series 1264, European Central Bank.
+37
+
+(2012): "On Approximating DSGE Models by Series Expansions," Mimeo. MAGNUS, J. R., AND H. NEUDECKER (1979): "The Commutation Matrix: Some Properties and
+Applications," The Annals of Statistics, 7(9), 383­394. MCCALLUM, B. T. (1989): "Real Business Cycle Models," in Modern Business Cycle Theory,
+ed. by R. J. Barro, chap. 1, pp. 16­50. Harvard University Press. PRIESTLY, M. B. (1988): Non-Linear and Non-Stationary Time Series Analysis. Academic Press
+Ltd., London, UK. RUGE-MURCIA, F. (2012): "Estimating Nonlinear DSGE Models by the Simulated Method of
+Moments," Journal of Economic Dynamics and Control, 36(6), 914938. SCHMITT-GROHE´ , S., AND M. URIBE (2004): "Solving Dynamic General Equilibrium Models
+Using a Second-Order Approximation to the Policy Function," Journal of Economic Dynamics and Control, 28(4), 755­775. TAYLOR, J. B. (1986): "Econometric Approaches to Stabilization Policy in Stochastic Models of Macroeconomic Fluctuations," in Handbook of Econometrics, ed. by Z. Griliches, and M. D. Intriligator, vol. 3 of Handbook of Econometrics, chap. 34, pp. 1997­2055. Elsevier. UHLIG, H. (1999): "A Toolkit for Analysing Nonlinear Dynamic Stochastic Models Easily," in Computational Methods for the Study of Dynamic Economies, ed. by R. Marimon, and A. Scott, chap. 3, pp. 30­61. Oxford University Press. VAN BINSBERGEN, J. H., J. FERNA´ NDEZ-VILLAVERDE, R. S. KOIJEN, AND J. RUBIORAM´IREZ (2012): "The Term Structure of Interest Rates in a DSGE Model with Recursive Preferences," Journal of Monetary Economics, 59(7), 634­648. VILLEMOT, S. (2011): "Solving Rational Expectations Models at First Order: What Dynare Does," Dynare Working Papers 2, CEPREMAP.
+38
+
+Appendix
+A Dimension Reduction Typology
+We adopt Dynare's typology of all the endogenous variables41 to minimize superfluous calculations. Definition A.1. Typology of Endogenous Variables
+· Static endogenous variables: those that appears only at period t. Their number is nstatic · Purely forward endogenous variables: those that appear only at period t + 1, possibly at
+period t, but not at period t - 1. Their number is n f wd · Purely backward endogenous variables: those that appear only at period t - 1, possibly at
+period t, but not period t + 1. Their number is nbwd · Mixed endogenous variables: those that appear both at period t - 1 and t + 1, and possibly
+at period t. Their number is nmix These four types variables, abbreviated as st, f wd, bwd and mix respectively, form a partition of the endogenous variables with the identity
+nstatic + nbwd + nmix + n f wd = ny For notational ease in derivations, we also define
+· Forward endogenous variables: the union of mixed and purely forward endogenous variables. Their number therefore is n f wdendo = n f wd + nmix
+· Backward endogenous variables: the union of static and purely backward endogenous variables. Their number therefore is nbwdendo = nstatic + nbwd
+· Endogenous state variables: the union of the purely backward and the mixed endogenous variables. Their number therefore is ns = nbwd + nmix
+with the abbreviation f wdendo, bwdendo and state respectively. Note that, the last two types of variables, i.e., the backward endogenous and endogenous state
+variables in definition (A.1), are different from those defined by Dynare: (i) the backward endogenous variables in Dynare refers to the union of the purely backward and the mixed endogenous variables, which is the endogenous state variables in our case, (ii) the state variables in Dynare
+41See again Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot (2011)
+39
+
+refer to the union of our endogenous state variables and the exogenous variables of the model. Based on the definition (A.1), the entries of the vector of the endogenous variables are ordered42
+
+such
+
+that
+
+the
+
+vector
+
+adymt =itsthyyyyetsttbttfmawwpitxddaicrtit=ionsyyytststtftawattdiec
+
+=
+
+ ytstatic   ytbwd 
+ytf wdendo
+
+=
+
+ytbwdendo ytf wdendo
+
+While all the partitions in yt are superscripted with the abbreviated names of the variable type,
+
+these superscripts can be considered as the indicator for the number of rows of that partition, for example, ytstatic is of dimension nstatic × 1.
+The definition (A.1) and the ordering of yt in the previous equation implies that the derivatives of the f function with respect to y-, y and y+ have the structure
+
+fy- =
+
+0
+ny×nstatic
+
+=
+
+0
+ny×nstatic
+
+fy-bwd fy-state
+
+fy-both
+
+0
+ny×n f wd
+
+0
+ny×n f wd
+
+fy = fystatic fybwd fymix fy f wd
+
+= fystatic fystate fy f wd
+
+= fybwdendo fy f wdendo
+
+fy+ =
+
+0
+ny×nstatic
+
+=
+
+0
+ny×nstatic
+
+0
+ny×nbwd
+0
+ny×nbwd
+
+fy+mix fy+ f wd fy+ f wdendo
+
+where the abbreviated names as subscripts can be considered as the indictor of the number of
+
+columns of that partition, for example, fy-bwd is of dimension ny × nbwd.
+
+B Coefficients of Nonlinear Moving Averages Recursive in the Minimal State Representation
+
+Here we apply the dimension reduction to the equations of Lan and Meyer-Gohde (2012b). As
+
+(B-1)
+
+0 = Et [ f (yt+1, yt , yt-1, t )]
+
+can be rewritten
+
+(B-2)
+
+0 = Et [ f (ytf+w1dendo, yt , yts-ta1te, t )]
+
+42This is the decision rule order of Dynare. See again Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot (2011).
+
+40
+
+For notational ease in derivations, we will define the vector xt, containing the complete set of
+
+variables (B-3)
+
+xt = ytf+ywts1y-dtate1tnedo t
+
+with the dimension nx × 1 with (nx = n f wdendo + ny + ns + ne). This differs from the vector of
+
+total variables in Lan and Meyer-Gohde (2012b) by allowing for the possibility, mentioned above, that only a subset of the variables in yt is present in t + 1, ytf+w1dendo, and only a subset in t - 1, yts-ta1te.
+With the policy function of the form (2), (3) and (4), we can write xt as
+
+(B-4)
+
+xt = x(, t+1, t , t-1, . . .)
+
+B.1 First Order Coefficients
+
+At first order, the approximation is
+
+
+
+(B-5)
+
+yt =y + yit-i
+
+i=0
+
+where we have already removed coefficients equal to zero.43 Accordingly, the task is to pin down
+
+yi. As it is serially uncorrelated vector of innovations, t can be represented by trivial infinite mov-
+ing average with the first or impact coefficient the identity matrix and all other coefficients zero.
+
+This makes the relation between endogenous variables and the underlying innovations different
+
+upon impact than in subsequent periods after a realization from the vector of innovations. Ac-
+
+cordingly, we split the problem in two: indices, i, greater than zero and i = 0. Accordingly, the
+
+first-order equation of Lan and Meyer-Gohde (2012b) becomes
+
+(B-6)
+
+fy-stateyis-ta1te + fyyi + fy+ f wdendoyif+w1dendo = 0
+
+for positive i and
+
+(B-7)
+
+fyy0 + fy+ f wdendoy1f wdendo + f = 0
+
+otherwise. We summarize the solutions in the following
+
+Proposition B.1. The solution to (B-6) and (B-7) takes the form
+
+(B-8)
+
+yi = ysi-ta1te  i > 0
+
+43Here y is zero, see Lan and Meyer-Gohde (2012b) and more generally in state space contexts, Jin and Judd (2002), Schmitt-Grohe´ and Uribe (2004), and Lan and Meyer-Gohde (2012a).
+
+41
+
+(B-9)
+
+y0 = 0
+
+Proof. yi solves the deterministic system (B-6) as studied by Anderson (2010) for positive i, with a unique solution  such that all the eigenvalues of state are inside the unit circle.44 Substituting
+
+this for y1 in (B-7) yields a linear equation in y0, whose solution we call 0. See the Appendix.
+
+B.2 Second Order Coefficients
+
+At second order, the approximation is
+
+(B-10)
+
+  yt
+
+=y +
+
+1 2 y2
+
+
++ yit-i
+i=0
+
++
+
+1 2
+
+
+y j,i(t- j
+j=0 i=0
+
+ t-i)
+
+where we have already removed coefficients equal to zero.45 Accordingly, the task is to pin down
+
+y j,i and y2 and we shall proceed in that order.
+
+The equation from Lan and Meyer-Gohde (2012b) for y j,i is now
+
+(B-11)
+
+fy-stateysjt-at1e,i-1
+
++
+
+fyy j,i
+
++
+
+fy+
+
+f
+
+wd end o y
+
+f wdendo j+1,i+1
+
++
+
+fx2 (x j
+
+
+
+xi)
+
+=
+
+0
+
+From (B-8), we rewrite the derivative of xt with respect to t-i as the product of a constant matrix
+
+and the vector of state variable coefficients from the first order
+
+(B-12)
+
+xi = yis-ta1te yi yif+w1dendo i  = 1yis-ta1te
+
+where 1 = Ins 
+
+ f wdendostate 
+
+
+0
+
+ns×ne
+
+i>0
+
+This reduces (B-11) to a difference equation system with inhomogenous terms in the first order
+
+coefficients of the endogenous state variables and homogenous coefficients identical to (B-6), the
+
+equation at first order. This is in line with the so-called pruning algorithm of Kim, Kim, Schaum-
+
+burg, and Sims (2008), though they are not entirely identical as we will show in section 4.
+
+Eliminating redundant calculations, y j,i can be split into three difference equations according to the different values that the indices j and i take on. The initial values (when j and/or i are zero)
+
+are handled separately, as in the first order case, by recognizing that the inhomogenous component
+
+associated with the zero index is a known constant
+
+(B-13)
+
+x0 =
+
+0
+ne×ns
+
+0
+
+ f wdendo0state 
+
+
+Ine
+
+We summarize the solutions in the following
+
+44See Villemot (2011) for details on solving the first order homogenous problem with the variable typology we have
+adapted here from Adjemian, Bastani, Juillard, Mihoubi, Perendia, Ratto, and Villemot's (2011) Dynare. 45Here y,i is zero, see footnote 43.
+
+42
+
+Proposition B.2. The solution to (B-11) takes the form
+
+(B-14) (B-15)
+
+y j,i = ysjt-at1e,i-1 + 22(ysjt-at1e  yis-ta1te) y j,0 = 20(ysjt-at1e  Ine)
+
+ i& j > 0  j>0
+
+(B-16)
+
+y0,0 = 00
+
+Proof. See the Appendix.
+
+The coefficient y0,i follows from the commutability of the matrix derivative operator and upon application of Magnus and Neudecker's (1979) commutation matrix, K, to reverse the order of
+
+Kronecker tensors. Accordingly
+
+(B-17)
+
+y0,i =02(Ine  ysjt-at1e), where 02  20Kns,ne
+
+The second order approximation also contains a constant correction for risk that is generically
+
+nonzero, see, e.g., Collard and Juillard (2001) or Schmitt-Grohe´ and Uribe (2004),
+
+Proposition B.3. y2 solves
+
+y2 = fystatic fy-bwd + fybwd fy-mix + fymix + fy+mix fy f wd + fy+ f wd -1
+
+(B-18)
+
+fy+ f wdendo0f0wdendo + f(y+ f wdendo)2 0f wdendo[2] Et t+[21]
+
+Proof. Direct verification of Lan and Meyer-Gohde's (2012b) equation for y2
+
+(B-19)
+
+y2 = -( fy- + fy + fy+ )-1[ fy+y0,0 + fy+2 y0[2]]Et t+[21]
+
+upon application of the variable typology here yields the desired result. This set of coefficients corrects for the risk of future shocks as captured by Et t+[21] , the
+
+(column vectorized) variance of next period's shocks.
+
+B.3 Third Order Coefficients
+
+The third order approximation of the policy function takes the form
+
+  yt(3)
+
+=y
+
++
+
+1 2 y2
+
++
+
+ i=0
+
+yi
+
++
+
+1 2
+
+y2,i
+
+t-i
+
++
+
+1 2
+
+
+y j,i(t- j
+j=0 i=0
+
+ t-i)
+
+(B-20)
+
+  +
+
+1 6
+
+ k=0
+
+ j=0
+
+ i=0
+
+yk,
+
+j,i(t-k
+
+
+
+t-
+
+j
+
+
+
+t-i)
+
+where again we have already removed coefficients equal to zero.46 Accordingly, the task is to pin
+
+down yk, j,i and y2,i.
+46Here y,i, j and y3 are zero, see again footnote 43. The latter follows from our assumption of normality, see Andreasen (2012) for a third order perturbation with nonnormal shocks and, consequently, nonzero third order constant risk corrects like y3
+
+43
+
+Lan and Meyer-Gohde's (2012b) equation for yk, j,i with nonzero k, j, and i is now given by47
+
+(B-21)
+
+fy-stateyskt-at1e, j-1,i-1 + fyyk, j,i + fy+ f wdendoykf+w1d,ejn+d1o,i+1 + 333sk, j,i = 0
+
+where the inhomogenous terms consists of the state spaces of all lower orders
+
+(B-22) sk, j,i =
+
+ykst-at1e, j-1  yis-ta1te +
+
+yskt-at1e  ysjt-at1e  yis-ta1te yskt-at1e,i-1  ysjt-at1e (Ine  Kne,ne) +
+
+ysjt-at1e,i-1  ykst-at1e
+
+mapped into (B-21) with the following constant matrix
+
+Kne2,ne
+
+(B-23)
+
+333 = fx3 1[3] + fx2 (22  1)(Ins3 + Ins  Kns,ns + Kns2,ns) fx2 1 [2]
+
+where (B-24)
+
+22 =
+
+0
+ns2×ns
+
+2 2
+
+ f wdendos2t2ate + 2f2wdendostate[2] 
+
+
+0
+ns2×ne
+
+and where K again is Magnus and Neudecker's (1979) commutation matrix.
+
+To eliminate redundant calculations, we split yk, j,i into four difference equations according
+
+to the different values that the indices k, j, and i take on and replace repeated coefficients with
+
+their lower order predecessors. The initial values (when k, j, and/or i are zero) are again handled
+
+separately by recognizing that the inhomogenous component associated with the zero index is a
+
+known constant.48 We summarize the solutions in the following
+
+Proposition B.4. The solution to (B-11) takes the form
+
+(B-25) (B-26) (B-27)
+
+yk, j,i = yskt-at1e, j-1,i-1 + 333 22 sk, j,i
+
+yk, j,0 = 330 20
+
+yskt-at1e  ysjt-at1e  Ine ykst-at1e, j-1  Ine
+
+yk,0,0 = 300 yskt-at1e  Ine2
+
+ i, j, &k > 0  k& j > 0 k>0
+
+(B-28)
+
+y0,0,0 = 000
+
+Proof. See the Appendix.
+
+The third order approximation also contains a time varying correction for risk that is generi-
+cally nonzero, see, e.g., Andreasen (2012), Ruge-Murcia (2012), or Caldara, Ferna´ndez-Villaverde,
+Rubio-Ram´irez, and Yao (2012). Analogously to the first order, y2,i must be split into two equations to respect the nonzero value of the shocks at impact. For nonzero i, the source equation can
+47See appendix H for the problem statement with zero k's, j's, and/or i's, which reduces the underlying state space to products of lower order state spaces.
+48As the calculation are rather onerous, the reader is directed to the Appendix for details and the second order calculations above for an example.
+
+44
+
+be written
+
+(B-29)
+
+fy-stateyst2a,tie-1 + fyy2,i + fy+ f wdendoyf w2,di+en1do
+
++ fx3 x~ [2]  1 + 2 fx2 x~  40f2wdendo
+
+Ine2  state + fx2 x~,~  1
+
++ fx 40f0w3dendo Ine2  state
+
+Et t+[21]  Ins + fx2 (x2  1) ysi-ta1te = 0
+
+where x~, x~,~, x2, 4, x~,i, and x~2,i are constant matrices and coefficients from previous calcula-
+
+tions. For i = 0, the source equation is
+
+fyy2,0 + fy+ f wdendoyf w2,d1endo + fx2 (x2  x0) (B-30) + fx3 x~ [2]  x0 + fx2 x~,~  x0 + 2 fx2 x~  x~,0 + fxx~2,0 where x~,0 and x~2,0 are coefficients from previous calculation
+We summarize the solutions in the following
+
+Et t+[21]  Ine = 0
+
+Proposition B.5. The solution to (B-29) and (B-30) takes the form
+
+(B-31) (B-32)
+
+y2,i = yst2a,tie-1 + 21yis-ta1te y2,0 = 20
+
+i>0
+
+Proof. The first equation follows directly as the homogenous component is identical to that of the
+
+first order with the first order itself being the inhomogenous component. The second follows from
+
+inserting the first into (B-30) and solving the resulting linear problem. See the Appendix.
+
+This set of coefficients corrects (up to first order) for the time varying conditional risk of future shocks as captured by Et t+[21] , the (column vectorized) variance of next period's shocks.
+
+C First Order Recursive Approximation Appendix
+
+We define (C-33)
+
+dyt(1)  yt(1) - y¯
+
+It follows that
+
+(C-34)
+
+dyt(1) =  yit-i
+
+i=0
+
+Evaluating and rearranging dyt(1) - dyt(-1)1state yields
+ dyt(1) - dyt(-1)1state =  yit-i -   yistatet-i-1 i=0 i=0
+
+45
+
+(C-35)
+
+
+= yi - yis-ta1te t-i i=0 
+=0t + yi - yis-ta1te t-i i=1
+=0t
+
+where the last line follows as yi = ysi-ta1te, i > 0 from the first order solution in proposition B.1.
+
+Therefore the state space representation of the first order approximation (11) takes the form
+
+(C-36)
+
+dyt(1) = dyt(-1)1state + 0t
+
+D Second Order Recursive Approximation Appendix
+
+Inserting the first order approximation (11) into the definition of the second order increment, (18),
+
+yields
+
+(D-37)
+
+dyt(2)
+
+=
+
+yt(2)
+
+- yt(1)
+
+-
+
+1 2 y2
+
+It follows (D-38)
+
+ dyt(2)
+
+=
+
+1 2
+
+
+y j,i(t- j
+j=0 i=0
+
+ t-i)
+
+Evaluating and rearranging dyt(2) - dyt(-2)1state yields
+
+   dyt(2)
+
+-
+
+dyt(-2)1state
+
+=
+
+1 2
+
+
+
+
+
+y j,i(t- j  t-i) - 
+
+ysjt-at1e,i-1(t- j  t-i)
+
+j=0 i=0
+
+j=0 i=0
+
+  =1
+2
+
+ j=1 i=1
+
+y j,i - ysjt-at1e,i-1
+
+
+(t- j  t-i) + y0,i(t  t-i)
+i=1
+
+(D-39)
+
++  y j,0(t- j  i) + y0,0t[2] j=1
+
+applying the second order solutions y j,i = ysjt-at1e,i-1 + 22(ysjt-at1e  yis-ta1te),  j, i > 0, y0,i = 02(Ine 
+
+ysi-ta1te),  j = 0, i > 0, y j,0 = 20(ysjt-at1e  Ine),  j > 0, i = 0 and noting 00 = y0,0
+
+  dyt(2)
+
+-
+
+dyt(-2)1state
+
+=1 2
+
+
+22
+j=1 i=1
+
+ysjt-at1e  yis-ta1te
+
+
+(t- j  t-i) + 02 (Ine  ysi-ta1te)(t  t-i)
+i=0
+
+(D-40)
+
++ 20  (ysjt-at1e  Ine)(t- j  i) + 00t[2] j=0
+
+which, using the mixed product rule can be rewritten as
+
+  dyt(2)
+
+-
+
+dyt(-2)1state
+
+=1 2
+
+
+22
+j=1 i=1
+
+ysjt-at1et- j  ysi-ta1tet-i
+
+
++ 02 (Inet  ysi-ta1tet-i)
+i=0
+
+46
+
+(D-41)
+
++ 20  (ysjt-at1et- j  Inei) + 00t[2] j=0
+
+=1 2
+
+22
+
+y0statet-1 + y1statet-2 + . . .
+
+
+
+y0statet-1 + ys1tatet-2 + . . .
+
++ 02t  ys0tatet-1 + ys1tatet-2 + . . .
+
++ 20 ys0tatet-1 + y1statet-2 + . . .  t + 00t[2]
+
+and from (11)
+
+(D-42)
+
+dyt(2)
+
+- dyt(-2)1state
+
+=
+
+1 2
+
+22dyts-ta1te[2] + 02
+
+t  dyts-ta1te
+
++ 20
+
+dyts-ta1te  t
+
++ 00t[2]
+
+The previous equation (17) can be further simplified by using yts-ta1te  t = Kns,ne t  yts-ta1te
+
+and 20 = 02Kne,ns
+
+(D-43)
+
+dyt(2)
+
+- dyt(-2)1state
+
+=
+
+1 2
+
+22dyts-ta1te[2] + 220
+
+dyt(-1)1state  t
+
++ 00t[2]
+
+D.1 Block Kronecker Expression of Second Order Coefficients
+
+Following Koning, Neudecker, and Wansbeek (1991), we define the block Kronecker product,
+
+denoted by , as (D-44)
+
+
+
+A  B11 . . . A  B1t
+
+A  B   ...
+
+... 
+
+A  Bs1 . . . A  Bst
+
+for a u × v matrix B consisting of blocks Bkl of size uk × vl, where u = sk=1 uk and v = tl=1 vl.
+
+This contrasts with the standard Kronecker product  
+
+
+
+B11  A . . . B1t  A
+
+b11A . . . b1vA
+
+(D-45)
+
+B  A   ...
+
+...  =  ...
+
+... 
+
+Bs1  A . . . Bst  A
+
+bu1A . . . buvA
+
+where b is used to distinguish the individual elements of B from the blocks defined above.
+
+Applying the properties of the block Kronecker product, we can connect yz2 and yystate2 yystate yystate y2
+
+through operations with Magnus and Neudecker's (1979) commutation matrix, denoted here by
+
+Ka,b, as follows
+
+
+
+
+
+yz2 dzt(1)[2] = yz2 
+
+Kns,ns+ne 0
+
+ne(ns+ne)×ns(ns+ne)
+
+0 ns(ns+ne)×ne(ns+ne)
+
+dyt(-1)1state
+
+Kne,ns+ne
+
+t
+
+
+
+dyt(-1)1state t
+
+(D-46)
+
+= yystate2
+
+yystate
+
+G2
+yystate y2 dzt(1)[2]
+
+47
+
+Accordingly,
+
+(D-47)
+
+yz2 G2 = yystate2 yystate yystate y2
+
+Hence, the block Kronecker product, through G2, allows us to extract the individual block second derivatives with respect to yts-ta1te and et from the matrix of second derivatives with respect to the entire state vector, zt.
+
+E Third Order Recursive Approximation Appendix
+
+Using the second order approximation (17), the definition of the third order increment, (26), can
+
+be written as (E-48)
+
+dyt(3) = yt(3) - yt(2)
+
+It follows
+
+(E-49)
+
+   dyt(3)
+
+=
+
+1 2
+
+
+y2,it-i
+i=0
+
++
+
+1 6
+
+ k=0
+
+
+yk, j,i(t-k
+j=0 i=0
+
+ t- j
+
+ t-i)
+
+Rearranging and evaluating dyt(3) - dyt(-3)1state yields
+
+dyt(3)
+
+-
+
+dyt(-3)1state
+
+=1 2
+
+ i=0
+
+y2,i2 - yst2a,tie-12
+
+t-i
+
+(E-50)
+
+  + 1   
+6 k=0 j=0 i=0
+
+yk, j,i - yskt-at1e, j-1,i-1
+
+(t-k  t- j  t-i)
+
+The first term on the right hand side of the previous equation can be written as
+
+(E-51)
+
+ y2,i2 - yst2a,tie-12 t-i = 20t + 21dyt(-1)1state
+i=0
+
+The second term can be written as
+
+ 
+   yk, j,i - ykst-at1e, j-1,i-1 (t-k  t- j  t-i)
+k=0 j=0 i=0
+
+ 
+  = yk,0,0(t-k  t  t ) + y0, j,0(t  t- j  t ) + y0,0,i(t  t  t-i) k=1 j=1 i=1
+
+
+
+
+
+
+
+     + yk, j,0(t-k  t- j  t ) + yk,0,i(t-k  t  t-i) + y0, j,i(t  t- j  t-i)
+
+k=1 j=1
+
+k=1 i=1
+
+j=1 i=1
+
+(E-52)
+ 
++  k=1 j=1 i=1
+
+yk, j,i - yskt-at1e, j-1,i-1
+
+(t-k  t- j  t-i) + y0,0,0(t  t  t )
+
+Each term can be converted into the corresponding state space representation. We will proceed
+
+48
+
+one by one (E-53)
+
+y0,0,0(t  t  t ) = 000 t[3]
+
+The triple sum, by commuting, can be written as
+
+ 
+   yk, j,i - ykst-at1e, j-1,i-1 (t-k  t- j  t-i)
+k=1 j=1 i=1
+
+ 
+  = 333sk, j,i(t-k  t- j  t-i) k=1 j=1 i=1
+
+ 
+  = 333,1 yskt-at1et-k  ysjt-at1et- j  yis-ta1tet-i k=1 j=1 i=1
+
+ 
++    22 k=1 j=1 i=1
+
+ykst-at1e, j-1  yis-ta1te (t-k  t- j  t-i)
+
++ ykst-at1e,i-1  ysjt-at1e (Ine  Kne,ne)(t-k  t- j  t-i)
+
++ ysjt-at1e,i-1  yskt-at1e Kne2,ne(t-k  t- j  t-i)
+
+(E-54)
+
+=333,1 dyt(-1)1state[3] + 622 dyt(-2)1state  dyt(-1)1state
+
+The following applies to, by commuting, all three of the single sums
+
+
+ yk,0,0(t-k  t  t )
+
+k=1 
+= 300 ykst-at1e  t-k (Ine2  t  t ) k=1
+
+(E-55)
+
+=300 dyt(-1)1state  t[2]
+
+The following applies to, by commuting, all three of the double sums
+
+
+  yk, j,0(t-k  t- j  t )
+
+k=1 j=1
+
+  
+= 330
+k=1 j=1
+
+yskt-at1e  ysjt-at1e  Ine yk-1, j-1  Ine
+
+(t-k  t- j  t )
+
+(E-56)
+
+=330,1 dyt(-1)1state[2]  t + 220 dyt(-2)1state  t
+
+Combining the above
+ 
+
+k=0 j=0 i=0
+
+yk, j,i - yskt-at1e, j-1,i-1
+
+(t-k  t- j  t-i)
+
+=333,1 dyt(-1)1state[3] + 000 t[3]
+
++ 3330,1 dyt(-1)1state[2]  t + 3300 dyt(-1)1state  t[2]
+
+49
+
++ 622 dyt(-2)1state  dyt(-1)1state + 620 dyt(-2)1state  t
+
+E.1 Block Kronecker Expression of Third Order Coefficients
+
+Similarly to the derivations at second order, we can connect yz3 and yystate3 yystate2 yystateystate y2ystate yystate2 yystate yystate2 y3
+
+with operations involving Magnus and Neudecker's (1979) commutation matrix, denoted here by
+
+Ka,b, following the definition of the block Kronecker product of Koning, Neudecker, and Wansbeek
+
+(1991) as follows  yz3dzt(1)[3] = yz3 
+
+Kns,(ns+ne)2 0
+
+ne(ns+ne)2 ×ns(ns+ne)2
+
+ 0 ns(ns+ne)2 ×ne(ns+ne)2  Kne,(ns+ne)2
+
+dzt(1)[2]
+
+ dzt(1)
+
+G31
+= yz3 G31 G2dzt(1)[2]  dzt(1)
+
+(E-57)
+
+= yz3 G31 [G2  Ins+ne] dzt(1)[3] = yz3 (Ins+ne  G2) G31dzt(1)[3]
+= y y y yystate3 ystate2 ystateystate 2ystate
+
+yystate2
+
+yystate
+
+yystate2
+
+y3 dzt(1)[3]
+
+where G2 was defined in the proof of the block Kronecker formulation of the second order approx-
+
+imation. Accordingly (E-58)
+yz3 (Ins+ne  G2) G31 = yystate3 yystate2 yystateystate y2ystate yystate2 yystate yystate2 y3
+
+As in the second order case, the block Kronecker product, through G2 and G31, allows us to extract the individual block third derivatives with respect to yts-ta1te and et from the matrix of third derivatives with respect to the entire state vector, zt.
+
+E.2 Proof of Proposition 4.5
+
+Our assumption of the existence of a nonlinear moving average policy function (2)
+
+(E-59)
+
+yt = y(, t, t-1, . . .)
+
+requires that the state space representation (37)
+
+(E-60)
+
+yt = g(, t, yts-ta1te)
+
+50
+
+can be "inverted" in the sense that recursive substitution of (37) in itself will deliver (2)
+
+(E-61)
+
+yt = g(, t, gstate(, t-1, . . .))  y(, t , t-1, . . .)
+
+yts-ta1te
+Thus, we can rewrite (37) by replacing with yt and yts-ta1te with (2), appropriately lagged and with
+
+the subvector of states selected for the latter. This gives
+
+(E-62)
+
+y(, t, t-1, . . .) = g(, t, ystate(, t-1, t-2, . . .))
+
+By differentiating (E-62) with respect to the arguments of the nonlinear moving average policy
+
+function (2), we will demonstrate the equivalence or difference of the coefficients in the recursive
+
+algorithms of section 3 with those of the pruning algorithms in section 4. At first order, we differentiate with respect to  and the sequence of shocks {t-i}i=0. Accord-
+ingly
+
+(E-63)
+
+y = g + gystate ystate
+
+which when evaluated at the deterministic steady state confirms49
+
+(E-64)
+
+g = 0  y = g = 0
+
+and with respect to the sequence of shocks
+
+(E-65)
+
+yi =
+
+gyst at e ysi-t a1t e g
+
+, for i > 0 , for i = 0
+
+comparing with (B-8), it follows by inspection that gystate =   yystate and g = 0  y
+
+At second order, we differentiate with respect to  twice,  and the sequence of shocks {t-i}i=0, and with respect to two sequences of shocks, {t-i}i=0 and t- j j=0.
+Beginning with the derivative with respect to  twice,
+
+(E-66)
+
+y2 = g2 + 2gystateystate + gystate2 ystate[2] + gystateyst2ate
+
+evaluating at the deterministic steady state yields
+
+(E-67)
+
+y2 = g2 + gystateyst2ate
+
+or, reexpressing the second term on the r.h.s in terms of the full vector of endogenous variables,
+
+(E-68)
+
+y2 = (Iny - gy)-1 g2
+
+as was claimed.
+
+49See Schmitt-Grohe´ and Uribe (2004), Jin and Judd (2002), and Lan and Meyer-Gohde (2012a).
+
+51
+
+With respect to  and the sequence of shocks {t-i}i=0, we obtain
+
+(E-69)
+
+yi =
+
+gystate yis-ta1te + gystate2 ystate  yis-ta1te + gystateystia-te1 gystateystate + g
+
+, for i > 0 , for i = 0
+
+evaluating at the deterministic steady state, gystate = 0 and g = 0 and50 recalling the results from
+
+the first order above
+
+(E-70)
+
+yi = 0
+
+With respect to two sequences of shocks gystateysjt-at1e,i-1 + gystate2 ysjt-at1e  yis-ta1te
+
+, for j, i > 0
+
+(E-71)
+
+y ji = ggys2tate ysjt-at1e  Ine
+
+, for j > 0, i = 051 , for j, i = 0
+
+comparing with (B-14), it follows by inspection that gystate2 = 22  yystate2 , gystate = 20  yystate,
+
+and g2 = 00  y2.
+
+This completes the proof that all coefficients in the second order pruning algorithms and re-
+
+cursive formulation of the nonlinear moving average are identical, except for the constant risk
+
+adjustment terms y2 and g2. The transitions follow immediately when setting all shock realizations to zero. For example, Kim, Kim, Schaumburg, and Sims's (2008) algorithm in lemma 4.3 in
+
+the absence of shocks is (E-72)
+
+yt(2) = y + dyt(2)
+
+where
+
+(E-73)
+
+dyt(2)
+
+=
+
+gyst at e d yt(-2)1st at e
+
++
+
+1 2
+
+g2
+
+with dy0(1) and dy0(2) initialized to zero. dyt(2) transitions from zero to (Iny - gy)-1 g2 and the same
+
+follows for yt(2) due to its linearity.
+
+E.3 Proof of Proposition 4.7
+
+Here we follow the proof of proposition 4.5 above. At third order, we have four derivatives:  thrice,  twice and a sequence of shocks,  once and two sequences of shocks, and three sequences of shocks. In our derivations, we will jump right to the equations evaluated in the deterministic
+steady state.
+50See again Schmitt-Grohe´ and Uribe (2004), Jin and Judd (2002), and Lan and Meyer-Gohde (2012a). 51The case i > 0, j = 0 follows symmetrically.
+
+52
+
+With respect to  thrice at the deterministic steady state
+
+(E-74)
+
+y3 = g3 + gystateyst3ate
+
+or, reexpressing the second term on the r.h.s in terms of the full vector of endogenous variables,
+
+(E-75)
+
+y3 = (Iny - gy)-1 g3
+
+as was claimed.
+
+With respect to  twice and a sequence of shocks and evaluating at the deterministic steady
+
+state (E-76)
+
+
+
+y2i
+
+=
+
+g2ystate yis-ta1te + gystate2 g2 + gystate yst2ate 
+
+yst2ate Ine
+
+
+
+ysi-ta1te
+
++ gystateyi-21state
+
+, for i > 0 , for i = 0
+
+comparing with (B-31) g2 +gystate yst2ate  Ine = 20  y2 and g2ystate +gystate2 yst2ate  Ins =
+
+21  y2ystate and, clearly, g2 = y2 and g2ystate = y2ystate .
+
+Derivatives with respect to  once and two sequences of shocks are zeros in both representa-
+
+tions,52 gystate2 = yystate2 = 0, gystate = yystate = 0, and g2 = y2 = 0.
+
+Finally, the terms with respect to three sequences of shocks,
+
+(E-77)
+
++gygstaytseta2t
+
+e
+
+yskt-at1e, j-1  ysi-ta1te + yskt-at1e, j-1,i-1 + gystate3
+
+ykst-at1e,i-1  ysjt-at1e yskt-at1e  ysjt-at1e 
+
+(Ine  yis-ta1te
+
+Kne,ne
+
+)
+
++
+
+ysjt-at1e,i-1
+
+
+
+ykst-at1e
+
+, for k, j, i > 0
+
+yk
+
+ji
+
+=
+
+gggyyss3tt
+
+ate ate2
+
+yskt-at1e, j-1  Ine yskt-at1e  Ine2
+
++ gystate2
+
+ykst-at1e  ysjt-at1e  Ine
+
+, for k, j > 0, i = 053 , for k > 0, j, i = 054 , for k, j, i = 0
+
+comparing with (B-25), gystate3 = 333  yystate3 , gystate2 = 330  yystate2, gystate2 = 300  yystate2 ,
+
+and g3 = 000  y3.
+
+This completes the proof that all coefficients in the third order pruning algorithm in lemma
+
+4.6 and recursive formulation of the nonlinear moving average are identical, except for the risk
+
+adjustment terms y3 and g3 as well as y2ystate and g2ystate. The transitions follow immediately when setting all shock realizations to zero, see the second order case.
+
+52See Andreasen (2012), Jin and Judd (2002), and Lan and Meyer-Gohde (2012a). 54The cases k, i > 0, j = 0 and i, j > 0, k = 0 follow symmetrically. 54The cases i > 0, k, j = 0 and j > 0, k, i = 0 follow symmetrically.
+
+53
+
+Online Appendix
+
+F First Order Coefficients Appendix
+
+We divide the problem into two cases, as the exogenous shocks are nonzero only upon impact.
+
+F.0.1 Case 1: i > 0
+
+Inserting (B-8) into (B-6), noting that i = 0 for all positive i. The coefficient matrix  solves a matrix quadratic problem and as our typology of variables follows that of Dynare, we refer to
+
+Villemot (2011) for details on how this problem can be solved efficiently.
+
+
+
+is
+
+partitioned
+
+as 
+ny×ns
+
+=
+
+ st  bmwixd 
+ f wd
+
+=
+
+ st  state
+ f wd
+
+=
+
+
+ 
+
+st  bwd 
+f wdendo
+
+=
+
+bwdendo  f wdendo
+
+bstwd mstix 
+
+= bmbbwwwixddd
+
+bmwixd mmiixx
+
+
+
+=
+
+bbwwddendo 
+bfwwddendo
+
+mbwixdendo  
+mf wixdendo
+
+bfwwdd mf wixd For stability, we assume that the square partition state has eigenvalues all inside the unit circle.
+
+F.0.2 Case 2: i = 0
+
+The
+
+impact
+
+effect
+
+of
+
+shocks
+
+on
+
+yt
+
+is
+
+0
+
+which
+
+can
+
+be 0st
+
+partitioned
+
+as
+
+(F-1)
+
+0 = s0tate
+
+0f wd
+
+When i = 0, the source equation reduces to
+
+(F-2)
+
+fyy0 + fy+ f wdendoy1f wdendo + f = 0
+
+inserting (B-8) in the previous equation and collecting terms yieldss0t 
+
+(F-3)
+
+fyst fystate + fy+ f wdendo f wdendo fy f wd s0tate = - f
+
+A 0f wd
+
+54
+
+Solving for 0 therefore is a standard linear problem
+
+(F-4)
+
+0 = -A-1 f
+
+G Second Order Coefficients Appendix
+
+G.1 Solving the Unknown Coefficient y j,i
+To avoid unnecessary repetitive calculation, we split the derivation of y j,i into three parts according to the different values that the indices j and i take on. This enables us to use smaller state spaces to construct the solutions.
+
+G.1.1 Case 1: j > 0 and i > 0
+
+Note that the derivative of xt with respect to t-i can be written as the product of a constant matrix
+
+and the vector of state variables
+
+(G-5) (G-6)
+
+xi = 1yis-ta1te  yis-ta1te 
+where xi = yif+w1ydiendo , i
+
+1
+
+=
+
+
+
+Ins
+
+
+
+f
+
+ wdendostat
+
+e
+
+0
+ne×ns
+
+Using the previous equation, the source equation takes the form
+
+(G-7)
+
+fy-stateysjt-at1e,i-1
+
++
+
+fyy j,i
+
++
+
+fy+
+
+f
+
+wdendo
+
+y
+
+f wdendo j+1,i+1
+
++
+
+fx2 1[2](ysjt-at1e
+
+
+
+yis-ta1te)
+
+=
+
+0
+
+The solution takes the form
+
+(G-8)
+
+y j,i = ysjt-at1e,i-1 + 22(ysjt-at1e  yis-ta1te)
+
+where 22 can be partitioned as (G-9)
+
+ s2t2  22 = 2bm2w22ixd 
+2f2wd
+
+With
+
+this
+
+partition,
+
+the
+
+recursion
+
+of
+
+y
+
+f wdendo j+1,i+1
+
+takes
+
+the
+
+form
+
+(G-10)
+
+y
+
+f wdendo j+1,i+1
+
+=
+
+
+
+f
+
+wdendostateysjt-at1e,i-1
+
++
+
+ f wdendos2t2ate + 2f2wdendostate[2]
+
+(ysjt-at1e  ysi-ta1te)
+
+Inserting the solution (G-8) and (G-10) in the source equation and matching coefficients yields
+
+the following
+
+(G-11)
+
+fy22 + fy+ f wdendo  f wdendo2st2ate + 2f2wdendostate[2] + fx2 1[2] = 0
+
+55
+
+Again using the partition of 22 and collecting terms yields the following equation in two
+
+unknowns
+
+fyst fybwd + fy+ f wdendobfwwddendo 2bw2 dendo + fymix + fy+ f wdendomf wixdendo fy f wd 2f2wdendo
+
+(G-12) + fy+mix
+
+A
+fy+ f wd 2f2wdendostate[2] + fx2 1[2] = 0
+
+B
+
+C
+Using AO to denote the null space of A and pre-multiplying the previous equation by AO yields
+
+the following Sylvester equation in 2f2wdendo
+
+(G-13)
+
+(AOB)2f2wdendo + (AOC)2f2wdendostate[2] + AO fx2 1 [2] = 0
+
+With 2f2wdendo in hand, solving b2w2 dendo is a standard linear problem
+
+(G-14)
+
+b2w2 dendo = -pinv(A) B2f2wdendo + C2f2wdendostate[2] + fx2 1[2]
+
+where pinv(A) represents the Moore-Penrose inverse of A.
+
+G.1.2 Case 2: j > 0 and i = 0
+
+Notice that (G-15)
+
+ 
+
+
+
+00
+
+x0
+
+=
+
+y1fnws×d0ennedo
+
+=
+
+
+
+f
+
+ns×ne
+0 wd end o 0st at
+
+e
+
+Ine Ine
+
+which is a known constant matrix given the results from the first order results,55 and the source
+
+equation takes the form
+
+(G-16)
+
+fyy j,0
+
++
+
+fy+
+
+f
+
+wdendo
+
+y
+
+f wdendo j+1,1
+
++
+
+fx2 (x j
+
+
+
+x0)
+
+=
+
+0
+
+The solution (G-8) implies y1f,wi+de1ndo takes the form
+
+(G-17)
+
+y
+
+f wdendo j+1,1
+
+=
+
+ f wdendoysjt,a0te
+
++
+
+2f2wdendo(ysjtate
+
+ s0tate)
+
+Inserting the previous equation in the source equation(G-16) and collecting terms yields
+
+fyst fystate + fy+ f wdendo f wdendo fy f wd yysjts,ja0t,0te
+
+A
+
+y
+
+f wd j,0
+
+y j,0
+
+55 While the first zero block should be removed from x0 in order to further reduce the size of the state space in this case, we choose to keep it as otherwise the dimension of x0 is different from that of xi. This difference requires additional efforts in indexing the variables when coding the method.
+
+56
+
+(G-18)
+
++ fy+ f wdendo2f2wdendo(state  0state) + fx2 (1  x0) (ysjt-at1e  Ine) = 0
+
+The solution of y0,i takes the form
+
+(G-19)
+
+y j,0 = 20 (ysjt-at1e  Ine)
+ny×(nens)
+
+Inserting the previous equation in the source equation (G-18) and matching coefficient yields
+
+(G-20)
+
+A20 = - fy+ f wdendo2f2wdendo(state  0state) + fx2 (1  x0)
+
+which is a standard linear equation in the unknown coefficient 20
+
+(G-21)
+
+20 = -A-1 fy+ f wdendo2f2wdendo(state  0state) + fx2(1  x0)
+
+The coefficient, y0,i, can be computed by exploiting the commutability of the matrix derivative
+
+operator
+
+(G-22) with
+
+y0,i =y j,0Kne,ne = 20(ysjt-at1e  Ine)Kne,ne =20Kns,ne(Ine  ysjt-at1e)Kne,neKne,ne =02(Ine  ysjt-at1e)
+
+(G-23)
+
+02 = 20Kns,ne
+
+G.1.3 Case 3: j = 0 and i = 0
+
+In this case the source equation (B-11) takes the form
+
+(G-24)
+
+fyy0,0 + fy+ f wdendoy1f,w1dendo + fx2 x0 [2] = 0
+
+The solution (G-8) implies y1f,w1dendo takes the form
+
+(G-25)
+
+y1f,w1dendo =  f wdendoy0st,a0te + 2f2wdendo0state[2]
+
+Inserting the previous equation in the source equation (G-24) and collecting terms yields
+
+(G-26)
+fyst fystate + fy+ f wdendo f wdendo
+A
+
+ fy f wd yy0s0st,at0,0te + fy+ f wdendo2f2wdendo0state[2] + fx2 x0 [2] = 0
+y0f,w0d
+
+y0,0
+Solving y0,0 therefore is a standard linear problem
+
+(G-27)
+
+y0,0 = -A-1 fy+ f wdendo2f2wdendos0tate[2] + fx2 x0[2]
+
+For the consistency of notation between the moving average and state space representations of
+
+57
+
+the second order approximation of the policy function, we let
+
+(G-28)
+
+00 = y0,0
+
+G.2 Solving the Unknown Coefficient y2
+
+The source equation takes the form
+
+(G-29)
+
+y2 = -( fy- + fy + fy+ )-1[ fy+y0,0 + fy+2 y0[2]]Et t+[21]
+
+Making use of the special structure of fy-, fy and fy+ and collecting terms yields
+
+y2 = fyst fy-bwd + fybwd fy-mix + fymix + fy+mix fy f wd + fy+ f wd -1
+
+(G-30)
+
+fy+ f wdendo0f0wdendo + f(y+ f wdendo)2 0f wdendo[2] Et t+[21]
+
+H Third Order Coefficients Appendix
+
+Given the results from lower orders, including that terms linear in the perturbation parameter are
+
+zero, the third order approximation of the policy function takes the form
+
+  yt(3)
+
+=y
+
++
+
+1 2 y2
+
++
+
+ i=0
+
+yi
+
++
+
+1 2
+
+y2,i
+
+t-i
+
++
+
+1 2
+
+
+y j,i(t- j
+j=0 i=0
+
+ t-i)
+
+(H-31)
+
+  +
+
+1 6
+
+ k=0
+
+ j=0
+
+ i=0
+
+yk,
+
+j,i(t-k
+
+
+
+t-
+
+j
+
+
+
+t-i)
+
+The task at hand is to pin down some third derivatives of the policy function, including yk, j,i,
+
+y2,i.
+
+H.1 Solving the Unknown Coefficient yk, j,i
+As in the second order case, to avoid redundant calculations, we split the derivation of yk, j,i into four parts according to the different values that the indices k, j and i take on.
+
+H.1.1 Case 1: k > 0, j > 0 and i > 0
+
+Note the second derivative of xt vector, x j,i can be written as the product of a constant matrix and
+
+the second order state space S j,i
+
+(H-32)
+
+x j,i = 2S j,i
+
+58
+
+(H-33)
+
+ ysjt-at1e,i-1 
+
+where x j,i = y fj+wy1dj,e,iin+d1o , S j,i =
+
+ysjt-at1e,i-1 ysjt-at1e  yis-ta1te
+
+0
+
+ ne×ne2
+
+
+
+Ins 0
+
+2
+
+=
+
+
+
+f
+
+ wdendostate
+
+
+
+f
+
+wdendo
+
+s2t2at
+
+e
+
+ns×ns2
+22 + 2f2wdendo
+
+st
+
+at
+
+e[2]
+
+
+
+00
+
+ne×ns
+
+ne×ns2
+
+In particular, let (H-34)
+
+
+
+0
+
+22
+
+=
+
+
+
+f
+
+wdendo2st2ate
+
+ns×ns2
+22 + 2f2wdendo
+
+st
+
+at
+
+e[2]
+
+
+
+0
+
+ne×ns2
+
+then 2 can be written as
+
+(H-35)
+
+2 = 1 22
+
+which implies
+
+(H-36)
+
+2  1 = 1 [2] 22  1
+
+This is a very useful property for avoiding redundant computations in solving for the coefficients
+
+of the third order approximation. The third order state space consists of the state spaces of all lower
+
+orders (H-37)
+
+ yskt-at1e  ysjt-at1e  ysi-ta1te 
+
+Sk, j,i = 
+
+ysjt-at1e
+
+Sk, j   Sk,i
+
+ysi-ta1te (Kne,ne
+
+
+
+Ine)
+
+ykst-at1e  S j,i
+
+By constructing (H-38)
+
+the
+
+following3co=nstan100t[3m] atr2ix00
+
+1
+
+0 0 1  2
+
+
+
+0
+
+0 0
+
+
+
+00
+
+0 1  2
+
+the source equation can be written as
+
+(H-39) fy-stateyskt-at1e, j-1,i-1 + fyyk, j,i + fy+ f wdendoykf+w1d,ejn+d1o,i+1 + fx3 fx2 fx2 fx2 3Sk, j,i = 0 The state space for the third order approximation, Sk, j,i, can be further reduced using (H-36),
+
+59
+
+the partition of 2. Multiplying out the last term of the previous equation yields56 fx3 fx2 fx2 fx2 3Sk, j,i = fx3 1[3] yskt-at1e  ysjt-at1e  ysi-ta1te + fx2 (2  1)(Sk, j  ysi-ta1te) + fx2 (1  2) ysjt-at1e  Sk,i Kne,ne2 (Ine  Kne,ne)
+
+(H-40)
+
++ fx2 (1  2) ykst-at1e  S j,i
+
+Using (H-35) and (H-36), terms on the right hand side of the previous equation can be written
+
+as (H-41)
+fx2 (2  1)(Sk, j  yis-ta1te) = fx2 1[2] yskt-at1e, j-1  ysi-ta1te + (22  1) yskt-at1e  ysjt-at1e  yis-ta1te
+(H-42) fx2 (1  2) ysjt-at1e  Sk,i Kne,ne2 (Ine  Kne,ne)
+= fx2 1[2] yskt-at1e,i-1  ysjt-at1e (Ine  Kne,ne) + (22  1)(Ins  Kns,ns) yskt-at1e  ysjt-at1e  ysi-ta1te
+(H-43) fx2 (1  2) yskt-at1e  S j,i
+= fx2 1[2] ysjt-at1e,i-1  yskt-at1e Kne2,ne + (22  1)Kns2,ns yskt-at1e  ysjt-at1e  yis-ta1te
+therefore
+
+fx3 fx2 fx2 fx2 3Sk, j,i = fx31[3] + fx2 (22  1) + fx2 (22  1)(Ins  Kns,ns) + fx2 (22  1)Kns2,ns yskt-at1e  ysjt-at1e  yis-ta1te
++ fx2 1[2] yskt-at1e, j-1  yis-ta1te + ykst-at1e,i-1  ysjt-at1e (Ine  Kne,ne) + ysjt-at1e,i-1  ykst-at1e Kne2,ne
+(H-44) =333sk, j,i
+
+with
+
+(H-45)
+
+333 = fx3 1[3] + fx2 (22  1)(Ins3 + Ins  Kns,ns + Kns2,ns) fx2 1 [2]
+
+where sk, j,i is the state space for the third order approximation defined in (B-22) that replaces the
+
+larger Sk, j,i, and the source equation (H-39) can therefore be written as
+
+(H-46)
+
+fy-stateykst-at1e, j-1,i-1 + fyyk, j,i + fy+ f wdendoykf+w1d,ejn+d1o,i+1 + 333sk, j,i = 0
+
+The solution takes the form
+
+(H-47)
+
+yk, j,i = yskt-at1e, j-1,i-1 + 333sk, j,i
+
+56We will make repeated use of the fact that Kne,ne  Ine = (Kne,ne  Ine)(Ine  Kne,ne)(Ine  Kne,ne) = Kne,ne2 (Ine  Kne,ne), see Lan and Meyer-Gohde (2012b), as this last representation will prove better suited to our needs.
+
+60
+
+which implies
+
+(H-48) ykf+w1d,ejn+d1o,i+1 =  f wdendostateyskt-at1e, j-1,i-1 +  f wdendo3st3a3te sk, j,i + 3f3w3dendosk+1, j+1,i+1
+
+where
+
+(H-49)
+
+
+
+sk+1, j+1,i+1 = state[2]
+
+state[3] yskt-at1e  ysjt-at1e  yis-ta1te ykst-at1e, j-1  yis-ta1te + ykst-at1e,i-1  ysjt-at1e (Ine  Kne,ne) +
+
+ysjt-at1e,i-1  yskt-at1e
+
++ s2t2ate  state (Ins3 + Ins  Kns,ns + Kns2,ns) yskt-at1e  ysjt-at1e  yis-ta1te
+
+With 333 conformably partitioned, the last term in (H-48) takes the form
+
+ Kne2,ne 
+
+(H-50) 3f3w3dendosk+1, j+1,i+1
+
+=
+
++3f3w3d,2endo
+
+3f3w3d,1endostate[3] s2t2ate  state (Ins3 + Ins  Kns,ns + Kns2,ns)
+
+therefore (H-48) can be written as
+
+(H-51)
+
+3f3w3d,2endostate[2] sk, j,i
+
+ykf+w1d,ejn+d1o,i+1
+
+= f wdendostateyskt-at1e, j-1,i-1
+
++
+
+ f wdendos3t3a3t,e1 + 3f3w3d,1endostate[3] +3f3w3d,2endo s2t2ate  state (Ins3 + Ins  Kns,ns + Kns2,ns)
+
+ f wdendo3st3a3t,e2 +3f 3w3d,2end o st at e[2]
+
+sk, j,i
+
+Inserting the solution (H-47) and (H-51) in the source equation (B-21) and matching coeffi-
+
+cients yields (H-52)
+
+fy333,1 fy333,2
+
++ fy+ f wdendo
+
+ f wdendos3t3a3t,e1 + 3f3w3d,1endostate[3] +3f3w3d,2endo s2t2ate  state (Ins3 + Ins  Kns,ns + Kns2,ns)
+
++ 333 = 0
+
+ f wdendos3t3a3t,e2 +3f3w3d,2endostate[2]
+
+which consists of two blocks. The second block takes the form
+
+(H-53)
+
+fy333,2 + fy+ f wdendo  f wdendos3t3a3t,e2 + 3f3w3d,2endostate[2] + fx2 1[2] = 0
+
+Partitioning 333,2 conformably (in rows) and collecting terms yields the following equation in
+
+two unknowns (H-54)
+fyst fybwd + fy+ f wdendobfwwddendo b3w33d,e2ndo + fymix + fy+ f wdendomf wixdendo
+
+fy f wd 3f3w3d,2endo
+
+AB
+
+61
+
++ fy+mix fy+ f wd 3f3w3d,2endostate[2] + fx2 1 [2] = 0
+
+C
+noting that the coefficients in (H-54) are identical to those in (G-12). As in section G.1.1, we
+
+pre-multiply the null space AO through the previous equation to obtain the Sylvester equation in
+
+3f3w3d,2endo (H-55)
+
+(AOB)3f3w3d,2endo + (AOC)3f3w3d,2endostate[2] + AO fx2 1[2] = 0
+
+As the coefficients in the previous Sylvester equation are identical to those in (G-13), it follows
+
+immediately that
+
+(H-56)
+
+3f3w3d,2endo = 2f2wdendo
+
+Given 3f3w3d,2endo, solving b3w33d,e2ndo is a standard linear problem
+
+(H-57)
+
+b33w3d,e2ndo = -pinv(A) B3f3w3d,2endo + C3f3w3d,2endostate[2] + fx2 1[2]
+
+It follows
+
+(H-58) Hence
+
+3b3w3d,e2ndo = b22wdendo
+
+(H-59)
+
+333,2 = 22
+
+Given 333,2, the first block of (H-52) takes the form
+
+(H-60)
+
+fy333,1 + fy+ f wdendo  f wdendo3st3a3t,e1 + 3f3w3d,1endostate[3] + D3 = 0
+
+where (H-61) D3 = fx3 1 [3] +
+
+fx2(22  1) + fy+ f wdendo2f2wdendo s2t2ate  state
+
+(Ins3 + Ins  Kns,ns + Kns2,ns)
+
+Partitioning 333,1 conformably (in rows) and collecting terms yields the following equation in
+
+two unknowns
+
+fyst fybwd + fy+ f wdendobfwwddendo b3w33d,e1ndo + fymix + fy+ f wdendomf wixdendo fy f wd 3f3w3d,1endo
+
+(H-62) + fy+mix
+
+A
+fy+ f wd 3f3w3d,1endostate[3] + D3 = 0
+
+B
+
+C
+Pre-multiplying the null space AO through the previous equation yields a Sylvester equation in
+
+3f3w3d,1endo (H-63)
+
+(AOB)3f3w3d,1endo + (AOC)3f3w3d,1endostate[3] + AOD3 = 0
+
+62
+
+Given 3f3w3d,1endo, solving b3w33d,e1ndo is a standard linear problem
+
+(H-64)
+
+b33w3d,e1ndo = -pinv(A) B3f3w3d,1endo + C3f3w3d,1endostate[3] + D3
+
+H.1.2 Case 2: k = 0, j = 0 and i = 0
+
+Note that (H-65)
+
+0 x0,0 = y1nf,wsy1×d0,ne0ne2do
+
+0
+ne×ne2
+
+which is a known constant matrix given the lower order results. The source equation takes the form
+
+fyy0,0,0+ fy+ f wdendoy1f,w1d,1endo + fx3 x0 [3] + fx2 (x0,0  x0)
+
+(H-66)
+
++ fx2 (x0  x0,0) (Kne,ne  Ine) + fx2 (x0  x0,0) = 0
+
+Note that rolling the solution (H-47) one period forward and taking only the forward endoge-
+
+nous variables part yields
+
+(H-67)
+
+y1f,w1d,1endo =  f wdendoy0st,a0t,e0 + 3f3w3dendos1,1,1
+
+where s1,1,1 can be obtained by setting k = j = i = 1 in (B-22)
+
+(H-68)
+
+s1,1,1 =
+
+y0st,a0te  ys0tate
+
+y0state[3] Ine3 + Ine  Kne,ne + Kne2,ne
+
+As all the terms on the right hand side of the previous equation are known, s1,1,1 is a known
+
+constant matrix. Inserting (H-67) in the source equation (H-66) and collecting terms yields
+
+(H-69) fyst fystate + fy+ f wdendo f wdendo fy f wd y0,0,0
+
+A
+= - fy+ f wdendo3f3w3dendos1,1,1 + fx3 x0 [3] + fx2 (x0,0  x0) Ine3 + Ine  Kne,ne + Kne2,ne
+Solving y0,0,0 is therefore a standard linear problem (H-70) y0,0,0 = -A-1 fy+ f wdendo3f3w3dendos1,1,1 + fx3 x0[3] + fx2 (x0,0  x0) Ine3 + Ine  Kne,ne + Kne2,ne
+For notational consistency, we let
+
+(H-71)
+
+000 = y0,0,0
+
+63
+
+H.1.3 Case 3: k > 0, j = 0 and i = 0
+
+Note that (H-72)
+
+0
+
+x
+
+j,0
+
+=
+
+y
+
+ns×ne2
+y j,0
+f wdendo j+1,1
+
+
+
+0
+ne×ne2
+
+and from the solution (G-10) and (B-17)
+
+(H-73)
+
+y
+
+f wdendo j+1,1
+
+=
+
+ f wdendo2st0ate + 2f2wdendo
+
+state  0state
+
+ysjt-at1e  Ine
+
+x j,0 can be written as the product of a constant matrix and a particular first order state space
+
+(H-74) (H-75)
+
+x j,0 = 20 ysjt-at1e  Ine 
+
+0
+
+
+
+where
+
+20
+
+=
+
+
+
+f
+
+wdendo2st0ate
+
+ns×(nsne)
+20 + 2f2wdendo
+
+state  s0tate
+
+
+
+0
+
+ne×(nsne)
+
+The source equation takes the form
+
+(H-76)
+
+fyyk,0,0 + fy+ f wdendoykf+w1d,e1n,d1o + fx3
+
+fx2
+
+fx2
+
+fx2
+
+ 
+
+x0
+
+
+
+xk  x0 [2] xk,0  x0 xk,0 (Kne,ne
+
+
+
+ Ine)
+
+=
+
+0
+
+xk  x0,0
+
+Using the constant matrices we defined and rearranging, the previous equation can be rewritten
+
+(H-77)
+
+
+
+fyyk,0,0 + fy+ f wdendoykf+w1d,e1n,d1o + fx3
+
+fx2
+
+fx2
+
+fx2
+
+Knx,nx
+
+1  x0[2]
+(20  x0) (20  x0) (Ins
+
+yskt-at1e  Ine2 ykst-at1e  Ine2  Kne,ne) ykst-at1e
+
+
+
+Ine2
+
+ = 0
+
+(1  x0,0) yskt-at1e  Ine2
+
+collecting terms and noting fx2 = fx2Knx,nx yields
+
+fyyk,0,0 + fy+ f wdendoykf+w1d,e1n,d1o
+
++ fx3 1  x0[2] + fx2 (20  x0) (Insne2 + Ins  Kne,ne) + fx2 (1  x0,0) yskt-at1e  Ine2
+
+(H-78) = 0
+
+Note that, from the solution (H-47)
+
+(H-79)
+
+ykf+w1d,e1n,d1o =  f wdendoykst,a0t,0e + 3f3w3dendosk+1,1,1
+
+64
+
+where (H-80)
+
+ sk+1,1,1 = 
+
+2st0at
+
+e
+
+
+
+state  0state[2] s0tate (Insne2 + Ins
+
+
+
+Kne,ne
+
+ )
+
+ykst-at1e  Ine2
+
++ s0t0ate  state Kne2,ns
+
+The solution (H-79) therefore can be written as
+
+(H-81)
+
+ykf+w1d,e1n,d1o
+
+= f wdendoyskt,a0t,0e 
++ 3f3w3dendo 
+
+s2t0ate
+
+
+
+state  0state[2] 0state (Insne2 + Ins
+
+
+
+ Kne,ne)
+
+ykst-at1e  Ine2
+
++ 0st0ate  state Kne2,ns
+
+Inserting the previous equation in the source equation (H-78) and collecting terms yields
+
+(H-82)
+
+fyst fystate + fy+ f wdendo f wdendo fy f wd yk,0,0
+
+A
+
+= - fx3 1  x0 [2] + fx2 (20  x0) (Insne2 + Ins  Kne,ne) + fx2 (1  x0,0)
+
+ + fy+ f wdendo3f3w3dendo 
+
+s2t0at
+
+e
+
+
+
+st 0stat
+
+at e
+
+e  0stat (Insne2
+
+e[2]
++ Ins
+
+
+
+Kne,ne
+
+ )
+
++ 0st0ate  state Kne2,ns
+
+ykst-at1e  Ine2
+
+Solving yk,0,0 is then a standard linear problem, and it is obvious that yk,0,0 takes the form
+
+(H-83)
+
+yk,0,0 = 300 ykst-at1e  Ine2
+
+where
+
+(H-84) 300 = -A-1 fx3 1  x0[2] + fx2 (20  x0) (Insne2 + Ins  Kne,ne) + fx2 (1  x0,0)
+
++
+
+ fy+ f wdendo3f3w3dendo 
+
+2st0at
+
+e
+
+
+
+state  0state[2] 0state (Insne2 + Ins
+
+
+
+Kne,ne
+
+ )
+
++ s0t0ate  state Kne2,ns
+
+The two associated coefficients, i.e., y0, j,0 and y0,0,i can be obtained by commuting yk,0,0
+
+(H-85)
+
+y0, j,0 =yk,0,0 (Kne,ne  Ine) = 300 yskt-at1e  Ine2 (Kne,ne  Ine)
+
+=300 (Kns,ne  Ine) Ine  yskt-at1e  Ine
+
+(H-86)
+
+y0,0,i =yk,0,0Kne,ne2 = 300 yskt-at1e  Ine2 Kne,ne2
+
+=300Kns,ne2 Ine2  yskt-at1e
+
+65
+
+therefore (H-87) (H-88)
+(H-89) (H-90)
+
+y0, j,0 = 030 Ine  ysjt-at1e  Ine y0,0,i = 003 Ine2  yis-ta1te where 030 = 300 (Kns,ne  Ine) 003 = 300Kns,ne2
+
+H.1.4 Case 4: k > 0, j > 0 and i = 0
+
+The source equation takes the form
+
+
+
+xk  x j  x0
+
+(H-91)
+
+fyyk, j,0 + fy+ f wdendoykf+w1d,ejn+d1o,1 + fx3
+
+fx2
+
+fx2
+
+fx2
+
+
+
+x
+
+j
+
+
+
+xk, xk,0
+
+j  x0 (Kne,ne
+
+
+
+Ine)
+
+=
+
+0
+
+xk  x j,0
+
+Using the constant matrices we defined and rearranging, the previous equation can be written
+
+as
+
+(H-92)
+
+
+
+fyyk, j,0 + fy+ f wdendoykf+w1d,ejn+d1o,1 + fx3
+
+fx2
+
+fx2
+
+fx2
+
+(1
+
+
+
+1[2]  x0 ykst-at1e  ysjt-at1e (2  x0) Sk, j  Ine
+20) (Kns,ns  Ine) ykst-at1e 
+
+ Ine ysjt-at1e
+
+
+
+Ine
+
+ = 0
+
+(1  20) ykst-at1e  ysjt-at1e  Ine
+
+collecting terms yields
+
+(H-93)
+
+fyyk,0,0 + fy+ f wdendoykf+w1d,e1n,d1o + fx3 1 [2]  x0
++ fx2 (1  20) (Ins2ne + Kns,ns  Ine) =0
+
+fx2 (2  x0)
+
+yskt-at1e  ysjt-at1e  Ine Sk, j  Ine
+
+Using (H-36), the partition of 2, the previous equation can be further reduced to
+
+(H-94)
+
+fyyk,0,0 + fy+ f wdendoykf+w1d,e1n,d1o
+
++
+
++
+
+fx2
+
+(1
+
+
+
+fx3 20
+
+)
+
+1[2]  (Ins2ne
+
+x0 +
+
+Kns,ns
+
+
+
+Ine
+
+)
+
++ fx2 (22  x0)
+
+=0
+
+
+
+ fx2 (1  x0)
+
+ykst-at1e  ysjt-at1e  Ine yk-1, j-1  Ine
+
+66
+
+Note that, from the solution (H-47)
+
+(H-95)
+
+ykf+w1d,ejn+d1o,1 =  f wdendoyskt,ajt,0e + 3f3w3dendosk+1, j+1,1
+
+where
+
+(H-96)
+
+sk+1, j+1,1
+
+
+
+=  2st2ate  0state +
+
+state[2]  0state yskt-at1e  ysjt-at1e  Ine s2t0ate  state (Ins  Kne,ns + Knsne,ns) yskt-at1e  ysjt-at1e  Ine
+
+
+
++ state  s0tate yskt-at1e, j-1  Ine
+
+With 333 conformably partitioned, the last term in the solution (H-95) takes the form
+
+(H-97)
+
+3f3w3dendosk+1, j+1,1
+
+=
+
++2f2wdendo
+
+3f3w3d,1endo state[2]  s0tate 2st2ate  s0tate + 2st0ate  state (Ins  Kne,ns + Knsne,ns)
+
+2f2wdendo state  s0tate
+
+ykst-at1e  ysjt-at1e  Ine ykst-at1e, j-1  Ine
+
+Inserting the previous equation in the source equation (H-94) and collecting terms yields
+
+(H-98)
+
+fyst fystate + fy+ f wdendo f wdendo fy f wd yk, j,0
+
+=-
+
+A
+
++
+
+fx2
+
+(1
+
+
+
+fx3 20)
+
+1 [2]  (Ins2ne
+
+x0 +
+
+Kns,ns
+
+
+
+Ine
+
+)
+
+ 
+
+ + 
+
++ fx2 (22  x0)
+fy+ f wdendo 3f3w3d,1endo state[2]  0state +2f2wdendo s2t2ate  0state
+
+fx2 (1  x0)
+
+ 
+
++2f2wdendo 2st0ate  state (Ins  Kne,ns + Knsne,ns)
+
+fy+ f wdendo2f2wdendo state  s0tate
+
+yskt-at1e  ysjt-at1e  Ine ykst-at1e, j-1  Ine
+
+Solving yk, j,0 therefore is a standard linear problem and yk, j,0 takes the form
+
+(H-99)
+
+yk, j,0 = 330
+
+ykst-at1e  ysjt-at1e  Ine ykst-at1e, j-1  Ine
+
+67
+
+where
+
+(H-100) 330 = - A-1
+
+
+
++
+
+fx2
+
+(1
+
+
+
+fx3 20)
+
+1 [2]  (Ins2ne
+
+x0 +
+
+Kns,ns
+
+
+
+Ine
+
+)
+
+ 
+
+ + 
+
++ fx2 (22  x0)
+fy+ f wdendo 3f3w3d,1endo state[2]  0state +2f2wdendo 2st2ate  s0tate
+
+fx2 (1  x0)
+
+ 
+
++2f2wdendo s2t0ate  state (Ins  Kne,ns + Knsne,ns)
+
+fy+ f wdendo2f2wdendo state  s0tate
+
+With 330 conformably partitioned
+
+(H-101) 330,1 = - A-1 fx3 1 [2]  x0 + fx2 (1  20) (Ins2ne + Kns,ns  Ine) + fx2 (22  x0)
+
++ fy+ f wdendo3f3w3d,1endo state[2]  0state + fy+ f wdendo2f2wdendo s2t2ate  0state + fy+ f wdendo2f2wdendo 2st0ate  state (Ins  Kne,ns + Knsne,ns)
+(H-102) 330,2 = - A-1 fx2 (1  x0) + fy+ f wdendo2f2wdendo state  0state noting that as the right hand side of (H-102) is identical to that of (G-21), we therefore have
+
+(H-103)
+
+330,2 = 20
+
+so that only 330,1 needs to be calculated. The two associated coefficients, i.e., yk,0,i and y0, j,i can
+
+be obtained by commuting yk, j,0.
+
+H.2 Solving the Unknown Coefficient y2,i
+
+When i > 0, the source equation takes the form
+
+(H-104)
+
+fy-stateyst2a,tie-1 + fyy2,i + fy+ f wdendoyf w2,di+en1do + fx2 (x2  xi) + fx3 x~ [2]  xi + 2 fx2 x~  x~,i + fx2 x~,~  xi + fxx~2,i
+
+Et t+[21]  Ine = 0
+
+With
+
+the following group of 0
+x~ = 0fnnwys××0dennneedo , x~,~
+0
+ne×ne
+
+shifting 0matrices = n0nfy0sw××0dnneeen22do , x2
+0
+ne×ne2
+
+=
+
+yfyw2ysdt2ae2tnedo , 0
+ne×1
+
+4
+
+=
+
+ 0
+nnysI××n nfnwff0wdweddneednnoddoo 0
+ne×n f wdendo
+
+68
+
+0
+
+x~,i
+
+=
+
+0f2wd
+
+ns×ne2
+0
+ny×ne2
+endo (Ine 
+
+ysi t at e )
+
+=
+
+40f2wdendo
+
+Ine  state
+
+Ine  yis-ta1te
+
+0
+
+ ne×ne2 0
+
+
+
+x~2,i = 0f0w3dendonn(ys××I0nnneee233 ysitate) = 40f0w3dendo Ine2  state
+
+Ine2  ysi-ta1te
+
+0
+
+ne×ne3
+
+the source equation (H-104) can be written as (B-29)
+
+The solution takes the form
+
+(H-105)
+
+y2,i = yst2a,tie-1 + 21yis-ta1te
+
+which implies
+
+(H-106)
+
+yf w2,di+en1do =  f wdendostateyst2a,tie-1 +  f wdendost2a1te + f w21dendostate yis-ta1te
+
+Inserting the previous equation in the source equation (B-29) and collecting terms yields
+
+fyst fybwd + fy+ f wdendobfwwddendo bw21dendo + fymix + fy+ f wdendobfowtdhendo fy f wd f w21dendo
+
+(H-107) + fy+mix
+
+A
+fyf+wd f w21dendostate + Di = 0
+
+B
+
+C
+where Di is a constant
+Di = fx2 (x2  1) + fx3 x~ [2]  1 + 2 fx2 x~  40f2wdendo
+
+Ine2  state
+
+(H-108)
+
++ fx2 x~,~  1 + fx 40f0w3dendo Ine2  state
+
+Et t+[21]  Ins
+
+Pre-multiplying the previous equation by the null space AO yields the following Sylvester equa-
+
+tion in f w21dendo
+
+(H-109)
+
+(AOB)f w21dendo + (AOC)f w21dendostate + (AODi) = 0
+
+With f w21dendo in hand, solving bw21dendo is a standard linear problem
+
+(H-110)
+
+bw21dendo = -pinv(A) Bf w21dendo + Cf w21dendostate + Di
+
+We now move to the case i = 0. The source equation in this case takes the form
+
+fyy2,0 + fy+ f wdendoyf w2,d1endo + fx2 (x2  x0)
+
+69
+
+(H-111) + fx3 x~ [2]  x0 + fx2 x~,~  x0 + 2 fx2 x~  x~,0 + fxx~2,0 Et t+[21]  Ine = 0
+
+where
+
+ 0  0 
+
+x~,0 = 0f2wdendonnys××I0nnneee22 0state  , x~2,0 = 0f0w3dendonnysI××0nnneee233 0state 
+
+00
+
+ne×ne2
+
+ne×ne3
+
+For notational consistency, we let
+
+(H-112)
+
+y2,0 = 20
+
+and from the solution (H-105)
+
+(H-113)
+
+yf w2,d1endo =  f wdendost2a0te + f w21dendo0state
+
+inserting the last two equations in the source equation and collecting terms yields
+
+(H-114)
+
+fyst fystate + fy+ f wdendo f wdendo fy f wd 20 = -D0
+
+where D0 is a constant D0 = fx3 x~ [2]  x0 + fx2 x~,~  x0 + 2 fx2 x~  x~,0 + fxx~2,0
+
+Et t+[21]  Ine
+
+(H-115)
+
++ fy+ f wdendof w21dendos0tate
+
+Solving for 20 therefore is a standard linear problem
+
+(H-116)
+
+20 = - fyst fystate + fy+ f wdendo f wdendo
+
+fy f wd -1 D0
+
+H.3 Solving for y3
+
+The source equation takes the form
+
+(H-117)
+
+y3 = -( fy- + fy + fy+ )-1[ fy+3 y0[3] + 3 fy+2 (y0,0  y0) + fy+y0,0,0]Et t+[31]
+
+Making use of the special structure of fy-, fy and fy+ and collecting terms yields
+
+y3 = fyst fy-bwd + fybwd fy-mix + fymix + fy+mix fy f wd + fy+ f wd -1
+
+(H-118)
+
+[ fy+3 y0[3] + 3 fy+2(y0,0  y0) + fy+y0,0,0]Et t+[31]
+
+70
+
+Table 1: Stochastic Growth Model Section 6.1
+Baseline Parameter Values
+
+Parameter    
+
+Value
+
+0.99 0.36 0.95 0.712%
+
+See Hansen (1985).
+
+Table 2: E1 Performance of the Different Algorithms Model of Section 6.1
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+Baseline
+5.90E-04 1.13E-05 1.09E-05 1.09E-05 1.09E-05 5.72E-08 1.79E-07 5.80E-04 1.62E-06 1.33E-06 1.79E-07
+
+=3
+5.02E-03 2.86E-04 2.76E-04 2.76E-04 2.76E-04 4.99E-06 1.35E-05 4.88E-03 4.35E-05 3.58E-05 1.35E-05
+
+ = 10
+4.55E-02 8.07E-03 8.11E-03 8.11E-03 8.11E-03
+NaN 1.29E-03 4.74E-02 1.85E-03 1.60E-03 1.29E-03
+
+ = 25
+1.73E-01 6.36E-02 7.28E-02 7.28E-02 7.28E-02
+NaN 2.79E-02 2.43E-01 3.18E-02 2.93E-02 2.79E-02
+
+ = 50
+2.50E-01 NaN
+1.82E-01 1.82E-01 1.82E-01
+NaN 1.26E-01 5.39E-01 1.34E-01 1.27E-01 1.26E-01
+
+Table 3: E2 Performance of the Different Algorithms Model of Section 6.1
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+Baseline
+4.43E-08 3.02E-11 3.04E-11 3.04E-11 3.04E-11 1.40E-15 1.66E-14 4.77E-08 5.06E-13 3.54E-13 1.66E-14
+
+=3
+3.64E-06 2.26E-08 2.24E-08 2.24E-08 2.24E-08 2.27E-11 1.11E-10 3.54E-06 4.70E-10 3.67E-10 1.11E-10
+
+ = 10
+5.24E-04 3.94E-05 3.52E-05 3.52E-05 3.52E-05
+NaN 1.92E-06 5.21E-04 2.46E-06 2.41E-06 1.92E-06
+
+ = 25
+4.90E-02 2.25E-02 1.83E-02 1.83E-02 1.83E-02
+NaN 5.77E-03 5.58E-02 6.00E-03 6.12E-03 5.77E-03
+
+ = 50
+2.68E+01 NaN
+2.48E+01 2.48E+01 2.48E+01
+NaN 2.19E+01 2.94E+01 2.19E+01 2.20E+01 2.19E+01
+
+71
+
+Table 4: E Performance of the Different Algorithms Model of Section 6.1
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+Baseline
+1.50E-02 8.96E-04 9.07E-04 9.07E-04 9.07E-04 1.60E-05 4.14E-05 2.98E-02 1.29E-04 1.28E-04 4.14E-05
+
+=3
+1.06E-01 1.99E-02 1.87E-02 1.87E-02 1.87E-02 2.45E-03 2.50E-03 1.19E-01 4.14E-03 4.12E-03 2.50E-03
+
+ = 10
+7.59E-01 3.30E-01 4.55E-01 4.55E-01 4.55E-01
+Inf 1.96E-01 1.63E+00 1.83E-01 1.64E-01 1.96E-01
+
+ = 25
+2.34E+00 1.14E+00 3.55E+00 3.55E+00 3.55E+00
+Inf 3.94E+00 1.66E+01 3.69E+00 3.56E+00 3.94E+00
+
+ = 50
+2.32E+00 Inf
+7.63E+00 7.63E+00 7.63E+00
+Inf 1.70E+01 7.00E+01 1.57E+01 1.53E+01 1.70E+01
+
+Table 5: Asset Pricing Model Section 6.2
+Baseline Parameter Values
+
+Parameter   µ
+
+
+
+Value
+
+-1.5 0.95 0.0179 -0.139 0.0348
+
+See Burnside (1998) and Collard and Juillard (2001).
+
+72
+
+Table 6: E1 Performance of the Different Algorithms Model of Section 6.2
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+Baseline
+1.42E-02 1.92E-04 1.92E-04 1.92E-04 1.92E-04 1.91E-04 1.91E-04 1.92E-04 1.91E-04 1.91E-04 1.91E-04
+
+ = 1E - 04
+1.18E-07 9.74E-11 9.74E-11 9.74E-11 9.74E-11 9.74E-11 9.74E-11 1.93E-09 9.74E-11 9.74E-11 9.74E-11
+
+ = 0.1
+1.16E-01 1.29E-02 1.29E-02 1.29E-02 1.29E-02 1.29E-02 1.29E-02 1.29E-02 1.29E-02 1.29E-02 1.29E-02
+
+=0
+1.85E-02 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04
+
+ = 0.5
+4.94E-02 2.96E-03 2.96E-03 2.96E-03 2.96E-03 2.62E-03 2.62E-03 2.91E-03 2.62E-03 2.62E-03 2.62E-03
+
+ = 0.9
+1.91E-01 6.74E-02 6.74E-02 6.74E-02 6.74E-02 5.82E-02 5.82E-02 8.29E-02 5.82E-02 5.82E-02 5.82E-02
+
+73
+
+ = 0.5  = 0.99
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+2.36E-03 1.28E-05 1.28E-05 1.28E-05 1.28E-05 3.78E-06 3.78E-06 6.49E-06 3.78E-06 3.78E-06 3.78E-06
+
+2.92E-02 8.30E-04 8.30E-04 8.30E-04 8.30E-04 8.31E-04 8.31E-04 8.32E-04 8.31E-04 8.31E-04 8.31E-04
+
+See Burnside (1998) and Collard and Juillard (2001).
+
+ = -10
+2.28E-01 4.65E-02 4.65E-02 4.65E-02 4.65E-02 4.66E-02 4.66E-02 4.67E-02 4.66E-02 4.66E-02 4.66E-02
+
+ = -5
+9.06E-02 7.52E-03 7.52E-03 7.52E-03 7.52E-03 7.54E-03 7.54E-03 7.54E-03 7.54E-03 7.54E-03 7.54E-03
+
+=0
+9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11
+
+ = 0.5
+2.85E-03 8.41E-06 8.41E-06 8.41E-06 8.41E-06 7.84E-06 7.84E-06 8.10E-06 7.84E-06 7.84E-06 7.84E-06
+
+Table 7: E2 Performance of the Different Algorithms Model of Section 6.2
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+Baseline
+3.17E-02 7.05E-06 7.05E-06 7.05E-06 7.05E-06 5.74E-06 5.74E-06 6.50E-06 5.74E-06 5.74E-06 5.74E-06
+
+ = 1E - 04
+2.10E-12 1.44E-18 1.44E-18 1.44E-18 1.44E-18 1.44E-18 1.44E-18 5.92E-12 1.44E-18 1.44E-18 1.44E-18
+
+ = 0.1
+2.66E+00 3.37E-02 3.37E-02 3.37E-02 3.37E-02 3.29E-02 3.29E-02 3.29E-02 3.29E-02 3.29E-02 3.29E-02
+
+=0
+5.36E-02 1.70E-05 1.70E-05 1.70E-05 1.70E-05 1.70E-05 1.70E-05 1.70E-05 1.70E-05 1.70E-05 1.70E-05
+
+ = 0.5
+4.29E-01 2.38E-03 2.38E-03 2.38E-03 2.38E-03 1.21E-03 1.21E-03 1.75E-03 1.21E-03 1.21E-03 1.21E-03
+
+ = 0.9
+1.73E+01 4.00E+00 4.00E+00 4.00E+00 4.00E+00 1.75E+00 1.75E+00 4.58E+00 1.75E+00 1.75E+00 1.75E+00
+
+74
+
+ = 0.5  = 0.99
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+5.04E-06 2.38E-10 2.38E-10 2.38E-10 2.38E-10 1.30E-11 1.30E-11 4.84E-09 1.30E-11 1.30E-11 1.30E-11
+
+6.43E-01 5.48E-04 5.48E-04 5.48E-04 5.48E-04 5.21E-04 5.21E-04 5.25E-04 5.21E-04 5.21E-04 5.21E-04
+
+See Burnside (1998) and Collard and Juillard (2001).
+
+ = -10
+1.37E+00 5.95E-02 5.95E-02 5.95E-02 5.95E-02 5.71E-02 5.71E-02 5.72E-02 5.71E-02 5.71E-02 5.71E-02
+
+ = -5
+4.43E-01 3.27E-03 3.27E-03 3.27E-03 3.27E-03 3.07E-03 3.07E-03 3.07E-03 3.07E-03 3.07E-03 3.07E-03
+
+=0
+3.58E-18 3.58E-18 3.58E-18 3.58E-18 3.58E-18 3.58E-18 3.58E-18 3.58E-18 3.58E-18 3.58E-18 3.58E-18
+
+ = 0.5
+4.36E-03 5.33E-08 5.33E-08 5.33E-08 5.33E-08 3.31E-08 3.31E-08 3.15E-07 3.31E-08 3.31E-08 3.31E-08
+
+Table 8: E Performance of the Different Algorithms Model of Section 6.2
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+Baseline
+1.48E-02 6.63E-04 6.63E-04 6.63E-04 6.63E-04 1.99E-04 1.99E-04 1.96E-02 1.99E-04 1.99E-04 1.99E-04
+
+ = 1E - 04
+1.22E-07 1.09E-10 1.09E-10 1.09E-10 1.09E-10 9.74E-11 9.74E-11 5.68E-05 9.74E-11 9.74E-11 9.74E-11
+
+ = 0.1
+1.21E-01 2.27E-02 2.27E-02 2.27E-02 2.27E-02 1.34E-02 1.34E-02 5.40E-02 1.34E-02 1.34E-02 1.34E-02
+
+=0
+1.85E-02 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04 3.29E-04
+
+ = 0.5
+7.10E-02 1.43E-02 1.43E-02 1.43E-02 1.43E-02 3.90E-03 3.90E-03 1.18E-01 3.90E-03 3.90E-03 3.90E-03
+
+ = 0.9
+6.61E-01 5.15E-01 5.15E-01 5.15E-01 5.15E-01 3.89E-01 3.89E-01 1.36E+00 3.89E-01 3.89E-01 3.89E-01
+
+75
+
+ = 0.5  = 0.99
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+2.97E-03 9.13E-05 9.13E-05 9.13E-05 9.13E-05 5.19E-06 5.19E-06 2.09E-02 5.19E-06 5.19E-06 5.19E-06
+
+2.98E-02 1.78E-03 1.78E-03 1.78E-03 1.78E-03 8.48E-04 8.48E-04 1.88E-02 8.48E-04 8.48E-04 8.48E-04
+
+See Burnside (1998) and Collard and Juillard (2001).
+
+ = -10
+2.48E-01 8.55E-02 8.55E-02 8.55E-02 8.55E-02 5.12E-02 5.12E-02 1.36E-01 5.12E-02 5.12E-02 5.12E-02
+
+ = -5
+9.65E-02 1.67E-02 1.67E-02 1.67E-02 1.67E-02 8.07E-03 8.07E-03 5.85E-02 8.07E-03 8.07E-03 8.07E-03
+
+=0
+9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11 9.95E-11
+
+ = 0.5
+2.91E-03 3.94E-05 3.94E-05 3.94E-05 3.94E-05 8.02E-06 8.02E-06 6.53E-03 8.02E-06 8.02E-06 8.02E-06
+
+Table 9: Recursive Utility and Stochastic Volatility Section 6.3
+Constant Parameter Values
+
+Parameter 
+
+   
+
+Value
+
+0.99 0.36218 0.3 0.0196 0.95 0.9
+
+See Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012).
+
+Table 10: Recursive Utility and Stochastic Volatility Section 6.3 Values for Different Parameterizations
+
+Parameter
+
+ z 
+
+Baseline Value 5 0.007 0.06
+
+Extreme Value 40 0.021 0.1
+
+See Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012).
+
+76
+
+Table 11: E1 Performance of the Different Algorithms Model of Section 6.3
+Baseline Parameterization
+
+77
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+kt
+6.25E-03 1.79E-03 1.12E-03 1.18E-03 1.12E-03 1.56E-03 7.19E-04 5.58E-03 7.37E-04 7.19E-04 7.20E-04
+
+ct
+3.81E-03 3.06E-03 6.16E-04 6.38E-04 6.16E-04 3.01E-03 3.42E-04 3.40E-03 3.53E-04 3.42E-04 3.42E-04
+
+lt
+1.61E-03 3.57E-03 3.83E-04 3.90E-04 3.83E-04 3.58E-03 3.27E-04 1.47E-03 3.29E-04 3.27E-04 3.27E-04
+
+it
+1.32E-02 2.78E-02 2.64E-03 2.67E-03 2.64E-03 2.79E-02 2.03E-03 1.20E-02 2.10E-03 2.04E-03 2.03E-03
+
+yt
+5.31E-03 8.16E-03 7.94E-04 7.95E-04 7.94E-04 8.11E-03 3.60E-04 4.74E-03 3.83E-04 3.62E-04 3.60E-04
+
+Rtf 1.10E-04 2.20E-04 2.21E-05 2.40E-05 2.21E-05 2.21E-04 1.63E-05 9.91E-05 1.65E-05 1.64E-05 1.63E-05
+
+Rt
+1.20E-04 2.44E-04 2.22E-05 2.43E-05 2.23E-05 2.46E-04 1.50E-05 1.08E-04 1.52E-05 1.50E-05 1.50E-05
+
+Table 12: E2 Performance of the Different Algorithms Model of Section 6.3
+Baseline Parameterization
+
+78
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+kt
+6.68E-03 5.57E-04 3.02E-04 3.27E-04 3.02E-04 3.97E-04 1.12E-04 5.19E-03 1.34E-04 1.12E-04 1.12E-04
+
+ct
+1.39E-05 8.14E-06 4.49E-07 4.75E-07 4.49E-07 7.97E-06 1.29E-07 1.09E-05 1.47E-07 1.29E-07 1.29E-07
+
+lt
+6.28E-07 2.45E-06 4.94E-08 4.99E-08 4.94E-08 2.47E-06 3.21E-08 5.02E-07 3.25E-08 3.21E-08 3.21E-08
+
+it
+1.48E-05 5.08E-05 9.33E-07 9.33E-07 9.33E-07 5.13E-05 4.76E-07 1.17E-05 5.35E-07 4.79E-07 4.75E-07
+
+yt
+4.65E-05 9.78E-05 1.54E-06 1.55E-06 1.54E-06 9.83E-05 3.10E-07 3.64E-05 4.25E-07 3.15E-07 3.09E-07
+
+Rtf 2.15E-08 8.24E-08 1.06E-09 1.16E-09 1.06E-09 8.29E-08 5.92E-10 1.72E-08 5.85E-10 5.93E-10 5.91E-10
+
+Rt
+2.60E-08 1.02E-07 1.10E-09 1.20E-09 1.10E-09 1.03E-07 4.76E-10 2.08E-08 4.78E-10 4.76E-10 4.75E-10
+
+Table 13: E Performance of the Different Algorithms Model of Section 6.3
+Baseline Parameterization
+
+79
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+kt
+5.61E-02 1.87E-02 2.00E-02 2.03E-02 2.00E-02 1.43E-02 1.09E-02 5.01E-02 1.38E-02 1.10E-02 1.08E-02
+
+ct
+3.49E-02 2.45E-02 1.05E-02 1.07E-02 1.05E-02 2.39E-02 5.10E-03 3.25E-02 6.03E-03 5.07E-03 5.12E-03
+
+lt
+2.80E-02 3.42E-02 1.08E-02 1.09E-02 1.08E-02 3.39E-02 7.07E-03 2.31E-02 7.58E-03 7.11E-03 7.08E-03
+
+it
+1.79E-01 2.40E-01 6.29E-02 6.27E-02 6.29E-02 2.38E-01 3.86E-02 1.45E-01 4.63E-02 3.86E-02 3.88E-02
+
+yt
+5.66E-02 7.36E-02 1.84E-02 1.85E-02 1.84E-02 7.17E-02 8.49E-03 5.01E-02 1.22E-02 8.65E-03 8.46E-03
+
+Rtf 1.19E-03 1.91E-03 3.42E-04 3.33E-04 3.42E-04 1.86E-03 2.52E-04 9.07E-04 2.56E-04 2.56E-04 2.52E-04
+
+Rt
+1.40E-03 2.26E-03 4.15E-04 4.06E-04 4.15E-04 2.20E-03 2.30E-04 1.15E-03 2.36E-04 2.29E-04 2.31E-04
+
+Table 14: E1 Performance of the Different Algorithms Model of Section 6.3
+Extreme Parameterization
+
+80
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+kt
+4.88E-02 1.08E-02 1.10E-02 3.41E-02 1.10E-02 7.24E-03 8.06E-03 4.58E-02 8.78E-03 8.01E-03 8.15E-03
+
+ct
+2.19E-02 1.05E-02 5.06E-03 1.46E-02 5.08E-03 9.37E-03 2.66E-03 2.30E-02 3.13E-03 2.63E-03 2.60E-03
+
+lt
+8.81E-03 1.16E-02 2.62E-03 5.33E-03 2.63E-03 1.15E-02 1.97E-03 8.99E-03 2.01E-03 1.97E-03 1.84E-03
+
+it
+6.93E-02 8.11E-02 1.93E-02 2.79E-02 1.94E-02 8.15E-02 1.24E-02 5.86E-02 1.40E-02 1.25E-02 1.25E-02
+
+yt
+3.06E-02 2.58E-02 7.11E-03 9.83E-03 7.11E-03 2.52E-02 3.58E-03 2.55E-02 4.38E-03 3.57E-03 3.59E-03
+
+Rtf 8.55E-04 7.28E-04 1.66E-04 7.74E-04 1.67E-04 6.94E-04 1.22E-04 8.95E-04 1.60E-04 1.23E-04 1.19E-04
+
+Rt
+8.52E-04 8.05E-04 1.71E-04 7.91E-04 1.72E-04 7.70E-04 1.14E-04 9.30E-04 1.53E-04 1.15E-04 1.10E-04
+
+Table 15: E2 Performance of the Different Algorithms Model of Section 6.3
+Extreme Parameterization
+
+81
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+kt
+4.66E-01 3.22E-02 4.27E-02 1.69E-01 4.28E-02 1.09E-02 1.74E-02 3.52E-01 2.56E-02 1.74E-02 1.52E-02
+
+ct
+5.24E-04 1.11E-04 3.89E-05 1.61E-04 3.90E-05 8.62E-05 9.63E-06 4.91E-04 1.47E-05 9.51E-06 8.57E-06
+
+lt
+1.90E-05 2.80E-05 2.41E-06 4.75E-06 2.42E-06 2.77E-05 1.13E-06 1.68E-05 1.27E-06 1.14E-06 1.04E-06
+
+it
+6.21E-04 6.24E-04 9.62E-05 1.00E-04 9.63E-05 6.16E-04 3.57E-05 3.90E-04 5.63E-05 3.68E-05 3.07E-05
+
+yt
+1.91E-03 1.18E-03 1.86E-04 2.46E-04 1.86E-04 1.13E-03 4.50E-05 1.25E-03 8.22E-05 4.64E-05 4.02E-05
+
+Rtf 1.10E-06 9.40E-07 5.04E-08 6.50E-07 5.09E-08 8.63E-07 2.66E-08 1.15E-06 4.42E-08 2.73E-08 2.29E-08
+
+Rt
+1.14E-06 1.16E-06 5.72E-08 6.81E-07 5.78E-08 1.08E-06 2.28E-08 1.26E-06 4.20E-08 2.35E-08 1.95E-08
+
+Table 16: E Performance of the Different Algorithms Model of Section 6.3
+Extreme Parameterization
+
+82
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+
+kt
+3.31E-01 1.49E-01 1.93E-01 2.08E-01 1.93E-01 8.53E-02 1.25E-01 2.71E-01 1.59E-01 1.26E-01 1.19E-01
+
+ct
+1.94E-01 1.01E-01 8.81E-02 9.68E-02 8.81E-02 8.92E-02 4.67E-02 1.83E-01 5.74E-02 4.52E-02 4.42E-02
+
+lt
+1.44E-01 1.47E-01 6.92E-02 7.42E-02 6.92E-02 1.47E-01 3.93E-02 1.19E-01 4.30E-02 3.99E-02 4.17E-02
+
+it
+6.58E-01 1.01E+00 3.36E-01 3.53E-01 3.36E-01 1.11E+00 2.18E-01 8.03E-01 2.80E-01 2.25E-01 2.21E-01
+
+yt
+3.26E-01 2.48E-01 1.83E-01 1.86E-01 1.83E-01 3.03E-01 1.06E-01 2.97E-01 1.41E-01 1.10E-01 1.04E-01
+
+Rtf 8.18E-03 9.84E-03 3.00E-03 2.33E-03 3.00E-03 9.32E-03 1.89E-03 5.90E-03 1.90E-03 1.97E-03 1.82E-03
+
+Rt
+1.15E-02 1.04E-02 5.48E-03 4.79E-03 5.48E-03 9.96E-03 2.50E-03 6.99E-03 3.07E-03 2.67E-03 2.42E-03
+
+83
+
+100 10-1 10-2 10-3 10-4 10-5 10-6 10-7 10-8
+0
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+10 20 30 40 50 
+Figure 1: E1 Performance of the Different Algorithms, Model of Section 6.1
+
+100
+
+84
+
+10-5
+10-10
+10-15 0
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+10 20 30 40 50 
+Figure 2: E2 Performance of the Different Algorithms, Model of Section 6.1
+
+85
+
+101 100 10-1 10-2 10-3 10-4
+0
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA
+10 20 30 40 50 
+Figure 3: E Performance of the Different Algorithms, Model of Section 6.1
+
+0.2 0.15
+0.1 0.05
+0 -0.05
+-0.1 -0.15
+-0.2 -0.25
+7980
+
+7985
+
+7990
+
+7995
+
+8000
+
+8005
+
+8010
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA Exact
+
+8015
+
+8020
+
+8025
+
+8030
+
+86
+
+Figure 4: Simulation, Model of Section 6.1,  = 10
+
+0.3 0.25
+0.2 0.15
+0.1 0.05
+0 -0.05
+-0.1 -0.15
+3350
+
+3360
+
+3370
+
+3380
+
+3390
+
+3400
+
+3410
+
+First Second-Perturbation Second-Kim et al Second-Den Haan and De Wind Second-NLMA Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al Third-Juillard Third-NLMA Exact
+
+3420
+
+3430
+
+3440
+
+3450
+
+87
+
+Figure 5: Simulation, Model of Section 6.1,  = 10
+
+88
+
+3
+First Second-Perturbation 2.5 Second-Kim et al Second-Den Haan and De Wind Second-NLMA 2 Third-Perturbation Third-Andreasen Third-Den Haan and De Wind Third-Fernandez-Villaverde et al 1.5 Third-Juillard Third-NLMA Exact 1
+0.5
+0 0 10 20 30 40 50 60 70 80 90 100
+Figure 6: Simulation, Model of Section 6.1,  = 31.2294
+
+SFB 649 Discussion Paper Series 2013
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001
+002 003 004 005 006
+007
+008 009
+010 011 012
+013 014
+015 016
+017
+018 019
+
+"Functional Data Analysis of Generalized Quantile Regressions" by
+Mengmeng Guo, Lhan Zhou, Jianhua Z. Huang and Wolfgang Karl Härdle, January 2013. "Statistical properties and stability of ratings in a subset of US firms" by
+Alexander B. Matthies, January 2013. "Empirical Research on Corporate Credit-Ratings: A Literature Review" by Alexander B. Matthies, January 2013. "Preference for Randomization: Empirical and Experimental Evidence" by
+Nadja Dwenger, Dorothea Kübler and Georg Weizsäcker, January 2013. "Pricing Rainfall Derivatives at the CME" by Brenda López Cabrera, Martin Odening and Matthias Ritter, January 2013. "Inference for Multi-Dimensional High-Frequency Data: Equivalence of
+Methods, Central Limit Theorems, and an Application to Conditional Independence Testing" by Markus Bibinger and Per A. Mykland, January 2013.
+"Crossing Network versus Dealer Market: Unique Equilibrium in the Allocation of Order Flow" by Jutta Dönges, Frank Heinemann and Tijmen R. Daniëls, January 2013. "Forecasting systemic impact in financial networks" by Nikolaus Hautsch,
+Julia Schaumburg and Melanie Schienle, January 2013. "`I'll do it by myself as I knew it all along': On the failure of hindsightbiased principals to delegate optimally" by David Danz, Frank Hüber,
+Dorothea Kübler, Lydia Mechtenberg and Julia Schmid, January 2013. "Composite Quantile Regression for the Single-Index Model" by Yan Fan, Wolfgang Karl Härdle, Weining Wang and Lixing Zhu, February 2013. "The Real Consequences of Financial Stress" by Stefan Mittnik and Willi
+Semmler, February 2013. "Are There Bubbles in the Sterling-dollar Exchange Rate? New Evidence from Sequential ADF Tests" by Timo Bettendorf and Wenjuan Chen, February 2013.
+"A Transfer Mechanism for a Monetary Union" by Philipp Engler and Simon Voigts, March 2013. "Do High-Frequency Data Improve High-Dimensional Portfolio
+Allocations?" by Nikolaus Hautsch, Lada M. Kyj and Peter Malec, March 2013. "Cyclical Variation in Labor Hours and Productivity Using the ATUS" by Michael C. Burda, Daniel S. Hamermesh and Jay Stewart, March 2013.
+"Quantitative forward guidance and the predictability of monetary policy ­ A wavelet based jump detection approach ­" by Lars Winkelmann, April 2013.
+"Estimating the Quadratic Covariation Matrix from Noisy Observations: Local Method of Moments and Efficiency" by Markus Bibinger, Nikolaus Hautsch, Peter Malec and Markus Reiss, April 2013. "Fair re-valuation of wine as an investment" by Fabian Y.R.P. Bocart
+and Christian M. Hafner, April 2013. "The European Debt Crisis: How did we get into this mess? How can we get out of it?" by Michael C. Burda, April 2013.
+
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2013
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+020 "Disaster Risk in a New Keynesian Model" by Maren Brede, April 2013. 021 "Econometrics of co-jumps in high-frequency data with noise" by Markus
+Bibinger and Lars Winkelmann, May 2013. 022 "Decomposing Risk in Dynamic Stochastic General Equilibrium" by Hong
+Lan and Alexander Meyer-Gohde, May 2013. 023 "Reference Dependent Preferences and the EPK Puzzle" by Maria Grith,
+Wolfgang Karl Härdle and Volker Krätschmer, May 2013. 024 "Pruning in Perturbation DSGE Models - Guidance from Nonlinear Moving
+Average Approximations" by Hong Lan and Alexander Meyer-Gohde, May 2013.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

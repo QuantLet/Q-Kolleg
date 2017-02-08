@@ -1,0 +1,1296 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2013-001
+Functional Data Analysis of Generalized
+Quantile Regressions
+Mengmeng Guo* Lhan Zhou**
+Jianhua Z. Huang** Wolfgang Karl Härdle***
+* Southwestern University of Finance and Economics, China ** Texas A&M University, U.S.A.
+*** Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Functional Data Analysis of Generalized Quantile Regressions
+Mengmeng Guo , Lan Zhou , Jianhua Z. Huang , Wolfgang Karl H¨ardle §
+November 7, 2012
+Abstract
+Generalized quantile regressions, including the conditional quantiles and expectiles as special cases, are useful alternatives to the conditional means for characterizing a conditional distribution, especially when the interest lies in the tails. We develop a functional data analysis approach to jointly estimate a family of generalized quantile regressions. Our approach assumes that the generalized quantile regressions share some common features that can be summarized by a small number of principal component functions. The principal component functions are modeled as splines and are estimated by minimizing a penalized asymmetric loss measure. An iterative least asymmetrically weighted squares algorithm is developed for computation. While separate estimation of individual generalized quantile regressions usually suffers from large variability due to lack of sufficient data, by borrowing strength across data sets, our joint estimation approach significantly improves the estimation efficiency, which is demonstrated in a simulation study. The proposed method is applied to data from 150 weather stations in China to obtain the generalized quantile curves of the volatility of the temperature at these stations. These curves are needed to adjust temperature risk factors so that gaussianity is achieved. The normal distribution of temperature variations is vital for pricing weather derivatives with tools from mathematical finance.
+KEY WORDS: Asymmetric loss function; Common structure; Functional data analysis; Generalized quantile curve; Iteratively reweighted least squares; Penalization.
+JEL Classification: C13; C23; C38; Q54;
+Assistant Professor at Research Institute of Economics and Management of Southwestern University of Finance and Economics, China, Email: gmm0701@gmail.com.
+Assistant Professor at Department of Statistics, Texas A&M University, College Station, Texas 77843, U.S.A., Email: lzhou@stat.tamu.edu.
+Professor at Department of Statistics, Texas A&M University, College Station, Texas 77843, U.S.A., Email: jianhua@stat.tamu.edu.
+§Professor at Humboldt-Universita¨t zu Berlin and Director of C.A.S.E - Center for Applied Statistics and Economics, Humboldt-Universit¨at zu Berlin, Unter den Linden 6, 10099, Berlin, Germany, Email: haerdle@wiwi.hu-berlin.de.
+1
+
+1 Introduction
+Conventional regression analysis is concerned about the conditional mean of a response given explanatory variables and focuses on the center of the conditional distribution. When the interest lies in the tails of the conditional distribution, the quantile regression (Koenker and Bassett, 1978), expectile regression (Newey and Powell, 1987), and M -quantiles (Breckling and Chambers, 1988) become useful tools. We refer to these tools broadly as generalized quantile regressions. The generalized quantile regression has found applications in many areas, such as financial markets, demographic studies, and weather analysis, especially for the statistical analysis of extreme events. Taylor (2008) applied generalized quantiles to calculate Value at Risk (VaR) and expected shortfall (ES) for financial risk management. Generalized quantiles were used by Schnabel and Eilers (2009a) to study the relationship between GDP and population, and by H¨ardle and Song (2010) to study the correlation of the wage and the level of education.
+The specific application that motivates our work is the statistical modeling of weather risk (Anastasiadou and Lo´pez-Cabrera, 2012). Extreme fluctuation of weather often causes great losses to industries that are weather related, such as the tourism and energy industries, which are temperature-dependent, and the agriculture industry, which are both temperature- and rainfall-dependent. To hedge the weather risk, an important financial instrument is the weather derivative. Statistical modeling and forecasting of the weather using historical data plays a crucial role in pricing weather derivatives (Odening et al., 2008). Guo and H¨ardle (2012) estimated the generalized quantiles of the volatility of temperatures as a function of time at a particular weather station and used them to identify temperature risk drivers. One problem with the generalized quantile regression is the high variability of the estimate at extreme quantile levels due to insufficiency of data at the tails of the distribution. The goal of this paper is to improve the estimation efficiency by borrowing strength across multiple data sets.
+We consider the scenario that there is a need to estimate a collection of generalized quantile regressions each coming from a different data set. Our motivating example, detailed in Section 5, is concerned about estimating the generalized quantile of the distribution of the volatility of temperature as a function of time separately at multiple weather stations. Taking a functional data analysis approach (FDA; Ramsay and Silverman, 2005), we assume that the generalized quantile regressions under consideration share some common features that in turn can be summarized
+2
+
+by a small number of principal component functions. By pooling data sets together to estimate the principal component functions, we obtain more efficient estimates of individual generalized quantile regressions. In a related work but for a different context from ours, Cardot et al. (2005) considered a quantile regression where functional covariates are used to explain a scalar response variable.
+More precisely, we assume that each generalized quantile regression (function) in the collection can be written as the summation of an overall mean function and a linear combination of several principal component functions. We model the mean and functional principal component functions as spline functions and use a roughness penalty to regularize the spline fit. Our estimation method makes use of the fact that the generalized quantile is the minimizer of an expected asymmetric loss function. By minimizing the corresponding empirical loss over spline coefficients, we obtain estimates of the mean and the principal component functions and consequently the generalized quantile regressions. We develop an iterative least asymmetrically weighted squares algorithm for computation. Our algorithm can be seen as an extension of previous functional PCA algorithms of James et al. (2000) and Zhou et al. (2008) for sparse functional data. As a result we obtain, PC funtions that tell us main sources of variations. The PC scores indicate us intra subject variation of the random curves and therefore allow us to price derivatives according to the locations of risk factors.
+The rest of this paper is organized as follows. Section 2 reviews the formulation of generalized quantile regressions, their connections to asymmetric loss functions, and their estimation using penalized splines. Section 3 presents our FDA approach for estimating a collection of generalized quantile regressions; both the FDA model construction and the computational algorithm are discussed in detail. In Section 4, we use a simulation study to investigate the performance of our FDA-based joint estimation approach and compare it with the separate estimation approach. In Section 5, our method is applied to data from 150 weather stations in China to understand the risk drivers of the volatility of the temperature at these stations. Section 6 concludes the paper. The Appendix contains some technical details. The complete algorithm can be found on www.quantlet.org.
+3
+
+2 Generalized Quantile Regressions
+
+Any random variable Y can be characterized by its cdf FY (y) = P (Y  y), or equivalently, by its quantile function (qf)
+
+QY ( ) = FY-1( ) = inf{y : F (y)   }, 0 <  < 1.
+
+The  -th quantile QY ( ) minimizes the expected loss,
+
+Q( ) = arg min E{ (Y - y)},
+y
+for the asymmetric loss function  (Y - y) with
+
+(1)
+
+ (u) = u{ - I(u < 0)}.
+
+(2)
+
+When Y is associated with a vector of covariates X, one is interested in studying the conditional (or regression) quantile QY |X( |x) = FY-|1X=x( ) as a function of x. Assuming linear dependence on covariates, the  -th theoretical quantile regression is QY |X ( |x) = x , where
+
+ = arg min E{ (Y - X )|X = x}.
+
+
+(3)
+
+Koenker and Bassett (1978) used this fact to define a minimum contrast estimator of regression quantiles. Since the loss function used in (1) and (3) can be interpreted as asymmetrically weighted absolute errors, it is natural to consider the asymmetrically weighted squared errors or other asymmetrically weighted loss functions. The expectile regressions of Newey and Powell (1987) are the solutions of the optimization problem (3) with the loss function corresponding to
+
+ (u) = u2| - I(u < 0)|.
+
+More general asymmetric loss functions have been considered by Breckling and Chambers (1988) to define their M -quantiles which include quantiles and expectiles as special cases.
+
+We now restrict our attention to a univariate covariate but consider the more
+
+flexible nonparametric estimation. For fixed  , the  -th generalized quantile regres-
+
+sion is defined as
+
+l (x) = arg min E{ (Y - )|X = x},
+
+
+(4)
+
+4
+
+where  (Y - y) is an asymmetric loss function. Because it is a univariate function, l (x) is also referred to as the  -th generalized quantile curve. In this paper we focus on the quantile and expectile regressions, corresponding to
+
+ (u) = |u|| - I(u < 0)|
+
+(5)
+
+with  = 1, 2, respectively, although with slight modifications our methodology is
+
+generally applicable for any  > 0. According to Jones (1994), the expectiles can be
+
+interpreted as quantiles, not of the distribution F (y|x) itself, but of a distribution
+
+related to F (y|x). Specifically, write H(y|x) for the conditional partial moment
+
+y -
+
+u
+
+F (du|x),
+
+and
+
+denote
+
+G(y|x)
+
+=
+
+H(y|x) - yF (y|x) 2{H(y|x) - yF (y|x)} + {y
+
+-
+
+µ(x)} ,
+
+where µ(x) = H(|x) =
+
+ -
+
+u
+
+F
+
+(du|x)
+
+is
+
+the
+
+conditional
+
+mean
+
+function.
+
+The
+
+ -th
+
+expectile of the conditional distribution L(Y |X = x) is the quantile of G(y|x), that
+
+is, l (x) = G-1( |x). When they are well-defined, both the conditional quantile and expectile characterize the conditional distribution, and there is a one-to-one
+
+mapping between them (Yao and Tong, 1996). Quantiles are intuitive, but expectiles
+
+are easier to compute and more efficient to estimate (Schnabel and Eilers, 2009b).
+
+To estimate the generalized quantile regressions, assume we have paired data
+
+(Xi, Yi), i = 1, . . . , n, an i.i.d. sample from the joint distribution of (X, Y ). It follows from (4) that the generalized quantile regression l (·) minimizes the unconditional expected loss,
+
+l (·) = arg min E[ {Y - f (X)}],
+fF
+
+(6)
+
+where F is the collection of functions such that the expectation is well-defined. Using
+
+the method of penalized splines (Eilers and Marx, 1996; Ruppert et al., 2003), we
+
+represent f (x) = b(x) , where b(x) = {b1(x), . . . , bq(x)} is a vector of B-spline basis functions and  is a q-vector of coefficients, and minimize the penalized average
+
+empirical loss,
+
+n
+
+l (·) = arg min  {Yi - f (Xi)} +  ,
+f (·)=b(·)  i=1
+
+(7)
+
+where  is a penalty matrix and  is the penalty parameter. The penalty term
+
+is introduced to penalize the roughness of the fitted generalized quantile function
+
+l (·). When Xi's are evenly spaced, the penalty matrix  can be chosen such that   = i(i+1 - 2i + i-1)2 is the squared second difference penalty. In this case,  = D D and D is the second-differential matrix such that D creates the
+
+5
+
+vector of second differences i+1 - 2i + i-1. In general, the penalty matrix  can be chosen to be ¨b(x)¨b(x) dx such that   = {¨b(x) }2 dx, where ¨b(x) = {¨b1(x), . . . , ¨bq(x)} denotes the vector of second derivatives of the basis functions.
+The minimizing objective function in (7) can be viewed as the penalized negative
+log likelihood for the signal-plus-noise model
+
+Yi = l (Xi) + i = b(Xi)  + i,
+
+(8)
+
+where i follows a distribution with a density proportional to exp{-r(u)}, which corresponds respectively to the asymmetric Laplace distribution or the asymmetric Gaussian distribution for  = 1 and  = 2 (Koenker and Machado, 1999). Since these distributions are rather implausible for real-world data, their likelihood is better interpreted as a quasi-likelihood.
+
+For expectiles ( = 2 in the definition of loss function), Schnabel and Eilers
+
+(2009b) developed an iterative least asymmetrically weighted squares (LAWS) al-
+
+gorithm to solve the minimization problem (7), by extending an idea of Newey and
+
+Powell (1987). They rewrote the objective function in (7) as
+
+where
+
+n
+wi( ){Yi - b(Xi) }2 +  ,
+i=1
+
+ wi( ) = 1 - 
+
+if Yi > b(Xi) , if Yi  b(Xi) .
+
+(9) (10)
+
+For fixed weights wi( )'s, the minimizing  has a closed-form expression
+
+ = (B W B + )-1B W Y,
+
+(11)
+
+where B is a matrix whose i-th row is b(Xi) , W is the diagonal matrix whose ith diagonal entry is wi( ), and Y = (Y1, . . . , Yn) . Note that the weights wi( )'s depend on the spline coefficient vector . The LAWS algorithm iterates until convergence between computing (11) and updating W using (10) with  being its current value obtained from (11).
+
+With a slight modification, the LAWS algorithm can also be used to calculate
+
+the penalized spline estimator of conditional quantile functions, which correspond
+
+to  = 1 in the asymmetric loss function. The weights for calculating the expectiles
+
+given in (10) need to be replaced by
+
+
+
+wi( )
+
+=
+
+ 
+
+|Yi
+
+-
+
+b(Xi) 1-
+
+|
+
++
+
+
+
+  |Yi - b(Xi) | + 
+
+if Yi > b(Xi) , if Yi  b(Xi) ,
+
+(12)
+
+6
+
+where  > 0 is a small constant used to avoid numerical problems when Yi - b(Xi)  is close to zero. In this case, the LAWS algorithm can be interpreted as a variant of Majorization-Minimization (MM) algorithm and the convergence of the LAWS algorithm then follows from the general convergence theory of the MM algorithm; see Hunter and Lange (2000).
+One advantage of expectiles is that they can always be calculated no matter how low or high of the generalized quantile level  , while the empirical quantiles can be undefined at extreme tails of the data distribution. It is also known that estimation of expectiles is usually more efficient than that of quantiles since it makes more effective use of data (Schnabel and Eilers, 2009b). However, when  is close to 0 or 1, both estimation of expectiles and quantiles exhibits high variability, because of sparsity of data in the tails of the distribution. In the next section, we will present a method for better quantile and expectile estimation when there is a need to estimate a collection of generalized quantile regressions and, if these regressions share some common features. We use functional data analysis techniques to improve the estimation efficiency by borrowing strength across data sets.
+
+3 Functional data analysis for a collection of regression quantiles
+
+3.1 Approach
+
+When we are interested in a collection of generalized quantile curves, denoted as
+
+li(t), i = 1, . . . , N , we may treat them as functional data. (To emphasize the
+
+one-dimensional nature of the covariate, from now on we change notation for the
+
+covariate from x to t.) Suppose li(t)'s are independent realizations of a stochastic process l(t) defined on a compact interval T with the mean function E{l(t)} = µ(t)
+
+and the covariance kernel K(s, t) = Cov{l(s), l(t)}, s, t  T . If T K(t, t)dt < , then Mercer's Lemma states that there exists an orthonormal sequence of eigen-
+
+functions (j) and a non-increasing and non-negative sequence of eigenvalues (j)
+
+such that
+
+(Kj)(s) d=ef K(s, t)j(t)dt = jj(s),
+T 
+K(s, t) = jj(s)j(t),
+j=1
+
+7
+
+and  j = K(t, t)dt. j=1 T
+Moreover, we have the following Karhunen-Lo`eve expansion
+
+
+
+l(t) = µ(t) +
+
+j j j (t),
+
+j=1
+
+(13)
+
+where j d=ef 1j l(t)j(s)ds, E(j) = 0, E(jk) = j,k, j, k  N, and j,k is the Kronecker delta.
+Usually statistical estimation demands a parsimonious model for estimation efficiency and thus the terms associated with small eigenvalues in (13) can be neglected. As a result for i = 1, · · · , n observations of l and therefore j, we obtain the following reduced-rank model:
+
+K
+li(t) = µ(t) + fk(t)ik = µ(t) + f (t) i,
+k=1
+
+(14)
+
+where f (t) = {f1(t), · · · , fK(t)} and K is a fixed integer. In practice, K can be chosen by cross validation (CV). As in (13) and (James et al., 2000; Zhou et al., 2008), µ is the mean function, fk the k-th principal component function (PC) and i = (i1, · · · , iK) the vector of PC scores for the i-th curve. ij corresponds to ijij in (13). Since the approximations (14) share the same mean function and the same set of principal components for the collection of generalized quantile curves, it enables to borrow information across data sets to improve estimation efficiency.
+
+Accepting the parameterizations in (14), estimation of the generalized quantile curves is reduced to the estimation of the mean and principal components functions. Using the method of penalized splines again, we represent these functions in the form of basis expansions
+
+µ(t) = b(t) µ, f (t) = b(t) f ,
+
+(15)
+
+where b(t) = {b1(t), · · · , bq(t)} is a q-vector of B-splines, µ is a q-vector and f = {f,1, · · · , f,K} is a q × K matrix of spline coefficients. The B-splines are normalized so that
+b(t)b(t) dt = Iq.
+
+8
+
+Thus the estimation problem is further reduced to the estimation of spline coefficients. For identifiability, we impose the following restriction
+f f = IK .
+The above two equations imply the usual orthogonality requirements of the principal component curves:
+
+f (t)f (t) dt = f b(t)b(t) dtf = IK.
+
+Denote the observations as {Yij} with i = 1, · · · , N , j = 1, · · · , Ti. Combining (14) and (15) yields the following representation
+
+lij d=ef li(tij) = b(tij) µ + b(tij) f i.
+
+(16)
+
+Here, the scores i's are treated as fixed effects instead of random effects for con-
+
+venience in applying the asymmetric loss minimization, see the last paragraph of
+
+this section for more information. For identifiability, we assume that
+
+N i=1
+
+ik
+
+=
+
+0,
+
+1  k  K, and
+
+N i=1
+
+i21
+
+>
+
+···
+
+>
+
+N i=1
+
+i2K
+
+.
+
+The empirical loss function for
+
+generalized quantile estimation is
+
+N Ti
+S =  {Yij - b(tij) µ - b(tij) f i},
+i=1 j=1
+
+(17)
+
+where  (u) is the asymmetric loss function defined in (5). To ensure the smoothness of the estimates of the mean curve and the principal components curves, we use a moderate number of knots and apply a roughness penalty to regularize the fitted curves. The squared second derivative penalties for the mean and principal components curves are given by
+
+Mµ = µ ¨b(t)¨b(t) dt µ = µ  µ,
+
+K
+Mf = f,k
+k=1
+
+K
+¨b(t)¨b(t) dt f,k = f,k f,k.
+k=1
+
+The penalized empirical loss function is then
+
+S = S + µMµ + f Mf ,
+
+(18)
+
+where µ and f are nonnegative penalty parameters. Note that we use the same penalty parameter for all principal components curves for the sake of simplicity,
+
+9
+
+similar strategy has been used in Zhou et al. (2008). We propose to minimize the penalized loss (18) to estimate the parameters µ, f , and i's. The choice of the penalty parameters will be discussed later in the paper.
+Define the vector Li = {li1, · · · , liTi} and the matrix Bi = {b(ti1), · · · , b(tiTi)} . The representation (16) can be written in matrix form
+
+Li = Biµ + Bif i
+
+(19)
+
+Writing Yi = (Yi1, . . . , YiTi) , the data have the following signal-plus-noise representation
+
+Yi = Li + i = Biµ + Bif i + i
+
+(20)
+
+where i is the random error vector whose components follow some asymmetric distribution as in (8), corresponding to the asymmetric loss minimization for the generalized quantile regression. Equation (20) has also been used in Zhou et al. (2008) for a random effects model of functional principal components, where both i and i are multivariate normally distributed. Since the signal-plus-noise model (20) for generalized quantile regression is not a plausible data generating model but rather an equivalent representation of the asymmetric loss minimization, the EMalgorithm used in Zhou et al. (2008) can not be simply extended and justified in the current context.
+
+3.2 Algorithm
+
+This subsection develops an iterative penalized least asymmetrically weighted squares (PLAWS) algorithm for minimizing the penalized loss function defined in (18), by defining weights in a similar manner as in (10) and (12).
+
+We fix the quantile level   (0, 1). To estimate the expectile curves, for i = 1, · · · , N and j = 1, · · · , Ti, define the weights
+
+wij =
+
+ if Yij > lij, 1 -  if Yij  lij.
+
+(21)
+
+where lij = b(tij) µ - b(tij) f i is a function of the parameters. To estimate the quantile curves, define the weights
+
+
+
+wij
+
+ 
+=
+
+|Yij - lij| +  1-
+
+  |Yij - lij| + 
+
+if Yij > lij, if Yij  lij,
+
+(22)
+
+10
+
+where lij is defined as in (21) and  is a small positive constant. Using these weights, the asymmetric loss function in (17) can be written as the following asymmetrically weighted sum of squares
+
+N Ti
+S = wij{Yij - b(tij) µ - b(tij) f i}2,
+i=1 j=1
+
+(23)
+
+and the penalized loss function (18) becomes the following penalized weighted sum of squares criterion
+
+N
+S = (Yi - Biµ - Bif i) Wi (Yi - Biµ - Bif i)
+i=1 K
++ µµ  µ + f f,k f,k,
+k=1
+
+(24)
+
+where Wi = diag{wi1, . . . , wiTi}. Since the weights depend on the parameters, the PLAWS algorithm iterates until convergence between minimizing (24) and updating the weights using (21) and (22).
+
+To minimize (24) for fixed weights, we alternate minimization with respect to µ, f , and i. Such minimizations have closed-form solutions
+
+µ =
+
+N -1 N
+
+Bi WiBi + µ
+
+Bi Wi(Yi - Bif i) ,
+
+i=1 i=1
+
+f,l =
+
+N -1 N
+
+i2lBi WiBi + f 
+
+ilBi Wi(Yi - Biµ - BiQil) ,
+
+i=1 i=1
+
+i = (f Bi WiBif )-1 f Bi Wi(Yi - Biµ) ,
+
+(25)
+
+where
+
+Qil = f,kik,
+k=l
+and i = 1, · · · , N , k, l = 1, · · · , K, f,k is the k-th column of f .
+A summary of the complete algorithm is presented in Appendix A.1. A procedure for obtaining initial values is given in Appendix A.2. After we get the parameter estimates from the PLAWS algorithm, we can estimate the individual quantile curves by plugging the parameter estimates into (14) and (15).
+
+11
+
+3.3 Choice of Auxiliary Parameters
+
+In this paper, for simplicity, we use equally spaced knots for the B-splines. The choice of the number of knots to be used is not critical, as long as it is moderately large, since the smoothness of the fitted curves is mainly controlled by the roughness penalty term. For typical sparse functional datasets, 10-20 knots are often sufficient, see Zhou et al. (2008). The optimal choice of the penalty parameter for the single curve estimation used in initialization follows the method in Schnabel and Eilers (2009b). There are several well developed methods for choosing the auxiliary parameters in the FDA framework, such as, AIC, BIC and cross-validation (CV), Ramsay and Silverman (2005). In this paper, all the auxiliary parameters, such as the number of principal components/factors to be included, and the penalty parameters µ and f , will be chosen via the 5-fold cross-validation by minimizing the cross-validated asymmetric loss function. Explicitly, the 5-fold cross-validation can be written as:
+
+1 CV (K, µ, f ) = 5
+
+N -m×5
+
+Ti
+wij|Yij - lij|2
+
+i=N -(m-1)×5 j=1
+
+where m = 1, 2, · · · , [N/5], wij = wij(Yij - lij) defined in (10) and (12)
+
+lij = b(tij) µ + b(tij) f i
+
+.
+
+4 Simulation
+
+We conducted a simulation study to illustrate the proposed FDA approach in estimating a collection of generalized quantile curves. For each case, we considered N data sets. For the i-th data set, the data were generated from the model
+
+Yij = µ(tj) + f1(tj)1i + f2(tj)2i + ij, j = 1, . . . , T,
+
+(26)
+
+where tj's are sampling points equidistant in [0, 1] with tj = j/T , the mean curve µ(t) = 1 + t + exp{-(t -0.6)2/0.05}, the principal component curves are f1(t) =
+2 sin(2t) and f2(t) = 2 cos(2t), and ij = i(t) are independent errors. The scores 1i and 2i were generated independently from N(0, 36) and N(0, 9) distribution, respectively. The errors ij were generated from either (1) N (0, 0.5), (2)
+
+12
+
+N (0, µ(t) × 0.5) or (3) t(5) distributions. The  -th quantile or expectile curve for the i-th data set is
+li(t) = µ(t) + f1(t)1i + f2(t)2i + c ,
+where c represents the corresponding  -th theoretical quantile or expectile of i(t). We considered two setups of sample sizes: (1) N = 20 data sets with T = 100 observation points for each set and (2) N = 40 data sets with T = 150 observation points for each set. The code for simulation may be found in www.quantlet.de.
+We ran the simulation 200 times for each setup. We applied both the proposed FDA method and the separate estimation method to each simulation to estimate the 95% expectile and quantile curves. For simplicity, we assume there are two principal components, i.e. K = 2, and the penalty parameters are chosen by 5-fold cross validation. We calculated the integrated squared error for estimating individual generalized quantile curves. These errors were then averaged over data sets to obtain the mean integrated squared errors (MSEs). The summary statistics (mean and SD) of the MSEs are reported in Table 1, where the same quantities for the separate estimation approach are also reported. We observe that the proposed FDA method outperforms the separate estimation approach in all scenarios by producing smaller MSEs. We also observe that, for each setup, the MSEs for estimating the expectiles are smaller than those for estimating the quantiles; this is consistent to our earlier discussion that expectile estimates are less variable than quantile estimates. Moreover, comparing results for Scenario 1 and Scenario 3, we see that the MSEs are bigger when the distribution has fatter tails.
+Figure 1 shows the estimated results of the 95% expectile curves by the proposed FDA approach with the error terms normally distributed. One observes that the mean of the estimated mean curves fit the respective true ones well, and the confidence intervals cover the real ones. We also notice that the results from the large data set fit slightly better to that from the small sample size, especially for the two functional principal component curves, since their confidence intervals become smaller as the sample size increases. However, the estimated mean curve, due to bias, is slightly underestimated at some points. Further, we observe that the large dataset gives us narrower confidence interval that the small one. Figure 2 shows the estimated mean curves and principal component curves of 95% quantile curves when the error terms are still normally distributed. The quantile curves perform similarly to that of the expectile curves. While, the results from the mean curves are slightly better than that of expectile curves, to say, the confidence intervals actually cover
+13
+
+Scenario 1
+2
+3
+
+Sample Size N = 20, T = 100 N = 40, T = 150 N = 20, T = 100 N = 40, T = 150 N = 20, T = 100 N = 40, T = 150
+
+Expectile curves FDA Separate
+0.0815 0.1407 (0.0296) (0.0149) 0.0189 0.0709 (0.0025) (0.0052) 0.1436 0.3188 (0.0248) (0.0339) 0.0931 0.2751 (0.0106) (0.0188) 0.2859 0.5194 (0.0525) (0.1284) 0.1531 0.4087 (0.0212) (0.0707)
+
+Quantile curves FDA Separate
+0.1733 0.2539 (0.0283) (0.0227) 0.0723 0.1875 (0.1205) (0.0127) 0.2769 0.8039 (0.1061) (0.0860) 0.1785 0.0.6029 (0.0813) (0.0503) 0.4490 1.2227 (0.2867) (0.2290) 0.2340 0.8683 (0.1259) (0.1085)
+
+Table 1: The summary statistics (mean and SD) of the MSEs for estimating 95%
+generalized quantile curves by the FDA approach and the separate estimation approach. Scenario 1 with ij  N (0, 0.5), Scenario 2 with ij  N (0, µ(t) × 0.5) and Scenario 3 with ij  t(5).
+
+the real mean curves well. In general, one can say that though the performance of the proposed FDA method for quantile regression is comparable to the result of expectile curves.
+5 Application
+Temperature derivatives are financial instruments that provide protection and investment opportunities contributed on weather events. Understanding of the risk factors of temperature is crucial to the pricing of temperature derivatives. In this section, we apply the proposed FDA method to study the variation of temperature at 150 weather stations in China using daily average temperature data of year 2010 obtained from the Chinese Meteorological Administration, which was obtained from Research Data Center (RDC) in Humboldt University at Berlin. The locations of the weather stations are shown in Figure 3.
+The temperature record has a clear seasonable pattern -- low in winter and high in summer -- and also displays strong autocorrelation. We studied the volatility of the temperature using the residuals after de-trending and removing the autoregressive effect as well as the seasonal effect. The standard procedure (for pricing) is
+14
+
+2.0 2.5 3.0
+
+2.0 2.5 3.0 3.5
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+-0.5 0.0 0.5 1.0 1.5
+
+-0.5 0.0 0.5 1.0 1.5
+
+-1.5
+
+-1.5
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+0.5 1.0 1.5
+
+0.5 1.0 1.5
+
+-0.5
+
+-0.5
+
+-1.5
+
+-1.5
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+Figure 1: The estimated µ (blue dotted), the real µ (black solid) and the 5% -
+95% pointwise confidence intervals ( red dashed), Upper Panel; the estimated first
+principal component f1, Middle Panel; the estimated second principal component f2, Bottom Panel; for 95% expectile curves when the error term is normally distributed
+with mean 0 and variance 0.5. The sample size are respectively N = 20, M = 100
+(Left) and N = 40, M = 150 (Right). 15
+
+2.0 2.5 3.0 3.5
+
+2.0 2.5 3.0 3.5
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+-0.5 0.0 0.5 1.0 1.5
+
+-0.5 0.0 0.5 1.0 1.5
+
+-1.5
+
+-1.5
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+0.5 1.0 1.5
+
+0.5 1.0 1.5
+
+-0.5
+
+-0.5
+
+-1.5
+
+-1.5
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+Figure 2: The estimated µ ( dotted blue), the real µ (solid black) and the 5% -
+
+95% pointwise confidence intervals ( red dashed), Upper Panel; the estimated first
+
+principal component f1, Middle Panel; the estimated second principal component f2, Bottom Panel; for 95% quantile curves with error term normally distributed with mean 0 and variance 0.5. The sample size is N = 20, M = 100 (Left) and
+
+N = 40, M = 150 (Right).
+
+16
+
+q qq
+
+q q
+
+q qq
+q
+
+qq
+qq qq
+
+q
+
+qq
+
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+
+q qq
+
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq q
+
+q qq
+
+Figure 3: 150 Weather Stations in China
+
+well-documented in the literature (Campbell and Diebold, 2005; H¨ardle and L´opezCabrera, 2011). Let Tit denote the average temperature on day t for city (station) i. The standard model described e.g. in Benth et al. (2007) is:
+
+Tit = Xit + it,
+M
+it = ai + bit + cim cos
+m=1 pi
+Xit = ij Xi,t-j + it.
+j=1
+
+2(t - dim) m · 365
+
+,
+
+(27)
+
+The seasonal effect it is captured by a small number of Fourier terms, and autocorrelation by an autoregressive AR structure. Our interest is the collection of expectile curves of different percentages at each station i which characterize the distribution of it as a function of t. We fit model (27) to the temperature data and obtained estimated residuals it. In principle, the distribution function of the volatility can be deduced from the generalized quantile curves. Further, the distribution function is crucial to pricing the weather derivatives, more description can be found in H¨ardle and Lo´pez-Cabrera (2011). We applied our FDA method to these residuals to estimate the 5%, 25%, 75%, and 95% expectile curves for each weather station. In each application of our method, penalty parameters were selected using cross-validation.
+
+Evaluating the empirical variance of the estimated PC scores suggest that,
+
+17
+
+PC index 1 2 3 4 5 6
+
+5% 0.3833 0.0665 0.0471 0.0415 0.0306 0.0262
+
+Expectile levels 25% 75% 0.0596 0.0659 0.0131 0.0194 0.0077 0.0158 0.0074 0.0123 0.0072 0.0056 0.0051 0.0050
+
+95% 0.4421 0.1102 0.0746 0.0657 0.0455 0.0226
+
+Table 2: The empirical variances of PC scores for the Chinese temperature data.
+
+for all four expectile levels, the first principal component is a dominating factor in explaining the variability among the weather stations; see Table 2. Figure 4 shows the estimated first principal component functions f1(t) for four expectile levels. These PC functions have the following interpretation: A positive score on the first PC of the 5% and 25% expectiles implies that the corresponding distribution has a lighter than average left tail, while a positive score on the first PC of the 75% and 95% expectiles implies that the corresponding distribution has a heavier than average right tail. The U shape of the PC functions suggest that the effect is stronger in winter than in summer.
+Figure 5 shows the estimated PC scores 1i for the first principal components at four expectile levels. To help the interpretation, the values of the scores are shown as colored dots at the locations of the stations on the map of China. For expectiles at lower levels, i.e., 5% and 25% levels, the weather stations in northern China tend to have positive PC scores, while those in the south are opposite; for expectiles at higher levels, i.e., 75% and 95% levels, the weather stations in northern China tend to have negative PC scores, while those in the south are opposite. According to the interpretation of the first principal components given earlier, these results suggest that the temperature distribution has heavier left and right tails (and is so more spread out) in southern China than that in the north, and this phenomenon is more pronounced in winter than in summer. Therefore, one can say that it has more potential to buy weather derivatives to hedge the corresponding risk in the south of China, especially to hedge the temperature risk in winter. We may understand the result as that in winter, the north part of China already has the perfect heating system, therefore even the big changes in temperature cannot influence the residents, the energy companies or other related industries. While, in the south, the weather related sectors, such as the crops and energy companies are more sensitive to the
+18
+
+0.6 0.8 1.0 1.2 1.4 1.6
+
+Eigenfunctions
+0 100 200 300 Figure 4: The estimated first principal component for the 5% (black solid), 25% (red dashed), 75% (green dotted), 95% (blue dash-dotted) expectiles curves of the volatility of the temperature of China in 2010 with the data from 150 weather stations. variation of temperature. Extreme cold weather in southern China even may kill people. Thus, weather derivatives are necessary tools to hedge temperature risk and avoid the corresponding loss, especially in the Southern China.
+6 Conclusion
+This paper develops an approach for jointly estimating a family of generalized quantile curves. By applying ideas from functional data analysis, we can borrow strength across populations. The simulation study demonstrates the proposed FDA approach is more efficient than separate estimation. Our method also provides principal component functions for the generalized quantile curves, which is useful for describing the major source of variation among these curves. The application to temperature data yielded scores that gave message into the distribution of tail events of
+19
+
+q q q
+
+q q
+
+q qq
+q
+
+q
+
+q
+
+q qq
+
+qq
+
+q qq
+
+qq
+
+q qq
+
+qqq q q
+
+q
+
+q qq
+
+qq q q q
+
+qq
+
+q qq q
+
+q
+
+qqq
+
+qq
+
+q qq
+
+qq q q
+
+q q q qq
+
+qq
+
+q
+
+q
+
+qq
+
+q q qq
+
+q
+
+qq
+
+q
+
+qqq
+
+q
+
+qq
+
+qq
+
+qq q q q qq
+
+qq
+
+q qq q q qq
+
+q qq
+
+q qq
+
+q
+
+q
+
+q qqq
+
+qq
+
+qq
+
+q q qqq
+
+q qq
+
+q
+
+q qq q q
+
+q qq qq
+
+qq qq q q
+
+q
+q q
+
+2.00 1.50 1.00 0.50 0.00 -0.50 -1.00 -1.50
+
+q qq
+
+q q q
+
+q q
+
+q qq
+q
+
+q
+
+q
+
+q qq
+
+qq
+
+q qq
+
+qq
+
+q qq
+
+qqq q q
+
+q
+
+q qq
+
+qq q q q
+
+qq
+
+q qq q
+
+q
+
+qqq
+
+qq
+
+q qq
+
+qq q q
+
+q q q qq
+
+qq
+
+q
+
+q
+
+qq
+
+q q qq
+
+q
+
+qq
+
+q
+
+qqq
+
+q
+
+qq
+
+qq
+
+qq q q q qq
+
+qq
+
+q qq q q qq
+
+q qq
+
+q qq
+
+q
+
+q
+
+q qqq
+
+qq
+
+qq
+
+q q qqq
+
+q qq
+
+q
+
+q qq q q
+
+q qq qq
+
+qq qq q q
+
+q
+q q
+
+q qq
+
+0.60 0.40 0.20 0.00 -0.20 -0.40 -0.60 -0.80
+
+q q q
+
+q q
+
+q qq
+q
+
+q
+
+q
+
+q qq
+
+qq
+
+q qq
+
+qq
+
+q qq
+
+qqq q q
+
+q
+
+q qq
+
+qq q q q
+
+qq
+
+q qq q
+
+q
+
+qqq
+
+qq
+
+q qq
+
+qq q q
+
+q q q qq
+
+qq
+
+q
+
+q
+
+qq
+
+q q qq
+
+q
+
+qq
+
+q
+
+qqq
+
+q
+
+qq
+
+qq
+
+qq q q q qq
+
+qq
+
+q qq q q qq
+
+q qq
+
+q qq
+
+q
+
+q
+
+q qqq
+
+qq
+
+qq
+
+q q qqq
+
+q qq
+
+q
+
+q qq q q
+
+q qq qq
+
+qq qq q q
+
+q
+q q
+
+0.80 0.60 0.40 0.20 0.00 -0.20 -0.40 -0.60
+
+q qq
+
+q q q
+
+q q
+
+q qq
+q
+
+q
+
+q
+
+q qq
+
+qq
+
+q qq
+
+qq
+
+q qq
+
+qqq q q
+
+q
+
+q qq
+
+qq q q q
+
+qq
+
+q qq q
+
+q
+
+qqq
+
+qq
+
+q qq
+
+qq q q
+
+q q q qq
+
+qq
+
+q
+
+q
+
+qq
+
+q q qq
+
+q
+
+qq
+
+q
+
+qqq
+
+q
+
+qq
+
+qq
+
+qq q q q qq
+
+qq
+
+q qq q q qq
+
+q qq
+
+q qq
+
+q
+
+q
+
+q qqq
+
+qq
+
+qq
+
+q q qqq
+
+q qq
+
+q
+
+q qq q q
+
+q qq qq
+
+qq qq q q
+
+q
+q q
+
+q qq
+
+2.00 1.50 1.00 0.50 0.00 -0.50 -1.00 -1.50 -2.00
+
+Figure 5: The estimated first principal component scores 1 for the 5%, 25%, 75% and 95% expectile curves of the temperature distribution.
+
+20
+
+temperature in China.
+
+A Appendix
+A.1 The complete PLAWS algorithm
+We give the complete algorithm in this appendix. The parameters that appear on the right hand side of the equations are all fixed at the values from the last iteration.
+
+a. Initialization the algorithm using the procedure described in Appendix A.2.
+
+b. Update µ using
+
+µ =
+
+N -1 N
+
+Bi WiBi + µ
+
+Bi Wi(Yi - Bif i) .
+
+i=1 i=1
+
+c. For l = 1, · · · , K, update the l-th column of f using
+
+f,l =
+
+N -1
+i2lBi WiBi + f 
+i=1
+
+N
+ilBi Wi(Yi - Biµ - BiQil) ,
+i=1
+
+where f,k is the k-th column of f , and
+
+Qil = f,kik, i = 1, · · · , N.
+k=l
+
+d. Use the QR decomposition to orthonormalize the columns of f .
+
+e. Update (1, . . . , N ) using
+
+i = (f Bi WiBif )-1 f Bi Wi(Yi - Biµ) ,
+
+and then center i such that
+
+N i
+
+i
+
+=
+
+0.
+
+f. Update the weights, defined in (21) for expectiles and (22) for quantiles.
+
+g. Iterate Steps b-f until convergence is reached.
+
+21
+
+A.2 Initial values for the PLAWS algorithm
+
+The initialization of the PLAWS algorithm is:
+
+a. Estimate N expectile/quantile curves li(t) separately by applying the single curve estimation algorithm described in Section 2.
+
+b. Set Li = {l(ti1), . . . , l(tiTi)} . Run the linear regression Li = Biµ + i, i = 1, . . . , N,
+
+(28)
+
+to get the initials of µ as follows
+
+µ(0) =
+
+N -1 N
+
+Bi Bi
+
+Bi Li .
+
+i=1 i=1
+
+c. Calculate the residuals of the regression (28), denoted as Li = Li - Biµ(0). For each i, run the following linear regression
+
+Li = Bii + i.
+The solution, denoted as i(0), is used in later steps for finding initials of f and i. Set 0 = (1(0), · · · , (N0)).
+
+d. Calculate the singular value decomposition of (0) :
+
+(0) = U DV .
+The initial of f is chosen as (f0) = VkDk where Vk consists of the first K columns of V and Dk is the corresponding K × K block of D.
+
+e. Run the following regression
+
+(i0) = f i + i
+
+(29)
+
+to get the initials of i; use a ridge penalty if the regression is singular. Center
+
+i's such that
+
+N i=1
+
+i
+
+=
+
+0.
+
+Acknowledgment
+
+Guo and Ha¨rdle's work were supported by the Deutsche Forschungsgemeinschaft via CRC 649 "Economic Risk", Humboldt-Universita¨t zu Berlin. Guo's work was also supported by a fellowship from China Scholarship Council (CSC). Zhou's work was partially supported by NSF grant DMS-0907170. Huang's work was partially sponsored by NSF grants (DMS-0907170, DMS-1007618, DMS-1208952), and Award Number KUS-CI-016-04, made by King Abdullah University of Science and Technology (KAUST).
+
+22
+
+References
+Anastasiadou, Z. and Lo´pez-Cabrera, B. (2012). Statistical modelling of temperature risk. SFB discussing paper 2012-029, submitted to Statistical Science.
+Benth, F., Benth, J., and Koekebakker, S. (2007). Putting a price on temperature. Scandinavian Journal of Statistics, 34(4):746­767.
+Breckling, J. and Chambers, R. (1988). M-quantiles. Biometrika, 74(4):761­772.
+Campbell, S. and Diebold, F. (2005). Weather forecasting for weather derivatives. Journal of the American Statistical Association, 469:6­16.
+Cardot, H., Crambes, C., and Sarda, P. (2005). Quantile regression when the covariates are funtions. Nonparametric Statistics, 17(7):841­856.
+Eilers, P. and Marx, B. (1996). Flexible smoothing with B-splines and penalties. Journal of the American Statistical Association, 11:89­121.
+Guo, M. and Ha¨rdle, W. (2012). Simultaneous confidence bands for expectile functions. AStA Advances in Statistical Analysis, 96:517­542.
+Ha¨rdle, W. and Lo´pez-Cabrera, B. (2011). Implied market price of weather risk. Applied Mathematical Finance, 5:1­37.
+Ha¨rdle, W. and Song, S. (2010). Confidence bands in quantile regression. Econometric Theory, 26(4):1180­1200.
+Hunter, D. and Lange, K. (2000). Quantile regression via an MM algorithm. Journal of Computational and Graphical Statistics, 9(1):60­77.
+James, G., Hastie, T., and Sugar, C. (2000). Principle component models for sparse functinal data. Biometrika, 87:587­602.
+Jones, M. (1994). Expectiles and M-quantiles are quantiles. Statistics and Probability Letters, 20:149­153.
+Koenker, R. and Bassett, G. W. (1978). Regression quantiles. Econometrica, 46:33­ 50.
+Koenker, R. and Machado, J. A. F. (1999). Goodness of fit and related inference processes for quantile regression. Journal of the American Statistical Association, 94:1296­1310.
+23
+
+Newey, W. K. and Powell, J. L. (1987). Asymmetric least squares estimation and testing. Econometrica, 55:819­847.
+Odening, M., Berg, E., and Turvey, C. (2008). Management of climate risk in agriculture. Special Issue of the Agricultural Finance Review, 68(1):83­97.
+Ramsay, J. and Silverman, B. (2005). Functional data analysis, 2nd ed. New York: Springer.
+Ruppert, D., Wand, M., and Carroll, R. (2003). Semiparametric Regression. Cambridge University Press.
+Schnabel, S. and Eilers, P. (2009a). An analysis of life expectancy and economic production using expectile frontier zones. Demographic Research, 21:109­134.
+Schnabel, S. and Eilers, P. (2009b). Optimal expectile smoothing. Computational Statistics and Data Analysis, 53:4168­4177.
+Taylor, J. (2008). Estimating value at risk and expected shortfall using expectiles. Journal of Financial Econometrics, 6:231­252.
+Yao, Q. and Tong, H. (1996). Asymmetric least squares regression estimation: a nonparametric approach. Journal of Nonparametric Statistics, 6(2-3):273­292.
+Zhou, L., Huang, J., and Carroll, R. (2008). Joint modelling of paired sparse functional data using principle components. Biometrika, 95(3):601­619.
+24
+
+SFB 649 Discussion Paper Series 2013
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Functional Data Analysis of Generalized Quantile Regressions" by Mengmeng Guo, Lhan Zhou, Jianhua Z. Huang and Wolfgang Karl Härdle, January 2013.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

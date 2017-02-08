@@ -1,0 +1,2622 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2013-014
+Do High-Frequency Data Improve High-
+Dimensional Portfolio Allocations?
+Nikolaus Hautsch* Lada M. Kyj** Peter Malec*
+* Humboldt-Universität zu Berlin, Germany ** Barclays Inc., New York, USA
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Do High-Frequency Data Improve High-Dimensional Portfolio Allocations? 
+Nikolaus Hautsch Lada M. Kyj Peter Malec§
+First version: September 2011 This version: February 2013
+Abstract
+This paper addresses the open debate about the usefulness of high-frequency (HF) data in large-scale portfolio allocation. We consider the problem of constructing global minimum variance portfolios based on the constituents of the S&P 500 over a four-year period covering the 2008 financial crisis. HF-based covariance matrix predictions are obtained by applying a blocked realized kernel estimator, different smoothing windows, various regularization methods and two forecasting models. We show that HF-based predictions yield a significantly lower portfolio volatility than methods employing daily returns. Particularly during the volatile crisis period, these performance gains hold over longer horizons than previous studies have shown and translate into substantial utility gains from the perspective For helpful comments and discussions we thank Frank Diebold and three anonymous referees, Bent Jesper Christensen, Peter Christoffersen, Victor DeMiguel, Robert Engle, Eric Ghysels, Asger Lunde, the participants of the Third Annual Conference of the Society for Financial Econometrics (SoFiE) in Melbourne, June 2010, the CREATES-SoFiE conference in Aarhus, October 2010, the European meeting of the Econometric Society in Malaga, August 2012, as well as of research seminars in Aarhus, Berlin, Dortmund and Manchester. This research is supported by the Deutsche Forschungsgemeinschaft via the Collaborative Research Center 649 "Economic Risk". Institute for Statistics and Econometrics and Center for Applied Statistics and Economics (CASE), HumboldtUniversita¨t zu Berlin as well as Center for Financial Studies (CFS), Frankfurt. Email: nikolaus.hautsch@wiwi.huberlin.de. Address: Spandauer Str. 1, D-10178 Berlin, Germany. Barclays Inc., New York, NY, USA. Email: ladakyj@gmail.com. This work was done while Kyj was at Deutsche Bank Quantitative Products Laboratory and the views expressed are strictly those of Kyj and not necessarily of Barclays. §Institute for Statistics and Econometrics, Humboldt-Universita¨t zu Berlin. Email: malecpet@hu-berlin.de. Address: Spandauer Str. 1, D-10178 Berlin, Germany.
+1
+
+of an investor with pronounced risk aversion.
+Keywords: portfolio optimization; spectral decomposition; regularization; blocked realized kernel; covariance prediction
+JEL classification: G11, G17, C58, C14, C38
+1 Introduction
+With the rise in mutual fund and exchange-traded fund (ETF) investing, quantitative short-term management of vast portfolios has emerged as a topic of great interest. For allocation decisions, forecasts of high-dimensional covariance matrices constitute a crucial input, which initiated a body of literature on the performance of various methods based on asset return data measured up to a daily frequency (see, e.g., Chan et al., 1999; Jagannathan and Ma, 2003). Although the work of Andersen et al. (2001), Barndorff-Nielsen and Shephard (2004) and Barndorff-Nielsen et al. (2011), among others, opened up a new channel for increasing the precision of covariance matrix estimates and forecasts by exploiting high-frequency (HF) data, existing empirical studies examine its benefits for portfolio selection only in moderate dimensions (e.g. Fleming et al., 2003; Liu, 2009). This paper evaluates the potential of HF data for portfolio selection in a realistic high-dimensional framework.
+While ensuring high precision, we face major technical and practical challenges when constructing covariance matrix forecasts for vast-dimensional portfolio applications. First, forecasts have to be both positive definite and well-conditioned. These properties can be guaranteed by having sufficiently long estimation windows, sampling frequently enough within a fixed window, imposing a parametric specification or applying suitable regularization techniques. The latter include factor structures, e.g., based on principal components, methods from random matrix theory, such as eigenvalue cleaning (see Laloux et al., 1999), or shrinkage techniques as proposed in Ledoit and Wolf (2003). Second, covariance matrix predictions have to balance responsiveness (to new information) and a certain degree of stability. The latter property is crucial for preventing high transaction costs caused by excessive portfolio re-balancing and can be ensured by appropriately smoothing the estimates.
+Motivated by these requirements, we address the following research questions: (i) Do HF-based forecasts generally outperform low-frequency-based approaches and ­ if yes ­ over which time horizons? (ii) Which regularization methods are (empirically) superior? (iii) How important is it to smooth estimates over time? (iv) How well do naive predictions of covariance matrices (i.e., random walk forecasts) perform compared to corresponding dynamic forecasting models? (v) How do results change in dependence of the dimension of the underlying portfolio?
+2
+
+We answer these questions in an extensive empirical study by focusing on the problem of constructing global minimum variance (GMV) portfolios based on the constituents of the S&P 500 index over a four-year period covering the 2008 financial crisis. Studying global minimum variance portfolios (in contrast to minimum variance portfolios for a given expected return) has the important advantage that the corresponding weights are determined solely by forecasts of the conditional covariance matrices over the given investment horizon. This property is tantamount to pure volatility timing strategies and avoids the inherent noisiness of conditional mean predictions overshadowing the analysis and blurring the role of covariance forecasts (see, e.g., Jagannathan and Ma, 2003). We obtain HF-based covariance matrix estimates by applying the blocked realized kernel (BRK) by Hautsch et al. (2012) to mid-quote data. These estimates are smoothed over different time windows, regularized by eigenvalue cleaning or imposing a factor structure and, finally, utilized to construct both naive predictions and forecasts based on a simple dynamic specification. We benchmark the HF forecasts with prevailing approaches employing daily returns. In particular, we use multivariate GARCH models, rolling-window sample covariance matrices regularized in different ways as well as classic and state-of-the-art RiskMetrics approaches. The competing methods are evaluated in terms of the (estimated) conditional portfolio volatility and important characteristics of the implied portfolio allocations, such as portfolio turnovers and the amount of short-selling. Finally, we examine the economic significance of differences in portfolio volatility by a refined version of the utility-based method introduced in West et al. (1993) and Fleming et al. (2001). This approach provides performance fees (net of transaction costs) that a risk-averse investor would be willing to pay to switch from, for instance, covariance forecasts employing daily returns to HF-based forecasts. To provide finite-sample inference for these performance characteristics, we embed the entire evaluation methodology into a stylized "portfolio bootstrap" framework based on a random sampling of asset sub-sets.
+We summarize the major results as follows. First, even naive HF-based forecasts outperform all low-frequency (LF) methods in terms of portfolio volatility. This is particularly true during the turbulent crisis period. Here, an investor with high risk aversion and a daily horizon would be willing to pay up to 199 basis points to benefit from a lower portfolio volatility produced from HF data. This superiority of HF-based forecasts persists up to a monthly horizon with the corresponding performance fee being still 99 basis points. Second, while eigenvalue cleaning, as applied to BRK estimates by Hautsch et al. (2012), performs well as a robust baseline approach, adaptive or fixed factor structures constitute an effective alternative. Third, short-term smoothing of HF-based covariance matrix estimates can be beneficial for further reducing portfolio volatility. In contrast, smoothing over too long time intervals increases volatility but lowers portfolio turnover. The latter, however, is of importance if the transaction cost level is
+3
+
+particularly high. Fourth, constructing forecasts based on a simple dynamic specification of (realized) covariances further improves the performance of HF-based forecasts. During the crisis period, the performance fees an investor with pronounced risk aversion would pay for switching from LF-based predictions amount to 328 and 239 basis points for a daily and monthly horizon, respectively. Fifth, we demonstrate that exploiting HF data for portfolio selection is challenging in a vast investment universe including relatively illiquid assets. In contrast, focusing on the 100 and 30 most heavily-traded stocks out of the S&P 500 universe, we find that basis point fees for switching to HF-based forecasts increase by a multiple.
+This paper contributes to (the few existing) studies on the benefits of HF data for portfolio allocation. In their seminal work, Fleming et al. (2003) apply the evaluation methodology by Fleming et al. (2001) to volatility timing strategies in a general mean-variance context. For a daily forecasting horizon, they find that a risk-averse investor would be willing to pay between 50 and 200 basis points to switch from covariance forecasts based on daily returns to those employing five-minute returns. However, these results are based on allocations across only three highly-liquid futures contracts. Liu (2009) extends the size of the asset universe to 30 by constructing minimum tracking error portfolios (tracking the S&P 500 index) based on the constituents of the Dow Jones Industrial Average. He confirms the benefits of HF-based forecasts in terms of tracking error volatility. Apart from examining the value of HF data for portfolio selection in general, the studies by Bandi et al. (2008) and de Pooter et al. (2008) also aim to determine the optimal intraday sampling frequency. While the former minimize a mean-squared error criterion for three S&P 500 stocks and conduct an ex-post economic evaluation, the latter directly compare the performance of volatility timing strategies based on different frequencies considering the constituents of the S&P 100 index.
+However, to our best knowledge, no study thoroughly analyzed HF-based forecasts of portfolios covering several hundreds of assets as commonly used in practice. In addition, our contributions to this strand of literature are twofold. First, the above studies are restricted to intraday data sampled at fixed time intervals (e.g., five minutes). We consider the highest frequency possible employing tailor-made covariance estimators that offer substantial precision gains (see, e.g., Barndorff-Nielsen et al., 2011; Hautsch et al., 2012). Second, the predominant evaluation method is to examine unconditional sample moments of implied portfolio returns (or utilities depending on the latter), which however, can distort the ranking of the underlying covariance matrix forecasts (see Voev, 2009). Our evaluation approach relies on estimated conditional portfolio volatilities allowing for a more reliable ranking of competing covariance predictions.
+The remainder of the paper is organized as follows. Section 2 introduces the general GMV framework, as well as the corresponding evaluation methodology for conditional covariance
+4
+
+matrix forecasts. In Section 3, we discuss the methods for the construction of conditional covariance predictions based on both HF and LF data. Section 4 presents the S&P 500 dataset, more details on the evaluation procedure and the empirical results. Finally, Section 5 concludes.
+
+2 Global Minimum Variance Portfolios and Covariance Forecasts
+
+The practical implementation of a general mean-variance framework in the spirit of Markowitz (1952) relies on forecasts of the first two conditional moments of asset returns. Consequently, the performance of the predicted (optimal) portfolio allocation depends on the predictability of both conditional means and conditional covariances. However, it is well-known that the predictability of first conditional moments of asset returns is much lower than the predictability of conditional (co-)variances (e.g. Merton, 1980). Consequently, mean forecasts are subject to substantial prediction errors which in turn can completely dominate and distort the analysis (e.g. Michaud, 1989). As a result, isolating the explicit effects of high-dimensional covariance forecasts on the resulting portfolio performance is virtually impossible. Hence, in order to eliminate the impact of conditional mean predictions and to solely focus on the value of covariance forecasts we consider global minimum variance portfolios. This proceeding is backed by empirical evidence showing that the noisiness of mean predictions leads to highly unstable portfolio allocations which are typically outperformed by approaches explicitly avoiding the need of mean forecasts (e.g. DeMiguel et al., 2009; Jagannathan and Ma, 2003; Michaud, 1989). In this sense, our analysis provides insights into the impact of covariance forecasts on portfolio performance without being affected by assumptions or estimation errors associated with mean predictions.
+We assume a risk-averse investor with a horizon of h days and an asset universe of m stocks whose optimization problem at day t can be formulated as
+
+min
+wt,t+h
+
+wt,t+h t,t+h wt,t+h s.t. wt,t+h = 1,
+
+(1)
+
+where wt,t+h is the (m × 1) vector of portfolio weights and  is a (m × 1) vector of ones.
+
+Further, t,t+h := Cov[rt,t+h|Ft] denotes the (m × m) conditional covariance matrix of rt,t+h,
+
+i.e., the (m × 1) vector of log returns from day t to t + h, given the information set at t,
+
+Ft. If, for simplicity, we assume that Cov[rt+r-1,t+r, rt+s-1,t+s|Ft] = 0, r, s  1, r = s,
+
+then t,t+h =
+
+h r=1
+
+E[t+r-1,t+r |Ft
+
+].
+
+For
+
+h
+
+=
+
+1,
+
+we
+
+write
+
+rt+1
+
+:=
+
+rt,t+1
+
+and
+
+equivalently,
+
+t+1 := t,t+1. Solving (1) yields the GMV portfolio weights given by
+
+wt,t+h
+
+=
+
+t-,t1+h   t-,t1+h 
+
+.
+
+(2)
+
+5
+
+We investigate the benefits of HF data for GMV portfolio selection in terms of forecasts of the conditional covariance matrix, t,t+h, with corresponding weights wt,t+h. To evaluate these predictions, we exploit the basic result of Patton and Sheppard (2008) showing that the conditional variances of the portfolios based on the true conditional covariance matrix t,t+h and its forecast t,t+h obey
+
+wt,t+h t,t+h wt,t+h > wt,t+h t,t+h wt,t+h if t,t+h = t,t+h.
+
+(3)
+
+This result yields a natural evaluation criterion as resulting portfolio variances approach a lower bound if forecasts t,t+h approach their population counterparts. Consequently, we consider a forecast t,t+h as being superior if it produces a smaller conditional portfolio variance. As will be discussed below, the conditional portfolio variances can be proxied using HF data.
+Importantly, Voev (2009) shows that the above criteria are valid only for conditional, but not unconditional variances. Employing the latter introduces a bias, which is driven by the variance of the conditional mean of portfolio returns. The bias is negligible only if a mean of zero can be assumed, which is problematic for horizons of more than, e.g., a day. In addition, it is shown that due to the bias term, estimators implying higher variations in portfolio weights become (unjustifiably) disadvantaged. This property becomes particularly restrictive when comparing covariance matrix forecasts based on LF and HF data, as intuitively, the latter should be able to incorporate new information faster, however, implying more variability in the weights. Hence, gains from employing HF data might be understated when unconditional portfolio variances are considered for evaluation.
+We assess the economic significance of a lower (conditional) portfolio variance by adapting the utility-based evaluation approach suggested by West et al. (1993) and Fleming et al. (2001) to a conditional framework. Accordingly, we assume that the investor has quadratic preferences of the form
+
+U rtp,t+h
+
+=
+
+1
+
++
+
+rtp,t+h
+
+-
+
+2
+
+ (1 +
+
+)
+
+1 + rtp,t+h
+
+2
+,
+
+(4)
+
+where rtp,t+h := wt,t+h rt,t+h is the portfolio return with  denoting the relative risk aversion.
+Following Fleming et al. (2003), we consider the two levels  = 1 and  = 10. For two
+competing covariance forecasts, It,t+h and tII,t+h, implying the GMV portfolio returns rtp,,tI+h and rtp,,tI+I h, we then determine a value  , such that
+
+T -h
+E U rtp,,tI+h
+t=1
+
+T -h
+
+Ft =
+
+E U rtp,,tI+I h - 
+
+t=1
+
+Ft .
+
+(5)
+
+6
+
+ can be interpreted as a fee the investor is willing to pay in order to switch from a GMV strategy based on tI,t+h to its counterpart employing tII,t+h. As we show in Appendix A, the solution to (5) depends on the conditional portfolio variances, wti,t+h t,t+h wti,t+h, and the conditional means, wti,t+h µt,t+h, where µt,t+h := E[rt,t+h|Ft] is the (m × 1) vector of conditional expected returns and i = I, II. To isolate the effects of differences in (average) conditional
+portfolio variances, we assume expected returns being constant over time and identical across all stocks, i.e. µt,t+h = (h/252) µid , t = 1, . . . , T - h. This yields the relationship
+
+ > 0 iff I2,p > I2I,p,
+
+i2,p
+
+:=
+
+T
+
+1 -h
+
+T -h
+wti,t+h t,t+h wti,t+h,
+
+t=1
+
+i = I, II,
+
+(6)
+
+under the assumption that (h/252) µid  1/ (see Appendix A).1 To control for the impact of the assumption on the level of µid on the performance fee , we consider a grid of values satisfying the above restriction for the different investment horizons and rates of risk aversion utilized, i.e., µid  {-0.05, 0, 0.05, 0.1}. However, as we discuss below, our results are very robust to the specific value of µid.
+
+3 Covariance Estimation and Forecasting in Vast Dimensions
+3.1 Forecasts Based on High-Frequency Data
+Estimating asset return covariances based on high-frequency data requires addressing four major challenges: (i) using high-frequency information at the highest sampling frequencies to maximize the estimator's efficiency, while (ii) avoiding biases due to microstructure noise (e.g. Hansen and Lunde, 2006) and the asynchronous arrival of observations across assets (e.g. Epps, 1979), as well as (iii) ensuring positive definiteness and (iv) well-conditioning of covariance estimates, i.e. numerical stability of their inverse. Satisfying all criteria simultaneously is challenging, as for instance, fulfilling (i), (iii) and (iv) requires sampling at the highest frequencies, which in turn, causes substantial biases ruled out by (ii). Conversely, sparse sampling, e.g., based on five-minute returns, as utilized by the classical realized covariance estimator proposed by Andersen et al. (2001), satisfies (ii) but violates (i) and ­ if the dimension of the portfolio is high ­ also (iv).
+A widely used estimator that is both consistent in the presence of microstructure noise and provides positive semi-definite estimates (thus satisfying (ii) and (iii)) is the multivariate
+1Even in case (h/252) µid > 1/, we always have that  > 0 if I2,p > I2I,p. However, the above condition on µid is not overly restrictive. For the longest investment horizon and highest level of risk aversion we consider, i.e. h = 20 and  = 10, we need to impose that µid  1.26. That is, the assumed annualized expected return may not exceed 126 percentage points.
+7
+
+realized kernel proposed by Barndorff-Nielsen et al. (2011). As an important ingredient, this approach involves so-called refresh time sampling for synchronization, implying to sample prices whenever all assets have been traded (i.e., have been refreshed) at least once. This naturally implies a loss of efficiency as the sampling frequency is driven by those assets trading slowest. As stressed and illustrated by Hautsch et al. (2012), this loss of efficiency can be substantial (thus violating (i)) if the number of assets and their heterogeneity in terms of trading frequency is high. In the extreme case, covariance matrix estimates might even become ill-conditioned (thus violating (iv)).
+
+The Blocked Realized Kernel
+To address this problem and construct estimates which satisfy all criteria, we consider the blocked realized kernel put forward by Hautsch et al. (2012). The idea behind the blocked realized kernel is to assign the assets to groups according to their (average) trading frequency and to estimate the underlying correlation matrix groupwise.
+In a general framework, we denote the log price of asset i at time  by p(i), i = 1, . . . , m. For the assumptions on the price process ensuring consistency of the (blocked) multivariate realized kernel, we refer to Barndorff-Nielsen et al. (2011). On day t, t = 1, . . . , T , the j-th price observation of asset i is at time t(,ij), where j = 1, . . . , Nt(i) and i = 1, . . . , m. Let G be the specified number of liquidity groups, yielding the blocks b = 1, . . . , B, with B = G (G + 1) /2. Further, we denote the set of indices of the mb assets associated with block b by Ib. Applying the multivariate realized kernel methodology to the assets in Ib then requires refresh time sampling with refresh times defined as the time it takes for all the assets in this set to trade or refresh posted prices, i.e.
+
+rtb,1
+
+:=
+
+max
+iIb
+
+t(,i1)
+
+,
+
+rtb,l+1
+
+:=
+
+max
+iIb
+
+t(,iN) (i)(rtb,l)+1
+
+,
+
+(7)
+
+where N (i)( ) denotes the number of price observations of asset i before time  . Accordingly, vectors of synchronized returns are obtained as rtb,l := prtb,l - prtb,l-1 , l = 1, . . . , nbt , where nbt is the number of refresh time observations in block b.
+The multivariate realized kernel on block b is defined as
+
+Htb
+
+Ktb :=
+
+k
+
+h=-Htb
+
+h Htb + 1
+
+ht ,b,
+
+(8)
+
+8
+
+3
+1 liquid  illiquid
+2
+631
+
+combine to form -
+
+352
+
+6 5 4
+
+124
+
+Figure 1: Visualization of the Blocking Strategy According to Hautsch et al. (2012)
+
+where k(·) is given by the Parzen Kernel and ht ,b is an autocovariance matrix, i.e.
+
+
+ht ,b :=  
+
+ntb l=h+1
+
+rtb,l
+
+rtb,l-h
+
+for h  0
+
+ntb l=-h+1
+
+rtb,l+h
+
+rtb,l
+
+for
+
+h < 0.
+
+(9)
+
+Htb is a block-specific smoothing bandwidth that is chosen as in Section 3.4 of Barndorff-Nielsen et al. (2011). Based on (8), we compute the corresponding estimate of the correlation block b as
+
+RtK,b :=
+
+Vtb -1 Ktb
+
+Vtb
+
+-1,
+
+Vtb := diag Ktb,(ii)
+
+1/2
+,
+
+i = 1, . . . , mb,
+
+(10)
+
+where Ktb,(ii), i = 1, . . . , mb, are the diagonal elements of Ktb. The correlation matrix RtBRK is then obtained as a hierarchical combination of the corre-
+lation blocks RtK,b, b = 1, . . . , B. Figure 1 from Hautsch et al. (2012) illustrates the blocking strategy in a covariance matrix, where the top-left corner is associated with the most liquid assets and the bottom-right corner associated with the least liquid assets. The data is decomposed into three equal-sized liquidity groups (G = 3), yielding six correlation blocks. Then, in a first step, the entire correlation matrix (block one) is estimated. Subsequently, we obtain estimates of blocks two and three associated with the correlations between the less liquid and more liquid assets, respectively. Finally, blocks four to six contain the correlations within each liquidity group. Efficiency gains arise due to a more effective synchronization and thus a higher (refresh time) sampling frequency within each block. Consequently, all blocks ­ except block one ­ are estimated with higher precision than in the plain realized kernel. Finally, from the (block-wise) estimated correlation matrix RtBRK, the BRK estimate of the covariance matrix is constructed
+
+9
+
+according to
+
+BRKt
+
+:= VtRK
+
+RtBRK
+
+VtRK ,
+
+VtRK
+
+:= diag RKt(i)
+
+1/2
+,
+
+i = 1, . . . , m,
+
+(11)
+
+with RKt(i), i = 1, . . . , m, denoting variance estimates based on the univariate version of the realized kernel (Barndorff-Nielsen et al., 2008a). Consequently, the variance elements are estimated with highest precision, since in a univariate setting synchronization by refresh time sampling is not necessary. We implement the realized kernel estimator following the procedure from Barndorff-Nielsen et al. (2008b).
+
+Smoothing, Regularization and Construction of Forecasts
+
+Variations in portfolio weights require a re-balancing of the portfolio and thus cause transaction
+
+costs. The latter can be reduced by keeping covariance matrix forecasts sufficiently stable. The
+
+explicit consideration of transaction costs in the underlying portfolio optimization problem,
+
+however, results in an empirically challenging problem, as it requires bounding the variability
+
+of portfolio weights and thus of the covariance matrix over time. Although the derivation of an
+
+explicit solution of this problem is beyond the scope of this paper, we still aim at studying the
+
+impact of competing covariance forecast constructions on the resulting portfolio turnover. A
+
+straightforward method to stabilize covariance matrix estimates is to "smooth" them over time
+
+by computing simple averages over S days, i.e. BRKt,S := (1/S)
+
+S s=1
+
+BRKt-s+1,
+
+where
+
+BRKt,1 = BRKt.2 Then, a smoothed correlation matrix is obtained as
+
+RtB,SRK := VtR,SK -1 BRKt,S
+
+VtR,SK
+
+-1 ,
+
+VtR,SK := diag RKt(,iS)
+
+1/2
+,
+
+i = 1, . . . , m,
+
+(12)
+
+with RKt(,iS) := (1/S)
+
+S s=1
+
+RKt(-i)s+1,
+
+i
+
+=
+
+1, . . . , m, being smoothed univariate realized
+
+kernel estimates.
+
+Estimating correlation matrices block-wise implies efficiency gains, but yields estimates
+
+(even after smoothing) which are not guaranteed to be positive semi-definite and well-
+
+conditioned. Indefinite matrices feature negative eigenvalues, while ill-conditioned matrices
+
+possess eigenvalues that are close to zero, which makes inversions numerically unstable. Particu-
+
+larly for the computation of minimum variance portfolio weights as in (2), however, it is crucial
+
+that covariance matrices are both positive definite and well-conditioned. These requirements
+
+make it necessary to employ suitable regularization techniques.
+
+2Obviously, one might also "smooth" in a more sophisticated way by applying weighting schemes, e.g., based on kernel methods. We leave this for further research but show that even smoothing utilizing simple averages yields superior results, see Section 4.3.
+
+10
+
+As a first alternative, we follow Hautsch et al. (2012) employing the eigenvalue cleaning procedure proposed by Laloux et al. (1999). This method rests on the idea of comparing the (empirical) distribution of eigenvalues of the estimated correlation matrix with the theoretical distribution of eigenvalues one would obtain under independence of the m processes. The latter is derived from random matrix theory and yields the expected distribution of eigenvalues if these are completely driven by noise. Consequently, eigenvalues strongly departing from the theoretical distribution are identified as "signals" carrying significant information on crosssectional dependencies. Conversely, eigenvalues being close to zero, and thus to the benchmark distribution, are identified as "noisy". They are likely to be non-informative, while causing the correlation matrix to be ill-conditioned. Hence, these eigenvalues can be inflated, making estimates well-conditioned without significantly losing information. See Appendix B for details.
+As a second regularization technique, we consider a factor structure based on the spectral components of the correlation matrix. Covariance forecasts based on factor models have been demonstrated to improve the performance of minimum variance portfolios (e.g. Chan et al., 1999). Moreover, a factor structure ensures fast convergence of the factor inverse if the number of factors is small relative to the number of assets (see Fan et al., 2008). Accordingly, we consider a spectral decomposition of the smoothed correlation matrix estimate on day t, i.e.,
+
+RtB,SRK = Qt,S t,S Qt,S ,
+
+(13)
+
+where t,S is the diagonal (m × m) matrix of eigenvalues ordered from largest to smallest, while Qt,S denotes the orthonormal (m × m) matrix of corresponding eigenvectors. Then, by retaining only the first kt,S  m correlation eigenvalues and associated eigenvectors we obtain the factorized estimate of the correlation matrix
+
+RtB,SR,(Kkt,S ) = Qt,S,(kt,S )t,S,(kt,S )Qt,S,(kt,S ) + Im - Qt,S,(kt,S ) ,
+
+(14)
+
+where Qt,S,(kt,S) is a diagonal (m × m) matrix containing the diagonal elements of Qt,S,(kt,S)t,S,(kt,S)Qt,S,(kt,S). The number of factors kt,S is chosen in two ways. First, we select the number of factors for each day t separately employing the criteria by Bai and Ng (2002). For implementation details, we refer to Appendix C. Second, we consider a factor structure with the numbers of factors fixed to one or three.
+Hence, our combined framework for smoothing and regularizing BRK estimates can be summarized as
+
+vt,RSnB := VtR,SK Rtv,RSnB VtR,SK , where v  {E, F, 1F, 3F} ,
+
+(15)
+
+11
+
+with Rtv,RSnB corresponding to the smoothed correlation matrix estimates from (12) regularized by eigenvalue cleaning (E) or by imposing an adaptive (F) or fixed (1F and 3F) factor structure. Following Hautsch et al. (2012), in all cases we regularize only if RtB,SRK is non-positive definite or ill-conditioned. The latter is defined to be the case if (t,1S)/t(,mS) > 10 × m, where t(,1S) and t(,mS) are the largest and smallest eigenvalue of RtB,SRK , respectively.
+Further possibilities to regularize the covariance matrix are, for instance, thresholding techniques (Wang and Zou, 2010). However, the latter rely on a sparsity assumption for the underlying covariance matrix, which is problematic given the strong cross-sectional dependencies typical for equity data. Alternatively, as shown by Jagannathan and Ma (2003), regularization can be achieved by imposing no-short-sale constraints in the portfolio optimization problem (1). A related result for general gross portfolio constraints is put forward by Fan et al. (2012b) and applied to evaluate covariance matrix estimates using HF data, e.g., in Fan et al. (2012a). Here, we focus on an unconstrained framework, since it explicitly allows us to compare the performance of different regularization methods and to evaluate the forecasting accuracy not only with respect to the covariance matrix, but also to its inverse.
+We construct forecasts of t,t+h based on the information set Ft by two alternative approaches. First, we evaluate random walk ("naive") forecasts of the form t,t+h = h vt,RSnB, which will be referred to as vRnB(S), v  {E, F, 1F, 3F}. As an alternative to a pure random walk forecast, we propose a simple dynamic model for non-smoothed covariance matrix estimates. When choosing a suitable dynamic specification for covariance matrices, positive definiteness of forecasts, model parsimony and ease of implementation are important factors to ensure feasibility in a vast-dimensional setting. To guarantee positive definiteness, we follow Andersen et al. (2003) and Chiriac and Voev (2011) in modeling the Cholesky decomposition of covariance matrix estimates, i.e., tv,R1nB = Lt Lt, where Lt is a lower triangular matrix. As Lt contains m (m + 1) /2 distinct elements, we ensure tractability in high dimensions by modeling each row or column of Lt independently. Due to its triangular form, modeling the rows or columns of Lt implies a hierarchical specification of dynamics, depending on the ordering of assets. Consequently, (co-)variances associated with assets being ranked first widely follow their individual dynamics, while volatilities associated with higher ranks are subject to several joint dynamics. For instance, in case of row modeling, the volatility of the first asset and, in case of column modeling, all scaled covariances thereof with all other stocks follow independent dynamics.3 To account for this hierarchy, we order the assets according to their (average) trading frequency during the estimation period.
+
+3The first row of Lt contains the diagonal element t(,11,1), (t,11,2), . . . , (t,11,m) / (t,11,1).
+
+(t,11,1), while the first column equals the vector
+
+12
+
+Let L(tg·) denote the (g × 1) vector of elements from the g-th row of Lt and Lt(·g) the ((m - g + 1) × 1) vector of elements from the g-th column, g = 1, . . . , m. Dynamic specifications for L(tg·) and Lt(·g) should capture the well-known persistence properties of volatility processes, which can be achieved by fractionally integrated processes (e.g., Andersen et al., 2003), appropriately mixing different frequencies using, e.g., mixed data sampling (MIDAS) techniques as proposed by Ghysels et al. (2006) or heterogeneous autoregressive (HAR) processes introduced by Corsi (2009). We follow the latter strategy, which is in the spirit of Chiriac and Voev (2011) applying HAR dynamics to the Cholesky factors of realized covariance estimates. Accordingly, we consider the HAR(1, 5, 20) specifications
+
+L(tg·)
+
+=
+
+c(g·)
+
++
+
+d(g·)L(t-g·1)
+
++
+
+w(g·) 5
+
+5
+
+Lt(-g·s)
+
++
+
+m(g·) 20
+
+20
+
+Lt(-g·s) + (tg·), g = 1, . . . , m,
+
+s=1 s=1
+
+(16)
+
+L(t·g)
+
+=
+
+c(·g)
+
++
+
+d(·g)L(t-·g1)
+
++
+
+w(·g) 5
+
+5
+
+Lt(-·gs)
+
++
+
+m(·g) 20
+
+20
+
+Lt(-·gs) + t(·g), g = 1, . . . , m,
+
+s=1 s=1
+
+where c(g·) and c(·g) are (g × 1) and ((m - g + 1) × 1) parameter vectors, respectively, while
+
+the remaining parameters are scalars. We will refer to these specifications as Row- and Column-
+
+Cholesky-HAR (RCHAR and CCHAR) models. Based on (least-squares) parameter estimates,
+
+the models (16) yield h-step ahead forecasts L(t+g·h) and Lt(+·gh), g = 1, . . . , m, which are combined
+
+to form Lt+h. Finally, we construct forecasts of t,t+h as t,t+h =
+
+h r=1
+
+Lt+r
+
+Lt+r
+
+.
+
+These
+
+forecasts involve a bias, as they rely on a nonlinear transformation of the covariance matrix.
+
+However, we abstain from a bias correction, as, e.g., Chiriac and Voev (2011) demonstrate that
+
+this bias is empirically negligible. In any case, this issue should be of minor relevance when
+
+considering an economic, instead of a statistical loss function.
+
+3.2 Forecasts Based on Daily Data
+We assess the merits of covariance forecasts based on HF data for the portfolio selection framework presented in Section 2 by benchmarking the former against methods employing daily returns. A comprehensive overview of these approaches can be found in Sheppard (2012). The three classes of estimators we consider are (i) multivariate GARCH models, (ii) (regularized) rolling window sample covariance matrices, and (iii) RiskMetrics. (i) and (ii) have been shown to perform well in the econometric and finance literature, while (iii) is of relevance in financial practice. In this context, we will denote by ut the (m × 1) vector of demeaned returns at day t, i.e. ut := rt - µt, t = 1, . . . , T , where as for the utility-based evaluation above and in line
+
+13
+
+with, e.g., Hansen and Lunde (2005) we assume that the vector of conditional mean returns µt is constant over time.
+
+Multivariate GARCH Models
+Multivariate GARCH (MGARCH) models parameterize the dynamics of the conditional covariance matrix t+1. For a survey of this model class, we refer to Bauwens et al. (2006). We consider the scalar version of the vector GARCH model (S-VEC) introduced in Bollerslev et al. (1988) and the dynamic conditional correlation (DCC) model proposed by Engle (2002). The former is motivated by the results on spectral components of covariance and correlation matrices in Zumbach (2009a) that favor a direct modeling of conditional covariance matrices. For that purpose, the S-VEC model is the most parsimonious approach. Employing DCC specifications is justified by their superior out-of-sample prediction accuracy within the MGARCH class when considering various statistical loss functions and different dimensions (e.g. Caporin and McAleer, 2012; Laurent et al., 2012). We estimate both models by Gaussian QML, i.e., assuming ut+1|Ft  N (0, t+1).
+The S-VEC model is a direct extension of the univariate GARCH specification. Ensuring covariance targeting as proposed by Engle and Mezrich (1996), it can be formulated as
+
+t+1 = ¯ (1 - h - h) + h ut ut + h t, h, h  0, h + h < 1,
+
+(17)
+
+where ¯ := E[ut ut] denotes the unconditional covariance matrix of ut, which is consistently estimated by the corresponding sample moment. Then, h and h are estimated by QML
+
+using the composite likelihood method proposed by Engle et al. (2008). Accordingly, the
+
+joint likelihood is replaced by the sum of pairwise likelihoods ensuring tractability in high
+
+dimensions.4 Using the parameter estimates in specification (17), we construct h-step ahead
+
+forecasts t+h yielding t,t+h =
+
+h r=1
+
+t+r .
+
+The DCC model decomposes the conditional covariance matrix as t+1 = Vt+1 Rt+1 Vt+1,
+
+where Vt+1
+
+:=
+
+diag t2+,(1i)
+
+1/2
+,
+
+i
+
+=
+
+1, . . . , m,
+
+with
+
+the
+
+conditional
+
+variances
+
+t2+,(1i)
+
+following
+
+univariate GARCH processes, while a similar dynamic structure is imposed on the conditional
+
+4In our vast-dimensional setting, we follow a suggestion of Engle et al. (2008) and use only adjacent pairs of assets. The results do not change qualitatively when modifying the ordering of assets.
+
+14
+
+correlations in Rt+1, i.e.,
+
+t2+,(1i) = i + i u(ti),2 + i t2,(i), i, i, i  0, i + i < 1, i = 1, . . . , m,
+
+Rt+1 =
+
+Vtz+1 -1 Zt+1
+
+Vtz+1
+
+-1,
+
+Vtz+1 := diag Zt(+ii1)
+
+1/2
+,
+
+i = 1, . . . , m,
+
+Zt+1 = Z¯ (1 - z - z) + z t t + z Zt, z, z  0, z + z < 1,
+
+(18)
+
+where Zt(+ii1) , i = 1, . . . , m, are the diagonal elements of Zt+1, t := Vt-1 ut is the (m × 1) vector of devolatilized returns and Z¯ := E[ t t]. Estimation is carried out in three steps. First, we estimate the m univariate GARCH(1, 1) models. Second, Z¯ is estimated by correlation
+targeting, i.e., replacing E[ t t] with its sample analogue.5 Finally, we estimate the correlation
+parameters by the composite likelihood approach. Based on QML parameter estimates and the
+
+dynamics in (18), one-step ahead covariance forecasts can be straightforwardly constructed as
+
+t+1
+
+=
+
+Vt+1
+
+Rt+1
+
+Vt+1,
+
+where
+
+Vt+1
+
+:=
+
+diag t2+,(1i)
+
+1/2
+,
+
+i
+
+=
+
+1, . . . , m.
+
+To
+
+obtain
+
+the
+
+multi-
+
+step forecasts necessary for computing t,t+h =
+
+h r=1
+
+t+r
+
+,
+
+h
+
+>
+
+1,
+
+we
+
+use
+
+the
+
+approximations
+
+suggested in Engle and Sheppard (2005) and Engle (2009, ch. 9.1).
+
+Regularized Rolling Window Sample Covariance
+
+The sample covariance matrix computed from L (demeaned) daily returns is defined as
+
+Ct
+
+:=
+
+1 L
+
+L
+ut-l+1ut-l+1.
+
+l=1
+
+(19)
+
+The covariance matrix estimate Ct is positive definite whenever L  m but inversion can be numerically unstable even if the latter condition is fulfilled. Accordingly, we regularize Ct using alternative techniques if it is ill-conditioned according to the definition in Section 3.1. We denote the resulting estimate by Ctreg, where Ctreg = Ct if no regularization is imposed. Covariance forecasts are then computed as t,t+h = h Ctreg.
+As a simple regularization method, we consider factor models based on the principal
+components of Ct. The strong performance of factor structures in GMV portfolio applications is documented by Chan et al. (1999), showing that a three-factor model mimicking the Fama
+and French (1993) factors is sufficient. While the latter are factors constructed based on asset
+return characteristics and economic fundamentals, an approximation thereof using principal
+components can be motivated, for instance, by the results in Connor (1995) on the similar explanatory power of fundamental and statistical factor models. Let tc,(kt) be the diagonal
+5Aielli (2011) shows that the resulting estimator of Z¯ is inconsistent and proposes a "corrected" DCC (cDCC) model. However, Caporin and McAleer (2012) find the latter having an inferior forecasting performance compared to the original DCC specification.
+
+15
+
+(kt × kt) matrix of the first kt eigenvalues and Qtc,(kt) the (m × kt) matrix of the corresponding eigenvectors of Ct. Then, the resulting factorized covariance matrix estimate is
+
+Ctreg = Qct,(kt)tc,(kt)Qct,(kt) + Vtc - Qct,(kt) ,
+
+(20)
+
+where Vtc and Qtc,(kt) are diagonal (m × m) matrices containing the diagonal elements of Ct and Qct,(kt)tc,(kt)Qtc,(kt), respectively. In the spirit of Chan et al. (1999), we consider a three-factor structure (i.e., kt = 3) and, alternatively, examine a more restrictive framework with kt = 1. Further, we allow for a closer comparison with FRnB estimates by choosing kt on a dynamic basis using the Bai and Ng (2002) criteria discussed in Appendix C.
+As a second type of regularization, we use the shrinkage technique initially proposed
+by Stein (1956) and adopted by Ledoit and Wolf (2003) for sample covariance matrices. The
+resulting shrunk estimator is a weighted average of Ct and a restricted, positive definite target Ft, i.e.,
+
+Ctreg =  Ft + (1 - ) Ct, 0    1,
+
+(21)
+
+where  is an estimate of the optimal shrinkage intensity derived by Ledoit and Wolf (2003) minimizing the squared error loss. As shrinkage target Ft, they consider the one-factor model by Sharpe (1963) showing that the resulting estimator outperforms, e.g., the pure one-factor and three-factor model. As an approximation, we employ the principal component structure (20) with kt = 1. In addition, we follow Ledoit and Wolf (2004) and let Ft be given by the equicorrelation model, i.e., the covariance matrix implied by setting the common correlation equal to the cross-sectional average of all pair-wise sample correlations implied by Ct.
+Finally, we regularize Ct by the eigenvalue cleaning procedure that is applied to BRK estimates in Section 3.1 and discussed in more detail in Appendix B. Laloux et al. (2000) demonstrate that sample covariance matrices regularized by this technique yield considerably lower portfolio volatilities than their "uncleaned" counterparts in minimum-variance applications.
+
+RiskMetrics
+RiskMetrics covariance forecasts constitute the industry standard. The original RiskMetrics1994 approach is based on an exponentially-weighted moving average (EWMA) of the outer product
+
+16
+
+of demeaned returns, i.e.,
+
+t+1 =
+
+(1 - ) 1 - LRM -1
+
+LRM
+l-1 ut-l+1ut-l+1,
+l=1
+
+0    1,
+
+(22)
+
+where LRM denotes the window length. We follow the suggestion made in J.P. Morgan/Reuters (1996) for daily returns and set  = 0.94. If the forecast t+1 is ill-conditioned according to the criterion in Section 3.1, we apply the tailored regularization technique suggested in Zumbach
+(2009b), which relies on a two-stage shrinkage. See Zumbach (2009b) for details. Forecasts of t,t+h are then computed as t,t+h = h rte+g1, where tre+g1 is the regularized forecast with rte+g1 = t+1 if no regularization is necessary.
+Additionally, we employ the updated RiskMetrics2006 methodology, which allows for long
+memory dynamics by assuming a hyperbolic decay of the weights on lagged outer products of
+returns. The corresponding one-step ahead covariance forecast is
+
+LRM
+
+t+1 =
+
+l ut-l+1ut-l+1,
+
+l=1
+
+vmax
+l := v
+v=1
+
+(1 - v) 1 - vLRM -1
+
+vl-1,
+
+v
+
+:=
+
+1 D
+
+1
+
+-
+
+ln(v ) ln(0)
+
+, v := exp(-1/v), v := 1 v-1,
+
+(23)
+
+where the constant D is specified such that v v = 1, 0 is a logarithmic decay factor, while
+
+1 and vmax denote the lower and upper cut-off, respectively. Moreover,  is an additional
+
+tuning
+
+parameter
+
+and
+
+vmax
+
+is
+
+determined
+
+by
+
+specifying
+
+the
+
+values
+
+of
+
+the
+
+other
+
+parameters.
+
+We 
+
+use the values suggested in Zumbach (2006), i.e., 0 = 1560, 1 = 4, vmax = 512 and  = 2.
+
+Finally, we construct forecasts of t,t+h according to t,t+h =
+
+h r=1
+
+tr+egr ,
+
+where
+
+multi-step
+
+predictions t+r, r > 1, are computed following Appendix A of Zumbach (2006).
+
+4 Empirical Results
+4.1 Data and Empirical Setup
+We employ mid-quotes for the constituents of the S&P 500 index extracted from the Trade and Quote (TAQ) database. We focus on the 400 assets with the longest continuous trading history during the sample period between January 2006 and December 2009 covering approximately 1, 000 trading days and including the financial crisis after the bankruptcy filing of Lehman
+
+17
+
+Average Volatility Average Abs. Correlation
+
+180 Daily
+160 Monthly Yearly
+140
+120
+100
+
+0.8 Daily Monthly
+0.7 Yearly
+0.6
+0.5
+
+80 0.4
+60 0.3
+40
+0.2 20
+
+0 2007
+
+2008
+
+2009
+
+Date
+
+2010
+
+0.1 2007
+
+2008
+
+2009
+
+Date
+
+2010
+
+(a) Average Volatility
+
+(b) Average Absolute Correlation
+
+Figure 2: Cross-Sectional Averages of Volatility and Absolute Correlation Estimates Based on smoothed BRK estimates using daily, monthly or yearly window. Volatilities are annualized square roots of diagonal elements and are reported in percentage points.
+
+Brothers Inc. We discard the first 15 minutes of each trading day to avoid opening effects and conduct additional steps to clean the raw quote data. Details are provided in the web appendix.6
+Based on the cleaned mid-quote data, we compute BRK estimates as outlined in Section 3.1 using G = 4 liquidity groups. The choice of G will be motivated below. Further, we smooth the BRK estimates over weekly, monthly, quarterly, half-yearly and yearly windows, i.e. S  {1, 5, 20, 63, 126, 252}. For three smoothing windows, Figure 2 depicts the resulting averages of the square roots of diagonal elements, i.e., volatility estimates, and of the absolute values of pairwise correlations. Two major features are apparent. First, there is a considerable increase of both volatility and absolute correlation during the peak of the financial crisis in the later part of 2008. Second, employing BRK estimates smoothed over monthly and yearly windows implies a noticeable stabilization. The latter effect is also confirmed for the eigenvalues of the corresponding correlation matrix estimates displayed in Figure 3. Here, smoothing is helpful to separate the dynamics of the first (largest) eigenvalue, which allows for a better signal extraction. The result that the first eigenvalue follows different dynamics than the rest of the eigenvalues is in contrast to findings based on correlation matrices estimated over long-term rolling windows of daily data (e.g. Zumbach, 2009a).
+Following Section 3.1, we regularize indefinite or ill-conditioned smoothed BRK estimates by eigenvalue cleaning (ERnB) or imposing a factor structure (FRnB, 1FRnB and 3FRnB). As we show in the web appendix in more detail, regularization is necessary for all days in the sample and every smoothing window. Figure 4 gives the number of factors based on BRK
+6The web appendix is available at http://amor.cms.hu-berlin.de/~malecpet/MHFDPF_appendix.pdf.
+18
+
+3
+10
+
+First
+
+Second
+
+Third
+
+Fourth
+
+2
+10
+
+3
+10
+
+First
+
+Second
+
+Third
+
+Fourth
+
+2
+10
+
+Eigenvalue Eigenvalue
+
+11
+10 10
+
+0
+10 2007
+
+2008
+
+Date
+
+2009
+
+2010
+
+0
+10 2007
+
+2008
+
+Date
+
+2009
+
+(a) Unsmoothed
+
+(b) Monthly Smoothing Window
+
+Figure 3: Eigenvalues of BRK Correlation Matrix Estimates (Logarithmic Scale)
+
+600 Daily Weekly
+500 Monthly Quarterly Half-Yearly
+400 Yearly
+
+2010
+
+Frequency
+
+300
+
+200
+
+100
+
+0 1 2 3 4 5 6 7 8 9 10 No. of Factors
+Figure 4: Sample Distribution of Number of Factors for FRnB Estimates
+Number of factors is determined by applying the Bai and Ng (2002) criteria from Appendix C to BRK
+estimates smoothed over different windows.
+
+estimates smoothed over different windows resulting from adaptive factor selection using the Bai and Ng (2002) criteria (FRnB). The positive relation between the length of the smoothing window and the parsimony of the factor structure is apparent.
+Our analysis focuses on open-to-close covariance matrices, whereby noisy overnight returns do not have to be included. This approach is in line with Andersen et al. (2010) treating overnight returns as deterministic jumps. Accordingly, we measure the vector of daily returns, rt, by the vector of open-to-close returns, which can be interpreted as close-to-close returns corrected for the above deterministic jumps. To implement the methods based on daily returns from Section 3.2, we then obtain the vector of demeaned returns, ut, by subtracting the sample mean during the respective estimation period.
+Using data up to day t, we compute out-of-sample forecasts of the conditional covariance matrices t,t+h for daily, weekly and monthly horizons, i.e., h  {1, 5, 20}. Rolling window
+
+19
+
+sample covariance matrices are computed using a baseline window length of L = 252 days, although alternative window sizes will be examined in a sensitivity analysis given below. RiskMetrics forecasts are computed employing all available data up to day t with an initial in-sample period of 252 days. Both the sample covariance matrix and RiskMetrics estimates need to be regularized for each day (see web appendix). Finally, we construct covariance forecasts based on MGARCH, as well as R- and CCHAR models using the same expanding windows as for RiskMetrics. R- and CCHAR parameters are re-estimated at each step. In the case of MGARCH models, we estimate the parameters over the entire sample for reasons of numerical stability.
+The initial in-sample period comprises observations from 01/2006 to 12/2006. Motivated by the descriptive results above and in order to gain insights into the forecasting performance during "normal" and "non-normal" market periods, we conduct a separate evaluation for a period of 375 days before the financial crisis, covering the time from 01/2007 until 06/2008 ("pre-crisis period"), and the period of 377 days from 07/2008 to 12/2009 including the financial crisis ("crisis period").
+
+4.2 Evaluation and Inference in the Portfolio Selection Framework
+The forecasts of the conditional covariance matrix, t,t+h, are used as inputs for the GMV portfolio selection framework in (1) and (2), yielding the weights wt,t+h. The resulting conditional portfolio variance, wt,t+h t,t+h wt,t+h, is then estimated by the five-minute realized portfolio variance
+
+t2,,tp+h := wt,t+h RCovt,t+h wt,t+h,
+
+(24)
+
+where RCovt,t+h is the five-minute realized covariance from day t to t + h, i.e., the sum of
+
+outer products of the five-minute return vectors obtained by previous-tick interpolation (e.g.
+
+Dacorogna et al., 2001). The realized portfolio variances based on competing covariance
+
+forecasts are used to compute performance fees ,   {1, 10}, according to (4) and (5).
+
+In addition, we examine several basic characteristics of the GMV portfolio allocations.
+
+Following de Pooter et al. (2008), we evaluate portfolio turnover rates to proxy transaction costs
+
+proportional to the traded dollar amount for every stock. For a horizon h, the total return of
+
+the portfolio from t - h to t is given by rtp-h,t := i wt(-i)h,t rt(-i)h,t, where wt(-i)h,t and rt(-i)h,t
+
+are the weight and return of stock i, respectively. Then, before re-balancing to the next period,
+
+the
+
+weight
+
+of
+
+stock
+
+i
+
+in
+
+the
+
+portfolio
+
+changes
+
+to
+
+wt(-i)h,t
+
+.1+rt(-i)h,t
+1+rtp-h,t
+
+Consequently,
+
+the
+
+portfolio
+
+20
+
+turnover is given by
+
+pot,h
+
+:=
+
+m i=1
+
+wt(,it)+h - wt(-i)h,t
+
+1 + rt(-i)h,t 1 + rtp-h,t
+
+.
+
+(25)
+
+Second, we quantify the portfolio concentration of resulting GMV portfolio weights. For instance, Oomen (2009) stresses that estimation errors might imply extreme positions and may cause practical pitfalls, such as disproportionate transaction costs or an excessive market impact. We measure portfolio concentration in terms of the norm of the vector of portfolio weights,
+
+pct,h := wt,t+h 2 =
+
+m
+wt(,it)+2h
+i=1
+
+1/2
+,
+
+(26)
+
+which is minimized for an equally-weighted portfolio, i.e., wt,t+h = (1/m) . Finally, motivated by the analysis in Liu (2009), we evaluate the size of short positions in the portfolio. Verifying to which extent short sale constraints would be violated is of practical relevance since many portfolio managers are prohibited from taking such positions. Hence, we compute the sum of negative portfolio weights as
+
+m
+
+spt,h :=
+
+wt(,it)+h 1I wt(,it)+h < 0 .
+
+i=1
+
+(27)
+
+To assess the statistical significance of performance differences between competing forecasts, we perform a stylized "portfolio bootstrap". First, we create asset indices by drawing random samples of size 350 without replacement from the uniform distribution on the integers 1, . . . , 400, which is repeated 1000 times. Second, for each random set of assets and every covariance matrix forecasting model, we compute: (i) the GMV portfolio weights for each horizon and day, (ii) the square root of the sample average of the (annualized) realized portfolio variance in (24), ¯pa, (iii) the resulting annualized performance fees relative to competing forecasts, a,   {1, 10}, for all considered values of the (identical) conditional mean µid, as well as (iv) the sample averages of the above portfolio characteristics in (25), (26), and (27), i.e., po, pc and sp, respectively. For the quantities in (ii)-(iv), we examine median values across all random samples. Additionally, we report the standard deviations of ¯pa. The empirical implementation of the outlined re-sampling procedure is computationally demanding, as it requires the inversion of more than two million 350 × 350 covariance matrices for each forecasting method.
+
+21
+
+4.3 The Economic Value of High-Frequency Data
+Global Minimum Variance Portfolio Performance
+Table 1 reports the GMV portfolio performance of ERnB, RCHAR and CCHAR forecasts, with the latter utilizing non-smoothed ERnB estimates. Throughout the analysis, we fix the number of groups in the blocking strategy to G = 4 and will justify this choice in a robustness analysis below. Table 1 also reports the performance of factor-based forecasts. For sake of brevity, however, we only show the best-performing factor models minimizing the median realized portfolio volatility for each smoothing window. The complete results are available in the web appendix.
+The following findings can be summarized. First, covariance predictions based on a dynamic model yield better GMV portfolio performances than those based on a "naive" forecast. Prior to the crisis, the median realized portfolio volatility declines by five standard deviations (s.d.'s) when switching from random walk ERnB(1) to RCHAR forecasts. During the crisis period, the gains induced by dynamic forecasts even increase up to 13 s.d.'s. HAR-based forecasts correspond to weighted averages of past realized covariances and thus are by construction "smoother" in time than random walk forecasts. This property pays off in terms of less volatile portfolio weights and thus lower portfolio turnover. The gains even increase for weekly and monthly forecasts. Moreover, it turns out that CCHAR forecasts are superior to RCHAR forecasts. In particular, in the pre-crisis period, the difference in median realized portfolio volatility is less than one s.d. for h = 1, but during the crisis period, CCHAR forecasts yield a median portfolio volatility that is lower by three s.d.'s. This is also reflected by lower portfolio turnovers induced by CCHAR forecasts.
+Second, varying the length of the smoothing window has a twofold effect. On the one hand, non-smoothed or only moderately smoothed forecasts result in lower portfolio volatility, fewer short positions and lower portfolio concentration (i.e., more diversification). These benefits of highly responsive forecasts have to be confronted, however, with a higher variability in portfolio weights, causing a higher portfolio turnover and hence higher transaction costs. These effects yield a natural tradeoff between responsiveness and (excessive) variability of covariance forecasts. Not surprisingly, portfolio turnover is minimized by maximizing smoothing intervals, i.e., one year in our setting.
+Third, we show that eigenvalue cleaning generally produces lowest portfolio turnovers and yields less concentrated weights and smaller short positions. Factor-based regularization (e.g., FRnB and 3FRnB), however, becomes effective only if the underlying estimates are sufficiently smoothed. In this case, they yield the lowest portfolio volatility and turnover. These effects are particularly apparent during the crisis period. Here, the combination of smoothing and
+22
+
+Table 1: GMV Portfolio Performance of Covariance Matrix Forecasts Employing High-Frequency Data Medians (m(·)) and standard deviations (s(·)) across 1,000 random samples of the square root of the annualized average realized portfolio variance (¯pa) using predicted GMV weights (in percentage points). Each random sample contains 350 assets out of the entire 400 asset universe. po is the average turnover as defined
+in (25) expressed in percentage points. pc denotes the sample average of the portfolio concentration measure (26). sp is the sample average of the sum of negative
+portfolio weights. RCHAR/CCHAR is based on unsmoothed ERnB estimates. Evaluation is performed for the pre-crisis period, 01/2007 to 06/2008, and the
+period including the crisis, 07/2008 to 12/2009. The three lowest entries of portfolio volatility and two lowest values of turnover, short position (absolute) and
+concentration are marked in bold.
+
+h=1
+
+h=5
+
+h = 20
+
+m(¯pa) s(¯pa) m(po) m(sp) m(pc) m(¯pa) s(¯pa) m(po) m(sp) m(pc) m(¯pa) s(¯pa) m(po) m(sp) m(pc)
+
+Pre-Crisis
+
+ERnB(1) ERnB(5) ERnB(20) ERnB(63) ERnB(126) ERnB(252) FRnB(5) 3FRnB(20) 3FRnB(63) 3FRnB(126) 3FRnB(252) RCHAR CCHAR
+
+7.49 7.68 8.65 9.54 10.14 10.91 7.62 8.41 9.15 9.74 10.19 7.14 7.18
+
+0.07 208.77 0.08 73.67 0.10 26.75 0.12 11.15 0.12 6.86 0.12 5.03 0.07 84.16 0.10 25.63 0.11 10.53 0.12 6.93 0.13 5.57 0.07 101.69 0.07 56.80
+
+-0.60 -0.79 -0.88 -0.99 -1.03 -0.98 -0.89 -1.02 -1.13 -1.18 -1.17 -0.80 -0.85
+
+0.21 7.88 0.07 45.30 -0.60
+
+0.23 8.05 0.09 35.97 -0.79
+
+0.24 8.83 0.11 16.37 -0.88
+
+0.25 9.64 0.12 7.35 -0.99
+
+0.24 10.18 0.12 4.36 -1.03
+
+0.23 10.98 0.12
+
+3.04 -0.98
+
+0.23 7.98 0.08 39.68 -0.89
+
+0.25 8.54 0.10 15.06 -1.02
+
+0.26 9.22 0.11 6.52 -1.13
+
+0.26 9.81 0.12 4.16 -1.18
+
+0.26 10.26 0.13
+
+3.13 -1.17
+
+0.22 7.45 0.07 20.86 -0.80
+
+0.23 7.52 0.07 18.66 -0.86
+
+0.21 8.62 0.01 12.15 -0.60
+
+0.23 8.53 0.01 11.26 -0.79
+
+0.24 9.15 0.01 9.44 -0.88
+
+0.25 9.95 0.01 4.67 -0.99
+
+0.24 10.41 0.01
+
+3.15 -1.03
+
+0.23 11.29 0.01
+
+2.25 -0.98
+
+0.23 8.38 0.01 12.20 -0.89
+
+0.25 8.85 0.01 9.23 -1.02
+
+0.26 9.49 0.01 4.63 -1.13
+
+0.26 10.09 0.01
+
+3.02 -1.18
+
+0.26 10.60 0.01
+
+2.23 -1.17
+
+0.21 8.04 0.01 5.05 -0.80
+
+0.22 8.15 0.01 5.05 -0.86
+
+0.21 0.23 0.24 0.25 0.24 0.23 0.23 0.25 0.26 0.26 0.26 0.21 0.22
+
+23
+
+Crisis
+
+ERnB(1) ERnB(5) ERnB(20) ERnB(63) ERnB(126) ERnB(252) FRnB(5) FRnB(20) FRnB(63) FRnB(126) FRnB(252) RCHAR CCHAR
+
+14.02 13.91 14.90 15.83 16.32 16.85 13.54 14.46 15.50 16.20 17.13 12.92 12.55
+
+0.11 215.93 0.11 91.65 0.14 34.21 0.17 14.29 0.19 12.02 0.20 9.11 0.11 111.82 0.13 36.90 0.15 18.53 0.18 13.90 0.19 10.13 0.12 128.39 0.10 64.77
+
+-0.66 -0.90 -1.06 -1.16 -1.35 -1.44 -1.08 -1.19 -1.31 -1.50 -1.59 -0.89 -0.94
+
+0.21 14.61 0.11 46.69 -0.66
+
+0.25 14.32 0.11 43.41 -0.90
+
+0.26 15.08 0.14 18.78 -1.06
+
+0.28 15.92 0.17 8.76 -1.16
+
+0.31 16.40 0.19 7.22 -1.35
+
+0.32 16.92 0.20
+
+5.06 -1.44
+
+0.27 13.99 0.11 50.74 -1.08
+
+0.28 14.63 0.13 20.11 -1.19
+
+0.29 15.59 0.15 11.02 -1.31
+
+0.32 16.27 0.18 8.12 -1.50
+
+0.34 17.21 0.19
+
+5.36 -1.59
+
+0.24 13.43 0.12 28.66 -0.89
+
+0.25 12.97 0.10 25.08 -0.95
+
+0.21 15.60 0.01 12.78 -0.66
+
+0.25 14.98 0.01 12.77 -0.90
+
+0.26 15.53 0.01 10.74 -1.06
+
+0.28 16.13 0.02
+
+6.11 -1.16
+
+0.31 16.54 0.02
+
+4.48 -1.35
+
+0.32 17.02 0.02
+
+3.42 -1.44
+
+0.27 14.68 0.01 15.06 -1.08
+
+0.28 15.13 0.01 11.94 -1.19
+
+0.29 15.90 0.01
+
+7.76 -1.31
+
+0.32 16.50 0.02
+
+5.27 -1.50
+
+0.34 17.30 0.02
+
+3.41 -1.59
+
+0.24 14.38 0.01
+
+8.19 -0.88
+
+0.25 13.70 0.01
+
+8.32 -0.95
+
+0.21 0.25 0.26 0.28 0.31 0.32 0.27 0.28 0.29 0.32 0.34 0.24 0.25
+
+3 Pre-Crisis
+2.5
+
+Crisis
+
+3 Pre-Crisis
+2.5
+
+Crisis
+
+Median PF Volatility rel. to RM1994 Median PF Volatility rel. to S-EvCl
+
+22
+
+1.5 1.5
+
+11
+
+0.5 0.5
+
+0 2007
+
+2008
+
+2009
+
+Date
+
+2010
+
+0 2007
+
+2008
+
+2009
+
+Date
+
+2010
+
+(a) Rel. to RM1994
+
+(b) Rel. to S-EvCl
+
+Figure 5: Median Portfolio Volatility of CCHAR Forecasts Relative to Benchmarks (h = 1) Time series of ratios m(tp,,tC+C1HAR)/m(tp,,tb+en1ch), where tp,t+1 is the square root of the realized portfolio variance in (24) computed for h = 1. m(·) denotes the median across 1,000 random samples with each
+
+random sample containing 350 assets out of the entire 400 asset universe.
+
+factor-based regularization yields the best portfolio performance in terms of lower portfolio volatility and turnover. In more stable market periods, such as prior to the crisis, the necessity of smoothing and thus the effectiveness of factor-based regularization declines, making eigenvalue cleaning superior. In contrast, factor structures based on non-smoothed BRK estimates result in highly non-stable forecasts and are not reported here (for details, see web appendix).
+Table 2 shows the corresponding results based on forecasting models utilizing daily returns as presented in Section 3.2. We find that covariance forecasts based on HF data as evaluated in Table 1 outperform all "low-frequency" (LF) benchmarks up to a weekly horizon. The best-performing LF methods in terms of median portfolio volatility are the RiskMetrics1994 estimator as well as the rolling window sample covariance matrix regularized by eigenvalue cleaning. The strong performance of the latter, particularly during volatile periods, indicates that the strength of a proper conditioning scheme might be even more important than imposing a dynamic forecasting model. Nevertheless, during the pre-crisis period, (random-walk-type) ERnB(1) forecasts yield a median portfolio volatility which is three s.d.'s lower than the bestperforming LF benchmark. This performance gain increases to seven s.d.'s if not naive but (dynamic) RCHAR specifications are used. During the volatile crisis period, the superiority of HF-based approaches becomes even stronger, resulting into a decrease in median realized portfolio volatility of up to 17 s.d.'s in case of a CCHAR model. The dominance of HF-based forecasts particularly during the crisis period is graphically highlighted by Figure 5, which displays the time series of median portfolio volatility implied by CCHAR forecasts relative to the two best-performing LF benchmarks.
+
+24
+
+Table 2: GMV Portfolio Performance of Covariance Matrix Forecasts Employing Daily Returns Medians (m(·)) and standard deviations (s(·)) across 1,000 random samples of the square root of the annualized average realized portfolio variance (¯pa) using predicted GMV weights (in percentage points). Each random sample contains 350 assets out of the entire 400 asset universe. po is the average turnover as defined
+in (25) expressed in percentage points. pc denotes the sample average of the portfolio concentration measure (26). sp is the sample average of the sum of negative
+portfolio weights. Forecasts are based on S-VEC and DCC models, regularized RiskMetrics1994 and RiskMetrics2006 estimators (RM1994 and RM2006) as well as the rolling window sample covariance matrix of daily returns over 252 days regularized by a one- or three-factor structure (1F or 3F), a factor structure based
+on the Bai and Ng (2002) criteria (BN-F), eigenvalue cleaning (S-EvCl) and shrinkage towards an equicorrelation or one-factor model (SHRKEC or SHRKSF ). In addition, results for the equally-weighted portfolio (EQW) are reported. Evaluation is performed for the pre-crisis period, 01/2007 to 06/2008, and the period
+including the crisis, 07/2008 to 12/2009. The two lowest entries of portfolio volatility, turnover, short position (absolute) and concentration are marked in bold.
+
+h=1
+
+h=5
+
+h = 20
+
+m(¯pa) s(¯pa) m(po) m(sp) m(pc) m(¯pa) s(¯pa) m(po) m(sp) m(pc) m(¯pa) s(¯pa) m(po) m(sp) m(pc)
+
+Pre-Crisis
+
+25
+
+EQW 1F 3F BN-F S-EvCl SHRKEC SHRKSF RM1994 RM2006 S-VEC DCC
+
+15.24 9.47 8.56 8.47 7.82 8.38 7.92 7.71 7.98 10.11 9.40
+
+0.09 0.97 0.09 6.26 0.08 10.54 0.11 13.77 0.08 21.35 0.08 27.74 0.08 24.89 0.08 34.96 0.08 38.94 0.16 37.20 0.10 124.13
+
+0.00 -0.65 -0.83 -1.04 -1.14 -1.67 -1.44 -1.18 -1.67 -3.11 -2.12
+
+0.05 15.30 0.09 0.43 0.00 0.18 9.54 0.09 3.41 -0.65 0.21 8.60 0.08 5.81 -0.83 0.24 8.50 0.11 6.81 -1.04 0.26 7.87 0.08 10.12 -1.14 0.33 8.42 0.08 14.16 -1.67 0.29 7.98 0.08 12.55 -1.44 0.27 7.80 0.08 18.07 -1.18 0.33 8.08 0.08 18.93 -1.69 0.54 10.12 0.16 19.49 -3.10 0.41 9.43 0.10 53.69 -2.15
+
+0.05 15.58 0.01 0.23 0.00 0.18 9.89 0.01 2.06 -0.65 0.21 8.82 0.01 3.38 -0.83 0.24 8.69 0.01 3.55 -1.04 0.26 8.06 0.01 4.93 -1.14 0.33 8.63 0.01 7.55 -1.67 0.29 8.19 0.01 6.48 -1.44 0.27 8.04 0.01 9.40 -1.18 0.33 8.40 0.01 9.17 -1.75 0.53 10.24 0.02 10.50 -3.08 0.41 9.58 0.01 19.52 -2.21
+
+0.05 0.18 0.21 0.24 0.26 0.33 0.29 0.27 0.34 0.53 0.41
+
+Crisis
+
+EQW 1F 3F BN-F S-EvCl SHRKEC SHRKSF RM1994 RM2006 S-VEC DCC
+
+31.90 17.92 16.89 15.43 14.93 15.53 15.59 15.20 15.36 18.47 17.73
+
+0.20 1.61 0.18 5.98 0.16 13.59 0.13 20.38 0.14 26.39 0.15 32.40 0.15 35.98 0.13 42.30 0.14 48.31 0.27 40.77 0.18 126.41
+
+0.00 -0.58 -0.92 -1.33 -1.46 -1.89 -1.99 -1.42 -2.11 -3.35 -1.92
+
+0.05 31.88 0.20 0.71 0.00
+
+0.17 18.07 0.18
+
+2.92 -0.58
+
+0.22 17.13 0.16
+
+6.79 -0.92
+
+0.28 15.58 0.13
+
+9.87 -1.33
+
+0.32 15.08 0.14 12.59 -1.46
+
+0.37 15.70 0.15 16.19 -1.89
+
+0.37 15.77 0.15 17.79 -1.99
+
+0.31 15.44 0.13 22.12 -1.42
+
+0.40 15.58 0.14 23.94 -2.13
+
+0.57 18.45 0.27 20.65 -3.34
+
+0.41 17.85 0.17 54.35 -1.93
+
+0.05 31.73 0.02 0.38 0.00
+
+0.17 18.41 0.02
+
+1.73 -0.58
+
+0.22 17.44 0.02
+
+3.93 -0.92
+
+0.28 15.85 0.01
+
+4.92 -1.33
+
+0.32 15.34 0.01
+
+6.06 -1.46
+
+0.37 15.98 0.02
+
+8.28 -1.89
+
+0.37 16.07 0.02
+
+9.07 -1.99
+
+0.31 15.92 0.01 11.61 -1.42
+
+0.40 15.97 0.01 11.57 -2.18
+
+0.56 18.30 0.03 10.79 -3.30
+
+0.41 18.10 0.02 20.32 -1.95
+
+0.05 0.17 0.22 0.28 0.32 0.37 0.37 0.31 0.40 0.56 0.40
+
+Not surprisingly, the aforementioned effects are strongest for daily horizons (h = 1) and become weaker for longer forecasting horizons. However, although the informational advantage of HF data naturally declines with the length of the prediction interval, we still identify performance gains from HF data even at a monthly horizon. While in the pre-crisis period, the best LF and HF one-month forecast yield exactly the same median portfolio volatility, the latter can be still significantly reduced during the crisis if HF-based forecasts are used.
+The dominance of HF-based approaches is due to the efficient use of more recent information, making forecasts more responsive and adaptable to structural changes. These effects particularly pay off during highly volatile periods, such as in 2008. Moreover, we show that HF-based forecasts also yield less concentrated (and thus more diversified) positions and imply less shortselling. However, as stressed above, the downside of a higher responsiveness of forecasts is a higher variability in portfolio weights increasing portfolio turnover and transaction costs. These costs could be reduced at the expense of a higher portfolio volatility by using longer, i.e., at least quarterly, smoothing windows. Addressing this tradeoff more thoroughly is a challenging avenue for further research but is clearly beyond the scope of the current study.
+Finally, we also evaluate the performance of a naive investment strategy assigning equal weights (1/m) to all assets. Interestingly, the 1/m-portfolio yields a significantly higher median volatility than all other methods. This finding is at odds with the study of DeMiguel et al. (2009) reporting that strategies based on covariance matrix forecasts cannot consistently outperform a naive diversification strategy. However, it has to be noted that DeMiguel et al. examine unconditional Sharpe ratios while our evaluation focuses on the conditional portfolio volatility (approximated by the realized volatility).
+Economic Significance
+We evaluate the economic gains of employing HF-based covariance forecasts using the utilitybased evaluation approach in (4) and (5). To incorporate the effect of transaction costs, we follow de Pooter et al. (2008) assuming that the latter are proportional to portfolio turnover. Accordingly, (5) is extended by defining performance fees net of the difference in transaction costs between the two competing strategies, i.e., c :=  - c poII - poI , where c denotes the proportional transaction costs on each traded dollar and poi is the (average) turnover implied by the GMV strategy based on the covariance forecasts ti,t+h, i = I, II. However, to avoid assumptions on the level c, we focus on "break-even" trading costs levels implying c = 0 and thus c := / poII - poI . Note that the economic interpretation depends on the signs of the performance fee  and the turnover difference Dpo := poII - poI. If  > 0, Dpo > 0 implies that c yields the maximum level of positive transaction costs under which the risk-averse investor is still willing to pay for employing strategy II instead of I, while for Dpo < 0, c gives
+26
+
+the minimum level (in absolute terms) of negative transaction costs, i.e. transaction credits, under which this is no longer the case. In contrast, given that  < 0, c denotes the minimum positive (for Dpo < 0) or negative (for Dpo > 0) transaction cost level necessary to make strategy II superior to strategy I.
+Table 3 reports the median values of the (annualized) performance fees a in basis points (bp) the investor would pay in order to switch from the best LF benchmarks to HF-based forecasting methods. Moreover, we show the median values of the corresponding annualized break-even transaction costs c. The underlying expected returns are assumed to be identical across stocks and are fixed to µid = 0.05. In the web appendix, we demonstrate that alternative values of µid yield quantitatively almost identical results. As LF benchmarks, we choose those strategies minimizing the median portfolio volatility or turnover. Among HF-based forecasts, for each smoothing window, we select the regularization method yielding the lowest median portfolio volatility. The corresponding findings for all other models are given in the web appendix.
+The major observations are as follows. First, by utilizing HF-based covariance forecasts, a risk-averse investor can achieve noticeable economic gains which become substantial during the crisis period. Before the crisis and for a daily horizon, an investor with low (high) risk aversion would be willing to pay 2 (17) bp to switch from the best LF strategy to the best random-walk-type HF forecast (ERnB(1)) and 4 (40) bp to switch to a CCHAR forecast. During the crisis period, these values increase to 20 (199) bp in the naive (FRnB(5)) and 33 (328) bp in the dynamic case. Focusing on longer forecasting intervals, these gains become smaller, however they are still substantial even for a monthly horizon if the investor exhibits a high risk aversion. In the latter case, the median performance fees for switching to FRnB(5) and CCHAR forecasts amount to 99 and 238 bp, respectively. Figure 6 shows the nonparametrically estimated performance fee densities resulting from the underlying portfolio bootstrap approach. The plots confirm the statistical significance of the results, particularly during the crisis period. Moreover, CCHAR covariance forecasts yield slightly less dispersed performance fee distributions than random-walk-type FRnB(5) forecasts.
+Second, using HF data remains valuable for more risk averse investors even in the presence of transaction costs. During the crisis period, the annualized median break-even transaction costs associated with the above performance fees for the daily horizon are 0.2 (2) percentage points (pp) for FRnB(5) and 0.9 (9) pp for CCHAR forecasts in case of low (high) risk aversion. These are the median values of the transaction cost levels at which the net performance fee paid by a risk-averse investor for switching from the low-volatility LF benchmark to the HF-based forecasts would just remain positive. When benchmarking against the LF-based forecast yielding the lowest turnover, i.e., rolling window sample covariances regularized by a one-factor structure,
+27
+
+Table 3: Basis Point Fees for Switching from Low-Frequency to High-Frequency Covariance Matrix Forecasts Medians (m(·)) across 1,000 random samples of annualized basis point fees (a) a risk-averse investor with quadratic utility and relative risk aversion  would pay to switch from covariance forecasts using daily data to high-frequency-based forecasts. We assume the constant conditional mean return being identical across all stocks and set it to µid = 0.05 (annualized). Moreover, we report the break-even transaction costs (c ) in percentage points, defined as the ratio of a and the difference of average portfolio turnovers. Each random sample contains 350 assets out of the entire 400 asset universe. Evaluation is performed for the
+pre-crisis period, 01/2007 to 06/2008, and the period including the crisis, 07/2008 to 12/2009. The low-frequency benchmarks are the RiskMetrics1994 estimator
+(RM1994) as well as the sample covariance computed over 252 days regularized by eigenvalue cleaning (S-EvCl) and by imposing a one factor model (1F). The two highest entries of the performance fee and the corresponding break-even transaction costs are marked in bold.
+
+h=1
+
+h=5
+
+h = 20
+
+m(a1 )
+
+m(c1 )
+
+m(a10)
+
+m(c10)
+
+m(a1 )
+
+m(c1 )
+
+m(1a0)
+
+m(c10)
+
+m(a1 )
+
+m(c1)
+
+m(1a0)
+
+m(c10)
+
+Pre-Crisis: vs. RM1994 (top) & 1F (bottom)
+
+ERnB(1) FRnB(5) 3FRnB(20) 3FRnB(63) 3FRnB(126) 3FRnB(252) CCHAR
+
+1.68 0.70 -5.66 -12.17 -17.67 -22.18 4.02
+
+0.01 16.85 0.01 7.06 0.69 -56.74 0.54 -121.94 0.67 -177.10 0.80 -222.28 0.18 40.22
+
+0.10
+
+-0.64
+
+-0.00
+
+-6.43
+
+0.10
+
+-1.40
+
+-0.01
+
+-14.00
+
+6.86 -6.05 0.45 -60.58
+
+5.41 -12.08
+
+0.23 -121.06
+
+6.75 -17.60
+
+0.27 -176.40
+
+8.00 -22.17
+
+0.31 -222.18
+
+1.79 2.19 0.72 21.95
+
+-0.04 -0.15 4.53 2.27 2.70 3.14 7.23
+
+-4.85 -2.73 -6.84 -12.72 -18.49 -23.80 -0.81
+
+-0.09 -0.05 1.69 0.14 0.15 0.18 0.01
+
+-48.57 -27.36 -68.53 -127.42 -185.33 -238.50 -8.14
+
+-0.91 -0.53 16.95 1.43 1.55 1.76 0.11
+
+28
+
+ERnB(1) FRnB(5) 3FRnB(20) 3FRnB(63) 3FRnB(126) 3FRnB(252) CCHAR
+
+16.77 15.78 9.43 2.94 -2.59 -7.09 19.09
+
+0.08 0.20 0.45 0.46 -5.71 12.01 0.38
+
+167.91 158.05 94.42 29.46 -25.97 -71.08 191.12
+
+0.83 2.01 4.53 4.62 -57.25 120.38 3.77
+
+14.43 13.69 9.06 3.01 -2.54 -7.09 17.26
+
+0.07 0.07 0.14 0.12 -1.01 5.96 0.22
+
+144.56 137.10 90.71 30.12 -25.44 -71.04 172.81
+
+0.69 0.74 1.42 1.24 -10.16 59.76 2.25
+
+11.71 13.80 9.69 3.81 -1.99 -7.27 15.71
+
+0.06 0.07 0.07 0.06 -0.15 -2.52 0.26
+
+117.33 138.22 97.09 38.13 -19.92 -72.82 157.36
+
+0.59 0.69 0.65 0.61 -1.49 -25.26 2.65
+
+Crisis: vs. S-EvCl (top) & 1F (bottom)
+
+ERnB(1) FRnB(5) FRnB(20) FRnB(63) FRnB(126) ERnB(252) CCHAR
+
+13.20 19.91 6.88 -8.70 -19.77 -30.62 32.74
+
+0.07 132.25 0.23 199.39 0.66 68.90 1.11 -87.21 1.59 -198.11 1.78 -306.96 0.86 327.73
+
+0.70 2.33 6.59 11.15 15.89 17.80 8.60
+
+6.94 15.85 6.68 -7.94 -18.73 -29.55 29.55
+
+0.04 69.51 0.08 158.70 0.18 66.95 1.00 -79.51 0.83 -187.67 0.79 -296.15 0.47 295.85
+
+0.41 0.83 1.78 10.04 8.36 7.89 4.75
+
+-4.12 9.84 3.04 -8.90 -18.57 -27.29 23.74
+
+-0.03 0.05 0.03 -0.26 1.17 0.52 0.53
+
+-41.30 98.54 30.47 -89.14 -186.07 -273.52 237.69
+
+-0.31 0.55 0.26 -2.61 11.75 5.16 5.29
+
+ERnB(1) FRnB(5) FRnB(20) FRnB(63) FRnB(126) ERnB(252) CCHAR
+
+62.46 69.13 56.08 40.49 29.44 18.65 81.90
+
+0.30 624.99 0.65 691.55 1.81 561.14 3.23 405.26 3.72 294.74 5.96 186.78 1.40 819.15
+
+2.98 6.53 18.15 32.34 37.28 59.64 13.98
+
+56.72 65.65 56.37 41.90 31.05 20.25 79.38
+
+0.26 567.59 0.27 656.84 0.66 564.03 1.04 419.43 1.20 310.84 1.89 202.74 0.72 793.98
+
+2.60 2.75 6.57 10.37 11.98 18.91 7.18
+
+48.10 62.01 55.20 43.23 33.51 24.86 75.93
+
+0.22 481.45 0.23 620.43 0.27 552.40 0.36 432.72 0.47 335.46 0.74 248.91 0.58 759.54
+
+2.18 2.33 2.70 3.58 4.74 7.37 5.77
+
+0.12 0.03
+
+h=1
+
+h=1
+
+h=5
+
+h=5
+
+0.1
+
+h = 20
+
+0.025
+
+h = 20
+
+0.08 0.02
+
+Density
+
+Density
+
+0.06 0.015
+
+0.04 0.01
+
+0.02 0.005
+
+0 -80 -60 -40 -20 0 20 40 60
+1a0
+
+(a) Pre-Crisis: FRnB(5) vs. RM1994
+
+0.12 0.1
+
+h=1
+h=5 h = 20
+
+80
+
+0 -50 0 50 100 150 200 250 300 350 400
+a10
+
+(b) Crisis: FRnB(5) vs. S-EvCl
+
+0.03 0.025
+
+h=1
+h=5 h = 20
+
+0.08 0.02
+
+Density
+
+Density
+
+0.06 0.015
+
+0.04 0.01
+
+0.02 0.005
+
+0 -80 -60 -40 -20 0 20 40 60 80
+a10
+
+0 -50 0 50 100 150 200 250 300 350 400
+1a0
+
+(c) Pre-Crisis: CCHAR vs. RM1994
+
+(d) Crisis: CCHAR vs. S-EvCl
+
+Figure 6: Kernel Estimates of Performance Fee Density
+
+Kernel density estimates across 1,000 random samples of the annualized basis point fee (a) a risk-averse investor with quadratic utility and relative risk aversion  = 10 would pay to switch from covariance
+
+forecasts using daily data to high-frequency-based forecasts. Each random sample contains 350 assets
+
+out of the entire 400 asset universe. The assumed constant conditional mean return is identical across all
+
+stocks and set to µid = 0.05 (annualized). Density estimates are based on the Gaussian kernel and the
+
+rule-of-thumb bandwidth with normal reference.
+
+the median break-even transaction costs associated with the CCHAR specification increase to 1.4 (14) pp, which is moderate compared to the increase in the corresponding performance fees. This finding is induced by the low portfolio turnover implied by the one-factor structure, naturally decreasing the impact of transaction costs.
+Finally, in several cases, we observe a combination of negative (median) performance fees and positive (median) break-even transaction costs. Here, the explicit consideration of transaction costs favors HF-based covariance forecasts as long as these costs exceed a certain level. For instance, ERnB(252) forecasts yield negative median performance fees vis-a-vis the low-volatility LF benchmark regardless of the level of risk aversion. However, after the introduction of transaction costs of at least 1.8 pp in case of low risk aversion and 18 pp in case of high risk aversion, the net performance fee turns positive. These effects materialize whenever
+
+29
+
+the smoothing window is sufficiently long driving down the turnover of HF-based approaches compared to their LF competitors.
+4.4 Sensitivity Analysis and Robustness Checks
+Number of Liquidity Groups
+An important parameter underlying BRK estimates is the number of liquidity groups G. Increasing G allows for additional efficiency gains by further reducing the impact of refresh time sampling, however, on the other hand, requires an even stronger regularization. From both the theoretical and practical perspective, it is very unclear to which extent regularization might overcompensate efficiency gains and whether there is a tradeoff between both steps. If, moreover, our focus is not only on the (in-sample) estimation of asset return covariances but particularly on the optimization of (out-of-sample) portfolio allocations, the problem of finding an "optimal" choice of G balancing efficiency gains and the need for regularization is even harder and a challenging avenue for further research.
+Nevertheless, aiming for empirical insights in the impact of G on portfolio allocations, Table 4 reports (for daily horizons) the forecasting performance of non-smoothed BRK estimates regularized by eigenvalue cleaning (ERnB(1)) for different values of G. Prior to the crisis, using four liquidity groups (G = 4) yields the lowest volatility. In this case, the choice of four liquidity groups seems to (empirically) balance the tradeoff between efficiency gains and the need of a tighter regularization. During the volatile crisis period, however, the effect of additional efficiency gains by increasing G seems to become more crucial. In this case, we observe the median portfolio volatility monotonously declining for rising G. Nonetheless, as soon as G exceeds four, the magnitude of additional reductions in portfolio volatility exhibits a noticeable decay and becomes smaller than one standard deviation. These results are in line with Hautsch et al. (2012) reporting that blocking-based efficiency gains are mainly due to a separation between liquid and illiquid assets which is ensured by a moderate number of liquidity groups.
+Hence, a universal choice of G = 4, as used in the analysis above, is justifiable and constitutes a reasonable (data driven) tradeoff between induced efficiency gains and tightness of regularization. In any case, the dominance of HF-based portfolio optimization compared to LF-based approaches might be even stronger (particularly in volatile periods) if G is further increased.
+30
+
+Table 4: Number of Liquidity Groups G and GMV Portfolio Volatility of ERnB(1) Forecasts Medians (m(·)) and standard deviations (s(·)) across 1,000 random samples of the square root of the annualized average realized portfolio variance (¯pa) using predicted GMV weights for the horizon h = 1 (in percentage points). Each random sample contains 350 assets out of the entire 400 asset universe.
+Evaluation is performed for the pre-crisis period, 01/2007 to 06/2008, and the period including the crisis,
+07/2008 to 12/2009.
+
+Pre-Crisis
+
+Crisis
+
+G
+
+m(¯pa)
+
+s(¯pa)
+
+m(¯pa)
+
+s(¯pa)
+
+1 8.38 0.28 14.43 0.11 2 8.25 0.29 14.25 0.11 4 7.49 0.07 14.02 0.11 5 8.15 0.30 13.98 0.11 8 8.13 0.30 13.94 0.11 10 8.12 0.30 13.93 0.11
+
+Length of the Estimation Window
+To gain insights into the role of the (local) estimation window utilized for the sample covariance of daily returns, we consider alternative window lengths of 378, 126, 63 and 20 days. Based on these settings, we investigate the impact on the median performance fees for switching to HF-based predictions as well as on the corresponding median break-even transaction costs. We focus on FRnB(5) and ERnB(252) forecasts, representing "slight" and "heavy" smoothing, respectively. As LF benchmarks, we compute the sample covariance matrix regularized by those techniques (according to Section 3.2) yielding the lowest median portfolio volatility or turnover, respectively.
+Table 5 reports the results based on the crisis period. The corresponding analysis for the precrisis sample along with the complete results of the above benchmark selection procedure can be found in the web appendix. For the low-volatility benchmarks, reducing the window length from 252 to, ultimately, 20 days implies a severe precision loss, as the median performance fees for switching to both FRnB(5) and ERnB(252) forecasts increase sharply. In these cases, the portfolio turnover of the LF benchmarks rises considerably making HF forecasts even more superior and thus leading to an increase in the median break-even transaction costs. A further lengthening of estimation windows to 378 days, however, causes only small additional reductions of median performance fees, thus indicating rather mild precision gains due to even longer local windows.
+Reducing the local window length in case of the LF benchmark implying the smallest portfolio turnover (one-factor structure) yields lower median performance fees for switching to HF-based forecasts. This finding suggests that the loss of efficiency induced by a smaller observation window is outweighed by a higher responsiveness of forecasts induced by the use of more recent information. This is particularly true in case of a relatively tight regularization (as,
+
+31
+
+e.g., induced by a one-factor structure), where the imposed structure itself limits the efficiency loss caused by shrinking local windows.
+Notably, shortening the estimation window does not necessarily imply an excessive rise in portfolio turnover, as we observe decreasing median break-even transaction costs vis-a-vis FRnB(5) forecasts. However, when compared to the more severely smoothed ERnB(252) forecasts, break-even transaction costs increase or even become negative as long as the median performance fee is positive. In this situation, negative (median) break-even transaction costs reflect the higher (average) turnover induced by LF-based covariance forecasts in comparison to their long-term smoothed HF counterparts.
+Dimension of the Asset Universe
+In the analysis above, we consider a high-dimensional asset universe comprising 400 stocks exhibiting a considerable heterogeneity in terms of their liquidity.7 In order to examine to which extent the gains from HF data depend on both the dimensionality and the trading frequency of underlying assets, we redo the analysis for subsets containing those 100 or 30 stocks revealing the highest number of mid-quote revisions during the sample period. The chosen cross-sectional dimensions and asset decompositions are comparable to those of the S&P 100 and the Dow Jones Industrial Average, which, e.g., constitute the asset universes for the studies by de Pooter et al. (2008) and Liu (2009), respectively.
+For the portfolio bootstrap procedure outlined in Section 4.2, we draw random samples based on asset indices consisting of 85 or 25 constituents, respectively. The covariance matrix forecasting approaches from Section 3.1 and 3.2 are implemented as in the sections above with, however, three exceptions. First, we compute BRK estimates employing a smaller number of liquidity groups, particularly G = 2 and G = 1 in the 100 and 30 asset case, respectively. As shown in the web appendix, up to these values of G, reductions in median realized portfolio volatility amounting to at least one standard deviation can be achieved. Second, the parameters of MGARCH models are estimated on a day-by-day basis using expanding estimation windows as for R- and CCHAR specifications above. In the 30 asset case, we also consider the full quasi-likelihood instead of the composite likelihood approach. Finally, we account for the fact that the regularization of BRK estimates, rolling window sample covariances and RiskMetrics forecasts is not always necessary according to the conditions discussed in Section 3.1 and 3.2. For BRK estimates and the LF sample covariance, Figure 7 shows that the proportion of regularized estimates is positively related to the dimension and negatively related to the length
+7The average number of mid-quote revisions is about 5, 000 in case of very liquid stocks and only 250 in case of very illiquid assets.
+32
+
+Table 5: Impact of Estimation Window on Basis Point Fees for Switching from Low-Frequency to High-Frequency Forecasts Medians (m(·)) across 1,000 random samples of the annualized basis point fee (a) a risk-averse investor with quadratic utility and relative risk aversion  would pay to switch from covariance forecasts using regularized sample covariances of daily data computed over different windows to high-frequency-based forecasts. We assume the constant conditional mean return being identical across all stocks and set it to µid = 0.05 (annualized). Moreover, we report the break-even transaction costs (c) in percentage points, defined as the ratio of a and the difference of average portfolio turnovers. Each random sample contains 350 assets out of the entire 400 asset universe. Evaluation is conducted for the period including the crisis, 07/2008 to 12/2009. For each window length of the sample
+covariance, we consider the regularization yielding the lowest median realized portfolio volatility ("low volatility") or median portfolio turnover ("low turnover").
+Low-volatility benchmarks: eigenvalue cleaning (378, 252 and 126 days), shrinkage towards single-factor model (63) and shrinkage towards equicorrelation
+model (20). Low-turnover benchmarks: imposing one-factor model (all windows). The entries corresponding to the 252-day window and the window yielding the
+smallest performance fee are marked in bold.
+
+h=1
+
+h=5
+
+h = 20
+
+Wind.
+
+m(a1 )
+
+m(c1 )
+
+m(1a0)
+
+m(c10)
+
+m(a1 )
+
+m(c1)
+
+m(a10)
+
+m(c10)
+
+m(a1 )
+
+m(c1)
+
+m(a10)
+
+m(c10)
+
+FRnB(5) vs. low volatility (top) & low turnover benchmarks (bottom)
+
+378 19.91 0.21 199.40 2.15 15.65 0.08 156.71 0.75 9.71 0.05 97.27 0.47
+
+252 19.91 0.23 199.39 2.33 15.85 0.08 158.70 0.83 9.84 0.05 98.54 0.55
+
+126
+
+22.95 0.32 229.77
+
+3.22 19.04 0.12 190.63
+
+1.17 14.04 0.11 140.63
+
+1.11
+
+63
+
+26.52 0.39 265.54
+
+3.88 23.99 0.16 240.24
+
+1.65 22.12 0.28 221.55
+
+2.82
+
+20
+
+31.98 0.59 320.17
+
+5.89 29.55 0.26 295.82
+
+2.63 28.01 0.76 280.42
+
+7.59
+
+33
+
+378
+
+71.72 0.67 717.44
+
+6.75 67.81 0.28 678.44
+
+2.82 62.30 0.23 623.37
+
+2.30
+
+252
+
+69.13 0.65 691.55
+
+6.53 65.65 0.27 656.84
+
+2.75 62.01 0.23 620.43
+
+2.33
+
+126
+
+61.72 0.59 617.59
+
+5.93 60.18 0.26 602.12
+
+2.58 62.34 0.25 623.78
+
+2.47
+
+63
+
+48.12 0.48 481.64
+
+4.77 47.19 0.21 472.29
+
+2.10 52.59 0.22 526.27
+
+2.24
+
+20
+
+40.39 0.47 404.35
+
+4.73 37.58 0.20 376.17
+
+2.00 38.84 0.23 388.82
+
+2.32
+
+ERnB(252) vs. low volatility (top) & low turnover benchmarks (bottom)
+
+378
+
+-30.66
+
+2.98 -307.32
+
+29.90
+
+-29.85
+
+1.43 -299.22
+
+14.30
+
+-27.45
+
+1.02 -275.13
+
+10.20
+
+252
+
+-30.62
+
+1.78 -306.96
+
+17.80
+
+-29.55
+
+0.79 -296.15
+
+7.89 -27.29
+
+0.52 -273.52
+
+5.16
+
+126
+
+-27.70
+
+0.88 -277.67
+
+8.86 -26.54
+
+0.40 -266.00
+
+4.04 -23.28
+
+0.22 -233.30
+
+2.21
+
+63
+
+-24.01
+
+0.70 -240.65
+
+7.04 -21.55
+
+0.26 -215.98
+
+2.61 -15.15
+
+0.10 -151.77
+
+0.98
+
+20
+
+-18.59
+
+0.38 -186.27
+
+3.85 -15.85
+
+0.14 -158.87
+
+1.38 -9.19 0.05 -92.04
+
+0.47
+
+378
+
+21.32
+
+5.80 213.46
+
+58.08
+
+22.37
+
+1.80 224.02
+
+18.07
+
+25.11
+
+0.67 251.38
+
+6.67
+
+252
+
+18.65
+
+5.96 186.78
+
+59.64
+
+20.25
+
+1.89 202.74
+
+18.91
+
+24.86
+
+0.74 248.91
+
+7.37
+
+126
+
+11.19
+
+8.09 112.10
+
+81.07
+
+14.73
+
+2.72 147.56
+
+27.24
+
+25.17
+
+1.25 252.07
+
+12.50
+
+63
+
+-2.37 1.35 -23.78 13.49
+
+1.71 -0.57
+
+17.12
+
+-5.67
+
+15.48
+
+6.45 155.01 64.59
+
+20
+
+-10.13
+
+0.58 -101.53
+
+5.81 -7.87 0.19 -78.87
+
+1.91
+
+1.74 -0.03
+
+17.42
+
+-0.27
+
+11
+
+0.9
+
+1 year
+
+1 2
+
+year
+
+0.9
+
+1
+
+1 2
+
+years
+
+1 year
+
+0.8 0.7
+
+3 months 1 month 1 week 1 day
+
+0.8 0.7
+
+1 2
+
+year
+
+3 months
+
+1 month
+
+0.6 0.6
+
+Rel. Frequency
+
+Rel. Frequency
+
+0.5 0.5
+
+0.4 0.4
+
+0.3 0.3
+
+0.2 0.2
+
+0.1 0.1
+
+0 YN
+Regularization
+
+0 YN
+Regularization
+
+(a) 100 Assets: BRK Estimates (G = 2)
+
+1
+
+1 year
+
+0.9
+
+1 2
+
+year
+
+0.8
+
+3 months 1 month
+
+0.7
+
+1 week 1 day
+
+0.6
+
+(b) 100 Assets: Sample Covariance
+
+1
+
+0.9
+
+1
+
+1 2
+
+years
+
+1 year
+
+0.8
+
+1 2
+
+year
+
+3 months
+
+0.7 1 month
+
+0.6
+
+Rel. Frequency
+
+Rel. Frequency
+
+0.5 0.5
+
+0.4 0.4
+
+0.3 0.3
+
+0.2 0.2
+
+0.1 0.1
+
+0 YN
+Regularization
+
+0 YN
+Regularization
+
+(c) 30 Assets: BRK Estimates (G = 1)
+
+(d) 30 Assets: Sample Covariance
+
+Figure 7: Proportion of Regularized Covariance Estimates Depending on Smoothing or Estimation Window BRK estimates are regularized if any correlation eigenvalue is negative or the condition number of the correlation matrix is greater than 10 × 100 or 10 × 30. The rolling-window sample covariance of daily returns is regularized if the condition number of the corresponding correlation matrix is greater than the above thresholds.
+
+of the smoothing or estimation window.8 Moreover, we compute forecasts based on estimates which are regularized in any case, i.e., independent from the rule above.
+The results of the entire analysis are available in the web appendix. Here, we focus on the median performance fees for switching from the best LF forecasts to random-walk-type HFbased predictions during the crisis period. The results are reported in Table 6. As LF benchmarks, we again choose the best-performing low-volatility and minimal-turnover benchmarks. These are found as the sample covariance estimator which is (unconditionally) shrunk towards an equicorrelation model and the DCC specification in the 100 and 30 asset case, respectively. The latter fact indicates that MGARCH models are more suitable for moderate dimensions
+8The relative proportion of regularized RiskMetrics2006 covariance matrices drops to approximately 50% in the 30 asset case whereas RiskMetrics1994 forecasts need to be regularized in all cases (see web appendix).
+
+34
+
+than for vast-dimensional settings. In case of HF forecasts, it turns out that an unconditional regularization is not advantageous in any case. In particular, no regularization is necessary for smoothing windows of one month or more in the 100 asset case and for all window lengths when 30 assets are considered (see Figure 7). We refer to the corresponding non-regularized random-walk-type forecasts based on a S-day smoothing window as BRK(S).
+The first major result is that, in general, the median basis point fees vis-a-vis the lowvolatility LF benchmarks increase considerably if the portfolio dimension becomes smaller. In case of 100 assets and a daily horizon, the median performance fees for switching to ERnB(5) forecasts assuming a low (high) risk aversion are 57 (567) bp, which is almost three times higher than in the vast-dimensional setting. Very similar results are obtained based on 30 assets. The increased benefits from HF data can be explained by the fact that we focus on more liquid assets featuring a higher number of mid-quote revisions translating into more precise BRK estimates. Second, the increased precision of BRK estimates yields large median performance fees even at a monthly horizon. Given a high risk aversion, the median fees for switching to BRK(20) forecasts are 427 and 526 bp in the 100 and 30 asset scenario, respectively, which is more than four and five times the highest fee for this horizon found in Section 4.3.
+Third, the median basis point fees remain positive when employing the three longest smoothing windows regardless of the magnitude of risk aversion or the investment horizon. This finding is of practical importance, as the corresponding forecasts yield a relatively low portfolio turnover resulting in negative median break-even transaction costs. Hence, a risk-averse investor is willing to pay for switching to long-term smoothed HF-based forecasts given any positive transaction cost level. In addition, the fact that, compared to the vast-dimensional scenario, the reduction in median performance fees is less pronounced when moving from short to yearly smoothing windows indicates a higher persistence of the conditional covariance matrix process in the lower dimensional case.
+Finally, reducing the portfolio dimension does not imply the same performance fee gains as above when HF forecasts are evaluated against the low-turnover LF benchmark (corresponding to the sample covariance matrix unconditionally regularized by a one-factor structure). This result might be explained by the less restrictive nature of the one-factor model as long as only 100 or 30 assets are considered. However, the reduced tightness of the structure also implies that the corresponding portfolio turnover increases relative to HF-based forecasts employing longer smoothing windows (see web appendix). For the 30 asset setting, in particular, the latter effect is evidenced by the median break-even transaction costs becoming considerably negative.
+35
+
+Table 6: Basis Point Fees for Switching from Low-Frequency to High-Frequency Forecasts in 100 and 30 Asset Universe Medians (m(·)) across 1,000 random samples of the annualized basis point fee (a) a risk-averse investor with quadratic utility and relative risk aversion  would pay to switch from covariance forecasts using daily data to high-frequency-based forecasts. We assume the constant conditional mean return being identical across all stocks and set it to µid = 0.05 (annualized). Moreover, we report the break-even transaction costs (c) in percentage points, defined as the ratio of a and the difference of average portfolio turnovers. Each random sample contains 85 assets out of the 100 asset universe or 25 assets out of the 30 asset universe,
+respectively. Evaluation is performed for the period including the crisis, 07/2008 to 12/2009. The low-frequency benchmarks are the DCC model as well as the sample covariance computed over 252 days and unconditionally regularized by shrinkage towards an equicorrelation model (SHRKEC) or by imposing a one factor model (1F). The two highest entries of the performance fee and the corresponding break-even transaction costs are marked in bold.
+
+h=1
+
+h=5
+
+h = 20
+
+m(a1 )
+
+m(c1)
+
+m(a10)
+
+m(c10)
+
+m(a1 )
+
+m(c1 )
+
+m(1a0)
+
+m(c10)
+
+m(1a)
+
+m(c1)
+
+m(1a0)
+
+m(c10)
+
+100 Assets: vs. SHRKE C (top) & 1F (bottom)
+
+3FRnB(1) ERnB(5) BRK(20) BRK(63) BRK(126) BRK(252)
+
+40.33 56.60 56.99 45.84 38.63 35.13
+
+0.28 0.89 8.37 -6.49 -4.05 -3.08
+
+403.75 566.36 570.29 458.77 386.67 351.72
+
+2.79 8.89 83.80 -64.94 -40.59 -30.86
+
+33.24 49.37 53.37 43.76 37.08 34.34
+
+0.24 0.36 2.26 -3.33 -1.79 -1.24
+
+332.79 494.09 534.14 437.97 371.22 343.79
+
+2.39 3.63 22.58 -33.30 -17.92 -12.43
+
+16.85 36.49 42.68 36.88 31.46 31.26
+
+0.14 0.27 0.61 -4.94 -1.13 -0.62
+
+168.76 365.34 427.22 369.14 314.93 312.92
+
+1.38 2.68 6.14 -49.50 -11.27 -6.24
+
+36
+
+3FRnB(1) ERnB(5) BRK(20) BRK(63) BRK(126) BRK(252)
+
+44.08 60.10 60.54 49.60 42.43 38.80
+
+0.28 0.81 3.51 14.64 46.68 -40.53
+
+441.21 601.36 605.78 496.43 424.69 388.40
+
+2.84 8.10 35.11 146.47 467.27 -405.68
+
+36.58 52.64 56.76 47.19 40.51 37.76
+
+0.22 0.32 1.12 3.37 6.38 -58.41
+
+366.15 526.84 567.94 472.30 405.50 377.96
+
+2.19 3.21 11.16 33.77 63.88 -584.79
+
+30 Assets: vs. DCC (top) & 1F (bottom)
+
+19.21 38.80 44.94 39.24 33.89 33.74
+
+0.11 0.21 0.37 0.87 1.38 14.17
+
+192.37 388.35 449.80 392.79 339.26 337.79
+
+1.10 2.05 3.69 8.75 13.86 141.83
+
+BRK(1) BRK(5) BRK(20) BRK(63) BRK(126) BRK(252)
+
+46.13 56.27 48.11 34.22 22.11 14.91
+
+0.50 -7.36 -1.68 -1.01 -0.64 -0.42
+
+461.71 563.08 481.54 342.54 221.39 149.32
+
+4.96 -73.62 -16.86 -10.13
+-6.37 -4.17
+
+37.69 53.32 50.38 38.45 26.81 20.61
+
+0.66 -9.04 -0.89 -0.52 -0.35 -0.26
+
+377.26 533.55 504.21 384.86 268.47 206.40
+
+6.66 -90.43
+-8.88 -5.23 -3.47 -2.55
+
+30.74 52.54 52.55 45.10 34.20 30.25
+
+0.85 -3.65 -1.17 -0.54 -0.36 -0.28
+
+307.81 525.81 525.86 451.37 342.34 302.89
+
+8.51 -36.47 -11.67 -5.37
+-3.57 -2.82
+
+BRK(1) BRK(5) BRK(20) BRK(63) BRK(126) BRK(252)
+
+62.33 72.64 64.38 50.39 38.24 31.19
+
+0.49 2.84 15.35 -44.33 -17.69 -10.78
+
+623.60 726.69 644.12 504.29 382.75 312.29
+
+4.95 28.39 153.59 -443.62 -177.07 -107.97
+
+47.98 63.68 60.78 48.56 36.89 30.95
+
+0.36 0.89 3.38 34.44 -14.90 -5.31
+
+480.23 637.12 608.18 486.03 369.34 309.88
+
+3.64 8.94 33.78 344.63 -149.13 -53.19
+
+25.04 46.89 46.97 39.52 28.55 25.28
+
+0.19 0.56 0.90 2.98 11.07 -2.46
+
+250.72 469.29 470.15 395.59 285.81 253.12
+
+1.88 5.60 8.98 29.81 110.80 -24.64
+
+5 Conclusions
+This paper provides insights into the value of high-frequency (HF) data for short-horizon large-scale portfolio allocation decisions. We construct global minimum variance (GMV) portfolios from the constituents of the S&P 500 index with weights being determined by different conditional covariance matrix forecasts. We consider HF-based forecasts originating from covariance estimates based on the blocked realized kernel proposed by Hautsch et al. (2012). The estimates are smoothed, regularized by either eigenvalue cleaning or imposing a factor structure and, finally, used to construct both random-walk-type predictions and forecasts relying on a simple autoregressive specification. We employ an extensive set of benchmark approaches based on daily returns and compare the competing forecasting methods in terms of estimated conditional portfolio volatility and additional portfolio characteristics. We allow for basic inference by using a "portfolio bootstrap" procedure and investigate the economic gains of reduced portfolio volatility by means of a conditional version of the methodology put forward in West et al. (1993) and Fleming et al. (2001).
+Based on mid-quote data from 2006 to 2009, we show the following major results. First, HFbased covariance forecasts outperform low-frequency (LF) approaches over investment horizons of up to a month. The gains in terms of reduced portfolio volatility are considerably larger during the volatile market period including the 2008 financial crisis and are of substantial economic value from the point of view of an investor with pronounced risk aversion. Second, short-term smoothing can be beneficial in terms of lower portfolio volatility, while long-term smoothing always helps to reduce transaction costs. Third, the performance of HF-based strategies can be further improved if naive random-walk-type forecasts are replaced by predictions relying on (even simple) dynamic models. Fourth, our findings show that the use of HF data is beneficial for dimensions of the portfolio around 500 and an asset universe that is relatively heterogeneous in terms of liquidity. These performance gains, however, become even more substantial in case of smaller portfolio dimensions when focusing on the most heavily-traded stocks. The other way around, we expect the superiority of HF-based forecasts becoming smaller if the size of the portfolio and the assets' heterogeneity in terms of their liquidity further increase. In these cases, the efficiency gains induced by the use of HF data vanish and are overcompensated by the need for a tight regularization and for limiting portfolio turnover.
+Possible avenues for future research are threefold. First, alternative regularization methods could be considered. Recent examples are the subsampled principal component approach put forward by Abadir et al. (2012) or nonlinear shrinkage as proposed in Ledoit and Wolf (2012). Second, while our choice of a dynamic model for HF-based covariance matrix estimates is mainly driven by parsimony and ease of estimation, richer specifications could be employed.
+37
+
+In this context, utilizing HF data in a GARCH framework, as e.g., suggested by Hansen et al. (2010) and Noureldin et al. (2012), appears particularly promising. Further possibilities, also specifically for vast-dimensional settings, are presented in Andersen et al. (2011). Finally, the naive smoothing of covariance matrix estimates could be replaced by an optimal smoothing scheme that strikes a balance between the accuracy of forecasts, implying low portfolio volatility, and the minimization of transaction costs caused by variation in portfolio weights. For this purpose, the approach recently proposed by Kirby and Ostdiek (2012) could be adapted to a HF framework.
+References
+ABADIR, K. M., W. DISTASO, AND F. ZIKES (2012): "Design-Free Estimation of Large Variance Matrices," Working paper, Imperial College London.
+AIELLI, G. P. (2011): "Dynamic Conditional Correlation: On Properties and Estimation," "Marco Fanno" Working Papers 0142, Dipartimento di Scienze Economiche "Marco Fanno".
+ANDERSEN, T. G., T. BOLLERSLEV, P. F. CHRISTOFFERSEN, AND F. X. DIEBOLD (2011): "Financial Risk Measurement for Financial Risk Management," in Handbook of the Economics of Finance Vol. II, ed. by G. Constanides, M. Harris, and R. Stulz, Amsterdam: Elsevier, forthcoming.
+ANDERSEN, T. G., T. BOLLERSLEV, F. X. DIEBOLD, AND P. LABYS (2001): "The Distribution of Realized Exchange Rate Volatility," Journal of the American Statistical Association, 96, 42­55.
+------ (2003): "Modeling and Forecasting Realized Volatility," Econometrica, 71, 579­625.
+ANDERSEN, T. G., T. BOLLERSLEV, P. FREDERIKSEN, AND M. O. NIELSEN (2010): "Continuous-Time Models, Realized Volatilities, and Testable Distributional Implications for Daily Stock Returns," Journal of Applied Econometrics, 25, 233­261.
+BAI, J. AND S. NG (2002): "Determining the Number of Factors in Approximate Factor Models," Econometrica, 70, 191­221.
+BANDI, F., J. R. RUSSELL, AND Y. ZHU (2008): "Using High-Frequency Data in Dynamic Portfolio Choice," Econometric Reviews, 27, 163­198.
+BARNDORFF-NIELSEN, O., P. HANSEN, A. LUNDE, AND N. SHEPHARD (2008a): "Designing Realized Kernels to Measure the Ex-Post Variation of Equity Prices in the Presence of Noise," Econometrica, 76, 1481­1536.
+------ (2008b): "Realised Kernels in Practice: Trades and Quotes," Econometrics Journal, 4, 1­32.
+------ (2011): "Multivariate Realised Kernels: Consistent Positive Semi-Definite Estimators of the Covariation of Equity Prices with Noise and Non-Synchronous Trading," Journal of Econometrics, 162, 149­169.
+38
+
+BARNDORFF-NIELSEN, O. AND N. SHEPHARD (2004): "Econometric Analysis of Realized Covariation: High Frequency Based Covariance, Regression, and Correlation in Financial Economics," Econometrica, 72, 885­925.
+BAUWENS, L., S. LAURENT, AND J. V. K. ROMBOUTS (2006): "Multivariate GARCH Models: A Survey," Journal of Applied Econometrics, 21, 79­109.
+BOLLERSLEV, T., R. F. ENGLE, AND J. M. WOOLDRIDGE (1988): "A Capital Asset Pricing Model with Time-Varying Covariances," Journal of Political Economy, 96, 116­131.
+CAPORIN, M. AND M. MCALEER (2012): "Robust Ranking of Multivariate GARCH Models by Problem Dimension," KIER Working Papers 815, Kyoto University, Institute of Economic Research.
+CHAN, L., J. KARCESKI, AND J. LAKONISHOK (1999): "On Portfolio Optimization: Forecasting Covarainces and Choosing the Risk Model," The Review of Financial Studies, 12, 937­974.
+CHIRIAC, R. AND V. VOEV (2011): "Modelling and Forecasting Multivariate Realized Volatility," Journal of Applied Econometrics, 26, 922­947.
+CONNOR, G. (1995): "The Three Types of Factor Models: A Comparison of Their Explanatory Power," Financial Analysts Journal, 51, 42­46.
+CORSI, F. (2009): "A Simple Approximate Long-Memory Model of Realized Volatility," Journal of Financial Econometrics, 7, 174­196.
+DACOROGNA, M., R. GENCAY, U. MULLER, R. OLSEN, AND O. PICTET (2001): An Intoduction to High-Frequency Finance, San Diego, CA: Academic Press.
+DE POOTER, M., M. MARTENS, AND D. VAN DIJK (2008): "Predicting the Daily Covariance Matrix of S&P100 Stocks Using Intraday Data - but which Frequency to Use?" Econometric Reviews, 27, 199­229.
+DEMIGUEL, V., L. GARLAPPI, AND R. UPPAL (2009): "Optimal versus Naive Diversification: How Inefficient is the 1/N Portfolio Strategy?" Review of Financial Studies, 22, 1915­1953.
+ENGLE, R. F. (2002): "Dynamic Conditional Correlation: A Simple Class of Multivariate Generalized Autoregressive Conditional Heteroscedasticity Models," Journal of Business & Economic Statistics, 20, 339­350.
+------ (2009): Anticipating Correlations: A New Paradigm for Risk Management, The Econometric Institute Lectures, Princeton, NJ: Princeton University Press.
+ENGLE, R. F. AND J. MEZRICH (1996): "GARCH for Groups," Risk, 9, 36­40.
+ENGLE, R. F., N. SHEPHARD, AND K. SHEPPARD (2008): "Fitting and Testing Vast Dimensional Time-Varying Covariance Models," Tech. rep., Oxford University.
+ENGLE, R. F. AND K. SHEPPARD (2005): "Theoretical Properties of Dynamic Conditional Correlation Multivariate GARCH," Working paper, University of California, San Diego.
+39
+
+EPPS, T. (1979): "Comovement in Stock Prices in the Very Short Run," Journal of the American Statistical Association, 74, 291­298.
+FAMA, E. F. AND K. R. FRENCH (1993): "Common Risk Factors in the Returns on Stocks and Bonds," Journal of Financial Economics, 33, 3­56.
+FAN, J., Y. FAN, AND J. LV (2008): "High Dimensional Covariance Matrix Estimation Using a Factor Model," Journal of Econometrics, 147, 186­197.
+FAN, J., Y. LI, AND K. YU (2012a): "Vast Volatility Matrix Estimation using High Frequency Data for Portfolio Selection," Journal of the American Statistical Association, 107, 412­428.
+FAN, J., J. ZHANG, AND K. YU (2012b): "Vast Portfolio Selection With Gross-Exposure Constraints," Journal of the American Statistical Association, 107, 592­606.
+FLEMING, J., C. KIRBY, AND B. OSTDIEK (2001): "The Economic Value of Volatility Timing," Journal of Finance, 56, 329­352.
+------ (2003): "The Economic Value of Volatility Timing Using "Realized" Volatility," Journal of Financial Economics, 67, 473­509.
+GHYSELS, E., P. SANTA-CLARA, AND R. VALKANOV (2006): "Predicting Volatility: Getting the Most out of Return Data Sampled at Different Frequencies," Journal of Econometrics, 131, 59­95.
+HANSEN, P. R. AND A. LUNDE (2005): "A Forecast Comparison of Volatility Models: Does Anything Beat a GARCH(1,1)?" Journal of Applied Econometrics, 20, 873­889.
+------ (2006): "Realized Variance and Market Microstructure Noise," Journal of Business and Economic Statistics, 24, 127­161.
+HANSEN, P. R., A. LUNDE, AND V. VOEV (2010): "Realized Beta GARCH: A Multivariate GARCH Model with Realized Measures of Volatility and CoVolatility," CREATES Research Papers 2010-74, School of Economics and Management, University of Aarhus.
+HAUTSCH, N., L. M. KYJ, AND R. C. A. OOMEN (2012): "A Blocking and Regularization Approach to High-Dimensional Realized Covariance Estimation," Journal of Applied Econometrics, 27, 625­645.
+JAGANNATHAN, R. AND T. MA (2003): "Risk Reduction in Large Portfolios: Why Imposing the Wrong Constraints Helps," Journal of Finance, 58, 1651­1683.
+J.P. MORGAN/REUTERS (1996): "RiskMetrics - Technical Document," Tech. rep., J.P. Morgan/Reuters.
+KIRBY, C. AND B. OSTDIEK (2012): "Optimizing the Performance of Sample Mean-Variance Efficient Portfolios," Working paper, AFA 2013 San Diego Meetings.
+LALOUX, L., P. CIZEAU, J.-P. BOUCHAUD, AND M. POTTERS (1999): "Noise Dressing of Financial Correlation Matrices," Physical Review Letters, 83, 1467­1470.
+40
+
+LALOUX, L., P. CIZEAU, M. POTTERS, AND J.-P. BOUCHAUD (2000): "Random Matrix Theory and Financial Correlations," International Journal of Theoretical Applied Finance, 3, 391­397.
+LAURENT, S., J. V. K. ROMBOUTS, AND F. VIOLANTE (2012): "On the Forecasting Accuracy of Multivariate GARCH Models," Journal of Applied Econometrics, 27, 934­955.
+LEDOIT, O. AND M. WOLF (2003): "Improved Estimation of the Covariance Matrix of Stock Returns with an Application to Portfolio Selection," Journal of Empirical Finance, 10, 603­621.
+------ (2004): "Honey, I Shrunk the Sample Covariance Matrix," The Journal of Portfolio Management, 30, 110­119.
+------ (2012): "Nonlinear Shrinkage Estimation of Large-Dimensional Covariance Matrices," The Annals of Statistics, 40, 1024­1060.
+LIU, Q. (2009): "On Portfolio Optimization: How and When Do We Benefit from HighFrequency Data?" Journal of Applied Econometrics, 24, 560­582.
+MARKOWITZ, H. (1952): "Portfolio Selection," The Journal of Finance, 7, 77­91.
+MERTON, R. C. (1980): "On Estimating the Expected Return on the Market: An Exploratory Investigation," Journal of Financial Economics, 8, 323­361.
+MICHAUD, R. O. (1989): "The Markowitz Optimization Enigma: Is Optimized Optimal?" Financial Analysts Journal, 45, 31­42.
+NOURELDIN, D., N. SHEPHARD, AND K. SHEPPARD (2012): "Multivariate High-FrequencyBased Volatility (HEAVY) Models," Journal of Applied Econometrics, 27, 907­933.
+OOMEN, R. C. A. (2009): "High Dimensional Covariance Forecasting for Short Intra-Day Horizons," Working Paper.
+PATTON, A. AND K. SHEPPARD (2008): "Evaluating Volatility and Correlation Forecasts," in Handbook of Financial Time Series, ed. by T. G. Andersen, R. A. Davis, J.-P. Kreiss, and T. Mikosch, Heidelberg: Springer, 801­828.
+SHARPE, W. (1963): "A Simplified Model for Portfolio Analysis," Management Science, 9, 277­293.
+SHEPPARD, K. (2012): "Forecasting High Dimensional Covariance Matrices," in Handbook of Volatility Models and Their Applications, ed. by L. Bauwens, C. Hafner, and S. Laurent, Hoboken, New Jersey: Wiley, 103­125.
+STEIN, J. (1956): "Inadmissibility of the Usual Estimator for the Mean of a Multivariate Normal Distribution," in Proceedings of the Third Berkeley Symposium on Mathematical and Statistical Probability, ed. by J. Neyman, University of California, Berkeley, 197­206.
+TOLA, V., F. LILLO, M. GALLEGATI, AND R. MANTEGNA (2008): "Cluster Analysis for Portfolio Optimization," Journal of Economic Dynamics and Control, 32, 235­258.
+41
+
+VOEV, V. (2009): "On the Economic Evaluation of Volatility Forecasts," CREATES Research Papers 2009-56, School of Economics and Management, University of Aarhus.
+WANG, Y. AND J. ZOU (2010): "Vast Volatility Matrix Estimation for High-Frequency Financial Data," Annals of Statistics, 38, 943­978.
+WEST, K. D., H. J. EDISON, AND D. CHO (1993): "A Utility-Based Comparison of Some Models of Exchange Rate Volatility," Journal of International Economics, 35, 23­45.
+ZUMBACH, G. (2006): "The RiskMetrics 2006 Methodology," Tech. rep., RiskMetrics Group.
+------ (2009a): "The Empirical Properties of Large Covariance Matrices," Tech. rep., RiskMetrics Group.
+------ (2009b): "Inference on Multivariate ARCH Processes with Large Sizes," Tech. rep., RiskMetrics Group.
+
+A Analytical Solution for the Performance Fee
+
+Consider the GMV framework (1) and the preference structure (4). In addition, let
+
+µpi
+
+:=
+
+T
+
+1 -h
+
+T -h
+wti,t+h µt,t+h,
+
+µi2,p
+
+:=
+
+T
+
+1 -h
+
+T -h
+
+wti,t+h µt,t+h
+
+2
+, i = I, II,
+
+t=1 t=1
+
+and  := 2 (1 + ) /. Then, exploiting the fact that
+
+(28)
+
+E
+
+rtp,,ti+h
+
+2
+Ft
+
+= wti,t+h t,t+h wti,t+h +
+
+wti,t+h µt,t+h
+
+2
+, i = I, II,
+
+(29)
+
+and using basic algebra, condition (5) can be rearranged to
+
+2 +   - 2 1 + µIpI = ( - 2) µIpI - µIp + µ2I ,p - µ2II,p + I2,p - I2I,p, (30)
+
+where i2,p, i = I, II, is defined as in (6). If we assume that µt,t+h = (h/252) µid , t = 1, . . . , T - h, (30) becomes
+
+2 + 
+
+-2
+
+h µid 1 + 252
+
+= I2,p - I2I,p,
+
+(31)
+
+yielding the solution
+
+
+
+=
+
+h µid 252
+
+-
+
+1 
+
++
+
+h µid - 1 252 
+
+2
++ I2,p - I2I,p,
+
+(32)
+
+42
+
+which, under the assumption that (h/252) µid  1/, is strictly positive only if I2,p > I2I,p.
+
+B Eigenvalue Cleaning
+
+Eigenvalue cleaning is a regularization technique proposed by Laloux et al. (1999) and further developed by Tola et al. (2008) that draws upon random matrix theory to determine the distribution of the eigenvalues of a correlation matrix estimate R depending on the ratio of n observations and m dimensions, q := n/m. The idea is to compare empirical correlation eigenvalues with those implied by the null hypothesis of independent Gaussian asset returns, which allows for an identification of those eigenvalues that deviate from the "noisy" ones and hence constitute "signals".
+Denote by  := diag(1, . . . , m) the diagonal matrix of eigenvalues of R ordered from largest to smallest and by Q the matrix of corresponding eigenvectors, yielding the spectral decomposition R = Q  Q . For n  , under the null hypothesis R is given by the identity matrix implying that all eigenvalues are equal to one. However, if m, n   with q  1 fixed, the eigenvalues of R follow a Marchenko­Pastur distribution with maximum eigenvalue max := 1 + 1/q + 2 1/q . Hautsch et al. (2012) argue that, for practical purposes, the above threshold should be tightened to max := (1 - 1/m) 1 + 1/q + 2 1/q . This adjustment allows for a better identification of smaller signals, as it accounts for the fact that the largest empirical eigenvalue 1 often is associated with a dominating "market factor". Then, eigenvalue cleaning requires that all eigenvalues below max are transformed according to
+
+ ~i := i if i  max,
+ otherwise,
+
+(33)
+
+where  is the average of the positive parts of all "noisy" eigenvalues, i.e.
+
+ :=
+
+(i<max) +i # of i < max
+
+.
+
+(34)
+
+Finally, the cleaned correlation matrix estimate is obtained as R~ = Q ~ Q , where ~ := diag ~i , i = 1, . . . , m. We apply the procedure to (smoothed) correlation matrix estimates based on the blocked realized kernel, RtB,SRK, by setting the number of observations n equal to the minimum number of refresh times in any block averaged over the smoothing window. For
+the regularization of the rolling window sample covariance of daily returns, Ct, we apply eigenvalue cleaning to the corresponding sample correlation matrix Rtc with n equal to the window length L.
+
+43
+
+C Selection of the Number of Factors
+
+To select the number of factors for the regularization approach discussed in Section 3.1, we
+employ the criteria by Bai and Ng (2002) developed for linear factor models with m assets and
+n observations. In the context of smoothed BRK estimates, we consider a factor model defined in refresh time. Let rt(,iS),l, i = 1, . . . , m, denote the l-th refresh time return from days t - S + 1 to t. The resulting factor structure reads
+
+rt(,iS),l = t,S,i Ft,S,l + (t,iS) ,l, i = 1, . . . , m, l = 1, . . . , nt,S ,
+
+(35)
+
+where Ft,S,l is the (kt,S × 1) vector of common factors, t,S,i denotes the corresponding vector of factor loadings and t(,iS) ,l is the idiosyncratic component of rt(,iS),l, i = 1, . . . , m. Following
+Bai and Ng (2002), we determine kt,S by employing the minima of the criteria
+
+Ctm,S,1(kt,S ) = ^t2,S (kt,S ) + kt,S ^t2,S (kmax) Ctm,S,2(kt,S ) = ^t2,S (kt,S ) + kt,S ^t2,S (kmax)
+
+m + nt,S m nt,S
+m + nt,S m nt,S
+
+ln
+
+m nt,S m + nt,S
+
+,
+
+ln
+
+min
+
+ ( m,
+
+nt,S
+
+)2
+
+,
+
+(36)
+
+where
+
+^t2,S (kt,S )
+
+:=
+
+1 m
+
+m i=1
+
+^t2,,S(i)(kt,S )
+
+with
+
+^t2,,S(i)(kt,S )
+
+being
+
+an
+
+estimate
+
+of
+
+the
+
+residual
+
+variance V t(,iS) ,l , while kmax is the exogenously fixed maximum number of factors.
+
+In practice, we let nt,S be the minimum number of refresh times in any block of the blocked
+
+realized kernel averaged over days t - S + 1 to t. Further, we set ^t2,,S(i)(kt,S) equal to the i-th
+
+diagonal element of VtR,SK Im - Qt,S,(kt,S) VtR,SK , i = 1, . . . , m, where VtR,SK and Qt,S,(kt,S)
+
+are defined as in (12) and (14), respectively. For the factor structure based on the rolling window
+
+sample covariance of daily returns in (20), the number of observations is equal to the window
+
+length L.
+
+The factor residual variance is estimated by ^t2(kt) :=
+
+1 m
+
+m i=1
+
+^t2,(i)(kt),
+
+where
+
+^t2,(i)(kt) is the i-th diagonal element of Vtc - Qtc,(kt) , i = 1, . . . , m.
+
+44
+
+SFB 649 Discussion Paper Series 2013
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Functional Data Analysis of Generalized Quantile Regressions" by Mengmeng Guo, Lhan Zhou, Jianhua Z. Huang and Wolfgang Karl Härdle, January 2013.
+002 "Statistical properties and stability of ratings in a subset of US firms" by Alexander B. Matthies, January 2013.
+003 "Empirical Research on Corporate Credit-Ratings: A Literature Review" by Alexander B. Matthies, January 2013.
+004 "Preference for Randomization: Empirical and Experimental Evidence" by Nadja Dwenger, Dorothea Kübler and Georg Weizsäcker, January 2013.
+005 "Pricing Rainfall Derivatives at the CME" by Brenda López Cabrera, Martin Odening and Matthias Ritter, January 2013.
+006 "Inference for Multi-Dimensional High-Frequency Data: Equivalence of Methods, Central Limit Theorems, and an Application to Conditional Independence Testing" by Markus Bibinger and Per A. Mykland, January 2013.
+007 "Crossing Network versus Dealer Market: Unique Equilibrium in the Allocation of Order Flow" by Jutta Dönges, Frank Heinemann and Tijmen R. Daniëls, January 2013.
+008 "Forecasting systemic impact in financial networks" by Nikolaus Hautsch, Julia Schaumburg and Melanie Schienle, January 2013.
+009 "`I'll do it by myself as I knew it all along': On the failure of hindsightbiased principals to delegate optimally" by David Danz, Frank Hüber, Dorothea Kübler, Lydia Mechtenberg and Julia Schmid, January 2013.
+010 "Composite Quantile Regression for the Single-Index Model" by Yan Fan, Wolfgang Karl Härdle, Weining Wang and Lixing Zhu, February 2013.
+011 "The Real Consequences of Financial Stress" by Stefan Mittnik and Willi Semmler, February 2013.
+012 "Are There Bubbles in the Sterling-dollar Exchange Rate? New Evidence from Sequential ADF Tests" by Timo Bettendorf and Wenjuan Chen, February 2013.
+013 "A Transfer Mechanism for a Monetary Union" by Philipp Engler and Simon Voigts, March 2013.
+014 "Do High-Frequency Data Improve High-Dimensional Portfolio Allocations?" by Nikolaus Hautsch, Lada M. Kyj and Peter Malec, March 2013.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

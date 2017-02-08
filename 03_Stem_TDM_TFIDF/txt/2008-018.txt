@@ -1,0 +1,2759 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2008-018
+Solving, Estimating and Selecting Nonlinear
+Dynamic Models without the Curse of Dimensionality
+Viktor Winschel* Markus Krätzig**
+* Universität Mannheim, Germany ** Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Solving, Estimating and Selecting Nonlinear Dynamic Models without the Curse of Dimensionality1
+Viktor Winschel2, Markus Kr¨atzig3 February 7, 2008
+Abstract: We present a comprehensive framework for Bayesian estimation of structural nonlinear dynamic economic models on sparse grids. The Smolyak operator underlying the sparse grids approach frees global approximation from the curse of dimensionality and we apply it to a Chebyshev approximation of the model solution. The operator also eliminates the curse from Gaussian quadrature and we use it for the integrals arising from rational expectations and in three new nonlinear state space filters. The filters substantially decrease the computational burden compared to the sequential importance resampling particle filter. The posterior of the structural parameters is estimated by a new Metropolis-Hastings algorithm with mixing parallel sequences. The parallel extension improves the global maximization property of the algorithm, simplifies the choice of the innovation variances, allows for unbiased convergence diagnostics and for a simple implementation of the estimation on parallel computers. Finally, we provide all algorithms in the open source software JBendge4 for the solution and estimation of a general class of models. Keywords: Dynamic Stochastic General Equilibrium (DSGE) Models, Bayesian Time Series Econometrics, Curse of Dimensionality JEL classification: C11, C13, C15, C32, C52, C63, C68, C87
+1We thank Wouter Denhaan, Paul Fackler, Jesu´s Fern´andez-Villaverde, James Heckman, Florian Heiss, Kenneth Judd, Michel Juillard, Felix Ku¨bler, Alexander Ludwig, Thomas Mertens, Juan Rubio-Ram´irez and the participant of the Institute on Computational Economics at the University of Chicago & Argonne National Laboratory, 2005, for discussion and inspiration. We also thank the anonymous referees for their valuable comments. This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 Economic Risk.
+2winschel@rumms.uni-mannheim.de, University of Mannheim 3mk@mk-home.de, Universit¨at zu Berlin 4JBendge is an acronym for "Java based Bayesian Estimation of Nonlinear Dynamic General Equilibrium models". The homepage of this project is at http://jbendge.sourceforge.net/. It is licensed under the GPL.
+
+1 Introduction
+Many modern macroeconomic models with microeconomic foundations and rational expectations are nonlinear. The simplest solution method is to linearize the model and to solve the associated quadratic matrix equation for the optimal policy function, as in Klein (2000). The likelihood implied by the solution can then be evaluated by the Kalman (1960) filter. The drawback of linearization is that it produces biased estimates and implied moments of the observables which may misinform the model evaluation and its further development. Moreover, Ferna´ndez-Villaverde and Rubio-Ram´irez (2006) find evidence for important nonlinearities in macroeconomic data. Beside a poor empirical performance, a theoretical problem of linear models is that their solution is certainty equivalent, i.e. it does not depend on shock variances and therefore a conclusive welfare analysis of risk is not possible. Kim and Kim (2003), for example, discuss a spurious welfare implication of a linearized model.
+One nonlinear estimation approach is the method of moments. It suffers from a small sample bias and does not efficiently use the available information, neither for parameter estimates nor for a model selection criterion. According to the likelihood principle, for example in Berger and Wolpert (1988), all sample information is contained in the likelihood function. Unfortunately a nonlinear likelihood approach is a complex numerical operation with at least four problems. We propose innovations to all of them.
+The first problem is to solve the model. Here we use the Smolyak operator for a Chebyshev approximation of the model solution as well as for a Gaussian quadrature of the rational expectations. The second problem is to evaluate the likelihood, where we introduce three new nonlinear state space filters. The third problem is to generate parameter estimates. We do this by a new parallel Metropolis-Hastings algorithm. The fourth problem is to program all these complex interacting algorithms. As a solution we provide the open source software JBendge for a general class of models.
+There are many different methods to approximate the model solution. The currently predominant approximation strategy is a local perturbation approach based on the implicit function theorem discussed by Judd and Guu (1997), Gaspar and L. Judd (2005) or Judd and Jin (2002). Current software packages implementing these methods are Juillard (1996), Anderson, Levin, and Swanson (2005) or Schmitt-Groh´e and Uribe (2004). Global approximations can be done by Chebyshev polynomials or finite elements. Projection methods are discussed in Judd (1992). A recent comparison of all three approaches for the growth model can be found in Aruoba, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2006).
+2
+
+Solutions for larger models with more than a few states are currently approximated exclusively by perturbation. The problems of a perturbation approximation is that its validity may be restricted to a ball around the steady state, which size is difficult or impossible to derive and that the approximation quality may be unacceptable if one moves away from the steady state. This is especially obstructive if the economic argumentation is that nonlinearities arise due to the system's fluctuations far from the steady state.
+The problem with global approximation is that it is by now widely believed to suffer from the curse of dimensionality. The curse arises if the tensor operator is used to extend the univariate approximation or integration operator to many dimensions. The curse indicates exponentially growing computational costs for a growing dimensionality of the approximated function or integrand. It effectively restricts tensor based global approximation methods to be useful only for a few (in our case - six) dimensions.
+We replace the tensor operator by the Smolyak (1963) operator. This operator decreases the approximation burden for many functional forms from exponentially growing costs to a polynomial order. It also implies that integrals beyond six dimensions do not need to be approximated exclusively by Monte Carlo methods. The Smolyak operator can be used for a Chebyshev approximation, as we do, but also for finite elements, wavelets and other forms of the approximating function. Bungartz and Griebel (2004) provide an extensive summary of this active field in numerics. Kru¨ger and Ku¨bler (2004) were to our best knowledge the first who applied the operator in an economic setting for the approximation of the solution of a high dimensional OLG model. We use the operator for a Chebyshev approximation of the model solution as well as for the integrals implied by rational expectations.
+Numerical integration problems also appear in the likelihood evaluation of nonlinear state space models. The current approach to these models is dominated by the sequential importance resampling particle filter. The simple particle filter and extensions are described in Doucet, de Freitas, and Gordon (2001). We introduce three new nonlinear filters based on deterministic integration in order to overcome the high computational burden of the particle filter.
+The first filter we propose is the simple but very fast deterministic Smolyak Kalman filter which is an improvement of the deterministic unscented Kalman filter by Julier and Uhlmann (1997). The unscented method is in fact a deterministic multivariate integration method which restricts the computational costs to rise linear in the dimensions of the integrand. The reverse of the medal is that the quality of the unscented integration decreases with the dimensionality and nonlinearity of the integrand. Our approach is therefore better suited for nonlinear and high dimensional applications in economet-
+3
+
+rics. Moreover the Smolyak based multivariate Gaussian quadrature can be more easily adapted to a setting with non normal shocks since Gaussian quadrature is readily available for many different densities. The Smolyak Kalman filter, as the unscented filter, is based on the assumption that some densities processed within the filtering recursions are Gaussian.
+For a better approximation of non-Gaussian densities, we propose, as the second new filter, an extension of the sequential importance resampling particle filter, where the importance density is generated by the deterministic Smolyak Kalman filter. We call this combination the Smolyak particle filter since it bears similarities to the combined unscented particle filter by van der Merwe, Doucet, de Freitas, and Wan (2000).
+Finally, we introduce the third filter which approximates the densities within the filtering recursions by sums of Gaussian densities. The purpose of these filters, is to demonstrate robustness of the estimation results. They also demonstrate that there are various possibilities to apply the Smolyak operator in the nonlinear filter design and that a Monte Carlo approach, as in the sequential importance resampling filter, is not the only way to implement nonlinear filters.
+For the estimation problem we extend the Metropolis-Hastings algorithm to a parallel version and implement a feature from the genetic algorithm of Storn and Price (1997), called differential evolution. This feature improves the global maximization properties of the Metropolis-Hastings algorithm and simplifies the choice of the innovation variances since it effectively estimates the optimal variances on the run. It also allows an unbiased convergence diagnostics since the parallel sequences start from different parameter vectors. And finally due to its parallel nature it provides a natural way to implement the estimation on parallel computers.
+The curse of dimensionality for numerical approximation and integration arises in many estimation, inference and forecasting problems of Bayesian, classical or nonparametric econometrics. Beside the application which we propose in this paper we expect the Smolyak operator and more elaborate sparse grids approaches to be useful in many other econometric algorithms. One example is presented in a Monte Carlo experiment by Heiss and Winschel (2008) where the Smolyak based mixed logit estimator systematically outperforms simulation based estimators in a maximum likelihood setting.
+Only few attempts to estimate nonlinear dynamic structural models with likelihood methods are presented in the literature. Ferna´ndez-Villaverde and Rubio-Ram´irez present in a number of papers (2004, 2005, 2006) the marginal likelihood as a model selection criterion for non-nested and quasi-true models, discuss a nonlinear structural parameter estimation and compare linear to nonlinear estimates. They approximate the model solution by finite
+4
+
+elements and perturbation, evaluate the likelihood by the particle filter and estimate the posterior by the serial Metropolis-Hastings algorithm. A recent nonlinear estimation is presented by Amisano and Tristani (2007) based on a perturbation solution, a filter called the conditional particle filter by Ionides, Bret´o, and King (2006) and the serial Metropolis-Hastings algorithm. The filter is a combination of the deterministic filter similar to the extended Kalman filter and the particle filter and comparable to the unscented particle filter and our Smolyak particle filter.
+The rest of the paper is divided into five sections: economics, econometrics, results, conclusion and the appendix. In the economic section 2 we present a generic model class, the optimality conditions for the example model, the nonlinear Chebyshev approximation, the Smolyak operator and the approximation error estimator. In the econometric section 3 we describe the Smolyak Kalman, particle, Smolyak particle and Smolyak sum filter, the parallel Metropolis-Hastings algorithm, the convergence diagnostics and the marginal likelihood. In the result section 4 we summarize the performance of the solution method, the filters and the estimators. In section 5 we conclude. In the appendix we present some details on the linearization of the general model and provide a step by step example of a 2-dimensional Smolyak polynomial approximation.
+
+2 Economics
+
+2.1 Model
+An appropriate model for this paper should allow for an increasing number of states and degrees of nonlinearity of the policy functions. We therefore use a multicountry standard growth model and vary the elasticity of intertemporal substitution and the standard deviation of the productivity shock as a proxy for the nonlinearity of the model solution.
+The social planner allocates by solving the dynamic optimization
+
+N
+
+max U = E0
+
+ t Un,t
+
+{{cn,t ,ln,t ,in,t }nN=1 }t=0
+
+t=0 n=1
+
+for n = 1, ..., N countries and all future periods t  0. The welfare function U is a discounted sum of country utilities
+
+Un,t
+
+=
+
+(cnn,t(1
+
+- ln,t)1-n )1-n 1 - n
+
+5
+
+with discount factor , elasticity of intertemporal substitutions n and consumption and leisure substitution rates n. The policy variables are consumption cn,t, labor ln,t and investment in,t for each country. The world budget constraint
+
+N
+(yn,t - cn,t - in,t) = 0
+n=1
+restricts the world output nyn,t to be either consumed or invested in one of the countries. The production technologies
+
+yn,t = ean,t kn,nt ln1-,tn
+
+depend on productivities an,t, capital kn,t and labor ln,t and the technical substitution rates n. The capital and productivity transitions are
+
+kn,t+1 = in,t + (1 - n)kn,t - 0.5nin2,t an,t+1 = nan,t + en,t+1
+
+(1) (2)
+
+where n are the depreciation rates and n the autocorrelation coefficients for the productivity processes with normally distributed shocks en,t  N (0, en) independent across the countries and time. In the capital transition equation
+(1) we include capital adjustment costs parameterized by n. These costs assure that in the multicountry model the state of the system is not simply
+the aggregate capital stock but its distribution across the countries.
+We have implemented the algorithms for the general model class:
+
+0 = f (st, xt, zt; )
+zt = Eeh(st, xt, et+1, st+1, xt+1; )
+st+1 = g(st, xt, et+1; ).
+All functions depend on the structural parameters in . The model is formulated in terms of the first order equilibrium conditions f : Rds+dx+dz  Rdx, expected functions h : Rds+dx+de+ds+dx  Rdz and state transitions g : Rds+dx+de  Rds. The variables are states st  S  Rds, policies xt  X  Rdx, expected variables zt  Z  Rdz and stochastic shocks et+1, which are usually specified to follow a normal distribution et+1  N (0, e). As the structural shocks are typically modeled to be independent we assume a diagonal e from now on.
+Our solution approach is to solve for the policy functions x : Rds  Rdx that map states into policies. The algorithm is a function iteration scheme
+
+6
+
+where we repeatedly solve the first order conditions f (s, x(k+1), Eeh(..., x(k), ...)) = 0 for the next k + 1 iteration of the policy x(k+1) for given expected variables z = Eeh(..., x(k), ...) based on the previous policy xk in iteration step k. This approach has the advantage that it decomposes one big system, when one solves for x in f (s, x, Eeh(..., x, ...)) = 0, into several independent smaller ones - for each grid point we solve one small system for all policies. The independence implies that the algorithm can be parallelized. We will discuss this in more detail in section 2.3.4.
+Since the numerical integration can be thought as a function approximation of the integrand with a subsequent analytically simple integration, we can apply the Smolyak operator also to Gaussian quadrature of the rational expectations integrals as
+Eeh(..., e, ...) = h(..., e, ...)p(e)de  wjh(..., ej, ...),
+j
+where the continuous random variable e and its density p(e) is essentially discretized into some realizations ej with weights wj.
+The entire problem of solving the model is to approximate the policy function x(st) in
+0 = f (st, x(st), wj; )
+j
+zt = h(st, x(st), ej,t+1, sj,t+1, x(sj,t+1); ) sj,t+1 = g(st, x(st), ej,t+1; ) j.
+The variables and parameters of the example model correspond to the following variables of the general model class:
+st = {kn,t, an,t}nN=1 xt = {cn,t, ln,t, in,t}Nn=1 et = {en,t}nN=1  = {n, n, n, n, n, n, en}Nn=1  {}.
+In the next section we derive the optimality conditions and map them into the general model functions f, h and g.
+7
+
+2.2 Optimality
+The Bellman equation for the allocation problem is
+
+Vt =
+
+max
+
+{cn,t ,ln,t ,in,t ,kn,t+1 }Nn=1
+
+NN
+
+Un,t + EtVt+1 + B (yn,t - cn,t - in,t)
+
+n=1
+
+n=1
+
+N
++ n kn,t+1 - (1 - n)kn,t - in,t + 0.5nin2,t
+
+n=1
+
+where Vt  V (k1,t, ..., kN,t, a1,t, ..., aN,t; ). The first order conditions for n = 1, ..., N are given by
+
+Vt cn,t
+
+=
+
+Un,t cn,t
+
+- B
+
+Vt ln,t
+
+=
+
+Un,t ln,t
+
++
+
+B
+
+yn,t ln,t
+
+Vt in,t
+
+=
+
+-B
+
++ n(nin,t
+
+- 1)
+
+Vt  kn,t+1
+
+=
+
+
+
+Et
+
+Vt+1  kn,t+1
+
++ n
+
+Vt n
+
+=
+
+kn,t+1
+
+- (1
+
+-
+
+n)kn,t
+
+-
+
+in,t
+
++
+
+0.5ni2n,t
+
+The last optimality condition is the budget constraint
+
+=0 =0 =0 =0 =0
+
+(3) (4) (5) (6) (7)
+
+Vt B
+
+=
+
+N
+(yn,t - cn,t - in,t)
+n=1
+
+=
+
+0.
+
+(8)
+
+The derivatives of the unknown value functions in equations (6) can be derived by the envelope theorem. It allows us to write the derivatives for n = 1, ..., N as
+
+Vt kn,t
+
+=
+
+B
+
+yn,t kn,t
+
+- n(1 - n)
+
+(9)
+
+since the derivatives of the policy variables with respect to kn,t are zero by optimality. The Lagrange multipliers n in equation (9) can be substituted by equations (5) and the multiplier B by equation (3) to arrive for n = 1, ..., N at
+
+Vt kn,t
+
+=
+
+Un,t cn,t
+
+yn,t kn,t
+
++
+
+1
+
+1 - n - nin,t
+
+.
+
+8
+
+These equations can then be forwarded one period and plugged into equations (6) to obtain the Euler equations for n = 1, ..., N
+
+1
+
+-
+
+1 nin,t
+
+Un,t cn,t
+
+-
+
+Et
+
+ Un,t+1  cn,t+1
+
+ yn,t+1  kn,t+1
+
++
+
+1 - n 1 - nin,t+1
+
+= 0.
+
+(10)
+
+Equations (3) and (4) imply the intratemporal optimality conditions between consumption and labor supply for n = 1, ..., N
+
+Un,t ln,t
+
++
+
+Un,t yn,t cn,t ln,t
+
+= 0.
+
+(11)
+
+Finally, we can substitute the Lagrange multiplier B from the first of the N equations (3) into the other N - 1 equations of (3) to arrive at N - 1
+conditions for n = 2, ..., N
+
+U1,t c1,t
+
+=
+
+Un,t cn,t
+
+,
+
+(12)
+
+which enforce equal marginal utilities across all the countries.
+The 4N equations which determine the variables cn,t, ln,t, in,t, kn,t+1 are the N Euler conditions (10), N intratemporal trade offs between consumption
+and labor (11), N - 1 equalities of marginal utilities (12), the budget con-
+straint (8) and N capital transitions (7). A simplification is to solve the
+trade off in equations (11) for consumptions cn,t and the budget constraint (8) for one investment i1,t.
+The mapping into the general model class is the following: The 2N -1 equa-
+tions (10) and (12) determine the policy variables l1,t, ..., lN,t and i2,t, ..., iN,t in the general functions f . The general model functions h for N forward
+looking variables are given by the arguments of the expected values in the
+Euler equations (10). The N capital transitions (7) and the N productivity
+transitions (2) form the state transition functions g of the general model.
+
+2.3 Solution
+
+2.3.1 Approximation
+
+The first step towards the nonlinear solution is to generate start values for
+
+the policy functions. We use a linear approximation of the model around the
+
+deterministic steady state described in appendix A.
+
+The nonlinear solution or policy functions x(s) reside in the infinite dimen-
+
+sional space of all functions. In a practical approximation we search in the mi
+
+dimensional space of polynomials x^(s; c) =
+
+mi j=1
+
+cj bj-1 (s)
+
+characterized
+
+by
+
+9
+
+the coefficient vector c. We use orthogonal Chebyshev polynomials as basis
+
+functions bj(s) defined by b0(s) = 1, b1(s) = s and bj+1(s) = 2s bj(s) - bj-1(s)
+
+for j  1. To identify the mi elements of the coefficient vector c we use
+
+the same number of policy values at the grid si = {s1i , s2i , ..., smi i}. In a 1dimensional approximation, for example with mi = 3 coefficients, we have to
+
+solve the linear equations
+
+ 
+
+b0(si1) b0(si2)
+
+b1(si1) b1(s2i )
+
+b2(si1) b2(si2)
+
+ 
+
+c1 c2
+
+ =
+
+x(s1i ) x(si2)
+
+ .
+
+(13)
+
+b0(s3i ) b1(s3i ) b2(s3i )
+
+c3
+
+x(si3)
+
+It requires the approximation on the left hand side to be exact for the policy values on the right hand side at the grid {s1i , s2i , s3i }. This equation can be solved accurately since the orthogonality property of the Chebyshev poly-
+nomials guarantees that the basis matrix, defined as the basis polynomials
+evaluated at the grid on the left hand side, is well conditioned for the cal-
+culation of its inverse. A good grid according to the numerical theory is the Gauss-Lobatto grid defined by s11 = 0 and sij = - cos((j - 1)/(mi - 1)) for j = 1, ..., mi and i > 1. The range of these points is from -1 to 1 and the grid in the desired approximation space is obtained by a simple linear
+transformation.
+
+2.3.2 Tensor Operator
+
+If the functions to be approximated or integrated depend on several variables we need a rule how to extend a univariate approximation operator to many dimensions. The usual extension uses the tensor operator. It combines each element of the univariate grids and basis functions with each other.
+The univariate approximation operator for function x : [0, 1]  R is
+
+mi
+U i(x) = aijx(sij)
+j=1
+
+where i  N is the approximation level and sji  [-1, 1] are the grid points. In case of a function approximation, aji  C for j = 1, ..., J are functions of s and in case of numerical integration aji are the weights. The Clenshaw-Curtis function m1 = 1 and mi = 2i-1 + 1 for i > 1 translates the approximation level i into the polynomial degree of the approximation.
+The multidimensional (d > 1) approximation operator based on the tensor
+product  is defined as
+
+mi1
+
+mid
+
+(U i1  · · ·  U id)(x) =
+
+· · · (aji11  · · ·  aijdd )x(sji11, ..., sijdd).
+
+j1=1 jd=1
+
+10
+
+In order to construct this approximation we need jd=1mij function evaluations x(sij11, ..., sjidd). This establishes the exponentially growing costs of the approximation, a phenomenon called the curse of dimensionality.
+The multivariate Chebyshev approximation can be expressed as the matrix equation B(si)c = x(si) where the approximation level is given by i = {i1, i2, ...id} and the basis matrix by B(si) = b(si1)· · ·b(sid). The grid si = si1 × · · · × sid is constructed by the Cartesian product of the univariate grids.
+The tensor product based multivariate Gaussian quadrature extends the univariate grids by the Cartesian product. The associated weights are multiplied. Since the Gaussian quadrature can be thought as approximating the integrand by a polynomial with a subsequent trivial integration, the Smolyak operator for the function approximation also applies for the Gaussian quadrature.
+2.3.3 Smolyak Operator
+Complete polynomials give us an intuition about how the exponential growth of tensor product costs can be decreased. A qth-degree expansion of a ddimensional function uses a linear combination of the basis functions
+d
+Pq,d = {si11 · · · sdid| il  q, 0  i1, ..., id}.
+l=1
+A second order approximation of a bivariate function is then given by
+x(s1, s2) = c0 + c1s1 + c2s2 + c3s1s2 + c4s12 + c5s22.
+This is the same polynomial as used in a Taylor expansion. We see that complete polynomials are not based on the tensor product of two second order univariate polynomials
+{1, s1, s21}  {1, s2, s22} = {1, s1, s2, s1s2, s21, s22, s12s2, s1s22, s21s22}.
+The insight is that the products s21s2, s1s22 and s21s22 can be dropped and in terms of asymptotic convergence, the complete polynomials will give us as good an approximation as the tensor product with far fewer elements, see Judd (1998).
+But beyond this intuition we do not know how to combine, for example, the univariate Gauss-Lobatto grid points in order to arrive at a multivariate grid for an optimal construction of the basis matrix. A discussion of the approximating properties of the Smolyak operator beyond this intuition can be found in Bungartz and Griebel (2004).
+11
+
+The usual formulation of the Smolyak operator is
+
+Aq,d(x) =
+
+(-1)q-|i|
+
+d-1 q - |i|
+
+(U i1  · · ·  U id).
+
+q-d+1|i|q
+
+where d is the dimensionality of the function to be approximated, q is the level
+
+of approximation and the multiindex i translates the approximation level into
+
+the univariate approximation levels. This formula highlights the fact that the
+
+Smolyak operator is a simple linear combination of some lower level tensor
+
+products and that a straightforward implementation of this operator is not
+
+complicated.
+
+The intuition of the complete polynomials does not give a clue about how
+
+to construct the multivariate grid from the univariate grids and thus where
+
+to evaluate the complete polynomials optimally. In contrast to this miss-
+
+ing link, the Smolyak operator constructs the multivariate grid as a com-
+
+bination of some lower level Cartesian products × of the univariate grids
+
+sij
+
+=
+
+{si1j
+
+,
+
+...,
+
+sij
+mij
+
+}
+
+Hq,d =
+
+si1 × · · · × sid ,
+
+q-d+1|i|q
+
+(14)
+
+analogous to the construction of the multivariate polynomial Aq,d. We illustrate the complicated looking Smolyak formulas in a step by step
+approximation in appendix B. For alternative presentations of the operator see Kru¨ger and Ku¨bler (2004) and Heiss and Winschel (2008).
+For the integration, as in Heiss and Winschel (2008), we use the KronrodPatterson univariate grids derived according to Genz and Keister (1996) and combine them by the Smolyak operator for a multivariate integration.
+
+2.3.4 Iteration
+There are two complications in the approximation of the solution. The first is rational expectations, which we approximate by a Smolyak based Gaussian quadrature. The second is that the functions we want to approximate are the unknown solutions of the functional. Therefore, we cannot obtain function values at the grid by simple function evaluations, as we assume on the right hand side of equation (13). The policy values are given only implicitly and a root finder or a function iteration has to improve a start value. Table 1 summarizes the iterative procedures.
+Approximation step 1 and interpolation step 2(a)ii are given for the tensor product but they are analogous for a Smolyak approximation. Efficient algorithms in the literature are often constructed to optimize the interpolation
+
+12
+
+Table 1: Function Iteration and Root Finding
+0. Initial policy: x(0) at grid si.
+1. Approximate policy function c(k) = B(si)-1x(k).
+2. Rational expectations:
+(a) For all discrete shock realizations j = 1, ..., J i. State transition: sj = g(si, x(k), ej) ii. Next policy: xj = B(sj)c(k)
+(b) Expected variables: z = j wjh(si, x, ej, sj, xj). 3. Iteration:
+(a) Function iteration: i. Solve for x(k+1) in f (si, x(k+1), z(x(k))) = 0 ii. Residual: R = x(k+1) - x(k)
+(b) Root finding: i. Residuals: R = f (si, x(k), z(x(k))) ii. Iteration: x(k+1) = x(k) - (R/x)-1R
+4. k=k+1, go to 1. until R  0
+step as a combined construction of approximation coefficients and interpolation. Implicit in the coefficient calculation is the basis matrix inversion. In our iterative application we need to invert the basis matrix only once since it is not changed over iterations and structural parameters.
+The choice between the function iteration in 3(a) and the root finding algorithm in 3(b) involves a trade off between a few iterations over one big root finding system in 3(b) and iterations over several small systems in 3(a). For example, in a model with dg = 1000 grid points and dx = 20 policy functions the complete system to be solved has dx ×dg = 20.000 equations. In the function iteration routine, on the other hand, the solution x(k+1) can be obtained point wise. Instead of solving one large system for all dx×dg policy values, we solve dg systems with dx equations. But since the function iteration usually needs more iterations the overall gain is not clear cut. Moreover, analytical
+13
+
+Jacobians are available for the small systems. In JBendge the Jacobians are automatically derived by the symbolic differentiation engine and do not need to be supplied by the user. A restriction of the function iteration scheme is that we need all policy functions to appear in the contemporary policy vector x in f (s, x, z) = 0 otherwise we can not solve for them (the Jacobians become singular).
+But the main advantage of the function iteration is probably that it can be parallelized since the policies at each grid point are independent of each other and the dg small systems of size dx can be solved on parallel CPUs. By now we solve these systems sequentially with a standard Newton root finder with analytical derivatives and a line search for the optimal step size.
+
+2.3.5 Error
+An approximation procedure has to be accompanied by error estimates in order to control its accuracy. The exact policy functions would imply zero residuals in the complete state space and any deviation is therefore due to the policy function approximation.
+Judd (1992) proposed to normalize the residual for an economic interpretation. Dividing the residual by (1 - ln(st))(1-n)(1-n)/(nin,t - 1) and taking it to the power of 1/(n(1 - n) - 1) gives the Euler equation in terms of consumption
+
+rc(s) = cn(s) -
+
+Eth(s, x(s), e, s , x(s ); ) (1 - ln(s))(1-n)(1-n)/(nin,t - 1)
+
+s = g(s, x(s), e ).
+
+1 (1- )-1
+
+The Euler error is finally given by rE = |rc(s)/cn(s)|. A log10 error of -3 means that the utility loss due to the approximation is less than one per 1000 dollars.
+
+3 Econometrics
+The Bayesian estimation based on models M = {M1, ..., Mm} can be summarized by the factorization of the joint density
+p(, y, Mi|Mi) = p(|y, Mi, Mi)p(y|Mi, Mi)p(Mi|Mi).
+The models can explain the observables by different unobservables, functional forms of their relations and shock distributions. The unobservables include the parameters and the states Mi = {}  {s}. The functions and the
+14
+
+shock distributions describing the variables of interest p(|y, Mi, Mi), the density of observables (or likelihood) p(y|Mi, Mi) and the prior density of unobservables p(Mi|Mi) factorize the joint density p(, y, Mi|Mi).
+The Bayesian estimation can transparently incorporate prior information.
+It is a decision theoretical framework which integrates the modeled subject
+and may also contain the researcher's utility. By that it helps to communicate
+the results as described in Geweke (2005).
+The variable of interest is a very useful construction. It is an arbitrary
+function and can represent specification tests or economically meaningful
+variables like a welfare function. Combined with an unobserved state density
+we can obtain test statistics which do not rely on the asymptotic theory but
+take into account usual small samples in macroeconometrics.
+In the Bayesian formula the likelihood contains the evidence in the data
+and transforms the prior into the posterior density of the unobservables
+
+p(Mi|y, Mi)
+
+=
+
+p(y
+
+|Mi, Mi)p(Mi p(y|Mi)
+
+|Mi
+
+)
+
+.
+
+The marginal likelihood
+
+p(y|Mi) = p(y|Mi, Mi)p(Mi|Mi)dMi
+
+allows the data to assign probabilities to model Mi
+
+p(Mi|y)
+
+=
+
+p(y|Mi)p(Mi) p(y)
+
+=
+
+p(y|Mi)p(Mi)
+
+m j=1
+
+p(y|Mj
+
+)p(Mj
+
+)
+
+.
+
+The ratio of two marginal likelihoods is the Bayes factor. It transforms the model prior into the posterior odds ratio
+
+p(Mi|y) p(Mj |y)
+
+=
+
+p(Mi) p(Mj )
+
+p(y|Mi) p(y|Mj )
+
+.
+
+For equal prior probabilities of the models, the marginal likelihood selects the model with the best in-sample forecast quality. Information theory also points out an interesting interpretation of the marginal likelihood as a selection criterion. It is related to Occam's razor and selects the model which allows a higher compression of the explained data and by that needs less bandwidth for a transmission of data and model. This highlights the close relation between modeling and compression. But it also reveals the shortcoming of this selection criterion: it is an in-sample criterion whereas models should also perform well out-of-sample.
+However, we later check whether this measure can properly select between the nonlinear and linear approximation of the example model.
+
+15
+
+3.1 Filtering
+The model solving policy functions x(s) can be used to substitute the policy variables in the state transition equation. Augmented with a measurement equation, we obtain the model's empirical implication for the observables in terms of a nonlinear state space model
+
+st = g(st-1, x(st-1), et) = g(st-1, et) yt = m(st, x(st-1)) + t = m(st) + t
+
+ p(st|st-1)  p(yt|st)
+
+where we also switch to a more convenient density representation of the
+model for the econometric discussion: with distributional assumptions for
+the state and measurement shocks, et and t, the state space equations can be expressed in terms of state and measurement densities. For notational
+convenience the conditioning of these densities on the parameter vector  is
+suppressed.
+The filtering approach evaluates the likelihood of this model by the pre-
+diction and filtering step. These steps transform the posterior density of
+unobserved states p(st-1|y1:t-1) into the next posterior p(st|y1:t) by recursively processing new data yt for each period t. As a by-product we get a likelihood value. The notation y1:t is a shorthand for {y1, ..., yt}.
+For a given parameter vector, we start at time 0 with the prior information
+about the state
+
+p(s0) = p(s0|y0).
+
+The prediction step generates the prior density according to the ChapmanKolmogorov equation
+
+p(st|y1:t-1) = p(st, st-1|y1:t-1)dst-1 = p(st|st-1)p(st-1|y1:t-1)dst-1 (15)
+
+where the state density p(st|st-1) is weighted by the last posterior density p(st-1|y1:t-1). The new posterior is obtained in the filtering step, where new data yt allows to update the prediction density
+
+p(st|y1:t)
+
+=
+
+p(st, yt|y1:t-1) p(yt|y1:t-1)
+
+=
+
+p(yt|st)p(st|y1:t-1) p(yt|st)p(st|y1:t-1)dst
+
+.
+
+(16)
+
+This equation is the result of a repeated application of Bayes' formula. The normalizing constant
+
+lt = p(yt|st)p(st|y1:t-1)dst = p(yt|y1:t-1)
+
+(17)
+
+16
+
+is the period's contribution to the likelihood of the complete sample
+
+TT
+L(; y1:T ) = p(y1:T |) = p(yt|y1:t-1, ) = lt.
+
+(18)
+
+t=1 t=1
+
+The state posterior density p(s1:T |y1:T ) can be the end of an estimation or just a means to obtain the likelihood. The likelihood can then be either
+maximized over the parameter vector or used to base the inference on the
+parameter posterior density
+
+p(|y1:T )
+
+=
+
+p(y1:T |)p() p(y1:T )
+
+.
+
+The particle filter estimates and updates the complete posterior density of
+
+the unobserved states represented by a sample of the states, called particles.
+
+This is done by a costly sequential importance sampling with an inaccurate
+
+but simple to implement proposal density. This filter is computationally
+
+costly because the proposal density does not use the available information
+
+from the current observation. Moreover, as a Monte Carlo approach it does
+
+not use any information, like the smoothness, of the involved functions.
+
+Our first new filter is the Smolyak Kalman filter which assumes that the
+
+prediction p(st|y1:t-1) and posterior densities p(st|y1:t) are Gaussian. We therefore need to approximate only the first two moments of the densities and
+
+can then use the Kalman update in the filtering step. The moments needed
+
+for the Kalman step can be calculated as expected values of nonlinearly
+
+transformed random variables. Hence, we can use a deterministic Smolyak
+
+Gaussian quadrature for the approximation of these moments. This filter is
+
+very fast but the price may be an undesirably high approximation error.
+
+The second new filter is the Smolyak particle filter. This approach improves
+
+the particle filter by combining it with the Smolyak Kalman filter. We use
+
+the posterior densities obtained by the Smolyak Kalman filter, represented by
+
+the deterministically integrated first two moments of the states, as a proposal
+
+density for the importance sampling of the particle filter. This procedure
+
+incorporates the latest information obtained from the data. It combines the
+
+advantages of both filters, the accurate but slow sampling particle filter and
+
+the potentially inaccurate but fast deterministic filter.
+
+The last filter we present is based on a Gaussian sum approximation of the
+
+involved densities. The filter is again very fast and purely deterministic. It
+
+effectively runs several Smolyak Kalman filters in parallel.
+
+These new filters are used to assure robustness of the simplest Smolyak
+
+Kalman filter and to demonstrate some alternatives to the computationally
+
+costly particle filter. A nice overview for the various approaches can be found
+
+in Arulampalam, Maskell, Gordon, and Clapp (2002).
+
+17
+
+3.1.1 Smolyak Kalman Filter
+The extended Kalman filter linearizes the state space equations and then applies the Kalman (1960) filter. A widely used improvement is the deterministic unscented filter by Julier and Uhlmann (1997).
+The idea of the unscented filter is that approximating a density is easier than approximating a function. The unscented filter approximates the first two moments needed for the Kalman update. The approximation is some kind of Gaussian quadrature where the number of grid points is taken to be 2d + 1 where d is the dimension of the integrand. This is an attempt but not a solution to the curse of dimensionality since the curse in terms of the number of grid points is effectively transformed into another analogous curse in terms of the approximation error. As the unscented filter raises the number of points only linearly the effect is that accordingly the accuracy of the numerical integration decreases with the dimensionality and nonlinearity of the integrands. Therefore, the unscented filter's error of the likelihood approximation comes from restricting the approximation to two moments and their ad hoc approximation. The unscented filter is therefore restricted to a low polynomial exactness and a small number of states.
+The Smolyak Kalman filter avoids this ad hoc moment approximation and instead uses a Smolyak Gaussian quadrature. The moments are then updated in the usual way by the Kalman gain in the filtering step. An advantage of this procedure compared to the unscented filter is that the approximation level can be chosen according to the problem at hand and that the filter is also useful for other than normally distributed shocks. An approach to nonGaussian densities is implemented in the so called scaled unscented transform which extends the unscented transform by parameters to control higher moments different from the ones of the Gaussian density.
+We assume that the initial state density is N (s0; s0, 0s). The notation N (x; µ, ) is a shorthand for a Gaussian density with argument x, mean µ and covariance . Assuming that the previous posterior density is Gaussian
+p(st-1|y1:t-1) = N (st-1; st-1|t-1, st-1|t-1),
+the prior density
+p(st|y1:t-1) = N (g(st-1, et); st|t-1, ts|t-1)
+18
+
+is characterized by its first two moments
+
+st|t-1 =
+
+g(st-1, et)N (st-1; st-1|t-1, ts-1|t-1)N (et; 0, e)dst-1det
+
+(19)
+
+ts|t-1 =
+
+g(st-1, et)g(st-1, et)T N (st-1; st-1|t-1, st-1|t-1)N (et; 0, e)dst-1det
+
+-st|t-1stT|t-1,
+
+(20)
+
+where T denotes a transpose and e is the covariance matrix of the state shocks. The measurement density of the observables is given by
+
+p(yt|yt-1) = N (yt; yt|t-1, ty|t-1)
+
+where the expected value is
+
+yt|t-1 =
+
+m(st)N (st; st|t-1, ts|t-1)dst.
+
+(21)
+
+and the covariance is
+
+yt|t-1 = m(st)m(st)T N (st; st|t-1, st|t-1)dst +  - yt|t-1ytT|t-1,
+
+(22)
+
+where  is the covariance matrix of the measurement shocks. We also need the covariance between the observed and unobserved variables
+
+st|yt-1 =
+
+stm(st)T N (st; st|t-1, st|t-1)dst - st|t-1ytT|t-1.
+
+(23)
+
+The recursion is closed by the filtering step (16) and we obtain the next posterior density
+
+p(st|y1:t) = N (st; st|t, st|t) Kt = st|yt-1(yt|t-1)-1
+st|t = st|t-1 + Kt(yt - yt|t-1) ts|t = ts|t-1 - Ktty|t-1KtT
+
+(24)
+
+according to a usual Kalman update. The numerical problem to be solved for
+
+this filter is the evaluation of the integrals for the expected value and covari-
+
+ance of the state prediction in equations (19) and (20), the expected value of
+
+the observables in equation (21), the innovation covariance in equation (22)
+
+and the covariance between the states and observations in equation (23).
+
+The integrals involved have the form f (s)N (s, µ, s)ds and can therefore
+
+be approximated by a Smolyak Gaussian quadrature with some nodes s(i)
+
+and weights w(i) by
+
+N i=1
+
+w(i)f
+
+(s(i)
+
+).
+
+19
+
+The integrals for the mean and the variance of the prior density in equation (19) and (20), respectively, can be approximated by the nodes and weights for the joint density of the states and shocks as the weighted sum
+
+N
+
+st|t-1 =
+
+w(i)g(s(t-i)1|t-1, et(i))
+
+i=1
+
+N
+
+ts|t-1 =
+
+w(i)g(st(-i)1|t-1, et(i))g(st(-i)1|t-1, e(ti))T - st|t-1stT|t-1.
+
+i=1
+
+The assumption of a normal density allows us to generate nodes and weights
+from the density N (st; st|t-1, ts|t-1) and to calculate the moments of the measurement density in equations (21) and (22) as
+
+N
+
+yt|t-1 =
+
+w(i)m(s(t|it)-1)
+
+i=1
+
+N
+
+ty|t-1 =
+
+w(i)m(s(t|it)-1)m(st(|it)-1)T +  - yt|t-1ytT|t-1.
+
+i=1
+
+The covariance between states and measurements in equation (23) can be
+
+approximated by the sum
+
+N
+
+st|yt-1 =
+
+w(i)st(|it)-1m(st(|it)-1)T - st|t-1ytT|t-1.
+
+i=1
+
+3.1.2 Particle Filter
+
+In the Smolyak Kalman filter we assumed that the state prior and posterior densities are Gaussian. In general they might be nonstandard and even multimodal. The particle filter provides a general approximation of the posterior density
+
+N
+
+p(s0:t|y1:t) 
+
+wt(i)(s0:t - s(0i:)t)
+
+i=1
+
+(25)
+
+by a sample of states {s0(i:)t}Ni=1 and corresponding weights {wt(i)}iN=1 with
+
+i wt(i) = 1, where  is the Dirac delta function defined by
+
+ -
+
+f
+
+(x)
+
+(x
+
+-
+
+a) dx = f (a).
+
+We can use importance sampling to draw a sample s0(i:)t from an importance density q(s0:t|y1:t) and to calculate the weights in (25) as
+
+wt(i)
+
+
+
+p(s0:t|y1:t) q(s0:t|y1:t)
+
+.
+
+(26)
+
+20
+
+For a recursive algorithm we need to factorize the importance density
+
+q(s0:t|y1:t) = q(st|s0:t-1, y1:t)q(s0:t-1|y1:t-1).
+
+(27)
+
+This allows us to augment the previous sample {s(0i:)t-1}Ni=1 with a sample of the next state st(i)  q(st|s0:t-1, y1:t), for i = 1, ..., N , to obtain the next sample {s(0i:)t}iN=1.
+In the following we derive two equations for a sequential update of the weights. In the first variant for the particle filter, the posterior density can be written as
+
+p(s0:t|y1:t)
+
+=
+
+p(yt|s0:t, y1:t-1)p(s0:t|y1:t-1) p(yt|y1:t-1)
+
+=
+
+p(yt|s0:t, y1:t-1)p(st|s0:t-1, y1:t-1)p(s0:t-1|y1:t-1) p(yt|y1:t-1)
+
+=
+
+p(yt|st)p(st|st-1)p(s0:t-1|y1:t-1) p(yt|y1:t-1)
+
+ p(yt|st)p(st|st-1)p(s0:t-1|y1:t-1).
+
+(28)
+
+The identities p(yt|s0:t, y1:t-1) = p(yt|st) and p(st|s0:t-1, y1:t-1) = p(st|st-1) follow from the Markov properties of the processes yt and st. By substituting (27) and (28) into (26), the weight equation becomes
+
+wt(i)
+
+
+
+p(s0(i:)t-1|y1:t-1) q(s0(i:)t-1|y1:t-1)
+
+p(yt|st(i))p(s(ti)|st(-i)1 q(s(ti)|s0(i:)t-1, y1:t)
+
+)
+
+,
+
+which can be written recursively as
+
+wt(i)
+
+
+
+wt(-i)1
+
+p(yt|s(ti))p(s(ti)|s(t-i)1 q(st(i)|s(0i:)t-1, y1:t)
+
+)
+
+.
+
+(29)
+
+The importance density is often chosen to depend only on st-1 and yt. This simplifies the proposal to q(st|s0:t-1, y1:t) = q(st|st-1, yt) and frees us from the need to save the history of the processes st and yt during the recursion.
+The second representation of the weights will be used to derive the recursive
+algorithm for the Smolyak particle filter in the next section. Using
+
+p(s0:t-1|y1:t)
+
+=
+
+p(s0:t-1|y1:t-1, yt)
+
+=
+
+p(s0:t-1, yt|y1:t-1) p(yt|y1:t-1)
+
+=
+
+p(s0:t-1|y1:t-1)p(yt|y1:t-1, s0:t-1) p(yt|y1:t-1)
+
+21
+
+and
+
+p(st|s0:t-1, y1:t)
+
+=
+
+p(st|s0:t-1, y1:t-1, yt)
+
+=
+
+p(st, y1:t-1|s0:t-1, y1:t-1) p(y1:t-1|s0:t-1, yt)
+
+=
+
+p(st|s0:t-1,
+
+yt)
+
+p(y1:t-1|st, s0:t-1, yt) p(y1:t-1|s0:t-1, yt)
+
+= p(st|s0:t-1, yt),
+
+the density p(s0:t|y1:t) can be factorized as
+
+p(s0:t|y1:t) = p(st, s0:t-1|y1:t) = p(st|s0:t-1, y1:t)p(s0:t-1|y1:t)
+
+=
+
+p(st|s0:t-1, yt)p(yt|s0:t-1, y1:t-1)p(s0:t-1|y1:t-1) p(yt|y1:t-1)
+
+ p(st|st-1, yt)p(yt|st-1)p(s0:t-1|y1:t-1).
+
+and we obtain the update equation for the weights
+
+wt(i)
+
+
+
+wt(-i)1
+
+p(yt|s(t-i)1)p(st(i)|s(t-i)1, q(st(i)|s(0i:)t-1, y1:t)
+
+yt)
+
+.
+
+(30)
+
+A serious problem with the particle filter is that after a few iterations, most particles will have weights close to zero. This means that many particles stop contributing to the approximation. A brute force solution is to increase the number of the particles and so to waste most of the computational resources. A more efficient and essentially genetic solution is to resample the particles according to their weights and to reproduce the ones with the highest weights and to drop the others. If we resample in each iteration, the weights update equations (29) and (30) become
+
+wt(i)
+
+
+
+p(yt|st(i))p(st(i)|st(-i)1) q(st(i)|s(0i:)t-1, y1:t)
+
+(31)
+
+and
+
+wt(i)
+
+
+
+p(yt|s(t-i)1)p(st(i)|s(t-i)1, q(st(i)|s(0i:)t-1, y1:t)
+
+yt)
+
+.
+
+(32)
+
+We are often interested in an estimate of the posterior density p(st|y1:t) instead of p(s0:t|y1:t). Again, the Markov property of st allows us to factorize the posterior density into
+
+t
+p(s0:t|y1:t) = p(s0:t-1|y1:t-1)p(st|y1:t) = . . . = p(s0) p(sj|y1:j).
+j=1
+
+22
+
+Since in
+
+p(st|y1:t)
+
+=
+
+p(s0:t|y1:t)
+
+p(s0)
+
+t-1 i=1
+
+p(si
+
+|y1:i)
+
+the denominator is constant at t, it follows that
+
+p(st|y1:t)  p(s0:t|y1:t) and we can use the weights given in (31) and (32) to approximate
+
+N
+
+p(st|y1:t) 
+
+wt(i)(st - s(ti)).
+
+i=1
+
+The simplest choice for the importance density q(st|s0:t-1, y1:t) is the state transition p(st|st-1). It is very easy to sample from this proposal density. Moreover, it simplifies the weights in equation (31) to wt(i)  p(yt|s(ti)). The particles are therefore weighted according to their likelihood. Small measurement errors therefore aggravate the problem of degenerating particles and enforce the need for resampling. Note, that due to this method to calculate the weights, the filter can not handle state space models without measurement errors. Resampling in turn introduces a bias into the particle filter, see for example in Berzuini, Best, Gilks, and Larizza (1997).
+The recursion for the particle filter is given by the following three steps. We start with an equally weighted sample from the previous posterior density
+
+st(-i)1  p(st-1|y1:t-1) for i = 1, . . . , N.
+
+1. In the prediction step, the state transition density is used as a proposal density to generate N particles
+
+st(i)  p(st|s(t-i)1) for i = 1, . . . , N.
+
+This is done by evaluating the state transition equation g(s(t-i)1, et(i)) for each particle st(-i)1 with randomly drawn shocks et(i) from the model's state shock distribution.
+
+2. In the filtering step, the particles are weighted with
+wt(i) = p(yt|st(i)).
+This is done by first evaluating the measurement equation yt(i) = m(s(ti)). With additive measurement shocks we know the distribution of the difference to the observed data. In case of Gaussian errors we have yt - yt(i)  N ( t; 0,  ).
+
+23
+
+3. The particles are then resampled according to their normalized weights
+
+w¯t(i) =
+
+wt(i)
+
+N n=1
+
+wt(n)
+
+.
+
+The resampled particles finally represent an equally weighted sample from the next posterior
+
+s(ti)  p(st|y1:t) for i = 1, . . . , N. The period likelihood is then given by the mean of the weights in step 2.
+
+1 N
+
+N
+
+p(yt|st(i)) 
+
+n=1
+
+p(st|st-1)p(st-1|y1:t-1)p(yt|st)dstdst-1
+
+= p(yt|y1:t-1).
+
+These likelihoods are obtained recursively for each period and at the end of
+the complete sample we arrive at the sample likelihood in equation (18).
+The problem of the filter is that the available observation yt is not taken into account in the importance density p(st|st-1). The consequence is that we may sample in very low probability regions of the states density with
+many implied particle weights close to zero. This is inefficient and the next
+filter uses a better proposal density.
+
+3.1.3 Smolyak Particle Filter
+
+Our idea to improve the particle filter is similar to the one in Amisano and Tristani (2007) where the proposal density for the particle filter is generated by an algorithm similar to the extended Kalman filter. Another related filter is the unscented particle filter by van der Merwe, Doucet, de Freitas, and Wan (2000), where the unscented Kalman filter is used to generate a proposal density.
+The information about the current observation is embedded in the posterior of the Smolyak Kalman filter. We use this posterior as the proposal density in the particle filter. This is more accurate than the proposal generated by the extended Kalman filter and more accurate and general than in the unscented filter. The proposal density is now
+
+q(st|s0:t-1, y1:t) = p~(st|st(-i)1, yt)  p(st|s(t-i)1, yt). The weights in equation (32) can be updated as
+
+wt(i)
+
+
+
+p(st|s(t-i)1, yt)p(yt|s(t-i)1) p~(st|st(-i)1, yt)
+
+.
+
+24
+
+If we do not correct the error resulting from the approximative proposal we can calculate the weights as
+w~t(i)  p(yt|st(-i)1).
+We construct the proposal density p~(st|s(t-i)1, yt) similar to the posterior of the Smolyak Kalman filter starting with an equally weighted sample from the previous posterior density
+s(t-i)1  p(st-1|y1:t-1) for i = 1, . . . , N.
+In the prediction step, we calculate the mean and variance of the state prediction by Gaussian quadrature over the state shocks {e(j), w(j)}jJ=1
+
+p(st|s(t-i)1, y1:t-1) = p(st|st(-i)1)p(s(t-i)1|y1:t-1)det  N (st; s(t|it)-1, st|(ti-) 1)
+
+J
+
+s(t|it)-1 =
+
+w(j)g(s(t-i)1, e(j))
+
+j=1
+
+J
+
+ts|(ti-) 1 =
+
+w(j)g(s(t-i)1, e(j))g(s(t-i)1, e(j))T - st|t-1sTt|t-1
+
+j=1
+
+The moments of the observables
+
+p(yt|s(t-i)1, y1:t-1) = p(yt|st)p(st|st(-i)1, y1:t-1)det  N (yt; yt(|it)-1, yt|(ti-) 1) (33)
+
+J
+
+yt(|it)-1 =
+
+w(j)m(g(s(t-i)1, e(j)))
+
+j=1
+
+J
+
+ty|(ti-) 1 =
+
+w(j)m(g(st(-i)1, e(j)))m(g(s(t-i)1, e(j)))T +  - yt|t-1ytT|t-1
+
+j=1
+
+J
+
+st|yt(-i)1 =
+
+w(j)g(st(-i)1, e(j))m(g(s(t-i)1, e(j)))T - st|t-1ytT|t-1
+
+j=1
+
+allow to calculate the Kalman gain and to update the prediction moments to the ones of the proposal density
+
+p(st|st(-i)1, yt)  N (st; st(|it), ts|(ti)) Kt = st|yt-1(ty|t-1)-1 st(|it) = st(|it)-1 + Kt(yt - yt(|it)-1)
+ts|(ti) = st|(ti-) 1 - Ktty|(ti-) 1KtT
+
+25
+
+from which we draw the next state particle:
+
+s(ti)  p~(st|s(t-i)1, y1:t) In the filtering step, we weight these new particles according to
+
+wt(i) = p(yt|s(t-i)1, y1:t-1). If we assume a normal density for p(yt|s(t-i)1, y1:t-1) we can evaluate the weights at the already calculated density in equation (33)
+
+wt(i) = N (yt; yt|t-1, ty|t-1) Finally, we resample the new particles according to their normalized weights
+
+w¯t(i) =
+
+wt(i)
+
+N n=1
+
+wt(n)
+
+.
+
+These steps again transform one posterior into the next one and the period likelihood can be approximated by the mean of the unnormalized weights
+
+1 N
+
+N
+
+p(yt|st(-i)1) 
+
+n=1
+
+p(st|st-1, yt)p(st-1|y1:t-1)p(yt|st-1)dstdst-1
+
+= p(yt|y1:t-1).
+
+Note, that the Smolyak particle filter is applicable in state space models without measurement errors since the weights do not need to be evaluated at the measurement shock density.
+
+3.1.4 Smolyak Sum Filter
+The last filter we present is based on a sum of Gaussian densities to approximate the posterior and prediction densities. The idea can be traced back to Alsbach and Sorenson (1972). More recently Kotecha and Djuri´c (2003) revived this approach but they use importance sampling to approximate the involved integrals as they do in their Gaussian particle filter. Instead we propose to use Smolyak Gaussian quadrature again.
+It seems that some deterministic approaches to nonlinear filtering were already developed in the seventies. They somehow dropped out of fashion and with the development of the particle filtering research turned towards sampling filters. With the advent of powerful deterministic integration schemes it is worth to reiterate on the deterministic filters.
+
+26
+
+The basic idea is that any density of practical concern can be approximated as a sum of normal densities
+
+I
+p(x)  iN (x; µix, ix)
+i=1
+
+I
+with i = 1.
+i=1
+
+The steps for the filter are similar to the steps of the Smolyak Kalman filter. The difference is that now we effectively run several Smolyak Kalman filters in parallel. The prediction density is approximated as a sum of normal densities
+
+p(st|y1:t-1) = p(st|st-1)p(st-1|y1:t-1)dst-1
+
+I
+ i;t-1p(st|st-1)N (st-1, sti-1|t-1, si ;t-1|t-1)dst-1
+i=1
+I
+= i;t-1 p(st|st-1)N (st-1, sti-1|t-1, is;t-1|t-1)dst-1
+i=1
+I
+= i;t-1N (st, sit|t-1, si ;t|t-1).
+i=1
+This is simply a parallel evaluation of several Smolyak Kalman filter steps to calculate the mean sit|t-1 and variance si;t|t-1 according to equations (19) and (20), respectively. Anderson and Moore (1979) present this approach to nonlinear filtering for a model with additive noise in the measurement and state equations. We therefore have an implicit assumption that the weights are preserved during the prediction step. For non additive state shocks this assumption deserves some further elaboration in future research.
+The filtering steps involved are again the same as the ones towards the density in equation (24)
+
+p(st|y1:t)  p(yt|st)N (st, sti|t-1, is;t|t-1)
+
+I
+ i;t-1p(st|st-1)N (st-1, sti|t-1, si ;t|t-1)dst-1
+
+i=1
+
+I
+=
+
+i;t-1p(st|st-1)N (st-1, sit|t-1, is;t|t-1)dst-1
+
+i=1
+
+I
+= i;tp(st|st-1)N (st-1, sit|t-1, si ;t|t-1)dst-1.
+
+i=1
+
+27
+
+The weights are updated according to
+
+i;t =
+
+i;t-1i;t
+
+I i=1
+
+i;t-1i;t
+
+where i;t is the likelihood contribution of each summand of the Gaussian sum.
+This extension to the Smolyak Kalman filter is simple to program and amounts to a parallel evaluation of several Smolyak Kalman filters which allows to parallelize this filter.
+
+3.2 Posterior Density
+
+Once the likelihood for a given parameter vector is evaluated we can use it to derive an estimator. The information accumulation in the Bayesian framework is described by Bayes' formula and the object of interest is the posterior of unobservables 
+
+p(|y)
+
+=
+
+p(y|)p() p(y)
+
+=
+
+p(y|)p() p(y|)p()d
+
+
+
+p(y|)p().
+
+An analytical expression is available neither for the likelihood nor for the posterior. But a random number generator drawing from this density can provide a histogram as an approximation.
+
+3.2.1 Metropolis-Hastings
+The Metropolis-Hastings algorithm allows to generate draws from a target density. As opposed to importance sampling no proposal density is needed. The only prerequisite is that the target density can be evaluated at any point of its domain. The algorithm described in Chib and Greenberg (1995) samples so that the histogram of the sequence of draws ^1:N approximates the target density for large N .
+The algorithm is summarized in table 2. The parameter space is traversed by a random walk. The newly generated candidate parameter vector ^n is accepted if its posterior is higher than the posterior of the last accepted parameter vector ^n-1. This qualifies the algorithm as a maximizer. But even if the candidate's posterior is smaller still there is a chance for it to be accepted. This makes the algorithm a global maximizer. The survival according to the parameter vector's fitness, measured by the posterior value, qualifies it as a genetic algorithm. If the acceptance ratio is tuned by the random walk variances to be around 30% we obtain a representative sample from the target density after convergence.
+28
+
+Table 2: Metropolis-Hastings Algorithm
+
+1. Choose start value 1 and  for an acceptance ratio of  30%
+
+2. For n = 2, while n - J < N , n = n + 1
+
+(a) Candidate: ^n = ^n-1 + , where N ( ; 0,  ).
+
+(b) Acceptance: ^n =
+
+^n ^n-1
+
+if
+
+U (0, 1)
+
+
+
+p(y1:t|^n )p(^n ) p(y1:t |^n-1 )p(^n-1 )
+
+otherwise
+
+(c) Decide on J by diagnostic tests
+
+3. Disregard burn-in draws ^1:J .
+
+The critical choices of the algorithm are the starting value ^0, the density to generate candidates ^n and the number of draws N . The choice of ^0 drives the number of draws before convergence. The start value might be far from a representative draw of the target density and many draws are needed to get into the representative region. The distributional choice is often a random walk with normal shocks. For a normal target density the optimal choice of the innovation variance is  = Cov(). It has to be scaled so that the acceptance ratio is around 0.3. For a normal target density this is achieved by RW = 2.38/ D where D is the number of estimated parameters. Of course the target density and its covariance Cov() are not known because they are the objects of interest.
+The chosen variances in  influence the region covered by the sequence. Sampling around the mode of the posterior with large variances will generate candidates far from the current value and a low acceptance probability. Smaller variances increase the acceptance ratio but decrease the region being covered so that low probability regions may be undersampled. The recommended acceptance ratio results from the attempt to balance this trade off.
+The next section discusses the diagnostic test to decide on convergence. The decision is about the number J determining how many burn-in draws ^1:J are to be ignored. Formal convergence tests are an important part of the analysis as well as eye-balling and after some estimations one acquires a visual feeling for convergence.
+
+29
+
+3.2.2 Convergence Test
+A convergence test can be based on one subdivided sequence or on several parallel ones. In general we diagnose convergence if the sequences appear to be drawn from the same distribution. Examining only one sequence will result in overly optimistic diagnostic tests. Gelman and Rubin (1992) pointed out that lack of convergence, in many problems, can easily be detected from many but not from one sequence.
+In both cases the diagnostic test is calculated from a 3-dimensional tensor ^ of size N × D × M with elements ^nd,m. D is the number of estimated parameters, N the number of draws and M the number of sequences. ^n,m is a 1 × D vector and represents the nth draw in the mth sequence and ^:,m is a N × D matrix and represents all draws in sequence m.
+Brooks and Gelman (1998) proposed the multivariate potential scale reduction factor R as a diagnostic test. The general idea is to check within and between-sequence-variances and diagnose convergence if they are close to each other. The within-sequence-variance is the D × D matrix
+
+W
+
+=
+
+1 M (N - 1)
+
+M
+
+N
+(^n,m - ¯m) (^n,m - ¯m)
+
+m=1 n=1
+
+where
+
+¯m
+
+=
+
+1 N
+
+N n=1
+
+^n,m
+
+is
+
+the
+
+1
+
+×
+
+D
+
+mean
+
+vector
+
+in
+
+sequence
+
+m.
+
+W
+
+is
+
+the mean of the variances in each sequence. The between-sequence-variance
+
+B/N is the D × D matrix
+
+B/N
+
+=
+
+1 M-
+
+1
+
+M
+(¯m - ¯) (¯m - ¯)
+
+m=1
+
+where
+
+¯
+
+=
+
+1 M
+
+M m=1
+
+¯m
+
+is
+
+the
+
+1×D
+
+mean
+
+of
+
+all
+
+draws.
+
+The
+
+combined
+
+variance
+
+can be estimated as
+
+V
+
+=
+
+N
+
+- N
+
+1
+
+W
+
++ (1 +
+
+1 M
+
+)B/N.
+
+Convergence is detected for similar V and W . A distance measure is calculated by the multivariate potential scale reduction factor
+
+R
+
+=
+
+N- N
+
+1
+
++
+
+M+ M
+
+1 max
+
+where
+
+max
+
+=
+
+max
+a
+
+a a
+
+Va Wa
+
+.
+
+max can be obtained by taking the largest absolute eigenvalue of W -1B/N . The following conditions for convergence should be checked: V and W should
+be similar and stabilize and R should be below 1.1.
+
+30
+
+These test statistics can be calculated recursively after each draw. Once the conditions are met the burn-in sequence length J is found and the draws thereafter are taken to represent draws from the posterior of structural parameters.
+
+3.2.3 Parallel Extension
+
+The variances of the random walk shocks  have to be tuned for an accep-
+
+tance ratio of around 0.3. It is quite demanding to find good values for all
+
+parameters simultaneously and usually many costly training sequences are
+
+needed. The variances can then be estimated from these runs. Moreover,
+
+as in Fern´andez-Villaverde and Rubio-Ram´irez (2004), robustness should be
+
+checked by running several sequences with different start vectors.
+
+We propose to run multiple sequences simultaneously and not sequentially.
+
+By that we can assure robustness with respect to start values, calculate
+
+unbiased convergence diagnostic tests, estimate the innovation variance on
+
+the fly and finally implement ideas from evolutionary algorithms to improve
+
+the search for the modus of the posterior in the beginning of the sampling.
+
+The pseudo code for this parallel Metropolis-Hastings Algorithm is given in
+
+table 3.
+
+The problem of choosing all variances of the random walk shocks is reduced
+
+in the proposed parallel variant to the choice of only two scalars b and GE.
+
+In the estimated models for this paper the optimal parameters were almost
+
+identical for the linear and nonlinear estimation. This means that fast lin-
+
+ear estimations can be used to tune the parameters for a more expensive
+
+nonlinear estimation run. The parameter draws are again collected in a N × D × M tensor ^ with
+elements ^nd,m with M sequences of N draws for D parameters. Our proposal is to add another source of innovation for the generation of the
+candidate draw ^n,mi in sequence mi. One source is common to the random walk algorithm where a random shock is added to the previous parameter
+
+draw. The second, additional source of innovation we propose, is the scaled
+
+difference between two parameter vectors from randomly chosen sequences
+
+m1 and m2. Parameter GE and the shock variance b determine the relative weight of mixing and random walk innovations.
+
+If the variance of the target density is  = Cov() then the variance of the
+
+difference of two population parameter vectors from the sequences m1 and m2
+
+is E[(m1 - m2)(m1 - m2) ] = 2. the law of large numbers limN
+
+In case of a converged sequence we get by
+
+N n=1
+
+(^n,m1
+
+-
+
+^n,m2 )(^n,m1
+
+-
+
+^n,m2 )
+
+= 2.
+
+The intuition behind this procedure is that the variance of the difference
+
+between two randomly drawn parameters is the optimal one given that the
+
+31
+
+Table 3: Parallel Metropolis-Hastings Algorithm
+
+1. Choose start values ^1,m for all m = 1, ..., M and b, GE for an acceptance ratio of  30%
+
+2. For n = 1, while n - J < N , n=n+1
+
+(a) Repeat for m = 1, ..., M
+
+i. Draw m1 and m2 such that m1 = m2 = m
+
+ii. Candidate: ^m = ^m,n + GE(^m1,n - ^m2,n) + , N ( ; 0, bI)
+
+iii. Acceptance:
+
+^n,m =
+
+^m ^n,m
+
+if
+
+U (0, 1)
+
+
+
+p(y1:t|^m )p(^m ) p(y1:t|^m)p(^m)
+
+otherwise
+
+(b) Decide on J by diagnostic tests
+
+3. Disregard burn-in draws ^1:J,1:M
+
+sequence has converged. Our idea originated from the diagnosis test where the within and between-sequence-variances are examined and convergence is detected when they are of similar size. ter Braak (2006) derives the same candidate by analogy to the global evolutionary optimization algorithm, called differential evolution, by Storn and Price (1997).
+A useful by-product of this parallel Metropolis-Hastings algorithm is that it allows a simple parallelization of the code for the estimation on a computer cluster. Each CPU generates only some sequences and the only information they need to exchange is the matrix ^n,1:M of accepted draws. Its size is only D × M so that overhead costs are driven by the synchronicity of the parallel posterior evaluations.
+We have implemented these parallel executions in JBendge, thus reducing the computing costs almost proportional to the number of CPUs.
+3.3 Marginal Likelihood
+Model selection is a difficult but important matter and depends usually on a variety of more or less formal criteria. A frequent and rather informal approach is to examine the model's ability to replicate some moments of the data.
+32
+
+One challenge is that models of interest are often not nested and do not emerge from each other through simple parameter restrictions. In practice functional forms, the number of estimated and calibrated parameters, the unobserved states or the shock distributions may differ across candidate models. Consequently classical likelihood ratio tests are not of much help.
+Another problem is that models are inherently wrong since they are at most approximations of the reality and are designed to explain some features of the real world in a given application. Landon-Lane (1998) discusses the Bayesian model selection within 1-dimensional linear processes. The non-nested and quasi-true nature of alternative models can be addressed within a Bayesian framework as described in Fern´andez-Villaverde and Rubio-Ram´irez (2004).
+According to Berger and Wolpert (1988) the likelihood contains all relevant information. Given some models {M1, ..., Mm} with parameter priors and the density of observables, the unobservables can be integrated out to obtain the marginal likelihood
+
+p(y|Mi) =
+
+p(y|Mi, Mi)p(Mi|Mi)dMi.
+
+Mi
+
+The parameter posterior is used for inference, conditional on the adequacy of the model whereas the marginal likelihood is used for a criticism of the model in the light of the data.
+Most of the work for calculating the marginal likelihood has already been done once the Metropolis-Hastings algorithm converged and generated parameter draws from the posterior density and the associated posterior values. Gelfand and Dey (1994) show that with any density h(Mi|Mi) we can write
+
+Ep(Mi |y,Mi)
+
+h(Mi |Mi) p(y|Mi, Mi)p(Mi|Mi)
+
+=
+
+Mi
+
+h(Mi |Mi) p(y|Mi, Mi)p(Mi
+
+|Mi
+
+)
+
+p(Mi
+
+|y
+
+,
+
+Mi
+
+)dMi
+
+=
+
+h(Mi |Mi) Mi p(y|Mi, Mi)p(Mi|Mi)
+
+Mi
+
+p(y|Mi , p(y|Mi ,
+
+Mi)p(Mi |Mi) Mi )p(Mi |Mi )dMi
+
+dMi
+
+=
+
+Mi h(Mi |Mi)dMi Mi p(y|Mi, Mi)p(Mi|Mi)dMi
+
+=p(y|Mi)-1.
+
+According to the last equation all we have to do is to calculate a weighted mean of the Metropolis-Hastings sequence. Geweke (1999) proposes the fol-
+
+33
+
+lowing procedure. First we calculate the mean and covariance of the parameter draws for each model Mi
+
+¯Mi
+
+=
+
+1 N
+
+N
+
+^n,Mi
+
+n=1
+
+Mi
+
+=
+
+1 N
+
+N
+(^n,Mi - ¯Mi )(^n,Mi - ¯Mi ) .
+
+n=1
+
+If D denotes the number of estimated parameters of a model, we define a 2 critical value for quantile p, to assure robustness over the quantiles
+p = 0.1, ..., 0.9 with
+
+Mi =  : ( - ¯Mi) -M1i( - ¯Mi)  21-p(D) . With density h(.)
+
+h()
+
+=
+
+p-1
+
+(2)-
+
+D 2
+
+|Mi
+
+|-
+
+1 2
+
+exp
+
+-
+
+1 2
+
+(
+
+-
+
+¯Mi
+
+)
+
+-M1i (
+
+-
+
+¯Mi )
+
+IMi ()
+
+where I is the indicator function with IS(s) = 1 if s  S and 0 otherwise, we can finally estimate the marginal likelihood by
+
+p^(y|Mi) =
+
+1N
+
+h(^n,Mi )
+
+N n=1 p(y|^n,Mi, Mi)p(^n,Mi|Mi)
+
+-1
+.
+
+4 Results
+
+In solution section 4.1 we compare the performance of the Smolyak and the tensor operator within the solution algorithm. In estimation section 4.2.1 we compare the likelihood values obtained by the Smolyak Kalman, Smolyak sum, Smolyak particle and the particle filter. Then in section 4.2.2 we estimate the smallest one country model on simulated data to document the overall performance of the algorithms and filters.
+All results are calculated on a cluster with 16 Xeon CPUs at 2.7 GHz with hyper threading. The software is the GNU/Linux openSUSE 10.2 operating system, the Java virtual machine 1.6.0 and the 1.4 beta version of JBendge. Since JBendge is completely programmed in Java it is platform independent and runs on any operating system with the Java virtual machine. The Metropolis-Hastings algorithm is parallelized and runs on all 16 CPUs simultaneously in separate threads.
+The model is parameterized equally for all countries by  = 0.4,  = 0.99,  = 0.02,  = 0.95,  = 0.357,  = 2.0, a = 0.007. The solutions for the multicountry models are calculated for  = 0.01. The estimations are
+
+34
+
+done only for the smallest one country model where we use the parameterization  = 50.0 and a = 0.035. To simplify the estimation we set capital adjustment costs to zero ( = 0) and obtain analytical expressions for the steady state values given in appendix A. The parameterization implies the steady states: a¯ = 0.0, k¯ = 23.2683, c¯ = 1.28563,¯i = 0.465366, ¯l = 0.312104 and y¯ = 1.751. They are independent of  or a. The missing investment costs also allow to compare our estimations to the ones obtained by Ferna´ndez-Villaverde and Rubio-Ram´irez (2005).
+4.1 Solution
+The performance of the Smolyak and tensor operators is measured by the number of grid points, the running time for a solution and the maximal absolute Euler error evaluated at 10,000 random points in the approximation space.
+We calculate all solutions with the same Smolyak level for the function approximation and for the numerical integration of the rational expectations. The tolerance level for the change of the policy function during the function iteration is set to 1E - 5. The bounds of the approximation space are critical parameters of the solution process. We simulate several data sets to find out the regions visited by the system and set the bounds to [20;26] for capital and [-0.06;0.06] for productivity.
+The tensor approximation is constructed from univariate approximations with at least three points. This is necessary for the approximation to be nonlinear otherwise only linear terms are present. Therefore the number of points for the simplest tensor approximation is given by 3d, where d is the number of states. The Smolyak approximation on the other hand starts from the very beginning with nonlinear second order polynomials. For example, the bivariate terms in the Smolyak approximation A3,2 are b0b0, b0b1, b0b2, b1b0, b2b0.
+Table 4 documents the results. We use Smolyak levels 2,3 and 4 for the models with 4 and 6 states and afterwards only levels 2 and 3. The Smolyak operator is superior to the tensor operator already for a small model with 4 states where the Euler error on a 41 point Smolyak grid is smaller than the error on a tensor grid with 81 points, although the solution time is the same. For the next level with a similar error the Smolyak operator is more than three times faster and uses about five times less points (137 vs. 625).
+The efficiency gain for the model with six states is even more dramatic. Here the Smolyak operator needs only 85 compared to 729 points of the tensor operator for a similar approximation accuracy. The running times are accordingly about 4 times lower for the Smolyak operator.
+The tensor operator breaks down for models beyond 6 states while the
+35
+
+Table 4: Smolyak and Tensor based Solutions
+
+States 4
+6
+8 10 12 14 16 18 20 22
+
+Operator Smolyak
+Tensor Smolyak
+Tensor Smolyak
+
+Points
+9 41 137 81 625
+13 85 389 729
+17 145 21 221 25 313 29 421 33 545 37 685 41 841 45 1013
+
+Error
+6.6E-4 8.1E-6 9.3E-7 4.9E-5 1.8E-7
+6.2E-4 5.1E-5 9.3E-7 6.5E-5
+5.9E-4 3.5E-5 7.5E-4 4.0E-5 4.4E-4 4.8E-5 4.3E-4 3.7E-5 4.5E-4 4.0E-5 3.7E-4 2.6E-5 3.3E-4 1.9E-5 3.3E-4 1.7E-5
+
+Time
+0.3 2.5 24.0 2.5 88.5
+0.7 12.5 201.5 54.09
+1.3 29.9 2.3 69.2 3.8 157.8 5.7 339.1 8.5 724.1 12.2 1819.4 17.1 2107.4 23.31 4087.4
+
+Smolyak operator is still doing fine. The biggest model we are able to solve has 22 states and it takes around 68 minutes for an approximation error of 1.7E - 5.
+4.2 Estimation
+In the next subsection we compare the likelihood values of the Smolyak Kalman, Smolyak particle, Smolyak sum and the particle filter. We simulate data sets of 100 observations starting from the deterministic steady states generated by very accurate nonlinear solutions of the one country model with the states productivity a and capital k and one labor decision l. The observ-
+36
+
+Table 5: Measurement Errors
+small large i 8.66E-4 4.65E-3 l 1.10E-3 3.12E-3 y 1.58E-4 1.75E-2
+
+ables in the measurement model are investment i, labor l and output y. The measurement shocks are assumed to be additive.
+We present the estimates of two variants of the models, one with small and one with large measurement errors. Their standard deviations are summarized in table 5. The large standard deviations are set to 1% of the steady state values and the small errors to the values in Ferna´ndez-Villaverde and Rubio-Ram´irez (2005) who use the same model to illustrate and test their algorithms.
+4.2.1 Likelihood
+The particle filter is run with 40,000 particles and the Smolyak Kalman filter with integration level 3 for both the time and the measurement steps. The Smolyak particle filter is run with integration level 2 and 500 particles and the Smolyak sum filter with integration level 3 for both the time and the measurement updates and 20 Gaussian summands. All solutions are calculated with level 3 for the policy approximation and the rational expectation integrals.
+
+Figure 1: Likelihood at True Parameters for  = 50.0 and a = 0.035
+
+1200
+
+900
+
+1000 800 600 400 200 0
+
+Smolyak Kalman Smolyak Sum Smolyak Particle Particle
+
+850 800 750 700 650
+
+Smolyak Kalman Smolyak Sum Smolyak Particle Particle
+
+-200
+
+600
+
+45 46 47 48 49 50 51 52 53 54 55 25 30 35 40 45 50 55 60 65 70 75
+
+Figures 1 and 2 show slices through the multidimensional likelihood. The left plots show likelihood values from the data with small measurement errors
+
+37
+
+Figure 2: Likelihood at True Parameters for  = 2.0 and a = 0.007
+
+2000
+
+990
+
+1000 0
+-1000 -2000 -3000 -4000
+
+Smolyak Kalman Smolyak Sum Smolyak Particle Particle
+
+980 970 960 950 940 930 920
+
+Smolyak Kalman Smolyak Sum Smolyak Particle Particle
+
+-5000
+
+910
+
+0 1 2 3 4 5 60 1 2 3 4 5 6
+
+and the right plots with large ones. We set all parameters to their true values and vary  at the abscissas and plot them against the likelihood values at the ordinates. The results are rather encouraging for all our filters as the values are very similar. It is interesting to see that the particle filter gets into trouble for small measurement errors in the model with  = 50.0 and a = 0.035 in the left plot of figure 1.
+The running times for the filters are very different: the particle filter is hardly useful in combination with a Chebyshev approximation. The construction of the basis matrix for as many as 40,000 particles is very costly and it takes around 120 seconds for one likelihood evaluation. It probably pays off to use a finite element approximation instead, where the trade off is a more costly approximation due to a larger grid, but a less costly likelihood evaluation due to a cheap finite element interpolation. The Smolyak Kalman filter is very fast and it takes around 0.2 seconds for one likelihood evaluation. The Smolyak particle filter is slower and needs around 6 seconds. The Smolyak sum filter is very fast and needs only 0.5 seconds. The likelihood evaluation by a linear Kalman filter takes 0.015 seconds and the extended Kalman filter needs 0.2 seconds.
+
+4.2.2 Parameters
+We have implemented an interactive sampling environment in JBendge where the Metropolis-Hastings parameters driving the innovation variance GE and b can be changed while sampling. Together with a regular update of the sequence plots and diagnostic tests the estimation process becomes very flexible and comfortable. Some of the sequences with the lowest posterior values or lowest acceptance ratios can be restarted at the parameter values of the other sequences. This serves the purpose to manually cancel some sequences
+
+38
+
+Table 6: Bounds of a Uniform Prior
+
+Low Hi
+
+Low Hi
+
+ 0.00 1.00 a  0.75 1.00 i  0.00 0.05 l  0.00 1.00 y  0.00 100
+ 0.00 1.00
+
+0.0 0.1 0.0 0.1 0.0 0.1 0.0 0.1
+
+which do not improve anymore. A more advanced global maximization algorithm could do this of course automatically. The second situation when a restart is useful happens while fine tuning the Metropolis-Hastings parameters GE and b. Their effect on the acceptance ratio can usually be inferred from the first few draws and therefore restarts are helpful while searching for the appropriate values.
+The usual procedure within our framework has three stages. The first searches for the posterior mode. At this stage the mixing parameter GE can be rather large between 0.8 and 2.0 according to the prescription for the differential evolution algorithm of Storn and Price (1997). During this stage the acceptance ratio is usually very low even for parameters GE and b which would later achieve the needed acceptance ratio. There is therefore no use to fine tune these parameters at this stage. During the second stage we sample until the diagnostic tests signal convergence and we also fine tune the parameters GE and b to obtain an acceptance ratio around 0.3. For all estimations parameter b is set to 1E - 6 and GE between 0.1 and 0.4. Both parameters are remarkably stable especially across the linear and nonlinear estimations. This helps to find the appropriate values for the nonlinear estimation by fast linear estimation runs. Once the convergence of the sampler is detected we get into the third stage where we sample 50,000 draws.
+We run the estimation with around two times more sequences than parameters. The estimated model has 13 parameters and we therefore use 32 sequences for a balanced work load on our 16 CPUs. The usual CPU load on our cluster after convergence is around 800% for the nonlinear and 1500% for the linear estimation. A CPU load of 100% corresponds to one CPU. Since the sequences have to be synchronized and the running times of posterior density evaluations for the parallel draws are different, an exactly linear scaling cannot be expected. However, it is still a dramatic improvement over a run on a single CPU.
+39
+
+For all estimations the Metropolis-Hastings sequences were initiated at random draws from the prior densities. They are taken to be uniform within the bounds in table 6.
+It takes around 1000 to 2000 draws for each of the 32 sequences to find the mode of the posterior density and another 1000 to 4000 draws to detect the convergence according to the R, V and W statistics. We sometimes restarted half of the sequences during the maximization process. The complete estimation process takes around 5 minutes for the linear estimation, around 2 hours for the nonlinear estimation with the Smolyak Kalman filter, 4 with the Smolyak sum filter and 20 with the Smolyak particle filter. We only present estimations with these three filters since the particle filter is much too slow to be of practical use. In all of the following tables the "Mean" column shows the mean and "SD" the standard deviation of the posterior density while the "ML" column shows the maximum likelihood estimates. The numbers themselves are coded as xy  x × 10y.
+We will report only estimates of the model with  = 50 and a = 0.35 for small and large measurement errors. The data is generated with a very accurate solution with integration and solution approximation level 5 and a function iteration tolerance of 1E - 10. The approximation error is around 1E - 10.
+Table 7 shows estimations with small measurement errors. The solution and integration Smolyak levels are set to 4 for the rational expectations and the filter integrals. On the left side we report the estimates obtained by the Kalman filter and on the right side we have the estimates from the Smolyak Kalman filter. The likelihood value for the Kalman filter is -54,201 at the true parameters. The minimal and maximal likelihoods obtained during the Metropolis-Hastings sampling after convergence are 1077 and 1098, respectively. The values for the Smolyak Kalman filter are 1197 at the true parameters, 1185 at minimum and 1200 at maximum. The estimates clearly indicate the superior performance of the nonlinear filter. While the mean of the nonlinear posterior estimates and the maximum likelihood values are close to the true parameters of the data generating process, the Kalman filter shows clear biases. The nonlinear filter has problems to accurately estimate the parameter  which is biased and exhibits a large standard deviation of the posterior. The measurement error standard deviations of output and investment are hardly identified with large standard errors 4.0-4 and 2.8-4 of the same magnitude as the estimates themselves. The standard deviation of the labor measurement error is estimated more accurately. Figure 3 shows the posterior density estimated by the Smolyak Kalman filter. Black vertical bars indicate the true parameter values.
+Table 8 shows on the left side estimates with solution, rational expectations
+40
+
+Table 7: Kalman and Smolyak Kalman Filter, Small Errors
+
+True Mean SD
+
+ML Mean SD
+
+ML
+
+ 3.57-1  9.90-1  4.00-1  9.50-1  2.00-2  5.00+1 a 3.50-2
+y 1.58-4 i 8.66-4 l 1.10-3
+
+3.496-1 9.957-1 3.839-1 9.641-1 1.796-2 1.946+1 3.716-2
+8.521-4 1.996-3 1.438-3
+
+1.9-3 5.5-4 5.1-3 3.0-3 1.2-3 2.7±0 2.7-3
+7.0-4 3.4-4 1.1-4
+
+3.487-1 9.960-1 3.815-1 9.659-1 1.737-2 1.784+1 3.798-2
+1.730-4 2.030-3 1.395-3
+
+3.569-1 9.906-1 4.003-1 9.506-1 1.957-2 5.255+1 3.604-2
+8.724-4 4.981-4 1.199-3
+
+2.6-3 4.4-3 6.7-3 1.6-3 5.3-4 7.6±0 1.7-3
+4.0-4 2.8-4 8.4-5
+
+3.572-1 9.933-1 4.010-1 9.523-1 1.934-2 4.447+1 3.704-2
+1.061-3 4.057-4 1.168-3
+
+Table 8: Smolyak Kalman Filters, Small Errors
+
+True Mean SD
+
+ML Mean SD
+
+ML
+
+ 3.57-1  9.90-1  4.00-1  9.50-1  2.00-2  5.00+1 a 3.50-2
+y 1.58-4 i 8.66-4 l 1.10-3
+
+3.586-1 9.914-1 4.047-1 9.501-1 1.996-2 5.516+1 3.700-2
+8.012-4 5.291-4 1.194-3
+
+2.6-3 4.7-3 6.7-3 1.9-3 6.1-4 1.1+1 1.8-3
+4.1-4 2.8-4 8.3-5
+
+3.596-1 9.948-1 4.074-1 9.513-1 2.004-2 4.690+1 3.790-2
+1.080-3 3.087-4 1.160-3
+
+3.436-1 9.529-1 3.641-1 9.552-1 1.936-2 6.708+1 3.802-2
+1.551-3 6.005-4 1.211-3
+
+2.4-3 7.9-3 6.8-3 1.2-3 7.4-4 8.3±0 2.6-3
+5.1-4 4.0-4 9.5-5
+
+3.430-1 9.608-1 3.625-1 9.559-1 1.889-2 5.901+1 3.821-2
+1.833-3 4.822-5 1.204-3
+
+Table 9: Smolyak Sum and Smolyak Particle Filters, Small Errors
+
+True Mean SD
+
+ML Mean SD
+
+ML
+
+ 3.57-1  9.90-1  4.00-1  9.50-1  2.00-2  5.00+1 a 3.50-2
+y 1.58-4 i 8.66-4 l 1.10-3
+
+3.593-1 9.927-1 4.063-1 9.505-1 2.011-2 5.372+1 3.647-2
+9.368-4 4.941-4 1.191-3
+
+2.0-3 4.5-3 5.1-3 2.4-3 6.3-4 1.5+1 1.9-3
+3.3-4 2.6-4 9.0-5
+
+3.611-1 9.968-1 4.112-1 9.513-1 2.043-2 4.463+1 3.765-2
+1.080-3 2.873-4 1.141-3
+
+3.560-1 9.870-1 3.978-1 9.503-1 1.973-2 5.467+1 3.619-2
+9.005-4 5.201-4 1.184-3
+
+3.7-3 6.8-3 9.9-3 1.5-3 6.7-4 6.9±0 1.8-3
+3.6-4 2.8-4 9.2-5
+
+3.607-1 9.952-1 4.103-1 9.498-1 2.047-2 5.244+1 3.704-2
+1.124-3 3.638-4 1.119-3
+
+41
+
+Table 10: Kalman and Extended Kalman Filters, Small Errors
+
+True Mean SD
+
+ML Mean SD
+
+ML
+
+ 3.57-1  9.90-1  4.00-1  9.50-1  2.00-2  5.00+1 a 3.50-2
+y 1.58-4 i 8.66-4 l 1.10-3
+
+3.496-1 9.957-1 3.839-1 9.641-1 1.796-2 1.946+1 3.716-2
+8.521-4 1.996-3 1.438-3
+
+1.9-3 5.5-4 5.1-3 3.0-3 1.2-3 2.7±0 2.7-3
+7.0-4 3.4-4 1.1-4
+
+3.487-1 9.960-1 3.815-1 9.659-1 1.737-2 1.784+1 3.798-2
+1.730-4 2.030-3 1.395-3
+
+3.526-1 9.950-1 3.890-1 9.631-1 1.817-2 2.045+1 3.517-2
+8.735-4 1.673-3 1.448-3
+
+1.6-3 2.8-4 4.2-3 1.0-3 8.0-4 1.5±0 2.2-3
+6.7-4 3.0-4 1.0-4
+
+3.515-1 9.950-1 3.861-1 9.633-1 1.773-2 1.982+1 3.408-2
+1.044-5 1.844-3 1.411-3
+
+Table 11: Smolyak Sum and Smolyak Particle Filters, Large Errors
+
+True Mean SD
+
+ML Mean SD
+
+ML
+
+ 3.57-1  9.90-1  4.00-1  9.50-1  2.00-2  5.00+1 a 3.50-2
+y 8.75-3 i 2.33-3 l 1.56-3
+
+3.562-1 9.873-1 3.979-1 9.437-1 2.038-2 5.719+1 3.357-2
+1.680-2 4.969-3 2.873-3
+
+5.2-3 7.7-3 1.4-2 8.4-3 2.2-3 1.9+1 2.7-3
+2.1-3 2.5-3 2.1-4
+
+3.572-1 9.822-1 4.007-1 9.400-1 2.053-2 8.012+1 3.303-2
+1.597-2 5.671-3 2.700-3
+
+3.543-1 9.864-1 3.928-1 9.472-1 1.966-2 5.403+1 3.385-2
+1.696-2 4.726-3 2.882-3
+
+6.8-3 8.6-3 1.8-2 8.9-3 3.0-3 2.0+1 2.4-3
+2.1-3 2.4-3 2.1-4
+
+3.575-1 9.897-1 4.016-1 9.444-1 2.085-2 4.873+1 3.422-2
+1.745-2 5.044-3 2.888-3
+
+Table 12: Smolyak Sum Filters, Large Errors
+
+True Mean SD
+
+ML Mean SD
+
+ML
+
+ 3.57-1  9.90-1  4.00-1  9.50-1  2.00-2  5.00+1 a 3.50-2
+y 8.75-3 i 2.33-3 l 1.56-3
+
+3.570-1 9.885-1 3.998-1 9.450-1 2.023-2 6.060+1 3.364-2
+1.671-2 5.027-3 2.878-3
+
+5.9-3 7.4-3 1.5-2 8.5-3 2.9-3 2.0+1 2.3-3
+2.2-3 2.6-3 2.2-4
+
+3.553-1 9.845-1 3.954-1 9.450-1 1.945-2 7.046+1 3.345-2
+1.742-2 3.332-3 2.951-3
+
+3.558-1 9.873-1 3.966-1 9.451-1 2.014-2 5.777+1 3.373-2
+1.738-2 4.393-3 2.872-3
+
+6.6-3 6.8-3 1.7-2 9.3-3 3.1-3 1.9+1 2.5-3
+2.0-3 2.5-3 2.1-4
+
+3.551-1 9.813-1 3.947-1 9.436-1 2.060-2 6.039+1 3.283-2
+1.739-2 4.414-3 2.866-3
+
+42
+
+Table 13: Kalman Filter, Linear Model, Small Errors
+
+True Mean SD
+
+ML Mean SD
+
+ML
+
+ 3.57-1  9.90-1  4.00-1  9.50-1  2.00-2  5.00+1 a 3.50-2
+y 1.58-4 i 8.66-4 l 1.10-3
+
+3.615-1 9.885-1 4.125-1 9.451-1 2.267-2 6.086+1 3.260-2
+8.753-4 5.518-4 1.145-3
+
+3.0-3 1.5-3 7.8-3 5.0-3 1.8-3 2.0+1 2.2-3
+4.1-4 2.8-4 8.5-5
+
+3.583-1 9.903-1 4.040-1 9.509-1 2.063-2 3.786+1 3.155-2
+2.369-4 8.196-4 1.095-3
+
+3.615-1 9.885-1 4.125-1 9.451-1 2.267-2 6.086+1 3.260-2
+8.753-4 5.518-4 1.145-3
+
+3.0-3 1.5-3 7.8-3 5.0-3 1.8-3 2.0+1 2.2-3
+4.1-4 2.8-4 8.5-5
+
+3.583-1 9.903-1 4.040-1 9.509-1 2.063-2 3.786+1 3.155-2
+2.369-4 8.196-4 1.095-3
+
+Table 14: Poor identification of 
+
+      a y i l
+Smolyak Kalman Particle
+
+Smallest  True Values Changes
+
+3.581-1
+
+3.570-1
+
+9.964-1
+
+9.900-1
+
+4.028-1
+
+4.000-1
+
+9.552-1
+
+9.500-1
+
+1.911-2
+
+2.000-2
+
+3.188+1
+
+3.188+1
+
+3.919-2
+
+3.500-2
+
+1.149-3
+
+1.580-4
+
+3.173-4
+
+8.660-4
+
+1.260-3
+
+1.100-3
+
+Log Likelihood
+
+3.570-1 9.964-1 4.000-1 9.552-1 1.911-2 3.188+1 3.500-2 1.580-4 8.660-4 1.100-3
+
+1193
+
+-8167
+
+1164
+
+1189
+
+-10761
+
+1159
+
+43
+
+Figure 3: Parameter Posterior, Smolyak Kalman Filter
+
+ 0.04
+
+0.03
+
+0.02
+
+0.01
+
+0 0.345 0.35 0.355 0.36 0.365
+ 0.04
+
+0.03
+
+0.02
+
+0.01
+
+0 0.37 0.38
+0.05 0.04 0.03 0.02 0.01
+0 0.018
+0.06
+
+0.39 0.4 
+
+0.019
+
+0.02
+
+a
+
+0.41 0.42 0.021
+
+0.04
+
+0.02
+
+0 0.03 0.032 0.034 0.036 0.038 0.04 0.042 0.044
+
+0.03
+
+i
+
+0.02
+
+0.01
+
+0 0 0.2 0.4 0.6 0.8 1 1.2 x 10-3
+
+ 0.04
+0.03
+0.02
+0.01
+0 0.975 0.98 0.985 0.99 0.995 1 1.005
+ 0.06
+
+0.04
+
+0.02
+
+0 0.94
+0.05 0.04 0.03 0.02 0.01
+0 30
+0.04 0.03 0.02 0.01
+0 0
+0.06
+
+0.945 0.95 0.955 0.96 0.965 
+40 50 60 70 80 90 y
+0.5 1 1.5 2 x 10-3
+l
+
+0.04
+
+0.02
+
+0 0.9 1 1.1 1.2 1.3 1.4 1.5
+x 10-3
+
+44
+
+Table 15: Likelihood Slice at y
+
+y
+3.78-04 5.67-04 7.56-04 9.45-04 1.13-03 1.32-03 1.51-03 1.70-03
+
+Particle 1,169 1,172 1,174 1,177 1,175 1,177 1,175 1,171
+
+Smolyak Kalman 1,170 1,171 1,172 1,174 1,172 1,171 1,169 1,167
+
+Table 16: Marginal Likelihood
+
+Small Measurement Errors Smolyak Kalman versus
+p Kalman Smolyak Sum Smolyak Particle 0.1 104.5 -1.3 -2.1 0.5 104.0 -1.4 -2.5 0.9 104.2 -1.1 -1.9
+
+Large Measurement Errors
+
+Smolyak Kalman versus
+
+p Smolyak Sum Smolyak Particle
+
+0.1 0.4
+
+0.4
+
+0.5 0.3
+
+0.3
+
+0.9 0.5
+
+0.2
+
+45
+
+and filter integration level 3. The results hardly change compared to the more accurate nonlinear solution and filter in the previous table. We do not report results of the estimates of a solution with level 3 and the filter with level 2 since they hardly differ. On the right hand side of the table we report the estimates with solution and filter level 2. Here we see clear biases and can conclude that the filter integration levels 2 and 3 imply similar results but a solution level of 2 is not sufficient for an accurate estimation. The log likelihood values for the accurate Smolyak Kalman filter are 1169 at the true parameters, 1186 at minimum and 1201 at maximum. The respective values for the other filters are -6546, 1141 and 1160.
+Table 9 shows the other two nonlinear filters. On the left side we have the Smolyak sum filter with the solution and the rational expectation approximations at level 3, level 2 for the Smolyak Kalman filter and 5 summands to approximate the densities involved. On the right hand side we see the Smolyak particle filter with the same levels and 500 particles. Both filters deliver comparable estimates. The likelihood values are 1169 at the true parameters for the sum filter, 1185 at minimum and 1201 at maximum. The numbers for the Smolyak particle filter are 1172 at the true parameters, 1185 at minimum and 1203 at maximum.
+The result of the nonlinear estimation for the data with small measurement errors is that we obtain accurate estimates for all parameters beside  and the measurement error standard deviations of output and investment. The estimates are essentially the same for all our nonlinear filters.
+In table 10 we present the comparison between the Kalman filter estimation and an estimation with the extended Kalman filter based on a solution with level 3. The estimates are similar, especially the ones of  .
+The next estimations process data generated with the large set of measurement errors.
+The first of these estimations is in table 11 and compares the Smolyak Kalman filter with the solution and integration level 4 and the Smolyak particle filter with the solution level 3, filter level 2 and with 500 particles. Both results are again very similar and differ only in the maximum likelihood estimates of  . Given the high inaccuracy for this parameter, indicated by the high standard deviation of the posterior, this difference is not very surprising. Compared to the estimation with small measurement errors we observe that the means of the posterior and the maximum likelihood estimates are similar and hardly deteriorate with large measurement errors. The difference is that of course the standard deviations of the posterior substantially increase for most estimates. The likelihood values for the Smolyak Kalman filter are 851 at the true parameters, 832 and 853 at minimum and maximum, respectively. For the Smolyak particle filter these numbers are 851, 841 and 852. Again
+46
+
+the measurement shocks are hardly identified and the parameter  is badly estimated as well.
+The last nonlinear estimation we report in table 12 tests whether increasing the number of summands in the Smolyak sum filter improves the estimation. Both estimations are run with solution level 3 and level 2 for the filters. On the left side we see the results of the filter with 5 summands while the right side shows the results from the filter with 20 summands. The results are very similar and the only difference is again the maximum likelihood estimates of  which can be attributed to the high inaccuracy of the estimator. The likelihood values for the Smolyak sum filter with 5 summands are 851, 838, 853 and 851, 837, 853 for 20 summands.
+We finally investigate whether the problem we encounter with the estimation of  is due to the errors of the approximations or a property of the model. Table 13 shows the first approach to this question where we estimate the parameters with the Kalman filter from the data generated with the linearized model. The estimation is therefore not confounded by any approximation error. The estimates for  are of similar inaccuracy as for the nonlinear estimations. Moreover, we can see that the standard deviations of the output and investment measurement errors are poorly estimated as well.
+A more convincing point is made in table 14. It also demonstrates that peaked likelihood slices are not necessarily informative as regards the standard deviation of a parameter estimate, since the likelihood slices seem to be properly peaked for  at the true parameter values in the left plot of figure 1. The left column "Smallest  " shows the figures with the smallest  of the posterior sequences. It exhibits a usual likelihood value of 1193 for this estimation obtained by the Smolyak Kalman filter based on the third level solution and integrations (1197 at true parameters, 1185 at minimum, 1200 at maximum). The particle filter with 40,000 particles delivers a similar value. If we evaluate the likelihood at the "True Values" except for  , where we use the smallest value of 31.88, the log likelihood collapses. If we in addition to  change the parameters ,  and  towards the ones we obtained together with the smallest  , the likelihood value recovers. This is done in column "Change" where the bold faced numbers show the changed parameters compared to the true values. Further changes of the parameters towards the "Smallest  " parametrization bring us back to the likelihood of 1193 and 1189.
+We conclude that the poor estimates of  are not a problem of our nonlinear filters but a feature of the model and thanks to good global search properties of our parallel Metropolis-Hastings algorithm we are able to find these parameters.
+A substantial change of the parameter y from 1.58-4 to 1.149-3 in the
+47
+
+parameterization of column "Changes" does not very much influence the likelihood value. It changes from 1164 to 1169 for the Smolyak Kalman filter and from 1160 to 1169 for the particle filter. In table 15 we finally look at the likelihood slice for y at the true parameters. The y values are between the minimal and maximal values of the posterior sample. The variations between 1,167 and 1,174 for the Smolyak Kalman filter and 1,169 and 1,177 for the particle filter indicate a flat likelihood, in the sense that this variation is around the variation of the log likelihood we usually see during the Metropolis-Hastings sampling. We ascribe the problem of the measurement errors to the lack of proper identification of this model and the ad hoc solution by adding some measurement errors. The identification problem is also discussed by Ferna´ndez-Villaverde and Rubio-Ram´irez (2006), where they obtain, however, more accurate estimates.
+The last calculation is the marginal likelihood in table 16. The upper part shows the results for the estimations on the data with small measurement errors. The numbers are the differences of the marginal log likelihoods between the Smolyak Kalman filter with solution and filter level 4. A positive number is in favor of the Smolyak Kalman filter and a negative one indicates superiority of the other filters. The upper three columns show that the Smolyak Kalman filter clearly outperforms the Kalman filter (104.5, 104.0, 104.2). The Smolyak sum, calculated with solution level 3 and 5 summands with integration level 2, outperforms the Smolyak Kalman filter. Finally, we have the Smolyak particle filter with solution level 3, integration level 2 and 500 particles. Here, we see a further improvement in the marginal likelihood compared to the Smolyak Kalman filter.
+The lower part of the table shows that in case of large measurement errors the performances of the filters are very similar.
+5 Conclusion
+The Smolyak operator is highly effective for the approximation and integration of high dimensional standard growth models. We have demonstrated that global approximations of the model solution beyond small models with around 6 states are possible and that models with around 20 states can be solved in reasonable time. Moreover, the solution algorithm can be parallelized.
+The Smolyak operator can also be used for numerical integration which is essential in many econometric applications. The Smolyak Kalman filter is very fast and can be used if the posterior and prediction densities are reasonably approximated by a Gaussian density. If not, they can be approximated
+48
+
+by a Gaussian sum as in the Smolyak sum filter. Both filters are very fast and the Smolyak sum filter can even be parallelized. The particle filter is of little use in our implementation in combination with a Chebyshev approximation where the interpolation is costly and therefore results in very costly likelihood evaluations. The Smolyak particle is slower than both deterministic filters but much faster than the particle filter. It improves the plain vanilla particle filter so that measurement errors do not need to be present.
+All these results indicate that deterministic filters research is an interesting road to go in nonlinear filter design. Some approaches were already developed in the seventies but were abandoned probably due to the lack of computer power and useful deterministic integration algorithms. Both are now available and a revival of these kinds of filters as an alternative to the slow Monte-Carlo based filters are worth to be considered. We therefore suggest to further investigate deterministic filtering schemes.
+The parallelized Metropolis-Hastings algorithm improves the global maximization properties of the serial algorithm. We were able to discover that a small  can be compensated in terms of the log likelihood with a larger  and  and a smaller . It is also an improvement that extensive training sequences and runs for robustness checks are not needed. The mixing feature simplifies the choice of the innovation variance. The parallel sequences provide an unbiased convergence diagnostic test and allow to implement the algorithms on parallel computers. A major improvement for the handling of the Metropolis-Hastings algorithm is the interactive feature of JBendge which allows a very comfortable estimation.
+
+A Linearization
+
+The deterministic steady state s¯, x¯ is defined by
+
+0 = f (s¯, x¯, h(s¯, x¯, 0, s¯, x¯)) s¯ = g(s¯, x¯, 0).
+
+For the one country model with states a and k and labor policy l the steady states are
+
+a¯ = 0
+
+k¯
+
+=
+
+-
+
+(
+
+-
+
+1)
+
+1 1-
+
+
+
+- + 
+
+1 1-
+
+((
+
+-
+
+1)
+
++  -  -
+
++
+
+1)
+
+ -1
+
+ + 1
+
+
+
+¯l =
+
+
+
+( - 1)(( - 1) + 1) + (( - 1) -  + 1)
+
+-
+
+1
+
+49
+
+The linearized model is given by
+
+I0 -fzhs -fzhx
+
+ds dx
+
+=
+
+gs gx fs + fzhs fx + fzhx
+
+ds dx
+
+where ds = s - s¯ and dx = x - x¯. Primes denote the next period variables {s , x } = {st+1, xt+1}. The subscripted functions f , g and h are Jacobians with respect to the variables in the subscript evaluated at the steady state. The left matrices on both sides of the equation can be decomposed by the generalized Schur or QZ decomposition to arrive at the following equation.
+
+S11 S12 0 S22
+
+Z1H1 Z2H1 Z1H2 Z2H2
+
+P CP
+
+=
+
+T11 T12 0 T22
+
+Z1H1 Z2H1 Z1H2 Z2H2
+
+I C
+
+This equation can then be solved for the linear policy function defined by C = Z21Z1-11 and the state transition matrix P = Z11S1-11T11Z1-11, as described in Klein (2000). The linear solution of the model is finally given by
+
+xt = x¯ + C(st - s¯) st+1 = s¯ + P (st - s¯).
+
+B Smolyak Example
+
+The following example is given in order to clarify the difficult notation of the
+
+Smolyak algorithm.
+
+The starting point is the index set. For a d = 2 dimensional approximation
+
+at level q = 4 the index set is given by all 2-dimensional vectors whose
+
+elements sum is between q - d + 1 = 3 and q = 4. These vectors are given in
+
+table (17) in the two left columns captioned by "Index". The two columns
+
+to the right, captioned by "CC" show the Clenshaw-Curtis function values of
+
+the index elements. For each index vector we build a tensor product shown
+
+in column "Tensor". For example, the first CC vector [3, 1] means that we
+
+have to combine the univariate Chebyshev polynomial in the first dimension
+
+with degrees from 0 to 2 with the Chebyshev polynomials for degrees from 0
+
+to 0. This gives the tensor products [[0, 0],[1, 0],[2, 0]] representing the three
+
+bivariate polynomials: [b0(s1)b0(s2), b1(s1)b0(s2), b2(s1)b0(s2)] where s1 and s2 are values in the first and the second dimension, respectively. The column captioned by "Smolyak" finally gives the degrees of non-repeating bivariate
+
+polynomial combinations which are shown in the last column. This repetitive
+
+pattern is captured by the binomial coefficient term (-1)q-|i|
+
+d-1 q-|i|
+
+.
+
+Thus, the
+
+Smolyak approximation A4,2 is characterized by thirteen coefficients c1, ..., c13
+
+50
+
+and needs function evaluations at thirteen grid points to identify them in the
+
+2-dimensional space. The approximating polynomial is finally given as the
+
+sum of the last column: x(s1, s2) = b0(s1)b0(s2)c1 + b1(s1)b0(s2)c2 + ... + b0(s1)b4(s2)c13.
+Table 18 shows how the grid is constructed. The operation is similar to
+
+the operations on the basis functions. Apparently, the "Index" and "CC"
+
+columns are identical in both tables. The 1-dimensional gridsare [0] for a one point grid, [-1, 0, 1] for three points and [-1, -1/ 2, 0, 1/ 2, 1] for five points.
+
+The basis matrix can now be calculated using both tables. The Smolyak
+
+column of table 17 represents the rows of the basis matrix and each row is
+
+evaluated at the vectors of the rows of the Smolyak column of table 18. The inverted 13 × 13 basis matrix identifies thirteen coefficients in
+
+ 
+
+
+
+c1 c2 ...
+
+ = 
+
+b0(-1)b0(0) b0(0)b0(0)
+... 
+
+... ... ...
+
+b0(-1)b4(0) b0(0)b4(0)
+... 
+
+-1   
+
+f (-1, 0) f (0, 0)
+... 
+
+ .
+
+c13
+
+b0(0)b0(1/ 2) ... b0(0)b4(1/ 2)
+
+f (0, 1/ 2)
+
+51
+
+Table 17: Smolyak Polynomial Aq,d for d = 2 and q = 4
+Index CC Tensor Smolyak Polynomial i1 i2 mi1 mi2 j1 j2 j1 j2 2 1 3 1 0 0 0 0 b0(s1)b0(s2)c1
+1 0 1 0 b1(s1)b0(s2)c2 2 0 2 0 b2(s1)b0(s2)c3 12 1 3 0 0 0 1 0 1 b0(s1)b1(s2)c4 0 2 0 2 b0(s1)b2(s2)c5 31 5 1 0 0 10 20 3 0 3 0 b3(s1)b0(s2)c6 4 0 4 0 b4(s1)b0(s2)c7 22 3 3 0 0 01 02 10 1 1 1 1 b1(s1)b1(s2)c8 1 2 1 2 b1(s1)b2(s2)c9 20 2 1 2 1 b2(s1)b1(s2)c10 2 2 2 2 b2(s1)b2(s2)c11 13 5 1 0 0 01 02 0 3 0 3 b0(s1)b3(s2)c12 0 4 0 4 b0(s1)b4(s2)c13
+52
+
+Table 18: Smolyak Grid Aq,d for d = 2 and q = 4
+
+Index CC
+
+Tensor
+
+Smolyak
+
+i1 i2 mi1 mi2 j1 j2 j1 j2
+
+21 3 1
+
+-1
+
+0 -1
+
+0
+
+0 00 0
+
+1 01 0
+
+12 1 3
+
+0 -1 0
+
+-1
+
+00
+
+0 10 1
+
+31 5
+
+1 -1 -1/ 2
+
+0 0 -1/ 2
+
+0
+
+0 1/ 2
+
+0 0 1/ 2
+
+0
+
+10
+
+22 3 3
+
+-1 -1 -1 -1
+
+-1 0
+
+-1
+
+1 -1
+
+1
+
+0 -1
+
+00
+
+01
+
+1 -1 1
+
+-1
+
+10
+
+1 11 1
+
+13 5 1
+
+0 -1 0 -1/ 2
+
+ 0 -1/ 2
+
+0 0 0 1/ 2
+
+0
+
+ 1/ 2
+
+01
+
+53
+
+References
+Alsbach, D. L., and H. W. Sorenson (1972): "Nonlinear Bayesian Estimation Using Gaussian Sum Approximations," IEEE Transactions on Automatic Control, Ac-17(4).
+Amisano, G., and O. Tristani (2007): "Euro Area Inflation Persistence in an Estimated Nonlinear DSGE Model," Discussion Paper 6373, C.E.P.R.
+Anderson, B. D. O., and J. B. Moore (1979): Optimal Filtering. Dover Publications.
+Anderson, G., A. Levin, and E. Swanson (2005): "Higher-Order Perturbation Solutions to Dynamic, Discrete-Time Rational Expectations Models," .
+Arulampalam, S., S. Maskell, N. Gordon, and T. Clapp (2002): "A Tutorial on Particle Filters for On-line Non-linear/Non-Gaussian Bayesian Tracking," IEEE Transactions on Signal Processing, 50(2), 174­188.
+Aruoba, B. S., J. Ferna´ndez-Villaverde, and J. F. RubioRam´irez (2006): "Comparing Solution Methods for Dynamic Equilibrium Economies," Journal of Economic Dynamics and Control, 30, 2477­2508.
+Berger, J., and R. Wolpert (1988): The Likelihood Principle. Hayward, California, 2nd edn., Institute of Mathematical Statistics.
+Berzuini, C., N. G. Best, W. R. Gilks, and C. Larizza (1997): "Dynamic Conditional Independence Models and Markov Chain Monte Carlo Methods," Journal of the American Statistical Association, 92(440), 1403­ 1412.
+Brooks, S. P., and A. Gelman (1998): "General methods for monitoring convergence of iterative simulations.," Journal of Computational & Graphical Statistics, 7(4), 434­455.
+Bungartz, H.-J., and M. Griebel (2004): "Sparse grids," Acta Numerica, 13, 1­123.
+Chib, S., and E. Greenberg (1995): "Understanding the MetropolisHastings Algorithm," The American Statistician, 49(4), 327­335.
+Doucet, A., N. de Freitas, and N. Gordon (eds.) (2001): Sequential Monte Carlo Methods in Practice. Springer, New York.
+54
+
+Ferna´ndez-Villaverde, J., and J. F. Rubio-Ram´irez (2004): "Comparing Dynamic Equilibrium Models to Data: A Bayesian Approach," Journal of Econometrics, 123, 153­187.
+(2005): "Estimating Dynamic Equilibrium Economies: Linear versus Nonlinear Likelihood," Journal of Applied Econometrics, 20, 891­910.
+(2006): "Estimating Macroeconomic Models: A Likelihood Approach," Discussion Paper 5513, CEPR.
+Gaspar, J., and K. L. Judd (2005): "Solving Large-Scale RationalExpectations Models," Macroeconomic Dynamics, 1(01), 45­75.
+Gelfand, A., and D. Dey (1994): "Bayesian Model Choice: Asymptotics and Exact Calculations," Journal of the Royal Statistical Society, Series B, 56, 501­514.
+Gelman, A., and D. B. Rubin (1992): "Inference from Iterative Simulation Using Multiple Sequences," Statistical Science, 7(4), 457­472.
+Genz, A., and C. Keister (1996): "Fully symmetric interpolatory rules for multiple integrals over infinite regions with Gaussian weights," Journal of Computational and Applied Mathematics, 71, 299­309.
+Geweke, J. (1999): "Using Simulation Methods for Bayesian Econometric Models: Inference, Development, and Communication," Econometric Reviews, 18, 1­126.
+(2005): Contemporary Bayesian Econometrics and Statistics. John Wiley & Sons, New York.
+Heiss, F., and V. Winschel (2008): "Likelihood Approximation by Numerical Integration on Sparse Grids," .
+Ionides, E., C. Breto´, and A. King (2006): "Inference for nonlinear dynamical systems," Proceedings of the National Academy of Sciences of the United States of America, PNAS, 103(49), 18438­18443.
+Judd, K. (1992): "Projection methods in economics," Journal of Economic Theory, 58, 410­452.
+Judd, K. L. (1998): Numerical Methods in Economics. MIT Press, Cambridge, Mass.
+55
+
+Judd, K. L., and S.-M. Guu (1997): "Asymptotic methods for aggregate growth models," Journal of Economic Dynamics and Control, 21, 1025­ 1042.
+Judd, K. L., and H.-H. Jin (2002): "Perturbation Methods for General Dynamic Stochastic Models," Discussion paper, Hoover Institution, Stanford.
+Juillard, M. (1996): "Dynare: A program for the resolution and simulation of dynamic models with forward variables through the use of a relaxation algorithm," Discussion paper, CEPREMAP.
+Julier, S. J., and J. K. Uhlmann (1997): "A new extension of the Kalman filter to nonlinear systems," in The proceedings of AeroSense: The 11th International Symposium on Aerospace/Defence Sensing, Simulation and Controls, Orlando, Florida.
+Kalman, R. E. (1960): "A New Approach to Linear Filtering and Prediction Problems," Transactions of the ASME­Journal of Basic Engineering, 82(Series D), 35­45.
+Kim, J., and S. Kim (2003): "Spurious welfare reversals in international business cycle models," Journal of International Economics, 60(2), 471­ 500.
+Klein, P. (2000): "Using the generalized Schur form to solve a multivariate linear rational expectations model," Journal of Economic Dynamics and Control, 24(10), 1405­1423.
+Kotecha, J., and P. Djuric´ (2003): "Gaussian Sum Particle Filter," IEEE Transactions on Signal Processing, 51, 2602­2612.
+Kru¨ger, D., and F. Ku¨bler (2004): "Computing equilibrium in OLG models with stochastic production," Journal of Economic Dynamics and Control, 28, 1411­1436.
+Landon-Lane, J. S. (1998): "Bayesian Comparison of Dynamic Macroeconomic Models," Ph.D. thesis, University of Minnesota.
+Miranda, M. J., and P. L. Fackler (2002): Applied Computational Economics and Finance. MIT Press, Cambridge MA.
+Schmitt-Grohe´, S., and M. Uribe (2004): "Solving Dynamic General Equilibrium Models Using a Second-Order Approximation to the Policy Function," Journal of Economic Dynamics and Control, 28, 755­775.
+56
+
+Smolyak, S. (1963): "Quadrature and interpolation formulas for tensor products of certain classes of functions," Soviet Math.Dokl, 4, 240­243.
+Storn, R., and K. Price (1997): "Differential Evolution - a simple and efficient heuristic for global optimization over continuous spaces," Journal of Global Optimisation, pp. 341­359.
+ter Braak, C. J. (2006): "A Markov Chain Monte Carlo version of the genetic algorithm Differential Evolution: easy Bayesian computing for real parameter spaces," Statistics and Computing, 16(3), 239­249.
+van der Merwe, R., A. Doucet, N. de Freitas, and E. Wan (2000): "The Unscented Particle Filter," Advances in Neural Information Processing Systems, 13, 584­590.
+57
+
+SFB 649 Discussion Paper Series 2008
+
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001 "Testing Monotonicity of Pricing Kernels" by Yuri Golubev, Wolfgang
+
+Härdle and Roman Timonfeev, January 2008.
+
+002 "Adaptive pointwise estimation in time-inhomogeneous time-series
+
+models" by Pavel Cizek, Wolfgang Härdle and Vladimir Spokoiny,
+
+January 2008.
+
+003 "The Bayesian Additive Classification Tree Applied to Credit Risk
+
+Modelling" by Junni L. Zhang and Wolfgang Härdle, January 2008.
+
+004 "Independent Component Analysis Via Copula Techniques" by Ray-Bing
+
+Chen, Meihui Guo, Wolfgang Härdle and Shih-Feng
+
+Huang, January
+
+2008.
+
+005 "The Default Risk of Firms Examined with Smooth Support Vector
+
+Machines" by Wolfgang Härdle, Yuh-Jye Lee, Dorothea Schäfer
+
+and Yi-Ren Yeh, January 2008.
+
+006 "Value-at-Risk and Expected Shortfall when there is long range
+
+dependence" by Wolfgang Härdle and Julius Mungo, Januray 2008.
+
+007 "A Consistent Nonparametric Test for Causality in Quantile" by
+
+Kiho Jeong and Wolfgang Härdle, January 2008.
+
+008 "Do Legal Standards Affect Ethical Concerns of Consumers?" by Dirk
+
+Engelmann and Dorothea Kübler, January 2008.
+
+009 "Recursive Portfolio Selection with Decision Trees" by Anton Andriyashin,
+
+Wolfgang Härdle and Roman Timofeev, January 2008.
+
+010 "Do Public Banks have a Competitive Advantage?" by Astrid Matthey,
+
+January 2008.
+
+011 "Don't aim too high: the potential costs of high aspirations" by Astrid
+
+Matthey and Nadja Dwenger, January 2008.
+
+012 "Visualizing exploratory factor analysis models" by Sigbert Klinke and
+
+Cornelia Wagner, January 2008.
+
+013 "House Prices and Replacement Cost: A Micro-Level Analysis" by Rainer
+
+Schulz and Axel Werwatz, January 2008.
+
+014 "Support Vector Regression Based GARCH Model with Application to
+
+Forecasting Volatility of Financial Returns" by Shiyi Chen, Kiho Jeong and
+
+Wolfgang Härdle, January 2008.
+
+015 "Structural Constant Conditional Correlation" by Enzo Weber, January
+
+2008.
+
+016 "Estimating Investment Equations in Imperfect Capital Markets" by Silke
+
+Hüttel, Oliver Mußhoff, Martin Odening and Nataliya Zinych, January
+
+2008.
+
+017 "Adaptive Forecasting of the EURIBOR Swap Term Structure" by Oliver
+
+Blaskowitz and Helmut Herwatz, January 2008.
+
+018 "Solving, Estimating and Selecting Nonlinear Dynamic Models without
+
+the Curse of Dimensionality" by Viktor Winschel and Markus Krätzig,
+
+February 2008.
+
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

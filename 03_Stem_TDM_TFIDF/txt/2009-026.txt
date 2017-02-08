@@ -1,0 +1,2513 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2009-026
+Regression methods for stochastic control problems and their
+convergence analysis
+Denis Belomestny* Anastasia Kolodko* John Schoenmakers*
+* Weierstrass Institute Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Regression methods for stochastic control problems and their convergence analysis
+Denis Belomestny1, , Anastasia Kolodko1, John Schoenmakers1 April 29, 2009
+
+Abstract
+In this paper we develop several regression algorithms for solving general stochastic optimal control problems via Monte Carlo. This type of algorithms is particularly useful for problems with a highdimensional state space and complex dependence structure of the underlying Markov process with respect to some control. The main idea behind the algorithms is to simulate a set of trajectories under some reference measure and to use the Bellman principle combined with fast methods for approximating conditional expectations and functional optimization. Theoretical properties of the presented algorithms are investigated and the convergence to the optimal solution is proved under some assumptions. Finally, the presented methods are applied in a numerical example of a high-dimensional controlled Bermudan basket option in a financial market with a large investor.
+Keywords: Optimal stochastic control; Regression methods; Convergence analysis.
+
+1 Introduction
+
+Modeling of optimal control is one of the most challenging areas in applied stochastics, particularly in finance. As typical real-world control problems, for example dynamic optimization problems in finance, are too complex to be treated analytically, effective generic computational algorithms are called for. Since the appearance of the ground-breaking articles Carriere (1996), Longstaff and Schwartz (2001), and Tsitsiklis and Van Roy (1999), regression based Monte Carlo methods emerged as an indispensable tool for solving high-dimensional stopping problems in the context of American style derivatives. From a mathematical point of view any optimal stopping
+
+1Weierstrass Institute for Applied Analysis and Stochastics, Mohrenstr.
+Berlin, Germany. belomest@wias-berlin.de. 2JEL Subject Classification: C15; C61. supported in part by the SFB 649 `Economic Risk'.
+
+39, 10117
+
+1
+
+problem can be seen as a particular case of a more general stochastic control problem. Optimal stochastic control problems appear in a natural way in many application areas. For instance in mathematical finance, problems such as portfolio optimization under market imperfections, optimal portfolio liquidation, super hedging, etc., do all come down to problems of stochastic optimal control. In fact, an active interplay between stochastic control and financial mathematics has been emerged in the last decades: While stochastic control has been a powerful tool for studying problems in finance on the one hand side, financial applications have been stimulating the development of new methods for optimal stopping and optimal control on the other hand, see, for example, besides the works mentioned above, Rogers (2002), Broadie and Glasserman (2004), Haugh and Kogan (2004), Ib´an~ez (2004), Meinshausen and Hambly (2004), Belomestny et al. (2006), Bender and Schoenmakers (2006), Belomestny et al. (2007), Kolodko and Schoenmakers (2006), Rogers (2007), and Carmona and Touzi (2008), and many others.
+As a canonical general approach for solving an optimal control problem one may consider all possible future evolutions of the process at each time that a control choice is to be made. This method is well developed and may be effective in some special cases, but for more general problems such as optimal control of a diffusion in high dimensions, this approach is impractical. Other recently developed methods for control problems include the Markov chain approximation method of Monoyios (2004), a maturity randomization approach of Bouchard, Karoui and Touzi (2005) and a Malliavin based Monte-Carlo approach of Hansen (2005) (see also Bouchard, Ekeland and Touzi (2004)). However, all these methods are tailored to some specific problems and it is not clear how to generalize them. In this paper we propose a generic Monte Carlo approach combined with fast approximation methods and methods of functional optimization which is applicable to any discrete-time controlled Markov processes. The main idea is to simulate a set of trajectories under some reference measure and then apply a dynamic programming formulation (Bellman principle) to compute recursively estimates for the optimal control process and the optimal stopping rule, where the fast approximation methods allow for computing conditional expectations without nested simulations. In particular we propose several regression procedures and prove for these procedures convergence of the value function estimations under some additional assumptions. Moreover, we present an example of a high-dimensional Bermudan basket option where the dynamics of the underlying are influenced by a large investor, and illustrate the numerical performance of the regression algorithms at this example.
+The outline of the paper is as follows. In Section 2 the basic stochastic setup is presented, some notations are introduced and the main problem is formulated. In Section 3 we introduce two kinds of regression methods for stochastic control problems: local regression methods and global regression
+2
+
+methods, which are discussed in Sections 3.1 and 3.7 respectively. The convergence analysis of the regression algorithms is done in Section 4. A method of constructing upper bounds is discussed in Section 5. Finally, the numerical example is studied in Section 6.
+
+2 Basic setup
+
+For our framework we adopt the discrete time setup as in Rogers (2007). On a filtered measurable probability space (, F), with F := (Fr)r=0,1,...,T , T  N+, we consider an adapted control process a :  × {0, ..., T - 1}  A, control for short, where (A, B) is a measurable state space. We assume a given set of admissible controls which is denoted by A. Given a control a = (a0, a1, ..., aT -1)  A, we consider a controlled Markov process X valued in some measurable space (S, S) and defined on a probability space (, F, Pa) with X0 = x0 a.s. and transition kernel of the following type,
+Pa(Xr+1  dy | Xr = x) = P ar (x, dy), 0  r < T.
+
+So, it is assumed that the distribution of Xr+1 conditional on Fr is governed by a (one-step) transition kernel P ar (Xr, dy) which is in turn controlled by ar. In this setting we may consider the general optimal control problem
+
+(2.1)
+
+T -1
+
+Y0 := sup Ea
+
+fr(Xr, ar) ,
+
+aA
+
+r=0
+
+for given functions fr, r = 0, . . . , T - 1. The optimization problem (2.1) contains the standard optimal stopping problem
+
+Y0 := sup E [g (X )] ,
+
+
+as a special case. Indeed, take Pa independent of a, fr(x, a) = gr(x)a, and A = Astop = a = 1{=0}, . . . , 1{=T } with  being F-stopping time taking values in the set {0, . . . , T }. Multiple stopping problems may be considered in a similar way by choosing a suitable A. In this article, however, we choose A to be the set of all adapted controls (as in Rogers (2007)), while keeping the standard optimal stopping problem as a special case. This leads to our central goal of solving the optimal control problem
+
+(2.2)
+
+ -1
+
+Y0 = sup Ea
+
+fr(Xr, ar) + g (X )
+
+aA,  T
+
+r=0
+
+for a given set of measurable functions fr : S × A  R, gr : S  R. For technical reasons fr and g are assumed to be bounded from below. To exclude trivialities we further assume that
+
+T -1
+
+sup Ea
+
+|fr(Xr, ar)| < , sup Ea[|gi(Xi)|] < , i = 0, . . . , T.
+
+aA
+
+r=0
+
+aA
+
+3
+
+The supremum in (2.2) is taken over a  A and all F-stopping times with values in a subset T  {0, . . . , T }.
+The optimal control problem (2.2) with T ={0, . . . , T } will be the main object of our study. Consider the process
+
+(2.3)
+
+ -1
+
+Yr = sup Ea
+
+fs(Xs, as) + g (X ) Fr ,
+
+aAr,  Tr
+
+s=r
+
+0  r  T,
+
+with Tr := {r, . . . , T } and Ar being the set of all adapted controls a :  × {r, . . . , T - 1}  A. Then there exists a vector h = (h0, . . . , hT ) of measurable functions on S, such that Yj = hj(Xj) and h satisfies
+
+(2.4)
+
+hr(x) = max [gr(x), (Lh)r (x)] , 0  r < T, hT (x) = gT (x),
+
+where L : h  Lh is a Bellman-type operator defined by
+
+(Lh)r (x) := sup [fr(x, a) + P ahr+1(x)]
+aA
+
+and P ahr+1(x) := P a(x, dy)hr+1(y).
+
+We now assume that there exists a reference measure P equivalent to Pa, such that
+P a(x, dy) = (x, y, a)P (x, dy), a  A,
+with P (x, dy) := P(Xr+1  dy | Xr = x) and the function (x, y, a) satisfying   0 and P (x, dy)(x, y, a)  1. Then for any nonnegative measurable function G : ST +1  R+ it holds
+
+(2.5)
+
+Ea[G(X)|Fj ] = E[G(X)j,T (a, X)|Fj ],
+
+where
+
+r-1
+j,r(a,y) := (yl, yl+1, al),
+l=j
+
+r = j + 1, . . . , T,
+
+y  ST +1.
+
+If G depends on X0, . . . , Xr only, we have for 0  j  r, Ea[G(X)|Fj ] = E[G(X)j,r(a, X)|Fj ].
+
+In particular, if G depends only on Xj+1 it holds
+
+(2.6)
+
+Ea[G(Xj+1)|Fj ] = E[G(Xj+1)(Xj , Xj+1, aj )|Fj ].
+
+4
+
+3 Regression methods for control problems
+The solution Y0 of the optimal control problem (2.2) can in principle be computed backwardly via the dynamic programming principle (2.4). However, if the space S is high-dimensional, an analytic computation of the conditional expectation
+Cr(x, a) := Ea[hr(Xr+1)|Xr = x] = E [(Xr, Xr+1, a)hr+1(Xr+1) | Xr = x] ,
+where henceforth for notational convenience h := h, is usually difficult, even if hr+1 is explicitly known. On the other hand, a straightforward backward construction of h using (2.4), by Monte Carlo simulation (under P) would lead to nested simulations where the degree of nesting increases with the number of exercise dates. In the context of optimal stopping problems, much research was focused on the development of fast methods to approximate Cr. We will show that these methods can be extended to a more general setting of optimal control problems.
+From now on we assume that S  Rd for some d > 0. Suppose that hr+1 is estimated by hr+1 and that we want to approximate hr via (2.4) and (2.5). Define
+
+hr(x) := max gr(x), sup fr(x, a) + P ahr+1(x)
+aA
+= max gr(x), sup fr(x, a) + E (Xr, Xr+1, a)hr+1(Xr+1) | Xr = x
+aA
+
+Let Xr(1), Xr(1+)1 , . . . , Xr(M), Xr(+M1)
+be a Monte Carlo sample from the joint distribution of (Xr, Xr+1) under P and suppose that, based on this Monte Carlo sample and the approximation hr+1 of hr+1, an estimate Cr,M (x, a) of the conditional expectation Cr(x, a) is constructed for all x  S and a  A. In this paper we consider a class of estimation methods with Cr,M being of the form
+
+(3.7)
+
+M
+
+Cr,M (x, a) =
+
+wm,M (x, XrM )(x, Xr(+m1), a)hr+1(Xr(m+1)),
+
+m=1
+
+where
+
+wm,M x, XrM = wm,M x, Xr(1), . . . , Xr(M)
+
+are some coefficients which are to be specified by the method under consideration. It turns out that this class of approximation methods is very general and contains local and global regression methods. We discuss these two types of method in the next sections.
+
+.
+
+5
+
+3.1 Algorithms based on local estimators
+By introducing
+
+dr(x, a) := (x, y, a)hr+1(y)pr(x, y) dy, pr(x) := pr(x, y)dy,
+SS
+with pr(x, y) being the joint density of (Xr, Xr+1) under P, we may write
+
+Cr(x, a) = dr(a, x)/pr(x).
+
+So it is natural to estimate Cr as a ratio of estimates for pr and dr, respec-
+tively. With this goal in mind we consider, for a given Borel measurable kernel function M (x, y) on Rd × Rd, the following estimators
+
+M
+
+pr,M (x) := M -1
+
+M (x, Xr(m)),
+
+m=1
+
+M
+
+dr,M (x, a) := M -1
+
+M (x, Xr(m))(x, Xr(+m1), a)hr+1(Xr(+m1)),
+
+m=1
+
+where x  Rd and a  A. Then we estimate Cr by
+
+(3.8)
+
+Cr,M (x, a)
+
+:=
+
+dr,M (x, a) pr,M (x)
+
+M
+=: wm,M (x, XrM )(x, Xr(m+1), a)hr+1(Xr(+m1))
+m=1
+
+with weight coefficients defined by
+
+wm,M (x, y) := wm,M (x, y1, y2, ...) :=
+
+M (x,
+
+M m =1
+
+M
+
+ym) (x, ym
+
+)
+
+.
+
+If pr,M = 0 we set Cr,M = 0. It is important to note that wm,M sum up to one. The name "local" comes from the fact that in most cases the function M (x, y) converges (in some sense) to a delta function (x - y) as M  . The class of local estimators is rather large and contains well known examples such as the Nadaraya-Watson and the k-nearest neighbors regression estimators. In recent years, local estimators have become popular in applied financial mathematics, mainly in the context of hedging and Greek estimation (see, e.g. Elie, Fermanian and Touzi (2009)).
+Example 3.1. Let K be a measurable function on Rd. Take
+
+M (x, y) = M-dK((x - y)/M ),
+
+6
+
+where {M } is a sequence of positive numbers tending to zero. Then (3.8) yields the well-known Nadaraya-Watson regression estimator
+
+(3.9)
+
+Cr,M (x, a) =
+
+M m=1
+
+K
+
+((x
+
+-
+
+Xr(m))/M )(x, Xr(m+1), a)hr+1(Xr(+m1))
+
+M m=1
+
+K
+
+((x
+
+-
+
+Xr(m)
+
+)/M
+
+)
+
+.
+
+Example 3.2. We can modify the estimator in Example 3.1 by specifying an
+
+increasing sequence (kM ) of natural numbers with kM  M and by reducing
+
+the number of summands in (3.9) to kM in the following way. Consider the first kM nearest neighbors of x, say Xr(m1), . . . , Xr(mkM ) in the Monte Carlo sample Xr(1), . . . , Xr(M), and define RM := x - Xr(mkM ) to obtain the
+2
+kM -nearest neighbors regression estimator
+
+(3.10)
+
+Cr,M (x, a) =
+
+kM n=1
+
+(x,
+
+Xr(m+1n), a)hr+1(Xr(m+1n))K((x -
+
+kM n=1
+
+K
+
+((x
+
+-
+
+Xr(mn
+
+))/RM
+
+)
+
+Xr(mn
+
+)
+
+)/RM
+
+)
+
+.
+
+Finally, after estimating Cr(x, a) by Cr,M (x, a), we construct
+
+(3.11)
+
+ar,M (x) := arg sup[fr(x, a) + Cr,M (x, a)], x  S,
+aA
+
+and estimate hr by
+
+(3.12)
+
+hr,M (x) := max{gr(x), fr(x, ar,M (x)) + Cr,M (x, ar,M (x))}.
+
+Starting with hT,M (x) = gT (x) and working backwardly, we so obtain estimates for all hr, r = 0, . . . , T - 1.
+Remark 3.3. Local estimators have in some respects nice theoretical properties, for example, almost sure convergence to Cr under rather weak smoothness assumptions. Basically only local smoothness is required for this. A disadvantage of local estimators is their numerical complexity in general. For instance, if we want to compute the Nadaraya-Watson estimator Cr,M (x, a) at M points in Rd, it will require M 2 operations. In the case of the kM nearest neighbors estimator this number can be reduced to M log M using fast search algorithms.
+
+3.2 Global regression estimators
+As an alternative to local regression methods we now consider algorithms based on global regression. From a practical point of view global regression estimators are easier to implement in an efficient way than local estimators. The convergence analysis of global estimators is, however, more delicate and usually requires rather strong assumptions on Cr and the underlying Markov process Xr. For the standard Bermudan stopping problem (fr  0,   1)
+
+7
+
+we refer to Cl´ement, Lamberton and Protter (2002), Egloff (2005) and Egloff, Kohler and Todorovic (2007). The global regression procedures in the next two sections are in some sense a generalization of the methods of Tsitsiklis and Van Roy (1999) and Longstaff and Schwartz (2001), respectively, to optimal control problems.
+
+3.2.1 Algorithms based on continuation functions
+For a given Monte Carlo sample (Xr(1), . . . , Xr(M)), r = 0, . . . , L, under the measure P  and a system of basis functions  := [1, . . . , K ] we consider for each a  A the minimization problem
+
+(3.13) where
+
+M
+r(a) := arg min
+
+(Xr(m)) - Y (m)(a)
+
+2
+,
+
+RK m=1
+
+Y (m)(a) := (Xr(m), Xr(m+1), a)hr+1(Xr(m+1))
+
+and an estimate hr+1 of hr+1 is assumed to be already constructed. The solution of (3.13) is explicitly given by
+
+(3.14)
+
+r(a) = (F F )-1F Y (a) =: F Y (a),
+
+where F = (Fmk) = (k(Xr(m))) is a M × K design matrix and Y (a) := (Y (m)(a))m=1,...,M . Note that the design matrix F does not depend on a. We next consider
+
+(3.15) where
+
+ar,M (x) = arg max{fr(x, a) + Cr,M (x, a)},
+aA
+
+(3.16)
+
+Cr,M (x, a) = (x)r(a) = (x)F Y (a)
+M
+= wm,M (x, XrM )(x, Xr(+m1), a)hr+1,M (Xr(m+1))
+m=1
+
+with coefficients wm,M given by
+
+(3.17)
+
+wm,M (x, XMr ) = (x) (F F )(Xr(·)) -1 (Xr(m)).
+
+In order to solve (3.15) one may, for instance, construct an approximation procedure for finding the a roots of the stationary point equation
+
+ a
+
+fr (x,
+
+a)
+
++
+
+K
+
+k (x)F
+
+
+
+ a
+
+Y
+
+(a)
+
+=
+
+0.
+
+k=1
+
+8
+
+We proceed with a second regression problem
+
+M
+r = arg min
+
+(Xr(m), Xr(+m1), ar,M (Xr(m)))hr+1(Xr(m+1)) - (Xr(m)) 2
+
+RK m=1
+
+based on a new set of paths
+
+(X1(m), . . . , XT(m)), under P to end up with
+
+m = 1, . . . , M
+
+(3.18)
+
+hr,M (x) = max g(x), fr(x, ar,M (x)) + (x)r .
+
+The second regression is needed to avoid the multiple vector-matrix multiplication in (3.14) when computing hr,M (Xr(m)), m = 1, . . . , M .
+
+3.2.2 Algorithms based on backward construction of stopping time and control
+In this section we present an algorithm where, instead of regressing continuation functions, the control and stopping times are backwardly constructed on a set of simulated trajectories. This method relies on the following consistency theorem proved in Appendix.
+Theorem 3.4. The optimal stopping time  (r) and the optimal control a(r) solving the problem
+
+ -1
+
+Yr = sup Ea
+
+fs(Xs, as) + g (X ) Fr ,
+
+aAr,  Tr
+
+s=r
+
+satisfy the following consistency relations
+
+ (r) > r   (r) =  (r + 1) and aj(r) = aj (r + 1)
+for all j such that r + 1  j <  (r + 1).
+Note that aj (r) is only defined for r  j <  (r), i.e. the control a(r) is not defined if  (r) = r. Given a sample (X0(m), . . . , XT(m)), m = 1, ..., M, we construct estimates  (m)(r) and aj(m)(r), r  j <  (m)(r) for stopping times and control processes respectively in the following way. At the terminal time we set
+
+ (m)(T ) = T, m = 1, ..., M.
+
+9
+
+Let  (m)(r + 1), aj(m)(r + 1), r + 1  j <  (r + 1) be constructed for m = 1, . . . , M, at time r + 1, 0  r < T. Let  := [1, . . . , K] be a system of
+basis functions. For any a  A consider the least squares regression problem
+
+(3.19) where with
+
+M
+(a) := arg min
+
+(Xr(m)) - Y (m)(a)
+
+2
+,
+
+RK m=1
+
+Y (m)(a) = (Xr(m), Xr(m+1), a)Zr(+m1)
+
+ (m)(r+1)-1
+
+Zr(m+1) :=
+
+r+1,l(a(m)(r + 1), X(m))fl(Xl(m), a(lm)(r + 1))
+
+l=r+1
+
++ r+1, (m)(r+1)(a(m)(r + 1), X(m))g(X(m(m))(r+1)).
+
+The solution of (3.19) is given by (3.14) and we can define an estimate Cr,M (x, a) = (x)(a) and then ar,M (x) as a solution of (3.15). Now
+simulate a new set of trajectories
+
+(X0(m), . . . , XT(m)), under P and define
+
+m = 1, . . . , M,
+
+M
+r := arg min
+
+(Xr(m)) - (Xr(m), Xr(m+1), ar,M (Xr(m)))Zr(+m1)
+
+2
+.
+
+RK m=1
+
+Put Cr,M (x) = (x)r. By setting for m = 1, . . . , M,
+
+ (m)(r) = r, if fr(Xr(m), ar,M (Xr(m))) + Cr,M (Xr(m))) < g(Xr(m)),
+
+and
+
+ (m)(r) =  (m)(r + 1), aj(m)(r) = aj(m)(r + 1),
+
+a(rm)(r) = ar,M (Xr(m)), r + 1  j <  (m)(r + 1),
+
+otherwise, we so end up with a sequence of estimates
+
+(3.20)
+
+K
+Cr,M (x) := r,kk(x), r = 0, . . . , T - 1,
+k=1
+
+and a sequence of functions ar,M , r = 0, . . . , T - 1. Based on (3.20) one may use the (generally suboptimal) stopping rule
+
+(3.21) M := inf{0  r  T : g(Xr)  fr(Xr, ar,M (Xr)) + Cr,M (Xr)} and the (generally suboptimal) control process
+
+(3.22)
+
+aM (X) = (a0,M (X0), a1,M (X1), . . . , aT -1,M (XT -1))
+
+to construct a lower approximation for Y0 via a next Monte Carlo simulation.
+
+10
+
+4 Convergence analysis of regression methods
+The issues of convergence for regression algorithms in the context of pricing Bermudan options have been already studied in several papers. Cl´ement, Lamberton and Protter (2002) were first who proved the convergence of the Longstaff-Schwartz algorithm. Glasserman and Yu (2005) have shown that the number of Monte Carlo paths has to be exponential in the number of basis functions used for regression in order to ensure the consistency of the price estimate. Recently, Egloff, Kohler and Todorovic (2007) have derived rates of convergence for continuation values estimates by the so called dynamic look-ahead algorithm (see also Egloff (2005)) that "interpolates" between Longstaff-Schwartz and Tsitsiklis-Roy algorithms. In the case of general control problems the issue of convergence is more delicate because along with the convergence of regression estimates Cr,M (x, a) we also need the convergence of control estimates ar,M . The latter convergence can be ensured only if the first one is uniform on the set of all possible controls. This type of convergence can be proved only under some additional assumptions.
+Generally, a convergence analysis can be divided into two parts. In the first part one considers local convergence, that is the convergence of the one step estimate
+
+hr,M (x) := max gr(x), sup [fr(x, a) + Cr,M (x, a)] ,
+aA
+based on the "pseudo" estimator
+
+(4.23)
+
+M
+
+Cr,M (x, a) :=
+
+wm,M (x, XMr )(x, Xr(+m1), a)hr+1(Xr(m+1)),
+
+m=1
+
+i.e. (3.7) with hr+1 replaced by the exact solution hr+1. It turns out that the local convergence relies exclusively on the sort of regression estimate under consideration and can be established via standard results from the theory of empirical processes and regression analysis as we will see. The second part deals with the global convergence. In practice, one starts from r = T and proceeds backwardly where at each step the previously constructed estimate hr+1 is used instead of hr+1. The aim of the global convergence analysis is to prove the convergence of hr,M to hr in a suitable sense, taking into account all errors from the previous steps. The next theorem provides conditions for the global convergence, assuming that Cr,M is known to converge to Cr in a certain sense. In fact, the prove of Theorem 4.24 is quite generic as it involves only general properties of the weights in (3.7).
+Theorem 4.1. Suppose that starting with hT,M = hT (x) = gT (x), at each backward step hr,M is constructed from hr+1,M via (3.12) or (3.18) using a
+
+11
+
+new independent sample of M trajectories. Suppose further that the function  is uniformly bounded, that is ||  A for some constant A. If
+
+(4.24)
+
+1/q
+
+E
+
+Cr,M (x, ·) - Cr(x, ·)
+
+q A
+
+pr(x)
+
+dx
+
+Rd
+
+q
+
+1/q
+
+= E sup |Cr,M (x, a) - Cr(x, a)| pr(x) dx
+Rd aA
+
+= O(M ), r = 0, . . . , T - 1, M  
+
+with some q  1 and some sequence M tending to 0, then it holds
+
+with
+
+E hr,M - hr
+
+=O
+
+Lq(pr )
+
+Tq,-Mr M
+
+, 0  r  T,
+
+(4.25)
+
+M
+
+q,M = sup
+0rT m=1
+
+wm,M (·, ·)
+
+.Lq (prlM=1pr)
+
+Corollary 4.2. If q = 1 and all weights wm,M in (3.7) are nonnegative and sum up to 1 (e.g. in the case (3.8) if M  0), then q,M  1 and
+
+E hr,M - hr
+
+= O (M ) , 0  r  T.
+
+L1 (pr )
+
+Thus, in the case of nonnegative weights and q = 1 the "global" convergence rates coincide with the rates of a particular regression estimator.
+
+4.1 Convergence of local regression estimators
+
+In this section we analyze the convergence of local regression estimators of the form (3.8). Define two sets of functions
+
+FM := {M (x, ·) : x  Rd}, F,M := {(x, ·, a)M (x, ·) : x  Rd, a  A}.
+
+Assume that for some constant Ah > 0,
+
+(4.26)
+
+P (|hr(Xr)| < Ah) = 1, r = 0, . . . , T,
+
+and that the function  is uniformly bounded, i.e. there exists a constant A such that
+
+(4.27)
+
+sup sup (x, y, a) < A.
+(x,y)Rd×Rd aA
+
+12
+
+Theorem 4.3. Let FM and F,M be measurable uniformly bounded VapnikCervonenkis (VC) classes of functions (see Appendix), such that (7.48) is fulfilled for some  > 0 and A > 0, simultaneously for all M. Furthermore, let M and UM be two sequences of positive real numbers such that
+
+(4.28) (4.29)
+
+UM  sup |M (x, y)|,
+(x,y)Rd ×Rd
+r2,M  sup E[2M (x, Xr)],
+xRd
+
+and the following relations hold as M  ,
+
+(i) 0 < r,M < UM /2, 
+(ii) (UM /r,M ) log(UM /r,M )  M , (iii) M := M -1/2r,M log(UM /r,M ) = o(1),
+
+(iv) log M = O(log (r,M /UM )),
+
+(v) pr - E pr,M Rd  0, (vi) dr - E dr,M Rd×A  0. Let D be a fixed bounded domain such that
+
+pmin
+
+=
+
+pmin(D)
+
+:=
+
+min
+r
+
+inf pr(x)
+xD
+
+>
+
+0.
+
+Define a truncated version of Cr,M (depending on D) as
+
+CrD,M (x, a) :=
+
+Cr,M (x, a), 0,
+
+|pr,M (x)| > pmin/2 and x  D, otherwise.
+
+Then it holds
+
+E
+
+CrD,M - Cr
+
+D×A
+
+
+
+Cmax pmin
+
+L0M +
+
+pr - E pr,M
+
+Rd +
+
+dr - E dr,M
+
+Rd
+
+with Cmax := max(Cmax(D), 1), where Cmax(D) = maxr sup(x,a)D×A Cr(x, a), pmin := 2 min(pmin, 1), and with L0 depending only on the VC characteristics of the classes FM and F,M .
+The proof of Theorem 4.3 is given in the Appendix. This result can be used to prove the condition (4.24) needed for the global convergence. Let us fix some R > 0 and consider the ball BR := B(x0, R) := {x : |x - x0|  R} with some fixed x0  Rd. For a fixed q  1 we then have
+
+E
+
+Rd
+
+CrB,MR (x, ·) - Cr(x, ·)
+
+q
+pr(x) dx
+A
+
+1/q
+
+
+1/q
+
+E CrB,MR - Cr BR×A +
+
+Cr(x, ·)
+
+q A
+
+pr(x)dx
+
+Rd\BR
+
+.
+
+13
+
+So, if RM is an increasing sequence of positive numbers such that both
+
+E1,M
+
+:=
+
+Cmax(BRM ) pmin(BRM )
+
+(L0M
+
++
+
+pr - E pr,M
+
+Rd
+
++ dr - E dr,M Rd×A)  0,
+
+and
+
+E2,M :=
+
+1/q
+
+Cr(x, ·)
+
+q A
+
+pr (x)dx
+
+Rd\BRM
+
+ 0,
+
+then by Theorem 4.3 it holds
+
+M  ,
+
+E
+
+Rd
+
+CrB,MRM (x, ·) - Cr(x, ·)
+
+q
+pr(x) dx
+A
+
+1/q
+ E1,M + E2,M  0.
+
+Kernel type estimators. Let us consider the application of Theorem 4.3
+to a kernel type regression estimator (3.9). Let K be a bounded square integrable function on Rd. In Dudley (1999) sufficient conditions are given
+that ensure that the set
+
+(4.30)
+
+F=
+
+K
+
+x-· 
+
+: x  Rd,   R \ {0}
+
+is a uniformly bounded VC class, i.e. it satisfies (7.48) with some A and  and all probability measures P. In particular it is shown that (4.30) is a bounded VC class if K(x) = f (p(x)) for some polynomial p and a bounded real function f of bounded variation. Obviously, the standard Gaussian kernel falls into this category. Another example is the case where K is a pyramid, or K = 1[-1,1]d. For constituting new VC classes from given ones the following lemma may be useful.
+
+Lemma 4.4. If F is a uniformly bounded VC class, then for any bounded measurable function h the class of functions hF := {h · f : f  F} is again a uniformly bounded VC class. In particular, if h is a constant then the VC characteristics of hF are equal to the VC characteristics of F. Moreover, if F and G are uniformly bounded VC classes then the function classes F ± G := {f ± g : f  F, g  G} and F · G := {f · g : f  F, g  G} are uniformly bounded VC classes.
+
+As can be easily seen from the above lemma the class
+
+F :=
+
+(x, ·, a)K
+
+x-· 
+
+: x  Rd,   R \ {0}, a  A
+
+is a uniformly bounded VC class, provided that the function classes (4.30)
+and {(x, ·, a) : x  Rd, a  A}
+
+14
+
+are uniformly bounded VC classes. In this case the classes FM and F,M
+
+with
+
+M (x, ·) = M-dK
+
+x-· M
+
+,
+
+x  Rd,
+
+M = 1, 2, . . .
+
+satisfy the conditions of Theorem 4.3. With regard to (4.28) and (4.29), we may take UM = M-d K  and
+
+r2,M = sup M-d
+
+K2(u)pr(x - uM ) du  M-d
+
+K
+
+2 2
+
+pr
+
+,
+
+xRd
+
+Rd
+
+respectively. Note that under this choice of r,M and UM the relation (i) of Theorem 4.3 is satisfied. In order to make the conditions (ii)-(iv) hold we
+additionally suppose that the bandwidths M satisfy for M  ,
+
+(4.31)
+
+M  0,
+
+M Md | log M |
+
+
+
+,
+
+log
+
+M Md | log M |
+
+=
+
+O(log
+
+M ).
+
+Turn now to the conditions (v)-(vi). It can be easily shown that if functions dr(x, a) and pr(x) have continuous derivatives in x of order s and these derivatives are uniformly bounded on Rd × A and Rd respectively, then
+
+pr - E pr,M Rd = O(Ms ), provided that
+
+dr - E dr,M Rd×A = O(Ms ), M  ,
+
+x sK(x) dx <  and
+
+xjl K(x) dx = 0
+
+Rd Rd
+
+for j = 1, . . . , d, l = 1, . . . , s - 1. Hence, according to Theorem 4.3
+
+E
+
+CrD,M - Cr
+
+D×A
+
+
+
+Cmax pmin
+
+D0
+
+| log M |/M Md + D1Ms
+
+,
+
+M  ,
+
+where D0 and D1 are positive constants independent of the region D.
+
+4.2 Convergence of global regression estimators
+
+Fix some r > 0 and consider the one step regression problem
+
+where
+
+M
+(a) := arg min
+
+K (Xr(m)) - Y (m)(a)
+
+2
+,
+
+RK m=1
+
+Y (m)(a) := (Xr(m), Xr(+m1), a)hr+1(Xr(+m1)), m = 1, ..., M,
+
+15
+
+and K(x) := [1(x), . . . , K (x)] with {i(x) : i = 1, 2, ..} being a set of basis functions. Consider the matrix M,K with elements
+
+(4.32)
+
+Ml,k,K
+
+:=
+
+1 M
+
+M
+
+l
+
+Xr(m)
+
+k
+
+Xr(m)
+
+,
+
+m=1
+
+1  l, k  K,
+
+and the matrix K = (lK,k)1l,kK with elements
+
+lK,k := E Ml,k,K =
+
+l(z)k(z)pr(z) dz.
+Rd
+
+In the sequel we assume that the smallest eigenvalue of the matrix K is
+bounded from below by min > 0 for all K and r > 0. Let us define a truncated version CrT,M (x, a) of the standard least squares regression estimator Cr,M (x, a) = K (x) as follows. If the smallest eigenvalue Mmi,nK of M,K fulfills Mmi,nK  min/2, we set CrT,M (x, a) = Cr,M (x, a) and otherwise CrT,M (x, a) = 0. The following theorem holds.
+
+Theorem 4.5. Suppose that conditions (4.26) and (4.27) are fulfilled and let {k, k = 1, 2, . . .} be a system of basis functions on Rd which are uniformly bounded, that is there exists a constant A > 0 such that maxk k  < A. Let further the families of functions
+
+(x, ·, a) : x  Rd, a  A and {k(·) : k = 1, 2, ... }
+
+be bounded VC classes. Then it holds
+
+(4.33) E
+
+sup
+
+CrT,M (x, a) - Cr(x, a)
+
+2
+pr(x)dx
+
+1/2
+
+aA
+
+ 2CmaxK2 exp
+
+-B0 M /K 2
+
++
+
+B1
+
+K 2 M
+
++
+
+sup |r(x, a)|2 pr(x) dx
+R aA
+
+1/2
+,
+
+where B0 and B1 are some positive constants, Cmax := maxr sup(x,a)Rd×A Cr(x, a) and
+
+r(x, a) = E K (x) K -1 K (Xr(1))Cr(Xr(1), a) - Cr(x, a).
+
+Corollary 4.6. Suppose that
+
+(4.34)
+
+
+Cr(x, a) = k(a)k(x),
+k=1
+
+16
+
+where the convergence takes place both pointwise and in L2(pr) sense. Then (4.33) becomes
+
+(4.35)
+
+E
+
+sup
+
+CrT,M (x, a) - Cr(x, a)
+
+2
+pr(x)dx
+
+1/2
+
+aA
+
+ 2CmaxK2 exp
+
+-B0 M /K 2
+
++
+
+B1
+
+K 2 M
+
++ K
+
+with (4.36)
+
+
+
+
+21/2
+
+K := E sup
+
+k(a)k(Xr) 
+
+aA k=K+1
+
+
+
+
+1/2
+
+ sup
+
+|k(a)k (a)| 1k/k21k/k2 
+
+aA k,k=K+1
+
+.
+
+Corollary 4.7. We can represent the truncated estimator CrT,M (x, a) in the form
+
+M
+
+CrT,M (x, a) :=
+
+wm,M (x, XrM )(Xr(m), Xr(+m1), a)hr+1(Xr(m+1))
+
+m=1
+
+with wm,M (x, XMr ) := M -1K (x) M,K -1 K (Xr(m)) if Mmi,nK  min/2 and 0 otherwise. A straightforward calculations lead to the bound
+
+wm,M (·, ·) =L2(prMl=1pr) E wm,M (Xr, XrM ) 2 1/2  B4K1/2M -1 
+and hence we obtain 2,M = O( K) with 2,M being defined in (4.25).
+
+Corollary 4.8. Suppose that K2/M = o(log-1(M )) as M  0, then
+
+
+
+E hr,M - hr
+
+= O KT/2(K + K2/ M ) , r = 0, . . . , T - 1,
+
+L2(pr )
+
+for M  . Moreover, if (4.34) holds and the coefficients {k(a)} in (4.34) fulfill
+
+
+sup |k(a)| exp(µk) < 
+a k=0
+
+for some positive  and µ, then under the choice K = ((log M )/2µ)1/, we get
+
+E
+
+hr,M - hr
+
+L2 (pr )
+
+
+
+A1
+
+log(T
+
++2)/
+ M
+
+(M
+
+)
+
+,
+
+r = 0, . . . , T - 1.
+
+17
+
+5 Dual upper bounds
+
+In order to assess the quality of our estimates we need to construct upper bounds for the value process. To this aim we extend the approach in Rogers (2007) to problem (2.2). In fact, the following theorem is a generalization of Theorem 1 in Rogers (2007).
+
+Theorem 5.1. Let Yr be the solution of the optimal control problem (2.3), then the following representation holds
+
+
+
+ T -1
+
+Yr
+
+=
+
+inf
+hH
+
+hr (Xr
+
+)
+
++
+
+E
+
+
+
+Wr,j
+
+j=r
+
++
+(Lh)j (Xj) - hj(Xj )
+
++
+
+max
+riT
+
+Wr,i
+
+(gi(Xi)
+
+-
+
+hi(Xi))+
+
+Fr
+
+,
+
+where Wr,j = supaA [r,j(a, X)] and H is the space of bounded measurable vector functions h = (h0, ..., hT ) on ST +1.
+
+6 Numerical example
+
+Now we illustrate our algorithms by pricing a Bermudan basket call option in a model, where asset prices can be influenced by an investor holding large amounts of shares of the asset. In our model the large investor can increase the expected value of future asset prices, hence the future option pay-off, by borrowing assets (and return them later on).
+Let Xr, r = 0, . . . , T be a discrete time Markov process. Consider a Bermudan call option on a basket of d assets with the payoff
+
+g(Xr) :=
+
+1 d
+
+d
+
+Xr(i) - K
+
+i=1
+
++
+,
+
+K>0
+
+which can be exercised at times r = 1, . . . , T. We assume that the large
+investor borrows ar × 100% (0  ar  1) of each asset at time r and pays to his lender the so called lending fee which is proportional to ar:
+
+(6.37)
+
+d
+ar Xr(k),
+k=1
+
+ > 0.
+
+Furthermore, the dynamic of Xr+1 given Xr depends on ar via
+
+Xr(i+)1 = Xr(i) exp
+
+-
+
+2 2
+
+r
+
++
+
+
+
+rr,i (ar),
+
+X0(i) = x0,
+
+i = 1, ..., d,
+
+18
+
+where r,i are i.i.d. standard Gaussian random variables,  : [0, 1]  R+ is
+
+some function, and r is a time scaling parameter. The transition kernel of
+
+the process X is given by
+
+Par (x, dy) =
+
+ y1-1 · . . . · yd-1 exp -
+d 2rd
+
+
+
+jd=1(ln
+
+yj xj
+
++
+
+2 r /2 22r
+
+-
+
+ln
+
+(ar
+
+))2
+
+
+
+dy.
+
+In our particular example we take (a) = exp(a/20) and choose as a reference measure the one corresponding to a = 0. Hence
+Pa(x, dy) = (x, y; a) P(x, dy)
+
+with (x, y; a) = exp
+
+d j=1
+
+ln(yj /xj ) 2r
+
++
+
+d 2 r /2
+
+ln
+
+(a)
+
+-
+
+d
+
+ln2 (a) 22r
+
+.
+
+The value of the controlled Bermudan option contract in this situation is
+
+given by (2.2) with gr  g and fr(x, a) = -a
+
+d k=1
+
+xk
+
+.
+
+We now study a numerical example with d = 5, T = 3, r  1, x0 = 100,
+
+K = 90,  = 0.2 where we shall construct lower bounds for the option
+
+price using local regression and global regression methods. First, using the
+
+k-nearest neighbor estimator (3.10) and the corresponding estimator (3.11),
+
+based on M paths of the process X, we construct a suboptimal stopping
+
+time and a suboptimal control. Then averaging over a new independent set of 50000 trajectories, we get a lower bound denoted by Y0k,Mnn,low. This lower bound is shown in Table 1 for different M and different numbers of nearest
+
+neighbors used to construct (3.10). Similarly, a suboptimal stopping time
+
+(3.21) and a suboptimal control (3.22) lead to a lower bound denoted by
+
+Y0g,Mr,low. In Table 2 the values of Y0g,Mr,low are presented in dependence on the set of basis functions used for the least squares approximation.
+Furthermore, we construct upper bounds Y0k,Mnn,up and Y0g,Mr,up for the option price based on the dual representation in Theorem 5.1, using approx-
+
+imative value functions (3.12) and (3.18), respectively. To get these upper
+
+bounds we simulate 50 ("outer") trajectories where on each trajectory the
+
+conditional expectations in (Lh)r are estimated using 10000 independent ("inner") trajectories.
+
+Note that it can be advantageous to take the number of nearest neighbors
+
+kM in (3.10) depending on x. To illustrate this we plot in Figure 1 the rootmean-square errors of the estimates C2k,n1n0000(x, 1) and C2k,n5n0000(x, 1), relative to the "exact" values C2(x, 1), computed using 106 Monte Carlo trajectories, for different numbers of nearest neighbors and for two points x(0) and x(1)
+
+with
+
+xk(i)
+
+=
+
+x0
+
+exp(- 2 2
+
+(0
+
++
+
+1)
+
++
+
+i(
+
+0 + 
+
+1)),
+
+k = 1, . . . , d,
+
+i = 0, 1,
+
+19
+
+where 0  0 (left figure) and 1  1.5 (right figure). Here the best value of kM for the "central" point x(0) is about 0.1 × M and the RMS error does not exceed 5% for M = 10000. However, the error becomes rather large if x lies in the region with a small concentration of the pre-simulated regression points (the optimal kM is about 10 in the right-hand side figure). Thus, the performance of the k-nearest neighbor estimator can be improved by choosing kM adaptively depending on x.
+As can be seen from our simulation study, global regression estimators provide a smaller gap between lower and upper bounds for the option price than their local regression counterparts. The gap between lower and upper bounds in the case of global regression for the best choice of basis functions does not exceed 4% (relative to the lower estimate), while for the local regression estimator the smallest gap is larger than 15%.
+
+Table 1: Lower and upper bounds obtained via the k-nearest neighbor estimator (3.10) for different numbers of the nearest neighbors.
+
+k
+10 20 50 100 500 1000
+
+h0k,n1n00,l0o0w(SD) 13.94(0.06) 14.10(0.06) 14.08(0.06) 14.13(0.05) 14.17(0.05) 13.56(0.05)
+
+hk0,n1n00,u0p0 (SD) 20.94(0.23) 18.89(0.20) 16.74(0.09) 16.59(0.14) 16.73(0.14) 17.04(0.13)
+
+hk0,n5n00,l0o0w (SD) 13.82(0.06) 14.20(0.06) 14.33(0.06) 14.19(0.05) 14.17(0.05) 14.06(0.05)
+
+hk0,n5n00,u0p0 (S D ) 21.22(0.27) 18.41(0.16) 17.08(0.14) 16.68(0.13 16.48(0.13) 16.27(0.11)
+
+Table 2: Lower and upper bounds using global regression algorithms with different sets of basis functions.
+
+base functions
+up to 2nd degree polynomials on gr(Xr) up to 3th degree polynomials on gr(Xr) up to 4th degree polynomials on gr(Xr)
+1, Xr(1), . . . , Xr(5), gr(Xr) up to 2nd degree polynomials on
+Xr(1), . . . , Xr(5), gr(Xr)
+
+hg0,r2,l0o0w000 (SD) 15.15(0.06) 15.10(0.07) 15.13(0.07) 15.01(0.07)
+15.09(0.06)
+
+h0g,r2,u00p000 (SD) 15.75(0.10) 15.62(0.07) 15.70(0.09) 15.76(0.08)
+15.55(0.07)
+
+20
+
+RMS (%) RMS (%)
+
+60 M=10000
+50 M=50000
+40
+30
+20
+10
+0 0 500 1000 1500 2000 2500 3000 3500 4000 4500 5000
+K
+
+100
+95
+90
+85
+80
+75 M=10000
+70 M=50000
+65 0 500 1000 1500 2000 2500 3000 3500 4000 4500 5000 K
+
+Figure 1: Root-mean-square errors (in %) of the estimators C2k,n1n0000(x, 0)
+
+(solid line) and C2k,n5n0000(x, 0) (dashed line) for different numbers neighbors at two points x0 exp(-2) (left) and x0 exp(-2 +
+
+k of nearest 1.5( 0 +
+
+ 1)) (right).
+
+7 Appendix
+
+7.1 Proof of Theorem 3.4
+
+The statement of the theorem holds trivially true for r = T. For r < T we
+
+have
+
+
+
+ -1
+
+1{(r)>r}Yr = 1{(r)>r} sup Ea  fj(Xj , aj ) + g (X ) Fr
+
+aAr,  Tr
+
+j=r
+
+
+
+ -1
+
+= 1{(r)>r} sup Ear (r)  fj(Xj , aj ) + g (X ) Fr
+
+ Tr+1
+
+j=r
+
+= 1{(r)>r}fr(Xr, ar (r))+
+
+
+
+
+
+ -1
+
++ 1{ (r)>r} sup Ear(r) E(ra+r1+1(r),...) 
+
+fj(Xj , aj (r)) + g (X ) Fr+1
+
+ Tr+1
+
+j=r+1
+
+21
+
+ 1{(r)>r}fr(Xr, ar (r))+
+
+
+
+
+
+ -1
+
+1{ (r)>r} Era(r)
+
+sup
+
+E(ar+1(r),...) 
+
+fj(Xj , aj ) + g (X ) Fr+1
+
+aAr+1,  Tr+1
+
+j=r+1
+
+=
+
+1{
+
+ (r)>r} fr (Xr
+
+,
+
+ar(r))
+
++
+
+1{
+
+ (r)>r}
+
+E(a(r),ar+1(r+1),...) × 
+
+ (r+1)-1
+
+×  fj(Xj , aj(r + 1)) + g(r+1)(X(r+1)) Fr
+
+j=r+1
+
+= 1{ (r)>r}fr(Xr, ar (r)) + 1{ (r)>r} Era(r) Yr+1 = 1{ (r)>r}Yr,
+
+due to the Bellman principle. Hence
+
+1{ (r)>r}Yr
+
+=
+
+1{ (r)>r} fr (Xr
+
+,
+
+ar(r))
+
++
+
+1{
+
+(r)>r}
+
+E(ra (r),ar+1 (r+1),...)
+
+× 
+
+ (r+1)-1
+
+×  fj(Xj , aj (r + 1)) + g(r+1)(X(r+1)) Fr
+
+j=r+1
+
+from which the consistency relations follow.
+
+7.2 Proof of Theorem 4.1
+
+For r = T the statement is trivial. As induction hypothesis we assume that
+
+(7.38)
+
+E hr+1,M - hr+1
+
+=O
+
+Lq (pr+1)
+
+qT,-Mr-1M
+
+, M  .
+
+Based on a new sample (Xr(m), Xr(m+1)), m = 1, ..., M, independent of the samples needed for constructing the estimate hr+1,M , we define
+
+ar,M (x) := arg sup[fr(x, a) + Cr,M (x, a)],
+aA
+ar,M (x) := arg sup[fr(x, a) + Cr,M (x, a)],
+aA
+
+where
+
+M
+
+Cr,M (x, a) :=
+
+wm,M (x, XMr )(x, Xr(+m1), a)hr+1,M (Xr(+m1)).
+
+m=1
+
+Observe that due to
+
+- sup Cr,M (x, a) - Cr,M (x, a)
+aA
+ fr(x, ar,M (x)) + Cr,M (x, ar,M (x)) - {fr(x, ar,M (x)) + Cr,M (x, ar,M (x))}  sup Cr,M (x, a) - Cr,M (x, a)
+aA
+
+22
+
+the inequality
+
+hr,M (x) - hr,M (x)  sup Cr,M (x, a) - Cr,M (x, a)
+aA
+holds for all x and a, where
+
+hr,M (x) := max{gr(x), fr(x, ar,M (x)) + Cr,M (x, ar,M (x))}.
+
+Analogously one can show that
+
+(7.39)
+
+|hr(x) - hr,M (x)|  sup |Cr(x, a) - Cr,M (x, a)|.
+aA
+
+On the other hand we have
+
+(7.40)
+
+Cr,M (x, a) - Cr,M (x, a) =
+
+M
+wm,M (x, XrM )(x, Xr(m+1), a)(hr+1,M (Xr(m+1)) - hr+1(Xr(m+1))),
+m=1
+
+hence
+
+hr,M (x) - hr,M (x)
+
+M
+
+ A
+
+|wm,M (x, XMr )| hr+1,M (Xr(m+1)) - hr+1(Xr(+m1)) ,
+
+m=1
+
+x  Rd.
+
+Denote with Gr+1 the -algebra generated by the samples used from T down to r + 1. The application of Ho¨lder's and Jensen inequality leads to
+
+E hr,M - hr,M
+Lq (pr )
+
+M
+
+ A E
+
+EGr+1
+
+m=1
+
+hr+1,M (Xr(+m1)) - hr+1(Xr(+m1))
+
+wm,M (·, Xr(·)) Lq(pr)
+
+ A E EGr+1 hr+1,M (Xr(1+)1) - hr+1(Xr(1+)1) q 1/q
+
+M
+×
+m=1
+
+EGr+1
+
+q 1-1/q
+
+wm,M (·, XrM )
+
+q-1
+Lq (pr)
+
+M
+ A E hr+1,M - hr+1
+Lq(pr+1) m=1
+
+1
+pr(x) E wm,M (x, XrM ) q dx q
+
+M
+
+= A E hr+1,M - hr+1 Lq(pr+1) m=1 wm,M (·, ·) .Lq(prlM=1pr)
+
+23
+
+The induction assumption (7.38) implies now that
+
+E hr,M - hr,M Lq(pr) = O(M qT,-Mr).
+Note that by letting q  1, the last estimate holds true for q = 1 as well. Further we have
+
+E
+
+hr,M - hr
+
+E
+Lq (pr)
+
+hr,M - hr,M
+
++E
+Lq(pr )
+
+hr,M - hr Lq(pr)
+
+and due to (7.39)
+
+E hr,M - hr Lq(pr)
+
+1/q
+
+
+
+Rd
+
+Cr(x, ·) - Cr,M (x, ·)
+
+q A
+
+pr (x)
+
+dx
+
+= O(M ),
+
+M  .
+
+7.3 Proof of Theorem 4.3
+
+For any x  D we have on the set {|pr,M (x)| > pmin/2}
+
+CrD,M (x, a) - Cr(x, a) =
+
+dr,M pr,M
+
+-
+
+dr pr
+
+=
+
+dr,M - dr pr,M
+
++
+
+Cr
+
+pr
+
+- pr,M pr,M
+
+and so
+
+CrD,M - Cr D×A  2p-m1in dr,M - dr D×A + 2Cmaxp-m1in pr - pr,M D . Hence
+
+E CrD,M - Cr D×A  2pm-1in E dr,M - dr D×A + 2Cmaxpm-1in E pr - pr,M D
+
+(7.41)
+
++ Cmax P pr - pr,M D > pmin/2 .
+
+Since
+
+pr,M (x) - E pr,M (x)
+
+=
+
+1 M
+
+M m=1
+
+M (x, Xr(m)) - E M (x, Xr(m))
+
+we immediately get from Theorem 7.1 taking into account conditions (i), (ii), and (iii) in Theorem 4.3,
+
+E
+
+pr,M - E pr,M
+
+Rd
+
+
+
+B M
+
+ UM
+
+log
+
+AUM r,M
+
+ +
+
+
+
+ B1 M , M  ,
+
+M r2,M
+
+log
+
+AUM r,M
+
+24
+
+with some universal positive constants constants B and B1. Similarly,
+
+P pr,M - E pr,M Rd > C1M 
+
+L exp
+
+-
+
+C1
+
+log(1
+
++ C1/(4L)) L
+
+log
+
+UM r,M
+
+,
+
+M  ,
+
+for any C1  C, where positive constants C and L only depend on the VC-characteristics A and . Due to condition (iv) there exists W > 0 such
+
+that
+
+r,M UM
+
+W
+ M .
+
+Then for any fixed C1  C such that
+
+C1
+
+log(1
+
++ C1/(4L)) L
+
+
+
+W
+
+we have
+
+P pr,M - E pr,M Rd > C1M
+
+L
+
+r,M UM
+
+C1 log(1+C1/(4L)) L
+L
+
+r,M UM
+
+W
+ LM ,
+
+M  .
+
+Due to (iii) we can now find M0 such that for all M > M0 it holds C1M  pmin/4. Hence
+
+Since
+
+P pr - E pr,M Rd > pmin/4  LM , M  .
+
+P pr - pr,M D > pmin/2  P pr - E pr,M Rd > pmin/4 + P E pr - pr,M Rd > pmin/4
+and pr - E pr,M D goes to zero for M  , we end up with
+P pr - pr,M D > pmin/2  LM , M  .
+Similarly,
+
+E pr - pr,M D  pr - E pr,M Rd + E E pr,M - pr,M Rd
+ pr - E pr,M Rd + L1M  with L1 := B1  only depending on the VC characteristics. Next, by applying Theorem 7.1 to the representation
+
+dr,M (x) - E dr,M (x)
+
+=
+
+1 M
+
+M m=1
+
+M (x, Xr(m))(x, Xr(m+1), a)hr+1(Xr(m+1))
+
+- E M (x, Xr(m))(x, Xr(+m1), a)hr+1(Xr(m+1)) ,
+
+25
+
+with UM := AAhUM and r,M := AAhr,M , and observing that (i)-(iv) in
+Theorem 4.3 are trivially fulfilled for the sequences UM and r,M , we obtain in an analogous way the estimate
+
+E dr - dr,M Rd×A  E dr - E dr,M Rd×A + L2M
+
+with some constant L2 > 0 only depending on the VC characteristics. Taking all together, (7.41) yields
+
+E CrD,M - Cr D×A  CmaxL + 2Cmaxp-m1inL1 + 2pm-1inL2 M + 2Cmaxp-m1in pr - E pr,M Rd + 2pm-1in dr - E dr,M Rd ,
+
+from
+
+which
+
+the
+
+statement
+
+of
+
+the
+
+theorem
+
+follows
+
+with
+
+L0
+
+:=
+
+1 2
+
+L
+
++
+
+L1
+
++ L2.
+
+7.4 Proof of Theorem 4.5
+
+We have
+
+(7.42)
+
+mMin =
+
+min wM,K w
+w =1
+
+ min wK w + min w(M,K - K )w
+
+w =1
+
+w =1
+
+
+
+min
+
+-
+
+K
+
+max
+1k,lK
+
+|Ml,k,K
+
+-
+
+lK,k|.
+
+By the uniform boundedness of k(x) on Rd it follows that Var [l (Xr) k (Xr)]  E l2 (Xr) k2 (Xr)  A4,
+
+and so we get by Bernstein's inequality 
+
+(7.43)
+
+P(|lM,k - l,k| > )  2 exp - 2A2
+
+M 2 A2 + 2/3
+
+ .
+
+Combining (7.42) and (7.43), we get
+
+P(Mmi,nK < min/2)  P 
+
+max
+1k,lK
+
+Ml,k,K - Kl,k 
+
+> min/2K
+
+(7.44)
+
+ 2K2 exp -
+
+M m2 in
+
+  2K2 exp -B0M/K2
+
+8K2A2 A2 + 2/3
+
+with some constant B0 > 0 independent of K and M. We further have
+
+(7.45) 1{Mminmin/2} CrT,M (x, a) - Cr(x, a)  Er(1,M) + E(r2,M) + |r(x, a)|
+
+26
+
+with
+
+E(r1,M)
+
+=
+
+sup
+(x,a)A
+
+1 M
+
+M
+
+K (x)
+
+m=1
+
+M,K -1 - K -1 K (Xr(m))Y (m)(a) ,
+
+Er(2,M)
+
+=
+
+sup
+(x,a)A
+
+1M M m=1
+
+K (x)
+
+K -1 K (Xr(m))Y (m)(a)
+
+- E K (x) K -1 K (Xr(m))Y (m)(a) .
+
+The matrix identity A-1 - B-1 = A-1(B - A)B-1 and the multiplicativity of the spectral matrix norm imply on the set {mMi,nK  min/2},
+
+M,K
+
+-1 -
+
+K
+
+-1
+
+2
+
+
+
+2 2min
+
+K - M,K 2 .
+
+Hence, it holds on the set {Mmi,nK  min/2},
+
+sup K (x) M,K -1 - K -1 K (Xr(m))Y (m)(a)
+(x,a)A
+
+
+
+2AAh m2 in
+
+K (x) 2
+
+K (Xr(m)) 2 K - M,K 2
+
+
+
+K 2 A Ah A2
+
+2 m2 in
+
+K - M,K max ,
+
+where · max denotes the elements-wise maximum. Due to our assumptions it follows from Theorem 7.1 that
+
+(7.46)
+
+E E(r1,M)
+
+
+
+B2
+
+K 2 M
+
+,
+
+where the constant B2 does not depend on K and M. Since
+
+E(r2,M)
+
+
+
+ K
+
+A min
+
+sup
+aA
+
+1M M m=1
+
+K (Xr(m))Y (m)(a) - E K (Xr(m))Y (m)(a)
+
+
+
+K A min
+
+sup max
+aA 1kK
+
+1M M m=1
+
+k(Xr(m))Y (m)(a) - E k(Xr(m))Y (m)(a)
+
+2
+,
+
+our assumptions and Theorem 7.1 lead to the following bound
+
+(7.47)
+
+E Er(2,M)
+
+
+
+B3
+
+K M
+
+,
+
+where constant B3 does not depend on K and M. Combining (7.45) with (7.46) and (7.47), we arrive at (4.33).
+
+27
+
+7.5 Proof of Theorem 5.1
+
+For any h = (h0, ..., hT )  H and a  A let consider a martingale Mr from the Doob decomposition of hr(Xr):
+
+Mra+1 - Mra = hr+1(Xr+1) - Ea [hr+1(Xr)|Fr] ,
+
+with M0a = 0, i.e.,
+
+r-1 r-1
+
+Mra =
+
+Mja+1 - Mja = (hj+1(Xj ) - P aj hj+1(Xj )) .
+
+j=0 j=0
+
+We then have
+
+
+ -1
+
+ -1
+
+
+
+Yr
+
+=
+
+inf
+h
+
+sup
+aAr
+,  r
+
+Ea
+
+
+
+j=r
+
+fj(Xj , aj ) 
+
++
+
+g (X )
+
+-
+
+j=r
+
+(hj+1(Xj )
+
+-
+
+P
+
+aj hj+1(Xj ))
+
+Fr 
+
+ i-1
+
+
+
+inf
+h
+
+hr (Xr )
+
++
+
+sup
+aAr
+
+E
+
+
+j=r
+
+r,j (a,
+
+X)
+
+(fj(Xj ,
+
+aj )
+
++
+
+P
+
+aj
+
+hj+1(Xj )
+
+-
+
+hj (Xj ))
+
++r,i(a,
+
+X
+
+)
+
+(gi
+
+(Xi)
+
+- 
+
+hi(Xi
+
+))|
+
+Fr
+
+]}
+
+ T -1
+
+
+
+inf
+h
+
+hr (Xr )
+
++
+
+E
+
+
+
+j=r
+
+sup
+aAr
+
+r,j (a,
+
+X)
+
+(Lh)j (Xj) - hj(Xj)
+
++
+
++
+
+max
+ir
+
+sup
+aAr
+
+r,i(a,
+
+X
+
+)
+
+(gi
+
+(Xi
+
+)
+
+-
+
+hi
+
+(Xi
+
+))+
+
+Fr
+
+.
+
+For h = h it holds max [gi, (Lh)i] = hi, and hT (x) = gT (x), so we finally
+
+have identity.
+
+7.6 Some results from the theory of empirical processes
+For the readers convenience we here recall some definitions and corner stone results from the theory of empirical processes.
+
+Definition A class F of measurable functions on a measurable space (S, S) is called a Vapnik-C ervonenkis class if there exist positive numbers A and  such that, for any probability measure P on (S, S) and any 0 <  < 1,
+
+(7.48)
+
+N(F, L2(P),  F L2(P)) 
+
+A 
+
+
+,
+
+where N(F, d, ) denotes the -covering number of F in a metric d, that is the minimal number of spheres with radius  needed to cover F, and F :=
+
+28
+
+supfF |f | is the envelope of F (with here and below sup denoting esssup with respect to P). The following proposition is a key tool for obtaining
+convergence rates for the local and global type estimators considered in this
+paper.
+
+Theorem 7.1 (Talagrand (1994), Gin´e and Guillou (2002)). Let F be a measurable uniformly bounded VC class of functions. Let P be any measure on (S, S), and let (Xm)m=1,2,... be an i.i.d. sequence of S-valued random variables with distribution P. Let  and U be any numbers such that
+
+sup VarP(f )  2, sup f   U
+
+f F
+
+f F
+
+and 0 <   U . Then, there exist a universal constant B such that
+
+M
+E sup (f (Xm) - E f (X1))
+f F m=1
+
+B
+
+U
+
+log
+
+AU 
+
+ +
+
+M 2 log AU 
+
+.
+
+ If moreover 0 <  < U/2 and M   U log(U/), there exist constants
+
+L and C which only depend on the VC characteristics of F, such that for all
+
+  C and t satisfying
+
+it holds
+
+ C M
+
+log
+
+U 
+
+
+
+t
+
+
+
+
+
+M 2 U
+
+,
+
+P
+
+M
+sup (f (Xm) - E f (X1)) > t
+f F m=1
+
+ L exp
+
+-
+
+log(1
+
++ /(4L)) L
+
+t2 M 2
+
+.
+
+Thus, in particular, for any C1  C we may take
+
+ t = C1 M 
+
+log
+
+U 
+
+,
+
+ = C1,
+
+which yields
+
+(7.49)
+
+P
+
+M sup (f (Xm) - E f (X1)) > C1 M 
+f F m=1
+
+log
+
+U 
+
+ L exp - C1 log(1 + C1/(4L)) log U . L
+
+References
+D. Belomestny, G.N. Milstein and V. Spokoiny (2006). Regression methods in pricing American and Bermudan options using consumption processes, to appear in Quantitative Finance.
+
+29
+
+D. Belomestny, Ch. Bender and J. Schoenmakers (2007). True upper bounds for Bermudan products via non-nested Monte Carlo, to appear in Mathematical Finance.
+C. Bender and J. Schoenmakers (2006). An iterative algorithm for multiple stopping: Convergence and stability. Advances in Appl. Prob., 38, 729­ 749.
+B. Bouchard, I. Ekeland, and N. Touzi (2004). On the Malliavin approach to Monte Carlo approximation of conditional expectations. Finance and Stochastics, 8(1), 45­71.
+B. Bouchard, N. El Karoui and N. Touzi (2005). Maturity randomisation for stochastic control problems. Annals of Applied Probability, 15(4), 25752605.
+M. Broadie and P. Glasserman (1997). Pricing American-style securities using simulation. J. of Economic Dynamics and Control, 21, 1323­1352.
+M. Broadie and P. Glasserman (2004). A stochastic mesh method for pricing high-dimensional American options. Journal of Computational Finance, 7, 4, 35­72.
+R. Carmona and N. Touzi (2008). Optimal multiple stopping and valuation of swing options. Mathematical Finance, 18(2), 239­268.
+J. Carriere (1996). Valuation of early-exercise price of options using simulations and nonparametric regression. Insuarance: Mathematics and Economics, 19, 19­30.
+E. Cl´ement, D. Lamberton and P. Protter (2002). An analysis of a least squares regression algorithm for American option pricing. Finance and Stochastics, 6, 449­471.
+R. M. Dudley (1999). Uniform Central Limit Theorems, Cambridge University Press, Cambridge, UK.
+D. Egloff (2005). Monte Carlo algorithms for optimal stopping and statistical learning. Ann. Appl. Probab., 15, 1396­1432.
+D. Egloff, M. Kohler and N. Todorovic (2007). A dynamic look-ahead Monte Carlo algorithm for pricing Bermudan options, Ann. Appl. Probab., 17, 1138­1171.
+R. Elie, J.-D. Fermanian and N. Touzi (2009). Kernel estimation of Greek weights by parameter randomization, to appear in Annals of Applied Probability.
+30
+
+E. Gin´e and A. Guillou (2002). Rates of strong uniform consistency for multivariate kernel density estimators. Ann. I. H. Poincar´e, 6, 907­921.
+P. Glasserman (2004). Monte Carlo Methods in Financial Engineering. Springer.
+P. Glasserman and B. Yu (2005). Pricing American Options by Simulation: Regression Now or Regression Later?, Monte Carlo and Quasi-Monte Carlo Methods, (H. Niederreiter, ed.), Springer, Berlin.
+M. B. Haugh and L. Kogan (2004). Pricing American Options: A Duality Approach. Operations Research, 52, 258­270.
+S. Hansen (2005). A Malliavin-based Monte-Carlo Approach for Numerical Solution of Stochastic Control Problems: Experiences from MertonSs Problem. Working Paper.
+A. Iba´n~ez (2004). Valuation by Simulation of Contingent Claims with Multiple Early Exercise Opportunities. Math. Finance, 14, 223­248.
+A. Kolodko and J. Schoenmakers (2006). Iterative Construction of the Optimal Bermudan Stopping Time. Finance Stoch., 10, 27­49.
+D. Lamberton and B. Lapeyre (1996). Introduction to Stochastic Calculus Applied to Finance. Chapman & Hall.
+M. Monoyios (2004). Option pricing with transaction costs using a Markov chain approximation. Journal of Economic Dynamics & Control , 28, 889­913.
+F. Longstaff and E. Schwartz (2001). Valuing American options by simulation: a simple least-squares approach. Review of Financial Studies, 14, 113­147.
+N. Meinshausen and B.M. Hambly (2004). Monte Carlo Methods for the Valuation of Multiple-Exercise Options. Math. Finance, 14, 557­583.
+L. C. G. Rogers (2002). Monte Carlo Valuation of American Options. Math. Finance, 12, 271­286.
+L. C. G. Rogers (2007). Pathwise stochastic optimal control. SIAM J. Control Optim., 46, No. 3, pp. 1116­1132.
+M. Talagrand (1994). Sharper bounds for Gaussian and empirical processes. Ann. Probab., 22, 28­76.
+J. Tsitsiklis and B. Van Roy (1999). Regression methods for pricing complex American style options. IEEE Trans. Neural. Net., 12, 694­703.
+31
+
+SFB 649 Discussion Paper Series 2009
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Implied Market Price of Weather Risk" by Wolfgang Härdle and Brenda López Cabrera, January 2009.
+002 "On the Systemic Nature of Weather Risk" by Guenther Filler, Martin Odening, Ostap Okhrin and Wei Xu, January 2009.
+003 "Localized Realized Volatility Modelling" by Ying Chen, Wolfgang Karl Härdle and Uta Pigorsch, January 2009.
+004 "New recipes for estimating default intensities" by Alexander Baranovski, Carsten von Lieres and André Wilch, January 2009.
+005 "Panel Cointegration Testing in the Presence of a Time Trend" by Bernd Droge and Deniz Dilan Karaman Örsal, January 2009.
+006 "Regulatory Risk under Optimal Incentive Regulation" by Roland Strausz, January 2009.
+007 "Combination of multivariate volatility forecasts" by Alessandra Amendola and Giuseppe Storti, January 2009.
+008 "Mortality modeling: Lee-Carter and the macroeconomy" by Katja Hanewald, January 2009.
+009 "Stochastic Population Forecast for Germany and its Consequence for the German Pension System" by Wolfgang Härdle and Alena Mysickova, February 2009.
+010 "A Microeconomic Explanation of the EPK Paradox" by Wolfgang Härdle, Volker Krätschmer and Rouslan Moro, February 2009.
+011 "Defending Against Speculative Attacks" by Tijmen Daniëls, Henk Jager and Franc Klaassen, February 2009.
+012 "On the Existence of the Moments of the Asymptotic Trace Statistic" by Deniz Dilan Karaman Örsal and Bernd Droge, February 2009.
+013 "CDO Pricing with Copulae" by Barbara Choros, Wolfgang Härdle and Ostap Okhrin, March 2009.
+014 "Properties of Hierarchical Archimedean Copulas" by Ostap Okhrin, Yarema Okhrin and Wolfgang Schmid, March 2009.
+015 "Stochastic Mortality, Macroeconomic Risks, and Life Insurer Solvency" by Katja Hanewald, Thomas Post and Helmut Gründl, March 2009.
+016 "Men, Women, and the Ballot Woman Suffrage in the United States" by Sebastian Braun and Michael Kvasnicka, March 2009.
+017 "The Importance of Two-Sided Heterogeneity for the Cyclicality of Labour Market Dynamics" by Ronald Bachmann and Peggy David, March 2009.
+018 "Transparency through Financial Claims with Fingerprints ­ A Free Market Mechanism for Preventing Mortgage Securitization Induced Financial Crises" by Helmut Gründl and Thomas Post, March 2009.
+019 "A Joint Analysis of the KOSPI 200 Option and ODAX Option Markets Dynamics" by Ji Cao, Wolfgang Härdle and Julius Mungo, March 2009.
+020 "Putting Up a Good Fight: The Galí-Monacelli Model versus `The Six Major Puzzles in International Macroeconomics'", by Stefan Ried, April 2009.
+021 "Spectral estimation of the fractional order of a Lévy process" by Denis Belomestny, April 2009.
+022 "Individual Welfare Gains from Deferred Life-Annuities under Stochastic Lee-Carter Mortality" by Thomas Post, April 2009.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2009
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+023 "Pricing Bermudan options using regression: optimal rates of convergence for lower estimates" by Denis Belomestny, April 2009.
+024 "Incorporating the Dynamics of Leverage into Default Prediction" by Gunter Löffler and Alina Maurer, April 2009.
+025 "Measuring the effects of geographical distance on stock market correlation" by Stefanie Eckel, Gunter Löffler, Alina Maurer and Volker Schmidt, April 2009.
+026 "Regression methods for stochastic control problems and their convergence analysis" by Denis Belomestny, Anastasia Kolodko and John Schoenmakers, May 2009.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

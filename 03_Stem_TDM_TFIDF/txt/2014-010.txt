@@ -1,0 +1,1987 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2014-010
+Efficient Iterative Maximum Likelihood
+Estimation of High-Parameterized Time Series Models
+Nikolaus Hautsch* Ostap Okhrin**
+Alexander Ristig**
+* University of Vienna, Austria ** Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Efficient Iterative Maximum Likelihood Estimation of High-Parameterized Time Series Models
+20th January 2014
+
+Nikolaus Hautsch
+
+Ostap Okhrin
+
+Alexander Ristig
+
+Abstract
+We propose an iterative procedure to efficiently estimate models with complex log-likelihood functions and the number of parameters relative to the observations being potentially high. Given consistent but inefficient estimates of sub-vectors of the parameter vector, the procedure yields computationally tractable, consistent and asymptotic efficient estimates of all parameters. We show the asymptotic normality and derive the estimator's asymptotic covariance in dependence of the number of iteration steps. To mitigate the curse of dimensionality in high-parameterized models, we combine the procedure with a penalization approach yielding sparsity and reducing model complexity. Small sample properties of the estimator are illustrated for two time series models in a simulation study. In an empirical application, we use the proposed method to estimate the connectedness between companies by extending the approach by Diebold and Yilmaz (2014) to a high-dimensional non-Gaussian setting.
+JEL classification: C13, C32, C50 Keywords: Multi-Step estimation, Sparse estimation, Multivariate time series, Maximum likelihood estimation, Copula.
+
+1. Introduction
+Statistical inference for models including many parameters is of growing interest in various fields in econometrics and statistics. Examples include high-dimensional vector autoregressive moving average
+Department of Statistics and Operations Research, University of Vienna, Oskar-Morgenstern-Platz 1, 1090 Vienna, Austria, nikolaus.hautsch@univie.ac.at
+Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E - Center for Applied Statistics and Economics, HumboldtUniversit¨at zu Berlin, Unter den Linden 6, 10099 Berlin, Germany, ostap.okhrin@hu-berlin.de
+Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E - Center for Applied Statistics and Economics, HumboldtUniversita¨t zu Berlin, Unter den Linden 6, 10099 Berlin, Germany, alexander.ristig@hu-berlin.de
+The research was supported by the Deutsche Forschungsgemeinschaft through the CRC 649 "Economic Risk", Humboldt-Universit¨at zu Berlin. Hautsch acknowledges support by the Wiener Wissenschafts-, Forschungs- und Technologiefonds (WWTF).
+1
+
+(VARMA) models, multivariate generalized autoregressive conditional heteroscedasticity (GARCH) models, vector multiplicative error models (VMEMs) or corresponding copula approaches. Such models are mostly estimated using multi-step approaches constructed from parts of the log-likelihood. Such estimators are typically inefficient and their asymptotic distributions are difficult to compute as asymptotic results for multi-step likelihood procedures are generally widely missing.
+In this paper, we address the situation of a complex, possibly highly parameterized log-likelihood function (in terms of the number of parameters relative to the sample size) whose first- and second-order derivatives cannot necessarily be derived analytically. Complexity can arise from nonlinearities in the underlying model and/or if the number of parameters r is high relative to the number of observations. In such a situation, a one-step optimization of the log-likelihood is typically (computationally or numerically) not possible and parameters have to be estimated in multiple steps. The contribution of this paper is to propose an asymptotically efficient and computationally tractable iterative estimation algorithm and to derive the asymptotic distribution of the estimates in dependence of the number of underlying iteration steps.
+Our approach rests on the assumption of the existence of a consistent but (eventually highly) inefficient estimator of a vector of parameters  of a log-likelihood function L(). For example,  might be consistently but inefficiently estimated by a 2-stage procedure. To obtain an efficient and computationally feasible estimator, we suggest splitting the estimation problem into appropriate computationally tractable sub-problems. In particular, we decompose  into G sub-vectors 1, . . . , G of arbitrary size, and maximize L(·) iteratively with respect to g, g = 1, . . . , G, holding fixed all other parameters which have been updated in previous iteration steps. We show the consistency and asymptotic normality of the resulting estimator nh in dependence of the number of iterations h and show that it is asymptotically efficient as h  . Moreover, we illustrate how to combine the procedure with penalization techniques as, e.g., the smoothly clipped absolute deviation (SCAD) penalty introduced by Fan and Li (2001). This step yields sparse estimates and allows diminishing the curse of dimensionality arising from highly parameterized models.
+Our major focus is on time series models where the number of parameters relative to the number of observations is high and thus it is computationally challenging or virtually impossible to optimize the entire log-likelihood in one step. The algorithm and corresponding asymptotic theory, however, can also be applied to other estimation and inference problems. The asymptotic distribution of the iterative estimation procedure in dependence of the exact number of iterations is particularly useful since researchers limit the latter in realistic applications. As illustrated in the paper, these results can be used, among others, to easily establish the asymptotic efficiency of the feasible generalized least squares (FGLS) estimator.
+Closest to our approach is the procedure proposed by Song, Fan, and Kalbfleisch (2005) who suggest decomposing the log-likelihood into a so-called (simple) working and a (complicated) error part. While the analytical first- and second-order derivatives can be computed for the working part, there is no analytical second-order derivative available for the error part. Then, the log-likelihood's first order condition ­ evaluating the error part at the estimate from previous step ­ is solved to update the estimator. Our approach, however, differs in two important respects: Firstly, our algorithm relies on the decomposition of the parameter space into G sub-spaces and thus is more flexible if  is large. Secondly, we do not require the analytical first-order derivative which makes it more tractable if the
+2
+
+underlying model is complex.
+However, the drawback of relying on a derivative-free optimization of L(·) is that each sub-vector, g, g = 1, . . . , G, should realistically only consist of a few parameters, say up to 10, inducing a curse of dimensionality if  is large. To address the latter and to keep the number of sub-vectors G small, we combine the underlying log-likelihood with a non-concave penalization function, as, for instance, the least absolute shrinkage and selection operator (LASSO), see Tibshirani (1996, 2011), or the SCAD penalty function see Fan and Li (2001). This step makes our approach applicable in high dimensions and thus useful for many comprehensive applications. We derive the asymptotic properties of the resulting sparse iterative procedure building on the results by Fan and Li (2001).
+The small-sample performance of the procedure is illustrated in two comprehensive simulation studies. The first one investigates the properties of hn for a 5-dimensional VARMA model including 24 parameters based on 50 observations. In the second simulation study, we analyze the performance of our estimator for a 15-dimensional VMEM containing 375 parameters based on a sample size of 500. We illustrate that our proposed procedure significantly simplifies the underlying estimation problem and performs sufficiently well even in these inherently high-dimensional settings. Finally, we apply our approach to measure volatility connections between 30 companies by extending the connectedness measure introduced by Diebold and Yilmaz (2014) to a high-dimensional and non-Gaussian setting. This requires estimating prediction error variance decompositions based on a 30-dimensional MA() process of realized volatilities. To allow for a non-Gaussian joint distribution, we model the joint dependence using Vine copulae, see Kurowicka and Joe (2011), and compute the final connectedness measure based on simulated (generalized) prediction error variance decompositions. The resulting model consists of 1860 parameters which are efficiently and sparsely estimated using our approach. Overall, the examples show that the proposed estimation technique performs well even in challenging settings and can serve as a working horse for parameter estimation in complex situations.
+The paper is organized as follows. Section 2 and 3 discuss the estimation details. Section 4 illustrates an application of the procedure in a generalized least squares setting. Section 5 shows the performance of the estimator in two simulation studies. Section 6 presents the empirical application and Section 7 concludes. Proofs are moved to Appendix A.
+
+2. Efficient Multi-Step Estimation
+
+Let the observed data x be a realization of the finite history X d=ef (X1 , . . . , Xn ) of the d-dimensional stochastic process Xi :   Rd, d  N, i = 1, 2, . . . , which is defined on a complete probability space
+(, F , P) with Xi d=ef (Xi1, . . . , Xid) . Let the absolutely continuous probability measure P describe
+
+the complete probabilistic behavior of X. Equivalently, the stochastic behavior of X can also be
+
+characterized by the measurable Radon-Nikody´m density of P denoted by f (X). Based on the -
+
+field Fi-1 d=ef {Xl : l  i - 1} and conditional density fi(·) d=ef fXi|Fi-1(Xi1, . . . , Xid), we rewrite the
+
+density as f (X) =
+
+n i=1
+
+fi(Xi1
+
+,
+
+.
+
+.
+
+.
+
+,
+
+Xid
+
+).
+
+Unless stated differently, we assume that P  P, with
+
+P = {P :     Rr, r  N}, so that the density of P is given by f (·; ) =
+
+n i=1
+
+fi(·;
+
+),
+
+which
+
+is
+
+assumed to be measurable for each    and absolutely continuous on the parameter space .
+
+Assume that the parameter vector    = 1 × 2 × · · · × G can be split up into G sub-vectors
+
+3
+
+g, g = 1, . . . , G, each consisting of rg components, g = 1, . . . , G, with r =
+
+G g=1
+
+rg
+
+denoting
+
+the
+
+total number of parameters. Let 0 = v(1,0, . . . , G,0) denote the (true) parameter vector where the
+
+v(·) operator vectorizes vectors of possibly different dimension, i.e., v(1, . . . , G) d=ef (1 , . . . , G) .
+
+The underlying log-likelihood function is given by L() d=ef L(; X) =
+
+n i=1
+
+i()
+
+with
+
+i() d=ef
+
+log fi(Xi1, . . . , Xid; ). According to Sklar's Theorem, see Sklar (1959), each d-dimensional distri-
+
+bution function can be decomposed into its conditional marginal distribution functions and a con-
+
+ditional dependence component ­ the copula function. Consequently, i() can be decomposed into
+
+the log copula density
+
+c i
+
+(1,
+
+.
+
+.
+
+.
+
+, G)
+
+d=ef
+
+c i
+
+()
+
+depending
+
+on
+
+
+
+and
+
+the
+
+sum
+
+of
+
+log
+
+marginal
+
+densities
+
+mi (1, . . . , k) d=ef
+
+d j=1
+
+log
+
+fXij
+
+|Fi-1
+
+(·;
+
+1
+
+,
+
+.
+
+.
+
+.
+
+,
+
+k
+
+)
+
+depending
+
+on
+
+p
+
+=
+
+k g=1
+
+rg
+
+parameters
+
+split
+
+into
+
+k < G groups, 1, . . . , k. See Joe (1997), Nelsen (2006), and Jaworski, Durante, and H¨ardle (2013)
+
+for comprehensive overviews of copulae and several examples. The log-likelihood can be then written
+
+as
+
+n
+L() = { mi (1, . . . , k) + ci ()} = Lm(1, . . . , k) + Lc(),
+i=1
+
+(1)
+
+where Lm(·) d=ef
+
+n i=1
+
+im(·) denotes the marginal and Lc(·) d=ef
+
+n i=1
+
+ci (·) the copula part.
+
+To keep the
+
+notation simple, we define
+
+and accordingly
+
+L(0) d=ef
+
+L() 
+
+=0
+
+and
+
+L¨(0) d=ef
+
+2L() 
+
+=0
+
+Lg (0) d=ef
+
+L() g
+
+=0
+
+and
+
+L¨g,l (0) d=ef
+
+2L()  g  l
+
+,
+=0
+
+with g, l = 1, . . . , G. An analogous notation is used for the components Lm(·) and Lc(·). Expectations are taken with respect to the measure P and defined as E(·) d=ef E0(·) = EP(·). For a sequence of random variables, vectors or matrices Un is said to be bounded in probability, the notation Un = Op(1)
+is used. The notation Un = Op(Vn) implies for two sequences of compatible random variables, vectors or matrices Un and Vn, UnVn-1 P 0.
+
+2.1. Iterative Estimation
+In non-linear models, first- and second-order derivatives of L(·) are typically complicated, making the maximization of (1) with respect to  challenging. If, moreover, the number of underlying parameters, r, is high (either absolutely or relative to the sample size n), one-step estimation is often numerically impossible. In these situations, it is inevitable to simplify the estimation problem by breaking it up into lower-dimensional and/or less demanding problems which can be solved individually. In most situations, however, the resulting estimators are inefficient since the dependence between the sub-components is neglected in the estimation. Addressing this shortcoming makes it necessary to apply a multi-step estimation procedure which iterates through all sub-model estimations and thus
+4
+
+allows estimates to be successively updated exploiting information from the other steps. A well-known example of this proceeding is the FGLS estimation of a heteroscedastic linear regression model which is efficiently estimated by iterating various times between (covariance-based weighted) least squares estimations of slope parameters and corresponding covariance estimations.
+The iterative algorithm proposed in this paper builds on the idea of iterative multi-step estimation relying on arbitrary decompositions of  into k sub-vectors associated with the marginals and G-k subvectors associated with the copula function. Assuming consistency though inefficiency of the (initial) estimator in Step h = 1 below, we propose the following algorithm:
+
+Algorithm 1. Step h = 1:
+
+(1)
+
+v(11,n, . . . , k1,n) = arg
+
+zero Lm(1, . . . , k)
+v(1 ,...,k )
+
+(2)
+
+v(k1+1,n,
+
+.
+
+.
+
+.
+
+,
+
+1G,n)
+
+=
+
+arg
+
+zero
+v(k+1,...,G)
+
+L cv(k+1 ,...,G ) (11,n ,
+
+.
+
+.
+
+.
+
+,
+
+1k,n,
+
+k+1,
+
+.
+
+.
+
+.
+
+,
+
+G)
+
+Step h > 1:
+
+(1)
+
+1h,n
+
+=
+
+arg
+
+max
+1
+
+L(1,
+
+2h,-n1,
+
+.
+
+.
+
+.
+
+,
+
+Gh-,n1)
+
+(2)
+
+2h,n
+
+=
+
+arg
+
+max
+2
+
+L(1h,n,
+
+2,
+
+3h,-n1,
+
+.
+
+.
+
+.
+
+,
+
+Gh-,n1)
+
+...
+
+(G)
+
+Gh ,n
+
+= arg
+
+max
+G
+
+L(1h,n,
+
+.
+
+.
+
+.
+
+,
+
+hG-1,n
+
+,
+
+G
+
+)
+
+The 2-stage procedure at Step 1 of Algorithm 1 is well known as inference functions for margins and a simple way to obtain consistent estimators of parametric copula-based models, see Joe and Xu (1996). Starting with the initial estimates in Step 1, the Algorithm 1 builds on an iterative estimation of the parameters of each g, given the parameters of the other groups l, l = g, g = 1, . . . , G, estimated in the (instantaneous) previous steps. For a discussion in the context of non-consistent initial estimators, we refer to Song et al. (2005) and the references therein.
+
+2.2. Asymptotic Properties
+
+We assume that the maximum likelihood (ML) estimator n = v(1,n, . . . , G,n) of  can be formulated as the maximizer of L() obtained from solving L() = 0. To show the consistency of hn  h in
+Theorem 1 below we need the following set of assumptions:
+
+Assumption 1. The model is identifiable and the true value 0 is an interior point of the compact parameter space . We assume that the model is correctly specified in the sense that E{ i()/g} = 0 and information equality holds,
+
+Ii,gl() d=ef E
+
+ i()  i() g l
+
+= - E
+
+2 i()  g  l
+
+,
+
+5
+
+for g, l = 1, . . . , G and i = 1, . . . , n.
+
+Assumption 2. The information matrix is I() =
+
+n i=1
+
+Ii(),
+
+with Ii() = {Ii,gl()}Gg,l=1.
+
+Let the
+
+limit of n-1I() P J () be the asymptotic information matrix, which is finite and positive definite
+
+at 0 and n-1L¨() P H() be the asymptotic Hessian, which is finite and negative definite for  
+
+{ : || - 0|| < },  > 0.
+
+Then, we can state the following theorem:
+
+Theorem 1. Let the random variables of the sequence X have an identical conditional density fi(·; ) for which Assumptions 1-2 hold. If 1n P 0, then nh P 0,  h = 2, 3, . . ..
+For deriving a compact formulation of the asymptotic covariance matrix of n1/2(hn - 0), define the number of copula parameters as q = r - p and the matrices
+
+T1 =
+
+Ip 0qp
+
+0pp 0qp
+
+0pq Iq
+
+and
+
+T2 =
+
+Ip 0qp
+
+Ip 0qp
+
+0pq Iq
+
+,
+
+(2)
+
+with p-dimensional identity matrix Ip and (p × q) null matrix 0pq. Moreover, define H1(0) via the relationship
+
+n-1
+
+L¨m(1,0, . . . , k,0) 0pq L¨cv(k+1,...,G),(0)
+
+= H1(0) + Op(1),
+
+where H1(0) denotes the (partial) Hessian resulting from Step 1. To show the asymptotic distribution of the estimator in dependence of the number of iteration steps h, we make the following additional assumptions:
+
+Assumption 3. The score s(0) = v{Lm(1,0, . . . , k,0), Lc(0)} of the decomposed log-likelihood L() = Lm(1, . . . k) + Lc(), with n-1s(0)s(0) P (0), obeys
+
+n-1/2s(0) L N{0, (0)}.
+
+(3)
+
+If X is the finite history of a stationary and ergodic stochastic process, Assumption 3 is then satisfied
+
+by "Gordin's conditions" as follows: Based on the observation-specific score contributions si(0) d=ef
+
+ i()/|=0, denote the long-run covariance by (0) =
+
+ i=-
+
+E
+
+si(0)si(0)
+
+. According to
+
+Gordin (1969),
+
+assuming (i) (0) existing and being finite,
+
+(ii) E {si(0)|si-j(0), si-j-1(0), . . .} P 0 as j   and (iii)
+
+ j=0
+
+E(ij
+
+ij
+
+)1/2
+
+being
+
+finite
+
+with
+
+ij = E {si(0)|si-j(0), si-j-1(0), . . .} - E {si(0)|si-j-1(0), si-j-2(0), . . .} ,
+
+is sufficient to guarantee (3).
+Assumption 4. Define the lower block and upper block triangular matrix of -n-1L¨(0) as Ln and Un, respectively, such that -n-1L¨(0) = Ln - Un with Lgl,n = 0 for g < l  G and Ugl,n = 0 for
+
+6
+
+l  g  G. For the probability limits L and U of Ln and Un, respectively, we assume () < 1, where (·) denotes the spectral radius and  d=ef L-1 U.
+
+Using these assumptions, we can state the following theorem:
+
+Theorem 2. Let the random variables of the sequence X have an identical conditional density fi(·; ) for which Assumptions 1-4 hold. Then,
+
+n1/2(nh - 0) L N 0, Bh(0)Bh ,
+
+where
+
+Bh = h-1 KT1 - {-H(0)}-1 T2 + {-H(0)}-1T2,
+
+and K = -H1(0) -1 .
+
+The theorem shows that the asymptotic covariance of hn has a sandwich form consisting of the covariance of the "decomposed" score s(0), (0), and matrices Bh. The latter can be computed based
+on (0) exploiting information equality (Assumption 1) and the fact that J (0) = T2(0)T2 = -H(0). Since T1(0)T1 is the expectation of the outer score product obtained from the 2-stage procedure in Step 1, the asymptotic covariance matrix of n1/2(n1 - 0) after the first iteration step
+(h = 1) collapses to the well known form
+
+{H1(0)-1}T1(0)T1 {H1(0)-1} .
+
+(4)
+
+Moreover, an important implication of Theorem 2 is that the estimator is asymptotically efficient if h  . This is due to the fact that, by Assumption 1 and 4, limh Bh = J (0)-1T2 and thus the asymptotic covariance matrix of n1/2(hn - 0) is J (0)-1:
+Corollary 1. Under the assumptions of Theorem 2,
+
+lim
+h
+
+n1/2(nh
+
+-
+
+0)
+
+L
+
+N
+
+0, J (0)-1
+
+.
+
+While Assumptions 1-3 are standard, Assumption 4 is usually not imposed in the context of ML estimation. From a mathematical point of view, Assumption 4 ensures the convergence of Algorithm 1, but it is unclear whether () < 1 is guaranteed for arbitrary decompositions of  = v(1, . . . , G). Using the terminology of Song et al. (2005), if U is "larger" than L, then ()  1 and thus the asymptotic normality of the estimator is not guaranteed anymore. Such a situation, however, is unlikely, as J (0) can be decomposed as J (0) = (D - U ) - U, where D = - diag {H11(0), . . . , HGG(0)} is a block diagonal matrix. We can neither verify that () < 1 generally holds, nor find a theoretical or numerical counter-example. Consider for illustration the trivial case of r = 2 and r1 = r2 = 1. Then, the smallest eigenvalue of
+
+L-1 U =
+
+0 - L21 / L11 0 L221 /(L11 L22)
+
+,
+
+is zero and the largest eigenvalue is smaller than one, since the information matrix is positive definite. The case r = 3, however, is already more elaborate and the conclusion () < 1 cannot be drawn
+
+7
+
+straightforwardly due to possibly complex eigenvalues of . A stronger condition implying () < 1, is given by  < 1, where · denotes a matrix norm. Yet, upper bounds constructed from standard
+inequalities are too rough and it can be generally shown that  < 1.
+The condition () < 1 is closely related to the dependence of the group-specific estimators gh,n, g = 1, . . . , G. Two sub-vectors g and l are said to be orthogonal for g = l, if all elements of the corresponding information matrix Jgl(0) are zero, c.f., Lehmann and Casella (1998). According to the structure of L and U, respectively, the blocks of  associated with the vectors g and l, are given by gl = (L-1)g· U·l, where (L-1)g· refers to rows related to g,n. If all pairs of {gh,n, hl,n}g=l are (almost) independent of each other, Assumption 4 will be fulfilled, since U will be close to 0rr and the inverse of L will be mainly driven by the blocks of the main diagonal. Hence, we have a strong conjecture that the condition will most likely be fulfilled if the dependence between the estimates gh,n, g = 1, . . . , G, is not too strong. The latter condition typically holds if the number of sub-vectors G
+(relative to r) does not become too high or (strong) dependence can be ruled out by construction of
+the appropriate sub-vectors.
+
+2.3. Properties under Misspecification
+
+Consider the case where P / P and let the true probability measure G be characterized by an absolutely continuous distribution function defined on Rd with g(X) denoting its measurable Radon-Nikody´m
+density. The observed trajectory X stems from a stochastic process defined on (, F, G). For the remainder of this subsection, expectations are taken with respect to G, so that E(·) d=ef EG(·). Then, the quasi log-likelihood is given by Q() d=ef n-1L(; X). White (1982) builds on the inference of Akaike
+(1973) that the maximizer of Q() estimates the minimizer of the Kullback-Leibler discrepancy between
+G and P, denoted by n, and shows that it converges almost surely to n. The latter is sometimes referred to as the pseudo-true parameter. Suppose analogously to Theorem 1 that n1 - n = Og(1), where Og(·) refers to the probability measure G. Then, under the assumptions stated in White (1994), convergence in probability of nh, h > 1, to n can be established by recursively applying White (1994, Theorem 3.11), which intrinsically establishes the consistency of the 2-stage quasi ML estimator.
+To derive the limiting distribution of n1/2(nh - n), the quantities L and U are re-defined based on H(n) = E{Q¨(n)} whith (L-1 U) = () < 1. Moreover, H1(·) has to be re-defined as
+
+H1(n) = E
+
+Q¨m(1,n, . . . , k,n) 0pq Q¨vc(k+1,...,G),(n)
+
+.
+
+Since the structure of the procedure is preserved and only the probability limits are changed,
+
+h-1{H(n)-1T2 - H1(n)-1T1} - H(n)-1T2 -1 n1/2(nh - n)
+
+(5)
+
+converges in distribution to an r-dimensional normally distributed random variable with covariance
+matrix (n). As in Theorem 2, the asymptotic covariance matrix for Step 1 is identical to that obtained from a 2-stage procedure. For h  , it collapses to
+
+H(n)-1 T2(n)T2 H(n)-1 ,
+
+8
+
+corresponding to the robust covariance matrix as if n1/2(hn -n) is estimated in one step. Accordingly, the robust covariance matrix leads to valid statistical inference under misspecification if the step-wise
+increments of the log-likelihood given by Algorithm 1 converge to zero for increasing h. Furthermore, it collapses to the inverse of the information matrix if fi(·) is correctly specified and information equality holds.
+
+3. Sparse and Efficient Estimation
+The iterative estimation approach proposed in the previous section rests on the idea of L(·) being a complicated function and analytical expressions of L(·) are not available. These properties require derivative-free optimization methods to obtain hg,n, g = 1. . . . , G, at Step h of the algorithm. However, derivative-free optimization routines do not lead to reliable results for a large number of parameters rg in group g, g = 1, . . . , G. Therefore, the number of parameters per sub-vector should be small, which, however, leads to a large number of sub-vectors G, and thus increases the computational burden in each iteration step. Moreover, as discussed in Section 2.1, a large number of sub-vectors makes it more difficult to satisfy the condition () < 1 since the dependence between the sub-vectors generally rises. In contrast, grouping non-orthogonal parameters in one sub-vector leads to a small G and by construction reduces inter-group dependencies. To address the resulting tradeoff between the reliability of derivative-free optimization procedures (suggesting a high G) and the requirement of keeping the dependence between sub-vectors small (suggesting a low G), we propose combining our estimation algorithm with a suitable penalization procedure reducing the model complexity in the first step and providing sparse (though inefficient) estimates as starting point for the iteration steps. Hence, the idea is to replace Step 1 of Algorithm 1 by a penalized 2-stage procedure.
+
+3.1. Penalized 2-Stage ML Estimation
+
+Though alternative forms of penalization are possible, we formulate the procedure based on a SCAD penalization of the parameters of Lm(·) and Lc(·) according to Fan and Li (2001). They suggest a
+penalty function which is zero at the origin and whose first derivative is given by
+
+p,a
+
+(||)
+
+=
+
+I
+
+(||
+
+
+
+)
+
++
+
+max
+
+(a - ||, (a - 1)
+
+0) I
+
+(||
+
+>
+
+)
+
+(6)
+
+for a > 2. Fan and Li (2001) show that this form of penalization function yields unbiased ML estimators which are sparse, i.e., the procedure serves as a thresholding rule setting small estimated coefficients to zero, and are continuous in the data.
+The penalized parameters of the marginals and the copula function are collected in pm d=ef v(1, 2) and pc d=ef v(G-1, G), respectively. Conversely, m d=ef v(3, . . . , k) and c d=ef v(k+1, . . . , G-2) are non-penalized. Fan and Li (2001) penalize all parameters for the sake of simplicity, but point out that their theoretical results also apply for decomposing parameters into penalized and non-penalized components. Such a separation is necessary in our multi-step estimation context. While existing theory mostly discuss shrinking parameters to zero, we introduce so called penalization targets denoted by 1, 2, G-1, G. The latter are user-specific and should imply a reduction of model complexity.
+
+9
+
+This is the case, for instance, (i) if the penalization target of the parameter in a linear model is the
+corresponding null vector yielding a more parsimonious model or, (ii) if the penalization target of
+a copula parameter reflects the independence copula yielding a reduction of model complexity. For ease of notation, define the centered SCAD penalty as p,a () = p,a (| - |), where  denotes the penalization target of .
+In the following analysis, we assume that the independence copula exists as a special case of the considered copula family. Without loss of generality suppose 1,0 = 1 and G,0 = G, i.e., the true parameters coincide with the penalization target. The aim is to group as many parameters in pm and pc as possible, so that shrinking (some of) them implies that fi(·; 0) has a less complicated functional form than fi(·; ) with  = 0. Equivalently, appropriately selected penalization targets imply a centering of the penalty p,a(| · |) around zero, which finally leads to a simpler functional form, for instance, a more parsimonious regression model. Based on the penalized log-likelihoods
+
+r1+r2
+
+Lpm(1, . . . , k) = Lm(1, . . . , k) - n
+
+pnm,am (l,pm ),
+
+l=1
+
+rG-1 +rG
+
+Lpc() = Lc() - n
+
+pcn,ac (l,pc ),
+
+l=1
+
+(7) (8)
+
+we formulate a penalized 2-stage ML estimation procedure as
+
+(1)
+
+v(11,n, . . . , 1k,n) = arg
+
+zero Lpm(1, . . . , k)
+v(1 ,...,k )
+
+(2)
+
+v(1k+1,n, . . . , 1G,n) = arg
+
+zero
+v(k+1,...,G
+
+)
+
+L pv(ck+1
+
+,...,G
+
+)
+
+(11,n,
+
+.
+
+.
+
+.
+
+,
+
+k1,n,
+
+k+1,
+
+.
+
+.
+
+.
+
+,
+
+G
+
+).
+
+In general, the penalties are permitted to be different for each of the penalized coefficients, but we
+assume for simplicity one penalty for each of the log-likelihoods. Even though we suggest a data driven choice of the penalty tuning parameters am and ac, we do not index them by the sample size as they
+are irrelevant for the asymptotic analysis. To formulate the asymptotic properties for the penalized (first-step) n1 , define anm = bmn  and acn = bcn , where · p denotes the Lp-norm, with maximum norm for p = , and
+
+bnm d=ef pmn ,am (21,0), . . . , pnm,am (2r2,0) , bnc d=ef pnc ,ac ((G-1)1,0), . . . , pcn,ac ((G-1)rG-1,0)
+
+.
+
+Theorem 3 below gives the consistency of the penalized 2-stage procedure in the first step, 1n. It mainly relies on Fan and Li (2001, Lemma 1), whose extension to the modified penalty p,a(·) is trivial and therefore not proved here. However, it additionally requires the penalization target being an interior point of the feasible parameter space. Likewise, while Fan and Li (2001) formulate the proof for i.i.d. data, we apply Lemma 1 in a time series context, as the extension is straightforward due to Assumption 3. Additionally, we impose Assumption 5 bounding the third-order derivative of i():
+
+10
+
+Assumption 5. There exists an open subset  of  containing the true parameter 0 such that for almost all Xi, i = 1, . . . , n, the density fi(·; ) admits all third derivatives fi(Xi1, . . . , Xid; )/uvw for all   . Furthermore, there exist functions Muvw(·) such that
+
+ i()  u  v  w
+
+ Muvw(Xi)
+
+for all
+
+  ,
+
+where E {Muvw(Xi)} <  for u, v, w = 1, . . . , r.
+Theorem 3. Let the random variables of the sequence X have an identical conditional density fi(·; ) for which Assumptions 1-3 and 5 hold. Let max{|pnm,am(2l,0)| : 2l,0 = 2l}  0, l = 1, . . . , r2, and max{|pnc ,ac ((G-1)l,0)| : (G-1)l,0 = (G-1)l}  0, l = 1, . . . , rG-1, be satisfied. If nm, nc  0, n1/2nm   and n1/2cn   as n  , then,
+(a) 11,n a.s. 1 and G1 ,n a.s. G,
+(b) 21,n + O(amn ) P 2,0 and 1G-1,n + O(acn) P G-1,0, with anm, acn  0 for nm, cn  0 as n  ,
+(c) m1 ,n P m,0 and c1,n P c,0.
+
+Note, however, that the penalization of certain parameters ­ particularly copula parameters ­ can also be counterproductive. For example, the penalization of the non-diagonal parameters of a correlation matrix does not ensure its invertibility or a meaningfully chosen penalization target for the parameter of the Gumbel or Clayton copula lies on the boundary of the feasible parameter space, which does not support Theorem 3.
+
+3.2. Iterative Efficient and Sparse Parameter Estimation
+According to Theorem 3 (a), the estimators of 1 and G do not need to be updated within the iterative procedure as by assumption their asymptotic limit 1 and G imply a simplified form of L(·) with probability tending to one. Re-estimating the parameters would again lead to a more complex form of L(·). Consequently, we propose a modification of Algorithm 1 by replacing Step 1 by the penalized 2-stage ML estimation procedure and 1 and G being replaced by their penalization targets 1 and G in the subsequent steps h > 1. Hence, the resulting algorithm benefits from a reduced number of parameters to be re-estimated, especially if r1 and rG are large:
+Algorithm 2. Step h = 1
+
+(1)
+
+v(11,n, . . . , 1k,n) = arg
+
+zero Lpm(1, . . . , k)
+v(1 ,...,k )
+
+(2)
+
+v(k1+1,n,
+
+.
+
+.
+
+.
+
+,
+
+G1 ,n)
+
+=
+
+arg
+
+zero
+v(k+1,...,G)
+
+L vp(ck+1 ,...,G ) (11,n ,
+
+.
+
+.
+
+.
+
+,
+
+1k,n,
+
+k+1,
+
+.
+
+.
+
+.
+
+,
+
+G)
+
+Step h > 1:
+
+(1) {blank step}
+
+11
+
+(2)
+
+2h,n
+
+=
+
+arg
+
+max
+2
+
+L(1,
+
+2, 3h,-n1, . . . , Gh--11,n, G)
+
+...
+
+(G - 1)
+
+Gh -1,n
+
+=
+
+arg
+
+max
+G-1
+
+L(1,
+
+h2,n,
+
+.
+
+.
+
+.
+
+,
+
+hG-2,n,
+
+G-1,
+
+G)
+
+(G) {blank step}
+
+For the non-shrunken components of nh, define ~ d=ef v(2, . . . , G-1) and q~ = r~-p~, where r~ =
+
+G-1 g=2
+
+rg
+
+and p~ =
+
+k g=2
+
+rg
+
+.
+
+The
+
+corollary
+
+below
+
+shows
+
+that
+
+the
+
+consistency
+
+of
+
+the
+
+iterative
+
+estimator
+
+~hn
+
+proved
+
+in Theorem 1 also holds in case of Algorithm 2:
+
+Corollary 2. Under the assumptions of Theorem 3, if nm, cn  0, n1/2mn   and n1/2nc   as n  , ~hn P ~0  h = 2, 3, . . ..
+
+Based on the consistency of ~nh, its asymptotic normality can be derived similarly as in Theorem 2.
+
+Let T1, T2 be as in (2), where p and q are replaced by p~ and q~. Define bn d=ef v(bmn , 0s, bcn), with
+
+s=
+
+G-2 g=3
+
+rg
+
+,
+
+and
+
+let
+
+the
+
+matrices
+
+(~),
+
+H1(~),
+
+H(~),
+
+L¨(~)
+
+and
+
+J (~)
+
+depend
+
+on
+
+~.
+
+These
+
+matrices
+
+are the corresponding sub-matrices of (), H1(), H(), L¨() and J (). For instance, (~) =
+
+(1, 2, . . . , G-1, G). To impose Assumption 4 based on the sub-vectors g, g = 2, . . . , G - 1, we
+
+accordingly re-define the limit of L-n 1Un P L-1 U = , where the lower block triangular matrix Ln and the strict upper block triangular matrix Un are arranged according to -n-1L¨(~0) = Ln - Un.
+
+Furthermore, since the asymptotic covariance of ~nh also involves expressions of the second derivative
+
+of the penalty, pn,a(·), denote
+
+nm = diag pmn ,am (21,0), . . . , pmn ,am (2r2,0) , cn = diag pnc ,ac {(G-1)1,0}, . . . , pnc ,ac {(G-1)rG-1,0} .
+
+Corollary 3. Under the assumptions of Theorem 2 and Theorem 3, if mn , cn  0, n1/2nm   and n1/2cn   as n  , then,
+
+n1/2Bh-,1n (~hn - ~0) + h-1Kn bn L N 0, (~0) ,
+
+with Bh,n = h-1 KnT1 - {-H(~0)}-1T2 + {-H(~0)}-1T2, 1
+
+Kn =
+
+n - H1(~0)
+
+-1
+,
+
+and n = diag (mn , 0ss, nc ) .
+
+Hence, compared with Theorem 2, we observe that the first-stage penalization induces two differences: Firstly, the penalization generates a bias h-1Kn bn depending on the first and second derivatives of
+1Since Bh,n is a non-square matrix, Bh-,1n refers to the generalized inverse.
+
+12
+
+the penalty function and vanishing for h  . Secondly, while in the non-penalization case, Kn just equals the inverse (partial) Hessian from Step 1, it is now adjusted by the diagonal matrix of second
+derivatives of the penalty. Likewise, after the first iteration step, the asymptotic covariance matrix of n1/2(~n1 - ~0) is given by
+
+n - H1(~0) -1 T1(~0)T1
+
+n - H1(~0) -1 ,
+
+(9)
+
+which is different from that provided by Fan and Li (2001) since -H1(~0) = J (~0) and T1(~0)T1 = J (~0). The "sandwich structure" follows from the (inefficient) 2-stage procedure in Step 1 and can be
+well approximated by (4), if nm, cn  0. As in Fan and Li (2001), if nm, cn  0, n1/2nm   and n1/2nc   as n  , the estimator ~hn enjoys the oracle property, i.e., ~hn performs as well as the corresponding sub-vector v(h2,n, . . . , hG-1,n) in Theorem 2. In other words, the asymptotic properties of ~nh are the same as if we knew that 1,0 = 1 and G,0 = G, since all elements of bn and n converge to zero if mn , cn  0, n1/2mn  , and n1/2nc   as n  .
+Finally, if () < 1 and information equality holds, limh,n Bh,n = J (~0)-1T2 and therefore,
+
+lim
+h
+
+n1/2(~nh
+
+-
+
+~0)
+
+-L
+
+N{0,
+
+J
+
+(~0)-1}.
+
+(10)
+
+Result (10) is a crucial implication of Corollary 3, showing that also the sparse estimator ~nh is efficient
+as h  . Hence, if the iteration-specific increments of the log-likelihood given by Algorithm 2
+are sufficiently small for a certain h, the finite sample covariance of ~nh can be well estimated by n-1J (~nh)-1 and is independent of the tuning parameters nm, nc and am, ac.
+
+4. Iterative Generalized Least Squares Estimation
+
+Besides complex likelihood-based models, Algorithm 1 and 2 can also be advantageous for maximizing simple(r) log-likelihoods, whose parameters 1, . . . , G, are non-orthogonal to each other. Consider, for example, a d-dimensional VAR(q) model under the assumption of heteroscedastic and/or autocorrelated errors of the form
+
+q
+xi = c + Alxi-l + i,
+l=1
+
+(11)
+
+where c = (c1, . . . , cd) is a vector of constants and Al is a (d × d) matrix. To compactly rewrite (11), define Y d=ef vec(x1, . . . , xn), Zi d=ef (1, xi-1, . . . , xi-q) , Z d=ef (Z1, . . . , Zn) and  d=ef vec(1, . . . , n). Then, (11) can be rewritten as Y = (Z Id) + , where  d=ef vec(c, A1, . . . , Aq). In a situation, where i is assumed to be homoscedastic Gaussian with covariance matrix  = E(ii ), Algorithm 1 and 2 are not beneficial, as  is consistently and efficiently estimated by equation-by-equation OLS
+and the estimators for  and  are independent of each other.
+However, as soon as we allow the sequence {i}in=1 being autocorrelated and/or heteroscedastic, i.e.,   N(0, ), with  = E( ) = In, equation-by-equation OLS estimation is not efficient anymore.
+
+13
+
+In this case, the relevant log-likelihood is given by
+
+L(, )  - 1 log || - 1 22
+
+Y -(Z
+
+Id)
+
+-1 Y -(Z Id) ,
+
+(12)
+
+where  = vec(c, A1, . . . , Ap) and efficient estimation of  usually requires maximizing (12) with respect to  and vech() in one step. While this is nearly impossible in practice in case of a non-small d, the iterative FGLS estimator, constructed from applying Algorithm 1 to (12), approaches the Cram´er-Rao bound according to Corollary 1.
+To illustrate the application of our iterative procedure in such a situation, assign v(1, 2) =  and 3 = vech(), and let v(10,n, 20,n) denote the (consistent) OLS estimator for , where vech(·) denotes half-vectorization of a (symmetric) matrix. As in Algorithm 2, we assume that some VAR parameters are penalized which are without loss of generality collected in 1,0 = 1 = 0. The vector 3 reflects the imposed (parametric) structure of  causing autocorrelation and/or heteroscedasticity. Then, Algorithm 3 yields a sparse estimator for  = v(1, 2, 3), which is asymptotically efficient as h  :
+
+Algorithm 3. Step h = 1:
+
+(1) v(11,n, 21,n) = (Z Z +n Bnm,am (10,n, 02,n) -1 Z Id Y
+
+(2) 13,n = vech Y -(Z Id)v(11,n, 21,n) Y -(Z Id)v(11,n, 21,n)
+
+Step h > 1:
+
+(1) {blank step} (2) h2,n = (Z Id)(hn-1)-1(Z Id) -1 (Z Id)(nh-1)-1 Y
+
+(3) h3,n = vech Y -(Z Id)2h,n Y -(Z Id)h2,n ,
+
+where
+
+Bnm,am (1, 2) = diag pmn ,am (|11|)/|11|, . . . , pnm,am (|2r2 |)/|2r2 | ,
+see Fan and Li (2001). The variable selection at Step 1(1) rests on the assumption of homoscedastic noise  = In   and corresponds to a ridge regression, which is iteratively computed until the estimator converges. Similar to Algorithm 2, only the regressors of the active set of parameters are kept for the computations in Step h > 1. Corollary 3 then yields straightforward statistical inference for a fixed h. If a non-sparse estimator is considered, the consequences of a misspecified covariance structure can be inferred from the arguments in Section 2.3.
+
+14
+
+5. Simulation Study
+We illustrate the finite-sample properties of Algorithm 1 and 2 in two simulation studies. The first one applies Algorithm 1 for a d = 5-dimensionl VARMA process based on r = 24 parameters using n = 50 and n = 150 observations. Though the number of parameters is comparably small and we do not incorporate any penalization, the model's dimension is high as r/n approaches 0.5. The second study is based on a VMEM process of the dimension d = 15 incorporating 375 (partly penalized) parameters and shows the performance of Algorithm 2. All results rely on w = 500 Monte Carlo replications.
+
+5.1. VARMA(1, 1)
+We assume a VARMA(1,1) process with the conditional mean corresponding to the fourth of the data generating processes (DGPs) considered by Kascha (2012), who investigates the quality of the parameter estimates of
+
+xi = A xi-1 + B i-1 + i,
+
+(13)
+
+for different estimation algorithms. Several elements of A and B are constrained to be zero a priori in order to avoid identification problems, see Assumption 1, Kascha (2012) or Lu¨tkepohl (2006) for details.
+While Kascha (2012) assumes i  N(0, ), we assume the errors to be t-distributed, i.e., ij  tj , which are linked by aGaussian copula with correlation matrix R. Hence,  =  /( - 2), for  > 2, and k = Rk kk , k, = 1, . . . , d, where k denotes the k -th element of the error term covariance . To emphasize the importance of using the complete log-likelihood and to challenge the estimation, we assume a strong dependence structure with
+
+1.00 0.31 0.57 0.10 0.74
+0.31 1.00 0.53 0.51 0.78  R = 0.57 0.53 1.00 0.10 0.78 ,  0.10 0.51 0.10 1.00 0.33
+0.74 0.78 0.78 0.33 1.00
+
+9
+
+14
+
+
+
+ = 6. 
+
+ 
+
+7
+
+ 
+
+14
+
+While Kascha (2012) sets the starting values of the optimization procedure to the true parameter values, we choose the start value for the elements of  as 10, for the elements of R as 0.35, and for the non-zero parameters of A and B as 0. The r = 24-dimensional parameter vector  is decomposed into G = 4 sub-vectors: 1 = , 2 = vec(Ak ) and 3 = vec(Bk ), for Ak = 0, Bk = 0 respectively, k, = 1, . . . , d, and 4 = vech(R). Covariance stationarity and invertibility of (13) is ensured with spectral radius (A)  0.57 and (B)  0.78.
+To evaluate the estimation performance after Step h relative to that after Step 1, we compute the ratio of the corresponding absolute estimation errors (henceforth, relative absolute estimation errors, RAE) as given by
+
+RAEhg d=ef
+
+g,0 - hg,n g,0 - g1,n
+
+1.
+1
+
+15
+
+n h=2 h=4 h=6 h = 10 h = 15 h = 20
+
+RAE1h 50 150 0.98 (0.15) 0.88 0.94 (0.20) 0.76 0.93 (0.23) 0.73 0.90 (0.27) 0.72 0.92 (0.28) 0.71 0.92 (0.29) 0.72
+
+RAEh2 50 150 0.80 (0.16) 0.68 0.60 (0.26) 0.41 0.53 (0.28) 0.37 0.50 (0.29) 0.36 0.51 (0.31) 0.37 0.52 (0.31) 0.37
+
+RAE3h 50 150 0.82 (0.14) 0.65 0.62 (0.25) 0.41 0.53 (0.28) 0.39 0.50 (0.34) 0.39 0.51 (0.32) 0.39 0.51 (0.32) 0.39
+
+RAEh4 50 150 0.94 (0.12) 0.94 0.90 (0.21) 0.93 0.90 (0.25) 0.95 0.93 (0.30) 0.95 0.93 (0.31) 0.96 0.92 (0.32) 0.98
+
+Table 5.1: Medians of RAEhg for the sample sizes n = 50 and n = 150, with g = 1, 2, 3, 4, and for 500 replications. The MAD (in parentheses) is given only for n = 50 as the corresponding findings for
+n = 150 are very similar.
+
+Table 5.1 reports the median of the h-specific sampled RAEgh together with the corresponding median absolute deviations (MAD, in parantheses). We observe distinct improvements in terms of the RAE for the first steps of the procedure, e.g., from h = 2 to h = 4 and from h = 4 to h = 6 respectively. Specifically for n = 50, the RAE is larger for hg,n, h  2, than for all other estimators gh,n, h > 2, g = 1, 2, 3, 4. For higher values of h the performance gains generally become smaller and even become (slightly) negative for some parameters. Figure 5.1 shows kernel density estimates (KDE) of the RAEgh for different values of h. We identify three major effects: (i) The distribution of RAEs generally shifts to the left if h increases. This confirms the statistics shown in Table 5.1 and is true for all sub-vectors. The pattern is most distinct for the parameters of the time series model and less pronounced for the parameters of the distribution model. (ii) The RAE distributions of the sub-vectors of time series parameters, 2 and 3, become right-skewed and thus reflect clear performance gains in most cases but also a higher risk of (rare but distinct) deteriorations. This effect is not shown for the distribution and copula parameters, RAE1h and RAEh4 , for which we observe smaller performance gains (on average). This is also confirmed by Table 5.1 reporting a slight deterioration of the quality of the estimates of copula parameters when moving from h = 6 to h = 10. (iii) Particularly for the copula parameter, the KDE becomes more dispersed for increasing h. Hence, for this parameter, there exists a higher risk to obtain a worse performing estimate over the course of iterations, which is not the case for the other three sub-vectors.
+The performance differences between distribution (and copula) parameters and time series parameters are obviously due to the strong correlation between the errors i. These mutual correlations induce a strong dependence between the estimators g,n, g = 1, 2, 3, which is not accounted for in Step 1 but only if h > 1. Consequently, we observe significant improvements in the quality of estimates if h increases. Conversely, the dependence between 4,n and each g,n, g = 1, 2, 3, is mostly captured directly at Step 1. Consequently, for these parameters, additional iteration steps cannot generate strong additional improvements. Overall, the results show a significant superior performance of Algorithm 1 compared to the 2-stage procedure.
+The findings above are also supported by corresponding improvements of the log-likelihood as depicted by Figure 5.2. The median of log-likelihood values strongly increases during the first iterations and then stabilizes at the final level. The graph also illustrates that the distribution of log-likelihood values
+16
+
+1 2
+
+0.0 0.5 1.0 1.5 2.0 0.0 0.5 1.0 1.5
+
+0.0 0.5 1.0 1.5
+
+0.0 0.5 1.0 1.5 2.0 3
+
+0.0 0.5 1.0 1.5 2.0 4
+
+0.0 0.5 1.0 1.5
+
+0.0 0.5 1.0 1.5 2.0
+
+0.0 0.5 1.0 1.5 2.0
+
+Figure 5.1: Kernel density estimates for RAEhg , where h = 2 (solid), h = 4 (dashed), h = 6 (dotted) and h = 20 (dashed-dotted). Although the selected bandwidth of 0.15 leads most likely to a slight
+overfitting of all curves, we keep it constant for all estimates to guarantee a comparable bias.
+
+becomes slightly right-skewed confirming the findings on the RAEs above.
+
+5.2. VMEM(1, 1)
+In this section, we apply Algorithm 2 to a vector multiplicative error model (VMEM), which is a working horse to describe the dynamics of multivariate positive-valued time series x, such as financial trading volumes, market depth or volatilities. The model has a multiplicative structure given by
+
+xi = µi i, µi =  + A xi-1 + B µi-1,
+
+(14)
+
+where µi d=ef E(xi|xi-1, . . .) denotes a d-dimensional vector of conditional means, i is a d-dimensional vector of i.i.d. error terms with E(ij) = 1, j = 1, . . . , d. Moreover, A and B are d-dimensional parameter matrices and " " denotes the Hadamard product. For more details on VMEM processes, see, e.g., Hautsch (2012). To challenge our proposed estimation procedure and illustrate its applicability to VMEM processes of higher dimensions, we set d = 15. This dimension is significantly higher than typically used in extant studies and thus causes numerical challenges induced by a high number of parameters. To limit the complexity in such a high-dimensional process, we, nevertheless, restrict B being a diagonal matrix B = diag(B11, . . . , Bdd). The errors ij are assumed to follow Weibull(j) distributions, whose parameters are randomly chosen from U(0.8, 10).
+Capturing mutual dependencies between the components of i is not straightforward as multivariate
+
+17
+
+log-likelihood -400 -350 -300 -250 -200
+
+1(1) 2
+
+6 10 14 18 22 h
+
+Figure 5.2: Median of log-likelihood values for each iteration step. The gray area covers 95% of the estimates.
+
+extensions of standard distributions for positive-valued random variables do not exist or require strong restrictions. Therefore, extant literature captures the contemporaneous dependence between i by copulas, see, e.g., Bodnar and Hautsch (2012) or Hautsch, Okhrin, and Ristig (2013). Here, we induce dependence between the errors through an R-vine copula, which can generate a broad range of dependence structures including non-linearities, asymmetries and tail dependence. On the other hand, R-vines are not necessarily parsimonious in their representation, as the copula density is split into the product of d(d - 1)/2 parametric (conditional) bivariate copulae. As the particular choice of the copula is not in the major focus of the present simulation study ­ the copula parameter is not penalized/decomposed ­ we refrain from going into more details and refer the reader to Bedford and Cooke (2001), Aas, Czado, Frignessi, and Bakken (2009), Kurowicka and Joe (2011) and Hobæk Haff (2013). To ensure a realistic simulation setup, the R-vine copula is specified based on estimates of empirical distribution functions of financial returns. This allows capturing typical dependencies being present in financial data.
+The off-diagonal elements Ak , k = , k, = 1, . . . , d, are penalized. Out of the 210 off-diagonal elements of A, we set 180 elements equal to zero and keep 30 elements as non-zero, being randomly chosen from U(0.08, 0.2). The diagonal elements of A are sampled from U(0.05, 0.15). The elements of B are chosen such that E(xi) = (Id - A - B)-1 = 1d holds, where j = 0.05, j = 1, . . . , d. The model is covariance stationary as (A + B) = 0.95. We construct the low dimensional vectors v(j, j, Aj·, Bjj) for the re-estimation with Aj· = 0, j = 1, . . . , d and Aj· refering to the j-th row of A. The parameters shrunken to zero are not re-estimated in the iteration steps h, h > 1. Each replication is based on a sample size of n = 500 with r = 375 parameters to be estimated (including
+18
+
+h Parameter
+
+RAEh
+
+SCh
+
+1(1) Ak , k =
+
+0.35 (0.09) 169 (10.38)
+
+Ak , k =
+
+0.34 (0.10) 169 (10.38)
+
+2 j, Ajj, Bjj  j 0.88 (0.17)
+
+-
+
+
+
+0.60 (0.15)
+
+-
+
+Ak , k =
+
+0.32 (0.10) 169 (11.86)
+
+4 j, Ajj, Bjj  j 0.82 (0.18)
+
+-
+
+
+
+0.46 (0.16)
+
+-
+
+Ak , k =
+
+0.31 (0.09) 169 (10.38)
+
+11 j, Ajj, Bjj  j 0.80 (0.18)
+
+-
+
+
+
+0.43 (0.16)
+
+-
+
+Table 5.2: Median values of RAEh and SCh for different parameters. The MAD is given in parentheses. The results are based on 500 replications.
+
+the penalized ones) in total.
+To evaluate the performance of the penalization procedure, we employ the RAE statistics introduced above and furthermore check sign consistency by computing
+SCh d=ef I sign(Ak ,0) = sign(Ahk ,n) .
+k=
+This statistic determines the number of elements of Ak , k = being correctly estimated (un)equal to zero. The results are presented in Table 5.2. Note that the true values of the (non-zero) penalized coefficients are relatively small, making it difficult to discriminate between relevant and non-relevant coefficients. Nevertheless, just around 20% out of the 210 penalized parameters are either estimated unequal zero although they are zero, or estimated zero although they are non-zero. This fraction remains constant in the course of the algorithm. An explanation for this failure rate is the selection of the tuning parameters discussed below. Moreover, RAEh reveals remarkable improvements of the quality of the estimates ­ noticeably for the penalized parameters and the parameters of the marginal distributions whose RAEhs are significantly smaller than 1. Note that we take the maximizer of Lm(1, . . . , k) as reference value in the denominator of the RAEh in order to evaluate the performance of the penalization procedure. Therefore, RAEh for Ak , k = , in Table 5.2 is already smaller than one at Step 1(1). To maximize Lpm(·) we use the ordinary ML estimator as starting value. Zou and Li (2008) provide a comprehensive overview concerning the maximization of non-concavely penalized log-likelihood functions.
+Figure 5.3 descriptively illustrates the convergence of Algorithm 2. The very first range of sample quantiles refers to L(·) evaluated at the ordinary ML estimator. Consequently, the values of the loglikelihood decline because the values of L(1n) must be smaller than the values of L(·) evaluated at the ordinary ML estimator. Moreover, we observe that the range of sample quantiles is wider for Step 1 than for each Step h > 1 and the procedure converges after a few iterations.
+19
+
+log-likelihood 500 1000 1500 2000 2500
+
+1(1) 2
+
+6 10 14 18 22 h
+
+Figure 5.3: Median values of the log-likelihood for each step of the iteration. The gray area includes 95% of the observations.
+
+Remarks on Selecting the Penalization Parameters
+
+The possibly complex functional form of Lm(·) makes the data driven choice of the tuning parameters of the penalty, nm and am, via cross-validation computationally demanding. Furthermore, in a time series setting, the log-likelihood contributions i() might be serially correlated. Hence, instead of
+using classical cross-validation, we split the sample into two parts, S1 and S2, containing, for instance, 80% and 20% of the data. Then, we maximize the non-penalized log-likelihood built from S2 in nm and am, while the estimator v{1,n(, a), 2,n(, a)} defined through Step 1(1) of Algorithm 2 is estimated
+from S1, see, e.g., Sun (2011). Formally, we follow the data driven choice
+
+(mn , am) = arg max Lm {1,n(, a), 2,n(, a), 3,n, . . . , k,n} ,
+(,a)
+
+(15)
+
+where the non-penalized parameters are fixed at values from the ML estimator of the partial log-
+likelihood Lm(·) denoted by 3,n, . . . , k,n. Fitting the tuning parameters of the penalized estimator
+based on the non-penalized log-likelihood can be motivated by the fact that the asymptotic properties
+of the penalized estimator hold, if nm  0 as n  , and that the penalized estimator is the ML estimator for nm = 0. Therefore, training the tuning parameters via (15) ensures nm  0 as n   and leads to a small mn for a finite n. Figure 5.4 indicates the distribution of the fitted tuning parameters, confirming our expectation that am > 2 and nm  0 due to the definition of the SCAD penalty. On average, the values of am are significantly smaller than the traditional value am = 3.7 suggested by
+Fan and Li (2001). For the sake of simplicity, we select just one pair of tuning parameters, which,
+however, implicitly requires that the log densities mij (·) = log fXij|Fi-1(·), j = 1, . . . , d, are similar.
+
+20
+
+am
+
+qqqqqqqqqqqq q qqqq
+
+q
+
+q
+
+qq
+
+q q qq
+
+mn
+
+q qq qq q
+
+q qq
+
+q
+
+q
+
+012345 Figure 5.4: Boxplots for the tuning parameters of the penalization function.
+
+For example, if two marginals would be fundamentally different, selecting the same tuning parameters would deteriorate the statistical performance of the procedure. The choice of the tuning parameters becomes even more relevant, if additionally the number of penalized parameters per margin is very large.
+
+The incorrect shrinkage in roughly 20% of the cases as reported above can also be explained by selecting
+
+just one pair of tuning parameters nm, am for different marginal distribution functions Weibull(j),
+
+j = 1, . . . , d. While i3  Weibull(1.41) and i4  Weibull(0.82), the other components of i follow
+
+Weibull(j) distributions with significantly larger parameters than 1.41 and 0.82, which induce a
+
+different shape for the corresponding log densities
+
+m ij
+
+(·).
+
+Consequently,
+
+the
+
+selected
+
+tuning
+
+parameters
+
+lead to an inappropriate penalization of the parameters associated with the third and fourth time series
+
+leading to a negative bias for the penalized elements of A3· and A4·.
+
+6. Measuring Volatility Connectedness
+Our empirical study builds on Diebold and Yilmaz (2014) who proposed measuring the connectedness between financial firms based on generalized forecast error variance decompositions (GVDs) stemming from the covariance stationary MA() representation of a linear time series model for daily realized asset price volatilities. Given the importance of such connectedness/spillover measures in recent discussions of systemic risk and financial networks, we illustrate an application of our procedure to an extension of the underlying framework as follows: Firstly, while Diebold and Yilmaz (2014) apply the measure only to a few stocks in order to keep the parameterization of the underlying process tractable, we study 30 U.S. companies making the setup more realistic but also significantly more challenging. Secondly, given that we aim at modeling (realized) volatilities, we specify the underlying time series model not as a VAR process for log volatilities but as a VMEM process for plain values thereof. Researchers often model log volatilities instead of the plain series for reasons of tractability and convenience. Indeed, logarithmic transformations ensure positiveness of volatilities by construction and reduce the impact of large outliers. However, when measuring volatility connectedness, it makes a difference whether we measure dependencies in terms of logarithmic or plain series. Therefore, we suggest a parameterization which allows modeling the non-transformed series while ensuring the non-
+21
+
+negativeness of the volatility processes. Thirdly, we allow for deviations from multivariate normality in terms of non-normal marginals (to ensure non-negativeness) which are coupled together with an R-vine copula. The resulting framework is statistically more flexible and realistic but obviously more challenging due to its high parameterization and departures from multivariate normality. However, note that for a dimension of 30, even a Gaussian VAR(3) parameterization as used by Diebold and Yilmaz (2014) cannot be easily estimated by OLS. Depending on the sample size, the need of shrinkage methods is very likely as the number of parameters easily exceeds the number of observations.
+
+Denote the d-dimensional positive-valued time series by x and define the zero-mean martingale difference sequence by i d=ef xi - µi, i = 1, . . . , n, with  = E(ii ). Then, under the assumption (A + B) < 1, the VMEM(1, 1) model in (14) can be rewritten in terms of a MA() parameterization,
+i.e.,
+
+
+
+yi =i +
+
+(A + B)l - (A + B)l-1B i-l = i + li-l,
+
+l=1 l=1
+
+(16)
+
+with yi = xi - {Id - (A + B)}-1 . While in the given context the insights from interpreting the
+
+single elements of the matrix l are rather low, the components of the GVDs "summarize" the ef-
+
+fect from shocking the -th element of i on the k-th time series. Define the H-step prediction
+
+error as i(H) =
+
+H -1 l=0
+
+l i+H -l
+
+and
+
+conditional
+
+on
+
+ ,i+H-l
+
+=
+
+,
+
+l
+
+=
+
+0, . . . , H
+
+-1
+
+as
+
+i,
+
+(H )
+
+=
+
+H -1 l=0
+
+l
+
+{i+H
+
+-l
+
+- E(i+H-l|
+
+,i+H -l
+
+=
+
+)}.
+
+Then,
+
+the
+
+elements
+
+of
+
+the
+
+GVD
+
+are
+
+defined
+
+as
+
+v~k
+
+,H
+
+= ek
+
+[Var {i(H)} - Var {i, ek Var {i(H)} ek
+
+(H)}] ek ,
+
+(17)
+
+where ek = (0, . . . , 0k-1, 1k, 0k+1, . . . , 0) is a (d × 1) vector.
+
+Building on the components of the standardized H-step GVD, whose elements are given by vk ,H =
+
+v~k ,H /
+
+d =1
+
+v~k
+
+,H ,
+
+Diebold
+
+and
+
+Yilmaz
+
+(2014)
+
+propose
+
+three
+
+types
+
+of
+
+aggregated
+
+connected
+
+measures:
+
+(i) the (net) pairwise directional connectedness' from to k are defined as Ck ,H = vk ,H and Ck ,H =
+
+C k,H - Ck ,H , respectively. (ii) The total directional connectedness from others to k is given by
+
+Ck·,H = =k vk ,H , the total directional connectedness to others from by C· ,H = k= vk ,H
+
+and the net total directional connectedness by C ,H = C· ,H - C ·,H . (iii) Accordingly, the total
+
+connectedness in the system is given by CH = k= vk ,H .
+
+As a closed form expression for v~k ,H can only be derived for i being Gaussian white noise, the components v~k ,H are simulated. In particular, the GVD is constructed based on 250 Monte Carlo simulations, where the (conditional centered) moments in (17) are replaced by corresponding sample averages. We conduct this study for  =  , though the simulation-based estimation of the GVDs also supports alternative specifications of . For instance, constructing the measures based on extreme shocks, we might consider  =  with  denoting the fourth standardized moment of  ,i. This can be particularly insightful when copulae are used which incorporate tail dependence in contrast to the Gaussian distribution.
+
+The sequence {l,n}Hl=1 can be computed from An and Bn for arbitrary H > 0. Analogously to the simulation study, we assume ij  Weibull(j), with E(ij) = 1, but restrict the bivariate (un)conditional
+
+22
+
+log - likelihood
+
+C
+
+0 30 60 90
+
+-70000 -50000
+
+1(2) 5 10 15 20 25 CGOOG
+
+1(2) 5 10 15 20 25 CGS
+
+012345
+
+012345
+
+1(2) 5 10 15 20 25
+
+1(2) 5 10 15 20 25
+
+Figure 6.1: Upper panel: log-likelihood values and total systemic connectedness C12 in dependence of h. Lower panel: volatility contagion from Google C·GOOG,12 and Goldman Sachs C·GS,12 in dependence of h. The solid lines refer to the median of the simulated connectedness measures where the gray areas contain 90% of the respective Monte Carlo sample. The dotted-dashed lines refer to the connectedness measures under the assumption of i being Gaussian white noise.
+
+copulae of the R-vine to be the t-copulae. Since the resulting specification involves r = 1860 parameters to be estimated, an efficient and sparse estimation procedure is expected to induce substantial efficiency gains.
+Our analysis employs daily variances estimated using realized kernels as proposed by Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008) for 30 companies listed in Table B.1 over the period 01/01/2007 to 31/12/2008. The list contains several constitutes of the Dow Jones Industrial Average and is completed by various large financial institutions. This allows assessing the connectedness between financial companies and important components of the major U.S. industrial stock index.
+Figure 6.1 summarizes the main estimation results for a forecast horizon H = 12 as in Diebold and Yilmaz (2014).The upper left panel of Figure 6.1 shows the convergence of the log-likelihood function. As in the simulation study, the log-likelihood function sharply decreases as soon as the significant variables are selected and the irrelevant parameters are set to zero. Even though the procedure visually converged, the increments of the log-likelihood at h = 25 are still around 30. They become sufficiently tiny for h  80, but the insights from the remaining iteration steps are rather low for illustration purposes. The slower rate of convergence compared to the simulation study is mainly caused by the
+23
+
+large-dimensional parameter vector. The penalization shrinks 487 out of the 870 penalized off-diagonal elements of A to zero. Therefore, a couple of sub-vectors are comparably large for using derivative-free optimization techniques which additionally slows down the rate of convergence. Moreover, estimates of the R-vine copula reveal strong dependencies between the components of the random vector i, which also increases the number of steps h until convergence of Algorithm 2. As illustrated by Figure B.1, this cross-sectional dependence is due to strong co-movements of the 30 time series. Song et al. (2005) detect similar features of their algorithm in such a setting. In any case, given the separation of the sub-vectors v(j, j, Aj·, Bjj), j = 1, . . . , d, they are merely implicitly dependent through the copula and thus Assumption 4 should be fulfilled.
+The directional connectedness from Google (GOOG) and Goldman Sachs (GS) to other companies of the sample, C·GOOG,12 and C·GS,12, are exemplarily investigated. Based on these measures for volatility contagion, we have identified Google and Goldman Sachs as driving factors for volatility in our sample, as the medians of C·GOOG,12 and C·GS,12 in Figure 6.1 are significantly larger than 1. The lower panel illustrates how the estimates change in dependence of the number of iterations h. As in Section 5.2, the values at h = 0 refer to the non-penalized likelihood estimation at which the medians of C·GOOG,12 and C·GS,12 are already larger than 1. Then, the shrinkage procedure sets several elements of the matrix A to zero and thus the estimated volatility connectedness to the other companies declines as expected. Incoporating the copula into the estimation procedure at Step 1(2) increases both measures (to 1.26) since the components of i+H-l, l = 0, . . . , H - 1 are not mutually independent anymore. Both connectedness estimates stabilize after some fluctuations on a level around 1.69, which is supported by widely symmetric sample quantiles.
+Comparing our estimates with the corresponding connectedness measures built on the GVD under the (misleading) assumption of Gaussian white noise errors i, reveals that our more flexible approach produces on average larger values for C·GOOG,12 and C·GS,12. Hence, imposing (multivariate) normality yields an under-estimation of volatility connectedness. Nevertheless, also the estimates based on the Gaussian GVD react to the penalization and the incorporation of the copula in a similar (and expected) way.
+The total connectedness presented in the upper right panel of Figure 6.1 does not vary with increasing h, but a smaller sample range can be observed. Values of C12 close to 30 indicate strong connectedness for the considered network. Likewise, we also find stable results for the connectedness from others as h increases. Overall, it is well illustrated that our iterative algorithm can be used as a valuable workhorse for the estimation of complex high-dimensional time series models. Moreover, it is shown that inefficient 2-stage estimation procedures may yield significantly different estimates resulting in different interpretations of the underlying effects.
+7. Conclusion
+In this paper, we have proposed an iterative algorithm for maximizing complicated log-likelihood functions and have established the asymptotic properties of the resulting estimator. We have shown that the resulting estimator is asymptotically efficient as the number of iteration steps tends to infinity. As a valuable by-product, we have derived the exact (asymptotic) distribution of the estimator in dependence of the number of iteration steps.
+24
+
+To deal with highly parameterized models, we have combined the procedure with a non-concave penalty reducing model complexity and the curse of dimensionality. While we have focused on multivariate time series models and have illustrated the finite-sample performance of our estimator in a simulation study, the procedure and asymptotic theory can be straightforwardly carried over to several other estimation and inference problems. For example, some are listed in Joe and Xu (1996) and include the multivariate Poisson-Lognormal distribution, multivariate extreme value models and in general copulabased models. Further applications comprise the limited information estimator for the simultaneous probit model and similar models for binary choice variables like the multivariate and the recursive probit model. To illustrate the applicability of the method in realistic but challenging settings, we have estimated volatility connectedness measures constructed from the generalized forecast error variance decomposition of a highly-parameterized non-linear 30-dimensional MA() process of realized volatilities.
+25
+
+A. Mathematical Appendix
+This appendix presents the mathematical proofs of the theorems and corollaries given in Section 2 and 3. Expectations are taken with respect to the (true) measure P and defined as E(·) d=ef E0(·) = EP(·).
+
+Proof of Theorem 1.
+Assume 1g,n is consistent, so that 1g,n = g,0 + Op(1) for g = 1, . . . , G. Note that 12,n satisfies L1(21,n, 12,n, . . . , G1 ,n) = 0. Then, by a Taylor expansion of L1(·) around 1,0 and utilizing the
+mean value theorem it follows that
+
+0 =L1 (1,0, 12,n, . . . , G1 ,n) + L¨11 (¯1, 12,n, . . . , 1G,n) (21,n - 1,0), where ¯1 lies between 12,n and 1,0. This leads directly to
+(21,n - 1,0) = -n-1L¨11 (¯1, 12,n, . . . , G1 ,n) -1 n-1L1 (1,0, 21,n, . . . , G1 ,n).
+
+(18)
+
+The first term of the right hand side of (18) converges in probability to a bounded matrix by Assumption 2. Since 1n is consistent, we obtain
+
+n-1L1 (1,0,
+
+12,n,
+
+.
+
+.
+
+.
+
+,
+
+G1 ,n)
+
+=
+
+lim n-1
+n
+
+E{L1 (0)}
+
++
+
+Op(1),
+
+as n   and since the derivatives of all log-likelihood contributions have a mean zero at 0 by
+Assumption 1, the second term on the right hand side of (18) converges in probability to zero. Hence,
+the product of the two random quantities converge in probability to zero by applying Slutsky's theorem and the consistency of 21,n can be deduced. Given the consistency of 21,n, the consistency of g2,n, g = 2, . . . , G, can be shown in a similar manner. As all sub-vectors 12,n, . . . , G2 ,n are consistent, 2n is consistent.
+
+Proof of Theorem 2. Using a Taylor expansion of Lg (·), g = 1 . . . , G, around 0, the estimator hn satisfies the following equations:
+
+0 =Lg (0) +
+
+L¨gl (0) (lh,n - l,0) +
+
+L¨gl (0) (lh,-n 1 - l,0).
+
+lg l>g
+
+Rewriting this system of equations in matrix notation leads to
+
+n1/2(nh - 0) =Ln-1n-1/2L(0) + L-n 1Unn1/2(hn-1 - 0).
+
+(19)
+
+Note that Ln-1 P L-1, Un P U and L is invertible. Similarly to Song et al. (2005), iterating the
+
+26
+
+recursive system of equations (19) results in
+
+h-2
+
+n1/2(hn - 0) = L-n 1Un h-1 n1/2(1n - 0) +
+
+Ln-1Un l L-n 1n-1/2L(0)
+
+l=0
+
+= L-n 1Un h-1 n1/2(n1 - 0) + Ir - Ln-1Un h-1
+
+Ir - Ln-1Un -1 L-n 1n-1/2L(0) .
+
+(20)
+
+Following basic matrix algebra, we get
+
+Ir - Ln-1Un -1 L-n 1 =
+
+-n-1L¨(0)
+
+-1
+, so that (20) simplifies
+
+to
+
+n1/2(nh - 0) = Ln-1Un h-1 n1/2(n1 - 0) + Ir - L-n 1Un h-1 -n-1L¨(0) -1 n-1/2L(0) .
+
+(21)
+
+A local approximation of the left hand side of T1s(1n) = 0 around 0, with T1s() = v{Lm(1, . . . , k), Lc k+1(), . . . , Lc G()} and T1 from (2), leads to
+
+L m 
+
+(1,0
+
+,
+
+.
+
+.
+
+.
+
+,
+
+ k,0)
+
+ 
+
+L¨m(1,0
+
+,
+
+.
+
+.
+
+.
+
+,
+
+k,0)
+
+   
+0=
+
+
+Lc k+1 (0) ...
+
+   
+
+
++
+
+   
+
+
+L¨ck+1 ...
+
+,1
+
+(0
+
+)
+
+... ...
+
+ 
+
+  
+
+Lc G (0)
+
+  
+
+L¨c G,1 (0)
+
+...
+
+
+
+0pq 
+
+L¨c 1
+
+,G
+
+(0)
+
+   
+
+... 
+
+n1 - 0
+
+.
+
+
+
+L¨c G
+
+,G
+
+(0
+
+ )
+
+d=ef K
+
+Based on the matrix -n-1K -1 P -H1(0) -1, a closed form expression for n1/2(1n - 0) can directly be derived and (21) can be reformulated as
+
+n1/2(nh - 0) = Ln-1Un h-1 -n-1K -1 T1n-1/2s(0) - Ln-1Un h-1 {-n-1L¨(0)}-1 - {-n-1L¨(0)}-1 T2n-1/2s(0),
+
+with T2s(0) = L(0) and T2 from (2). The statement of the theorem follows, as n  , by applying Slutsky's theorem to the right hand side of the latter equation and factorizing the outcome.
+
+Proof of Theorem 3. As L(11,n, . . . , k1,n, k+1, . . . , G) is measurable for each v(k+1, . . . , G)  k+1 × . . . × G and v(k+1, . . . , G) can be chosen to induce the product copula, the existence of the penalized estimator as maximizer of Lpm(·) from (7) is ensured by Fan and Li (2001, Theorem 1). Therefore, the first statement of part (a) follows from Fan and Li (2001, Lemma 1), since the expectation of the third derivative of the log-likelihood contributions are bounded by Assumption 5, n-1/2Lm(1,0, . . . , k,0) = Op(1) by Assumption 3 and n-1L¨m(1, . . . , k) P Hm(1, . . . , k) by Assumption 2. To prove the first statements of (b) and (c), treat Lm(2, m) = Lm(1, 2, . . . , k) and its derivatives
+27
+
+as functions of v(2, m) and apply the mean value theorem around v(2,0, m,0) to the right hand side of
+
+0 =Lm(12,n, m1 ,n) - n pmn ,am (211,n), . . . , pnm,am (12r2,n), 0sm ,
+
+with sm d=ef
+
+k g=3
+
+rg
+
+.
+
+Based on ¯m
+
+lying between 1m,n
+
+and m,0
+
+and ¯2
+
+between 12,n
+
+and 2,0, the
+
+latter equation can be rewritten as
+
+21,n m1 ,n
+
+-
+
+2,0 m,0
+
+= -n-1L¨m(¯2, ¯m) + ¯ nm -1 n-1Lm(2,0, m,0)
+
+-
+
+-n-1L¨m(¯2, ¯m) + ¯ mn -1
+
+bnm 0sm
+
+,
+
+(22)
+
+where ¯ mn = diag{pmn ,am (¯21), . . . , pnm,am (¯2r2 ), 0sm } and p,a(·) denotes the derivative of p,a(·). The statement follows as n  , since the first term on the right hand side of (22) is Op(1) and the second of order O(an).
+The second statement of part (a) follows from Fan and Li (2001, Lemma 1) as v(11,n, . . . , k1,n) is consistent for nm  0 as n  . The second statements of (b) and (c) follow straightforwardly by similar arguments as for proving the first statements of (b) and (c).
+
+Proof of Corollary 2.
+The consistency of ~12,n and ~1G-1,n follows from Theorem 3 for nm, cn  0 as n  . Thus, ~1n can be consistently estimated. Applying Theorem 1 leads to the consistency statement for ~nh.
+
+Proof of Corollary 3.
+To show the asymptotic normality, a closed form expression for n1/2(~n1 - ~0) has to be derived. For this purpose, treat L(~) = L(1, 2, . . . , G-1, G) and Lc(~) = Lc(1, 2, . . . , G-1, G) as a function of ~. Similarly to the proof of Theorem 2, Taylor's expansion around ~0 leads to
+
+L m (1 ,
+
+2,0
+
+,
+
+.
+
+.
+
+.
+
+,
+
+ k,0)
+
+ 
+
+L¨m(1, 2,0 . . . , k,0)
+
+ 0p~q~ 
+
+
+
+   
+0=
+
+
+Lc k+1 (~0) ...
+
+
+
+
+
+ 
+
+
+
++
+
+ 
+
+ 
+
+L¨c k+1,2 (~0) ...
+
+... ...
+
+L¨c 2,G-1 (~0) ...
+
+   
+-
+
+
+n n
+
+ (~1n 
+
+- ~0) -
+
+bn , n
+
+  
+
+
+
+  
+
+LcG-1 (~0)
+
+  
+
+L¨cG-1
+
+,2
+
+(~0
+
+)
+
+.
+
+.
+
+.
+
+L¨cG-1,G-1
+
+(~0
+
+ )
+
+d=ef K
+
+with
+
+-n-1K -1 P
+
+n - H1(~0)
+
+-1
+.
+
+Replacing n1/2(~n1 - ~0) in the corresponding expression of
+
+28
+
+(21) results in
+
+n1/2 (~nh - ~0) + =
+
+Ln-1Un h-1 -n-1K -1 bn L-n 1Un h-1 -n-1K -1 T1 - {-n-1L¨(~0)}-1T2
+
++{-n-1L¨(~0)}-1T2 n-1/2s(~0),
+
+(23)
+
+with s(~0) = v{Lm(1, 2,0, . . . , k,0), Lc 2(~0), . . . , LcG-1(~0)}. Given that n-1/2s(~0) L N{0, (~0)}, applying Slutsky's theorem to the product on the right hand side of (23), as n  , completes the
+proof.
+
+B. List of Companies
+This appendix presents a list of the 30 companies used in Section 6.
+
+realized volatility 20 40 60 80 100 140
+
+2007-01-03
+
+2007-08-31
+
+2008-05-02
+
+2008-12-31
+
+Figure B.1: Median of the realized volatilities over the companies presented in Table B.1. The gray area includes 0.90% of the observations.
+
+29
+
+Company 3M AT&T ConocoPhillips Caterpillar Chevron Cisco Systems Coca-Cola DuPont ExxonMobil General Electric Goldman Sachs Google Hewlett-Packard Home Depot IBM Intel Johnson & Johnson JPMorgan Chase Kraft Foods McDonald's Merck & Co MetLife Microsoft Pfizer Procter & Gamble United Technologies U.S. Bancorp Walmart Walt Disney Wells Fargo
+
+Ticker MMM T COP CAT CVX CSCO KO DD XOM GE GS GOOG HPQ HD IBM INTC JNJ JPM KFT MCD MRK MET MSFT PFE PG UTX USB WMT DIS WFC
+
+Sector Conglomerate Telecommunications Oil & Gas Heavy Equipment Oil & Gas Networking Equipment Beverage Chemicals Oil & Gas Conglomerate Banking IT IT Retailing IT IT Medical Equipment Banking Food Processing Restaurants Pharmaceuticals Financial Services IT Pharmaceutical Consumer Goods Conglomerate Banking Retail Mass Media Banking
+
+Table B.1: Basic information of the companies used in Section 6.
+
+References
+Aas K, Czado C, Frignessi A, Bakken H (2009). "Pair-Copula Constructions of Multiple Dependence." Insurance, Mathematics and Economics, 8(2), 182­198.
+Akaike H (1973). "Information Theory and an Extension of the Maximum Likelihood Principle." In 30
+
+BN Petrov, F Csa´ki (eds.), Second International Symposium on Information Theory, pp. 267­281. Akad´emiai Kiado.
+Barndorff-Nielsen O, Hansen P, Lunde A, Shephard N (2008). "Designing Realized Kernels to Measure the Ex-Post Variation of Equity Prices in the Presence of Noise." Econometrica, 76, 1481­1536.
+Bedford T, Cooke RM (2001). "Probability Density Decomposition for Conditionally Dependent Random Variables Modeled by Vines." Annals of Mathematical and Artificial Intelligence, 32, 245­268.
+Bodnar T, Hautsch N (2012). "Modeling Time-Varying Covariances of Trading Processes: CopulaBased Dynamic Conditional Correlation Multiplicative Error Processes." SFB 649 Discussion Paper 2012-44, Sonderforschungsbereich 649, Humboldt-Universita¨t zu Berlin, Germany.
+Diebold FX, Yilmaz K (2014). "On the Network Topology of Variance Decompositions: Measuring the Connectedness of Financial Firms." Journal of Econometrics, forthcoming.
+Fan J, Li R (2001). "Variable Selection via Nonconcave Penalized Likelihood and Its Oracle Properties." Journal of the American Statistical Association, 96(456), 1348­1360.
+Gordin MI (1969). "The Central Limit Theorem for Stationary Processes." Soviet Math. Dokl., 10, 1174­1176.
+Hautsch N (2012). Econometrics of Financial High-Frequency Data. 1 edition. Springer, Berlin.
+Hautsch N, Okhrin O, Ristig A (2013). "Modeling Time-Varying Dependencies between PositiveValued High-Frequency Time Series." In P Jaworski, F Durante, WK H¨ardle (eds.), Copulae in Mathematical and Quantitative Finance. Springer.
+Hobæk Haff I (2013). "Parameter Estimation for Pair-Copula Constructions." Bernoulli, 19(2), 462­ 491.
+Jaworski P, Durante F, H¨ardle WK (2013). Copulae in Mathematical and Quantitative Finance, volume 213 of Lecture Notes in Statistics. Springer.
+Joe H (1997). Multivariate Models and Dependence Concepts. Chapman & Hall, London.
+Joe H, Xu JJ (1996). "The Estimation Method of Inference Functions for Margins for Multivariate Models." Technical Report 166, Department of Statistics, University of British Columbia.
+Kascha CJ (2012). "A Comparison of Estimation Methods for Vector Autoregressive Moving-Average Models." Econometric Reviews, 31(3), 297­324.
+Kurowicka D, Joe H (2011). Dependence Modeling: Vine Copula Handbook. World Scientific Publishing Company, Incorporated.
+Lehmann E, Casella G (1998). Theory of point estimation. 2 edition. Springer.
+Lu¨tkepohl H (2006). New Introduction to Multiple Time Series Analysis. Springer.
+Nelsen RB (2006). An Introduction to Copulas. Springer, New York.
+31
+
+Sklar A (1959). "Fonctions de R´epartition `a n Dimension et Leurs Marges." Publications de l'Institut de Statistique de l'Universit´e de Paris, 8, 299­231.
+Song PX, Fan Y, Kalbfleisch JD (2005). "Maximization by Parts in Likelihood Inference." Journal of the American Statistical Association, 100, 1145­1158.
+Sun Y (2011). "Regularization for High Dimensional Time Series Models." PhD-thesis, University of Cincinnati.
+Tibshirani R (1996). "Regression Shrinkage and Selection via the Lasso." Journal of the Royal Statistical Society: Series B (Statistical Methodology), pp. 267­288.
+Tibshirani R (2011). "Regression Shrinkage and Selection via the Lasso: a Retrospective." Journal of the Royal Statistical Society: Series B (Statistical Methodology), 73(3), 273­282.
+White H (1982). "Maximum Likelihood Estimation of Misspecified Models." Econometrica, 50, 1­25. White H (1994). Estimation, Inference and Specification Analysis. 1 edition. Cambridge University
+Press, Cambridge. Zou H, Li R (2008). "One-Step Sparse Estimates in Nonconcave Penalized Likelihood Models." The
+Annals of Statistics, 36(4), 1509­1533.
+32
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Principal Component Analysis in an Asymmetric Norm" by Ngoc Mai Tran, Maria Osipenko and Wolfgang Karl Härdle, January 2014.
+002 "A Simultaneous Confidence Corridor for Varying Coefficient Regression with Sparse Functional Data" by Lijie Gu, Li Wang, Wolfgang Karl Härdle and Lijian Yang, January 2014.
+003 "An Extended Single Index Model with Missing Response at Random" by Qihua Wang, Tao Zhang, Wolfgang Karl Härdle, January 2014.
+004 "Structural Vector Autoregressive Analysis in a Data Rich Environment: A Survey" by Helmut Lütkepohl, January 2014.
+005 "Functional stable limit theorems for efficient spectral covolatility estimators" by Randolf Altmeyer and Markus Bibinger, January 2014.
+006 "A consistent two-factor model for pricing temperature derivatives" by Andreas Groll, Brenda López-Cabrera and Thilo Meyer-Brandis, January 2014.
+007 "Confidence Bands for Impulse Responses: Bonferroni versus Wald" by Helmut Lütkepohl, Anna Staszewska-Bystrova and Peter Winker, January 2014.
+008 "Simultaneous Confidence Corridors and Variable Selection for Generalized Additive Models" by Shuzhuan Zheng, Rong Liu, Lijian Yang and Wolfgang Karl Härdle, January 2014.
+009 "Structural Vector Autoregressions: Checking Identifying Long-run Restrictions via Heteroskedasticity" by Helmut Lütkepohl and Anton Velinov, January 2014.
+010 "Efficient Iterative Maximum Likelihood Estimation of HighParameterized Time Series Models" by Nikolaus Hautsch, Ostap Okhrin and Alexander Ristig, January 2014.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

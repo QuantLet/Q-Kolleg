@@ -1,0 +1,5736 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2010-038
+Pre-Averaging Based Estimation of Quadratic Variation in the Presence
+of Noise and Jumps: Theory, Implementation,
+and Empirical Evidence
+Nikolaus Hautsch* Mark Podolskij**
+* Humboldt-Universität zu Berlin, Germany ** ETH Zürich, Switzerland
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Pre-Averaging Based Estimation of Quadratic Variation in
+the Presence of Noise and Jumps: Theory, Implementation, and Empirical Evidence 
+
+Nikolaus Hautsch
+
+Mark Podolskij 
+
+July 2010
+
+Abstract
+This paper provides theory as well as empirical results for pre-averaging estimators of the daily quadratic variation of asset prices. We derive jump robust inference for pre-averaging estimators, corresponding feasible central limit theorems and an explicit test on serial dependence in microstructure noise. Using transaction data of different stocks traded at the NYSE, we analyze the estimators' sensitivity to the choice of the pre-averaging bandwidth and suggest an optimal interval length. Moreover, we investigate the dependence of pre-averaging based inference on the sampling scheme, the sampling frequency, microstructure noise properties as well as the occurrence of jumps. As a result of a detailed empirical study we provide guidance for optimal implementation of pre-averaging estimators and discuss potential pitfalls in practice.
+Keywords: Quadratic Variation; Market Microstructure Noise; Pre-averaging; Sampling Schemes; Jumps.
+JEL Classification: C14, C22, G10
+1 Introduction
+The availability of high-frequency data has significantly influenced research on volatility estimation during the last decade. Inspired by the seminal papers by Andersen, Bollerslev, Diebold, and Labys (2001) and Barndorff-Nielsen and Shephard (2002) the idea of estimating daily volatility using realized measures relying on intraday data has stimulated a new and active area of volatility modelling and estimation.1
+This paper provides new theory, implementation details as well as extensive and detailed empirical results for the class of pre-averaging estimators originally introduced by
+This research is supported by the Deutsche Forschungsgemeinschaft (DFG) via the Collaborative Research Center 649 `Economic Risk'.
+Institute for Statistics and Econometrics and Center for Applied Statistics and Economics (CASE), Humboldt-Universit¨at zu Berlin as well as Quantitative Products Laboratory (QPL), Berlin, and Center for Financial Studies (CFS), Frankfurt. Email: nikolaus.hautsch@wiwi.hu-berlin.de. Address: Spandauer Str. 1, D-10178 Berlin, Germany. Email: nikolaus.hautsch@wiwi.hu-berlin.de.
+Department of Mathematics, ETH Zu¨rich, HG G32.2, 8092 Zu¨rich, Switzerland, Email: mark.podolskij@math.ethz.ch.
+1For a recent survey on a wide range of literature, see, e.g., (Andersen, Bollerslev, and Diebold 2008).
+1
+
+N. Hautsch and M. Podolskij (2010)
+
+2
+
+Jacod, Li, Mykland, Podolskij, and Vetter (2009). The paper's aim is two-fold: First, as an important theoretical contribution we extend existing theory by deriving jump robust inference for pre-averaging estimators. In this context, we develop feasible central limit theorems as well as appropriate local estimators for underlying components of pre-averaging estimators' asymptotic variance. To address serial dependence in market microstructure noise we suggest an explicit test. Second, we provide evidence on the widely unknown properties of pre-averaging estimators in practice. We shed light on their empirical performance and analyze the impact of implementation details, such as the optimal choice of local pre-averaging windows, the role of sampling frequency, finite-sample adjustments as well as the impact of the sampling scheme in dependence of noise properties and jumps.
+The main difficulty in estimating the daily quadratic variation of asset prices using noisy high-frequency data is how to optimally employ a maximum of information without being affected by so-called market microstructure noise arising from market frictions, such as the bid-ask bounce or the discreteness of prices, inducing a deviation of the price process from a continuous semi-martingale process. As discussed, e.g., by Hansen and Lunde (2006), among others, market microstructure noise can lead to severe biases and inconsistency of the estimators when the sampling frequency tends to infinity. In order to overcome these effects, sparse sampling, e.g., based on 20 minutes, has been proposed as an ad hoc solution (see, e.g., Andersen, Bollerslev, Diebold, and Labys (2003)). The major disadvantage of sparse sampling, however, is the enormous data loss and the resulting inefficiency of the estimator. As a result, various methods for bias corrections and filtering of noise effects have been proposed in the literature. The most prominent and general approaches are the realized kernel estimator by Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008), the two-scale estimator by Zhang, Mykland, and A¨it-Sahalia (2005) and the pre-averaging estimator by Jacod, Li, Mykland, Podolskij, and Vetter (2009).2 While the empirical performance and properties of kernel type estimators are analyzed in Hansen and Lunde (2006) and Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008), the empirical properties of pre-averaging estimators are widely unknown and have not been studied systematically yet. As also illustrated by Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008), the estimators' empirical (finite-sample) properties can significantly deviate from theoretical (asymptotic) properties making finite-sample and data-specific adjustments necessary and ultimately important in financial practice. In this context, implementation details, such as the appropriate choice of plug-in estimators, the role of data properties as well as the underlying sampling scheme play a crucial role.
+This paper is motivated by the need for a better understanding of how pre-averaging estimators and corresponding inference work in practice and how they should be optimally implemented. Using transaction and quote data from different stocks traded at the New York Stock Exchange we study the estimators' dependence on the choice of the underlying local pre-averaging interval, the role of the sampling scheme (i.e., calendar time sampling vs. business time sampling, transaction price sampling vs. midquote price sampling) and the impact of the sampling frequency. A new test on the serial dependence in microstructure noise yields deeper insights into the impact of noise properties on the estimator's performance. An important contribution of this paper is the development of jump robust inference for pre-averaging estimators and corresponding feasible central limit theorems. Empirical implementation using estimators of local variance components provide evidence on jump frequencies and the impact of jumps on estimation errors.
+Employing pre-averaging based inference to transaction and quote data of a cross-
+2See Andersen, Bollerslev, and Diebold (2008) for an overview of alternative approaches.
+
+N. Hautsch and M. Podolskij (2010)
+
+3
+
+section of NYSE stocks covering different liquidity classes we gain insights into the sensitivity of the estimators and tests for jumps as well as noise dynamics to the length of the underlying local pre-averaging interval and find a data-driven MSE minimizing choice to be empirically preferable. In this context, finite sample adjustments of the estimator and the underlying sampling scheme are particularly important. Using an optimal preaveraging scheme we find jump proportions between 5% and 10% on average. Ignoring the possibility of jumps in the price process leads to an under-estimation of 95% confidence intervals of approximately 15% on average.
+Moreover, our results suggest implementing pre-averaging estimators based on maximally high sampling frequencies. A reduction in sampling frequency tends to imply an 'oversmoothing' of volatility resulting in negative biases. Finally, benchmarking the preaveraging estimators to realized kernels and sparsely sub-sampled realized variance estimators we show that basic pre-averaging is most robust to the choice of the underlying sampling scheme. As a result of this analysis we derive suggestions for optimal implementation of this class of estimators and tests in practice.
+The remainder of the paper is organized as follows: In Section 2, we present the basic case with underlying conditionally independent noise without jumps, discuss the underlying theoretical framework and provide evidence on the optimal choice of the preaveraging interval. Section 3 considers pre-averaging estimators under the assumption of continuous semimartingales with dependent noise and presents empirical evidence based on an explicit test. In Section 4, we discuss the discontinuous case including the possibility of jumps. Finally, in Section 5, the time series properties and the impact of sampling frequencies and schemes are analyzed while Section 6 concludes.
+
+2 Pre-Averaging Estimators for the Quadratic Variation: The Continuous Case
+
+2.1 The Basic Model
+
+It is well-known in finance that, under the no-arbitrage assumption, price processes must follow a semimartingale (see, e.g., Delbaen and Schachermayer (1994)). In this section, we consider a continuous semimartingale (Xt)t0 of the form
+
+tt
+Xt = X0 + asds + sdWs.
+00
+
+(2.1)
+
+Here, W denotes a one-dimensional Brownian motion, (as)s0 is a ca`gl`ad drift process and (s)s0 is an adapted ca`dla`g volatility process. Moreover, t denotes (continuous) calendar time.
+
+However, due to various market frictions, such as price discreteness or bid-ask spreads,
+
+the efficient price X is contaminated by noise. Thus, we can only observe a noisy version Z
+
+of the process X. More precisely, we consider a filtered probability space (, F, (Ft)t0, P)
+
+on which we define the process Z, observed at n time points, indexed by i = 0, 1, . . . , n,
+
+as
+
+Zt = Xt + Ut , t  0 ,
+
+(2.2)
+
+where Ut denotes the error term. In case of transaction time sampling (TRTS), i indexes the (irregular) time points associated with each n-th trade. Hence, n = [N/n] with
+
+N. Hautsch and M. Podolskij (2010)
+
+4
+
+N denoting the number of trades until t. In case of calendar time sampling (CTS), i indexes equal-spaced time intervals of length n with n = [t/n]. Here, the price of the most previous observation occurring before the end of the sampling interval is used (previous tick sampling). For convenience, we show all theoretical relationships using the CTS notation. However, all relationships also hold for TRTS with i, n and n accordingly defined.
+We are in the framework of high frequency asymptotics or so-called 'in-fill' asymptotics, i.e. n  0. We assume that Ut's are, conditionally on the efficient price X, centered and independent, i.e.,
+
+E(Ut|X) = 0 , Ut  Us , t = s , conditionally on X.
+
+(2.3)
+
+Furthermore, we assume that the conditional variance of the noise process U , defined as
+
+t2 = E(Ut2|X) ,
+
+(2.4)
+
+is ca`dla`g, and introduce the process
+
+Nt(q) = E(|Ut|q|X) ,
+
+(2.5)
+
+which denotes the qth conditional absolute moment of the process U . The model (2.2) has been originally introduced by Jacod, Li, Mykland, Podolskij, and Vetter (2009). In particular, it allows for time-varying variances of the noise and dependence between the efficient price X and the microstructure noise U . These features are important as they are in accordance with the stylized facts observed for high frequency observations. To better understand our framework, let us demonstrate some examples.
+
+Example 2.1 (i) (Additive i.i.d. noise) Consider the discretely observed process
+
+Zin = Xin + in ,
+where (in)i0 is an i.i.d. noise with Ein = 0, Ei2n = 2, and X  . Then, condition (2.3) is obviously satisfied. The assumption of i.i.d. noise process is traditionally used in the first approaches dealing with microstructure effects in high frequency finance (see, e.g., Zhang, Mykland, and A¨it-Sahalia (2005) and BarndorffNielsen, Hansen, Lunde, and Shephard (2008)).
+
+(ii) (Additive i.i.d. noise + rounding) Consider the process of the form
+
+Zin = 
+
+Xin + in 
+
+,
+
+where  > 0, (in)i0 is as in (i) and follows a U ([0, ]) distribution. Then,
+
+t2 = 2
+
+Xt 
+
+-
+
+Xt 2 
+
+is ca`dla`g and condition (2.3) is fulfilled ({x} denotes the fractional part of x). This example is rather interesting from two perspectives. First, the noise part has a timevarying variance and is not independent from X. But the more intriguing observation is the following: it is well-known that after pure rounding at fixed level  > 0, it is, in general, impossible to estimate the quadratic variation of X. However, adding noise process (with U ([0, ]) distribution) regularizes the problem and the quadratic variation of X (and other quantities of interest) becomes feasible as we will see in the following sections.
+
+N. Hautsch and M. Podolskij (2010)
+
+5
+
+2.2 The Pre-Averaging Method and Asymptotic Results
+
+Our main goal is the estimation of the integrated variance (or quadratic variation) defined
+
+as
+
+t
+
+IVt = [X]t = u2du.
+
+(2.6)
+
+0
+
+The pre-averaging method as originally introduced by Podolskij and Vetter (2009) is based
+
+on certain local moving averages that reduce the influence of the noise process U . Below,
+
+we briefly review the asymptotic theory for the pre-averaging method as presented in
+
+Jacod, Li, Mykland, Podolskij, and Vetter (2009).
+
+To construct the estimator, we choose a sequence kn of integers, which satisfies
+
+kn1n/2
+
+=
+
+
+
++
+
+1
+o(n4 )
+
+(2.7)
+
+for some  > 0, and a non-zero real-valued function g : [0, 1]  R, which is continuous, piecewise continuously differentiable such that g is piecewise Lipschitz, and g(0) = g(1) =
+0. Then, g is associated with the following real valued numbers:
+
+1
+1 = (g(s))2ds ,
+0
+
+1
+2 = (g(s))2 ds ,
+0
+
+1(s) =
+
+11
+g(u)g(u - s)du , 2(s) = g(u)g(u - s)du ,
+ss
+
+1
+ij = i(s)j(s)ds ,
+0
+
+i, j = 1, 2.
+
+s  [0, 1] ,
+
+Example 2.2 A typical example of a function g : [0, 1]  R, which we use in the empirical section, is given by g(x) = x  (1 - x). In this case, the afore-mentioned constants are
+
+1 = 1,
+
+2
+
+=
+
+1 12
+
+,
+
+11
+
+=
+
+1 6
+
+,
+
+12
+
+=
+
+1 96
+
+,
+
+22
+
+=
+
+151 80 640
+
+.
+
+The pre-averaged returns are given as
+
+kn
+
+Z
+
+n i
+
+=
+
+g
+
+j=1
+
+j kn
+
+ni+j Z ,
+
+inZ = Zin - Z(i-1)n .
+
+(2.8)
+
+Notice that the latter performs a weighted averaging of the increments nj Z in the local window [in, (i + kn)n]. It is intuitively clear that such an averaging diminishes the influence of the noise to some extent. The window size kn is chosen to be of order n-1/2 to find a balance between the two conflicting convergence rates that are due to the diffusive part and the noise part. This choice will lead later to optimal convergence rates.
+Our main statistical instruments are the realized variance
+
+[t/n]
+
+RVtn =
+
+|ni Z|2 ,
+
+i=0
+
+(2.9)
+
+N. Hautsch and M. Podolskij (2010)
+
+6
+
+and the pre-averaging estimator
+
+[t/n]-kn
+
+V (Z, 2)tn =
+
+|Z
+
+n i
+
+|2
+
+,
+
+(2.10)
+
+i=0
+
+which is a direct analogue of RV based on pre-averaged returns Zin. We remark that RVtn is not an appropriate estimator of the integrated volatility in the noisy diffusion model
+
+(2.2). More precisely, we have that
+
+n 2
+
+RVtn
+
+-P
+
+t
+u2 du,
+0
+
+(2.11)
+
+i.e., a normalized version of RVtn converges to the integrated conditional variance of the noise process U (see, e.g., Jacod, Li, Mykland, Podolskij, and Vetter (2009)).
+
+Denote a mixed normal distribution with expectation 0 and (conditional) variance V 2 by M N (0, V 2). Then, the main result of this subsection is the following theorem.
+
+Theorem 2.3 Assume that the process Nt(2) is locally bounded. Then, we have
+
+
+
+n 2
+
+V
+
+(Z,
+
+2)nt
+
+-P
+
+t 0
+
+u2 du
+
++
+
+1 22
+
+t
+u2 du.
+0
+
+By (2.11) we obtain a consistent estimator of IVt by
+
+
+
+Ctn :=
+
+n 2
+
+V
+
+(Z,
+
+2)nt
+
+-
+
+1n 222
+
+RVtn
+
+-P
+
+I Vt
+
+=
+
+t
+u2 du.
+0
+
+(2.12)
+
+Furthermore, when the process Nt(8) is locally bounded, we deduce the associated central
+
+limit theorem
+
+n-1/4(Ctn - IVt) -st M N (0, t) ,
+
+(2.13)
+
+where the convergence is stable in distribution (see Renyi (1963) for the definition of stable
+
+convergence), t =
+
+t 0
+
+u2du
+
+and
+
+u2
+
+is
+
+defined
+
+by
+
+u2
+
+=
+
+4 22
+
+22u4
+
++
+
+212
+
+u2 u2 
+
++
+
+11
+
+u4 3
+
+.
+
+(2.14)
+
+Proof: See Theorem 3.1 in Jacod, Li, Mykland, Podolskij, and Vetter (2009).
+
+2
+
+We remark that the estimator Ctn has the convergence rate 1n/4, which is known to be the best attainable (see Gloter and Jacod (2001)). In order to obtain a feasible version
+of stable convergence in (2.13) we require a consistent estimator of the conditional variance
+t, which is given in the following proposition.
+
+Proposition 2.4 Assume that the process Nt(8) is locally bounded. Then, we have
+
+nt
+
+=
+
+422 324
+
+[t/n]-kn
+
+|Z
+
+n i
+
+|4
+
+i=0
+
++
+
+4n 3
+
+12 23
+
+-
+
+221 24
+
+[t/n]-2kn
+
+i+2kn
+
+|Zni |2
+
+|jn Z |2
+
+i=0 j=i+kn+1
+
++
+
+n 3
+
+11 22
+
+-
+
+2
+
+121 23
+
++
+
+2212 24
+
+[t/n]-2
+|inZ|2|ni+2Z|2 -P t.
+i=1
+
+N. Hautsch and M. Podolskij (2010)
+
+7
+
+Proof: See Theorem 3.1 in Jacod, Li, Mykland, Podolskij, and Vetter (2009).
+
+2
+
+Now, by Proposition 2.4 and the properties of stable convergence, we deduce the con-
+
+vergence in distribution
+
+n-1/4(Ctn - nt
+
+I Vt )
+
+-d
+
+N (0, 1).
+
+(2.15)
+
+From the latter we can obtain the confidence regions for IVt.
+
+Remark 2.5 Clearly, we are also able to estimate other random quantities of similar form
+
+as
+
+t 0
+
+u2du.
+
+Consider
+
+a
+
+random
+
+variable
+
+of
+
+the
+
+type
+
+tt
+
+t
+
+Tt = a u4du + b u2u2 du + c u4 du
+
+00
+
+0
+
+for given constants a, b, c. Following the arguments of Remark 4 in Jacod, Li, Mykland, Podolskij, and Vetter (2009) a consistent estimator of T is obtained by
+
+Ttn
+
+=
+
+a 3222
+
+[t/n]-kn
+|Zni |4
+i=0
+
++n
+
+b22 - 2a1 2422
+
+[t/n]-2kn i=0
+
+|Z in |2
+
+i+2kn j=i+kn+1
+
+|jn Z |2
+
++
+
+n 4
+
+c
+
++
+
+a12
+
+- b212 422
+
+[t/n]-2
+|inZ|2|ni+2Z|2 -P Tt.
+i=1
+
+(2.16)
+
+For instance, when taking (a, b, c) = (1, 0, 0), we obtain a consistent estimator of the
+
+integrated quarticity
+
+t 0
+
+u4 du.
+
+2.3 Finite Sample Adjustments
+
+To reduce the finite sample bias in case of too small sampling frequencies we need to slightly modify our statistics. First, let us introduce the finite sample analogues of the quantities 1, 2, ij, 1(s), 2(s) as given by
+
+1kn
+
+=
+
+kn
+kn
+j=1
+
+g
+
+j+1 kn
+
+-g
+
+j kn
+
+2
+,
+
+2kn
+
+=
+
+1 kn
+
+kn-1
+g2
+j=1
+
+j kn
+
+k1n (j)
+
+=
+
+kn i=j+1
+
+g
+
+i-1 kn
+
+-g
+
+i kn
+
+g
+
+i-j-1 kn
+
+-g
+
+i-j kn
+
+,
+
+kn
+
+2kn (j) =
+
+g
+
+i=j+1
+
+i kn
+
+g
+
+i-j kn
+
+,
+
+k11n
+
+=
+
+kn
+
+kn-1
+(1kn (j))2
+
+-
+
+1 2
+
+(k1n
+
+(0))2
+
+,
+
+j=0
+
+2k2n
+
+=
+
+1 kn3
+
+kn-1
+(2kn (j))2
+
+-
+
+1 2
+
+(k2n
+
+(0))2
+
+,
+
+j=0
+
+k12n
+
+=
+
+1 kn
+
+kn-1
+1kn (j)k2n (j)
+
+-
+
+1 2
+
+1kn
+
+(0)2kn
+
+(0)
+
+.
+
+j=0
+
+N. Hautsch and M. Podolskij (2010)
+
+8
+
+Note that ikn  i, kiln  il and ikn(j) - i(j/kn)  0 (i, l = 1, 2), but the above approximations are the "correct" quantities (i.e., these are the quantities that really appear in the proof). Now, we redefine our main statistics as follows:
+
+Ctn,a =
+
+1
+
+-
+
+1kn n 222kn
+
+-1
+
+ [t/n] n ([t/n] - kn + 2)2kn
+
+V
+
+(Z,
+
+2)tn
+
+-
+
+1kn n 222kn
+
+RVtn
+
+and
+
+tn,a =
+
+1
+
+-
+
+1kn n 222kn
+
+-2
+
+42k2n [t/n] 3(2kn )4([t/n] - kn
+
++
+
+1)
+
+[t/n]-kn i=0
+
+|Z¯in|4
+
++
+
+4n[t/n] 3([t/n] - kn + 1)
+
+1k2n (2kn )3
+
+-
+
+k22n 1kn (2kn )4
+
+[t/n]-kn
+
+i+2kn
+
+|Z¯in|2
+
+|nj Z|2
+
+i=0 j=i+kn+1
+
++
+
+n[t/n] 3([t/n] - 2)
+
+1k1n (2kn )2
+
+-
+
+2k12n 1kn (2kn )3
+
++
+
+k22n (1kn )2 (2kn )4
+
+[t/n]-2
+|inZ|2|in+2Z|2 ,
+i=1
+
+where the subscript a stands for adjusted. Note that the finite-sample adjustments do not influence the asymptotic results.
+To explain the afore-mentioned modifications let us consider the statistic Ctn,a. First, the factor [t/n]/([t/n] - kn + 1) in the definition of Ctn,a is an adjustment for the true number of summands in V (Z, 2)nt . On the other hand, we have that
+
+n 2
+
+RVtn
+
+
+
+t
+u2 du
+0
+
++
+
+n 2
+
+I
+
+Vt
+
+,
+
+where the error of this approximation is of order n and has expectation 0. This means that the original statistic Ctn actually estimates
+
+1
+
+-
+
+1kn n 222kn
+
+I Vt .
+
+This explains the appearance of
+
+1
+
+-
+
+1kn n 22 2kn
+
+-1 in the definition of Ctn,a.
+
+2.4 Choosing  in Practice
+To analyze the empirical properties of the pre-averaging estimators and their sensitivity to the choice of  we employ transaction and quote data of the stocks Exxon (XOM), Citigroup (C), Homedepot (HD), Sonoco Products Co. (SON), Tektronik (TEK) and Zale Corporation (ZLC) traded at the New York Stock Exchange (NYSE) between May and August 2006 corresponding to 88 trading days. The sample represents an arbitrary cross-sectional selection covering highly and less liquid stocks. We focus on four sampling schemes:
+
+(i) calendar time sampling (CTS) using transaction prices, (ii) calendar time sampling (CTS) using mid-quotes,
+
+N. Hautsch and M. Podolskij (2010)
+
+9
+
+(iii) transaction time sampling (TRTS) using transaction prices, (iv) tick change time sampling (TTS) using mid-quotes.
+
+CTS is commonly used in the empirical literature (see, e.g., Andersen, Bollerslev,
+
+Diebold, and Labys (2003)) and is a natural choice if the sampling frequency is moderate
+
+(e.g., 10 minutes). However, it faces the problem of sampling mainly zero return intervals if
+
+the sampling frequency is very high. In this case, TRTS is a more natural sampling scheme
+
+since one samples only whenever a transaction has occurred avoiding sampling artificial
+
+zero returns. However, even in this case, a high number of zero returns can be sampled
+
+since many trades do not necessarily imply a price or quote change. As an alternative,
+
+TTS ignores any zero returns and samples only whenever quotes have been changed. Table
+
+1 gives descriptive statistics on the number of trades, quote arrivals and non-zero returns
+
+for all stocks. On average, we observe between approximately 650 to 4, 400 trades and
+
+6, 800 to 32, 000 quote arrivals per day. Thus the sample covers a substantial range of
+
+different liquidity classes. The table gives also information on the magnitude of market
+
+microstructure noise as represented by its variance t2 =
+
+t 0
+
+u2 du
+
+and
+
+estimated
+
+by
+
+
+
+^ 2t
+
+=
+
+-
+
+1 N -1
+
+iN=2(iN Z)(Ni-1Z)
+
+
+
+N (iN Z)2 i=1 2Nt0
+
+if Ni=2(iN Z)(iN-1Z) < 0, otherwise,
+
+(2.17)
+
+where Ni Z denotes trade-to-trade returns and N 0 is the number of all non-zero tradeto-trade returns. Eq. (2.17) corresponds to the estimator proposed by Oomen (2006)
+
+based on TRTS employing all transactions, i.e. n = N and  = 1. As it provides only
+
+positive variance estimates as long as the first-order autocorrelations of trade returns are
+
+negative, we replace it by
+
+N (iN Z)2 i=1 2N 0
+
+whenever
+
+iN=2(iN Z)(Ni-1Z)  0. The latter
+
+estimator is motivated by (2.11) in case of i.i.d. noise. As suggested by Oomen (2006),
+
+^t := ^t2/(IV t/N ) gives the noise-to-signal ratio per trade, where IV t is computed as the
+
+average of 10-min realized variance estimates based on 100 (equally-spaced) sub-grids over
+
+the 10min interval (henceforth RV10).3 As shown in Table 1, ^2t is varying substantially across the different stocks, with ^t being quite stable ranging between approximately 0.2
+
+to 0.4. Moreover, we also report the first order empirical autocorrelation for trade-to-
+
+trade price and mid-quote returns. We observe that the magnitude of serial correlation
+
+substantially varies across the sample. The negative sign is well confirmed by the literature
+
+and is pre-dominantly driven by the bid-ask bounce effect. Interestingly, we find even
+
+higher negative autocorrelations based on mid-quote returns. This yields evidence for
+
+significant reversals in quote processes. Hence, quote changes induced, e.g., by a trade or
+
+a limit order arrival tend to be reversed quickly. Corresponding evidence is also confirmed
+
+by Hautsch and Huang (2009) analyzing the quote impact of order arrivals based on blue
+
+chip stocks. See also Hansen and Lunde (2006) for an extensive discussion of empirical
+
+properties of market microstructure noise effects.
+
+To gain insights into the performance of the proposed pre-averaging estimators we benchmark them against the most common competing approaches employed in recent literature. In particular, we use the sub-sampled 10min RV estimator (RV10) based on trade prices, the maximum likelihood estimator proposed by Ait-Sahalia, Mykland, and Zhang (2005) and the realized kernel (RK) estimator introduced by Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008) based on the Tukey-Hanning2 kernel with optimal
+
+3See in the Appendix for implementation details.
+
+N. Hautsch and M. Podolskij (2010)
+
+10
+
+bandwidth. For implementation details, see the Appendix. The pre-averaging estimators and their asymptotic variances are computed as described in the previous subsection. As the estimators are not necessarily positive in all cases we bound them from below by zero. This happens, however, quite rarely and only in cases where either  or n are chosen to be very large or in case of an insufficient number of intraday observations (as sometimes occurring in cased of more illiquid stocks). Throughout the paper all quadratic variation estimates are reported in terms of averaged annualized volatilities (i.e., standard deviations) in percentages. Summary statistics of all estimators and statistics computed in the sequel of the paper are given by Tables 5 to 10 in the Appendix.
+Figures 1 and 2 show averaged estimates of Ctn and Ctn,a for different choices of  based on 3 secs CTS using transaction prices and mid-quote changes as well as TRTS and TTS.4 The estimators' sensitivity to the choice of  and thus the width of the local pre-averaging window is highest if  is small. This sensitivity is particularly strong in case of TRTS and TTS inducing a strongly negative bias if  is small. This bias is obviously induced by the fact that in finite samples, the statistic Ctn estimates An · IVt with
+
+An =
+
+1
+
+-
+
+1kn n 222kn
+
+I Vt
+
+(see Section 2.3). For   0, An is severely downward biased. This effect is strongest in case of T(R)TS. For CTS, the bias is significantly smaller (or virtually not existing). In
+these cases, the finite sample adjustments can be nearly neglected. Since 3 sec CTS and T(R)TS employ essentially very similar underlying price or quote sampling information,
+the different -sensitivity of both sampling schemes is only explained by a higher sampling frequency -n 1 in case of CTS resulting in 7, 800 sampling intervals per day and scaling up An toward one. Hence, CTS based on possibly high frequencies (i.e.,  3 sec) is suggested to remove finite sample biases. Conversely, as shown in Table 1, even for very
+actively traded assets, T(R)TS does not induce sufficiently many sampling intervals to ensure An  1. Hence, in case of T(R)TS, scaling by A-n 1 as in Ctn,a is essential to reduce the estimator's negative bias and ensures stabilizing the estimates for small values
+of . However, even after the finite-sample adjustment, we still observe a slightly negative bias of the estimator in case of T(R)TS. This is obviously induced by a relatively strong impact of the noise-induced component 1nRVtn/(222) driving down the estimator if kn is small. In this case, the width of the local window is not sufficient to diminish the influence of noise. For larger values of  and thus kn, this effect vanishes and we observe a stabilization of the estimator.
+Second, for larger values of , the impact of the underlying sampling scheme diminishes
+and the estimates stabilize and converge (on average) to the RV10 estimates. This is particularly true for the blue chips while for the less liquid assets even for higher values of
+ still slight deviations are observed. In these cases, the pre-averaging estimators are below those of the realized kernel. Conversely, both estimators are quite similar (on average) for values of  around 0.4 to 0.6. This choice of  seems to widely resemble the optimal
+bandwidth choice in the realized kernel according to Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008). Overall, these results suggest choosing  not too small but rather
+
+4Note that in case of high values for , i.e., high values of kn, the pre-averaging estimators cannot necessarily be computed when there are not sufficient intraday observations. This might occur particularly for the less liquid assets. In this case, the corresponding figures are based on only those trading days for which all estimators can be computed for all values of  avoiding any sample selection effects. The range of analyzed realizations of  is chosen to guarantee using at least 90% of the overall sample.
+
+N. Hautsch and M. Podolskij (2010)
+
+11
+
+conservatively confirming the results by Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008) (for details see in the Appendix).
+
+To illustrate the estimators' sensitivity to the choice of  for individual trading days, Figures 3 and 4 show Ctn,a in dependence of  for the first 12 days in the sample using TRTS and CTS, respectively. Confirming the averaged results it turns out that the estimators' sensitivity is highest for small values of  whereas they tend to stabilize for larger preaveraging intervals. Nevertheless, we observe that the shapes can substantially vary from day to day. This is induced by daily variations in trading frequencies, noise and specific intraday price paths causing different sensitivity to pre-averaging. Based on the plots of the corresponding price paths for the first 12 trading days in the sample (Figures 5 to 7), we find evidence for the estimator's sensitivity to the choice of  being highest if the price path tends to be not sufficiently smooth over the course of the trading day. In these situations, pre-averaging based on too large local windows seems to induce an under-estimation of the quadratic variation. These results suggest that a universal choice of  is obviously sub-optimal and  should be chosen rather day-specific.
+
+To analyze the impact of the underlying sampling frequency, Figure 8 shows the sensitivity of Ctn and Ctn,a based on TRTS employing different sampling frequencies (n  {1, 3, 5, 10, 20, 30, 50}). As expected, the finite-sample adjustment becomes even more
+important when n is large, i.e., the sampling frequency is small. Particularly if n exceeds approximately 5, the negative biases for small values of  become substantial.
+Nevertheless, the lower panel of Figure 8 shows that in these cases, the finite-sample
+adjustment is very effective and significantly reduces the bias. Moreover, we observe a
+slight downward bias of the estimator with increasing n. Hence, pre-averaging based on too large local windows seems to imply an 'over-smoothing' of volatility.
+
+of
+
+Figures 9 and 10 depict the average values the pre-averaging estimates without and with
+
+ofifnitthee-saamppprloexaimdjautsetmsteanntds,ard1n/d4eviattiaonnds
+
+1n/4 t,a, respectively. The underlying sampling schemes are CTS based on 3 sec in-
+
+tervals and T(R)TS employing all trades or price changes, respectively. For the liquid
+
+assets, we observe that the standard deviation is monotonically increasing in  regardless
+
+of the finite-sample adjustment. Hence, using a larger pre-averaging window ultimately
+
+increases the estimation error. Here, the effect of additional smoothing is obviously over-
+
+compensated by a smaller number of observations (induced by larger local windows). For
+
+the less liquid stocks, the corresponding plots reveal slight non-monotonicities with in-
+
+creasing variances for small values of . These effects are, however, only visible in case of
+
+finite-sample adjustments and T(R)TS.
+
+The relationships revealed by Figures 1 to 9 indicate an obvious trade-off between bias and efficiency. For small values of , the estimators are most efficient but tend to be biased and most sensitive to the choice of . Conversely, larger values of  induce a stabilization and convergence of the estimator toward RV10 but a decline in efficiency.
+
+To suggest a data-driven optimal choice of , we propose choosing  as the minimizer of the mean square error (MSE) evaluated against a benchmark IVt, i.e.,
+
+ := arg minM SE = arg min(Ctn,a - IVt)2 + nt,a.
+
+An obviously critical choice is the benchmark IVt used to compute the bias. We choose IVt
+
+as RV10 yielding a benchmark which tends to be unbiased, robust to market microstructure
+
+noise and does not require pre-estimating plug-in parameters such as t2 and
+
+t 0
+
+u4 du
+
+as,
+
+e.g., in case of a realized kernel. Since no analytical solution for the MSE minimization is
+
+N. Hautsch and M. Podolskij (2010)
+
+12
+
+available we compute  using a grid search algorithm covering the range [0.05; 3]. Then, having , we compute the optimal window size as kn = n-1/2.
+Figures 11 and 12 show histograms of the resulting (daily) choices of  and kn based on MSE minimization using highest frequency T(R)TS and 3 sec CTS. Corresponding
+summary statistics are reported in Tables 5 to 10. With exception of ZLC, we observe that the average values of  are relatively stable across stocks. Nevertheless, they differ
+significantly in dependence of the underlying sampling scheme. While T(R)TS and CTS based on price observations produce values of  ranging in most cases between 0.5 and 0.8 on average, CTS based on mid-quote observations yields values of  between 0.9 and 1.2. This induces optimal window sizes kn which increase with the underlying (average) sampling frequency yielding values between 30 and 60 for T(R)TS and 60 to 120 for
+3 sec CTS. Figures 13 and 14 show the corresponding distributions for lower sampling
+frequencies, in particular T(R)TS with n = 3 and CTS using 15 secs. We observe that for the more liquid assets,  tends to become larger which is obviously driven by a larger
+bias if the sampling frequency declines and  is small (recall Figure 8). Conversely, for the less liquid stocks,  slightly declines due to comparably higher variances. Hence, the relationship between  and the underlying sampling frequency is non-monotonous and depends also on the underlying trading frequency. Nevertheless, the dependence of kn and the sampling frequency is more clear-cut. By comparing Figures 12 and 14, for all stocks the window size kn becomes smaller if the underlying sampling frequency increases.
+
+3 Continuous Semi-Martingales with Dependent Noise
+
+3.1 Pre-Averaging with Dependent Noise
+
+Model (2.2) implies that the noise process is uncorrelated, which is not realistic at very high frequencies (see, e.g., Hansen and Lunde (2006)). In this section, we allow for serial correlation in the noise process and derive the corresponding asymptotic results for the pre-averaging method. We consider a model
+
+Zin = Xin + Ui ,
+
+(3.18)
+
+where X and U are independent, and (Ui)i0 is a stationary q-dependent sequence (for some known q > 0), i.e., Ui and Uj are independent for |i-j| > q. We define the covariance function by
+(k) := cov(U1, U1+k).
+Similarly to the first convergence in Theorem 2.3 (in the framework of (2.2)), we obtain the following results.
+
+Lemma 3.1 Assume that EU12 < . Then, we have
+
+
+
+n 2
+
+V
+
+(Z,
+
+2)tn
+
+-P
+
+t 0
+
+u2 du
+
++
+
+1t 22
+
+2
+
+with q 2 = (0) + 2 (k).
+k=1
+
+(3.19)
+
+N. Hautsch and M. Podolskij (2010)
+
+13
+
+Proof: A careful inspection of the proof of Theorem 3.1 in Jacod, Li, Mykland, Podolskij, and Vetter (2009) shows that the first consistency result of Theorem 2.3 remains valid for the q-dependent noise. Indeed, the main ingredient of the afore-mentioned proof is the convergence in law
+
+kn
+
+U
+
+n i
+
+-d
+
+N (0, 12),
+
+0  i  [t/n] - kn,
+
+and
+
+the
+
+independence
+
+of
+
+U ni ,
+
+U
+
+n j
+
+for
+
+|i -
+
+j|
+
+>
+
+kn
+
++
+
+q,
+
+which
+
+both
+
+follow
+
+from
+
+the
+
+q-
+
+dependence of the noise process U .
+
+2
+
+Similarly to Theorem 2.3 we obtain a bias which has to be estimated from the data. The estimation procedure is a bit more involved than in the previous section. We introduce a class of estimators given by
+
+[t/n]
+
+tn(k) = n
+
+ni Zni+kZ,
+
+i=0
+
+k = 0, . . . , q + 1.
+
+(3.20)
+
+In the econometric literature such estimators are called realized autocovariances (see, e.g.,
+Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008)). The following lemma describes the asymptotic behaviour of tn(k).
+
+Lemma 3.2 Assume that EU12 < . Then, we obtain
+
+tn(0) -P 2t((0) - (1)) ,
+
+tn(k) -P t(2(k) - (k - 1) - (k + 1)) , k = 1, . . . , q - 1 ,
+
+tn(q) -P t(2(q) - (q - 1)) ,
+
+tn(q + 1) -P -t(q).
+
+Proof: Observe that
+
+[t/n]
+
+[t/n]
+
+[t/n]
+
+tn(k) = n
+
+inU ni+kU +
+
+inXin+kX +
+
+(ni U ni+kX + inXin+kU )
+
+i=0 i=0
+
+i=0
+
+[t/n]
+
+= n
+
+inU ni+kU + OP(n)
+
+i=0
+
+for all fixed k  0, because U and X are independent, and E[|ni X|2]  Cn (uniformly in i). The assertion of Lemma 3.2 follows now by the law of large numbers for q-dependent
+
+random variables.
+
+2
+
+Notice that Lemma 3.2 provides estimates n(0), . . . , n(q) of (0), . . . , (q) that are obtained by a simple recursion:
+
+n(q)
+
+=
+
+-
+
+tn
+
+(q + t
+
+1)
+
+,
+
+n(q
+
+-
+
+1)
+
+=
+
+-
+
+tn(q) t
+
++
+
+2n(q)
+
+,
+
+n(q
+
+-
+
+2)
+
+=
+
+-
+
+tn
+
+(q - t
+
+1)
+
++
+
+2n(q
+
+-
+
+1)
+
+-
+
+n(q).
+
+N. Hautsch and M. Podolskij (2010)
+
+14
+
+Thus, we deduce a n-1/2­consistent estimator 2n = n(0) + 2
+
+q k=1
+
+n(k)
+
+of
+
+2
+
+which
+
+can
+
+be used for bias correcting the statistic V (Z, 2)nt . The asymptotic results are presented in
+
+the following theorem.
+
+Theorem 3.3 Assume that EU12 < . Then we have
+
+
+
+Ctn(q) :=
+
+n 2
+
+V
+
+(Z,
+
+2)tn
+
+-
+
+1t 22
+
+2n
+
+-P
+
+I Vt .
+
+Furthermore, when EU18 < , we deduce the associated central limit theorem
+
+1n/4(Ctn(q) - IVt) -st M N (0, t(q)) ,
+
+where t(q) =
+
+t 0
+
+u2(q)du
+
+and
+
+u2(q)
+
+is
+
+defined
+
+by
+
+u2(q)
+
+=
+
+4 22
+
+22u4
+
++
+
+212
+
+2u2 
+
++
+
+11
+
+4 3
+
+.
+
+(3.21) (3.22) (3.23)
+
+Proof: The results follow along the lines of the proof of Theorem 3.1 in Jacod, Li, Myk-
+
+land, Podolskij, and Vetter (2009). The justification is exactly the same as in the proof of
+
+Lemma 3.1.
+
+2
+
+As before, we need to estimate the conditional variance t(q) to obtain a feasible ver-
+sion of (3.22). In fact, the estimation procedure is a bit easier than the one presented in Section 2, because the quantity 2 is not time-varying.
+
+Proposition 3.4 Assume that EU18 < . Then, we obtain
+
+tn(q)
+
+=
+
+422 324
+
+[t/n]-kn
+|Zni |4
+i=0
+
++
+
+8n2 n 2
+
+12 23
+
+-
+
+221 24
+
+[t/n]-2kn
+|Z in |2
+i=0
+
++
+
+4n4 3
+
+11 22
+
+-
+
+2
+
+121 23
+
++
+
+2212 24
+
+-P t(q) ,
+
+and it holds that
+
+1n/4(Ctn(q) - nt (q)
+
+I Vt )
+
+-d
+
+N (0,
+
+1).
+
+Proof: Applying Theorem 3.3 from Jacod, Podolskij, and Vetter (2009) for p=2,4 (which is also valid for the q-dependent noise) we deduce that
+
+[t/n]-kn
+
+n1-p/4
+
+|Zin|p -P mp
+
+t
+(2u2 + -112)p/2du,
+
+i=0 0
+
+where mp = E[|N (0, 1)|p]. Thus, the consistency result of Proposition 3.4 readily follows.
+
+The properties of stable convergence together with tn(q) -P t(q) imply the central limit
+
+theorem.
+
+2
+
+N. Hautsch and M. Podolskij (2010)
+
+15
+
+The corresponding finite-sample adjustments are obtained similarly as in Section 2.3 and are given by
+
+Ctn,a(q) :=
+
+1
+
+-
+
+1kn n 222kn
+
+-1
+
+ [t/n] n ([t/n] - kn + 1)2kn
+
+V
+
+(Z,
+
+2)nt
+
+-
+
+1kn t 22kn
+
+n2
+
+(3.24)
+
+and
+
+
+
+tn,a(q) =
+
+1
+
+-
+
+1kn n 222kn
+
+-2
+
+3
+
+42k2n [t/n]
+
+2kn
+
+4
+([t/n] - kn + 1)
+
+[t/n]-kn
+
+|Z
+
+n i
+
+|4
+
+i=0
+
+
+
++
+
+8n2
+
+ n[t/n
+
+]
+
+2([t/n] - kn + 1)
+
+
+
+k12n 2kn
+
+3
+
+-
+
+2k2n 1 2kn 4
+
+
+
+[t/n]-2kn i=0
+
+|Zni |2
+
+
+
++
+
+44n[t/n] 3([t/n] - kn + 1)
+
+
+
+1k1n 2kn
+
+2
+
+-
+
+2
+
+1k2n 1kn 2kn 3
+
++
+
+k22n 1kn 2kn 4
+
+2   .
+
+(3.25)
+
+Figures 15 and 16 show the average realizations of Ctn(1) and Ctn,a(1) in dependence of . Comparing these plots with Figures 1 and 2 as discussed in the previous subsection
+we observe that in case of CTS, the dependent-noise robust version of the pre-averaging
+estimator provides similar values as the i.i.d.-noise version. Conversely, for TTS and TRTS we find evidence for Ctn,a(1) > Ctn,a. Comparing the expressions for Ctn,a(q) and Ctn,a (and standardizing t to one) this can only be induced by
+
+nRVtn 2
+
+>
+
+2n.
+
+Obviously,
+
+if
+
+there
+
+is
+
+serial
+
+dependence
+
+in
+
+the
+
+noise
+
+process,
+
+the
+
+estimator
+
+n RVtn 2
+
+is
+
+upward
+
+(downward) biased if there is negative (positive) serial dependence in the noise process
+
+{U }. As shown below, we indeed find evidence for significant serial correlations in the
+
+noise process inducing an upward bias of the expression nRVtn/2. These effects are most distinct for TTS for which also the strongest serial dependence in the return process is
+
+found (see Table 1). Similar but weaker effects are observable in case of TRTS. As shown
+
+in Figure 16, the corresponding finite-sample adjustments seem to imply an over-correction
+
+of the estimators' negative biases inducing a slight upward bias of the estimator if  is
+
+small. This indicates that Ctn,a(1) tends to be more sensitive to the choice of  than Ctn,a.
+
+Figure 17 shows the empirical distributions of the percentage deviation between Ctn,a and Ctn,a(1). Confirming our results above it turns out that the deviations are virtually zero for CTS but are clearly higher (in magnitude) for TRTS and TTS. Tables 5 to 10 show
+
+that for an optimal choice , the average percentage deviation is around -3% to -5%
+
+for TRTS and between -5% and -10% for TTS. According to Figure 16 these differences
+
+vanish if  becomes larger. Based on these findings we can conclude that pre-averaging
+
+based on CTS seems to yield estimates which are less sensitive to the choice of  and
+
+serial dependence in noise. The fact that in case of CTS Ctn,a and Ctn,a(1) are very similar indicates that the i.i.d. noise version Ctn,a seems to be empirically (though not theoretically) quite robust. Conversely, pre-averaging based on TRTS or TTS seems to be very sensitive
+
+to adjustments for serially dependent noise. This indicates less robustness of the estimator
+
+and/or the fact that microstructure noise is more dominant in this sampling scheme.
+
+N. Hautsch and M. Podolskij (2010)
+
+16
+
+3.2 A Test for Dependence
+
+In the previous subsection we assumed that the number of non-vanishing covariances q is known. In practice, however, we need a decision rule on the choice of q based on the discrete observations of the price process. Formally speaking we require a test procedure to decide whether (k) = 0 for some k  1. To illustrate the underlying idea consider a 1-dependent noise model. In this case we would like to test whether (1) = 0 (i.e., the noise process is actually i.i.d.) or not. Thus, we obtain the following hypothesis:
+
+H0 : (1) = 0 , H1 : (1) = 0.
+
+By a standard central limit theorem for q-dependent variables we deduce that
+
+n-1/2
+
+-
+
+tn(2) t
+
+-
+
+(1)
+
+-d N
+
+0,
+
+2 t
+
+,
+
+where tn(2) is defined by (3.20) and  2 is given by
+
+2
+ 2 =  (0) + 2  (k) ,
+k=1
+
+ (k) = cov((U1 - U0)(U3 - U2), (U1+k - Uk)(U3+k - U2+k)).
+
+Obviously, we require a consistent estimator of  (k), 0  k  2, to construct a test
+statistic. Set Hin = inZin+2Z. Then, by the weak law of large numbers q-dependent variables we deduce that
+
+n n(k) =
+
+[t/n] i=0
+
+HinHin+k - HinHin+3
+
+t
+
+-P  (k) ,
+
+0  k  2.
+
+The latter implies that n2 = n(0) + 2
+
+2 k=1
+
+n(k)
+
+is
+
+a
+
+consistent
+
+estimator
+
+of
+
+ 2.
+
+Then,
+
+the test statistic is given by
+
+Sn
+
+=
+
+-n-1/2tn(2) . tn2
+
+Observe that under H0 : (1) = 0, we obtain that
+
+Sn -d N (0, 1).
+
+We reject H0 : (1) = 0 at level  when
+
+|Sn|
+
+>
+
+c1-
+
+ 2
+
+,
+
+where
+
+c1-
+
+ 2
+
+denotes
+
+the
+
+(1 -
+
+ 2
+
+)-quantile
+
+of
+
+N (0, 1)-distribution.
+
+Notice
+
+that
+
+this
+
+test
+
+is
+
+consistent against the alternative H1 : (1) = 0.
+
+Figure 18 shows the (time series) distribution of the test statistic Sn based on highest frequency T(R)TS and 3 sec CTS. Corresponding summary statistics are found in Tables
+
+5 to 10. We observe that in case of the liquid stocks, Sn takes highly negative values supporting the evidence for significant negative serial dependence in the noise process
+and confirming the results by Hansen and Lunde (2006). The strength of the serial de-
+
+pendence is decreasing if the underlying trading frequency of the stock becomes smaller.
+
+Correspondingly, the highest test statistics are found for XOM whereas for the less liquid stocks TEK, SON and ZLC the time series distribution of the test statistic is virtually
+
+symmetrically around zero. Moreover, the highest magnitudes are found for TTS using
+
+N. Hautsch and M. Podolskij (2010)
+
+17
+
+mid-quotes for which we also observe the strongest serial dependence in the underlying return series. Conversely, 3 sec CTS yields significant lower test statistics (in absolute terms). Hence, we can conclude that the serial dependence in underlying returns is mainly driven by a serial dependence in the corresponding noise process. As reported by Table 1, these autocorrelations and thus the test statistic Sn are obviously strongly dependent on the underlying sampling scheme. This is most evident for mid-quote based sampling. Conversely, based on CTS, Sn is close to zero on average in most cases. This also explains why Ctn,a and Ctn,a(1) perform very similar in case of CTS but not in case of T(R)TS.
+
+4 Pre-Averaging Estimators for the Quadratic Variation: The Discontinuous Case
+
+In this section we present the asymptotic theory for the estimator Ctn defined in (2.12) for the discontinuous case. We consider the process Z = X + U given by (2.2), where (Xt)t0
+is a discontinuous semi-martingale of the form
+
+tt
+X = X0 + audu + udWu + (1{||1})  (µt - t) + (1{||>1})  µt ,
+00
+
+(4.26)
+
+where µ is a Poisson random measure on R+ × R,  is a predictable compensator of µ with
+
+(ds, dx) = ds  F (dx) (where F is a -finite measure), f  µt =
+
+t 0
+
+R f (s, x)µ(ds, dx)
+
+and the process  is predictable and supxR |(s, x)  1|/(z) is locally bounded for some
+
+bounded function  in L2(R, F ). The noise process U is assumed to satisfy the conditions
+
+(2.3) and (2.4).
+
+Below we present the asymptotic results for Ctn derived in Jacod, Podolskij, and Vetter (2009).
+
+Theorem 4.1 Assume that the process Nt(2) is locally bounded. Then, we have, for any
+
+t > 0,
+
+t
+Ctn -P [X]t = u2du + |Xu|2 ,
+0 ut
+
+(4.27)
+
+where Xu = Xu - Xu-. If moreover Nt(8) is locally bounded, we obtain the stable
+
+convergence in law
+
+1n/4(Ctn - [X]t) -st M N (0, t + t) ,
+
+(4.28)
+
+for any t > 0. The process t is given in Theorem 2.3 and t is defined as
+
+t
+
+=
+
+4 22
+
+|XTm |2
+Tmt
+
+22(T2m-
+
++
+
+T2m )
+
++
+
+12 
+
+(T2 m -
+
++
+
+T2m )
+
+,
+
+(4.29)
+
+where (Tm)m1 are jump times of X, Xs = Xs - Xs- and the quantities 2, 12, 22 are given in Section 2.2.
+
+Proof: See Theorem 3.4 and Theorem 4.6 in Jacod, Podolskij, and Vetter (2009).
+
+2
+
+Observe that Ctn remains a n-1/4­consistent estimator of [X]t in the discontinuous case. In fact, the consistency result of Theorem 4.1 also holds true for non-equidistant observa-
+tions.
+
+N. Hautsch and M. Podolskij (2010)
+
+18
+
+In contrast to the continuous case we obtain an additional term t in the conditional variance of Ctn. In order to derive a feasible version of the stable convergence in (4.28), we need to construct a consistent estimator of t. This turns out to be a complicated problem, because we obviously require jump robust local estimators of u2, u2 and the left limits u2-, u2-. The jump robust estimation methods are presented in the next subsection.
+
+4.1 Jump Robust Estimation Methods
+
+For various problems in finance it is extremely important to separate the diffusive part from the jump part. In a noise-free framework, a well-known approach to obtain jump robust estimators of (a functional of) volatility is the multipower variation (see, e.g., Barndorff-Nielsen, Shephard, and Winkel (2006)). The main idea of constructing jump robust estimators for models with microstructure noise is combining the multipower variation approach with the pre-averaging method. A rigorous mathematical theory for preaveraged multipower variation has been derived in Podolskij and Vetter (2009). Below we recall the consistency results as derived in the aforementioned paper.
+We define the pre-averaged multipower variation as
+
+[t/n]-lkn+1
+
+V (Z, p1, . . . , pl)tn =
+
+|Z
+
+n i
+
+|p1
+
+|Z
+
+n i+kn
+
+|p2
+
+·
+
+·
+
+·
+
+|Z
+
+n i+(l-1)kn
+
+|pl
+
+,
+
+i=0
+
+(4.30)
+
+and set p+ =
+
+l k=1
+
+pk
+
+.
+
+The asymptotic behaviour of V (Z, p1, . . . , pl)nt is given in the
+
+following theorem.
+
+Theorem 4.2 Assume that Z = X +U , X satisfies (4.26) and Nt(2p+) is locally bounded. If max(p1, . . . , pl) < 2 then we deduce that
+
+1n-
+
+p+ 4
+
+V
+
+(Z,
+
+p1,
+
+.
+
+.
+
+.
+
+,
+
+pl)nt
+
+-P
+
+mp1
+
+·
+
+·
+
+·
+
+mpl
+
+t
+(2u2
+0
+
++
+
+1 
+
+1u2
+
+)
+
+p+ 2
+
+du
+
+,
+
+(4.31)
+
+where mp = E[|N (0, 1)|p]. In particular, V (Z, p1, . . . , pl)tn is robust to the presence of jumps when max(p1, . . . , pl) < 2.
+
+Proof: See Theorem 2(ii) in Podolskij and Vetter (2009).
+
+2
+
+Note that V (Z, p1, . . . , pl)nt is a class of jump robust biased measures of
+
+t 0
+
+|u|p+ du
+
+when
+
+max(p1, . . . , pl) < 2. If p+ is an even number we are able to bias-correct our statistic to
+
+obtain consistent estimators of
+
+t 0
+
+|u|p+
+
+du.
+
+In
+
+particular,
+
+we
+
+can
+
+estimate
+
+the
+
+quadratic
+
+variation of the jump part and the quadratic variation of the continuous part separately.
+
+Corollary 4.3 Assume that the conditions of Theorem 4.2 are satisfied. Then, we obtain
+
+that 
+
+BTtn
+
+:=
+
+n m212
+
+V
+
+(Z,
+
+1,
+
+1)nt
+
+-
+
+1n 222
+
+RVtn
+
+-P
+
+I Vt
+
+,
+
+
+
+BT Vtn :=
+
+n 2
+
+(V
+
+(Z,
+
+2)nt
+
+-
+
+m1-2V
+
+(Z,
+
+1,
+
+1)tn)
+
+-P
+
+ut
+
+|Xs|2.
+
+N. Hautsch and M. Podolskij (2010)
+
+19
+
+In finite samples it is again better to replace the constants 1, 2 by their empirical counterparts 1kn, 2kn and to standardize the statistic V (Z, p1, . . . , pl)nt by [t/n]/([t/n]- lkn + 2) to account for the true number of summands. This leads to the corresponding estimators BTtn,a and BT Vtn,a.
+Figure 19 shows the sensitivity of the estimated (averaged) jump proportion BT Vtn,a/Ctn,a to the choice of . In general, we observe that for moderate values of , the jump propor-
+tion is quite insensitive to the choice of . Only in cases where  becomes too small, the
+ratio jumps up to unrealistically high values. For the liquid stocks, the jump proportion
+tends to stabilize for values of  around 0.4 to 0.6. For the less liquid stocks, we observe a stabilization around 1.0. These values are quite similar to the optimal choices  con-
+firming also the usefulness of the MSE minimization approach above. The fact that the jump proportion strongly increases for small  shows that the estimator BT Vtn,a is upward biased if the local pre-averaging window is chosen to small.
+Figure 20 shows the time series distribution of the estimated jump proportions for
+optimal choices of . It turns out that 3 sec CTS implies generally higher jump proportions.
+This is particularly evident for the less liquid stocks yielding jump proportions of up to
+25% on average (see Tables 5 to 10). Hence, this sampling scheme (at least based on
+very high frequencies) seems to be particularly sensitive to jumps providing unrealistically high values for BT Vtn,a. Conversely, TTS and TRTS yield fairly stable jump proportions between 5% and 10% across the whole sample. Hence, event time sampling seems to be
+more appropriate and more natural for estimating jump components.
+
+4.2 Estimation of the Conditional Variance and a Feasible Central Limit Theorem
+
+The jump robust methods presented in the previous subsection open up a way to estimate
+
+the conditional variance in (4.28). Recall that the main difficulty is the estimation of the
+
+term
+
+t
+
+=
+
+4 22
+
+|XTm |2
+Tmt
+
+22(T2m-
+
++
+
+T2m )
+
++
+
+12 
+
+(T2 m -
+
++
+
+T2m )
+
+,
+
+defined in (4.29).
+
+We start with the local estimates of 2 and 2, where we first concentrate on the process 2. Consider a sequence of integers rn with rn   and rnn  0. Define
+Ji+ = {i + 1, . . . , i + rn}, Ji- = {i - rn + 1, . . . , i} and
+
+^i2n-
+
+=
+
+1 2rn
+
+|nl Z|2
+lJi-
+
+,
+
+^i2n+
+
+=
+
+1 2rn
+
+lJi+
+
+|nl Z|2.
+
+(4.32)
+
+Obviously, assumed to
+
+^i2n- and be ca`dla`g,
+
+^^i2i2nn-+aanrde
+
+the ^i2n
+
+local + are
+
+analogues of RVtn. Since the process obviously good estimates of i2n- and
+
+2 is i2n ,
+
+respectively (this is justified by the local version of the convergence in (2.11)).
+
+The construction of the local estimates for the process 2 is more complicated and is
+
+mainly based on r¯n  , r¯n n
+
+the 
+
+local version  and r¯nn
+
+of Corollary  0. Define
+
+4.3. Consider a sequence J¯i+, J¯i- as before (with
+
+of rn
+
+integers r¯n with replaced by r¯n)
+
+N. Hautsch and M. Podolskij (2010)
+
+20
+
+and set
+
+^i2n-
+
+=
+
+1 m21r¯n
+
+lJ¯i-
+
+n-1/2 2
+
+|Z¯ln||Z¯ln-kn |
+
+-
+
+1 22
+
+^i2n-
+
+,
+
+(4.33)
+
+^i2n+
+
+=
+
+1 m21r¯n
+
+lJ¯i+
+
+n-1/2 2
+
+|Z¯ln||Z¯ln+kn |
+
+-
+
+1 22
+
+^i2n
+
++
+
+.
+
+(4.34)
+
+Note that ^i2n- and ^i2n+ are local analogues of the statistic BTtn defined in Corollary 4.3. The numbers r¯n must be of higher order than n-1/2, because otherwise all summands in (4.33) (resp. (4.34)) are strongly correlated.
+Our first consistency result is the following theorem.
+
+Theorem 4.4 Assume that the process Nt(8) is locally bounded. Then, it holds
+
+tn
+
+=
+
+ n
+2
+
+[t/n]-kn+1
+|Z¯in|2
+i=0
+
+22(^i2n-
+
++
+
+^i2n+)
+
++
+
+12 
+
+(^i2n-
+
++
+
+^i2n+)
+
+-P
+
+|XTm |2
+
+22(T2m-
+
++
+
+T2m )
+
++
+
+12 
+
+(T2 m -
+
++
+
+T2m )
+
+Tmt
+
++
+
+1 2
+
+t 0
+
+2u2
+
++
+
+1 
+
+u2
+
+222u2
+
++
+
+212 
+
+u2
+
+du.
+
+Proof: Following the ideas of Theorem 3.1 in Jacod, Podolskij, and Vetter (2009) we immediately deduce that
+
+tn
+
+=
+
+ n
+2
+
+[t/n]-kn+1
+|Z¯in|2
+i=0
+
+22(i2n-
+
++
+
+i2n )
+
++
+
+12 
+
+(i2n
+
+-
+
++
+
+i2n )
+
+-P
+
+|XTm |2
+
+22(T2m-
+
++
+
+T2m )
+
++
+
+12 
+
+(T2 m -
+
++
+
+T2m )
+
+Tmt
+
++
+
+1 2
+
+t 0
+
+2u2
+
++
+
+1 
+
+u2
+
+222u2
+
++
+
+212 
+
+u2
+
+du,
+
+since 2 and 2 are ca`dla`g processes. The convergence readily follows, because
+
+^i2n--i2n- = oP(1), ^i2n+-i2n = oP(1), ^i2n--i2n- = oP(1), ^i2n+-i2n = oP(1)
+
+uniformly in i.
+
+2
+
+The actual number of summands in the definition of nt depends on the particular choice of the sequences rn and r¯n. Note that tn itself is not a consistent estimator of the conditional variance in (4.28). However, a particular linear combination of nt and the three summands in the definition of tn (see Proposition 2.4) yields a consistent estimator of t + t. For the sake of simplicity we propose such an estimator only for our canonical
+choice g(x) = x  (1 - x).
+
+N. Hautsch and M. Podolskij (2010)
+
+21
+
+Proposition 4.5 Assume that g(x) = x  (1 - x) and the process Nt(8) is locally bounded. Then, it holds
+
+~ nt
+
+=
+
+Atn
+
++
+
+B
+
+m4 m33/4
+
+[t/n]-3kn i=0
+
+|Z
+
+n i
+
+|4/3|Z
+
+n i+kn
+
+|4/3|Z
+
+n i+2kn
+
+|4/3
+
++
+
+C m21
+
+n
+
+[t/n]-2kn i=0
+
+|Zni ||Z
+
+n i+kn
+
+|
+
+i+2kn j=i+kn+1
+
+|jn Z |2
+
+with
+
+[t/n]-2
+
++Dn
+
+|ni Z|2|in+2Z|2 -P t + t ,
+
+i=1
+
+A=
+
+4 22
+
+,
+
+B
+
+=
+
+-
+
+422 324
+
+,
+
+C
+
+=
+
+422 (2)3
+
+1 22
+
+-
+
+1 2
+
+,
+
+D
+
+=
+
+1 4
+
+411 322
+
+-
+
+2112A 32
+
+-
+
+312B 2
+
+- 21C
+
+,
+
+where the constants ij, 1  i, j  2, are explicitly given in Example 2.2. In particular,
+
+we deduce that
+
+1n/4(Ctn - [X]t) -d N (0, 1).
+
+~ tn
+
+Proof: The central limit theorem follows immediately by the properties of stable convergence. To obtain the consistency of the estimator ~nt we note that
+
+[t/n]-2
+
+t
+
+n |ni Z|2|in+2Z|2 -P 4 u4 du,
+
+i=1 0
+
+i+2kn
+kn-1 |nj Z|2 - 2(2i+kn)n = oP(1)
+j=i+kn+1
+
+uniformly in i. Now, the convergence ~nt -P t + t follows from Theorem 4.2 (with
+
+p1 = p2 = p3 = 4/3 and q1 = q2 = 1) and Theorem 4.4.
+
+2
+
+The constants i, ij should be replaced by their empirical analogues ikn, ikjn (see Section 2.3) to achieve better finite sample performance.
+
+Finally, note that the estimator ~nt is not necessarily positive. The constant B, for instance, is negative for any weight function g. However, we obtain a positive consistent
+
+estimator of t + t by setting
+
+^nt = max(~tn, tn)  0 ,
+
+where t, ^nt
+
+tn is
+
+is a positive a consistent
+
+consistent estimator
+
+estimator of of t + t.
+
+t
+
+defined
+
+in
+
+Proposition
+
+2.4.
+
+Since
+
+t +t
+
+
+
+5 Time Series Properties and the Impact of Sampling Frequencies and Sampling Schemes
+Figures 21 to 24 show the averaged pre-averaging estimates for an optimal choice of  and different sampling frequencies n using T(R)TS and CTS. As benchmarks we also
+
+N. Hautsch and M. Podolskij (2010)
+
+22
+
+report the realized variance estimator (RV), the 10 min sub-sampled RV estimator (RV10) and the realized kernel (RK) estimator. We observe the well-known bias of the realized variance estimator when the sampling frequency becomes high. Not surprisingly, this is particularly evident in case of midquote change sampling for which the serial dependence in underlying returns is comparably high. We can summarize the following main findings: First, confirming the results above, the estimator tends to be downward biased if the sampling frequency is too low. Second, the finite-sample adjustment is particularly important. Without this adjustment the estimator becomes strongly negatively biased even for high sampling frequencies. Third, CTS induces stronger negative biases for low sampling frequencies than T(R)TS. This implication is also true for the realized kernel suffering from significantly negative biases if n becomes large. Fourth, we observe slightly less biases of the pre-averaging estimator in case of mid-quote sampling than based on price sampling. This is particularly true for event time sampling while in case of CTS, the estimates seem to be less dependent on the price information. Fifth, as shown above, based on very high sampling frequencies the pre-averaging estimator seems to be slightly less biased than the realized kernel. Conversely, for lower sampling frequencies, the realized kernel estimator tends to be more stable.
+Figures 25 and 26 show the optimal choices of  and kn based on MSE minimization in dependence of the sampling frequency n. Overall,  is higher if the underlying sampling frequency is lower. Nevertheless, we observe a non-monotonous relationship between  and n particularly if n is small. This is quite distinct for the more liquid assets yielding the smallest values of  for n being approximately 10. However, overall, these relationships imply a monotonously declining relationship between the resulting window size kn and the sampling frequency n.
+Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008) suggest evaluating an estimator's performance based on its ability to produce similar daily quadratic variation estimates irrespective of the employed underlying intraday price information. In particular, an estimator is 'good' if it produces the same estimate irrespective of whether transaction prices or midquotes are used. They propose regressing the daily estimates of competing estimators on each other and evaluating the distance of the resulting regression line to the 45 degree line. This motivates computing the Euclidean distance to unity as
+
+Dt(IVt) = (IVt1 - I¯V t)2 + (IVt2 - I¯V t)2,
+
+(5.35)
+
+where IVt1 and IVt2 are competing estimators for the integrated variation and I¯V t is the average of both. Table 2 shows the average values of Dt(·) for the estimators Ctn, Ctn,a, Ctn,a(1) and RK. Table 3 gives the corresponding relative measures relative to the distances implied by Ctn,a, i.e. Dt(·)/Dt(Ctn,a). The upper panels evaluate price-based versus midquote-based estimators based on T(R)TS and 3 sec CTS. It turns out that Ctn,a performs best based on T(R)TS whereas RK performs best in case of CTS. However, the latter is only true for the more liquid stocks whereas for the less liquid assets the
+realized kernel's performance is significantly worse. The lower panels in both tables give the corresponding statistics if 3 sec CTS is evaluated against T(R)TS. In this case, Ctn,a outperforms all competing estimators in nearly all cases. The overall worst performance is revealed by Ctn indicating again the importance of finite-sample adjustments. This is particularly evident when the relative performance in relation to that of Ctn,a is analyzed (see Table 3). Interestingly, the dependent-noise-robust estimator Ctn,a(1) is quite sensitive to the choice of the underlying sampling scheme. This is particularly true in case T(R)TS
+and is obviously induced by the highly negative serial correlation in midquote change
+
+N. Hautsch and M. Podolskij (2010)
+
+23
+
+returns. This confirms the results from the previous section and shows that Ctn,a is not able to accommodate serial dependencies in the noise process very well and yields quite different quadratic variation estimates in dependence of the underlying price information. Interestingly, this is mostly evident in case of TTS or TRTS whereas in case of CTS, the performance of Ctn,a and Ctn,a(1) is quite similar.
+To obtain a universal comparison of the estimators based on all four sampling schemes employed in this paper, we compute the corresponding Euclidean distance
+
+D~ t(IVt) =
+
+4
+(IVtj - I¯V t)2,
+j=1
+
+(5.36)
+
+where IVtj, j = 1, . . . , 4, represent the corresponding estimators based on TRTS, TTS and 3 sec price-based and midquote-based CTS. The corresponding (relative) averages are reported by Table 4, whereas the empirical distributions are depicted by Figures 27 and 28. It is shown that on average Ctn,a outperforms all other estimators, and thus provides the strongest robustness to the underlying sampling scheme. This is also confirmed by Figures 27 and 28 showing that Ctn,a and RK reveal the lowest (time series) dispersion and thus the greatest performance stability over time. Conversely, Ctn and Ct,a(1) reveal significantly higher time series variations of D~t(·). This indicates that these estimators are quite sensitive to the underlying sampling scheme on specifically 'bad' days. As revealed by the relative Euclidean statistics (relative to those of Ctn,a), the relative discrepancies become smaller for more illiquid stocks.
+Figure 29 shows the time series variation of daily quadratic variation estimates for all stocks computed based on Ctn,a using TRTS. As depicted by the corresponding (jump robust) 95% confidence intervals, estimation error is still not negligible in most cases. Figure 17 shows the distributions of the percentage deviations between tn,a and ^nt,a reflecting differences in estimation errors due to the inclusion of jumps. We observe standard deviations which are on average up to 10%-20% higher in case of jumps. This translates back into 95% confidence intervals which are 14% wider on average. Figure 30 graphically illustrates these differences for the first 20 trading days in the sample.
+Analyzing major descriptive statistics of the analyzed estimators in Tables 5 to 10 we observe that all estimators are significantly serially autocorrelated with first order autocorrelations around 0.4 to 0.6 for the liquid assets and around 0.2 to 0.3 for the less liquid ones. In general, both the dynamic as well as the distributional properties of the pre-averaging estimators are quite similar to that of the realized kernel. We find the well-known result that the distribution of log volatilities is close to that of a normal distribution with a kurtosis ranging around 3 in most cases. Only in case of the less liquid stocks we observe evidence for significant over-kurtosis. For both type of estimators the empirical properties are quite independent of the underlying sampling scheme. Only in case of neglected finite-sample adjustments (i.e., Ctn and Ctn(1)) the estimators' properties are obviously quite sensitive to the sampling scheme. This is particularly evident for Ctn in case of TTS.
+Finally, Figures 31 and 32 show the time series variation of the jump proportion BT Vtn,a/Ctn,a and the test statistic Sn. We observe that both statistics can vary substantially across days. While for the jump proportion no systematic daily serial dependence over the cross-section of stocks can be reported, we observe a slight daily clustering of Sn and thus of serial dependence in noise.
+
+N. Hautsch and M. Podolskij (2010)
+
+24
+
+6 Conclusions
+In this paper, we discussed the class of pre-averaging estimators for quadratic variation in asset prices and extended existing theory to explicitly test for serial dependence in noise and to compute jump robust inference. In an extensive empirical study we analyzed the empirical properties of different pre-averaging estimators in dependence of the choice of the pre-averaging interval, the sampling scheme, the underlying sampling frequency and the impact of noise. We can summarize the following major results:
+First, the pre-averaging estimator is sensitive to the choice of the pre-averaging parameter . This sensitivity seems to be strongest on days where the underlying price path is not sufficiently smooth. As a result, for too small and too large values of , the estimator tends to be negatively biased on average.
+Second, choosing  by minimizing the MSE based on a sub-sampled 10 min realized variance estimator seems to be a reasonable data-driven strategy and results in an estimator with good empirical properties. In case of a data-independent choice of , we suggest values between 0.4 to 0.8 as a good rule of thumb. In general, the choice of  decreases with the sampling frequency.
+Third, finite sample adjustments of the estimator are particularly important in order to reduce significant biases. This is particularly true if  is chosen to be small and if the sampling frequency is not sufficiently high. As a result, even for very liquid stocks, event time sampling is not sufficiently frequent to reduce this bias. Conversely, high-frequency CTS implies significantly less sensitivity due to finite-sample adjustments.
+Fourth, ignoring the possibility of jumps in the price process leads to an underestimation of 95% confidence intervals of approximately 15% on average and thus understating estimation errors. Pre-averaging multi-power estimators are quite sensitive to the underlying sampling scheme and the choice of . This is particularly true for CTS inducing an over-estimation of the relative component of jumps in daily quadratic variations. For MSE minimal choices of , we find jump proportions between 5% and 10% on average.
+Fifth, it is strongly suggested to implement both pre-averaging and kernel estimators based on a highest possible sampling frequency. Our empirical findings show that a reduction in sampling frequency tends to imply an 'oversmoothing' of volatilities resulting in negative biases.
+Sixth, pre-averaging estimators are widely unaffected by the choice of the underlying sampling scheme. Comparing the different estimators in terms of their ability to produce similar estimates of the daily quadratic variation irrespective of the underlying sampling scheme and the employed price information, we show that the standard version of the preaveraging estimator slightly outperforms all estimators in nearly all cases. In conclusion, for this estimator, the choice between event time sampling and calendar time sampling does not yield significantly different results (given that the ultimate sampling frequency is similar and high). Conversely, the noise-dependent robust version of the pre-averaging estimator turns out to be quite sensitive yielding different estimates in dependence of the underlying price information and sampling scheme. Consequently, we conclude that the specific adjustment for serially dependent noise tends to be rather unstable in practice.
+Seventh, the quantification of serial dependence in noise strongly depends on the underlying sampling scheme. Strong evidence for serially dependent noise processes is shown based on mid-quote change sampling. Conversely, for the other sampling schemes, partic-
+
+N. Hautsch and M. Podolskij (2010)
+
+25
+
+ularly CTS, these effects are significantly weaker and virtually not significant.
+
+7 Appendix
+Data Cleaning
+In line with Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008) we perform the following data cleaning steps:
+(i) Delete entries outside the 9:30pm and 4pm time window.
+(ii) Delete entries with a quote or transaction price equal to be zero.
+(iii) Delete all entries with negative prices or quotes.
+(iv) Delete all entries with negative spreads.
+(v) Delete entries whenever the price is outside the interval [bid - 2 · spread ; ask + 2 · spread].
+(vi) Delete all entries with the spread greater or equal than 50 times the median spread of that day.
+(vii) Delete all entries with the price greater or equal than 5 times the median mid-quote of that day.
+(viii) Delete all entries with the mid-quote greater or equal than 10 times the mean absolute deviation from the local median mid-quote.
+(ix) Delete all entries with the price greater or equal than 10 times the mean absolute deviation from the local median mid-quote.
+
+Implementation Details for the Different Estimators
+
+The realized kernel estimator (RK) proposed by Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008) is defined by
+
+H
+K(Z) = 0(Z) + k
+
+h-1 H
+
+{h(Z) + -h(Z)} ,
+
+h=1
+
+where h(Z) denotes the h-th realized autocovariance given by
+
+[t/n]
+
+h(Z) =
+
+(Zin - Z(i-1)n )(Z(i-h)n - Z(i-h-1)n )
+
+j=1
+
+with h = -H, . . . , -1, 0, 1, . . . , H and k(·) denoting the kernel function to be chosen as the Tukey-Hanning2 kernel with
+k(x) = sin2{/2(1 - x)2}.
+
+N. Hautsch and M. Podolskij (2010)
+
+26
+
+Moreover, define
+
+t
+t2 = t2/ t u4du.
+0
+Then, the optimal choice of the bandwidth, H, is given by
+
+H = ct [t/]
+
+with c = 5.74 for the Tukey-Hanning2 kernel.
+
+To estimate
+
+t 0
+
+u4 du
+
+we
+
+use
+
+(2.16)
+
+with
+
+a = 1,
+
+b
+
+=c
+
+=
+
+0.
+
+To
+
+estimate
+
+t2,
+
+Barndorff-
+
+Nielsen, Hansen, Lunde, and Shephard (2008) suggest
+
+^ 2
+
+=
+
+1 q
+
+q
+
+^ 2(i)
+
+i=1
+
+with
+
+^ (2i)
+
+=
+
+RV(ni) 2n~(i)
+
+,
+
+i = 1, . . . , q,
+
+and RV(ni), i = 1, . . . , q are realized variance estimators RV(ni) =
+
+n j=i
+
+|ni Z
+
+|2
+
+sampling
+
+every q = N/n-th trade using the first q trades per day as different starting points and
+
+n~(i) denoting the number of non-zero returns that were used to compute RV(ni). To robustify this estimator against serial dependence in the noise process, Barndorff-Nielsen, Hansen,
+
+Lunde, and Shephard (2008) propose using q such that every q-th observation is, on
+
+average, 2 minutes apart. As discussed by the authors and also found in this study, this
+
+estimator is likely to be upward biased and thus yields a relatively conservative choice of
+
+the bandwidth.
+
+Note that the realized kernel estimator is computed without accounting for end effects, i.e., replacing the first and last observation by local averages to eliminate the corresponding noise components ('jittering' according to Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008)). Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008) argue that these effects are theoretically important however practically negligible, particularly for actively traded assets.
+
+The maximum likelihood estimator (MLRV) proposed by Ait-Sahalia, Mykland, and Zhang, L. (2005) is given by
+
+M LRV = N ^2(1 + ^)2,
+
+where N denotes the number of trades per day and (^2, ^) are the maximum likelihood estimates of an MA(1) model for observed trade-to-trade returns, Zi = i + i-1, with i being white noise with variance 2 and -1 <  < 0. This model suggests an alternative estimator of the market microstructure noise variance given by
+^2 = -^^2.
+
+As a further benchmark estimator we use a sparsely sub-sampled realized variance estimator (RV10) which is computed as the average of 100 realized variance estimators using 10min returns starting at 100 different equi-distant start points across the first 10
+
+N. Hautsch and M. Podolskij (2010)
+
+27
+
+trading minutes. To account for the fact that the estimators use different starting points, the daily estimates are accordingly scaled.
+Hence, in case of aggregated sampling if N/n > 1 and being not an integer, the last return per day is computed by aggregating over less than [N/n] observations. However, both theoretically and empirically this effect can safely be ignored.
+Finally, for all estimators, the daily quadratic variation is computed starting at the first observation after 9:30 am. Hence, according to the timing of the first daily observation the time span over which the quadratic variation is computed, can differ. Since this affects all estimators similarly, this effect is not important in our study. In general, one can adjust for it by scaling the daily variance estimate according to the (ignored) time span between 9:30 am and the timing of the first observation.
+
+References
+Aldous, D.J., Eagleson, G.K., 1978. On mixing and stability of limit theorems. Annals of Probability 6(2), 325­331.
+Ait-Sahalia, Y., Mykland, P., Zhang, L., 2005. How Often to Sample a Continuous-Time Process in the Presence of Market Microstructure Noise? Review of Financial Studies 18, 351­416.
+Andersen, T., Bollerslev, T., Diebold, F., Labys, P., 2001. The Distribution of Realized Exchange Rate Volatility. Journal of the American Statistical Association 96, 42­55.
+Andersen, T., Bollerslev, T., Diebold, F., Labys, P., 2003. Modeling and Forecasting Realized Volatility. Econometrica 71,579­625.
+Andersen, T., Bollerslev, T., Diebold, F., 2008. Parametric and Nonparametric Measurement of Volatility. In Y. Ait-Sahalia and L.P. Hansen (Eds.), Handbook of Financial Econometrics. Amsterdam: North Holland.
+Barndorff-Nielsen, O., Shephard, N., 2002. Econometric Analysis of Realized Volatility and Its Use in Estimating Stochastic Volatility Models. Journal of the Royal Statistical Society, Ser. B. 64, 253­280.
+Barndorff-Nielsen, O.E., Graversen, S.E., Jacod, J., Podolskij, M., Shephard, N., 2006. A central limit theorem for realised power and bipower variations of continuous semimartingales. In: Yu. Kabanov, R. Liptser and J. Stoyanov (Eds.), From Stochastic Calculus to Mathematical Finance. Festschrift in Honour of A.N. Shiryaev, Heidelberg: Springer, 2006, 33-68.
+Barndorff-Nielsen, O.E., Hansen, P.R., Lunde, A., Shephard, N., 2008. Designing realised kernels to measure the ex-post variation of equity prices in the presence of noise. Econometrica 76(6), 1481­1536.
+Barndorff-Nielsen, O.E., Hansen, P.R., Lunde, A., Shephard, N., 2008. Realised Kernels in Practice: Trades and Quotes. Econometrics Journal 4, 1­32.
+Barndorff-Nielsen, O.E., Shephard, N., 2004. Power and bipower variation with stochastic volatility and jumps (with discussion). Journal of Financial Econometrics 2, 1­48.
+
+N. Hautsch and M. Podolskij (2010)
+
+28
+
+Barndorff-Nielsen, O.E., Shephard, N., Winkel, M., 2006. Limit theorems for multipower variation in the presence of jumps. Stochastic Processes and their Applications, 116, 796-806.
+Delbaen, F., Schachermayer, W., 1994. A general version of the fundamental theorem of asset pricing. Mathematische Annalen, 300, 463­520.
+Gloter, A., Jacod, J., 2001. Diffusions with measurement errors. II-Optimal estimators. ESAIM, 5, 243-260.
+Hautsch, N., Huang, R., 2009. The Market Impact of a Limit Order. Discussion Paper, 2009-51, CRC 649, Humboldt-Universit¨at zu Berlin.
+Hansen, P. R., Lunde, A., 2006. Realized variance and market microstructure noise. Journal of Business and Economic Statistics, 24 (2), 127161.
+Jacod, J. (1994): Limit of random measures associated with the increments of a Brownian semimartingale. Preprint number 120, Laboratoire de Probabiliti´es, Univ. P. et M. Curie.
+Jacod, J., 2008. Asymptotic properties of realized power variations and related functionals of semimartingales. Stochastic Processes and their Applications, 118, 517-559.
+Jacod, J., Li, Y., Mykland, P., Podolskij, M., Vetter, M., 2009. Microstructure noise in the continuous case: the pre-Averaging approach. Stochastic Processes and Their Applications 119, 2249-2276 .
+Jacod, J., Podolskij, M., Vetter, M., 2009. Limit theorems for moving averages of discretized processes plus noise. Annals of Statistics 38(3), 1478-1545.
+Jacod, J., Shiryaev, A. N., 2003. Limit Theorems for Stochastic Processes, 2d ed., SpringerVerlag: Berlin.
+Mancini, C., 2001. Disentangling the jumps of the diffusion in a geometric jumping Brownian motion. Giornale dellInstituto Italiano degli Attuari LXIV 1947.
+Oomen, R. C. A., 2006. Comment on Hansen, P. R. and Lunde, A., 2006. Realized Variance and Market Microstructure Noise. Journal of Business and Economic Statistics, 24(2), 195-202.
+Oomen, R. C. A., 2006. Properties of Realized Variance Under Alternative Sampling Schemes. Journal of Business and Economic Statistics, 24(2), 219­237.
+Podolskij, M., Vetter, M., 2009. Estimation of volatility functionals in the simultaneous presence of microstructure noise and jumps. Bernoulli, 15(3), 634-658.
+Podolskij, M., Vetter, M., 2009. Bipower-type estimation in the noisy diffusion setting. Stochastic Processes and Their Applications 119, 2803-2831.
+Renyi, A., 1963. On stable sequences of events. Sankhya A 25, 293-302.
+Revuz, D., Yor, M., 1998. Continuous martingales and Brownian motion, 3d ed., Springer, New York.
+Zhang, L., Mykland, P.A., A¨it-Sahalia, Y., 2005. A tale of two time scales: Determining integrated volatility with noisy high-frequency data. Journal of the American Statistical Association 100, 1394­1411.
+
+N. Hautsch and M. Podolskij (2010)
+Tables
+
+29
+
+Table 1: Summary statistics of the underlying data.
+
+Avg. time between trades (in secs) Avg. time between quote arrivals (in secs) Avg. time betw. non-zero quote chgs. (in secs) Avg. number of trades Avg. number of quotes Avg. proportion of non-zero trade returns Avg. proportion of non-zero MQ returns Avg. ^2 · 1e7 Avg. ^ ACF(1) trade returns ACF(1) MQ returns ACF(1) non-zero MQ returns ACF(1) 3 sec price returns ACF(1) 3 sec MQ returns
+
+XOM 5.28 0.74 3.16 4428 31758 0.73 0.23
+0.10
+0.40 0.03 -0.20 -0.24 0.01 -0.27
+
+C 7.25 1.01 4.72 3227 23158 0.58 0.21
+0.03
+0.18 -0.05 -0.25 -0.35 -0.10 -0.40
+
+HD 7.19 1.07 4.60 3255 21964 0.60 0.23
+0.08
+0.25 -0.09 -0.22 -0.32 -0.15 -0.39
+
+TEK 25.53 3.16 10.21 916 7395 0.63 0.31
+0.99
+0.37 0.00 -0.19 -0.25 -0.03 -0.32
+
+SON 36.29 4.33 14.29 644 5405 0.62 0.30
+0.91
+0.38 -0.05 -0.20 -0.28 -0.08 -0.34
+
+ZLC 26.17 3.43 8.78 894 6829 0.67 0.39
+1.30
+0.33 -0.07 -0.23 -0.30 -0.10 -0.32
+
+Note. The table reports (daily) averages of the time between trades, quote arrivals and non-zero quote changes, the
+number of trades and quotes, the proportions of non-zero trade (or mid-quote) returns, the (long-run) noise variance ^2, the (long-run) noise variance per trade ^ and first-order autocorrelations of underlying sampled returns.
+
+Table 2: Euclidean distance discrepancy measures Dt(·)
+
+XOM C HD TEK SON ZLC
+XOM C HD TEK SON ZLC
+
+Ctn
+
+Ctn,a
+
+Ctn,a(1)
+
+RK
+
+TRTS PR vs. TTS MQ
+
+1.86 0.33 1.18 0.29
+
+1.04 0.22 0.77 0.26
+
+1.44 0.33 1.05 0.47
+
+1.36 0.70 1.44 1.30
+
+1.13 0.65 1.54 1.06
+
+1.39 1.03 1.91 3.97
+
+3 sec CTS PR vs. TRTS PR
+
+1.54 0.29 0.89 0.44
+
+1.01 0.21 0.37 0.42
+
+1.68 0.36 0.66 0.67
+
+1.61 0.79 1.07 1.24
+
+1.25 0.71 0.99 1.85
+
+2.36 1.99 2.10 5.03
+
+Ctn
+
+Can,t
+
+Ctn,a(1)
+
+RK
+
+3 sec CTS PR vs. 3 sec CTS MQ
+
+0.32 0.25 0.24 0.17
+
+0.43 0.32 0.32 0.22
+
+0.54 0.39 0.40 0.30
+
+0.94 0.87 0.88 1.20
+
+0.79 0.68 0.69 1.57
+
+1.57 1.60 1.61 1.61
+
+3 sec CTS MQ vs. TTS MQ
+
+0.96 0.39 1.10 0.47
+
+0.59 0.34 0.68 0.40
+
+1.10 0.57 1.15 0.64
+
+1.50 1.04 1.26 1.22
+
+1.49 0.98 1.29 1.67
+
+2.68 2.18 2.87 2.12
+
+N. Hautsch and M. Podolskij (2010)
+
+30
+
+Table 3: Relative Euclidean distance discrepancy measures Dt(·)/Dt(Ctn,a).
+
+XOM C HD TEK SON ZLC
+XOM C HD TEK SON ZLC
+
+Ctn
+
+Ctn,a
+
+Ctn,a(1)
+
+RK
+
+TRTS PR vs. TTS MQ
+
+5.59 1.00 3.54 0.88
+
+4.83 1.00 3.59 1.21
+
+4.37 1.00 3.17 1.44
+
+1.95 1.00 2.06 1.86
+
+1.73 1.00 2.37 1.63
+
+1.35 1.00 1.85 3.85
+
+3 sec CTS PR vs. TRTS PR
+
+5.31 1.00 3.05 1.50
+
+4.71 1.00 1.73 1.97
+
+4.64 1.00 1.81 1.84
+
+2.04 1.00 1.36 1.58
+
+1.77 1.00 1.41 2.61
+
+1.18 1.00 1.05 2.52
+
+Ctn
+
+Can,t
+
+Ctn,a(1)
+
+RK
+
+3 sec CTS PR vs. 3 sec CTS MQ
+
+1.31 1.00 0.99 0.70
+
+1.32 1.00 1.00 0.67
+
+1.39 1.00 1.04 0.77
+
+1.08 1.00 1.01 1.38
+
+1.16 1.00 1.01 2.32
+
+0.98 1.00 1.01 1.01
+
+3 sec CTS MQ vs. TTS MQ
+
+2.53 1.00 3.17 1.26
+
+1.81 1.00 2.66 1.33
+
+1.78 1.00 1.96 0.97
+
+1.62 1.00 1.18 1.20
+
+1.78 1.00 1.65 0.99
+
+1.24 1.00 1.24 0.46
+
+Table 4: (Relative) Euclidean distance discrepancy measures D~t and D~t(·)/D~t(Ctn,a) based on TRTS PR, TTS MQ, 3 sec CTS PR and 3 sec CTS MQ.
+
+XOM
+
+Ctn 2.64
+
+Ctn,a 0.66
+
+D~ t Ctn,a(1)
+1.94
+
+RK 0.76
+
+Ctn 4.98
+
+D~ t(·)/D~ t(Ctn,a)
+
+Ctn,a
+
+Ctn,a(1)
+
+1.00 1.96
+
+C 1.64 0.57 1.23 0.71 3.37 1.00 1.24
+
+HD 2.70 0.92 1.83 1.11 3.78 1.00 1.85
+
+TEK
+
+2.87 1.75
+
+2.38
+
+2.53 2.09 1.00
+
+2.41
+
+SON
+
+2.45 1.50
+
+2.33
+
+2.83 1.85 1.00
+
+2.36
+
+ZLC
+
+5.21 4.39
+
+5.32
+
+6.26 1.44 1.00
+
+5.38
+
+RK 0.77 0.72 1.13 2.56 2.87 6.33
+
+N. Hautsch and M. Podolskij (2010)
+
+31
+
+Table 5: Summary statistics of all estimators and statistics for XOM
+
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+
+Mean
+16.20 17.12 17.74 17.67
+18.42 18.31 18.47 18.50
+17.38 18.84 18.01 18.03
+19.45 19.94 18.78 18.91
+18.57 18.54 18.57 18.54
+17.87 16.19 17.87 16.19
+19.44 19.52 19.41 19.30
+1.43 1.34 1.28 1.20
+1.44 1.35 1.28 1.21
+1.60 1.38 1.47 1.36
+0.52 0.30 0.60 0.45
+35.99 24.80 53.18 39.64
+0.09 0.17 0.11 0.14
+-4.87 -11.59 -3.67 -4.29
+-5.60 -10.05 -1.58 -2.22
+8.77 2.56 9.84 8.99
+
+Median
+15.79 16.96 17.30 17.40
+18.03 17.84 18.24 18.12
+16.67 17.99 17.95 17.94
+18.71 19.42 18.28 18.38
+18.38 18.26 18.38 18.26
+16.82 15.25 16.82 15.25
+18.78 18.90 19.02 18.69
+1.17 1.04 1.09 0.90
+1.18 1.04 1.09 0.90
+1.22 1.05 1.16 1.00
+0.15 0.15 0.19 0.19
+11.00 13.00 17.00 17.00
+0.08 0.14 0.08 0.10
+-4.76 -11.87 -3.82 -3.92
+-1.03 -2.44 -0.22 -0.33
+2.97 0.00 8.54 5.97
+
+Std.Dev.
+
+ACF(1)
+
+Ctn
+
+5.72
+
+0.23
+
+5.50
+
+0.25
+
+4.46
+
+0.41
+
+4.52 Ctn,a
+4.57
+
+0.40 0.47
+
+4.67
+
+0.50
+
+4.53
+
+0.49
+
+4.51
+
+0.53
+
+Ctn (1)
+
+4.82
+
+0.38
+
+4.55
+
+0.58
+
+4.49
+
+0.45
+
+4.50
+
+0.47
+
+Ctn,a (1)
+
+5.01
+
+0.49
+
+5.12
+
+0.62
+
+4.68
+
+0.52
+
+4.62
+
+0.57
+
+RV 10
+
+4.77
+
+0.45
+
+4.79
+
+0.46
+
+4.77
+
+0.45
+
+4.79
+
+0.46
+
+M LRV
+
+4.34
+
+0.67
+
+4.30
+
+0.72
+
+4.34
+
+0.67
+
+4.30
+
+0.72
+
+KRV
+
+4.57
+
+0.56
+
+4.71
+
+0.56
+
+4.54
+
+0.58
+
+4.53
+
+0.57
+
+n-1/4 nt,a
+
+0.85 0.81 0.85 0.86
+n-1/4
+
+0.57 0.32 0.35 0.23
+nt,a (1)
+
+0.85 0.81 0.85 0.85
+
+0.57 0.34 0.35 0.23
+
+n-1/4 ^nt
+
+1.00
+
+0.47
+
+0.85
+
+0.30
+
+1.08
+
+0.31
+
+1.01
+
+0.19
+
+
+
+0.74
+
+-0.04
+
+0.42
+
+0.06
+
+0.83
+
+0.08
+
+0.57
+
+0.05
+
+k
+
+52.17
+
+-0.05
+
+36.74
+
+0.03
+
+73.30
+
+0.08
+
+50.12
+
+0.05
+
+BT Vtn,a/Ctn,a
+
+0.07
+
+0.23
+
+0.13
+
+0.03
+
+0.11
+
+0.16
+
+0.13
+
+-0.01
+
+Sn 2.19
+
+0.15
+
+3.38
+
+0.44
+
+2.00
+
+0.36
+
+1.92
+
+0.25
+
+100 · (Ctn,a - Ctn,a(1))/Ctn,a
+
+9.71
+
+0.11
+
+19.09
+
+0.04
+
+2.77
+
+0.23
+
+3.29
+
+-0.03
+
+100 · (~nt,a - nt,a)/tn,a
+
+10.51
+
+0.05
+
+5.93
+
+0.09
+
+10.39
+
+-0.07
+
+9.41
+
+-0.20
+
+ACF(5)
+0.17 0.35 0.39 0.39
+0.40 0.43 0.42 0.42
+0.31 0.39 0.40 0.40
+0.39 0.39 0.41 0.43
+0.39 0.39 0.39 0.39
+0.49 0.56 0.49 0.56
+0.47 0.42 0.49 0.48
+0.42 0.47 0.33 0.20
+0.42 0.47 0.34 0.20
+0.30 0.43 0.27 0.20
+-0.06 0.09 0.06 0.00
+-0.07 0.13 0.06 0.00
+-0.04 0.04 0.05 0.01
+-0.10 0.33 0.09 0.14
+-0.02 0.18 0.00 0.07
+0.08 0.11 0.08 0.06
+
+ACF(10)
+0.00 0.03 0.10 0.10
+0.11 0.12 0.10 0.09
+0.06 0.02 0.09 0.09
+0.10 0.11 0.07 0.08
+0.10 0.10 0.10 0.10
+0.07 0.18 0.07 0.18
+0.16 0.12 0.17 0.17
+0.20 0.28 0.31 0.17
+0.20 0.28 0.31 0.17
+0.10 0.23 0.22 0.09
+0.13 -0.02 0.11 -0.08
+0.14 -0.01 0.11 -0.08
+-0.08 0.01 0.03 0.00
+-0.12 0.22 -0.43 -0.19
+-0.05 0.06 -0.02 -0.13
+0.04 0.00 0.10 -0.15
+
+Skew
+-0.49 -6.17 0.30 0.15
+0.20 0.13 0.19 0.12
+0.00 0.17 0.22 0.12
+0.05 0.04 0.13 0.08
+0.23 0.24 0.23 0.24
+-0.10 -0.08 -0.10 -0.08
+-0.09 0.01 -0.08 -0.06
+0.94 1.10 1.69 1.97
+0.93 1.08 1.69 1.97
+1.05 1.14 1.72 1.82
+1.79 3.06 1.59 1.47
+1.88 3.27 1.59 1.47
+0.30 1.48 1.03 0.74
+-1.41 -0.28 0.21 -0.26
+-1.70 -2.69 -1.71 -1.30
+0.85 3.01 0.75 0.69
+
+Kurt
+2.78 39.55 2.74 2.65
+2.53 2.41 2.62 2.50
+2.90 2.61 2.65 2.56
+2.29 2.32 2.50 2.40
+2.50 2.48 2.50 2.48
+3.02 2.60 3.02 2.60
+2.70 2.68 2.67 2.63
+3.25 3.31 6.62 7.78
+3.22 3.26 6.62 7.80
+3.56 3.47 6.37 6.96
+5.01 12.25 4.12 3.74
+5.44 13.78 4.12 3.74
+1.98 5.75 2.76 2.24
+7.40 3.88 2.45 3.07
+4.23 10.04 4.47 3.29
+2.39 13.19 2.58 2.33
+
+Note: In case of volatility estimators, skewness and kurtosis are computed for logarithmic values. T(R)TS based on highest frequency sampling. CTS based on 3 secs.
+
+N. Hautsch and M. Podolskij (2010)
+
+32
+
+Table 6: Summary statistics of all estimators and statistics for C
+
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+
+Mean
+12.22 12.88 13.24 13.11
+13.59 13.40 13.66 13.57
+12.76 14.04 13.26 13.25
+14.02 14.50 13.69 13.73
+13.58 13.51 13.58 13.51
+13.53 11.46 13.53 11.46
+14.22 14.26 14.16 14.01
+0.94 0.80 0.92 0.84
+0.95 0.81 0.92 0.84
+1.10 0.93 1.08 0.98
+0.61 0.45 0.88 0.67
+37.14 31.95 77.66 58.86
+0.08 0.09 0.13 0.16
+-2.46 -12.89 -0.46 -2.08
+-3.20 -9.34 -0.11 -1.20
+13.43 14.46 10.70 9.32
+
+Median
+12.19 12.81 13.00 12.94
+13.26 13.20 13.28 13.31
+12.33 13.94 13.16 13.15
+13.31 14.51 13.28 13.34
+13.12 13.10 13.12 13.10
+13.64 11.52 13.64 11.52
+14.04 14.30 14.17 14.04
+0.70 0.56 0.67 0.62
+0.71 0.58 0.67 0.63
+0.79 0.69 0.73 0.68
+0.29 0.20 0.50 0.34
+16.00 14.00 44.00 30.00
+0.05 0.08 0.09 0.11
+-2.37 -13.23 -0.40 -2.03
+-0.16 -4.16 0.00 -0.02
+14.78 14.58 9.10 5.26
+
+Std.Dev.
+
+ACF(1)
+
+Ctn
+
+4.39
+
+0.22
+
+3.89
+
+0.22
+
+3.58
+
+0.33
+
+3.64 Ctn,a
+3.66
+
+0.36 0.33
+
+3.62
+
+0.35
+
+3.59
+
+0.34
+
+3.60
+
+0.36
+
+Ctn (1)
+
+3.91
+
+0.32
+
+3.57
+
+0.38
+
+3.60
+
+0.33
+
+3.63
+
+0.37
+
+Ctn,a (1)
+
+3.83
+
+0.33
+
+3.94
+
+0.37
+
+3.64
+
+0.35
+
+3.64
+
+0.36
+
+RV 10
+
+3.77
+
+0.30
+
+3.78
+
+0.31
+
+3.77
+
+0.30
+
+3.78
+
+0.31
+
+M LRV
+
+3.36
+
+0.44
+
+2.95
+
+0.49
+
+3.36
+
+0.44
+
+2.95
+
+0.49
+
+KRV
+
+3.54
+
+0.35
+
+3.50
+
+0.39
+
+3.43
+
+0.37
+
+3.42
+
+0.38
+
+n-1/4 nt,a
+
+0.73 0.69 0.73 0.69
+n-1/4
+
+-0.03 0.03 0.02 0.03
+nt,a (1)
+
+0.73 0.69 0.73 0.69
+
+-0.02 0.03 0.01 0.03
+
+n-1/4 ^tn
+
+0.85
+
+-0.04
+
+0.80
+
+0.02
+
+0.93
+
+-0.01
+
+0.91
+
+-0.01
+
+
+
+0.66
+
+-0.12
+
+0.62
+
+0.03
+
+0.87
+
+-0.01
+
+0.67
+
+-0.04
+
+k
+
+40.77
+
+-0.10
+
+46.64
+
+0.05
+
+77.25
+
+-0.01
+
+59.34
+
+-0.04
+
+BT Vtn,a/Ctn,a
+
+0.07
+
+0.08
+
+0.10
+
+0.02
+
+0.14
+
+0.20
+
+0.15
+
+0.03
+
+Sn 1.82
+
+0.36
+
+2.93
+
+0.18
+
+1.81
+
+0.31
+
+1.78
+
+0.30
+
+100 · (Ctn,a - Ctn,a(1))/Ctn,a
+
+6.47
+
+-0.03
+
+16.44
+
+0.02
+
+1.53
+
+0.06
+
+2.54
+
+0.21
+
+100 · (~nt,a - nt,a)/tn,a
+
+10.74
+
+-0.06
+
+10.72
+
+0.13
+
+10.52
+
+0.06
+
+10.18
+
+-0.06
+
+ACF(5)
+0.14 0.11 0.29 0.27
+0.27 0.25 0.23 0.27
+0.22 0.29 0.28 0.27
+0.24 0.29 0.22 0.26
+0.23 0.23 0.23 0.23
+0.36 0.35 0.36 0.35
+0.30 0.31 0.30 0.31
+0.15 0.19 0.26 0.14
+0.15 0.19 0.26 0.14
+0.17 0.20 0.25 0.14
+0.13 0.21 -0.03 0.10
+0.11 0.24 -0.03 0.10
+-0.02 0.06 -0.16 0.02
+-0.08 0.01 -0.04 0.21
+-0.16 -0.07 0.08 0.03
+0.05 -0.01 -0.06 0.14
+
+ACF(10)
+0.19 0.00 0.18 0.19
+0.16 0.15 0.15 0.18
+0.20 0.25 0.17 0.18
+0.13 0.30 0.14 0.15
+0.14 0.15 0.14 0.15
+0.24 0.25 0.24 0.25
+0.16 0.18 0.18 0.21
+0.20 0.18 0.22 0.15
+0.20 0.18 0.22 0.15
+0.25 0.17 0.26 0.17
+-0.08 0.09 0.16 -0.16
+-0.06 0.06 0.16 -0.16
+-0.03 -0.02 0.06 -0.17
+0.02 0.00 0.13 0.03
+0.07 -0.02 0.24 -0.08
+-0.05 -0.03 -0.06 -0.03
+
+Skew
+-0.82 -9.00 -0.13 -0.12
+-0.24 -0.30 -0.28 -0.19
+-0.28 -0.11 -0.15 -0.17
+-0.31 0.05 -0.27 -0.24
+-0.17 -0.21 -0.17 -0.21
+-0.36 -0.38 -0.36 -0.38
+-0.24 -0.30 -0.25 -0.31
+1.99 2.30 1.99 2.29
+1.98 2.31 1.99 2.30
+1.77 2.33 1.94 2.33
+1.16 2.43 0.81 0.67
+1.22 2.61 0.81 0.67
+1.29 3.83 1.31 0.83
+0.01 0.64 -0.13 -0.02
+-2.10 -4.42 -0.60 -1.98
+0.14 0.05 0.50 0.61
+
+Kurt
+3.74 82.97 3.06 2.82
+2.98 3.09 3.14 2.83
+2.97 2.59 2.99 2.81
+2.85 2.80 3.03 2.77
+3.11 3.11 3.11 3.11
+2.40 2.44 2.40 2.44
+2.79 2.68 2.62 2.61
+7.41 8.65 7.70 8.95
+7.37 8.71 7.71 8.98
+5.96 8.62 7.01 8.76
+3.27 8.59 2.36 1.78
+3.49 9.63 2.36 1.78
+5.13 24.72 4.01 2.61
+2.58 4.41 2.28 3.71
+6.19 27.97 10.46 5.87
+1.88 1.80 1.95 1.91
+
+Note: In case of volatility estimators, skewness and kurtosis are computed for logarithmic values. T(R)TS based on highest frequency sampling. CTS based on 3 secs.
+
+N. Hautsch and M. Podolskij (2010)
+
+33
+
+Table 7: Summary statistics of all estimators and statistics for HD
+
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+
+Mean
+16.47 17.28 18.16 18.29
+18.46 18.17 18.62 18.67
+17.27 19.13 18.13 18.32
+19.09 19.96 18.59 18.71
+18.48 18.39 18.48 18.39
+18.75 16.72 18.75 16.72
+19.66 19.75 19.55 19.36
+1.82 1.63 1.74 1.74
+1.84 1.66 1.74 1.74
+2.08 1.86 1.98 1.98
+0.67 0.61 0.95 0.77
+38.66 42.57 83.79 68.38
+0.07 0.12 0.11 0.12
+-1.95 -9.93 0.78 -0.59
+-3.01 -12.13
+0.14 -0.15
+12.38 12.17 10.54 9.56
+
+Median
+16.17 17.09 18.04 18.06
+18.00 17.77 18.50 18.38
+16.53 18.59 18.04 18.01
+18.39 19.03 18.50 18.38
+18.23 18.12 18.23 18.12
+18.29 16.44 18.29 16.44
+19.24 19.35 18.95 19.16
+1.57 1.32 1.52 1.40
+1.57 1.35 1.52 1.42
+1.77 1.54 1.69 1.58
+0.39 0.20 0.69 0.59
+24.00 14.00 61.00 52.00
+0.06 0.10 0.08 0.09
+-1.63 -9.60 0.81 -0.56
+-0.07 -3.17 0.00 0.00
+11.26 10.12 10.15 8.40
+
+Std.Dev.
+
+ACF(1)
+
+Ctn
+
+5.32
+
+0.16
+
+5.52
+
+0.38
+
+4.78
+
+0.46
+
+4.84 Ctn,a
+5.03
+
+0.48 0.47
+
+4.98
+
+0.48
+
+5.04
+
+0.48
+
+4.94
+
+0.49
+
+Ctn (1)
+
+4.79
+
+0.35
+
+4.76
+
+0.41
+
+4.77
+
+0.45
+
+4.86
+
+0.48
+
+Ctn,a (1)
+
+5.70
+
+0.47
+
+5.34
+
+0.33
+
+5.03
+
+0.48
+
+4.99
+
+0.49
+
+RV 10
+
+5.15
+
+0.45
+
+5.19
+
+0.45
+
+5.15
+
+0.45
+
+5.19
+
+0.45
+
+M LRV
+
+4.35
+
+0.57
+
+4.17
+
+0.55
+
+4.35
+
+0.57
+
+4.17
+
+0.55
+
+KRV
+
+4.98
+
+0.46
+
+5.02
+
+0.46
+
+4.66
+
+0.46
+
+4.81
+
+0.45
+
+n-1/4 nt,a
+
+1.28 1.23 1.14 1.27
+n-1/4
+
+0.16 0.11 0.01 0.10
+tn,a (1)
+
+1.28 1.23 1.14 1.27
+
+0.16 0.11 0.01 0.10
+
+n-1/4 ^tn
+
+1.37
+
+0.19
+
+1.31
+
+0.14
+
+1.28
+
+-0.02
+
+1.48
+
+0.16
+
+
+
+0.71
+
+0.23
+
+0.77
+
+0.12
+
+0.89
+
+0.17
+
+0.63
+
+0.15
+
+k
+
+39.83
+
+0.20
+
+53.33
+
+0.11
+
+78.44
+
+0.17
+
+55.84
+
+0.15
+
+BT Vtn,a/Ctn,a
+
+0.07
+
+0.01
+
+0.13
+
+0.03
+
+0.10
+
+-0.06
+
+0.11
+
+0.22
+
+Sn 2.84
+
+0.06
+
+2.75
+
+0.16
+
+1.40
+
+0.50
+
+1.51
+
+0.26
+
+100 · (Ctn,a - Ctn,a(1))/Ctn,a
+
+6.85
+
+0.12
+
+24.36
+
+0.12
+
+1.00
+
+0.04
+
+0.89
+
+0.00
+
+100 · (~nt,a - nt,a)/nt,a
+
+10.42
+
+0.17
+
+10.20
+
+0.14
+
+10.01
+
+0.02
+
+9.18
+
+0.34
+
+ACF(5)
+0.06 0.08 0.16 0.15
+0.12 0.12 0.12 0.14
+0.13 0.09 0.17 0.15
+0.08 0.08 0.13 0.14
+0.11 0.11 0.11 0.11
+0.22 0.22 0.22 0.22
+0.12 0.12 0.10 0.11
+0.05 0.10 0.16 0.05
+0.05 0.10 0.16 0.06
+0.11 0.13 0.20 0.06
+0.03 -0.06 0.05 0.01
+0.02 -0.04 0.05 0.01
+-0.13 -0.11 0.07 0.09
+-0.02 0.05 0.21 0.02
+-0.13 -0.02 0.03 0.01
+-0.01 -0.08 0.16 -0.14
+
+ACF(10)
+-0.01 -0.06 -0.14 -0.20
+-0.18 -0.15 -0.17 -0.21
+-0.10 -0.20 -0.13 -0.21
+-0.21 -0.19 -0.17 -0.22
+-0.14 -0.14 -0.14 -0.14
+-0.21 -0.24 -0.21 -0.24
+-0.23 -0.27 -0.23 -0.25
+-0.07 -0.07 -0.08 -0.05
+-0.07 -0.07 -0.08 -0.05
+-0.03 -0.06 -0.07 -0.08
+0.18 0.07 0.09 0.01
+0.16 0.06 0.09 0.01
+0.09 0.32 0.05 0.02
+-0.10 -0.09 0.03 -0.19
+-0.06 0.28 -0.03 -0.13
+-0.03 -0.09 0.08 0.02
+
+Skew
+-0.91 -6.25 -0.25 -0.09
+-0.13 -0.25 -0.24 -0.13
+-0.33 0.01 -0.24 -0.09
+0.00 0.14 -0.24 -0.12
+-0.20 -0.22 -0.20 -0.22
+0.04 0.01 0.04 0.01
+-0.02 0.05 -0.07 -0.09
+3.12 3.13 3.09 3.21
+3.09 3.13 3.08 3.21
+2.52 2.48 2.30 2.49
+1.30 1.62 0.83 0.47
+1.25 1.54 0.83 0.47
+0.86 3.70 1.06 1.21
+-5.84 -0.31 0.17 -0.16
+-2.76 -3.79 2.38 -2.62
+0.42 0.40 0.63 0.56
+
+Kurt
+4.11 40.55 2.93 2.48
+2.48 2.85 2.71 2.44
+2.83 2.61 2.92 2.45
+2.60 2.75 2.70 2.42
+2.72 2.76 2.72 2.76
+2.49 2.53 2.49 2.53
+2.33 2.44 2.52 2.49
+17.23 17.70 18.07 18.32
+17.01 17.64 18.06 18.35
+12.30 12.78 11.29 11.32
+4.01 4.57 2.46 1.73
+3.89 4.16 2.46 1.73
+3.03 20.01 3.54 4.02
+47.07 2.98 2.28 2.53
+9.87 20.15 23.01 16.78
+1.97 1.89 2.50 2.12
+
+Note: In case of volatility estimators, skewness and kurtosis are computed for logarithmic values. T(R)TS based on highest frequency sampling. CTS based on 3 secs.
+
+N. Hautsch and M. Podolskij (2010)
+
+34
+
+Table 8: Summary statistics of all estimators and statistics for TEK
+
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+
+Mean
+22.72 22.92 24.19 23.91
+24.31 23.89 24.63 24.38
+23.33 24.34 24.23 23.92
+24.91 25.28 24.68 24.39
+24.75 24.26 24.75 24.26
+24.60 21.33 24.60 21.33
+27.23 26.37 26.81 25.91
+4.88 4.12 4.42 3.96
+4.94 4.14 4.43 3.97
+6.37 5.47 5.58 4.77
+0.63 0.62 1.16 0.69
+19.35 28.51 102.27 60.72
+0.06 0.08 0.25 0.27
+-1.12 -3.39 -0.62 0.00
+-2.23 -6.66 -0.16 -0.06
+17.29 17.16 9.15 5.02
+
+Median
+21.55 22.21 23.53 22.89
+23.65 23.07 24.03 23.61
+22.69 23.81 23.59 22.86
+23.92 24.44 24.03 23.51
+23.91 23.21 23.91 23.21
+23.73 20.66 23.73 20.66
+26.26 24.99 26.11 24.86
+3.72 2.87 3.42 2.71
+3.73 2.84 3.43 2.74
+4.54 3.59 3.68 2.84
+0.41 0.39 0.69 0.37
+12.00 17.00 61.00 32.50
+0.05 0.06 0.17 0.26
+-0.88 -3.06 -0.61 0.01
+-0.22 -1.16 0.00 0.00
+19.53 19.31 0.00 0.00
+
+Std.Dev.
+
+ACF(1)
+
+Ctn
+
+8.81
+
+0.23
+
+9.15
+
+0.16
+
+8.80
+
+0.23
+
+8.72 Ctn,a
+9.01
+
+0.22 0.25
+
+8.88
+
+0.21
+
+8.91
+
+0.23
+
+8.80 Ctn (1)
+8.83
+
+0.23 0.24
+
+9.15
+
+0.21
+
+8.81
+
+0.23
+
+8.73
+
+0.22
+
+Ctn,a (1)
+
+9.34
+
+0.24
+
+10.04
+
+0.20
+
+8.93
+
+0.23
+
+8.81
+
+0.22
+
+RV 10
+
+9.59
+
+0.18
+
+9.67
+
+0.19
+
+9.59
+
+0.18
+
+9.67
+
+0.19
+
+M LRV
+
+7.63
+
+0.36
+
+6.85
+
+0.25
+
+7.63
+
+0.36
+
+6.85
+
+0.25
+
+KRV
+
+8.96
+
+0.25
+
+8.40
+
+0.27
+
+8.45
+
+0.26
+
+8.77
+
+0.25
+
+n-1/4 tn,a
+
+9.17 8.79 8.61 8.11
+n-1/4
+
+0.04 0.02 0.03 0.05
+nt,a (1)
+
+9.17 8.77 8.61 8.11
+
+0.04 0.02 0.03 0.05
+
+n-1/4 ^nt
+
+15.16
+
+0.02
+
+15.35
+
+0.01
+
+14.87
+
+0.01
+
+13.86
+
+0.03
+
+
+
+0.54
+
+0.05
+
+0.68
+
+-0.05
+
+1.06
+
+0.10
+
+0.66
+
+-0.03
+
+k
+
+17.46
+
+0.07
+
+31.50
+
+-0.07
+
+93.44
+
+0.10
+
+58.46
+
+-0.03
+
+BT Vtn,a/Ctn,a
+
+0.06
+
+-0.09
+
+0.13
+
+0.00
+
+0.23
+
+0.03
+
+0.18
+
+-0.15
+
+Sn 1.49
+
+0.04
+
+1.73
+
+-0.13
+
+1.24
+
+-0.06
+
+2.09
+
+0.05
+
+100 · (Ctn,a - Ctn,a(1))/Ctn,a
+
+4.73
+
+-0.10
+
+28.70
+
+0.02
+
+0.54
+
+-0.10
+
+1.37
+
+-0.04
+
+100 · (~nt,a - tn,a)/tn,a
+
+11.36
+
+-0.20
+
+11.94
+
+0.00
+
+12.28
+
+-0.03
+
+8.51
+
+-0.10
+
+ACF(5)
+-0.03 0.04 0.02 0.02
+0.02 0.02 0.02 0.03
+-0.01 0.02 0.02 0.02
+0.04 0.03 0.02 0.04
+0.01 0.02 0.01 0.02
+-0.02 0.05 -0.02 0.05
+0.00 0.03 0.04 0.08
+-0.04 -0.03 -0.03 -0.03
+-0.03 -0.03 -0.03 -0.03
+-0.03 -0.02 -0.03 -0.03
+0.02 0.02 0.11 0.15
+-0.02 -0.01 0.11 0.15
+0.00 0.12 -0.02 0.05
+-0.05 -0.09 -0.10 0.30
+0.03 0.10 0.04 -0.18
+-0.09 -0.03 0.02 0.04
+
+ACF(10)
+-0.05 -0.05 -0.05 -0.04
+-0.05 -0.05 -0.06 -0.05
+-0.06 -0.05 -0.05 -0.04
+-0.05 -0.05 -0.06 -0.04
+-0.06 -0.05 -0.06 -0.05
+-0.07 -0.03 -0.07 -0.03
+-0.09 -0.08 -0.09 -0.05
+-0.03 -0.03 -0.03 -0.04
+-0.03 -0.03 -0.03 -0.04
+-0.02 -0.02 -0.02 -0.03
+0.15 0.20 -0.02 -0.05
+0.13 0.19 -0.02 -0.05
+-0.08 -0.15 0.04 0.09
+-0.03 0.03 -0.09 0.06
+0.08 -0.04 -0.09 0.01
+0.13 -0.10 0.00 -0.04
+
+Skew
+0.71 -8.94 0.67 0.96
+0.50 0.80 0.63 0.89
+0.61 0.58 0.65 0.96
+0.45 0.84 0.62 0.88
+0.71 0.85 0.71 0.85
+0.07 0.85 0.07 0.85
+0.31 0.61 0.38 0.88
+8.40 8.28 8.48 8.35
+8.40 8.32 8.49 8.35
+8.66 8.70 8.68 8.70
+1.30 2.01 0.62 0.73
+1.49 2.13 0.62 0.73
+0.80 4.37 0.83 0.26
+-1.31 -0.23 -0.09 3.51
+-2.43 -8.50 -4.58 1.56
+-0.19 -0.02 1.03 1.84
+
+Kurt
+8.63 81.97 8.37 8.50
+8.08 8.39 8.22 8.43
+8.39 7.29 8.31 8.50
+6.97 7.31 8.12 8.41
+8.54 8.87 8.54 8.87
+5.31 6.96 5.31 6.96
+5.01 5.30 5.74 6.12
+75.38 73.68 76.47 74.70
+75.35 74.22 76.48 74.70
+78.54 78.94 78.80 79.01
+4.21 6.48 1.91 1.88
+4.95 7.21 1.91 1.88
+2.76 29.78 2.39 1.89
+5.94 2.29 2.17 23.19
+9.00 76.55 26.97 26.25
+1.88 1.98 2.65 6.17
+
+Note: In case of volatility estimators, skewness and kurtosis are computed for logarithmic values. T(R)TS based on highest frequency sampling. CTS based on 3 secs.
+
+N. Hautsch and M. Podolskij (2010)
+
+35
+
+Table 9: Summary statistics of all estimators and statistics for SON
+
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+
+Mean
+18.34 17.98 19.50 19.10
+19.61 19.05 19.82 19.46
+18.37 19.58 19.52 19.08
+19.66 20.55 19.85 19.44
+19.79 19.17 19.79 19.17
+20.67 18.71 20.67 18.71
+20.88 20.37 21.71 20.06
+3.08 2.38 2.90 2.27
+3.11 2.43 2.91 2.28
+3.78 2.92 3.27 2.35
+0.51 0.64 1.25 0.69
+12.93 24.94 110.05 60.56
+0.08 0.11 0.27 0.31
+0.23 -2.91 -0.23 0.57
+-0.03 -7.87 -0.14 0.09
+18.91 17.78 7.66 2.97
+
+Median
+17.37 17.40 18.38 18.25
+18.66 18.29 18.79 18.44
+17.20 18.20 18.51 18.25
+18.38 19.59 18.78 18.43
+18.90 18.56 18.90 18.56
+19.90 18.21 19.90 18.21
+20.47 20.14 20.93 19.21
+2.53 1.97 2.13 1.85
+2.57 2.04 2.13 1.85
+3.16 2.42 2.26 1.86
+0.40 0.30 1.00 0.34
+10.00 13.00 88.00 30.00
+0.08 0.09 0.18 0.30
+0.13 -3.16 -0.40 0.57
+0.05 -2.59 0.00 0.01
+19.05 18.12 0.00 0.00
+
+Std.Dev.
+
+ACF(1)
+
+Ctn
+
+6.30
+
+0.40
+
+6.46
+
+0.39
+
+6.01
+
+0.44
+
+6.13 Ctn,a
+6.40
+
+0.49 0.47
+
+6.38
+
+0.49
+
+6.13
+
+0.46
+
+6.22 Ctn (1)
+6.36
+
+0.49 0.46
+
+6.99
+
+0.46
+
+6.02
+
+0.45
+
+6.11
+
+0.50
+
+Ctn,a (1)
+
+6.65
+
+0.48
+
+7.42
+
+0.47
+
+6.15
+
+0.46
+
+6.21
+
+0.50
+
+RV 10
+
+6.27
+
+0.44
+
+6.26
+
+0.48
+
+6.27
+
+0.44
+
+6.26
+
+0.48
+
+M LRV
+
+6.12
+
+0.30
+
+5.47
+
+0.32
+
+6.12
+
+0.30
+
+5.47
+
+0.32
+
+KRV
+
+6.74
+
+0.46
+
+6.18
+
+0.43
+
+6.03
+
+0.38
+
+6.05
+
+0.42
+
+n-1/4 nt,a
+
+2.19 1.70 2.95 1.82
+n-1/4
+
+0.34 0.42 0.34 0.42
+tn,a (1)
+
+2.20 1.76 2.95 1.82
+
+0.34 0.43 0.34 0.42
+
+n-1/4 ^nt
+
+2.63
+
+0.30
+
+2.00
+
+0.38
+
+4.28
+
+0.24
+
+1.88
+
+0.38
+
+
+
+0.39
+
+-0.09
+
+0.68
+
+0.05
+
+1.02
+
+0.11
+
+0.67
+
+-0.06
+
+k
+
+9.61
+
+-0.09
+
+27.32
+
+0.05
+
+89.96
+
+0.11
+
+59.61
+
+-0.06
+
+BT Vtn,a/Ctn,a
+
+0.08
+
+-0.01
+
+0.10
+
+0.19
+
+0.24
+
+0.14
+
+0.19
+
+0.07
+
+Sn 1.43
+
+0.14
+
+1.56
+
+0.14
+
+1.12
+
+0.12
+
+1.15
+
+0.06
+
+100 · (Ctn,a - Ctn,a(1))/Ctn,a
+
+7.08
+
+0.06
+
+13.45
+
+0.01
+
+1.14
+
+0.01
+
+1.16
+
+0.05
+
+100 · (~tn,a - tn,a)/tn,a
+
+12.78
+
+-0.02
+
+12.30
+
+0.20
+
+11.22
+
+0.10
+
+6.55
+
+-0.07
+
+ACF(5)
+0.03 0.08 0.02 0.04
+0.02 0.03 0.04 0.04
+0.02 0.02 0.03 0.05
+0.00 -0.02 0.05 0.05
+0.03 0.04 0.03 0.04
+0.02 0.02 0.02 0.02
+0.01 0.01 0.01 0.02
+-0.05 0.00 -0.07 -0.06
+-0.05 0.00 -0.07 -0.06
+-0.04 0.00 -0.08 -0.06
+0.18 -0.06 -0.12 0.01
+0.19 -0.06 -0.12 0.01
+-0.06 -0.12 -0.05 0.08
+0.00 -0.02 -0.05 -0.12
+-0.22 -0.02 -0.01 -0.05
+0.07 -0.16 -0.20 0.02
+
+ACF(10)
+-0.11 -0.10 -0.13 -0.15
+-0.13 -0.12 -0.13 -0.14
+-0.13 -0.12 -0.13 -0.14
+-0.14 -0.12 -0.13 -0.14
+-0.12 -0.13 -0.12 -0.13
+-0.11 -0.22 -0.11 -0.22
+-0.07 -0.16 -0.12 -0.13
+-0.06 -0.11 -0.07 -0.09
+-0.07 -0.10 -0.07 -0.09
+-0.09 -0.07 -0.04 -0.10
+0.06 -0.14 -0.09 -0.16
+0.08 -0.13 -0.09 -0.16
+-0.23 -0.19 -0.03 -0.26
+0.02 -0.07 -0.12 -0.15
+-0.13 -0.14 -0.01 0.00
+0.04 -0.08 0.20 -0.08
+
+Skew
+0.66 -8.94 0.43 0.45
+0.55 0.52 0.40 0.44
+0.63 0.48 0.41 0.43
+0.47 0.42 0.40 0.43
+0.49 0.42 0.49 0.42
+0.59 0.48 0.59 0.48
+0.30 0.48 0.82 0.58
+3.12 3.44 5.34 3.54
+3.07 3.57 5.34 3.53
+3.47 3.44 6.92 3.38
+1.94 1.68 0.41 0.80
+1.54 1.83 0.41 0.80
+0.83 1.15 0.88 0.33
+0.87 1.80 0.13 -0.11
+-2.64 -2.69 -7.77 -0.39
+0.30 -0.12 1.06 2.22
+
+Kurt
+4.21 81.96 3.25 3.84
+3.74 4.01 3.19 3.69
+3.96 4.18 3.23 3.88
+3.41 4.13 3.15 3.69
+3.49 3.41 3.49 3.41
+4.81 4.76 4.81 4.76
+3.39 4.10 4.99 4.02
+16.27 17.75 37.94 18.10
+15.97 18.55 37.93 18.07
+18.82 19.19 57.09 16.76
+7.34 5.18 1.69 1.88
+5.05 5.59 1.69 1.88
+3.26 4.46 2.52 2.08
+4.73 10.90 1.93 2.81
+16.20 10.66 66.91 16.98
+2.56 1.87 2.51 6.83
+
+Note: In case of volatility estimators, skewness and kurtosis are computed for logarithmic values. T(R)TS based on highest frequency sampling. CTS based on 3 secs.
+
+N. Hautsch and M. Podolskij (2010)
+
+36
+
+Table 10: Summary statistics of all estimators and statistics for ZLC
+
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+TRTS TTS CTS PR CTS MQ
+
+Mean
+30.03 29.73 30.88 32.22
+31.03 31.09 31.42 32.52
+29.92 31.18 30.81 32.22
+30.92 32.46 31.34 32.51
+31.39 30.83 31.39 30.83
+38.77 39.60 38.77 39.60
+33.81 39.10 39.02 37.54
+13.89 14.12 13.65 15.09
+13.92 14.12 13.70 15.09
+15.77 16.60 15.36 16.27
+0.86 1.87 2.06 1.60
+26.65 95.94 181.96 141.54
+0.06 0.07 0.10 0.08
+0.47 -3.43 0.31 0.40
+0.45 -4.53 0.09 0.00
+20.19 20.81 17.74 13.21
+
+Median
+28.20 27.00 28.99 28.86
+29.18 28.70 29.26 29.04
+28.14 28.70 28.99 28.85
+29.18 29.55 29.26 29.03
+28.98 28.06 28.98 28.06
+35.70 36.91 35.70 36.91
+30.46 36.14 35.77 33.75
+6.59 6.81 6.26 6.18
+6.60 6.81 6.26 6.18
+8.64 8.52 7.54 7.13
+0.78 1.98 2.20 1.79
+23.00 95.00 194.00 158.00
+0.02 0.00 0.04 0.04
+0.32 -3.40 0.35 0.42
+0.10 -0.09 0.00 0.00
+22.02 22.27 19.35 14.24
+
+Std.Dev.
+
+ACF(1)
+
+Ctn
+
+14.99
+
+0.22
+
+15.89
+
+0.21
+
+15.23
+
+0.18
+
+17.45 Ctn,a
+15.26
+
+0.17 0.20
+
+15.79
+
+0.20
+
+16.01
+
+0.17
+
+17.61 Ctn (1)
+15.04
+
+0.17 0.22
+
+15.74
+
+0.18
+
+15.00
+
+0.18
+
+17.45
+
+0.17
+
+Ctn,a (1)
+
+15.32
+
+0.20
+
+16.66
+
+0.14
+
+15.70
+
+0.18
+
+17.61
+
+0.17
+
+RV 10
+
+16.69
+
+0.16
+
+16.62
+
+0.17
+
+16.69
+
+0.16
+
+16.62
+
+0.17
+
+M LRV
+
+18.04
+
+0.17
+
+16.67
+
+0.24
+
+18.04
+
+0.17
+
+16.67
+
+0.24
+
+KRV
+
+19.18
+
+0.18
+
+18.88
+
+0.18
+
+18.29
+
+0.13
+
+18.85
+
+0.17
+
+n-1/4 tn,a
+
+53.04 52.81 56.32 69.00
+n-1/4
+
+0.00 0.00 0.00 0.00
+nt,a (1)
+
+53.04 52.81 56.35 69.00
+
+0.00 0.00 0.00 0.00
+
+n-1/4 ^tn
+
+52.89
+
+0.01
+
+52.93
+
+0.01
+
+56.20
+
+0.00
+
+68.90
+
+0.00
+
+
+
+0.51
+
+0.07
+
+0.91
+
+0.06
+
+0.76
+
+0.33
+
+0.38
+
+0.17
+
+k
+
+19.27
+
+0.22
+
+51.38
+
+0.25
+
+67.28
+
+0.33
+
+33.90
+
+0.17
+
+BT Vtn,a/Ctn,a
+
+0.08
+
+-0.10
+
+0.14
+
+-0.18
+
+0.15
+
+0.08
+
+0.11
+
+0.01
+
+Sn 1.11
+
+0.10
+
+1.59
+
+0.12
+
+1.12
+
+0.00
+
+0.96
+
+-0.11
+
+100 · (Ctn,a - Ctn,a(1))/Ctn,a
+
+2.15
+
+0.08
+
+16.76
+
+-0.07
+
+0.75
+
+0.05
+
+0.01
+
+0.06
+
+100 · (~nt,a - tn,a)/tn,a
+
+11.31
+
+-0.03
+
+12.76
+
+-0.10
+
+11.32
+
+0.01
+
+10.45
+
+0.07
+
+ACF(5)
+0.05 0.04 0.03 0.02
+0.04 0.02 0.03 0.02
+0.04 0.01 0.03 0.02
+0.03 -0.01 0.03 0.02
+0.02 0.02 0.02 0.02
+0.10 0.16 0.10 0.16
+0.01 0.05 0.04 0.03
+-0.01 -0.02 -0.01 -0.02
+-0.01 -0.02 -0.01 -0.02
+-0.02 -0.02 -0.01 -0.02
+0.07 -0.20 0.00 -0.19
+0.10 -0.08 0.00 -0.19
+-0.07 -0.03 0.01 0.02
+-0.05 0.02 0.16 -0.05
+0.02 -0.07 -0.02 -0.06
+0.00 0.03 0.03 0.00
+
+ACF(10)
+0.05 0.03 0.04 0.04
+0.05 0.08 0.03 0.04
+0.05 0.10 0.04 0.04
+0.05 0.11 0.03 0.04
+0.02 0.05 0.02 0.05
+-0.03 -0.01 -0.03 -0.01
+0.03 0.02 -0.02 0.02
+-0.01 -0.01 0.00 0.00
+-0.01 -0.01 0.00 0.00
+0.00 -0.01 0.01 0.00
+0.01 -0.02 -0.01 0.15
+-0.01 -0.06 -0.01 0.15
+-0.07 0.03 -0.07 -0.01
+0.00 0.23 -0.07 -0.03
+-0.07 -0.05 -0.02 -0.01
+0.02 0.00 -0.11 -0.18
+
+Skew
+1.43 -8.89 1.48 1.88
+1.46 1.51 1.58 1.89
+1.36 1.28 1.44 1.88
+1.41 1.24 1.53 1.88
+1.75 1.83 1.75 1.83
+1.27 1.47 1.27 1.47
+1.49 1.60 1.76 1.74
+8.61 8.56 8.76 8.77
+8.61 8.56 8.75 8.77
+8.58 8.38 8.73 8.76
+1.72 -0.53 -0.81 -2.12
+2.79 0.01 -0.81 -2.12
+2.12 2.82 2.39 2.56
+0.34 -0.24 -0.07 -0.05
+2.66 -4.59 8.83 4.34
+-0.44 -0.34 -0.25 0.01
+
+Kurt
+8.66 80.94 9.75 11.09
+9.16 9.23 9.93 11.10
+8.43 8.04 9.75 11.09
+8.95 7.08 9.85 11.10
+10.85 10.70 10.85 10.70
+8.44 8.72 8.44 8.72
+9.23 9.36 10.13 9.86
+77.49 76.77 79.46 79.50
+77.46 76.78 79.27 79.50
+77.14 74.53 79.09 79.35
+8.17 2.31 2.94 6.47
+16.31 2.82 2.94 6.47
+9.15 12.67 8.70 12.62
+2.78 2.79 2.51 2.75
+16.09 25.62 80.29 25.12
+2.08 2.05 1.91 1.50
+
+Note: In case of volatility estimators, skewness and kurtosis are computed for logarithmic values. T(R)TS based on highest frequency sampling. CTS based on 3 secs.
+
+N. Hautsch and M. Podolskij (2010)
+Figures
+
+37
+
+Figure 1: Averages of 100 252Ctn in dependence of . Based on T(R)TS and 3 sec CTS using prices and mid-quotes. Benchmarks: RV10, MLRV and RK using prices.
+
+Figure 2: Averages of 100 252Ctn,a in dependence of . Based on T(R)TS and 3 sec CTS using prices and mid-quotes. Benchmarks: RV10, MLRV and RK using prices.
+
+N. Hautsch and M. Podolskij (2010)
+
+38
+
+Figure 3: Realizations of 100 252Ctn,a for different values of  using highest frequency TRTS for the first 12 trading days in the sample.
+
+Figure 4: Realizations of 100 252Ctn,a for different values of  using 3 sec CTS based on prices for the first 12 trading days in the sample.
+
+N. Hautsch and M. Podolskij (2010)
+
+39
+
+Figure 5: Time series of prices for XOM for the first 12 trading days in the sample.
+
+Figure 6: Time series of prices for C for the first 12 trading days in the sample.
+
+N. Hautsch and M. Podolskij (2010)
+
+40
+
+Figure 7: Time series of prices for HD for the first 12 trading days in the sample.
+
+Figure 8: Averages of 100 252Ctn (top panel) and 100 252Ctn,a (bottom panel) for different values of  and n using TRTS.
+
+N. Hautsch and M. Podolskij (2010)
+
+41
+
+Figure 9: Averages of nt-1/4t (multiplied by 1000) for different choices of . Based on highest frequency T(R)TS and 3 sec CTS using prices and mid-quotes.
+
+Figure 10: Averages of nt-1/4t,a (multiplied by 1000) for different choices of . Based on highest frequency T(R)TS and 3sec CTS using prices and mid-quotes.
+
+N. Hautsch and M. Podolskij (2010)
+
+42
+
+Figure 11: Histogram of daily values of  based on MSE minimization. Based on highest frequency T(R)TS and 3 sec CTS using prices and mid-quotes.
+
+Figure 12: Histogram of daily values of kn based on MSE minimization. Based on highest frequency T(R)TS and 3 sec CTS using prices and mid-quotes.
+
+N. Hautsch and M. Podolskij (2010)
+
+43
+
+Figure 13: Histogram of daily optimal values of  based on MSE minimization. Based on T(R)TS with n = 3 and 15 sec CTS using prices and mid-quotes.
+
+Figure 14: Histogram of daily optimal values of kn based on MSE minimization. Based on T(R)TS with n = 3 and 15 sec CTS using prices and mid-quotes.
+
+N. Hautsch and M. Podolskij (2010)
+
+44
+
+Figure 15: Averages of 100 252Ctn(1) for different values of . Based on highest frequency T(R)TS and 3 sec CTS using prices and mid-quotes. Benchmarks: RV10, MLRV and RK
+implemented based on trade prices.
+
+Figure 16: Averages of 100 252Ctn,a(1) for different values of . Based on highest frequency T(R)TS and 3 sec CTS using prices and mid-quotes. Benchmarks: RV10, MLRV and RK implemented based on trade prices.
+
+N. Hautsch and M. Podolskij (2010)
+
+45
+
+Figure 17: Histogram of 100 · (Ctn,a - Ctn,a(1))/Ctn,a. Based on highest frequency T(R)TS and 3 sec CTS.
+
+Figure 18: Histogram of AR(1) test statistic Sn. Based on highest frequency T(R)TS and 3 sec CTS.
+
+N. Hautsch and M. Podolskij (2010)
+
+46
+
+Figure 19: Averaged jump ratio BT Vtn,a/Ctn,a for different values of . Based on highest frequency T(R)TS and 3 sec CTS using prices and mid-quotes.
+
+Figure 20: Histogram of BT Vtn,a/Ctn,a. Based on highest frequency T(R)TS and 3 sec CTS.
+
+N. Hautsch and M. Podolskij (2010)
+
+47
+
+Figure
+
+21:
+
+Averages
+
+of
+
+ 100 252Yt
+
+with
+
+Yt
+
+
+
+{Ctn, Ctn,a, RV, RV
+
+10, RK}
+
+for
+
+different
+
+values
+
+of n using T(R)TS. Ctn and Ctn,a based on an optimal choice of .
+
+N. Hautsch and M. Podolskij (2010)
+
+48
+
+Figure
+
+22:
+
+Averages
+
+of
+
+ 100 252Yt
+
+with
+
+Yt
+
+
+
+{Ctn(1), Ctn,a(1), RV, RV 10, RK}
+
+for
+
+different
+
+values of n using T(R)TS. Ctn(1) and Ctn,a(1) based on an optimal choice of .
+
+Figure
+
+23:
+
+Averages
+
+of
+
+ 100 252Yt
+
+with
+
+Yt
+
+
+
+{Ctn, Ctn,a, RV, RV
+
+10, RK}
+
+for
+
+different
+
+values
+
+of n using CTS. Ctn and Ctn,a based on an optimal choice of .
+
+N. Hautsch and M. Podolskij (2010)
+
+49
+
+Figure
+
+24:
+
+Averages
+
+of
+
+ 100 252Yt
+
+with
+
+Yt
+
+
+
+{Ctn(1), Ctn,a(1), RV, RV 10, RK}
+
+for
+
+different
+
+values of n using CTS. Ctn(1) and Ctn,a(1) based on an optimal choice of .
+
+Figure 25: Average  in dependence of n using T(R)TS.
+
+N. Hautsch and M. Podolskij (2010)
+
+50
+
+Figure 26: Average kn in dependence of n using T(R)TS.
+
+Figure 27: Discrepancy measures D~t based on Euclidean distances between TRTS PR, TTS MQ, 3 sec CTS PR and 3 sec CTS MQ.
+
+N. Hautsch and M. Podolskij (2010)
+
+51
+
+Figure 28: Relative discrepancy measures D~t(·)/D~t(Ctn,a) based on Euclidean distances between TRTS PR, TTS MQ, 3 sec CTS PR and 3 sec CTS MQ.
+
+Figure 29: Time series plot of 100 252Ctn,a with 95% jump robust confidence intervals. Based on TRTS.
+
+N. Hautsch and M. Podolskij (2010)
+
+52
+
+Figure 30: Time series plot of 100 252Ctn,a with 95% confidence intervals computed based ^nt,a and tn,a. Based on TRTS.
+
+Figure 31: Time series plot of BT /Ctn,a. Based on highest frequency T(R)TS and 3 sec CTS.
+
+N. Hautsch and M. Podolskij (2010)
+
+53
+
+Figure 32: Time series plot of AR(1) test statistic Sn. Based on highest frequency T(R)TS and 3 sec CTS.
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Volatility Investing with Variance Swaps" by Wolfgang Karl Härdle and Elena Silyakova, January 2010.
+002 "Partial Linear Quantile Regression and Bootstrap Confidence Bands" by Wolfgang Karl Härdle, Ya'acov Ritov and Song Song, January 2010.
+003 "Uniform confidence bands for pricing kernels" by Wolfgang Karl Härdle, Yarema Okhrin and Weining Wang, January 2010.
+004 "Bayesian Inference in a Stochastic Volatility Nelson-Siegel Model" by Nikolaus Hautsch and Fuyu Yang, January 2010.
+005 "The Impact of Macroeconomic News on Quote Adjustments, Noise, and Informational Volatility" by Nikolaus Hautsch, Dieter Hess and David Veredas, January 2010.
+006 "Bayesian Estimation and Model Selection in the Generalised Stochastic Unit Root Model" by Fuyu Yang and Roberto Leon-Gonzalez, January 2010.
+007 "Two-sided Certification: The market for Rating Agencies" by Erik R. Fasten and Dirk Hofmann, January 2010.
+008 "Characterising Equilibrium Selection in Global Games with Strategic Complementarities" by Christian Basteck, Tijmen R. Daniels and Frank Heinemann, January 2010.
+009 "Predicting extreme VaR: Nonparametric quantile regression with refinements from extreme value theory" by Julia Schaumburg, February 2010.
+010 "On Securitization, Market Completion and Equilibrium Risk Transfer" by Ulrich Horst, Traian A. Pirvu and Gonçalo Dos Reis, February 2010.
+011 "Illiquidity and Derivative Valuation" by Ulrich Horst and Felix Naujokat, February 2010.
+012 "Dynamic Systems of Social Interactions" by Ulrich Horst, February 2010.
+013 "The dynamics of hourly electricity prices" by Wolfgang Karl Härdle and Stefan Trück, February 2010.
+014 "Crisis? What Crisis? Currency vs. Banking in the Financial Crisis of 1931" by Albrecht Ritschl and Samad Sarferaz, February 2010.
+015 "Estimation of the characteristics of a Lévy process observed at arbitrary frequency" by Johanna Kappusl and Markus Reiß, February 2010.
+016 "Honey, I'll Be Working Late Tonight. The Effect of Individual Work Routines on Leisure Time Synchronization of Couples" by Juliane Scheffel, February 2010.
+017 "The Impact of ICT Investments on the Relative Demand for HighMedium-, and Low-Skilled Workers: Industry versus Country Analysis" by Dorothee Schneider, February 2010.
+018 "Time varying Hierarchical Archimedean Copulae" by Wolfgang Karl Härdle, Ostap Okhrin and Yarema Okhrin, February 2010.
+019 "Monetary Transmission Right from the Start: The (Dis)Connection Between the Money Market and the ECB's Main Refinancing Rates" by Puriya Abbassi and Dieter Nautz, March 2010.
+020 "Aggregate Hazard Function in Price-Setting: A Bayesian Analysis Using Macro Data" by Fang Yao, March 2010.
+021 "Nonparametric Estimation of Risk-Neutral Densities" by Maria Grith, Wolfgang Karl Härdle and Melanie Schienle, March 2010.
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Fitting high-dimensional Copulae to Data" by Ostap Okhrin, April 2010. 023 "The (In)stability of Money Demand in the Euro Area: Lessons from a
+Cross-Country Analysis" by Dieter Nautz and Ulrike Rondorf, April 2010. 024 "The optimal industry structure in a vertically related market" by
+Raffaele Fiocco, April 2010. 025 "Herding of Institutional Traders" by Stephanie Kremer, April 2010. 026 "Non-Gaussian Component Analysis: New Ideas, New Proofs, New
+Applications" by Vladimir Panov, May 2010. 027 "Liquidity and Capital Requirements and the Probability of Bank Failure"
+by Philipp Johann König, May 2010. 028 "Social Relationships and Trust" by Christine Binzel and Dietmar Fehr,
+May 2010. 029 "Adaptive Interest Rate Modelling" by Mengmeng Guo and Wolfgang Karl
+Härdle, May 2010. 030 "Can the New Keynesian Phillips Curve Explain Inflation Gap
+Persistence?" by Fang Yao, June 2010. 031 "Modeling Asset Prices" by James E. Gentle and Wolfgang Karl Härdle,
+June 2010. 032 "Learning Machines Supporting Bankruptcy Prediction" by Wolfgang Karl
+Härdle, Rouslan Moro and Linda Hoffmann, June 2010. 033 "Sensitivity of risk measures with respect to the normal approximation
+of total claim distributions" by Volker Krätschmer and Henryk Zähle, June 2010. 034 "Sociodemographic, Economic, and Psychological Drivers of the Demand for Life Insurance: Evidence from the German Retirement Income Act" by Carolin Hecht and Katja Hanewald, July 2010. 035 "Efficiency and Equilibria in Games of Optimal Derivative Design" by Ulrich Horst and Santiago Moreno-Bromberg, July 2010. 036 "Why Do Financial Market Experts Misperceive Future Monetary Policy Decisions?" by Sandra Schmidt and Dieter Nautz, July 2010. 037 "Dynamical systems forced by shot noise as a new paradigm in the interest rate modeling" by Alexander L. Baranovski, July 2010. 038 "Pre-Averaging Based Estimation of Quadratic Variation in the Presence of Noise and Jumps: Theory, Implementation, and Empirical Evidence" by Nikolaus Hautsch and Mark Podolskij, July 2010.
+
+

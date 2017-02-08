@@ -1,0 +1,535 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2007-044
+Ein Vergleich des bin‰ren Logit-Modells mit
+k¸nstlichen neuronalen Netzen zur
+Insolvenzprognose anhand relativer Bilanzkennzahlen
+Ronald Franken*
+* Technische Universit‰t Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+Ein Vergleich des bina®ren Logit-Modells mit ku®nstlichen neuronalen Netzen zur Insolvenzprognose anhand relativer Bilanzkennzahlen
+Ronald Franken Technische Universita®t Berlin Institut fu®r Wirtschaftsinformatik und Quantitative Methoden FG Statistik und O® konometrie
+Franklinstraﬂe 28/29 10587 Berlin
+Juli 2007
+Zusammenfassung Die Prognose der Insolvenzgefa®hrdung von Unternehmen anhand statistischer Methodik war und ist eine bedeutende Aufgabe empirischer Forschung. Eine Mo®glichkeit der Beurteilung der finanziellen bzw. wirtschaftlichen Verfassung von Unternehmen stellt die sog. externe Bilanzanalyse anhand verschiedener relativer Kennzahlen(-systeme) dar, welche aus den ver®offentlichten Jahresabschlu®ssen von Kapitalgesellschaften abgeleitet werden k®onnen. In der aktuellen Praxis der empirischen Insolvenz- und Risikoforschung ist nach wie vor die klassische parametrische Methode der bin®aren logistischen Regression weit verbreitet. In der ju®ngeren Vergangenheit haben jedoch neue Methoden der statistischen Lerntheorie, die aus den Methoden des maschinellen Lernens hervorgegangen sind, zunehmend an Bedeutung erlangt. In der vorliegenden Arbeit wird ein ku®nstliches neuronales Netz zur Insolvenzklassifikation anhand relativer Bilanzkennzahlen entwickelt und mit den Ergebnissen der logistischen Regressionsanalyse verglichen und evaluiert.
+Keywords: Insolvenzprognose, externe Bilanzanalyse, Ku®nstliche Neuronale Netze, Bin®ares Logit-Modell, logistische Regression
+Diese Arbeit wurde von der Deutschen Forschungsgemeinschaft durch den SFB 649 "O® konomisches Risiko" unterstu®tzt.
+JEL Codes: C45, G32, G33
+1
+
+2
+
+1 Problemstellung: Insolvenzprognose aus Jahresabschlu®ssen
+
+Ziel der hier durchzufu®hrenden Analyse ist es, anhand der beobachteten Jahresabschlussdaten einer Auswahl von 21.000 deutschen Unternehmen
+Klassifikations- und damit Prognosemodelle fu®r die zuku®nftige Ertragslage und damit verbunden einer Insolvenzprognose zu entwickeln. Dabei sollen das am
+ha®ufigsten zu diesem Zweck eingesetzte klassischen statistische Verfahren, die bina®re logistische Regression, mit den in der ju®ngeren Vergangenheit stark verbreiteten ku®nstlichen neuronalen Netzwerkmodellen verglichen und evaluiert werden.
+Die softwaregestu®tzte Analyse erfolgt mit der Data Mining-Software Enterprise Miner 5.2 und der Statistik-Analysesoftware SAS Enterprise Guide 3.0 der
+Firma SAS Institute GmbH Deutschland, die im Rahmen eines Kooperationsvertrages zur Verfu®gung gestellt wurden.1 Auﬂerdem wird das Statistik-Paket R Vers. 2.4.0 des R Project for Statistical Computing2 verwendet.
+Die Generierung von Aussagen u®ber die Ertragslage von Unternehmen betrifft sowohl gesamtwirtschaftliche als auch betriebswirtschaftliche Fragestellungen.
+So wird eine sinnvolle Konjunkturprognose ohne die Beru®cksichtigung der Ertragslage der Gesamtheit der Unternehmen nicht m®oglich sein. Bei den betriebswirtschaftlichen Aspekten spielen insbesondere die Bereiche Risikofru®herkennung, Kreditwu®rdigkeitspru®fung, Ratingverfahren sowie die Insolvenzprognose eine wichtige Rolle.
+Insbesondere die Prognose einer eventuellen Insolvenzgefahr ist fu®r viele Unternehmen von unmittelbarer praktischer Bedeutung. So ist es etwa fu®r Unternehmen, die die deutsche Rechtsform der Aktiengesellschaft (AG) besitzen, ver-
+pflichtend, ein sog. Insolvenzfru®hwarnsystem in ihr internes Rechnungswesen zu integrieren. $ 91 II AktG schreibt hierzu vor: "Der Vorstand hat geeignete Maﬂnahmen zu treffen, insbesondere ein U® berwachungssystem einzurichten, damit
+den Fortbestand der Gesellschaft gefa®hrdende Entwicklungen fru®h erkannt werden." Nach deutschem Gesellschaftsrecht kann sowohl die Zahlungsunf®ahigkeit der Gesellschaft als auch die U® berschuldung zur Insolvenz fu®hren.3 Zahlungsunf®ahigkeit ist hierbei definiert als die Unf®ahigkeit der Unternehmung, rechtlich oder o®konomisch zwingend f®allige Zahlungen leisten zu k®onnen.4 Der Tatbestand der U® berschuldung ist erfu®llt, wenn die Verbindlichkeiten der Unternehmung den Wert der vorhandenen Aktiva u®bersteigen.5 Bei Personengesellschaften fu®hrt lediglich die Zahlungsunfa®higkeit zur Insolvenz.
+Die o®konomische Bedeutung einer mo®glichst guten Prognose der Insolvenzgefahr ist unmittelbar ersichtlich, da die Unf®ahigkeit eines Unternehmens, Ver-
+
+1Vgl.
+
+http://www.sas.com/technologies/analytics/datamining/miner/
+
+bzw.
+
+http://www.sas.com/technologies/bi/query reporting/guide/index.html.
+
+2Informationen und Download von R bzw. MatLab auf http://www.r-project.org bzw.
+
+http://www.mathworks.de.
+
+3Vgl. $ 92 II AktG.
+
+4Vgl. $ 17 InsO.
+
+5Vgl. $ 19 InsO.
+
+3
+bindlichkeiten zu bedienen, meist den Ausfall oder zumindest die Reduzierung der entsprechenden Forderungen des Vertragspartners zur Folge hat. Hat der Vertragspartner wiederum Verbindlichkeiten zu bedienen, k®onnte dieser Forderungsausfall auch ihn in Schwierigkeiten bringen. Somit kann die Insolvenz eines Unternehmens eine Kettenreaktion bezu®glich der Insolvenzgefahr vieler weiterer mittelbar oder unmittelbar mit diesem Unternehmen verbundenen Unternehmen ausl®osen. Eine entsprechende Betrachtung der Vertragspartner hinsichtlich deren Insolvenzgefahr ist somit als essentiell wichtig einzustufen.6 Des Weiteren kann die Insolvenzwahrscheinlichkeit als Risikomaﬂ in die Kreditvertragsgestaltung einflieﬂen, z.B. bei der Festlegung risikoabh®angiger Zinssa®tze (Credit Scoring).
+1.1 Externe Bilanzanalyse
+Unter einer externen Bilanzanalyse versteht man die Analyse eines Unternehmens ausschlieﬂlich anhand publizierter Informationsquellen wie z.B. Jahresabschlu®ssen, Gesch®aftsberichten und ggf. Presseberichten. Betriebsinterne Informationsquellen werden dabei nicht herangezogen.7
+Zu den grundlegenden Aufgaben des von einem Unternehmen zu verfassenden Jahresabschlusses8 z®ahlt, Aufschluss u®ber die Verm®ogenslage, die Finanzlage und die Ertragslage des betreffenden Unternehmens zu geben.9 Der Jahresabschluss spiegelt dabei das Ergebnis sa®mtlicher Gescha®ftsvorfa®lle eines Gesch®aftsjahres wieder.
+Die Darstellung der Verm®ogenslage soll daru®ber informieren, wie "reich" bzw. "arm" das Unternehmen ist, d.h. wie groﬂ der Saldo zwischen den ihm geho®renden Besitzpositionen und seinen Verbindlichkeiten im weitesten Sinne ist. Die Darstellung der Finanzlage soll u®ber die Herkunft und Verwendung der im Unternehmen eingesetzten Mittel sowie u®ber deren Fristigkeiten Auskunft geben. Letztlich soll die Darstellung der Ertragslage daru®ber informieren, in welchem Umfang und aus welchen Gru®nden sich das Reinvermo®gen (Eigenkapital) des Unternehmens innerhalb eines bestimmten Zeitraumes ver®andert hat. Das zentrale Instrument zur Darstellung der Ertragslage ist die zeitraumbezogene Gewinn- und Verlustrechnung (GuV). Darin sind einerseits die Quellen und das Zustandekommen des Ertrages10 sowie andererseits die Aufwandsstruk-
+6Dies stellt auch den Unternehmenszweck des "Verbandes der Vereine Creditreform e.V." dar, von dem die in dieser Arbeit verwendeten Jahresabschlussdaten zur Verfu®gung gestellt wurden, vgl. weiter unten Abschnitt 1.2.
+7Vgl. [Schult 2003], S.5. Im Gegensatz dazu kann in einer internen Bilanzanalyse auf sa®mtliche Informationen bezu®glich des Jahresabschlusses des jeweiligen Unternehmens zugegriffen werden. Dazu geh®oren beispielsweise das umfassend verfu®gbare Datenmaterial aus Kontennachweisen, der Finanzbuchhaltung und -planung, der Kostenrechnung und sonstiger Auswertungen und Plandaten.
+8Der Jahresabschluss einer Kapitalgesellschaft besteht aus der Bilanz, der Gewinn- und Verlustrechnung, dem Anhang und dem Lagebericht. Dieser Jahresabschluss hat unter Beachtung der Grunds®atze ordnungsma®ﬂiger Buchfu®hrung ein den tats®achlichen Verha®ltnissen entsprechendes Bild der Verm®ogens-, Finanz- und Ertragslage zu vermitteln. ($ 264 HGB)
+9Vgl. $ 264 Abs.2 HGB, Generalklausel. 10Der Begriff der Ertragslage im betriebswirtschaftlichen Sinn bezieht sich auf den Ertrag,
+
+4
+tur aus gewo®hnlicher und auﬂergew®ohnlicher Gescha®ftsta®tigkeit im abgelaufenen Gesch®aftsjahr ersichtlich zu machen.
+Somit kann der Jahresabschluss eine Grundlage fu®r die Sch®atzung der Ertragslage des Unternehmens unter Beru®cksichtigung der finanziellen Stabilit®at des Unternehmens bilden.11 Unter dem Begriff der finanziellen Stabilit®at wird insbesondere die nachhaltige Sicherung der Liquidita®t, d.h. der Zahlungsf®ahigkeit des Unternehmens verstanden. Beide Aspekte sind voneinander abha®ngig, denn die finanzielle Stabilita®t ist Voraussetzung fu®r das Erreichen von nachhaltigen Gewinnen und Wachstum eines Unternehmens.
+Allgemein ist die Aussagekraft der externen Bilanzanalyse durch verschiedene Faktoren begrenzt. Einige davon sollen im Folgenden angesprochen werden.
+Die wichtigste Beschra®nkung liegt in der Mangelhaftigkeit der Informationsquelle Jahresabschluss. Diese hat verschiedene Ursachen. Zum Einen sind Bilanzgr®oﬂen durch Ausu®bung von Bilanzierungs- und Bewertungsrichtlinien in gewissem Umfang beeinflussbar. Es ist davon auszugehen, dass diese Spielra®ume genutzt werden, da ein Unternehmen bei negativer Gescha®ftslage einen Anreiz hat, diese gegenu®ber den Anteilseignern besser darzustellen, um seinen Marktwert nicht negativ zu beeinflussen. Andererseits besteht bei positiver Gescha®ftslage evtl. ein Anreiz, die Situation z.B. gegenu®ber der Steuerbeh®orde oder den Anteilseignern schlechter darzustellen, um Zahlungsanspru®che niedrig zu halten. Hinzu kommt, dass diese Bilanzierungs- und Bewertungsspielra®ume zwischen den verschiedenen Rechnungslegungsnormen variieren. So ist beispielsweise im deutschen Handelsrecht der Gl®aubigerschutz das bestimmende Prinzip. Daher sind die Wertans®atze fu®r Verm®ogensgegenst®ande eher niedrig zu wa®hlen. In den IAS/IFRS 12 hingegen ist es gestattet, Verm®ogensgegenst®ande neu zu bewerten und so stille Reserven aufzudecken.13 Dies fu®hrt dazu, dass die Wertansa®tze auf der Aktivseite der Unternehmen, die nach HGB bilanzieren, tendenziell niedriger sein werden als die der nach IAS/IFRS bilanzierenden Unternehmen.
+Des Weiteren resultieren die Positionen der Bilanz und der GuV aus der Periodenabgrenzung von Aufwendungen und Ertra®gen. Es handelt sich hierbei also nicht um reine Zahlungsstromgr®oﬂen, wie sie fu®r eine sinnvolle Analyse der Liquidita®t no®tig wa®ren. Weiterhin ist unklar, in welchem Umfang die Jahresabschlussdaten Einflu®sse konzerninterner Verflechtungen enthalten, die die Vergleichbarkeit der Daten hinsichtlich der Ertragskraft beeinflussen k®onnten.
+Schlieﬂlich ko®nnen im Rahmen der hier durchzufu®hrenden unternehmensu®bergreifenden externen Bilanzanalyse keine zeitlichen Entwicklungen der Unternehmen beobachtet werden. Im Folgenden wird daher eine statische Bilanzanalyse durchgefu®hrt.
+der den Wert aller wa®hrend einer Periode erbrachten Leistungen umfasst. Dieser setzt sich aus Ertr®agen, die durch die typischen Leistungen des Betriebes entstanden sind und aus neutralen Ertr®agen wie Gewinne aus auﬂerordentlicher, betriebs- und periodenfremder Leistung zusammen, vgl. [Coenenberg 1993], S.597 ff.
+11Vgl. [Jerschensky 1998], S.80. 12International Accounting Standards / International Financial Reporting Standards, internationale Standards und Interpretationen zur externen Rechnungslegung von Unternehmen, vgl. http://www.iasifrs.de. 13Vgl. [Pellens et al. 2004], S.290 ff.
+
+5
+1.2 Datenbasis
+Bei den zu analysierenden Rohdaten handelt es sich um eine vom SFB 649 "O® konomisches Risiko" der Humboldt Universita®t zu Berlin fu®r Forschungszwecke zur Verfu®gung gestellte Stichprobe des Verbandes der Vereine Creditreform e.V.14 im Umfang von 21.000 in Deutschland ans®assigen Unternehmen, welche jeweils durch die in Tab. 1 aufgelisteten Jahresabschlusspositionen charakterisiert sind, die in Positionen der Bilanz und der GuV untergliedert werden ko®nnen. Daru®ber hinaus sind in dem Datensatz Informationen u®ber die Branchenzugeh®origkeit der Unternehmen und ihre Gro®ﬂe enthalten. Rechtsform, Rechtskreis und die Regulierungsvorschrift, nach der die Unternehmen bilanzieren, werden ebenfalls benannt. Das Merkmal 'Insolvenzkriterium' beinhaltet die Information, ob das entsprechende Unternehmen innerhalb der nach dem Erhebungszeitpunkt liegenden 2 folgenden Jahre insolvent wurde (KRIT= 1) oder nicht (KRIT= 0). Dabei sind genau 1.000 Unternehmen in der Stichprobe insolvent und 20.000 Unternehmen nicht insolvent geworden.
+Einige Merkmale des Rohdatensatzes weisen sehr hohe Anteile fehlender Werte (zum Teil mehr als 50%) auf. Dies betrifft die Merkmale GRSTBA, IMMA, FORDBET, VERBBET, PRST, GESDAHR, VERW und MA, weshalb diese aus Gru®nden der mo®glichen Ergebnisverzerrung aus der weiteren Analyse ausgeschlossen werden. Alle Unternehmen des Datensatzes haben einen Einzelabschluss nach deutschem Handelsrecht in Euro erstellt, weshalb auch die Merkmale REK und ABSCHLUSS aus dem Datensatz entfernt werden, da alle Objekte die gleiche Auspra®gung "HGB" bzw. "Einzelabschluss" aufweisen. Ebenso werden das Jahr des beobachteten Jahresabschlusses, die Rechtsform und die Identifikationsnummer nicht in die weitere Analyse einbezogen. Die Branchenzugeh®origkeit der Unternehmen wird zu Wirtschaftszweigen in Form von Dummyvariablen verdichtet und so bei den Modellscha®tzungen beru®cksichtigt.
+1.3 Aufbereitung der Positionen der Bilanz und GuV
+Die Datenbasis ist nun so aufzubereiten, um die fu®r die Abbildung der Vermo®gens-, Finanz- und Ertragslage notwendigen Kennzahlen zu erhalten. Dazu sind die Jahresabschlu®sse in die sog. Strukturbilanz und in die Erfolgsspaltung zu u®berfu®hren.
+Fu®r die Bilanzerstellung von Kapitalgesellschaften ist das je nach Gro®ﬂe der Gesellschaft gesetzlich vorgeschriebene Gliederungsschema nach $ 266 HGB maﬂgebend. Fu®r kleine Kapitalgesellschaften beschra®nkt sich die Gliederungstiefe auf die in Abb. 1 dargestellte Form. Aufgrund der im hier zur Verfu®gung stehenden Datensatz enthaltenen Variablen ist diese Darstellung fu®r die weitere Bilanzanalyse dieser Arbeit ausreichend.
+14Zu den Aufgaben der Creditreform vgl. das Internetangebot des "Verbandes der Vereine Creditreform e.V." unter http://www.creditreform.de.
+15Klassifikation der Wirtschaftszweige in der Fassung von 2003 (WZ 2003) des Statistischen Bundesamtes Deutschland.
+
+6
+
+Label
+ID KRIT JAHR
+BRANCHE REF REK ABSCHLUSS SAV GRSTBA IMMA KASSE FLL FORDBET VOR UV BILS  GK EK PRST KVERB LVERB BAVERB VERBBET GESDAHR VLL U VERW AFA EBIT ZINS EBT JE LAGV VERBV KASSEV MA
+
+Variable bzw. Variablenbedeutung
+Unternehmens-Identifikationsnummer Insolvenzkriterium Bilanzjahr des beobachteten Jahresabschlusses Branchenschlu®ssel15 Rechtsform Rechtskreis Abschlussart Sachanlagevermo®gen Grundstu®cke und Bauten Immaterielle Vermo®gensgegensta®nde Kassenbestand, Zahlungsmittelbestand Forderungen aus Lieferung und Leistung Forderungen gegenu®ber Unt. mit denen Beteiligungsverha®ltnis besteht Vorr®ate Umlaufvem®ogen Bilanzsumme  Gesamtkapital Eigenkapital Pensionsru®ckstellungen und andere Aufwendungen fu®r Alterssicherung Kurzfristige Verbindlichkeiten (gesamt) Langfristige Verbindlichkeiten (gesamt) Bankschulden in den kurz- und langfristigen Verbindlichkeiten Verbindlichkeiten gegenu®ber Unt. mit denen Beteiligungsverh®altnis besteht Gesellschafterdahrlehen Verbindlichkeiten aus Lieferung und Leistung Ums®atze Vertriebs- und Verwaltungsaufwand Abschreibungen Earnings before Interest and Taxes (Betriebsergebnis) Zinsaufwand Earnings before Taxes (Gewinn aus ordentlicher Gescha®ftsta®tigkeit) Jahresergebnis (Lager)- Bestandsvera®nderung Ver®anderung der kurz- und langfristigen Verbindlichkeiten Vera®nderung Kassenbestand Anzahl Mitarbeiter
+
+Tabelle 1: Im Creditreform-Datensatz enthaltene Jahresabschlussvariablen
+
+7
+
+Bilanz
+Aktiva
+A. Anlagevermo®gen: I. Immaterielle Vermo®gensgegensta®nde II. Sachanlagen III. Finanzanlagen
+B. Umlaufvermo®gen: I. Vorr®ate II. Forderungen und sonst. Verm.-gegenst®ande III. Wertpapiere IV. Kassenbestand, Schecks, Bankguthaben
+C. Rechnungsabgrenzungsposten
+= Bilanzsumme
+
+Passiva A. Eigenkapital B. Ru®ckstellungen C. Fremdkapital:
+I. kurzfristige Verbindlichkeiten II. langfristige Verbindlichkeiten III. sonst. Verbindlichkeiten
+D. Rechnungsabgrenzungsposten = Gesamtkapital
+
+Abbildung 1: Gliederungsschema der Strukturbilanz fu®r die kleine Kapitalgesellschaft
+
+Auf der Aktivseite der Strukturbilanz ist das Verm®ogen des Unternehmens ausgewiesen. Diese wird untergliedert in die drei Hauptposten Anlagevermo®gen (AV), Umlaufverm®ogen (UV) und aktive Rechnungsabgrenzungsposten. Das Anlageverm®ogen setzt sich aus den Posten Immaterielle Vermo®gensgegensta®nde (IMMA), Sach- und Finanzanlagen zusammen. In den Sachanlagen (SAV) sind die evtl. vorhandenen Grundstu®cke und Bauten (GRSTBA) enthalten. Unter dem Umlaufverm®ogen werden die Positionen Vorra®te (VOR), Forderungen (darunter Forderungen aus Lieferung und Leistung (FLL) und Forderungen gegen Unternehmen, mit denen ein Beteiligungsverh®altnis besteht (FORDBET)) und sonstige Vermo®gensgegenst®ande, Wertpapiere, Kassenbestand (KASSE), Schecks und Bankguthaben aufgefu®hrt.
+Auf der Passivseite ist das dem Unternehmen zur Verfu®gung stehende Kapital ausgewiesen. Dieses wird unterteilt in Eigenkapital (EK), evtl. Ru®ckstellungen (u.a. Pensionsru®ckstellungen (PRST)) und das von Dritten befristet zur Verfu®gung gestellte Fremdkapital (FK). Das Eigenkapital umfasst die Mittel, u®ber die das Unternehmen unbeschr®ankt verfu®gen kann, insbesondere das eingebrachte Grund- und Stammkapital.16 Das Fremdkapital kann weiter untergliedert werden in kurz- (KVERB) und langfristige (LVERB) Verbindlichkeiten. Darin sind je nach Fristigkeit u.a. Bankverbindlichkeiten (BAVERB), Verbindlichkeiten aus Lieferung und Leistung (VLL), Gesellschafterdahrlehen (GESDAHR) und Verbindlichkeiten gegenu®ber Unternehmen, mit denen ein Beteiligungsverh®altnis besteht (VERBBET), enthalten. Die Summe aus Eigen- und Fremdkapital bildet das Gesamtkapital bzw. die Bilanzsumme (GK  BILS) des Unternehmens. Dieses entspricht ebenfalls der Summe aus Anlage- und Umlaufverm®ogen der Aktivseite der Bilanz.
+In der Gewinn- und Verlustrechnung (GuV) werden die Ertr®age und die Aufwendungen einer Periode - hier eines Gescha®ftsjahres - einander gegenu®bergestellt.17 Die gesetzlich vorgeschriebene Gliederung der GuV nach dem Gesamtkostenverfahren18 ist im linken Teil der Abb. 2 dargestellt. Die im rech-
+16Das Eigenkapital dient ebenso als Korrekturposten zur Wahrung der Identit®at von Aktiva und Passiva.
+17Vgl. $ 275 HGB. 18Vgl.$ 275 Abs. 2 HGB.
+
+8
+
+ten Teil dargestellten Zwischenergebnisse stellen die in dieser Arbeit verwende-
+ten Komponenten der sog. Erfolgsspaltung dar. Darin werden allgemein wichtige betriebliche Erfolgsgr®oﬂen kumuliert und zusammenfassend dargestellt.19 In den Klammern des linken Teiles der Abb. 2 sind die im hier verwendeten
+Datensatz vorhandenen absoluten Jahresabschlussvariablen angegeben. Die im
+rechten Teil gelisteten Bestandteile Betriebsergebnis, Gewinn aus ordentlicher
+Gesch®aftst®atigkeit und Jahresergebnis sind ebenfalls im Original-Datensatz angegeben. Die Gesamtleistung wird hier aus der Summe der Umsatzerl®ose und der Lagerbestandsvera®nderung errechnet.
+
+GuV
+Umsatzerl®ose (U) +/- Bestandsver®anderungen (LAGV) + andere aktivierte Eigenleistungen
++ sonst. betriebliche Ertr®age - Materialaufwand - Personalaufwand - Abschreibungen (AFA) - sonst. betriebliche Aufwendungen
++ Ertra®ge aus Beteiligungen + andere Ertr®age des Finanzanlagevermo®gens + sonst. Zinsen und a®hnliche Ertr®age - Abschreibungen auf Wertpapiere - Zinsen und a®hnliche Aufwendungen (ZINS)
++ auﬂerordentliche Ertr®age - auﬂerordentliche Aufwendungen - Steuern vom Einkommen und vom Ertrag - sonst. Steuern = Jahresergebnis (JE)
+
+Erfolgsspaltung = Gesamtleistung (GL)
+= Betriebsergebnis (EBIT)
+= Gewinn aus ordentl. Gesch®aftst®atigkeit (EBT) = Jahresergebnis (JE)
+
+Abbildung 2: Gliederungsschema der GuV nach dem Gesamtkostenverfahren und Erfolgsspaltung
+
+1.4 Ableitung von relativen Bilanzkennzahlen
+Mit der Anwendung von Verha®ltniszahlen zur Beschreibung der Ertragslage und der finanziellen Stabilita®t k®onnen die relevanten Informationen des Jahresabschlusses gebu®ndelt werden.
+Der Vergleich von relativen Kennzahlen hat gegenu®ber dem Vergleich von absoluten Jahresabschlusswerten zum einen den Vorteil, dass mehrere Informationen zu einer Gro®ﬂe aggregiert werden, und zum anderen, dass hinsichtlicher ihrer Gr®oﬂe und anderer grundlegender Kriterien unterschiedliche Unternehmen dennoch miteinander verglichen werden k®onnen. Dabei kann jedoch das
+19Bei der hier dargestellten Erfolgsspaltung wird nicht dem handelsrechtlich vorgeschriebenen Gliederungsschema gefolgt, die das Ergebnis in gew®ohnliche und auﬂergewo®hnliche Bestandteile aufspaltet (vgl. [Coenenberg 1993], S.251), sondern in Ans®atzen dem Vorgehen von [Jerschensky 1998], S.101.
+
+9
+
+Problem auftreten, dass eine Vielzahl unterschiedlicher Sachverhalte im Ergeb-
+nis zu der gleichen Kennzahl fu®hrt. Daher werden ha®ufig Kennzahlensysteme verwendet, die einzelne Einflussfaktoren und deren Beziehungen untereinander explizit beru®cksichtigen.20
+Im Folgenden ko®nnen nur die relativen Kennzahlen gebildet werden, die sich mit dem vorhandenen Datenmaterial nach der in den vorherigen Abschnitten
+durchgefu®hrten Merkmalsbereinigung aus den absoluten Kennzahlen bilden lassen. Im Hinblick auf die gewu®nschte Abbildung der Vermo®gens- und der Ertragslage sowie der finanziellen Stabilit®at wird unterschieden in Verm®ogensstrukturkennzahlen, Rentabilit®atskennzahlen und Liquidita®tskennzahlen.
+Die Verm®ogensstrukturkennzahlen beziehen sich auf die Passivseite der Bilanz (vgl. Abb. 1) und sollen dazu dienen, die Gefahr einer U® berschuldung in die
+Analyse einzubeziehen. Die Rentabilit®atskennzahlen dienen dazu, die Ertragskraft des Unternehmens zu beurteilen. Die Liquidit®atskennzahlen ko®nnen sinnvoll unterteilt werden in Gr®oﬂen, die den Zahlungsmittelbestand im weitesten Sinne beschreiben und solche Gr®oﬂen, die die Liquidierbarkeit der Vermo®gensgegenst®ande beschreiben. Erstere werden durch die ersten drei Liquidita®tsgrade beschrieben und letztere durch die Anlage- bzw. Umlaufintensit®at. Weiterhin werden die Anteile der einzelnen zum Umlaufvermo®gen geh®orenden Positionen (Zahlungsmittelbestand, kurzfristige Forderungen, Vorra®te) an der Gesamtposition berechnet und als Liquidita®tskennzahlen in die Analyse einbezogen. Die gebildeten relativen Jahresabschlusskennzahlen sind in Tab. 2 dargestellt.
+
+Kennzahl
+Eigenkapitalquote Fremdkapitalquote Verschuldungsgrad Deckungsgrad des Anlagevermo®gens durch Eigenkapital
+Deckungsgrad des Anlagevermo®gens durch langfr. Kapital
+Verm®ogensaufbau (Konstitution) Eigenkapitalrentabilita®t Gesamtkapitalrentabilit®at (Brutto-) Umsatzrentabilit®at (Netto)- Umsatzrentabilita®t Ergebnisrentabilit®at Abschreibungsintensit®at Anteil Abschreibungen an Gesamtleistung Anteil Gesamtleistung an Gesamtkapital Liquidit®at 1. Grades
+Liquidit®at 2. Grades
+Liquidit®at 3. Grades (Current Ratio)
+Anlagenintensit®at Umlaufintensit®at Vorratsanteil Forderungsanteil Kassenanteil
+
+Label
+EKQ FKQ VG DG1
+DG2
+KON EKR GKR BUR NUR JER AFAI AFAGL GLGK LIQ1
+LIQ2
+LIQ3
+AI UI VORA FLLA KASA
+
+Berechnung
+EK/GK FK/GK FK/EK EK/AV EK+LVERB
+AV AV/UV EBT/EK EBT/GK EBT/U JE/U JE/GK AFA/GK AFA/GL GL/GK KASSE/KVERB KASSE+FLL KAKSVSEE+RFBLL+VOR
+KVERB AV/GK UV/GK VOR/UV FLL/UV KASSE/UV
+
+Tabelle 2: Relative Jahresabschlusskennzahlen
+
+Die gebildeten 22 relativen Kennzahlen bilden den fu®r die hier durchzufu®hren-
+20Vgl. [Schult 2003], S.15.
+
+10
+
+de Datenanalyse aufgestellten relativen Kennzahlenkatalog.21 Aufgrund von Multikollinearita®tsproblemen wurde vor den in den n®achsten Abschnitten durchgefu®hrten Scha®tzungen eine Faktorenanalyse zur Variablenkonsolidierung durchgefu®hrt. Als Ergebnis dieser wurden die Kennzahlen EKR, BUR, LIQ1 und LIQ2 aufgrund hoher Korrelationen dieser Variablen mit einer oder mehreren anderen Kennzahlen aus dem Kennzahlenkatalog entfernt. Ebenso wurden Clusteranalysen durchgefu®hrt, um eine zu starke Heterogenita®t der Datenmenge zu vermeiden. Letztlich wurde ein ausreiﬂerbereinigtes Cluster von 14.125 kleinen und mittleren Unternehmen identifiziert, welches fu®r alle folgenden Analysen verwendet wird.
+
+2 Bin®are logistische Regression zur Insolvenzklassifikation
+
+In diesem Abschnitt wird die bina®re logistische Regressionsanalyse zur Klassifikation der bina®ren Zielgro®ﬂe des Insolvenzkriteriums (KRIT) angewendet. Das logistische Regressionsmodell stellt die Wahrscheinlichkeit der Zugeh®origkeit eines Objektes zu einer von zwei Klassen einer Zielvariable in linearer Abha®ngigkeit von den betrachteten Einflussvariablen dar. Im Kontext der Insolvenzana-
+lyse nimmt die Zielvariable im Falle der Insolvenz eines Unternehmens die Aus-
+pra®gung 1 und im Falle der Solvenz die Auspra®gung 0 an und stellt somit eine bina®re Variable dar. Das Modell der logistischen Regression lautet formal
+
+Pr (Yi
+
+= 1) =
+
+exi 1 + exi
+
+=
+
+1 1 + e-xi
+
+,
+
+(2.1)
+
+d.h. die logistische Transformation der Linearkombination der unabh®angigen Variablen22 x  bildet die Wahrscheinlichkeit eines Unternehmens, der Klasse der insolventen Unternehmen zugeordnet zu werden, ab.
+Trotz der logistischen Abbildung der Zielvariable ist bei der logistischen Regression zu beachten, dass zwischen den Einflussvariablen und der Insolvenzgefa®hrdung lediglich lineare Zusammenha®nge modelliert werden, da die unabha®ngigen Variablen letztlich ausschlieﬂlich in Form einer linearen Kombination Einfluss auf die Insolvenzwahrscheinlichkeit nehmen.23 Die logistische Transformation stellt dabei lediglich eine (nichtlineare) Normierung auf das Intervall [0, 1] in der weiter oben beschriebenen Art dar. Somit werden insbesondere eventuelle nichtlineare Abha®ngigkeiten der unabha®ngigen Variablen untereinander bzw. direkte und indirekte nichtlineare Einflu®sse einzelner Einflussgro®ﬂen auf die Zielvariable nicht beru®cksichtigt.
+Zur Scha®tzung und anschlieﬂenden Pru®fung der Prognosegu®te wird die Gesamtdatenmenge aufgrund ihrer groﬂen Objektanzahl zuna®chst ad hoc im
+
+21Zu Gru®nden und Aussagefa®higkeit der hier gebildeten relativen Kennzahlen sei auf die
+betriebswirtschaftliche Literatur verwiesen, u.a. [Coenenberg 1993] und [Wo®he 1996], S.1055
+ff. 22In diesem Fall der verwendeten relativen Jahresabschlussgr®oﬂen, vgl. Abschnitt 1.4. 23Vgl. [Anders 1997], S.166.
+
+11
+Verha®ltnis 70%/30% in eine Trainings- und eine Testmenge aufgeteilt. Dies wird anhand einer einfachen Zufallsziehung durchgefu®hrt. Die im Folgenden verwendeten Daten entsprechen damit einem Datensatz der relativen Jahresabschlusskennzahlen von 14.125 kleinen und mittleren Unternehmen, von denen 13301 solvent und 824 insolvent sind. Somit stehen fu®r die Scha®tzung 9887 (9310 solvent und 577 insolvent) Trainings- und 4238 (3991 solvent und 247 insolvent) Testdatens®atze zur Verfu®gung.24
+Durch die stark ungleiche Verteilung der beiden Klassen der Zielvariable in den zur Sch®atzung verwendeten Daten (nur 6.238% insolvente Unternehmen) ergibt sich das folgende Problem: Der Sch®atzalgorithmus des Logitmodells minimiert bzw. verringert sukkzessive den Klassifikationfehler in den Trainingsdaten, um die Modelle zu optimieren.25 Dies fu®hrt jedoch dazu, dass das globale Optimum dann erreicht wird, wenn alle insolventen Unternehmen f®alschlicherweise als solvent klassifiziert werden, da in diesem Fall die Fehlerquote insgesamt bei einem sonst nicht zu erreichenden Minimum von 0.06238 liegt. Dieses Problem kann auf zwei Arten umgangen werden. Zum Einen kann aus den solventen Unternehmen eine Zufallsstichprobe im Umfang der Anzahl der insolventen Unternehmen gezogen werden, um eine Gleichverteilung hinsichtlich der Zielvariable zu erreichen. Nachteil dieses Verfahrens ist jedoch die dann stark abnehmende Menge an insgesamt zur Sch®atzung zur Verfu®gung stehenden Daten. Im Fall der kleinen und mittleren Unternehmen verblieben lediglich 1414 Unternehmen, von denen weiterhin noch eine Testmenge von ca. 30% abgespaltet werden mu®sste. Als zweite Mo®glichkeit kann versucht werden, durch das Aufstellen einer sog. Entscheidungsmatrix die beiden m®oglichen Klassifikationsfehler durch eine asymmetrische Fehlerfunktion unterschiedlich stark zu bewerten. Im hier untersuchten Fall mu®sste der Fehler, ein insolventes Unternehmen irrtu®mlich als solvent zu klassifizieren, ho®her bewertet werden als umgekehrt ein solventes Unternehmen als insolvent einzustufen. Diese Vorgehensweise hat auch eine inhaltliche Rechtfertigung: Wenn bspw. ein Kreditinstitut anhand des Klassifikationsmodells eine Entscheidung fu®r eine evtl. Kreditbewilligung treffen will, wa®re der erstgenannte Fehler auch praktisch als schwerwiegender einzuscha®tzen, da in dem Fall ein laut Modell insolvenzgefa®hrdetes Unternehmen einen Kredit einger®aumt bekommt, den es evtl. spa®ter nicht tilgen kann. Umgekehrt wu®rde einem "gesunden" Unternehmen fa®lschlicherweise ein Dahrlehen verweigert werden, was (aus der Sicht des Kreditinstituts) i.d.R. nicht so gravierende Folgen haben wird. Der Nachteil dieser Vorgehensweise ist die durch theoretisch inhaltliche Voru®berlegungen evtl. nicht vollst®andig zu beseitigende Subjektivita®t beim Erstellen der Fehlerfunktion, da es immer auch auf die konkrete Sichtweise des Untersuchenden auf das entsprechende Klassifikationsproblem ankommt. In der
+24Bei der Sch®atzung des Modells werden allerdings nur die hinsichtlich aller verwendeten Merkmale vollst®andigen Datensa®tze der Trainingsmenge verwendet, was zu einer weiteren Verringerung der Datenzahl auf 6412 Unternehmen (6012 solvent und 400 insolvent) fu®hrt.
+25Bei den Lernalgorithmen der Netzwerkmodelle in Abschnitt 3 wird der Fehler in den Validierungsdaten minimiert, was das angesprochene Problem jedoch grundsa®tzlich nicht beeinflusst, da das Verh®altnis von insolventen zu solventen Unternehmen in allen Teildatens®atzen ann®ahernd gleich ist.
+
+12
+
+Praxis mu®sste somit an dieser Stelle durch eine genauere Analyse der Klassifikatiosfehler und ihrer Auswirkungen eine inhaltlich begru®ndete asymmetrische Kostenfunktion erstellt werden, anhand derer die Modelle dann optimiert wer-
+den. An dieser Stelle wird vor allem aufgrund des Zieles der m®oglichst objektiven Vergleichbarkeit verschiedener Modelle die folgende U® berlegung angestellt, die
+zu einer vorzugsweise aufgestellten Kostenmatrix fu®hren kann: Da das ungleiche Verh®altnis der Auspr®agungen der Zielvariable in den Trainingsdaten fu®r das beschriebene Problem verantwortlich ist, wird die Zahl der solventen zur Zahl der
+insolventen Unternehmen ins Verh®altnis gesetzt und das Ergebnis als Faktor der sta®rkeren Bewertung des ["Entscheidung Solvent"|Insolvent]-Fehlers verwendet, um so einen Ausgleich der Entscheidungssituationen herbeizufu®hren. Es ergibt sich fu®r die hier verwendete Datenmenge der kleinen und mittleren Unternehmen in der logistischen Regression die in Tab. 3 dargestellte Kostenmatrix fu®r die vier mo®glichen Entscheidungssituationen.
+
+Minimiere Kosten fu®r . . . KRIT= 1
+Ziel KRIT= 0
+
+Entscheidung KRIT= 1 KRIT= 0
+
+0
+
+6012 400
+
+ 15
+
+10
+
+Tabelle 3: Kostenmatrix fu®r das Insolvenzprognosemodell der Stichprobe von 6412 vollsta®ndigen Trainingsdatensa®tzen der 14.125 Unternehmen.
+
+Die Qualita®t des gescha®tzten logistischen Modells wird anhand der Fehlklassifikationsquoten fu®r die mo®glichen Entscheidungskonstellationen und der damit zusammenha®ngenden ROC-Kurve evaluiert.26
+Fu®r die Kostenmatrix aus Tab. 3 ergibt sich das in Tab. 4 dargestellte Klassifikationsergebnis.
+
+Ziel Output Anzahl Anteil Ziel Anteil Insgesamt
+
+Train Test
+
+0 1 0 1
+0 1 0 1
+
+0 7078 0 268 1 2232 1 309
+0 3005 0 115 1 986 1 132
+
+0.7603 0.4645 0.2397 0.5355
+0.7529 0.4656 0.2471 0.5344
+
+0.7159 0.0271 0.2258 0.0313
+0.7091 0.0271 0.2327 0.0311
+
+Tabelle 4: Klassifikationsergebnisse der bina®ren logistischen Regression fu®r die relativen Jahresabschlussdaten nach Anwendung der Kostenmatrix aus Tab. 3.
+
+Durch die st®arkere Bestrafung des ["0"|1]-Fehlers wurde dieser in 268 Fa®llen begangen, was innerhalb der insolventen Unternehmen einer Fehlerquote von 46.45% und bzgl. aller Unternehmen einer Fehlerquote von 2.71% entspricht.
+26Zu den Modellbeurteilungsmo®glichkeiten von Klassifikationsmodellen vgl. u.a. [Hastie, Tibshirani et al. 2001], S.193 ff.
+
+13
+Der Trainingsfehler betra®gt F QT rain = 25.29% und der Testfehler F QT est = 25.98%. Dabei kann die - fast einer zuf®alligen Klassifizierung entsprechende Fehlerquote innerhalb der insolventen Unternehmen als eindeutig zu hoch angesehen werden. In diesem Zusammenhang ist zu beachten, dass hier je nach einer evtl. unter inhaltlich praktischen U® berlegungen ver®anderten Kostenmatrix vom Anwender ein beliebiger Trade-Off zwischen den Fehlerquoten in den beiden Klassifikationsgruppen erreicht werden kann.
+In diesem Zusammenhang kann die sog. Receiver Operating Characteristic (ROC)-Kurve zur Modellbeurteilung in Betracht gezogen werden.27 Fu®r das eben gescha®tzte logistische Modell ist diese getrennt fu®r Trainings- und Testdaten in Abb. 3 dargestellt.
+Abbildung 3: ROC-Kurve fu®r das bina®re Logit-Modell, Quelle: Model Comparison Results des SAS Enterprise Miner 5.2
+Auf der horizontalen Achse sind abha®ngig von der Wahl eines bestimmten Fehlerbewertungsmodells die Anteile der fa®lschlicherweise als insolvent klassifizierten solventen Unternehmen (Falsch Positiv (FP)), welche gleich 1- der Spezifizit®at (Anteil korrekt solvent klassifizierter Unternehmen) des Modells sind, abgetragen. Auf der vertikalen Achse sind diesen gegenu®ber die Sensitivit®aten (Richtig Positiv (TP), vgl. Tab. 4), welche den Anteilen der korrekt klassifizierten insolventen Unternehmen entsprechen, dargestellt. Die diagonale Achse entspricht als trivialem Vergleichsfall einem rein zufallsorientierten Gruppieren der Unternehmen in eine der beiden Klassen. Dem Anwender bleibt nun durch die Wahl eines Kostenmodells die Verwendung desjenigen Klassifikationsmodells vorbehalten, welches die beiden Fehlerquoten nach seiner Einscha®tzung am geeignetsten gegeneinander abw®agt.
+27Die ROC-Kurve stellt die Fehlerbetrachtung getrennt nach Klassen grafisch dar. In dieser werden die Trefferquoten, in der Form 1-Spezifit®at (Abszisse) und Sensitivit®at (Ordinate) einander gegenu®bergestellt. Zur ROC-Analyse vgl. [Hastie, Tibshirani et al. 2001], S.277f.
+
+14
+3 Entwicklung eines ku®nstlichen neuronalen Netzes zur Insolvenzklassifikation
+Im diesem Abschnitt wird ein ku®nstliches neuronales Netz (KNN) auf das Problem der Insolvenzprognose angewendet. KNN haben in den letzten Jahren eine erhebliche Bedeutung in der statistischen Datenanalyse erlangt und wurden auch im Bereich der Insolvenzanalyse vielfach genutzt.28
+Im Gegensatz zur klassischen parametrischen Statistik, die den datengenerierenden Prozess (DGP) formal identifizieren, modellieren und sch®atzen will, wird in dem Bereich der Ku®nstlichen Intelligenz (KI), dem die KNN zuzuordnen sind, der DGP lediglich imitiert bzw. erlernt. Ziel ist das Erkennen von Mustern in den Daten. Dabei ko®nnen die inhaltlichen Zusammenha®nge jedoch oft nicht mehr inhaltlich interpretiert werden, da das erlernte System bzw. Netzwerk durch die Verknu®pfung mehrerer nichtlinearer Funktionsformen meist sehr komplex ist und somit fu®r den Anwender eine Black Box hinsichtlich der Interpretation der Zusammenha®nge darstellt.
+Um ein Prognosemodell anhand eines KNN zu entwickeln, muss die Netzwerktopologie spezifiziert und eine Trainingstechnik angewandt werden. Anhand den in Abschnitt 1 bereitgestellten Jahresabschlussdaten von zufa®llig ausgewa®hlten deutschen Unternehmen erlernt das KNN in der sog. Trainingsphase die Zusammenh®ange zwischen einer Zielvariable (Insolvenzkriterium) und den Inputvariablen anhand der pra®sentierten Datensa®tze (Muster) durch das iterative Durchlaufen eines vorher festzulegenden Lernverfahrens eigensta®ndig.
+Innerhalb eines KNN werden ein oder mehrere Neuronen durch eine bestimmte Netzwerkarchitektur miteinander verbunden und in einer oder mehreren Schichten angeordnet. Sollen durch neuronale Netze funktionale Zusammenha®nge zwischen Einflussvariablen und einer Zielvariable abgebildet werden, besteht die erste Neuronenschicht aus den erkla®renden Variablen, die dann innerhalb der na®chsten Schichten, den sog. verdeckten Schichten (engl.: hidden layer), des KNN nach bestimmten Verarbeitungsvorschriften durch die in den Schichten enthaltenen Neuronen und deren Aktivierungsfunktionen i(∑) funktional weiterverarbeitet werden. Die so zun®achst entstandenen Outputs der Neuronen der ersten verdeckten Schicht k®onnen dann unter Umst®anden wiederum als Input einer weiteren Neuronenschicht verwendet werden und leisten so einen Beitrag zur Erkla®rung der Zielvariable des Modells.
+Ein KNN la®sst sich als Funktion der beobachteten Daten der erkl®arenden Variablen x und der zu scha®tzenden Gewichte bzw. Netzparameter  wie folgt
+28Vgl. u.a. [Atiya 2001, Becerra et al. 2005, Burger et al. 1996, Giacomini 2003, Graf, Nakhaeizadeh 1993, Jerschensky 1998].
+
+15
+
+formal beschreiben:
+
+
+
+
+
+a = f (x, (1), (2))
+
+=
+
+
+
+j
+
+J =1
+
+j(2)
+
+j
+
+K
+k(1)xk
+k=0
+
+
+
+ aj 
+J
+=   j(2) j (x (1))  = (a (2)) . (3.2)
+j=1
+
+In einem KNN werden die K Einflussvariablen mit den Gewichten (1) der ersten Schicht (Inputschicht) gewichtet und aufsummiert. Diese Lineartransformation x (1) wird dann in einem zweiten Schritt von j = 1, . . . , J verdeckten Neuronen in (meist) nichtlinearer Form durch die jeweiligen Aktivierungsfunktionen j weiterverarbeitet. Die Ausgabe aj eines verdeckten Neurons wird dann wiederum mit den Gewichten (2) der zweiten Schicht (erste verdeckte Schicht) gewichtet und linear transformiert an die Ausgabeschicht weitergeleitet. Dort wird die Eingabe a (2) durch die Aktivierungsfunktion  des Ausgabeneurons transformiert und als Ergebnis a des KNN ausgegeben. Bei dem in Gl. (3.2) beschriebenen Netz handelt es sich um ein dreilagiges vorwa®rtsgerichtetes Netzwerk mit einer verdeckten Schicht und einem Ausgabeneuron. Fu®r den Fall weiterer verdeckter Schichten la®sst sich die Gl. (3.2) beliebig weiter verschachteln; mehrere Ausgabeneuronen sind ebenfalls mo®glich.29
+Durch ku®nstliche neuronale Netze ko®nnen beliebige nichtlineare stetige Funktionen approximiert werden, da sie die sog. universelle Approximationseigenschaft aufweisen. Diese besagt, dass mehrschichtige KNN in der Lage sind, jede beliebige stetige Funktion anzupassen. Dies geht auf den Beweis von [Kolmogorov 1957] zuru®ck, der zeigte, dass jede mehrdimensionale stetige Funktion auf eine Komposition einer endlichen Menge von primitiven eindimensionalen Funktionen zuru®ckgefu®hrt werden kann. Dies bedeutet fu®r ein KNN mit genu®gend verdeckten Schichten und darin enthaltenen Neuronen, dass die dem Netz zur Verfu®gung stehenden Daten und damit der Zusammenhang zwischen den Einfluss- und Zielvariablen beliebig genau angen®ahert werden kann.
+Eine wesentliche Eigenschaft von KNN in ihrer Funktion als statistische Lernverfahren besteht des Weiteren darin, dass bei der Modellierung von unbekannten Zusammenh®angen keine explizite Annahme u®ber die funktionale Form des Zusammenhanges aufgestellt werden muss. Dies unterscheidet sie insb. von den klassischen parametrischen Verfahren. Je nach Art der Netzwerktopologie - d.h. der Struktur des Netzes und der Zahl der Schichten und der verdeckten Neuronen - und der verwendeten Aktivierungsfunktionen lassen sich auﬂerdem die
+29Es ist ersichtlich, dass im Falle des Fehlens von verdeckten Schichten lediglich eine Lineartransformation der Einflussvariablen erfolgt und damit das KNN den klassischen parametrischen Modellen entspricht. Ist die Aktivierungsfunktion des Ausgabeneurons die Identita®tsfunktion, bildet das Netz bspw. die lineare Regression, im Falle der Logit-Transformation die logistische Regression ab.
+
+16
+meisten klassischen Modelle, z.B. das lineare oder logistische Regressionmodell, sowie die parametrisch schwer zu sch®atzenden nichtlinearen Regressionsmodelle durch KNN modellieren.
+Die eben beschriebenen Vorteile Neuronaler Netze haben jedoch einen Preis: Eine inhaltliche Interpretation des angepassten Netzes ist fast nicht m®oglich, da der Weg einer Inputvariable durch das Netz hin zu der Netzausgabe in einer komplexen und vielfach transformierten Weise erfolgt. Insgesamt fu®hren die Vor- und Nachteile von KNN dazu, dass sie zwar als gute Prognosemodelle der Zielvariablen fungieren ko®nnen, das gesch®atzte neuronale Modell zur Erkl®arung der Zusammenh®ange zwischen Einfluss- und Zielvariablen jedoch kaum geeignet ist.
+Um ein MLP fu®r das konkrete Problem der Insolvenzklassifikation zu entwickeln und zu sch®atzen, welches die Ergebnisse der klassischen parametrischen Insolvenzmodelle mo®glichst verbessert, muss zun®achst eine geeignete Spezifikation des Netzwerkes, d.h. die Art und Struktur der Schichten und der in diesen enthaltenen Neuronen, erfolgen. Dabei muss grunds®atzlich zwischen zwei gegenl®aufigen Effekten abgewogen werden. Auf der einen Seite kann ein KNN durch eine zu hohe Komplexita®t nach zu vielen Regeln die Inputvariablen in den gewu®nschten Output transformieren. Dies fu®hrt u®ber den systematischen grundlegenden Zusammenhang hinaus zum Erlernen des nicht systematischen St®oreffektes bzw. spezieller Effekte zwischen den Daten, was die Prognosef®ahigkeit fu®r neue Daten vermindert. Im umgekehrten Fall fu®hrt eine zu geringe Netzwerkkomplexit®at evtl. zu einer zu stark vereinfachten bzw. unzureichenden Abbildung des systematischen Zusammenhanges, was den Erkla®rungsgehalt des Modells und damit auch die Prognosequalit®at ebenfalls negativ beeinflusst.30 Es ist also eine dem Datenumfang und der Problemdefinition angemessene, d.h. sowohl nicht u®berma®ﬂig komplexe als auch nicht zu einfache Netzwerktopologie zu bestimmen.
+Aufgrund der u®berschaubaren Anzahl der Jahresabschlussvariablen und um dem Ziel der hier durchgefu®hrten Analysen, die Netzwerkmodelle hinsichtlich ihrer Klassifikationsgu®te mit den klassischen statistischen Modellen vergleichen zu ko®nnen, gerecht zu werden, wird ein KNN mit allen zur Verfu®gung stehenden Variablen erstellt und trainiert.
+Im Gegensatz zur Maximum-Likelihood-Scha®tzung der Regressionsparameter bei der klassischen logistischen Regression31 erfolgt die Bestimmung der den dortigen Parametern entsprechenden Netzwerkgewichte eines MLP mit dem Backpropagation-Algorithmus durch ein Gradientenabstiegsverfahren.32 Dabei wird die mittlere quadratische Abweichung zwischen den Netzausgabewerten und den beobachteten Zielwerten des Insolvenzkriteriums minimiert.
+Da das Training einen iterativen Prozess darstellt, in dem sukzessive die Netzwerkparameter hinsichtlich eines Zielkriteriums angepasst werden, muss weiterhin vorher festgelegt werden, wann das Training beendet werden soll. Aufgrund der universellen Approximationseigenschaft eines hinreichend komplexen KNN,
+30Zu Generalisierungs- bzw. Prognosef®ahigkeit vgl. u.a. [Hastie, Tibshirani et al. 2001]. 31Vgl. u.a. [Aldrich, Nelson 1984, Fahrmeir et al. 1996]. 32Vgl. u.a. [Haykin 1999, Rojas 1993].
+
+17
+
+jede beliebige nichtlineare Funktion anpassen zu ko®nnen, ist die Minimierung des Netzwerkfehlers u®ber alle zur Verfu®gung stehenden Daten nicht als geeignetes Zielkriterium anzusehen. Aus diesem Grund werden hier wiederum die bereits
+
+in Abschnitt 2 in zwei Teilmengen aufgeteilten 14.125 Unternehmensdatensa®tze verwendet. Dabei werden die gr®oﬂere - 70% der Gesamtmenge umfassende - Datenmenge zum Training und die u®brige Datenmenge zur Validierung verwendet.
+Anhand der dem KNN w®ahrend des Lernvorganges pr®asentierten Trainingsmenge T = {(x1, y1), . . . , (xT , yT )} werden die Netzwerkgewichte anhand eines Lernalgorithmus33 iterativ angepasst. Dabei ist jedoch die Minimierung des
+
+Fehlers in den Trainingsdaten nicht das entscheidende Kriterium, da dieser sich
+
+bei einer genu®gend hohen Netzkomplexit®at so lange immer weiter verringert, bis eine vollst®andige Erkl®arung der Trainingsdaten durch das MLP erfolgt ist. Dies wu®rde jedoch wie beschrieben die Prognose- bzw. Generalisierungsfa®higkeit des Modells negativ beeinflussen. Die Prognosequalit®at wird anhand des Fehlers in den Validierungsdaten abgescha®tzt, da diese dem KNN w®ahrend des Trainingsprozesses vorenthalten werden. Dazu wird nach jedem Lernschritt das
+
+mit den aktuellen Gewichten spezifizierte Netz auf die Daten der Validierungs-
+menge V = {(x1, y1, . . . , (xV , yV )} angewendet und es werden fu®r diese die Ausgabewerte der Zielvariable und durch den Vergleich mit den Zielwerten die
+
+entsprechenden Fehlerwerte berechnet.
+
+Zu einem bestimmten Zeitpunkt des Trainingsprozesses ist davon auszugehen,
+
+dass der Fehler in den Validierungsdaten wieder ansteigt. Dies geschieht dann,
+
+wenn das KNN beginnt, die Daten der Trainingsmenge so genau anzuna®hern, dass u®ber den systematischen Zusammenhang in den Daten hinaus auch unsystematische Sto®reinflu®sse mit angen®ahert werden. Da der St®oreinfluss jedoch nicht beobachtbar bzw. nicht erkl®arbar ist, kann er in der dem Netz unbekannten Validierungsmenge auch nicht prognostiziert werden. Zu dieser Prognose kann
+ausschlieﬂlich der systematische Zusammenhang in den Daten verwendet werden. Demzufolge steigt in diesem Fall der sog. U®beranpassung (engl.: overfitting)
+
+der durchschnittliche Fehler (Mean Error (ME )) einer bestimmten Netzwerk-
+
+funktion f
+
+M Ef
+
+=
+
+1 V
+
+V
+l(yv - f (xv, ))
+
+,
+
+v=1
+
+(3.3)
+
+gemessen in der Validierungsmenge, wieder an. Nach dem als Early Stopping be-
+
+zeichneten Abbruchkriterium sollte das Training des KNN zu diesem Zeitpunkt
+
+beendet werden. Im Folgenden wird als Kriterium fu®r einen Trainingsabbruch das Minimum
+
+min
+
+M SEV al(xv, )
+
+=
+
+1 V
+
+V
+(yv
+v=1
+
+- f (xv, ))2
+
+(3.4)
+
+des durchschnittlichen quadratischen Fehlers (Mean Squared Error (MSE )) in den Validierungsdaten verwendet. (3.4) stellt eine Sch®atzung des erwarteten
+
+33Z.B. eines Gradientenabstiegsverfahrens durch Backpropagation, vgl. u.a. [Bishop 2006, Haykin 1999].
+
+18
+
+Prognosefehlers eines Modells, hier eines gesch®atzten KNN, dar. Zwecks einer erho®hten Scha®tzsicherheit des Prognosefehlers kann des Weiteren die Kreuzvalidierung angewendet werden, bei der der Durchschnitt der Validierungsfehler unterschiedlicher Validierungsmengen als Sch®atzung verwendet wird.34
+Im Folgenden wird ein MLP mit einer - drei verdeckte Neuronen enthaltenen - verdeckten Schicht gesch®atzt.35 Aus den in Abschnitt 2 angefu®hrten Gru®nden, vor allem bzgl. der Minimierung des Klassifikationsfehlers u®ber alle Daten, ist die Anwendbarkeit eines neuronalen Netzwerkmodells auf den gesamten Datensatz
+der 14.125 Unternehmen aufgrund der 15:1-Ungleichverteilung der Merkmals-
+auspra®gungen der Zielvariable von solventen zu insolventen Unternehmen auch hier eingeschra®nkt. Daher und aus Gru®nden der besseren Vergleichbarkeit mit den Ergebnissen aus Abschnitt 2 wird an dieser Stelle wiederum die in Tab. 3 auf
+Seite 12 generierte Kostenmatrix zur Fehlergewichtung w®ahrend der Sch®atzung des Modells angewendet.
+Bei der Scha®tzung des KNN ergab sich eine minimale Gesamt-Fehlerquote in den Validierungsdaten von F QV al = 20.48%, welche damit um 5.5% unter der entsprechenden Fehlerquote bei der logistischen Regressionsscha®tzung liegt.36
+
+Datensatz
+
+Ziel Output Anzahl Anteil Ziel Anteil Insgesamt
+
+alle Daten
+
+Train Val
+
+0 1 0 1 0 1 0 1
+
+0 7537 0 295 1 1773 1 282 0 3247 0 124 1 744 1 123
+
+0.8096 0.5113 0.1904 0.4887 0.8136 0.5020 0.1864 0.4980
+
+0.7623 0.0298 0.1793 0.0285 0.7662 0.0293 0.1755 0.0290
+
+Tabelle 5: Klassifikationsergebnisse der MLP's mit einer verdeckten Schicht und drei verdeckten Neuronen fu®r die relativen Jahresabschlussdaten, wobei bei der Scha®tzung wiederum die Kostenmatrix aus Tab. 3 auf Seite 12 verwendet wurde. Die Aufteilung in Trainings- und Validierungsdaten betra®gt ebenfalls 70/30.
+
+Zur Veranschaulichung der U® berlegenheit des auf die gesamten 14.125 Unternehmen trainierten ku®nstlichen neuronalen Netzes sind die ROC-Kurven des dreilagigen MLP und des logistischen Regressionsmodells in Abb. 4 gegenu®bergestellt. Sowohl in den Trainings- als auch in den Validierungsdaten sind die
+34Zur Scha®tzung der Prognosequalita®t eines Modells und zur Kreuzvalidierung vgl. u.a. [Hastie, Tibshirani et al. 2001], Kap.7.
+35Es wurden verschiedene Netzwerkarchitekturen mit unterschiedlichen Anzahlen von verdeckten Neuronen verwendet, wobei sich herausstellte, dass eine Zahl von drei verdeckten Neuronen fu®r das vorliegende Klassifikationsproblem ausreichend ist und sich fu®r ho®here Anzahlen keine wesentlichen Verbesserungen bzgl. der Klassifikationsergebnisse ergaben. Des Weiteren wird die inhaltliche Interpretation des Netzes mit steigender Anzahl verdeckter Neuronen ungleich schwieriger und auch aus diesem Grund sind drei verdeckte Neuronen als ausreichend anzusehen. Die Anzahl der verdeckten Schichten war durch die verwendete Software SAS Enterprise Miner 5.2 auf eine beschr®ankt. Auch kann fu®r das vorliegende Problem vermutet werden, dass sich durch die Verwendung mehrerer verdeckter Schichten keine Verbesserungen der Modelle ergeben wu®rden, u.a. da sich in vielen praktischen Anwendungen ku®nstlicher neuronaler Netze eine verdeckte Schicht als ausreichend erwiesen hat.
+36Vgl. Tab. 4 auf Seite 12.
+
+19
+Entscheidungsh®aufigkeiten des MLP fast im gesamten Bereich der fa®lschlichen Einordnung als insolvent (1-Spezifit®at) links bzw. kleiner37 und im Bereich der korrekten Einordnung als insolvent (Sensitivita®t) oberhalb und damit h®oher als beim logistischen Modell.38
+Abbildung 4: Vergleich der ROC-Kurven fu®r das Logit-Modell (helle Kurven) und das MLP mit drei verdeckten Neuronen in einer verdeckten Schicht (dunkle Kurven) in den Trainings- und Validierungsdaten bei Anwendung der Kostenmatrix aus Tab. 3, Quelle: Model Comparison Results des SAS Enterprise Miner 5.2.
+4 Zusammenfassung und Ausblick
+In dieser Arbeit wurde eine empirische externe Bilanzanalyse durchgefu®hrt, indem statistische Klassifikationsmodelle entwickelt und zur Insolvenzprognose verwendet wurden. Dazu wurden zuna®chst aus den Jahresabschlussdaten von 14.125 zufa®llig ausgewa®hlten deutschen kleinen und mittleren Unternehmen relative Bilanzkennzahlen zur Abbildung der Vermo®gens-, Finanz- sowie Liqiuidita®tssituation abgeleitet. Anschlieﬂend wurde innerhalb der statistischen Analyse insb. die klassische parametrische Methode der bina®ren logistischen Regression mit einem dreilagigen ku®nstlichen neuronalen Netz bzgl. der Klassifikationsergebnisse verglichen. Im Ergebnis erwies sich fu®r die bzgl. der Auspr®agungen der Zielvariable stark ungleich verteilte Menge von 14.125 Unternehmen das KNN der parametrischen Logitanalyse als u®berlegen. So konnte anhand der ROCAnalyse festgestellt werden, dass fu®r fast alle Fehlerbewertungsmodelle anhand verschiedener Kostenmatrizen durch das KNN ho®here Trefferquoten fu®r die bei-
+37Und damit fu®r die korrekte Einordnung als solvent (Spezifita®t) rechts bzw. gro®ﬂer. 38Vgl. die Werte fu®r die Klassifikationsanteile innerhalb der Zielwerte im oberen Teil der Tab. 5.
+
+20
+den Entscheidungskonstellationen erzielt wurden.39 Nachteil einer Netzwerkanalyse ist jedoch die fehlende Interpretationsm®oglichkeit des gesch®atzten Netzwerkmodells, um die zwischen den als Netzinput wirkenden relativen Bilanzkennzahlen und der erfolgten Insolvenzklassifikation herrschenden Zusammenha®nge inhaltlich beurteilen zu ko®nnen. Hierzu sind weitere Forschungsaktivit®aten zu unternehmen. Weiterhin ist zu untersuchen, inwiefern andere Methoden der statistischen Lerntheorie wie bspw. die in letzter Zeit stark an Bedeutung gewonnenen Support-Vektor-Maschinen eine Insolvenzanalyse unterstu®tzen bzw. evtl. verbessern k®onnen.
+Literatur
+[Aldrich, Nelson 1984] Aldrich, J., Nelson, F.: Linear Probability, Logit and Probit Models, Quantitative Applications in the Social Sciences 45, SAGE University Press, L.A. 1984.
+[Anders 1997] Anders, U.: Statistische Neuronale Netze, Vahlen, Mu®nchen 1997.
+[Anderson 1982] Anderson, J.: Logistic Discrimination, in: Krishnaiah, P., Kanal, L.: Handbook of Statistics, Vol. 2, North-Holland Publishing Co., Amsterdam 1982.
+[Atiya 2001] Atiya, A.: Bankruptcy Prediction for Credit Risk Using Neural Networks: A Survey and New Results, in IEEE Transactions on Neural Networks 12.4, 2001.
+[Bartlett 1999] Bartlett, P.: Neural Network Learning, Cambridge Univ. Press 1999.
+[Becerra et al. 2005] Becerra, V., Kawakami, R., Galvao, H., Abou-Seada, M.: Neural and Wavelet Network Models for Financial Distress Classification, Data Mining and Knowledge Discovery 11.1, 2005.
+[Bishop 1995] Bishop, C.: Neural Networks for Pattern Recognition, Oxford Univ. Press 1995.
+[Bishop 2006] Bishop, C.: Pattern Recognition and Machine Learning, Springer, N.Y. 2006.
+[Brockmann 2005] Brockmann, H.: KMU. Definition kleiner und mittlerer Unternehmen der Europ®aischen Kommission, in: Wirtschaftswissenschaftliches Studium (WiSt), S.39 ff., Beck, Mu®nchen 2005.
+[Burger et al. 1996] Burger, A., Schellberg, B.: Neuronale Netze in der Jahresabschlussanalyse, in: Beitra®ge zur theoretischen BWL, 1996.
+39Vgl. Abb. 4.
+
+21
+[Coenenberg 1993] Coenenberg, A.: Jahresabschluss und Jahresabschlussanalyse - Betriebswirtschaftliche, handelsrechtliche und steuerrechtliche Grundlagen, Scha®ffer-Poeschel, Stuttgart 1993.
+[Fahrmeir et al. 1996] Fahrmeir, L., Hamerle, A., Tutz, G.: Multivariate statistische Verfahren, 2. Auflage, de Gruyter, Berlin 1996.
+[Giacomini 2003] Giacomini, E.: Neural Networks in Quantitative Finance, Master Thesis, Fachgebiet Statistik und O® konometrie, Humboldt Universita®t zu Berlin, 2003.
+[Graf, Nakhaeizadeh 1993] Graf, J., Nakhaeizadeh, G.: Credit Scoring Based on Neural and Machine Learning, in: Plantamura, V., Soucek, B., Visaggio, VG.: Frontier Decision Support Concepts, John Wiley, N.Y. 1993.
+[Handl 2002] Handl, A.: Multivariate Analysemethoden, Springer, Berlin 2002.
+[Hastie, Tibshirani et al. 2001] Hastie, T., Tibshirani, R., Friedman, J.: The Elements of Statistical Learning. Data Mining, Inference and Prediction, Springer, N.Y. 2001.
+[Haykin 1999] Haykin, S.: Neural Networks. A Comprehensive Foundation, Prentice Hall, New Jersey 1999.
+[Hofmann 1977] Hofmann, R.: Bilanzkennzahlen, Industrielle Bilanzanalyse und Bilanzkritik, 4. Auflage, Gabler-Verlag, Wiesbaden 1977.
+[Jerschensky 1998] Jerschensky, A.: Messung des Bonita®tsrisikos von Unternehmen: Krisendiagnose mit ku®nstlichen neuronalen Netzen, IDW, Du®sseldorf 1998.
+[Johnson et al. 2002] Johnson, R., Wichern, D.: Applied Multivariate Statistical Analysis, 5. Auflage, Prentice Hall, New Jersey 2003.
+[Kolmogorov 1957] Kolmogorov, A.: On the Representation of Continuous Functions of Several Variables by Superposition of Continuous Functions of One Variable and Addition, Doklady Akademiia Nauk SSSR 114 (5), S. 953-956, 1957.
+[Lange 2003] Lange, C.: Neuronale Netze in der wirtschaftswissenschaftlichen Prognose und Modellgenerierung, Physica, Heidelberg 2003.
+[Leffson 1984] Leffson, U.: Bilanzanalyse, 3. Auflage, Poeschel, Stuttgart 1984.
+[Mardia et al. 1979] Mardia, K., Kent, J., Bibby, J.: Multivariate Analysis, Academic Press, London 1979.
+[McLachlan 1992] McLachlan, G.: Discriminant Analysis and Statistical Pattern Recognition, John Wiley, N.Y. 1992.
+
+22
+[Oerthel, Tuschl 1995] Oerthel, F., Tuschl, S.: Statistische Datenanalyse mit dem Programmpaket SAS, Oldenbourg, Mu®nchen 1995.
+[Pellens et al. 2004] Pellens, B., Fu®lbier, R., Gassen, J.: Internationale Rechnungslegung, 5. Auflage, Sch®affer Poeschel, Stuttgart 2004.
+[Rehkugler et al. 1994] Rehkugler, H., Zimmermann, H.: Neuronale Netze in der O® konomie, Vahlen, Mu®nchen 1994.
+[Rencher 1995] Rencher, A.: Methods of Multivariate Analysis, John Wiley, N.Y 1995.
+[Rencher 1998] Rencher, A.: Multivariate Statistical Inference and Applications, John Wiley, N.Y. 1998.
+[Ripley 1996] Ripley, B.: Pattern Recognition and Neural Networks, Cambridge Univ. Press 1996.
+[Rojas 1993] Rojas, R.: Theorie der Neuronalen Netze. Eine systematische Einfu®hrung, Springer, Berlin 1993.
+[Schott 1988] Schott, G.: Kennzahlen, Instrument der Unternehmensfu®hrung, 5. Auflage, Forkel-Verlag, Wiesbaden 1988.
+[Schult 2003] Schult, E.: Bilanzanalyse - M®oglichkeiten und Grenzen externer Unternehmensbeurteilung, 11. Auflage, Erich Schmidt Verlag, Berlin 2003.
+[Urban 1993] Urban, D.: Logit-Analyse, Gustav Fischer, Stuttgart 1993.
+[Wo®he 1996] W®ohe, U.: Allgemeine Betriebswirtschaftslehre, 19. Auflage, Vahlen, Mu®nchen 1996.
+[Yoon et al. 1993] Yoon, Y., Swales, G., Margavio, T.: A Comparison of Discriminant Analysis Versus Artificial Neural Networks, Journal of Operational Research 44, S. 51-60, 1993.
+
+SFB 649 Discussion Paper Series 2007
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Trade Liberalisation, Process and Product Innovation, and Relative Skill Demand" by Sebastian Braun, January 2007.
+002 "Robust Risk Management. Accounting for Nonstationarity and Heavy Tails" by Ying Chen and Vladimir Spokoiny, January 2007.
+003 "Explaining Asset Prices with External Habits and Wage Rigidities in a DSGE Model." by Harald Uhlig, January 2007.
+004 "Volatility and Causality in Asia Pacific Financial Markets" by Enzo Weber, January 2007.
+005 "Quantile Sieve Estimates For Time Series" by J¸rgen Franke, JeanPierre Stockis and Joseph Tadjuidje, February 2007.
+006 "Real Origins of the Great Depression: Monopolistic Competition, Union Power, and the American Business Cycle in the 1920s" by Monique Ebell and Albrecht Ritschl, February 2007.
+007 "Rules, Discretion or Reputation? Monetary Policies and the Efficiency of Financial Markets in Germany, 14th to 16th Centuries" by Oliver Volckart, February 2007.
+008 "Sectoral Transformation, Turbulence, and Labour Market Dynamics in Germany" by Ronald Bachmann and Michael C. Burda, February 2007.
+009 "Union Wage Compression in a Right-to-Manage Model" by Thorsten Vogel, February 2007.
+010 "On -additive robust representation of convex risk measures for unbounded financial positions in the presence of uncertainty about the market model" by Volker Kr‰tschmer, March 2007.
+011 "Media Coverage and Macroeconomic Information Processing" by Alexandra Niessen, March 2007.
+012 "Are Correlations Constant Over Time? Application of the CC-TRIGt-test to Return Series from Different Asset Classes." by Matthias Fischer, March 2007.
+013 "Uncertain Paternity, Mating Market Failure, and the Institution of Marriage" by Dirk Bethmann and Michael Kvasnicka, March 2007.
+014 "What Happened to the Transatlantic Capital Market Relations?" by Enzo Weber, March 2007.
+015 "Who Leads Financial Markets?" by Enzo Weber, April 2007. 016 "Fiscal Policy Rules in Practice" by Andreas Thams, April 2007. 017 "Empirical Pricing Kernels and Investor Preferences" by Kai Detlefsen,
+Wolfgang H‰rdle and Rouslan Moro, April 2007. 018 "Simultaneous Causality in International Trade" by Enzo Weber, April
+2007. 019 "Regional and Outward Economic Integration in South-East Asia" by
+Enzo Weber, April 2007. 020 "Computational Statistics and Data Visualization" by Antony Unwin,
+Chun-houh Chen and Wolfgang H‰rdle, April 2007. 021 "Ideology Without Ideologists" by Lydia Mechtenberg, April 2007. 022 "A Generalized ARFIMA Process with Markov-Switching Fractional
+Differencing Parameter" by Wen-Jen Tsay and Wolfgang H‰rdle, April 2007.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "Time Series Modelling with Semiparametric Factor Dynamics" by Szymon Borak, Wolfgang H‰rdle, Enno Mammen and Byeong U. Park, April 2007.
+024 "From Animal Baits to Investors' Preference: Estimating and Demixing of the Weight Function in Semiparametric Models for Biased Samples" by Ya'acov Ritov and Wolfgang H‰rdle, May 2007.
+025 "Statistics of Risk Aversion" by Enzo Giacomini and Wolfgang H‰rdle, May 2007.
+026 "Robust Optimal Control for a Consumption-Investment Problem" by Alexander Schied, May 2007.
+027 "Long Memory Persistence in the Factor of Implied Volatility Dynamics" by Wolfgang H‰rdle and Julius Mungo, May 2007.
+028 "Macroeconomic Policy in a Heterogeneous Monetary Union" by Oliver Grimm and Stefan Ried, May 2007.
+029 "Comparison of Panel Cointegration Tests" by Deniz Dilan Karaman ÷rsal, May 2007.
+030 "Robust Maximization of Consumption with Logarithmic Utility" by Daniel Hern·ndez-Hern·ndez and Alexander Schied, May 2007.
+031 "Using Wiki to Build an E-learning System in Statistics in Arabic Language" by Taleb Ahmad, Wolfgang H‰rdle and Sigbert Klinke, May 2007.
+032 "Visualization of Competitive Market Structure by Means of Choice Data" by Werner Kunz, May 2007.
+033 "Does International Outsourcing Depress Union Wages? by Sebastian Braun and Juliane Scheffel, May 2007.
+034 "A Note on the Effect of Outsourcing on Union Wages" by Sebastian Braun and Juliane Scheffel, May 2007.
+035 "Estimating Probabilities of Default With Support Vector Machines" by Wolfgang H‰rdle, Rouslan Moro and Dorothea Sch‰fer, June 2007.
+036 "Yxilon ≠ A Client/Server Based Statistical Environment" by Wolfgang H‰rdle, Sigbert Klinke and Uwe Ziegenhagen, June 2007.
+037 "Calibrating CAT Bonds for Mexican Earthquakes" by Wolfgang H‰rdle and Brenda LÛpez Cabrera, June 2007.
+038 "Economic Integration and the Foreign Exchange" by Enzo Weber, June 2007.
+039 "Tracking Down the Business Cycle: A Dynamic Factor Model For Germany 1820-1913" by Samad Sarferaz and Martin Uebele, June 2007.
+040 "Optimal Policy Under Model Uncertainty: A Structural-Bayesian Estimation Approach" by Alexander Kriwoluzky and Christian Stoltenberg, July 2007.
+041 "QuantNet ≠ A Database-Driven Online Repository of Scientific Information" by Anton Andriyashin and Wolfgang H‰rdle, July 2007.
+042 "Exchange Rate Uncertainty and Trade Growth - A Comparison of Linear and Nonlinear (Forecasting) Models" by Helmut Herwartz and Henning Weber, July 2007.
+043 "How do Rating Agencies Score in Predicting Firm Performance" by Gunter Lˆffler and Peter N. Posch, August 2007.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+044 "Ein Vergleich des bin‰ren Logit-Modells mit k¸nstlichen neuronalen Netzen zur Insolvenzprognose anhand relativer Bilanzkennzahlen" by Ronald Franken, August 2007.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

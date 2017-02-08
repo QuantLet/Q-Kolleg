@@ -1,0 +1,846 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2008-009
+Recursive Portfolio Selection with Decision Trees
+Anton Andriyashin* Wolfgang Härdle* Roman Timofeev*
+* Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Recursive Portfolio Selection with Decision Trees
+Anton Andriyashin
+CASE ­ Center for Applied Statistics and Economics Humboldt-Universita¨t zu Berlin,
+Spandauer Straße 1, 10178 Berlin, Germany
+Wolfgang K. H¨ardle
+CASE ­ Center for Applied Statistics and Economics Humboldt-Universit¨at zu Berlin,
+Spandauer Straße 1, 10178 Berlin, Germany
+Roman Timofeev
+CASE ­ Center for Applied Statistics and Economics Humboldt-Universita¨t zu Berlin,
+Spandauer Straße 1, 10178 Berlin, Germany
+January 15, 2008
+We gratefully acknowledge financial support by the Deutsche Forschungsgemeinschaft and the Sonderforschungsbereich 649 "O¨ konomisches Risiko". Roman Timofeev's and Anton Andriyashin's research was supported by Deka Bank scholarship program.
+1
+
+Abstract A great proportion of stock dynamics can be explained using publicly available information. The relationship between dynamics and public information may be of nonlinear character. In this paper we offer an approach to stock picking by employing so-called decision trees and applying them to XETRA DAX stocks. Using a set of fundamental and technical variables, stocks are classified into three groups according to the proposed position: long, short or neutral. More precisely, by assessing the current state of a company, which is represented by fundamental variables and current market situation, well reflected by technical variables, it is possible to suggest if the current market value of a company is underestimated, overestimated or the stock is fairly priced. The performance of the model over the observed period suggests that XETRA DAX stock returns can adequately be predicted by publicly available economic data. Another conclusion of this study is that the implied volatility variable, when included into the training sample, boosts the predictive power of the model significantly.
+JEL classification: C14, C49, G11, G12 Keywords: CART, decision trees in finance, nonlinear decision rules, asset management, portfolio optimisation
+2
+
+1 Introduction
+There is extensive literature in financial econometrics on the predictability of characteristics of stock prices (e.g. volatility, directions, duration) using publicly available information. Goyal & Welch (2003) investigated the empirical real-world out-of-sample performance of plain linear regressions to predict the equity premium and concluded that none of the combinations of the well-known and widely suggested variables (e.g. the dividend-price ratio, dividend yield, interest and inflation rates etc.) lead to an appropriate result. Unsatisfactory out-of-sample performance for linear regression was also obtained by other groups of researches such as Campbell (1988) and Fama & French (1988). Attempts to forecast the Eurex stock returns using Logit regression were undertaken by Amenc, et al (2003) ­ the model showed an average hit ratio of 2/3 over the observed period with the corresponding annual return of about 7%. Bauer & Molenaar (2002) employed a similar approach of Logit regression and provided information ratios greater than 0.50. Avramov (2002) used a Bayesian model averaging to develop a global model that has proven to be robust in predicting stock returns. As a result, a weighted model that averages across competing models provided the Sharpe ratios of less than 0.25.
+In this paper an alternative approach to stock picking by employing Classification and Regression Trees (CART) is offered. Due to its properties (Breiman, et al 1987), CART provides considerable performance gains in comparison with other, more traditional models. CART is nonparametric, does not require variables to be selected in advance, is invariant to monotone transformations of the independent variables, is robust to the effects of outliers and, what most important is, provides superior performance to major stock exchange indexes. Stock pricing with CART has been considered among other methods like rolling regressions by the leading financial institutions, such as SmithBarney (a member of Citigroup), see Sorensen, et al (1999). The model yielded 19.62% (annualized) with the standard deviation of 11.96% and the Sharpe ratio of 1.23. JPMorgan (Seshadri 2003) used CART to classify US technology stocks into three classes: overpriced, underpriced and fairly priced ones. The performance of their quantitative model has shown 14.6% of the annualised return with the corresponding standard deviation of 9.5% and the Sharpe ratio of 1.54.
+Our model based on weekly observations of XETRA DAX companies yielded 19.99% annu-
+3
+
+alised with the corresponding Sharpe ratio of 0.88, which clearly outperforms other benchmark strategies for the relevant period. Risk free rate was assessed by the three month London interbank offer rate (LIBOR).
+Active CART Portfolio (Vola Included) Performance Benchmarking
+1.6
+
+1.4
+
+1.2
+
+Cumulative Yield
+
+1
+
+0.8
+
+0.6
+
+0.4 DAX30
+
+LIBOR 90 days
+
+DJJA
+
+FTSE100
+
+Active CART
+
+0.2 22-Oct-2001
+
+06-May-2002
+
+28-Oct-2002
+Date
+
+29-Apr-2003
+
+20-Oct-2003
+
+Figure 1.1: Wealth curves for active CART strategy and benchmark strategies
+In the last part of the study we include the implied volatility variable in the learning sample that increased the performance of the strategy up to 25.55% per year with the corresponding Sharpe ratio of 1.59, see Figure 1.1. CART strategy (solid line) shows a superior performance in comparison with major stock exchange indexes and risk free rate. These results prove the importance of implied volatility as a risk factor that is consistent with the conclusions of Ferson & Harvey (1991) where it states that the relationship between stock and bond market returns and market fluctuations exists and is well approximated by the implied volatility.
+The structure of the paper is as follows: Sections 2 and 3 give a short overview of the
+4
+
+decision tree methodology. We start with the general notions used in the study such as the splitting rule and the impurity measure, then in Section 3 the tree pruning mechanism is described. Section 4 describes available data and the construction of the learning sample, which is quite important in order to train adequately the decision trees. Section 5 provides the backtesting results and the model performance, Section 6 has concluding remarks.
+2 CART ­ Classification and Regression Trees
+CART stands for Classification and Regression Trees and is a nonparametric classification method that uses available data in the form of (X , Y). X is the matrix of explanatory variables and Y is the vector of classes which has to be defined a priori. It means that the available data may not contain the target characteristic Y in advance and has to be computed additionally ­ usually using the available data X .
+For stock picking applications of decision trees it is natural to regard an element of the class vector y  Y as a predefined characteristic of a stock, for instance a stock could be subjectively undervalued, overvalued or it could also have a subjectively fair price. In this setup y  {long, short, neutral} are three predefined classes of stocks. X can then contain a set of fundamental and technical variables relating to a particular stock and probably some general macroeconomic factors as well. However, there could be several ways to assess the historical stock potential in the aforementioned terms and build vector Y, this aspect will be examined in more detail in Section 4.
+At this point we assume that each observation has its class that constitutes vector Y for the whole learning sample ­ the combination of available data from the past X and (probably computed additionally) target characteristic Y. The data set (X , Y) is used to extract available data patterns ­ this is achieved by "learning" i.e. the creation of a decision tree T that extracts different outcomes from the past and tries to "explain" a connection between X and Y observed in the past in the form of a binary tree. The decision tree is then used to classify new data into classes from Y ­ in this way when new market information becomes available, for a given stock using the existing tree it is possible to produce a recommendation either to long, short or maintain the current position.
+5
+
+Consider an example of an artificially generated two-dimensional data set with five classes and the resulting decision tree presented in Figure 2.3. For the sake of simplicity, each color represents a class, and CART tends to separate the respective colour areas with the minimal number of questions (or splits) in a binary tree. Nodes with tags Blue, Green, Black, Yellow and Purple are the so called terminal nodes T~k whereas the node at the top, with the question "Is X1  0.5?", is called the root node. If the answer is positive, the left branch of the tree is taken.
+Decision trees are represented by a set of questions that splits the learning sample into smaller and smaller parts. CART asks only yes/no questions. A possible question could be: "Are the company's last reported Earnings Per Share (EPS) > 1.5?" or "Is the Brent crude oil 1-month future price < 80?". But where does the value of 1.5 in the question about EPS come from?
+CART searches through all available variables and their possible values in order to find the split s ­ a combination of a variable from the available data X and the appropriate question value. The question s that splits the data into two parts with maximum homogeneity inside each of those parts is then selected as optimal. The process is repeated for each of the resulting data fragments since every question in a tree just splits the initial data set into two parts, see Section 2.2 for more details on splitting algorithm employed in this study. At some point of time a tree T reaches its "optimal" size, this means that no additional questions are added to the rule (refer to Section 3 for the description of the tree optimisation procedure). Finally, at the bottom of a tree there are terminal nodes T~k that contain decision rule parts for a certain combination of data questions led to a particular node t. Different data questions lead to different terminal nodes, so a set of terminal nodes along with the respective paths to nodes constitute a final decision rule T .
+The application of decision trees to a data set implies conducting three major steps:
+· the construction of the so called maximum tree TMAX
+· the choice of the right tree size (tree pruning) T 
+· the classification of new data using the constructed tree T 
+6
+
+X2
+
+1 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1
+0 0
+
+GREEN
+
+BLUE
+
+BLACK
+
+PURPLE
+
+YELLOW
+
+0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 X1
+
+1
+
+Figure 2.2: Application of CART to an artificial two-dimensional data set. Because of the special form of the questions (univariate linear splits), the separating lines are always orthogonal to the axes. For a given example four splits were sufficient to separate data into different nodes of the tree. The corresponding tree is depicted on Figure 2.3
+2.1 Construction of the Maximum Tree
+Let P be the number of variables from the available company data X . If X = (X1, X2, . . . , XP ) is the matrix of the learning sample and there are M observations available, then the class vector Y has the same length M , i.e. a class tag yi is assigned to each i-th observation of the learning sample. Without the loss of generality let us also suppose that there are J unique classes (the situation when yi  {long, short, neutral} corresponds to J = 3).
+Let tP be a parent node and tL, tR ­ left and right child nodes of the parent node tP respectively so that a fraction pL of observations from node tP follows to the left child node and a fraction pR = (1 - pL) ­ to the right one. If nP is the number of observations in tP
+
+7
+
+X1  0.5
+
+Blue
+
+X2  0.5
+
+X1  0.75
+
+Green
+
+Black
+
+X2  0.25
+
+Yellow
+
+Purple
+
+Figure 2.3: The resulting classification tree. Left branches stand for the positive answers, right branches ­ for the negative ones. There are four splits and five terminal nodes in this tree.
+and nL, nR ­ in tL and tR respectively, then
+
+pL
+
+=
+
+nL , nP
+
+pR
+
+=
+
+nR nP
+
+(1)
+
+A classification tree is built in accordance with a splitting rule ­ a rule that determines a
+
+split s at each node. Its aim is to create two more homogenous groups by splitting the
+
+initial less homogenous one (the parent node) into two parts (two child nodes). A split s
+
+contains those variable Xp, p  {1, . . . , P } from the matrix of explanatory variables X and
+
+a question value x, which lead to splitting of the parent node tP into nodes tL and tR, when
+
+a question "Is Xp < x?" separates the data contained in tP into two different groups with
+
+the maximum feasible inner homogeneity.
+
+1
+
+Homogeneity is defined via an impurity function i(t). This is an arbitrary function that
+
+has a unique maximum at point
+
+1 J
+
+,
+
+1 J
+
+,
+
+.
+
+.
+
+.
+
+,
+
+1 J
+
+ RP and a unique minimum at points
+
+(1, 0, 0, . . . , 0), (0, 1, 0, . . . , 0), . . ., (0, 0, 0, . . . , 1)  RP . It also possesses some important
+
+8
+
+Node tP
+
+Node tL
+
+Node tR
+
+Figure 2.4: Parent and child node hierarchy
+technical properties, refer to Breiman, et al (1987) for more details. Section 2.2 contains the explicit definition of this function that is frequently employed for applied decision tree analysis and was employed in this study.
+The split corresponding to the maximum homogeneity of the left and right child nodes compared to the parent node is equivalent to the split following from the maximization of change of the impurity function i(t) for an arbitrary node t and arbitrary split s:
+
+i(t) = i(tP ) - E {i(tC)} where E {i(tC)} = pLi(tL) + pRi(tR) and set of child nodes C = {L, R}.
+
+(2)
+
+Assuming that pL and pR are the estimated probabilities of the right and left nodes (respective proportions of observations distributing from the parent node to two child nodes), it follows that:
+
+i(s, t) = i(t) - pLi(tL) - pRi(tR) for an arbitrary data split s. Therefore, at each node one solves the following optimisation problem:
+
+(3)
+
+s = argmax i(s, t) = argmax {-pLi(tL) - pRi(tR)} =
+ss
+= argmin {pLi(tL) + pRi(tR)}
+s
+91
+
+(4)
+
+Note that tL and tR are implicit functions of s since a change of an arbitrary question variable Xp~, p~  {1, . . . , P } or an arbitrary question value x~ (change of an arbitrary s~: "Is Xp~ < x~?") makes the values tL and tR change as well.
+In this algorithm CART searches through all possible values of all variables constituting the matrix X for the best split s that maximises the change of impurity function i(s, t).
+The maximum tree TMAX is the tree containing the maximum number of nodes for a given data set. Put differently, it is a tree built by applying equation (4) to the original data set and resulting split data portions until the following condition holds. This condition defines TMAX as the tree where each terminal node contains only observations belonging to the same class j:
+
+t  T~ j: p(j|t) = 1 where T~ is the set of terminal nodes of a tree T .
+
+(5)
+
+The next important step is to define the impurity function i(t). Although impurity functions can be defined in numerous ways, the Gini index is the preferred choice in financial applications, see Kolyshkina & Brookes (2002).
+
+2.2 Gini Splitting Rule
+Employing the idea of the Gini index, this special form of the impurity function i(t) can be written down as follows:
+
+JJ
+
+i(t) =
+
+p(k|t)p(l|t)
+
+k=l l=k k=1 l=1
+
+where k, l = 1, J are class indices and
+
+(6)
+
+p(j|t) = nt(j) nt
+10
+
+(7)
+
+where nt(j) is the number of observations from X belonging to the class j  {1, . . . , J} that have been filtered to a node t for a given split s; nt is the overall number of observations contained in the node t.
+Applying the Gini splitting rule to (3), i(t) transforms to:
+
+JJ
+
+J
+
+i(t) = - p2(j|t) + pL p2(j|tL) + pR p2(j|tR)
+
+j=1 j=1
+
+j=1
+
+and (4) takes the following form:
+
+(8)
+
+JJ
+
+J
+
+s = argmax - p2(j|t) + pL p2(j|tL) + pR p2(j|tR)
+
+s j=1
+
+j=1
+
+j=1
+
+(9)
+
+It is possible to show that for a certain setup the Gini index is equivalent to the data variance according to the class in Y i.e. it evaluates class homogeneity of the data in a given node, see Breiman, et al (1987) for more details. The Gini algorithm usually tends to search for the largest class in a learning sample and isolate it from the rest of the data ­ the relevant examples and the comparison with other impurity function types can also be found in Breiman, et al (1987).
+
+3 Optimal Tree Size
+3.1 Over- and Underparameterization of the Trees
+The algorithm of the tree building is as follows. Equation (9) is first applied to the whole learning sample (root node) X , after which it is applied to each of the created tree nodes. This process can be looped until either i(t) = 0 for every terminal node as indicated in (5) or until the size of the tree becomes balanced.
+But what is the balanced or optimal size of a tree? And why is a maximum tree not always the best choice?
+11
+
+Indeed, applying (9) until (5) holds means that at each step it was possible to decrease the class heterogeneity inside the learning sample by filtering out observations of other classes and assigning them to other nodes. Therefore, if in the limiting case each observation can be assigned to a separate node, it would only mean that even smallest random disturbances including, but not limited to measurement errors, were represented as parts of a final decision rule. Clearly one would wish to have only those reliable parts of the tree that stand for a fundamental inner data pattern. And the reason is straightforward ­ new data to classify would have to pass through the created tree, therefore if they pass through a noisy part of the rule, with a high probability the classification of new data may be wrong.
+On the other hand, a small tree is also not a panacea since it can be under-parameterised, i.e. it does not account for significant data portions in the learning sample.
+One solution to the problem could be the application of the cross-validation to the subtrees of different sizes and comparison of their performance.
+
+3.2 Cost-complexity Function and Cross-validation
+The idea of this method presented in Breiman, et al (1987) is to introduce some new measure that would be able to take into account tree complexity, i.e. its size which can be estimated by the number of terminal nodes. Then the maximum tree is penalized for its big size, however on the other hand it makes perfect in-sample predictions. Small trees, of course, get a much lower penalty for their size, but their predicting abilities are naturally limited. The aim is therefore to find a balance between the tree size, which is penalized, and the predictive power of the tree. This can be achieved via the cost-complexity function to be defined later in this Section.
+First, let us define the internal misclassification error of an arbitrary observation at node t as e(t) = 1 - max p(j| t), define also E(t) = e(t)p(t). Then the internal misclassification
+j
+tree error is:
+
+E(T ) = E(t)
+tT~
+12
+
+(10)
+
+where T~ is a set of terminal nodes. For any subtree T  TMAX define the number of terminal nodes T~ as the measure of its complexity. Then the cost-complexity function
+aimed to optimize the decision tree size is defined as follows:
+
+E(T ) = E(T ) +  T~ where   0 is the complexity parameter and  T~ is the cost component.
+
+(11)
+
+Although  can have an infinite number of values, the number of subtrees of TMAX resulting in minimisation of E(T ) is finite. Hence pruning of TMAX leads to creation of subtrees sequence T1, T2, T3, . . . with a decreasing number of terminal nodes. Since the sequence is finite, if T () is an optimal subtree for some arbitrary , then it will remain optimal until the complexity parameter is not changed to some  when T ( ) becomes a new optimal subtree until complexity parameter value is  and so on.
+
+In Breiman, et al (1987) it is shown that for   0 an optimal tree T () exists in the sense that
+
+1. E {T ()} = min E(T ) = min E(T ) +  T~
+
+T TMAX
+
+T TMAX
+
+2. if E(T ) = E {T ()}, then T ()  T .
+
+Let {t0} denote the root node. This way one can get a sequence of optimal nested subtrees TMAX T1 T2 T3 . . . {t0} for which it is possible to prove that the sequence {k} is increasing, i.e. k < k+1, k  1 and 1 = 0. For k  1: k   < k+1 and T () = T (k) = Tk.
+
+Applying then the method of the V -fold cross-validation to the sequence TMAX T1 T2 T3 . . . {t0}, an optimal tree is then determined.
+
+However, selecting an optimal tree as the one with the minimum value of ECV (T ) may
+
+not be the best solution since usually there is a whole range of values ECV (T ) satisfying
+
+ECV
+
+(T
+
+)
+
+<
+
+ECV
+MI
+
+N
+
+(T
+
+)
+
++
+
+
+
+for
+
+small
+
+
+
+>
+
+0.
+
+And if V
+
+is less than the number of observations in
+
+X , then the second run of V-fold cross-validation procedure could provide slightly different
+
+results because of the randomness embedded in the algorithm of cross-validation.
+
+13
+
+Therefore, a so called one standard error empirical rule is applied. It states that if Tk0 is the tree minimizing ECV (Tk0) from the sequence of nested subtrees TMAX T1 T2 T3 . . . {t0}, then a value k1 and a correspondent tree Tk1 are selected so that
+
+argmax E^(Tk1)  E^(Tk0) +  E^(Tk0)
+k1
+
+(12)
+
+where (·) denotes the sample estimate of the standard error and E^(·) ­ the relevant esti-
+
+mates of the internal misclassification errors (introduced in (10)) that are derived from data
+
+subsamples employed by the cross-validation procedure.
+
+1
+E^ (Tk )
+0 0
+
+8 16 24 32 40 T~ k
+
+Figure 3.5: The example of relationship between E^(Tk) and number of terminal nodes
+The dotted line in Figure 3.5 shows the area where the values of E^(Tk) only slightly differ from min E^(Tk). The left edge, which is roughly equivalent to 16 terminal nodes, shows the
+|T~k| application of the one standard error rule. The use of the one standard error rule allows not only more robust results to be achieved, but also to get trees of lower complexity given the error comparable with min E^(Tk).
+|T~k|
+
+14
+
+4 Available Data and Calibration
+
+In this study we operate with a single data set of XETRA DAX companies for the period of 27 April, 2000 ­ 30 October, 2003 that, along with historical stock prices, has a set of technical and fundamental indicators. Table 4.1 provides an overview of the available data.
+
+Indicator Momentum Stochastic MA MA St. Error MACD
+ROC TRIX BV CF Dividends paid
+EPS Sales ImplVola
+
+Type Technical Technical Technical Technical Technical
+Technical Technical Fundamental Fundamental Fundamental
+Fundamental Fundamental Fundamental
+
+Frequency 1 day 1 day 1 day 1 day 1 day
+1 day 1 day 1 month 1 month 1 month
+1 month 1 month 1 day
+
+Description
+
+Mt = Pt - Pt-T , T = 20
+
+, PPt-PL
+PH -PL
+
+H
+
+M A(T ) =
+
+= max(Pt), PL =
+
+,t
+i=t-T
+
+Pi
+
+T
+
+T
+
+= 12
+
+min(Pt)
+
+Standard deviation of MA
+
+(1
+
+-
+
+n1 n2
+
+){M A(n1)
+
+-
+
+M A(n2
+
+-
+
+n1)}
+
+n1 = 12, n2 = 26
+
+,Pt
+Pt-T
+
+T
+
+= 10
+
+Triple exponentially smoothed MA
+
+Book Value
+
+Cash Flow
+
+-
+
+Depreciation
+
+Earnings Per Share
+
+-
+
+Implied volatility
+
+Table 4.1: List of available variables, t is the current time period
+
+The data contain two types of variables: technical indicators, which are collected daily and
+
+usually represent some derivative of historical price, and fundamental data, which provide
+
+us with the evidence of the current market status of the company by means of various
+
+numbers and ratios from the balance sheet and the income statement. Fundamental data
+
+are collected monthly and sometimes quarterly. In order to have the same time scale, the
+
+following transformations were applied: other than daily variables are normalized by the
+
+stock price, e.g.
+
+instead of BVt,
+
+BVt Pt
+
+is taken, where t refers to a particular time moment,
+
+see Table 4.1 for the description of the available variables.
+
+15
+
+Because of the different measurement periods for technical and fundamental data (refer to Table 4.1), it is an open question which time scale to use for the stock picking analysis. Obviously, daily data provide us with a sufficient number of observations in a learning set, but at the same time they may contain undesired market fluctuations and natural noise (e.g. measurement errors). Since fundamental data are collected monthly, their daily changes bring us little new information. On the other hand, monthly data will give us 12 observations per year, which is not enough to construct a reliable tree. Our analysis is therefore based on weekly observations which is a trade-off between data scarcity and informational content. The final data set consists of technical data by the end of each week and fundamental indicators normalised by corresponding stock prices.
+Individual trees are built for each stock from XETRA DAX. This is opposed to a setup when the data from all the stocks are combined and a single common tree is employed to provide forecasts for each of the stocks. However, due to the different nature, scale and business areas of the companies in XETRA DAX, individual decision trees are employed to capture those company peculiarities that might be lost if a single common tree is used.
+The available data are divided into three groups: the learning set, the test/calibration set and the validation set. The first data set is a learning sample that is used to construct the initial decision tree for every company. The test set is employed for the model parameters to be optimised. And finally, with the optimised model parameters, the simulated performance of each stock is evaluated using the last section of the data ­ the validation set.
+In Section 2 the stock classes (stored in the vector Y) were introduced in the form of three possible values ­ long, short or neutral standing for undervalued, overvalued and fairly priced stocks. In this study we assess the relative performance of a stock in the following way.
+Let R¯ be some positive threshold. Then for given R¯ the tree classes are defined as following:
+
+
+Rt  R¯  
+-R¯  Rt  R¯
+
+
+
+ Rt
+
+
+
+-R¯
+
+ long  neutral  short
+
+16
+
+If the forward-looking one period stock return for the next period t + 1 computed at time t
+
+Rt
+
+=
+
+Pt+1 - Pt
+
+Pt
+
+(13)
+
+exceeds the threshold value R¯ (where Pt is the current stock price), this stock is regarded as
+
+underperforming in the current period t.
+
+The value of R¯ is supposed to be different for each of the analysed XETRA DAX stocks. Setting it up too high R¯ results in a low number of cases in the learning sample where active positions should be maintained ­ the trading system is too cautious. On the other hand, if R¯ is close to zero, then even small price fluctuations, which are, perhaps, due to only speculative market activity and not fundamental reasons, trigger the signal for maintaining the active position ­ in this case the trading system is too sensitive to market signals.
+
+The threshold value R¯ was optimised using the calibration set for each stock individually. It
+was chosen in such a way that maximises the return of the stock over the calibration period if the trading activity is simulated. For that purpose different values of R¯ starting from 0%
+and ending at 3% with a step of 0.25% were analysed resulting in 13 different scenarios for each stock. Although different stocks resulted in various values of R¯, in the majority of cases R¯ was close to 1.5%.
+
+The size of the learning set was set to one year (52 weekly observations). In order to reflect structural changes on the market, a sliding window approach was employed, i.e. as new data point becomes available, it was included in the sample while the oldest one was excluded. Thus, the size of the learning sample remains fixed over time, but it is constantly updated with the new observations as they become available.
+
+The calibration sample size was set to 26 weeks. The rest data points were allocated for the validation set.
+
+5 Backtesting Results
+As mentioned before, each available stock from XETRA DAX was analysed using the individual trees. Due to the data scarcity only the stocks with the market data available during
+17
+
+the whole period were regarded: ADS (1939), VOW (621), SAP (24243), DTE (19594), BMW (708), FME (684), HEN3 (3917), SIE (657) ­ the numbers in parentheses correspond to the relevant company XETRA DAX codes.
+
+For the validation period for every time point the model forecasted position (via optimised and properly calibrated decision trees) was compared with an actual following period return happened in the past. If the position coincided with the forward-looking stock price change direction, the trading system recorded the relevant profit.
+
+An example of the decision tree for SIE (657) is given in Figure 5.6. Left branch corresponds
+
+to the positive answer, whereas right branch to the negative answer to the question in the
+
+parent node. The number of observations for each of three classes is given in brackets. The
+
+class of terminal nodes (marked with yellow) is defined by the dominating class of the node.
+
+Since the sliding window approach was employed, a new tree was constructed as soon as
+
+data become available.
+
+(long, short, neutral) [10, 0.75]
+
+Impl. Vola < 42.574 (15,17,20)
+
+EP S P
+
+<
+
+0.042
+
+(4,12,17)
+
+CLASS long (11,5,3)
+
+CLASS short (1,10,4)
+
+CLASS neutral (3,2,13)
+
+Figure 5.6: One of the decision trees for SIE (657), R¯ = 3%
+At the beginning of each period all open positions were closed and profits were not reinvested. Transaction costs in amount of 10 b.p. for each operation were included into the calculations. An equally-weighted portfolio out of the available stocks with the recommended active positions (either long or short) was formed for every period. Because the trading system updated
+18
+
+the recommendations every week (when new market data became available), the weights of
+
+the portfolio were recalculated as well. If At > 0 is the number of stocks with the recommended active position for the current period t, then the relevant i-th stock weight in the
+
+portfolio at time point t is it:
+
+|it|
+
+=
+
+1 .
+At
+
+(14)
+
+If At = 0, then the portfolio positions remain unchanged from the previous period. The portfolio is created at the first week c of the validating period when Ac > 0.
+
+The creation of the equally weighted portfolio is a common way to get the backtesting results for stock picking in the case of multiple stocks, see, for example, Amenc, et al (2003), Seshadri (2003) or Sorensen, et al (1999).
+
+Figure 5.7 shows the weekly portfolio returns and Figure 5.8 plots the wealth curves of the CART strategy and traditional benchmarks: dynamics of XETRA DAX, FTSE 100 and Dow Jones Industrial indices. The risk free rate was approximated with the three month LIBOR interest rate. For the observed period the average annualized profit was 19.99% with the corresponding Sharpe ratio of 0.88.
+
+Sharpe ratio Mean relative weekly Skewness Kurtosis Risk free (Avg. LIBOR)
+
+Value 0.88 19.99% 0.63 6.69 0.04
+
+Table 5.2: Performance statistics for portfolio without the implied volatility variable in the learning sample
+
+To test the relevance of the implied volatility in terms of the stock price predicting power, the second recursive portfolio based on the learning samples with the implied volatility variable was constructed. Weekly returns and wealth curve are available in Figures 5.9 and 5.10. The performance of the portfolio with the implied volatility variable is summarised in Table 5.3. Because the implied volatility data were not available for SAP (24243), we excluded this
+19
+
+Weekly Yield
+
+Active CART Strategy Weekly Yields: Vola Excluded
+
+0.1
+
+0.08
+
+0.06
+
+0.04
+
+0.02
+
+0
+
+-0.02
+
+-0.04
+
+-0.06
+
+-0.08 28-Jan-2002
+
+08-Feb-2002
+
+09-Dec-2002 Date
+
+19-May-2003
+
+20-Oct-2003
+
+Figure 5.7: Weekly portfolio returns for active CART strategy without the implied volatility variable in the learning sample
+
+stock from the second portfolio. Hence one can notice slightly different backtesting periods on the following pairs of Figures: 5.7, 5.8 vs 5.9, 5.10.
+
+Sharpe ratio Mean relative weekly Skewness Kurtosis Risk free (Avg. LIBOR)
+
+Value 1.59 25.55% 1.00 5.68 0.04
+
+Table 5.3: Performance statistics for portfolio with the implied volatility in the learning sample
+
+20
+
+Cumulative Yield
+
+Active CART Portfolio (Vola Excluded) Performance Benchmarking
+1.6
+
+1.4
+
+1.2
+
+1
+
+0.8
+
+0.6
+
+0.4 DAX30 LIBOR 90 days DJJA FTSE100 Active CART
+0.2 28-Jan-2002
+
+08-Feb-2002
+
+09-Dec-2002
+Date
+
+19-May-2003
+
+20-Oct-2003
+
+Figure 5.8: Wealth curves for active CART strategy without the implied volatility variable in the learning sample; wealth curves for benchmark strategies
+It is clear that the implied volatility variable, at least for the indicated stock market and period, had a positive effect on the stock price predictive power. Being one of the factors that allows the measurement of the overall market uncertainty and, ultimately, one of the important risk factors, the inclusion of implied volatility variable in the learning sample boosted the forecasting potential of the proposed trading model based on binary decision trees.
+
+21
+
+Weekly Yield
+
+0.1 0.08 0.06 0.04 0.02
+0 -0.02 -0.04 -0.06 -0.08 22-Oct-2001
+
+Active CART Strategy Weekly Yields: Vola Included
+
+06-May-2002
+
+28-Oct-2002 Date
+
+29-Apr-2003
+
+20-Oct-2003
+
+Figure 5.9: Weekly portfolio returns for active CART strategy with the volatility variable in the learning sample
+6 Concluding Remarks
+In this study it is assumed that stock selection can effectively be based on the proper analysis of available market data, i.e. a relationship of an unknown non-linear form between the current stock prices and the lagged market indicators exists. This relationship is estimated here via a nonparametric classification method called decision trees. Decision trees are a type of the classification rule that describes the relationship between the stock price and available market information in the form of a binary tree and are further employed to predict the future movements of the price. We also imply that this dependency may change in time with the evolving financial markets and therefore rebuild the decision tree for each period (week) whereas the last observations are included into the learning sample to keep it updated
+22
+
+Cumulative Yield
+
+Active CART Portfolio (Vola Included) Performance Benchmarking
+1.6
+
+1.4
+
+1.2
+
+1
+
+0.8
+
+0.6
+
+0.4 DAX30
+
+LIBOR 90 days
+
+DJJA
+
+FTSE100
+
+Active CART
+
+0.2 22-Oct-2001
+
+06-May-2002
+
+28-Oct-2002
+Date
+
+29-Apr-2003
+
+20-Oct-2003
+
+Figure 5.10: Wealth curves for active CART strategy with the implied volatility variable in the learning sample; wealth curves for benchmark strategies
+and the oldest one is excluded to maintain the fixed sample size.
+In order to evaluate the importance of the market risk factor for the stock prediction power, two different recursive portfolios ­ including and excluding the implied volatility variable in the learning samples ­ were created. The first portfolio was constructed using only technical and fundamental information available from data providers. With an annualised yield of 19.99% and the corresponding Sharpe ratio of 0.88 it clearly outperformed traditional benchmark strategies. Having included the implied volatility variable, the backtesting performance of the trading system was boosted up to an annual yield of 25.55% and the Sharpe ratio of 1.59. This result is consistent with previous research in the area implying that equity premium can be well explained by risk factors that are well approximated by the implied volatility.
+23
+
+References
+Amenc, N., Malaise P., Martellini, L. & Sfeir, D. (2003). Portable Alpha and Portable Beta Strategies in the Eurozone, Risk and asset management research center, EDHEC business school.
+Avramov D. & Chordia F. (2006). Predicting stock returns, Journal of Financial Economics 82 : 387-415.
+Avramov D. (2002). Stock return predictability and model uncertainty Journal of Financial Economics 64, Nm. 3 : 423-458.
+Bauer, R. & Molenaar, R. (2002). Is the Value Premium Predictable in Real Time? Working paper, Maastricht University
+Breiman, L., Friedman, H. J., Olshen, A. R., Stone, J. C. (1987). Classification and regression trees, The Wadsworth Statistics/Probability Seriesy: 358 p.
+Campbell, J. Y. & Shiller, R. J. (1988). Stock Prices, Earnings, and Expected Dividends, Journal of Finance 43 Nm.3 : 661-676.
+Campbell, J. Y. (1987). Stock returns and the Term Structure, Journal of Financial Economics 18 Nm. 2 : 373-399.
+Goyal, A. & Welch, I. (2003). Predicting the Equity Premium with Dividend Ratios, Management Science 49 Nm. 5 : 639-654.
+Fama, E. F. & French, K. R. (1988). Dividend Yields and Expected Stock Returns, Journal of Financial Economics 22 Nm. 1 : 3-25.
+Fama, E. F. & French, K. R. (1988). Permanent and Temporary Components of Stock Prices, Journal of Political Economy 96 Nm. 2 : 246-73.
+Ferson, W. & Harvey, C. (1991). The variation in economic risk premia, Journal of Political Economy 99 : 385-415.
+Hafner, M. C. & Herwatz, H. (1999). Time-Varying Price of Risk in the CAPM-Approaches, Empricial Evidence and Implications, JFinance 19 Nm. 2 : 93-112.
+24
+
+Inna Kolyshkina & Richard Brookes. (2002). Data mining approaches to modelling insurance risk, electronic version, PricewaterhouseCoopers, 22 October 2002, 20 p.
+Seshadri, L. (2003). JPMorgan US Quantitative Factor Model: August 2003 Stock Lists, electronic version, JPMorgan Quantitative Equity and Derivatives Strategy: 7 p.
+Sorensen, H. E., Ooi, K. C. & Miller, L. K. (1999). The Decision Tree Approach to Stock Selection, Salomon Smith Barney Equity Research: United States, Global Quantitative Research: 28 p.
+25
+
+SFB 649 Discussion Paper Series 2008
+
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001 "Testing Monotonicity of Pricing Kernels" by Yuri Golubev, Wolfgang
+
+Härdle and Roman Timonfeev, January 2008.
+
+002 "Adaptive pointwise estimation in time-inhomogeneous time-series
+
+models" by Pavel Cizek, Wolfgang Härdle and Vladimir Spokoiny,
+
+January 2008.
+
+003 "The Bayesian Additive Classification Tree Applied to Credit Risk
+
+Modelling" by Junni L. Zhang and Wolfgang Härdle, January 2008.
+
+004 "Independent Component Analysis Via Copula Techniques" by Ray-Bing
+
+Chen, Meihui Guo, Wolfgang Härdle and Shih-Feng
+
+Huang, January
+
+2008.
+
+005 "The Default Risk of Firms Examined with Smooth Support Vector
+
+Machines" by Wolfgang Härdle, Yuh-Jye Lee, Dorothea Schäfer
+
+and Yi-Ren Yeh, January 2008.
+
+006 "Value-at-Risk and Expected Shortfall when there is long range
+
+dependence" by Wolfgang Härdle and Julius Mungo, Januray 2008.
+
+007 "A Consistent Nonparametric Test for Causality in Quantile" by
+
+Kiho Jeong and Wolfgang Härdle, January 2008.
+
+008 "Do Legal Standards Affect Ethical Concerns of Consumers?" by Dirk
+
+Engelmann and Dorothea Kübler, January 2008.
+
+009 "Recursive Portfolio Selection with Decision Trees" by Anton Andriyashin,
+
+Wolfgang Härdle and Roman Timofeev, January 2008.
+
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

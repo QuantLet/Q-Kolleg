@@ -1,0 +1,1640 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2010-021
+Nonparametric Estimation of Risk-Neutral Densities
+Maria Grith* Wolfgang Karl Härdle*
+Melanie Schienle
+* Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Nonparametric Estimation of Risk-Neutral Densities
+Maria Grith2, Wolfgang Karl H¨ardle1 and Melanie Schienle3
+1 Professor at Humboldt-Universita¨t zu Berlin, Ladislaus von Bortkiewicz Chair of Statistics and Director of CASE - Center for Applied Statistics and Economics, Spandauer Straße 1, 10178 Berlin, Germany and National Central University, Department of Finance, No. 300, Jhongda Rd., Jhongli City, Taoyuan County 32001,Taiwan, (R.O.C.), Email: haerdle@wiwi.hu-berlin.de
+2 Research Associate at Humboldt-Universita¨t zu Berlin, Ladislaus von Bortkiewicz Chair of Statistics, Spandauer Straße 1, 10178 Berlin, Germany, Email: gritmari@wiwi.hu-berlin.de
+3 Professor at Humboldt-Universita¨t zu Berlin, Chair of Econometrics and CASE Center for Applied Statistics and Economics, Spandauer Straße 1, 10178 Berlin Germany, Email: melanie.schienle@wiwi.hu-berlin.de
+Summary. This chapter deals with nonparametric estimation of the risk neutral density. We present three different approaches which do not require parametric functional assumptions on the underlying asset price dynamics nor on the distributional form of the risk neutral density. The first estimator is a kernel smoother of the second derivative of call prices, while the second procedure applies kernel type smoothing in the implied volatility domain. In the conceptually different third approach we assume the existence of a stochastic discount factor (pricing kernel) which establishes the risk neutral density conditional on the physical measure of the underlying asset. Via direct series type estimation of the pricing kernel we can derive an estimate of the risk neutral density by solving a constrained optimization problem. The methods are compared using European call option prices. The focus of the presentation is on practical aspects such as appropriate choice of smoothing parameters in order to facilitate the application of the techniques.
+Keywords: Risk neutral density; Pricing kernel; Kernel smoothing; Local polynomials; Series methods JEL classification: C13, C14, G12
+ We are grateful to the Deutsche Forschungsgemeinschaft which has supported this research via SFB 649 O¨ konomisches Risiko, Humboldt-Universita¨t zu Berlin.
+
+2 Maria Grith, Wolfgang Karl H¨ardle and Melanie Schienle
+1 Introduction
+
+Most of our economic understanding of investment under uncertainty is based on pure Arrow-Debreu Securities (Arrow 1964, Debreu, 1959), which pay one unit of currency at the end of a period if a state of nature is realized and zero otherwise. Their theoretical state-contingent prices are the starting point for pricing any security in an economic equilibrium under uncertainty. In a continuum of states, the prices of the Arrow-Debreu securities are characterized by the state-price density, which yields one dollar if the final state is in the interval [x, x+dx] when starting from any point x. While one way to justify existence and form of a state-price density is from preference-based equilibrium models (Lucas, 1978), we focus here on the reasoning from arbitrage-based models (Merton, 1973). In these models the state-price density is called risk neutral density (RND) under the assumption that the underlying market is dynamically complete, which we will adopt in the following. The RND also uniquely characterizes the equivalent martingale measure under which all asset prices discounted at the risk-free rate are martingales.
+Under the above stated assumption, the price of a European call is obtained by discounting the expected payoff, where the expectation is taken with respect to the risk neutral measure
+
+
+
+C(X, , rt, , t, , St) = e-rt, 
+
+(ST - X)+q(ST |, rt, , t, , St) dST . (1)
+
+0
+
+Here St is the underlying asset price at time t, X the strike price,  the time to maturity, T = t +  the expiration date, rt, the deterministic risk free interest rate for that maturity T , t, corresponding dividend yield of the asset, q(ST |, rt, , t, , St) is the conditional risk neutral density. We assume that these state variables contain all essential information needed for estima-
+tion of C and q while quantities such as stochastic market volatility, trading volumes, ask-bid spreads are negligible. We write q(ST ) instead of q(ST |·) to keep notation simple. The risk neutral density can be derived from (1) as
+
+q(ST ) = ert, 
+
+2C
+
+X2
+
+.
+X =ST
+
+(2)
+
+The relation is due to Breeden and Litzenberger (1978) and is the starting point for two possible estimation strategies: first, estimate a continuous twice-differentiable call function in all its arguments from traded options by smoothing in the call price or secondly, by smoothing in the implied volatility space. In addition to these standard approaches we also introduce a third indirect way via estimation of the empirical pricing kernel. Assuming that all the variables other than X are fixed, the price of the European call option with strike price X expiring in  years under the historical measure p is given by
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+3
+
+C(X) = e-rt,  = e-rt, 
+
+
+(ST
+0
+
+-
+
+X
+
+)+
+
+q(ST p(ST
+
+) )
+
+p(ST
+
+)dST
+
+
+
+(ST - X)+m(ST )p(ST )dST ,
+
+0
+
+(3)
+
+where p is the subjective density of the stock price at the expiration of the option, at time T and m is the so called pricing kernel characterizing the change of measure from q to p.
+In standard option pricing models such as Merton (1976), Heston (1993) or Bates (1996), estimation of the risk neutral density crucially depends on underlying model assumptions such as the underlying asset price dynamics and the statistical family of distributions that the risk neutral density is assumed to belong to. Consumption based asset pricing models prespecify the preference of the representative agent and condition therefore the shape of the pricing kernel (Lucas, 1978 and Rubinstein, 1976). Recent empirical findings, however, question the validity of these popular specifications which drive the overall result (Campbell, Lo and McKinlay, 1997). Nonparametric estimation offers an alternative by avoiding possibly biased parametric restrictions and therefore reducing the respective misspecification risk. Since nonparametric estimation techniques require larger sample sizes for the same accuracy as a parametric estimation procedure, increasing availability of large data sets as intraday traded option prices have raised their feasibility. On the other hand, due to their flexibility, many existing nonparametric risk neutral density estimation techniques are afflicted by irregularities such as data sparsity in the tails, negative probabilities and integrability to one. We will address these problems by appropriate choices of bandwidths and kernels, suggesting semiparametric techniques or imposing relevant constraints.
+We use kernel based methods (local polynomial regression) in each of the first two cases. These methods are flexible and yield point estimates as opposed to series expansion, sieve methods or splines. Though shape constraints such as convexity or monotonicity of the call price are hard to incorporate directly in the estimation step. Therefore in particular in small samples they are not satisfied leading to problems with economic theory. Thus in the estimation via EPK in Section 3 we use series approximation for directly controlling constraints in the estimation.
+The rest of the chapter is organized as follows: section 2 describes kernel based regression methods for direct estimation of the RND from the call prices function, section 3 introduces the concept of pricing kernel and explains the indirect method of estimating RND, section 4 concludes. Throughout the chapter empirical studies using EUREX DAX Index based European option data illustrate the methods, comparing their performance.
+
+4 Maria Grith, Wolfgang Karl H¨ardle and Melanie Schienle
+2 Estimation of RND based on the second derivative
+
+The standard approach for a nonparametric estimator for the risk neutral
+density is by estimating the second derivative of the call price with respect to
+the strike X. Then an estimate for q is obtained by discounting according to
+(2). Therefore in the following we focus on estimation of the second derivative
+of a regression function.
+Call the d-dimensional vector of covariates Z which comprises all estima-
+tion relevant variables of (X, , rt, , t, , St) from (1) and denote call prices as response Y . From paired observations Yi and Zi = (Zik)dk=1, for i = 1, ..., n we want to estimate the following general, possibly nonlinear relationship
+
+Yi = C(Zi) + i, i = 1, ..., n
+
+(4)
+
+where C(·) : Rd  R is a smooth function in all d dimensions and i is i.i.d. with E[i|Zi] = 0.
+Kernel based methods are local techniques for estimating the function C
+
+at any point z in its domain; they use a weighted average of the Yi-s to yield
+
+fitted values via
+
+n
+C^(z) = wi(z)Yi
+
+(5)
+
+i=1
+
+where the weights wi(z) assigned to each point of fit z decline for increasing
+
+distance
+
+|Zi - z|
+
+and
+
+1 n
+
+n i=1
+
+wi(z)
+
+=
+
+1.
+
+Kernel
+
+regression
+
+methods
+
+use
+
+kernel
+
+functions to construct weights. A univariate kernel is a smooth, symmetric
+
+real-valued squared integrable function K(u) : R  R which integrates to
+
+one. We can think of a standard kernel function as a probability density with
+
+potentially compact support. Examples of such K are presented in Table 1.
+
+Table 1. Kernel functions K(u)
+
+Uniform Triangle
+
+1 2
+
+I(|u|
+
+
+
+1)
+
+(1 - |u|) I(|u|  1)
+
+Epanechnikov
+
+3 4
+
+(1
+
+-
+
+u2)
+
+I(|u|
+
+
+
+1)
+
+Quartic
+
+(Biweight)
+
+15 16
+
+(1
+
+-
+
+u2)2
+
+I(|u|
+
+
+
+1)
+
+Triweight
+
+35 32
+
+(1
+
+-
+
+u2)3
+
+I(|u|
+
+
+
+1)
+
+Gaussian
+
+1 2
+
+exp(-
+
+1 2
+
+u2
+
+)
+
+Cosine
+
+ 4
+
+cos(
+
+ 2
+
+u)
+
+I(|u|
+
+
+
+1)
+
+Furthermore, there exist more general types of kernel functions, so called higher order kernels, which can be used for bias refinements in the estimation, see Subsection 2.1. The order of a kernel  > 0 is defined as the first nonzero moment of the kernel, that is
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+5
+
+ulK(u)du = 0, l = 1, ...,  - 1
+
+(6)
+
+uK(u)du =  = 0
+
+and  < . Solving the system of equations (6) for kernel functions integrating to unity for a fixed  , yields a -th order kernel. The larger , however,
+
+the more "wiggly" the resulting kernel becomes - covering more and more
+
+negative areas. Here we mostly consider standard second order kernels, which
+
+are nonnegative functions.
+
+Set
+
+Kh(u)
+
+=
+
+1 h
+
+K
+
+u h
+
+for all u  R where h is the bandwidth, the smooth-
+
+ing parameter. In a d-dimensional space, for each pair z and Zi the multivari-
+
+ate kernel function K(z - Zi) : Rd  R must analogously fulfil
+
+KH (z
+
+- Zi)
+
+=
+
+1 K{H-1(z - det(H )
+
+Zi)}
+
+where H = diag(h~) is the diagonal matrix of bandwidths h~ = [h1, ..., hd]. The matrix H can in general also contain off-diagonal elements - but in practice such generality is not needed. Define the multidimensional kernel KH (z - Zi) as a product of univariate kernels
+
+d
+KH (z - Zi) = K
+k=1
+
+zk - Zik hk
+
+.
+
+For expositional simplicity we let h1 = · · · = hd = h. Details on how to choose the optimal bandwidths are addressed in the next section.
+The simplest case of choosing wi in (5) is to use Nadaraya-Watson weights
+
+wi(z) =
+
+Kh(z - Zi)
+
+n i=1
+
+Kh(z
+
+-
+
+Zi)
+
+.
+
+These are a special constant case of general local polynomial weights de-
+
+rived below. Besides other choices of weights such as in the k-nearest neighbour
+
+or the Gasser-Mu¨ller estimator are possible. Estimators of the second deriva-
+
+tive of a function are constructed by twice differentiating the estimator of the
+
+function. In this case these estimators, however, have inferior statistical prop-
+
+erties and are therefore not included here. References are e.g. Ha¨rdle at al.
+
+(2004) and Fan and Gijbels (1996). We focus on local polynomial estimation
+
+which directly yields estimates of derivatives. The idea of local polynomial
+
+regression is based on Taylor expansion approximating an unknown function
+
+C at a point z. In order to keep notation simple we will first illustrate the
+
+method for the univariate case. The multivariate case is systematically the
+
+same and will be sketched afterwards.
+
+Locally any sufficiently smooth function C can be approximated by a poly-
+
+nomial of degree p
+
+6 Maria Grith, Wolfgang Karl H¨ardle and Melanie Schienle
+
+C(Zi) =
+
+p
+
+C (j ) (z ) j! (Zi
+
+-
+
+z)j
+
++
+
+O{(Zi
+
+-
+
+z)p+1}
+
+j=0
+
+p
+
+= j(Zi - z)j + O{(Zi - z)p+1}
+
+j=0
+
+(7)
+
+with i = 1, ..., n. Therefore by minimizing a locally weighted least squares
+
+regression
+
+ 2
+
+np
+
+
+
+min Yi - j(z)(z - Zi)j Kh(z - Zi).
+
+ i=1 
+
+j=0
+
+
+
+(8)
+
+the solution ^0(z) provides an estimator of C at point z, while j!^j(z), with j = 1, ..., p are the estimated derivatives at that point. Closed forms for ^(z) = (^0(z), . . . , ^p(z)) can be obtained by solving (8) via equating the corresponding system of first order conditions to zero. As we are interested in an estimator for the second derivative of a function, we should choose p  2.
+As will be outlined in the subsection below, for good statistical properties
+without requiring too much smoothness p = 3 will be a suitable choice.
+In d-dimensional case, expansion (7) will include mixed terms which must
+be appropriately ordered. Then the interpretation of the coefficients is similar: ^0(z) is the estimator of C at point z, while j!^j(z) = j! [j1(z), · · · , jµ(z)] with µ = 1, ..., Nj is Nj-dimensional vector of j-th order derivatives of C evaluated at point z. It is obvious that N0 = 1 (0 is the local constant) and N1 = d (1 is the vector of partial derivatives) but for j  2 the expansion contains cross order derivatives and the general formula for Nj is
+
+Nj =
+
+d+j-1 j-1
+
+(d + j - 1)! = (j - 1)! .
+
+For example, when j = 2 we have N2 = d(d + 1)/2 distinct derivatives and, (2)C^(z) = 2^2(z) is the estimate of
+
+ 2C(z) 
+
+ 2Cz1(2z) 
+
+(2) C (z)
+
+=
+
+   
+
+ z1  z2
+...
+
+   
+
+.
+
+ 2C(z) 
+
+ zd2
+
+For the estimation of the RND we are interested in the second derivative
+
+of the call price with respect to the strike price X. In our notation with
+
+z = (X, , rt, , t, , St) this is 221. Thus
+
+q^(ST ) = 2ert, ^21(ST , z-1) = ert,  with z-1 = (, rt, , t, , St).
+
+ 2 C (z)
+
+z12
+
+X =ST
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+7
+
+2.1 Statistical Properties
+
+Assume for simplicity that C is univariate and has continuous derivatives
+of total order (p + 1). The probability density function fZ of (Z1, ..., Zn) is continuous and (p + 1) times continuously differentiable (fZ  0) and also K(u) is a bounded second order kernel having compact support. Let C^(j) denote the estimator of C(j) based on a p-th order local polynomial fit (j  p).
+The results below are standard and can be found for instance in Li and Racine
+(2007).
+
+Theorem 1. When p - j is odd, the bias is
+
+E C^(j)(z) - C(j)(z) = hp-j+1c1,j,p
+
+(p+1)(z) (p + 1)!
+
++ O(hp-l+1).
+
+When p - j is even, the bias is
+
+(9)
+
+E C^(j)(z) - C(j)(z) = hp-j+2c2,j,p + hp-j+2c3,j,p
+
+(p+2)(z) (p + 2)!
+
+up+2K(u)du (10)
+
+(p+1)(z)f (1)(z)
+
+f (z)(p + 1)!
+
+where (z) = C^(z) - C(z) f (z). In either case
+
+Var C^(j)(z) =
+
+c4,j,p2(z) nh2j+1
+
++ O (nh2j+1)-1) .
+
+(11)
+
+The exact form of the constants ca,j,p for a = 1, 2, 3, 4 can be found in Ruppert and Wand (1994).
+
+For illustration consider the special case p = 0 and j = 0 - local constant estimation of a function. The bias is
+
+h2 2
+
+C(2)(z) + 2 C(1)(z)fX(1)(z) fZ (z)
+
+µ2(K) ,
+
+(12)
+
+with µ2(K) = u2K(u) du. For p = 1 and j = 0 - local linear estimation of a function - the bias becomes
+
+h2 2
+
+C (2) (z )
+
+µ2 (K ).
+
+(13)
+
+Observe in general from (9) and (10) that the bias for p - j even con-
+
+tains
+
+an
+
+additional
+
+design
+
+dependent
+
+term
+
+with
+
+factor
+
+fX(1) (z ) fZ (z)
+
+as
+
+opposed
+
+to
+
+the odd case. Sign and size of this quantity, however, depend on the shape of
+
+the underlying estimated function and the shape of fZ. In particular at the
+
+8 Maria Grith, Wolfgang Karl H¨ardle and Melanie Schienle
+boundary of the support of Z small values of fZ inflate the entire term. Therefore odd values of p - j are preferable avoiding such boundary bias problems and pertaining the same variance. In our case, we are interested in the second derivative. We therefore choose the design adaptive order p = 3 and not p = 2 according to Theorem 1.
+With higher order kernels (6) of order  and corresponding higher smoothness assumptions the bias in Theorem 1 can be further reduced to be of order h for fixed p and j with  > p - j + 2 without changing the rate in the variance. In practice the order , however, cannot be chosen too large as with increasing  the estimates have robustness problems in finite samples due to negative weights associated with the kernels (Mu¨ller, 1988).
+Observe from Theorem 1 that kernel estimation of a derivative is harder than of the function itself. While the variance in the function estimation decreases with O(1/(nh)) the corresponding rate in the second derivative is only OP (1/(nh5)) which is much slower. Therefore the finite sample performance of second derivatives lacks the precision of the fit achieved for the function.
+Rates of convergence can be judged according to the MSE. Assuming that p - j is odd, it is
+
+MSE(z, h, j) = E C^(j)(z) - C(j)(z) 2
+
+= O{h2(p-j+1) + (nh2j+1)-1}.
+
+bias2
+
+var
+
+(14)
+
+For constructing confidence intervals of the nonparametric estimates use the following normality result
+
+Theorem 2. Under some additional moment assumptions it is for p - j odd
+
+ nh2j+1{C^(j)(z) - C(j)(z)}  N(0, Vj )
+
+(15)
+
+with Vj as in Theorem 1.
+For a precise statement of the standard moment conditions see Li and Racine (2007). Analogous results to Theorem 1 and 2 hold for d-dimensional functions. The only remarkable systematic difference is that the dimension of the regressors enters in the rate of the variance which is then OP {(nh2j+d)-1}. Likewise the rate in the CLT also deteriorates with d and is nh2j+d. This phenomenon is known in the literature as the curse of dimensionality capturing the fact that finite sample performance of nonparametric estimators decreases with an increasing number of regressors. Therefore in practice appropriate semiparametric dimension reduction techniques are used. They keep high modeling flexibility but yield better finite sample properties in regression settings with more than three regressors. See Subsection 2.3 for details.
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+9
+
+2.2 Selection of smoothing parameter
+
+Most important for good nonparametric estimation results is an appropriate choice of bandwidth. Other parameters like the selection of a suitable kernel K only have little influence on the final result in practice. This is because kernel functions can be rescaled such that the difference between two kernel estimates using two different kernels is almost negligible (Marron and Nolan, 1988). For the choice of order p of the employed local polynomial estimator it is sufficient to follow the logic outlined above.
+
+0.03
+
+MASE, bias2, var
+
+0.02
+
+0.01
+
+0.05 0.1 h
+
+0.15
+
+Fig. 1. MASE (simple line), squared bias (dashed line) and variance part (dotted line) for simulated data, weights w(x) = I(x  [0.05, 0.95])
+
+An optimal bandwidth should minimize both bias and variance of the estimator. Though according to Theorem 1 there is a tradeoff between these quantities as smaller bandwidths would reduce the bias but inflate the variance. Therefore selecting h by minimizing MSE(z, h, j) (14) balances bias and variance (see Figure 1 for an illustration in averages). However, such a choice depends on the location z. For a global choice use an integrated criterion like the weighted intergrated mean square error (WIMSE)
+
+10 Maria Grith, Wolfgang Karl H¨ardle and Melanie Schienle
+
+WIMSE(h, j) = MSE(z, h, j)(z)dz = E[C^(j)(z) - C(j)(z)]2(z)dz
+
+(16) where (z) is a nonnegative weight function which ensures that WIMSE is well defined. Instead of an integrated criterion also an averaged criterion like the mean average squared error (MASE) can be used which replaces integration with summation in (16). When using a second order kernel straightforward calculations yield
+
+h=
+
+cn-1/(2p+d+2) for p - j odd c n-1/(2p+d+4) for p - j even
+
+(17)
+
+for the optimal bandwidth h in a multivariate setting. In our case of interest for p = 3, j = 2 and d = 1 it is h = n-1/9. As for larger j also p must be enlarged, the optimal bandwidth for estimating the j-th derivative decreases in j. Note, however, that h is not feasible in practice because the constants c, c in(17) contain unknown quantities such as higher derivatives of C and the regressors density fZ as we can see from (9),(10) and (11).
+A way to operationalize these are plug-in methods. They replace unknown quantities by pilot estimates and then calculate h via (17). The rule-of-thumb additionally uses normality assumptions in the distribution of the regressors and for the kernel to calculate exact constants. For p = j = 0 it is hk  skn-1/(4+d) for h = (h1, . . . , hd) with sk the standard deviation of observations of covariate Zk. It is an easy and fast way to obtain a rough estimate and can be used for pilot estimates in plug-in procedures. Nevertheless, a bandwidth choice based on these procedures yields only an asymptotically optimal selection as the employed criteria are asymptotic ones.
+In small samples, however, there are better choices which can be made by data driven cross-validation methods. In general, these procedures yield precise finite sample results, but do not have closed form solutions. Therefore computation intensive numerical methods must be used in order to obtain hCV . This can amount to a feasibility issue in particular for time series. We present a least squares cross-validation for local cubic estimation as our interest is in estimating the second derivative of C. Here select hCV as minimizer of the sum of squared errors between obtained local cubic fit and observed response.
+
+nn
+
+CV(h~) =
+
+Yi - Ch~,-i(Zi) - Ch~(1,-) i(Zi)(Zj - Zi)
+
+i=1 j=i
+
+-
+
+1 2
+
+Ch~(2,-) i(Zi
+
+)(Zj
+
+-
+
+Zi)2
+
+2
+M (Zi)
+
+(18)
+
+where 0  M (Zi)  1 is a weight function that ensures existence of the limit for n large. and (Ch~,-i, Ch~(1,-) i, Ch~(2,-) i) denote the local cubic regression estimate
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+11
+
+obtained without using the i-th observation (Zi, Ci). This way we ensure that
+the observations used for calculating Ch~,-i(·) are independent of Zi. It can be shown that asymptotically hCV converges to the corresponding theoretical bandwidth obtained from (17). This design driven choice of bandwidth is
+completely free of functional form assumptions and therefore most appealing
+in finite samples at the expense of potentially long computation time.
+
+2.3 Dimension reduction techniques
+While flexible, a high-dimension kernel regression requires large data samples for precise results in terms of confidence intervals. Ait-Sahalia and Lo (1998), for example, use a one year option data to empirically derive the call function based on five-dimensional kernel regression. Quite generally, larger samples make for smaller variances. Conversely, small samples make the bias-variance tradeoff even more acute. For a given bias, the variance of the model response is larger than for a model built from a larger sample. This is referred to as the "curse of dimensionality" (see Section 2.1. for theoretical details). Hence, there is a need to keep the dimension or equivalently the number of regressors low.
+There has been lot of effort in developing methods which reduce the complexity of high dimensional regression problems resulting in better feasibility. In particular, the reduction of dimensionality is achieved by putting some structure on the model by e.g. imposing a parametric model. The resulting models are so-called semiparametric models, among which the additive models are the most feasible methods considered in practice. The basic idea of additive models is to take advantage of the fact that a regression surface may be of a simpler structure, that is a function of only certain linear combinations of the coordinates of the predictor variables such that high dimensional surface collapses down to one-dimensional surface. We refer to Mammen, Linton and Nielsen (1999) and Linton and Nielsen (1995) for detailed methods in this case. Here, however, we will focus on suitable parametric assumptions tailored to financial modeling.
+One way is to use no-arbitrage arguments and collapse St, rt, and t, into the forward price Ft = S et (rt, -t, ) in order to express the call pricing function as
+C(St, X, , rt, , t, ) = C(Ft, , X, , rt, )
+Alternatively use the non-arbitrage relation to estimate dividends and express the function in terms of the discounted stock price, that is either by St0 = St  e-t, = St - Divt, where Divt, is the present value of the dividends to be paid before the expiration.
+C(St, X, , rt, , t, ) = C(St0, X, , rt, )
+
+12 Maria Grith, Wolfgang Karl Ha¨rdle and Melanie Schienle
+A further reduction of the number of regressors is achieved by assuming that the call option function is homogeneous of degree one in St and X so that
+
+C(St, K, , rt, , t, ) = XC(St/K, , rt, , t, ).
+
+Combining the assumptions of the last two equations, the call price func-
+
+tion can be further reduced to a function of three variables: moneyness
+
+Mt
+
+=
+
+St0 K
+
+,
+
+maturity
+
+
+
+and
+
+risk
+
+free
+
+interest
+
+rate:
+
+rt, .
+
+Notice
+
+that
+
+by
+
+smooth-
+
+ing with respect to moneyness, rather than to the dividend adjusted index
+
+level we implicitly assume the theoretical option function is homogeneous of
+
+degree one with respect to the index and strike price. The basic Black-Scholes
+
+formula is an example of such a function, and as shown by Merton (1973) and
+
+discussed in Ingersoll (1987), a call price is homogeneous of degree one in the
+
+asset price and strike price if the asset's return distribution is independent of
+
+the level of the underlying index.
+
+These dimension reduction techniques may be used both in direct estima-
+
+tion of RND from the call prices and indirectly via implied volatility. In the
+
+empirical study in the next subsection we will use only one regressor.
+
+2.4 Application
+
+We use tick data on the DAX index based European options prices matur-
+
+ing in one month (21 trading days), provided by EUREX for 20040121. The
+
+transformed data according to a methodology by Fengler (2005) contain date
+
+stamp, implied volatility, type of the option, maturity, strike price, option
+
+price, interest rate, intraday future price, average dividend rate.
+
+The index stock price varies within one day and one needs to identify the
+
+price at which a certain transaction has taken place. Intraday DAX index
+
+prices are available on EUREX. Several authors (E.g. Jackwerth 2000) report
+
+that the change of the index price is stale and for every pair option/strike we
+
+use instead the prices of futures contracts closest to the time of the registered
+
+trade.
+
+Original strike prices are given on an equidistant grid and in order to ac-
+
+count for movements in the intraday price we use the following transformation
+
+Xi Fi
+
+S et rt, -t,
+
+,
+
+where
+
+Xi
+
+and
+
+Fi
+
+are
+
+paired
+
+observations
+
+and
+
+St
+
+is
+
+the
+
+median
+
+intraday stock price, rt, is the one month interest rate (linearly interpolated
+
+EURIBOR rates, for the desired maturity) and t, the average dividend. Con-
+
+ditional on these values we estimate q and interpret it as an average curve for
+
+the estimation date.
+
+We use only at-the-money and out-of-the-money call options and in-the-
+
+money puts translated in call prices by using the put call parity
+
+Ct - Pt = Ste-t,  - X e-rt, 
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+13
+
+This guarantees that unreliable observations (high volatility) will be removed from our estimation samples. Since, as mentioned before, the intraday stock price varies, we use its median to compute the risk neutral density. For this price, we verify if our observations satisfy the arbitrage condition and delete for our sample those who do not satisfy it
+
+St  Ci  max(St - Xie-rt,  , 0).
+Finally, if we have different call price observations observations for the same strike price we take their median at that point. In this way we ensure that we have a one to one relationship between every call and strike price.
+
+x 10-3
+
+2
+
+RND
+
+1
+
+3500
+
+4000
+
+4500
+
+S
+T
+
+5000
+
+Fig. 2. q^(ST ) by local polynomial smoother for the optimally chosen bandwidth h = 114.34 by cross-validation (simple line) and oversmoothing bandwidths h = 227.59 (dashed line) and h = 434.49 (dotted line)
+
+Smoothing in call option space
+As described in Section 2.1 local polynomial method allows us to compute the second derivative of the call price directly, in a single step. We use local
+
+14 Maria Grith, Wolfgang Karl H¨ardle and Melanie Schienle
+polynomial smoothing of degree three and a quartic kernel. In the first step we rescale the call price by dividing it by St and we smooth in this direction. We use cross-validation to choose the optimal bandwidth; however, this bandwidth yields a wiggly estimator and we decide to increase further the bandwidth. Smoothing comes at the expense of higher bias as we can see in Figure 2.
+Smoothing in implied volatility space
+In practice, the smoothing is mainly done in the implied volatility span because call prices are a more volatile function of the underlying asset price. In the present context, implied volatility is the volatility that yields a theoretical value for the option equal to the observed market price of that option, when using the Black-Scholes pricing model. We then estimate a smooth function ^ and recover the call price by a bijective function evaluated at some fixed values of the regressors and variable 
+
+C^(St,
+
+X,
+
+,
+
+rt, ,
+
+t, )
+
+= =
+
+CBS (.; e-t, 
+
+^(St, X, St(y +
+
+,rt,  )
+
+, t, )) - e-rt,
+
+
+
+X
+
+(y
+
+)
+
+where  is the distribution function of the standard normal distribution and
+
+y
+
+=
+
+log(
+
+St K
+
+)
+
++ (b 
+
+-
+
+1 2
+
+2
+
+)
+
+.
+
+
+
+In this chapter we use a method based on Rookley (1997) who shows how to improve the efficiency of the estimator by estimating  and its first two derivatives by local polynomial regression and plugging them into a modified version of the Black-Scholes formula. Below we describe the method for fixed maturity of one month.
+For each pair (Ci, Xi) we define the rescaled call option ci = Ci/St in terms of moneyness Mi = St/Xi so that starting from the Black-Scholes formula for the call price we can write
+
+ci
+
+=
+
+c{Mi;
+
+(Mi)}
+
+=
+
+(d1)
+
+-
+
+e-r (d2) Mi
+
+d1
+
+=
+
+log(Mi)
+
++ rt, +12 (Mi)2 (Mi) 
+
+d2 = d1 - (Mit)  .
+
+
+
+For simplification we drop the indices. The risk neutral density can be expressed in terms of rescaled call price
+
+with and
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+q(·)
+
+=
+
+er
+
+2C X2
+
+=
+
+er
+
+S
+
+2c X2
+
+2c d2c M 2 dc M
+
+K2 = dM 2 X
+
++
+
+2 dM
+
+X2
+
+15
+
+d2c dM 2 = (d1)
+
+d2d1 dM 2
+
+-
+
+d1
+
+dd1 dM
+
+2
+
+- e-r (d2) M
+
+d2d2 dM 2
+
+-
+
+2 M
+
+dd2 dM
+
+- d2
+
+dd2 2 dM
+
+- 2e-r (d2) M3
+where  is the probability density function of the standard normal distribution. The results depend further on the following quantities, where (M ),  (M ),  (M ) are smooth functions in moneyness direction
+
+d2d1 dM 2
+
+=
+
+-
+
+1 M (M ) 
+
+1  (M ) +
+M (M )
+
+  log(M ) + r
++  (M ) 2 - (M )2
+
+log(M ) + r
+
+1
+
++  (M ) 2 (M ) (M )3 - M (M )2
+
+d2d2 dM 2
+
+=
+
+-
+
+1 M (M ) 
+
+1  (M ) +
+M (M )
+
+
+
+-  (M )
+
+ 2
+
++
+
+log(M ) +r (M )2 
+
++  (M )
+
+2
+
+(M
+
+)
+
+log(M ) +r (M )3 
+
+-
+
+1
+
+M
+
+(M
+
+)2
+
+ 
+
+.
+
+In order to estimate (M ) and its associated first and second derivatives with respect to moneyness we use univariate local polynomial kernel regression of degree three and quartic kernel. The optimal bandwidth has been computed using cross-validation criteria (18) for the implied volatility. By increasing the bandwidth in Figure 3 we observe that oversmoothing improves the tails while having little effects on the values of q^ situated in the middle of the distribution. It follows that smoothing in implied volatility yields a more robust estimator to the changes in the bandwidth. It is because the implied volatility is less sensitive to the changes in strike price than the call price.
+
+16 Maria Grith, Wolfgang Karl Ha¨rdle and Melanie Schienle
+x 10-3 2
+1
+
+RND
+
+3500
+
+4000
+
+4500
+
+S
+T
+
+5000
+
+Fig. 3. q^(ST ) by Rookley method with oversmoothing bandwidth h = 372.42
+
+Problems and refinements
+
+In applications the support of strike prices is mostly compact and thus bounded. As shown in Section 2.1. the quality of estimates in regions close to the boundary might be low due to small values of the regressors' density when using even order polynomials. By using a polynomial of order 3, estimation is design adaptive for the second derivative avoiding this problem.
+Furthermore, associated with the boundary, option data is characterized by scarce observations close to the bounds. In general, nonparametric techniques do not perform well in regions with sparse data and other methods are required. Parametrization of the tails using Pareto type distributions might be advantageous leaving however the question of how to join the two regions in order to assure that the resulting distribution integrates to one. Alternatively, Rookley (1997) proposes to further parametrize these distributions by matching them with an Edgeworth expansion type density
+
+q(ST )
+
+=
+
+1 (Z){1 ST 
+
++
+
+ (Z 3
+
+-
+
+3Z )
+
++
+
+ (Z 4
+
+-
+
+6Z 2
+
++
+
+3)}
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+17
+
+for
+
+Z
+
+=
+
+log(ST 
+
+)-
+
+,
+
+where
+
+
+
+and
+
+
+
+are
+
+the
+
+conditional
+
+mean
+
+and
+
+standard
+
+deviation of log(ST ) implied by the risk neutral measure, and  and  are
+
+coefficients related to the higher moments of log(ST ).
+
+According to economic theory, a nonparametric estimate of the call price
+
+function C must satisfy certain high-level conditions: It should be (1) positive,
+
+(2) decreasing in X, (3) convex, and (4) its second derivative should exist, be
+
+nonnegative and integrable. Given that the first derivative of C with respect
+
+to X is the (negative) discounted cumulative density function of q conditions
+
+(2) and condition (3) can be summarized by the following inequality
+
+-ert,  C(St, X, , rt, , t, )  0. X
+Convexity requires
+
+2C(St, X, , rt, , t, ) 2X
+
+
+
+0.
+
+Nonparametric kernel estimates may violate these constraints, unless we deal with large samples of observations. Imposing constraints like monotonicity or convexity directly in the estimation leads to nontrivial optimization problems in topological cones. If it is crucial for the outcome to fulfill the shape restrictions in small samples, it is recommended use series type estimation methods which easily allow to incorporate them directly in the estimation. In general, these constrains must be applied directly to the call price, because theoretical properties of the implied volatility are not well known. For further references see Ait-Sahalia (2003). This will be illustrated in the next section.
+
+3 Estimation of the RND via empirical pricing kernel
+
+In the previous section, we studied nonparametric kernel methods for estimating q as the discounted second derivative of the call price function and discussed the problems associated with kernel type estimators in this setting. Now, we propose a new approach, based on series expansion of the pricing kernel.
+In financial mathematics the relationship between the physical measure p and RND q of a financial asset can be represented via the pricing kernel m. Also called stochastic discount factor, the pricing kernel is the quotient of the Arrow security prices and the objective probability measure and summarizes information related to asset pricing. Based on this relation
+
+q(ST ) = m(ST )p(ST ).
+
+(19)
+
+From a behavioral economics perspective m describes risk preferences of a representative agent in an exchange economy. In many applications, the empirical pricing kernel is the object of interest. In most of the studies A¨it-Sahalia
+
+18 Maria Grith, Wolfgang Karl Ha¨rdle and Melanie Schienle
+and Lo (2000), Brown and Jackwerth (2004), Grith et al. (2009) it has been estimated as a ratio of two estimated densities: q^ computed as the second derivative of a smooth call function (as described in Section 2) and p^ based on historical returns. This approach leads to difficulties in deriving the statistical properties of the estimator. In particular, the sample sizes for estimating p and q may differ substantially: p uses daily observations, whereas q is based on intraday high-frequency observations. On the other hand, methods for estimating p are in general much simpler and more stable compared to those for q for which typically nonparametric kernel estimation of a second derivative is required. Direct estimation of the pricing kernel can be seen as an improvement in this sense.
+For estimating q, however, a series approach is additionally appealing, as high-level shape constraints are straightforward to incorporate in finite samples. Recall that for kernel type estimators this is not the case, see the end of Subsection 2.4.
+We introduce the series expansion for the pricing kernel in (3). With an estimate of the physical measure from historical data and the pricing kernel m from option prices, these indirectly imply an estimate of q via (19). In statistical theory and also in practice, this indirect way of estimating q is much more stable than using series methods directly for q in (1). In particular, in (19) large values of ST are downweighted by integrating over the physical measure, while they enter undamped in (1) leading to unreliable results.
+
+3.1 Direct estimation of pricing kernel via series methods
+As for q, there are several factors which drive the form of the pricing kernel. Here, however, we focus on the projection of the pricing kernel on the set of available payoff functions m, which allows us to represent m in terms of ST only. In practice this is a reasonable assumption. Thus we require that m and m are close in the following sense
+
+||m - m||2 = |m(x) - m(x)|2dx <
+
+(20)
+
+with small. Further we assume that m has a Fourier series expansion
+
+
+m(ST ) = lgl(ST ),
+l=1
+
+(21)
+
+where {l}l=1 are Fourier coefficients and {gl}l=1 is a fixed collection of basis functions. The functions gl are taken as orthonormal with respect to a particular norm. Such a representation is possible if the function is absolutely
+integrable. Based on (21), we can construct an estimator for m and thus m. If a finite
+number L of basis functions is sufficient for a good approximation of m then
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+19
+
+1g
+1
+g
+2
+g
+3
+g
+4
+0.5 g
+5
+
+0
+
+g (x)
+l
+
+-0.5
+
+-1 -1 -0.5 0 0.5 1 x
+Fig. 4. First five terms of the Laguerre polynomials
+
+L
+m(ST ) = ^lgl(ST ).
+l=1
+
+(22)
+
+Estimates ^l for the coefficients l could be obtained by least squares for fixed basis functions gl if a direct response was observable. Clearly the choice of L controls the quality of the estimate. The larger L, the better the fit but the higher the computing cost and less robust the result. See Subsection 2.2 for a sophisticated way of selecting the smoothing parameter.
+In financial applications the following polynomial basis functions are frequently used: e.g. Laguerre, Legendre, Chebyshev polynomials, see Subsection 3.3. While asymptotically equivalent, in finite samples their form will influence the size of L. In general, one would prefer to have gl such that L small is sufficient. For a formal criterion on how to select between different basis options see Li and Racine (2007). They assess different candidate basis functions by comparing a CV -type criterion for fixed L.
+
+Though the form of m is only indirectly determined by relating observable call prices Yi to strike prices Xi for given T,  via (3). A response to observed payoffs via the pricing kernel is not directly available in the data. But in sample an estimate of m should fulfill
+
+20 Maria Grith, Wolfgang Karl H¨ardle and Melanie Schienle
+
+L
+
+Yi = e-rt, 
+
+(ST - Xi)+ ^lgl(ST )pt(ST )dST + i
+
+0 l=1
+
+(23)
+
+L
+= ^l
+l=1
+
+
+
+e-rti,  i
+
+(ST - Xi)+gl(ST )pt(ST )dST
+
+0
+
++ i
+
+with error  such that E[|X] = 0. Set
+
+
+
+il = l(Xi) = e-rt, 
+
+(ST - Xi)+gl(ST )pt(ST )dST .
+
+0
+
+(24)
+
+Then for known p and fixed basis functions and fixed L, the vector ^ = (^1, ..., ^L) is obtained as
+
+n
+argmin
+ i=1
+
+L2
+Yi - ll(Xi)
+l=1
+
+(25)
+
+In practice, however, p is not known and can only be estimated. Therefore instead of l in (24) we have only estimates ^l of the basis functions. There are two possible ways for constructing them. First, regard  as an expectation
+which can be estimated by sample averaging over J different payoffs at time
+T for fixed  and given X
+
+J
+^il = e-rt,  J -1 (STs - Xi)+gl(STs )
+s=1
+
+with .
+
+(26)
+
+How (STs )Js=1 are obtained is explained in detail in the following subsection. Or alternatively, replace p by an estimator, e.g. a kernel density estimator.
+
+This gives
+
+
+
+^il = e-rt, 
+
+(ST - Xi)+gl(ST )p^(ST )dST .
+
+(27)
+
+0
+
+Here some care is needed for the numerical integration to keep discretization
+
+errors negligible. Furthermore, for an appropriate choice of bandwidth in p^,
+
+both approaches are asymptotically equivalent. In finite samples, however,
+
+estimates for q might differ, see Figure 5).
+
+In total we obtain a feasible estimator of  based on a feasible version of
+
+(25) as
+
+ = (^ ^)-^ Y.
+
+(28)
+
+The elements of ^(n×L) are given either by (26) or (27) and Y = (Y1, · · · , Yn) . Then an estimate of the pricing kernel at s is given by
+
+m^ (s) = gL(s) ,
+
+(29)
+
+where gL(s) = (g1(s), . . . , gL(s)) . We see in figure () that the estimator or m is less stable for different approximations of il. Finally, the risk neutral density is estimated as
+
+q^(s) = m^ (s)p^(s).
+
+(30)
+
+x 10-3
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+21
+
+2
+
+1
+
+RND
+
+3500
+
+4000
+
+4500
+
+S
+T
+
+5000
+
+Fig. 5. q^(ST ) by Laguerre basis expansion with L = 5 based on approximation (26) (simple line) and (27) of  (dashed line)
+
+3.2 Estimation of the PDF of ST
+
+In the empirical study we use two different ways of obtaining DAX Index prices at time T . And we look at the sensitivity of q^ w.r.t. p^. First, we extrapolate possible realizations of ST in the future from historical log-returns. Based on a sample of historical DAX Index values we get
+
+STs = SterTs , for rTs = log(St-s/St-(s+1)).
+Alternatively, we use a GARCH(1,1) specification for the log-returns to account for slowly decaying autocorrelation in the data exhibiting persistence. The model is specified as follows
+
+log(St/St-1) = µ + ut ,
+
+ut  f (0, tr).
+
+(31)
+
+In equation (31), the returns consist of a simple constant, plus an uncorrelated, non-Gaussian disturbance. The conditional variance follows an ARMA(1,1) type specification
+
+22 Maria Grith, Wolfgang Karl Ha¨rdle and Melanie Schienle
+2 1
+
+EPK
+
+3500
+
+4000 S
+T
+
+4500
+
+Fig. 6. m^ (ST ) by Laguerre basis expansion with L = 5 based on approximation (26) (simple line) and (27) of  (dashed line)
+
+(tr)2 = a1 + a2rt2-1 + a3(tr-1)2 .
+
+(32)
+
+We can estimate the parameters of the model (µ, a1, a2, a3) and retrieve a time series of stochastic volatilities {tr-s}sJ=1. The simulated index prices at
+time T are obtained as in (3.2) above for
+
+rTs
+
+=
+
+rt-s
+
+Tr tr-s
+
+where we use for the forecasted volatility Tr today's volatility t. Then the probability density p of ST is estimated at each point ST using
+a kernel density estimator
+
+1J ph(ST ) = J h K
+
+STs - ST h
+
+s=1
+
+(33)
+
+where K is a kernel function and the bandwidth is selected similarly to the criteria introduced in Subsection 2.2. The two approaches are illustrated in
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+23
+
+Figure 7. We observe that they differ mainly in the tails for p which carries over to q via (30).
+
+x 10-3
+
+2
+
+RND, PDF
+
+1
+
+3500
+
+4000
+
+4500
+
+S
+T
+
+5000
+
+Fig. 7. q^ by Laguerre basis expansion with L = 5 (red) and p^ based on log-returns (simple line) and weighted log-returns (dashed line)
+
+3.3 Choice of tuning parameters
+
+The quality of the obtained series estimators (29) and (30) depends on a suitable choice of the number L(n)   for n   for given basis functions. Note that the role of L (or L/n) is similar to that played by the smoothing parameter h for the kernel methods. There are three well-known procedures for a data-driven optimal selection of L. The first one is Mallows's CL as proposed in Mallows (1973): Select LM such that it minimizes
+
+n
+CL = n-1
+i=1
+
+L2
+Yi - l^l(Xi) + 22(L/n)
+l=1
+
+where 2 is the variance of . One can estimate 2 by
+
+24 Maria Grith, Wolfgang Karl H¨ardle and Melanie Schienle
+
+n
+^2 = n-1 ^i2
+i=1
+
+with ^i = Yi - l l^l(Xi). A second option is selecting L according to generalized cross-validation
+suggested by Craven and Wahba (1979). Choose LGCV minimizing
+
+n-1 CVLG =
+
+n i=1
+
+Yi -
+
+L l=1
+
+l
+
+^l(Xi
+
+)
+
+2
+
+{1 - (L/n)}2
+
+.
+
+The last criterion is leave-one-out cross-validation according to Stone (1974): Select LCV minimizing
+
+n
+CVL =
+i=1
+
+L2
+Yi - l-i^l(Xi)
+l=1
+
+where l-i is the leave one estimate of l obtained by removing (Xi, Yi) from the sample.
+Li (1987) showed that each of the above three criteria leads to an optimally selected L in the sense that they all minimize the asymptotic weighted integrated squared error (see (16)). In this sense the obtained L are asymptotically equivalent.
+
+3.4 Statistical properties
+Series type estimators are designed to provide good approximations in an L2 sense, see (20). Therefore asymptotic properties as consistency and rates of convergence should be derived from the asymptotic mean squared error. The rate of convergence for the indirect estimator of q via the pricing kernel depends on the two smoothing parameters h and L.
+
+{q^(ST ) - q(ST )}2dST = {m^ (ST )p^(ST ) - m(ST )p(ST )}2dST
+00 
+= [m^ (ST ){p^(ST ) - p(ST )}]2dST
+0 
++ [p(ST ){m^ (ST ) - m(ST )}]2dST
+0 
++ 2m^ (ST ){p^(ST ) - p(ST )}p(ST ){m^ (ST ) - m(ST )}dST
+0
+It easily follows from the law of iterated expectations that the third term equals zero. Consequently, the convergence of q^(ST ) depends only on the first two terms. Since sup m^ (s) = OP (1) under Assumption 1 given below, the order of convergence for the first term is dominated by {p^(ST ) - p(ST )}2.
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+25
+
+Assumption 1 Suppose that p is twice continuously differentiable, K is a second order kernel and the bandwidth is chosen optimally as h = cn-1/5, for
+a known constant c.
+
+Then the asymptotic mean squared error for the kernel density estimator is
+
+||ph(x) - p(x)||22 = OP (n-4/5)
+
+(34)
+
+This follows along the same logic as the results for local polynomials in Section
+2.1. For further details see e.g. H¨ardle et al. (2004). The order of convergence for the second term only depends on {m^ (ST ) -
+m(ST )}2 since sup p(s)  1. The next assumption establishes consistency of m^ (ST ).
+
+Assumption 2 {Xi, Yi} are i.i.d. observations of (X, Y ), Var(Y |X) is bounded on S, the compact connected interval of support of X. Furthermore
+p is bounded away from zero and m is -times continuously differentiable on S. Choose L such that L3/n  0 as n  .
+
+Under Assumption 2 it is
+
+
+{m^ (ST ) - m(ST )}2dST = Op(L/n + L-2 ).
+0
+
+(35)
+
+This result is from Newey (1997) for fixed basis functions l. With estimated basis (^l)l the result still goes through as the convergence of ^l to the true l is at parametric rate. The i.i.d. assumption is for simplicity of the exposition
+only. It can be easily relaxed to mixing type of observations.
+The theorem below puts (34) and (35) together for an asymptotic result
+for q.
+
+Theorem 3. Assume that Assumptions 1 and 2 hold. Then the integrated square error (ISE) converges as
+
+
+{q^(ST ) - q(ST )}2dST = Op(n-4/5 + L/n + L-2 ) .
+0
+
+(36)
+
+3.5 Practical aspects for implementation
+We illustrate the method using the data described in Subsection 2.4. We consider the univariate regression of C on the strike price X for fixed maturity and fixed interest rate. We estimate q using three different systems of orthogonal basis: Laguerre, Legendre and Chebyshev. We found that the fit of the call price is almost identical for fixed L, while ^ varies obviously with the series. This little sensitivity with respect to the choice of the basis function
+
+26 Maria Grith, Wolfgang Karl H¨ardle and Melanie Schienle holds also for the empirical pricing kernel and the implied risk neutral density. Based on the selection criteria for L from Section 3.3, we have chosen L = 5. We exemplify the method with Laguerre polynomials. The first two terms are
+g1(x) = 1 g2(x) = 1 - x The other terms are given by the recurrence relation 1 gl+1(x) = l {(2l - 1 - x)gl-1(x) - (l - 1)gl-2(x)} for l = 2, · · · , L. Estimation results are displayed in Figure (5) through Figure (8).
+x 10-3
+2
+1
+
+RND
+
+3500
+
+4000
+
+4500
+
+S
+T
+
+5000
+
+Fig. 8. q^(ST ) by local polynomial regression with h = 227.59 in call space (black), by Rookley method h = 372.42 in IV space (green), indirect estimation of the pricing kernel as Laguerre basis expansion with L = 5 (green)
+
+Nonparametric Estimation of Risk-Neutral Densities§
+4 Conclusions
+
+27
+
+We have studied three nonparametric approaches for estimating the risk neutral density. They are based on fundamentally different techniques: two of them use local features and the third one is based on global curve fitting. For these approaches we have described the estimation methodology and their performance in finite sample, in terms of robustness and stability. Statistical properties of all procedures have been derived and illustrated focusing on practically most relevant aspects.
+In terms of comparative performance, figure 8 shows estimates of q using the three methods we discussed in this article for suitable choices of tuning parameters. While all three nonparametric methods yield similar results, there still are some peculiarities. As we have seen so far, kernel methods for the estimation of q in implied volatility space work much better than those which smooth in the call price space. Local polynomial methods applied to call prices yield estimates which are highly sensitive to the choice of the bandwidth. Furthermore, extrapolation in the tails gives wiggly estimates unless we increase the bandwidth considerably. This comes at a high price of increased bias. In comparison to this, when we smooth in implied volatility space, the Rookley method yields a more stable estimate with respect to the choice of bandwidth and performs also better in the regions with sparse data. Estimation of risk neutral density based on the pricing kernel yields relatively stable results in small samples with respect to the choice of the basis function. The center distribution exhibits little sensitivity to the choice of basis functions, whereas the tails are highly sensitive due to scarcity of observations at the boundaries. This problem can be solved by imposing constraints on the estimator, as explained in the end of Section 2. Generally, series type methods should be preferred when performing constrained estimation.
+
+28 Maria Grith, Wolfgang Karl Ha¨rdle and Melanie Schienle
+References
+1. A¨it-Sahalia, Y. and Duarte, J. (2003) Nonparametric option pricing under shape restrictions. Journal of Econometrics 116: 947
+2. A¨it-Sahalia, Y. and Lo, A. W. (1998) Nonparametric estimation of state-price densities implicit in financial asset prices. Journal of Finance 53: 499-547
+3. A¨it-Sahalia, Y. and Lo, A. W. (2000) Nonparametric risk management and implied risk aversion. Journal of Econometrics 94: 9-51
+4. Arrow, K. J. (1964) The role of securities in the optimal allocation of riskbearing. Review of Economic Studies 31: 91-96
+5. Bates, D. S. (1996) Jumps and stochastic volatility: Exchange rate processes implicit in deutsche mark options. Review of Financial Studies 9(1): 69-107
+6. Black, F. and Scholes, M. (1973) The Pricing of Options and Corporate Liabilities. Journal of Political Economy 81: 637-654.
+7. Breeden, D. T. and Litzenberger, R. H. (1978) Prices of state-contingent claims implicit in option prices. The Journal of Business 51(4): 621-651
+8. Brown, D.P. and Jackwerth, J. C. (2004) The pricing kernel puzzle: Reconciling index option data and economic theory. Manuscript
+9. Campbell, J., Lo, A. and McKinlay, A. (1997) The econometrics of financial markets. Princeton University Press, Princeton, New Jersey
+10. Debreu, G. (1959) Theory of value: An axiomatic analysis of economic equilibrium. Yale University Press, New Haven
+11. Engle, R. F. and Rosenberg, J. V. (2002) Empirical pricing kernels. Journal of Financial Economics 64: 341-372
+12. Fan, J., and Gijbels, I. (1996) Local polynomial modelling and its applications. Chapman and Hall, London
+13. Fengler, M. R. (2005) Semiparametric modeling of implied volatility, Springer Finance
+14. Grith, M., H¨ardle, W. and Park, J. (2009) Shape invariant modelling pricing kernels and risk aversion. SFB649DP2009-041. Submitted to Journal of Financial Econometrics on 1 June 2009
+15. Ha¨rdle, W. (1990) Applied nonparametric regression. Econometric Society Monographs No. 19. Cambridge University Press
+16. Ha¨rdle, W. and Hlavka, Z. (2009) Dynamics of state price densities. Journal of Econometrics 150: 1-15
+17. Ha¨rdle, W., Mu¨ller, M., Sperlich, S. and Werwatz, A. (2004) Nonparametric and Semiparametric Models. Springer Verlag, Heidelberg
+18. Ha¨rdle, W., Okhrin, Y. and Wang, W. (2009) Uniform confidence for pricing kernels. SFB649DP2010-003. Submitted to Econometric Theory on 1 January 2010
+19. Heston, S. (1993) A closed-form solution for options with stochastic volatility with applications to bond and currency options. Review of Financial Studies 6: 327-343
+20. Jackwerth, J. C. (1999) Option-implied risk-neutral distributions and implied binomial trees: a literature review. Journal of Derivatives 2: 66-82
+21. Jackwerth, J. C.(2000) Recovering risk aversion from option prices and realized returns. Review of Financial Studies 13: 433-451
+22. Li, K. C. (1987) Asymptotic optimality for cp, cl, cross-validation and generalized cross-validation: Discrete index set. Annals of Statistics 15: 958-975
+
+Nonparametric Estimation of Risk-Neutral Densities§
+
+29
+
+23. Li, Q. and J. S. Racine (2007) Nonparametric econometrics: Theory and practice. Princeton University Press
+24. Linton, O. and Nielsen, J. P. (1995). A kernel method of estimating structured nonparametric regression based on marginal integration. Biometrika 82: 93­100.
+25. Longstaff, F. (1995) Option Pricing and the Martingale Restriciton. Review of Financial Studies 8: 1091-1124.
+26. Lucas, R.E. (1978) Asset prices in an exchange economy. Econometrica 46: 1429-1445
+27. Mallows, C.L. (1973) Some comments on cp. Technometrics 15: 661-675 28. Mammen, E., Linton, O. and Nielsen, J. (1999). The existence and asymptotic
+properties of a backfitting projection algorithm under weak conditions. Annals of Statistics 27 (5): 1443­1490. 29. Marron, J. S. and Nolan, D. (1988) Canonical kernels for density estimation. Statistics and Probability Letters 7(3): 195-199 30. Merton, R. C. (1973) Theory of rational option pricing. Bell Journal of Economics, The RAND Corporation 4(1): 141-183, Spring 31. Mu¨ller, H. G. (1988) Nonparametric regression analysis of longitudinal data. Lecture Notes in Statistics Vol. 46, New York, Springer-Verlag 32. W.K. Newey (1997) Convergence rates and asymptotic normality for series estimators. Journal of Econometrics 79: 147-168. 33. Renault, E., (1997) Econometric models of option pricing errors. In: Kreps, D.M. and Wallis, K.F. (eds) Advances in Economics and Econometrics: Theory and Applications vol. 3: 223-278. Cambridge University Press, Cambridge 34. Rookley, C. (1997) Fully exploiting the information content of intra day option quotes: Applications in option pricing and risk management, Working paper, University of Arizona 35. Rubinstein (1976) The valuation of uncertain income streams and the pricing of options. Bell Journal of Economics 7(2): 407-425 36. Ruppert, D. and Wand, M. P. (1994) Multivariate locally weighted least squares regression. Annals of Statistics 22(3): 1346-1370 37. Wahba, G. (1985) A comparison of GCV and GML for choosing the smoothing parameter in the generalized spline smoothing problem. Annals of Statistics 4: 1378-1402
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Volatility Investing with Variance Swaps" by Wolfgang Karl Härdle and Elena Silyakova, January 2010.
+002 "Partial Linear Quantile Regression and Bootstrap Confidence Bands" by Wolfgang Karl Härdle, Ya'acov Ritov and Song Song, January 2010.
+003 "Uniform confidence bands for pricing kernels" by Wolfgang Karl Härdle, Yarema Okhrin and Weining Wang, January 2010.
+004 "Bayesian Inference in a Stochastic Volatility Nelson-Siegel Model" by Nikolaus Hautsch and Fuyu Yang, January 2010.
+005 "The Impact of Macroeconomic News on Quote Adjustments, Noise, and Informational Volatility" by Nikolaus Hautsch, Dieter Hess and David Veredas, January 2010.
+006 "Bayesian Estimation and Model Selection in the Generalised Stochastic Unit Root Model" by Fuyu Yang and Roberto Leon-Gonzalez, January 2010.
+007 "Two-sided Certification: The market for Rating Agencies" by Erik R. Fasten and Dirk Hofmann, January 2010.
+008 "Characterising Equilibrium Selection in Global Games with Strategic Complementarities" by Christian Basteck, Tijmen R. Daniels and Frank Heinemann, January 2010.
+009 "Predicting extreme VaR: Nonparametric quantile regression with refinements from extreme value theory" by Julia Schaumburg, February 2010.
+010 "On Securitization, Market Completion and Equilibrium Risk Transfer" by Ulrich Horst, Traian A. Pirvu and Gonçalo Dos Reis, February 2010.
+011 "Illiquidity and Derivative Valuation" by Ulrich Horst and Felix Naujokat, February 2010.
+012 "Dynamic Systems of Social Interactions" by Ulrich Horst, February 2010.
+013 "The dynamics of hourly electricity prices" by Wolfgang Karl Härdle and Stefan Trück, February 2010.
+014 "Crisis? What Crisis? Currency vs. Banking in the Financial Crisis of 1931" by Albrecht Ritschl and Samad Sarferaz, February 2010.
+015 "Estimation of the characteristics of a Lévy process observed at arbitrary frequency" by Johanna Kappusl and Markus Reiß, February 2010.
+016 "Honey, I'll Be Working Late Tonight. The Effect of Individual Work Routines on Leisure Time Synchronization of Couples" by Juliane Scheffel, February 2010.
+017 "The Impact of ICT Investments on the Relative Demand for HighMedium-, and Low-Skilled Workers: Industry versus Country Analysis" by Dorothee Schneider, February 2010.
+018 "Time varying Hierarchical Archimedean Copulae" by Wolfgang Karl Härdle, Ostap Okhrin and Yarema Okhrin, February 2010.
+019 "Monetary Transmission Right from the Start: The (Dis)Connection Between the Money Market and the ECB's Main Refinancing Rates" by Puriya Abbassi and Dieter Nautz, March 2010.
+020 "Aggregate Hazard Function in Price-Setting: A Bayesian Analysis Using Macro Data" by Fang Yao, March 2010.
+021 "Nonparametric Estimation of Risk-Neutral Densities" by Maria Grith, Wolfgang Karl Härdle and Melanie Schienle, March 2010.
+
+

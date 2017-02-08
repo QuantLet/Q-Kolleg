@@ -1,0 +1,2078 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2014-049
+Comparing Solution Methods for DSGE Models with Labor Market Search
+Hong Lan*
+* Humboldt-Universität zu Berlin, Germany This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Comparing Solution Methods for DSGE Models with Labor Market Search
+Hong Lan
+This Version: September 11, 2014 Abstract
+I compare the performance of solution methods in solving a standard real business cycle model with labor market search frictions. Under the conventional calibration, the model is solved by the projection method using the Chebyshev polynomials as its basis, and the perturbation methods up to third order in both levels and logs. Evaluated by two accuracy tests, the projection approximation achieves the highest degree of accuracy, closely followed by the third order perturbation in levels. Although different in accuracy, all the approximated solutions produce simulated moments similar in value. JEL classification: C63; C68; E32 Keywords: Computational methods; DSGE; Business cycles; Search and matching; Accuracy test
+I am grateful to Michael Burda, Alexander Meyer-Gohde and Julien Albertini as well as participants of research seminars and workshops at HU Berlin for useful comments, suggestions, and discussions. This research was supported by the DFG through the SFB 649 "Economic Risk". Any and all errors are entirely my own.
+Humboldt-Universita¨t zu Berlin, Institut fu¨r Wirtschaftstheorie II, Spandauer Straße 1, 10178 Berlin, Germany; Email: lanhong@cms.hu-berlin.de
+
+1 Introduction
+Initiated by Merz (1995) and Andofatto (1996), many studies of business cycles choose to incorporate the search frictions introduced by Pissarides (1985) and Mortensen and Pissarides (1994) in their characterization of the labor market. While various methods are employed to solve this type of business cycle models with labor market search frictions, little effort has been made to compare the performance of these solution methods. I present a baseline model of this type, and solve it using projection and perturbation methods under the conventional calibration. Whereas the approximated solutions provided by these two classes of methods are different in accuracy, I find the simulated moments based on them are very similar in value.
+The projection methods introduced by Judd (1992) have been shown to be able to produce a highly accurate approximation to the true policy function of a large class of DSGE models, and have therefore often been used as the reference solution of a model that has no known closed form solution, see Aruoba et al. (2006) and Caldara et al. (2012) for example. The projection I implement approximates the true solution of the model with a linear combination of the Chebyshev polynomials, and pins down the coefficients of the linear combination by minimizing a residual function derived from the Euler equations of the model at the nodes of the Chebyshev polynomials. The perturbation method introduced by Gaspar and Judd (1997) approximates the policy function with a Taylor expansion, and solves for the coefficients of the expansion from the equations resulting from successive differentiation of the equilibrium conditions of the model. With the perturbation method I approximate the policy rule up to third order for both the level and log specifications of the model. Then I implement Den Haan and Marcet's (1994) accuracy test and the Euler equation error test from Judd (1992) and Judd (1998) to evaluate the quality of the approximations produced by the two methods.
+Of particular interest is that the equilibrium of the model is characterized by two intertemporal Euler equations. Besides the standard consumption Euler equation, employment is endogenously determined and also characterized by an intertemporal Euler equation. For each approximation and measured by the statistics of the two accuracy tests, I find that the consumption Euler equation is always better satisfied than the employment Euler equation. The projection approximation achieves the highest degree of accuracy in satisfying both of the two Euler equations, and the third order
+1
+
+perturbation in levels is the second-best performing approximation. In particular, Den Haan and Marcet's (1994) test suggests that the first order perturbation in levels (the linear approximation) is superior to the first order perturbation in logs (log-linearization) in satisfying the employment Euler equation. For the consumption Euler equation, the Euler equation error test suggests that the linear approximation performs better than the log-linearization, as noted by Aruoba et al. (2006) in their comparison of solution methods for a business cycle model where labor supply is also endogenously determined but characterized by an intratemporal Euler equation.
+As above, the two accuracy tests complement each other in evaluating the approximations of this model. In practice, the Euler equation error test is often conducted on a state variable grid whose size is pre-specified merely with the guidance of the distributional properties of the state variables, without taking into account the correlation among the state variables implied by the corresponding approximation itself. As noted by Judd et al. (2010) and Judd et al. (2012), some regions on such a grid will not be visited in the equilibrium of the model.1 Indeed, in this model, such redundant regions exist and the Euler equation errors computed in those regions are uninformative in evaluating the approximations. Den Haan and Marcet's (1994) test, however, builds up its test statistic using the simulated time series in which the correlation among the state variables as the restraint on the realizations has been enforced. Consequently, this test examines the accuracy of an approximation essentially in its associated state space where it ought to be accurate. One drawback of Den Haan and Marcet's (1994) test is that the results do not have an economic interpretation, but the results from the Euler equation error test do.
+Although different in accuracy, all the approximations of this model produce similar simulated moments. This similarity follows from the fact that in the neighborhood of the deterministic steady state of the model, all the approximations behave similarly, and most of their realizations fall in that neighborhood in simulation. In recent literature, Petrosky-Nadeau and Zhang (2013) compare the performance of a spline approximation with the perturbation in logs up to second order in solving Hagedorn and Manovskii's (2008) model and find that the simulated moments produced by log-linearization is significantly different from those generated by the accurate spline approximation. Aside from that capital is not included, Hagedorn and Manovskii's (2008) model assumes a
+1Instead of focusing on computing the Euler equation error, they make use of this observation to develop the projection methods on the realized (in simulation) state space only, for the purpose of mitigating the curse of dimensionality when solving models with a large number of state variables.
+2
+
+CES type of matching function, forcing the realization of the vacancy-filling rate to fall in between zero and one (see den Haan et al. (2000)). The model in this paper follows Merz (1995), Andofatto (1996), Pissarides (2000), Shimer (2005), Pissarides (2009) and many others in assuming a standard Cobb-Douglas matching function, and interprets the vacancy-filling rate that exceeds unity as, following Den Haan and De Wind (2012), being due to firms hire more than one workers for a posted vacancy.
+The rest of the paper is organized as follows. The real business cycle model with labor market search is specified in section 2. In section 3, I present the perturbation and projection approximations to the model with the calibration. The numerical results and implications of the approximations are analyzed in section 4. Section 5 concludes.
+
+2 The Stochastic Growth Model with Labor Market Search
+
+In this section, I lay out the model and characterize the equilibrium. The model embeds a MortensenPissarides labor market search framework into an otherwise standard real business cycle model, and is parameterized close to the way described in Merz (1995) and Andofatto (1996).
+
+2.1 The model
+
+The economy is populated by infinitely lived, identical households whose preferences are repre-
+
+sented by the following utility function
+
+(1)
+
+U
+
+(ct
+
+,
+
+nt
+
+)
+
+=
+
+ln
+
+ct
+
+-
+
+nt1-1/ 1 - 1/
+
+where ct is consumption, nt the fraction of employed family members and  the negative of the
+
+Frisch elasticity of labor supply. The model assumes only two states for a family member, em-
+
+ployed or unemployed. The fraction of the unemployed family members therefore writes
+
+(2) ut = 1 - nt
+
+Under appropriate assumptions on the matching function, the externality generated by labor
+
+market search activities can be internalized and therefore the model can be solved as a social
+
+planner's problem. The social planer evaluates the social welfare represented by the following
+
+3
+
+value function
+
+(3)
+
+V
+
+(kt
+
+,
+
+nt
+
+,
+
+zt
+
+)
+
+=
+
+max
+ct ,vt
+
+U (ct, nt ) + EtV (kt+1, nt+1, zt+1)
+
+where   (0, 1) is the discount factor, kt the capital stock, vt the vacancy and zt a stochastic
+
+productivity process of the form
+
+(4) zt = zt-1 + z,t , t  N (0, z)
+
+where   (0, 1) is the persistence parameter of the process and t the productivity shock, normally and identically distributed with zero mean and standard deviation z. The maximization is subject to the following constraints
+
+(5) kt+1 = (1 - )kt + F(zt, nt, kt) - ct - vvt - u(1 - nt)
+
+(6) nt+1 = (1 - )nt + M((1 - nt), vt) where (5) is the aggregate resource constraint with   (0, 1) the depreciation rate of capital stock, v the vacancy posting cost and u the cost of job search, both assumed to be constant. F(zt, nt, kt) is the production function and assumed to take the Cobb-Douglas form (7) F(zt, nt , kt ) = ezt ktnt1- where   (0, 1) is the capital share. The capital stock in the next period therefore is the sum of
+
+current capital after depreciation, and the current output net of consumption and two types of costs
+
+incurred by search and matching activities in labor markets.
+
+The dynamic of aggregate employment is described by (6) with   (0, 1) the exogenous job separation rate, assumed to be constant and M((1-nt), vt) the matching function. The employment in the next period therefore is the sum of current employment that has not been destroyed, and the
+
+new employment generated by the matching function. Following Merz (1995), Andofatto (1996),
+
+Pissarides (2000), Shimer (2005), Pissarides (2009) and many others, the matching function is
+
+assumed Cobb-Douglas (8) M((1 - nt), vt) = m0vt1-(1 - nt ) where m0 is a constant scaling factor and   (0, 1) the elasticity of the matching function with respect to unemployment.
+
+As is usual in labor market search and matching literature, the labor market tightness is defined
+
+4
+
+as the ratio of the vacancy to the unemployment
+
+(9)
+
+t
+
+
+
+vt 1 - nt
+
+=
+
+vt ut
+
+The job finding rate is a function of the labor market tightness, measuring the rate at which
+
+unemployed workers find jobs, and is defined as the ratio of the job match to the unemployment
+
+(10)
+
+ft
+
+
+
+Mt 1 - nt
+
+=
+
+Mt ut
+
+The vacancy filling rate is also a function of the labor market tightness, measuring the rate at
+
+which vacant jobs become filled, and is defined as the ratio of the job match to the vacancy
+
+(11)
+
+qt
+
+
+
+Mt vt
+
+Both the job finding and vacancy filling rate are probabilities, and should lie between zero
+
+and one. The vacancy filling rate, however, can potentially exceed unity in simulation when the
+
+matching function takes the Cobb-Douglas form (see den Haan et al. (2000, p. 485)). To avoid
+
+introducing nonsmoothness into the policy function since in that case the perturbation methods
+
+cannot be applied, I do not restrict qt to be less than one. The realization of qt that exceeds unity
+
+is interpreted as that firms hire more than one worker on each posted vacancy (see Den Haan and
+
+De Wind (2012, p. 1480)).
+
+2.2 Characterization
+
+The equilibrium of the economy is characterized by, apart from the stochastic productivity process
+
+(4), the resource constraint (5) and aggregate employment dynamic (6), the Euler equation for
+
+consumption equalizing the expected present-discounted utility value of postponing consumption
+
+of one period to its utility value today
+
+(12) Uc,t = Et Uc,t+1 1 -  + Fk,t+1
+
+where (13) (14)
+
+Uc,t
+
+=
+
+1 ct
+
+Fk,t = ezt kt-1nt1-
+
+and the Euler equation for employment equalizing the marginal loss in welfare due to vacancy cre-
+
+ation, in terms of utility, to its expected present-discounted marginal contribution to social welfare
+
+(15)
+
+v Mv,t
+
+Uc,t
+
+=
+
+Et
+
+Uc,t+1
+
+Un,t+1 Uc,t+1
+
++
+
+Fn,t+1
+
++
+
+u
+
++
+
+v Mv,t+1
+
+1 -  + Mn,t+1
+
+5
+
+where (16) (17)
+
+Un,t = -nt-1/ Fn,t = (1 - )ezt ktnt-
+
+and (18) Mv,t = (1 - )m0vt-(1 - nt) (19) Mn,t = -m0vt1-(1 - nt)-1
+
+This marginal contribution, net of the disutility from work, is the sum of the marginal labor pro-
+
+ductivity, the saved job search cost and the its potential continuation, i.e., in case the job match
+
+is not destroyed. Mn,t+1 corrects the continuation as the (un)employment stock has already been
+
+changed by the vacancy creation.
+
+3 Solution Methods
+The model described in section 2 does not have a known closed form solution, and needs to be solved with numerical methods. I solve the model using perturbation and a particular type of projection method, that is, the spectral method with Chebyshev polynomials.
+The Perturbation method as described in Gaspar and Judd (1997), Judd and Guu (1997), Judd (1998, ch. 13), Jin and Judd (2002) , Schmitt-Grohe´ and Uribe (2004) and many others, assumes the policy function exists, then successively differentiates the equilibrium conditions and solve the resulting system of equations evaluated at typically the deterministic steady state to recover the coefficients of a Taylor expansion of a desired order of the policy function. Under appropriate smoothness assumptions, Taylor's theorem guarantees the expansion converges to the true policy function as the order of expansion approaches infinity.
+The spectral method specifies the approximated policy function as a linear combination of Chebyshev polynomial basis, as noted in Judd (1992, p. 421), imposing smoothness conditions on the approximated policy function, and then solves for the coefficients of the linear combination by minimizing the residual function defined by the equilibrium conditions of the model at the chosen collocation points, i.e., the zeros of the Chebyshev polynomial basis. As noted in Aruoba et al. (2006, p. 2488), such a minimization process delivers the best trade-off between accuracy and the ability of handling a large number of basis functions, and by the Chebyshev interpolation
+
+6
+
+theorem, the approximation error becomes arbitrarily small as the number of collocation points used in approximation approaches infinity.
+
+3.1 Perturbation
+
+The equilibrium conditions of the model, that is, (4)-(6) and the two Euler equations (12) and (15)
+
+can be cast into the following problem
+
+(20) 0 = Et [ f (yt+1, yt , yt-1, t )] where the ny-dimensional vector-valued function f : Rny × Rny × Rny × Rne  Rny is assumed CM with respect to all its arguments, where M is the order of approximation to be introduced subsequently; yt  Rny is the vector of ny endogenous and exogenous variables; and t  Rne the vector of ne exogenous shocks,2 where ny and ne are positive integers (ny, ne  N). The elements of t are assumed i.i.d. with E [t] = 0 and E t[m] finite m  M.3
+Following standard practice in DSGE perturbation, I introduce an auxiliary parameter   R to scale the risk in the model.4 The stochastic model under study in (20) corresponds to  = 1 and
+
+ = 0 represents the deterministic version of the model. Indexing solutions with 
+
+(21) yt = y(, zt), y : R × Rnz  Rny
+
+with the state vector zt given by5
+
+(22)
+
+zt =
+
+yt-1 t
+
+ Rnz×1, where nz = ny + ne
+
+To enable a standard DSGE perturbation, I assume the vector function y exists and is CM with
+
+respect to all its arguments. Time invariance of the policy function and scaling risk imply
+
+(23)
+
+yt+1 = y~(, z~t+1), z~t+1 =
+
+yt t+1
+
+ Rnz×1, y~ : R × Rnz  Rny
+
+The notation, y and y~, is adopted to track the source (through yt or yt+1) of derivatives of the
+
+policy function. This is necessary as (i) the z~t+1 argument of y~ is itself a function of y through its
+
+dependance on yt, and (ii)  scales t+1 in the z~t+1 argument of y~, but not t in the zt argument of
+
+2Nonlinearity or serial correlation in exogenous processes can be captured by including the processes themselves in the vector yt and including functions in f that specify the nonlinearity or correlation pattern.
+3The notation t [m] represents Kronecker powers. t [m] is the m'th fold Kronecker product of t with itself: t  t · · ·  t .
+m times
+4This formulation follows Adjemian et al.'s (2011) Dynare, Anderson et al.'s (2006) PerturbationAIM and Michel (2011). Jin and Judd's (2002) or Schmitt-Grohe´ and Uribe's (2004) model classes can be rearranged to fit (20).
+5Only in this section, i.e., section 3.1, zt is used to denote the state vector of the policy function. In anywhere else, zt denotes the productivity process.
+
+7
+
+y. This follows from the conditional expectations in (20): t realizes at time t and is in the time
+
+t information set--hence, it is not scaled by ; however, t+1 has not yet been realized and is the source of risk--hence, it is scaled by .6
+
+Inserting the policy functions for yt and yt+1--equations (21) and (23)--into (20) yields
+
+(24)
+
+0 = Et
+
+f
+
+y~
+
+,
+
+y(, zt) t+1
+
+, y(, zt), zt
+
+= F(, zt)
+
+a function with arguments  and zt. 7 I will construct a Taylor series approximation of the solution
+
+(21) around a deterministic steady state defined as follows
+
+Definition 3.1. Deterministic Steady State
+
+Let y  Rny be a vector that solves the policy function (21) with t = 0 and  = 0
+
+(25)
+
+y¯ = y(0, z), where z =
+
+y 0
+
+In practice, the deterministic steady state value is solved from the deterministic version of (24), i.e., from 0 = f (y, y, z).
+With f and y both being vector-valued functions that take vectors as arguments, their partial derivatives form hypercubes. I use the method of Lan and Meyer-Gohde (2013) that differentiates conformably with the Kronecker product, allowing me to maintain standard linear algebraic structures to derive my results.
+
+Definition 3.2. Matrix Derivatives Let A(B) : Rs×1  Rp×q be a matrix-valued function that maps an s × 1 vector B into an p × q
+
+matrix A(B), the derivative structure of A(B) with respect to B is defined as
+
+(26)
+
+AB  DBT {A} 
+
+ b1
+
+...
+
+ bs
+
+A
+
+where bi denotes i'th row of vector B, T indicates transposition; n'th derivatives are
+
+(27)
+
+ABn  D(nBT )n{A} 
+
+ b1
+
+...
+
+ [n] bs
+
+A
+
+6See also Anderson et al. (2006) and Michel (2011) for similar discussions. 7Note that t+1 is not an argument of F as it is the variable of integration inside the expectations. I.e.,
+
+F(, zt ) = f y~ , y(, zt )t+1 , y(, zt ), zt  (t+1) dt+1
+
+where  is the support and  the p.d.f. of t+1. Thus, when  = 0, t+1 is no longer an argument of f and the integral (and hence the expectations operator) is superfluous, yielding the deterministic version of the model.
+
+8
+
+I assume the policy function, (21), admits a Taylor series approximation up to M'th order at a
+
+deterministic steady state which I write as8
+
+ (28)
+
+yt
+
+
+
+M j=0
+
+1 j!
+
+M- j i=0
+
+1 i!
+
+yz
+
+j
+
+i i
+
+(zt - z)[ j]
+
+where yzji  Rny×nzj is the partial derivative of the vector function y with respect to the state vector
+
+zt j times and the perturbation parameter  i times evaluated at the deterministic steady state using
+
+the notation of definition 3.2. That is
+
+(29)
+
+yz ji  DzjtT+-j1ii{y(, zt )} 
+
+ z1,t-1
+
+...
+
+ znz,t-1
+
+[ j]
+
+
+ [i] 
+
+ y(, zt)
+
+=
+
+ z1,t-1
+
+...
+
+ [ j] znz,t-1
+
+ 
+
+i
+
+ y(, zt)
+
+where T indicates transposition and the second line follows as  is a scalar. The terms
+
+iM=-0 j
+
+1 i!
+
+yz
+
+j
+
+i
+
+i
+
+in (28) collect all the coefficients associated with the j'th fold Kronecker product of the state vector,
+
+(zt - z). Higher orders of  correct the Taylor series coefficients for risk by successively opening the coefficients to higher moments in the distribution of future shocks.9 At third order and for
+
+ = 1, the Taylor approximation (28) writes
+
+(30)
+
+yt
+
+
+
+y
+
++
+
+1 2 y2
+
++
+
+1 6 y3
+
++
+
+yz
+
++
+
+1 2
+
+y2z
+
+(zt
+
+-
+
+z)
+
++
+
+1 2
+
+yz2
+
+(zt
+
+-
+
+z)[2]
+
++
+
+1 6
+
+yz3
+
+(zt
+
+-
+
+z)[3]
+
+=
+
+y^t
+
+where only terms with nonzero coefficients have been included and ^ highlights that (30) is an
+
+approximation of the policy function (21). To solve for the coefficients of the third order expansion
+
+(30), I take the collection of derivatives of f in (24) from the previous order (for the first order, I
+
+start with f itself) and
+
+1. differentiate the derivatives of f from the previous order with respect to all their arguments
+
+2. evaluate the partial derivatives of f and of y at the deterministic steady state
+
+3. apply the expectations operator and evaluate using the given moments
+
+4. set the resulting expression to zero and solve for the unknown partial derivatives of y.
+The resulting equation for yz at first order takes the form of a matrix quadratic.10 All the other
+8See appendix A.1 for a derivation of the Taylor series approximation. 9A similar interpretation can be found in Judd and Mertens (2013) for univariate expansions and in Lan and MeyerGohde (2013) for expansions in infinite sequences of innovations. 10See, Uhlig (1999) for example.
+
+9
+
+unknown coefficients, as noted by Judd (1998, ch. 13), Jin and Judd (2002), Schmitt-Grohe´ and Uribe (2004) and others, are solutions to linear equations taking the results from lower orders as given.11
+3.2 Projection
+The spectral method seeks an approximation of the policy function on the grid of state variables. The lower and upper bounds of this grid are chosen such that, as noted in Aruoba et al. (2006, p. 2486) and Caldara et al. (2012, p. 196), they will bind only with an extremely low probability. The deterministic steady state as given in definition 3.1 of the state variables is also included in the grid as it is a point that can be determined before approximation, see Judd (1992, p. 429). Given there are three state variables in the model, i.e., capital, employment and productivity, the grid of approximation is a cube, [kmin, kmax] × [nmin, nmax] × [zmin, zmax] where the subscripts min and max indicate the lower and upper bounds of the state variables they attach to. Along each of the three dimensions, the grid points are chosen to be, up to a linear transformation, the roots of Chebyshev polynomials that lie in the interval between -1 and 1.
+The two policy functions of consumption and vacancy are both functions of state variables and are approximated with the following linear combination of the Chebyshev basis (31) c^t = X (kt, nt, zt)c (32) v^t = X (kt, nt, zt)v where ^ indicates these are approximations. c and v are two vectors of coefficients to be determined. Both c^t and v^t are of dimension (ng × 1) with ng the number of grid points. The multidimensional Chebyshev polynomial basis X (kt, nt, zt) on which the approximation of both consumption and vacancy are built is the Kronecker tensor product of three Chevyshev polynomial basis of capital, employment and productivity respectively. The details of constructing X (kt, nt, zt) are relegated to the appendix.
+The two Euler equations (12) and (15) that characterize the policy function of consumption and
+11All these linear equations can be cast into a generalized Sylvester form, see Lan and Meyer-Gohde (2014).
+10
+
+vacancy can be written as the following functional
+
+(33) 
+
+
+
+
+
+N
+
+(ct, vt)
+
+= 
+
+Uc,t - Et Uc,t+1 1 -  + Fk,t+1
+
+v Mv,t
+
+Uc,t
+
+-
+
+Et
+
+Uc,t+1
+
+Un,t+1 Uc,t+1
+
++ Fn,t+1
+
++ u
+
++
+
+v Mv,t+1
+
+1 -  + Mn,t+1
+
+ 
+
+=
+
+
+
+0 0
+
+Inserting the approximated policy functions (31) and (32) in the previous functional, noting
+
+that kt+1 and nt+1 can be calculated using the aggregate resource constraint (5) and the dynamic of aggregate employment (6) given the state variable grid and approximated policy function, and
+
+approximating the expectation with, following Judd (1992), Gauss-Hermite quadrature method
+
+yields the residual function. The unknown coefficients of the approximated policy function, c and v, are solved from the residual function using den Haan and Marcet's (1990) functional iteration, taken the third order perturbation in levels as the initial guess. See the appendix for
+
+details.
+
+3.3 Calibration
+The model is quarterly calibrated. The parameter values as summarized in Table 1, are taken from Merz (1995), Petrongolo and Pissarides (2001), Shimer (2005) and Pissarides (2009)
+[Table 1 about here.]
+In particular, the steady state values of the labor market tightness and aggregate employment, ss and nss respectively, are taken from Shimer (2005) and Pissarides (2009). The vacancy posting cost, v, is chosen, using the projection approximation, such that the standard deviation of vacancy relative to that of output is equal to 7.31 as reported in Merz (1995).12 Then solving the model in steady state pins down u, the cost of job searching.
+
+4 Numerical Results
+
+This section first reports the simulated moments of the model using the projection approximation which will be shown as the top performing one among all the approximations considered in this paper. Such set of moments reveals the model's ability in replicating some of the key regularities
+12The projection solution is used to calibrate the model as it is most accurate approximation of the policy function evaluated with Den Haan and Marcet's (1994) accuracy test and the Euler equation error test. The detailed discussion of accuracy is presented in the next section.
+11
+
+of the business cycle and in particular, of the labor markets. Second, the simulated density of all the approximations will be presented. Third, the quality of the approximations will be examined by implementing Den Haan and Marcet's (1994) test and the Euler equation error test from Judd (1992) and Judd (1998). Given the difference in accuracy among all the approximations and to study the implications of such difference, the simulated moments of all the approximations will be computed for comparison.
+4.1 Simulated Moments
+The model is simulated using the approximation generated by the projection method. This approximation outperforms all the perturbations in terms of accuracy. To this end, it is chosen as the benchmark that represents the model's ability of explaining the observed aggregate fluctuations, in particular the fluctuations of the labor market variables as they reflect the contribution of the search and matching framework incorporated in the model.
+The simulation environment is similar to that specified in Merz (1995), Shimer (2005) and Petrosky-Nadeau and Zhang (2013): the model is simulated 1000 times. Each simulation contains 412 observations with the first 200 discarded. As the model is quarterly calibrated, each simulation contains effectively the observations of 212 quarters, corresponding to about 53 years of quarterly data presented in Shimer (2005) and Pissarides (2009). As the projection method approximates the model in levels, the simulated time series are transformed by the natural logarithm, and then detrended using the Hodrick-Prescott filter with a quarterly smoothing parameter 1600. From the 1000 simulations there are 1000 sets of moments, and only the average of these simulated moments is reported.
+[Table 2 about here.]
+The model performs well in generating relative volatilities in frequently reported business cycle aggregates such as consumption and capital stock. Along the labor market dimension, the volatility of labor market tightness relative to that of the labor productivity, /p, reaches 10.33. Whereas it is about half of 19.10 reported by Shimer (2005), it already exceeds 7.56, a plausible target of a model with constant job destruction and productivity shock only (see Pissarides (2009)). Moreover, the model is capable of replicating the negatively sloped Beveridge curve, i.e., (u, v) in
+12
+
+table 2. This is because that the aggregate unemployment as a state variable will not immediately respond to an increase in vacancy creating activities induced by a positive productivity shock. The household therefore cannot send more family members to searching which will lead to an increase in unemployment and a positive relationship between vacancy and unemployment. Given that the model assumes constant vacancy posting and searching cost, incorporating no frictions other than search, a richer structure is needed to generate an (u, v) that closer to the empirical target.
+4.2 Simulated Density
+Before performing accuracy tests, all the approximations are simulated for the estimation of density. Such simulated density indicates, as noted in Aruoba et al. (2006), a plausible range of the state space in which accuracy test like the Euler equation error test is conducted. For local approximations like the perturbations, such indicated ranges of the state space are particularly useful in evaluating their ability of producing global implications.
+Each approximation is simulated once, with 101, 000 observations and the first 1000 discarded. For comparison, all approximations are fed with the same sequence of exogenous shocks in simulation with which the density is estimated based on a normal kernel function.
+[Figure 1 about here.]
+Figure 1 depicts the simulated density of the two endogenous state variables, i.e., capital and employment, and other labor market variables. Note that for each variable, the simulated densities based on different approximations are similar and roughly centered around the deterministic steady state. Capital and employment range from 29 to 40 and from 0.90 to 0.96 respectively. The Euler equation error test will accordingly be conducted on such ranges. Besides, the simulated density of vacancy filling rate q shows that under the calibration in section 3.3, most of the realizations of this variable fall in between 0.6 and 1, exceeding unity very infrequently. Moreover, given the Cobb-Douglas matching function and the values of  and m0, the realizations of q that are smaller than m0 correspond to those of labor market tightness  that are larger than one. This implies that this calibrated model allows the vacancies to outnumber the unemployment workers, whereas it still captures the uncoordinated nature of the search process as the job finding rate f does not exceed unity as shown by its simulated density.13
+13Andofatto (1996) formulates this uncoordinated nature of the search process as M(v, (1 - n))  min {v, (1 - n)},
+13
+
+Petrosky-Nadeau and Zhang (2013) have noted that, when solving Hagedorn and Manovskii's (2008) model using den Haan and Marcet's (1990) parameterized expectations algorithm with a spline basis, the vacancy rate can fall below zero at nevertheless an extremely low frequency, and therefore incorporated a nonnegativity constraint on vacancy in their characterization of the model. Albeit the labor market in the model economy resembles that described by Hagedorn and Manovskii (2008) in many respects, the simulated density of v shows that the realization of vacancy remains positive at all frequencies, centering at its deterministic steady state value 0.043 and ranging from about 0.02 to 0.07, which covers roughly 50% derivation from the steady state on each side. Given that the model generates about 1% deviation in labor productivity from its steady state, this range of vacancy is sufficiently large to accommodate the empirical observation that the vacancy is about 10 times more volatile than the labor productivity as reported by Shimer (2005).
+
+4.3 Den Haan and Marcet's (1994) Accuracy Test
+
+All the approximated solutions are firstly sent to Den Haan and Marcet's (1994) accuracy test to
+
+evaluate their performance in a dynamic and simulation-based environment. To examine how well
+
+the approximations satisfy the Euler equation for consumption and employment respectively, the
+
+test statistics are calculated and reported separately for the two Euler equations. Starting with the
+
+consumption Euler equation, inserting the functional form of the marginal consumption (13) and
+
+capital productivity (14) in (12) yields
+
+(34)
+
+ct-1 = Et ct-+11 ezt+1 kt+-11nt+-11 + 1 - 
+
+Defining the expression in the expectation operator as a new variable
+
+(35)
+
+t+1  ct-+11 ezt+1 kt+-11nt+-11 + 1 - 
+
+Then the forecast error of t+1 writes
+
+(36) ut+1 = Et (t+1) - t+1 = ct-1 - t+1
+
+If the solution were exact, then ut+1 would have zero mean, and satisfy the following
+
+(37) E [ut+1  h(xt)] = 0
+
+which implies M(v, (1 - n))/(1 - n)  f ()  min {, 1} with the constant return to scale assumption on the matching function M(v, (1 - n)). Therefore, when  > 1, the search friction still exists and is nontrivial if f () < 1.
+
+14
+
+for any function h : Rk  Rq and for any k-dimensional vector xt belongs to the information set on which the conditional expectation in the Euler equation (34) is formed. To evaluate the
+
+performance of an approximation, inserting its simulation in the sample analog of the previous
+
+equation
+T
+(38) MT = (1/T ) uts+im1  h xtsim t=1
+where sim indicates the corresponding simulated series and T the length of simulation, and checking
+
+if MT is close to zero. Note that, MT could be made small by taking a h(·) with small function values, and owing to sampling error, MT will not be exactly equal to zero. To avoid such problems, Den Haan and Marcet (1994) construct the following test statistic, with the null hypothesis that the
+
+approximation under evaluation is accurate, i.e., (37) holds for this approximation, to examine if
+
+MT is significantly different from zero (39) JT = T MT WT-1MT
+
+where WT is some weighting matrix, chosen to take the following form
+
+(40)
+
+T
+WT = (1/T )
+
+uts+im1  h xtsim
+
+uts+im1  h xtsim 
+
+t=1
+
+When the solution is exact and T goes to infinity, JT converges to a 2 distribution with, as
+
+the Euler equation (34) is of dimension 1 × 1, q × 1 degrees of freedom. If the value of JT of an
+
+approximation falls in the lower or upper critical region of the 2 distribution, then there is evidence
+
+against the accuracy of that approximation. The test statistic for the employment Euler equation can be constructed following the steps above14: inserting the functional form of the marginal
+
+disutility of labor (16), labor productivity (17) and two first derivatives of the matching function
+
+(18) and (19) in (15) and noting the definition of qt, ft and t yields
+
+(41)
+
+v (1 - )qtct
+
+= Et
+
+ ct+1
+
+-
+
+ct+1 nt1+/1
+
++
+
+(1
+
+-
+
+)ezt+1
+
+kt+1 nt+1
+
+
+
++
+
+u
+
++
+
+v(1 -  -  ft+1) (1 - )qt+1
+
+Defining the expression in the expectation operator as
+
+(42)
+
+t+1
+
+
+
+ ct+1
+
+-
+
+ct+1 nt1+/1
+
++
+
+(1
+
+-
+
+)ezt+1
+
+kt+1 nt+1
+
+
+
++
+
+u
+
++
+
+v(1 -  -  ft+1) (1 - )qt+1
+
+and the forecast error of t+1 writes
+
+(43)
+
+ut+1
+
+=
+
+v (1 - )qtct
+
+- t+1
+
+Inserting the involved simulated series in the previous equation yields uts+im1 with which the test
+
+14To save notation, t+1 and ut+1 are recycled from (35) and (36), and will be redefined below.
+
+15
+
+statistic as given in (39) can be constructed for the employment Euler equation. As noted by Aruoba et al. (2006), the null hypothesis will be rejected for all approximations
+if T is sufficiently large. On the other hand, Den Haan and Marcet (1994) note that an accurate/inaccurate approximation could fail/pass the test with a plausible T simply by chance. To control for such problems, each approximation is simulated 1000 times and each simulation contains 1000 observations with first 500 discarded. These 1000 simulations produce 1000 JT values for each approximation and the percentages of the JT values in the upper and lower 5% critical regions of the distribution are documented. For an accurate approximation, both the two percentages should be close to 5 as noted by Aruoba et al. (2006). An approximation is considered inaccurate, however, if its JT value falls in the upper 5% region too often, and rarely drops in the lower 5% region.
+[Table 3 about here.]
+Table 3 reports the test results. As can be seen, all the approximations satisfy the consumption Euler equation well, since all the percentages in column 2 and 3 of the table are close to 5. Meanwhile, as all the percentages in these two columns are similar in value, it is so far unclear which solution method is preferred in terms of accuracy. For the employment Euler equation, however, projection provides the most accurate approximation, outperforming perturbation of all three orders, either in levels or in logs, as indicated by the percentages in the last two columns.
+Among all the perturbation approximations for the employment Euler equation, the first order perturbation in logs (log-linearization) is the least accurate one since its JT falls in the upper critical region too often (40.8 percent) and seldomly drops in the lower critical region (2.0 percent). Still at first order, the approximation in levels (linearization) achieves a much higher degree of accuracy with the upper tail percentage down to 12 and lower tail percentage rising to 4.2. Aruoba et al. (2006) have also observed, when they compare solution methods for a real business cycle model with endogenous labor choice, that linear approximation outperforms log-linearization, contradicting to the common practice. In comparison with linear approximations, second and third order perturbation further drives down the upper tail percentage, exhibiting a higher degree of accuracy.
+Den Haan and Marcet's (1994) test evaluates how well the simulation of an approximation fits the Euler equations, and therefore has an implication for the accuracy of the simulation-based
+16
+
+results like simulated moments. Moreover, the construction of the test statistic requires no approximation of the conditional expectation, which could be a potential source of inaccuracy in addition to that in the approximation itself.15 One drawback of the test is that there is no economic interpretation of the test result. The Euler equation error test in the next section presents the results that economically interpretable.
+
+4.4 Euler Equation Error Test
+
+The Euler equation error test from Judd (1992) and Judd (1998) examines if the policy function
+
+is consistently approximated over two consecutive periods by evaluating a unit-free measure that
+
+expresses the one-period optimization error in relation to current consumption. Given the recursive
+
+structure of the Euler equation, current consumption can be written as a function of the next period
+
+consumption and other model variables: for the consumption Euler equation, rearranging (34)
+
+yields (44)
+
+ct = Et ct-+11 ezt+1kt+-11nt+-11 + 1 - 
+
+-1
+
+Likewise, for the employment Euler equation, rearranging (41) yields
+
+(45) ct =
+
+Et
+
+(1 - )qt vct+1
+
+-
+
+ct+1 nt1+/1
+
++ (1
+
+-
+
+)ezt+1
+
+kt+1 nt+1
+
+
+
++
+
+u
+
++
+
+v(1 -  -  ft+1) (1 - )qt+1
+
+-1
+
+Inserting the involved approximations in the right hand side of the previous two equations
+
+yields the current consumption implied by the approximated, next period consumption and other
+
+approximated model variables (46)
+
+c^timplied,ConEuler = E^ t c^t-+11 ez^t+1k^t+-11n^t+-11 + 1 - 
+
+-1
+
+(47)
+
+c^timplied,EmpEuler =
+
+E^ t
+
+(1 - )q^t vc^t+1
+
+-
+
+c^t+1 n^t1+/1
+
++
+
+(1
+
+-
+
+)ez^t+1
+
+k^t+1 n^t+1
+
+
+
++
+
+u
+
++
+
+v(1 -  -  f^t+1) (1 - )q^t+1
+
+where^over the conditional expectation indicates this expectation has been explicitly approximated,
+
+as in Judd (1992), using the Gauss-Hermite quadrature method with the same number of quadrature
+
+points as used in the projection method discussed in section 3.2 to compute the coefficients c and v. The superscripts ConEuler and EmpEuler indicate the two implied current consumption are
+15As noted by Judd (1992), the conditional expectation in the Euler equation involves an integral that cannot in general be evaluated explicitly and usually approximated with a finite sum.
+
+-1
+
+17
+
+computed using the relationship given by the consumption and employment Euler equation, (44)
+
+and (45), respectively.
+
+The test statistic is essentially the difference between the implied and the actual approximated
+
+current consumption, normalized as the common logarithm of the absolute value of the difference
+
+between unity and the ratio of the implied to the actual approximated current consumption
+
+(48)
+
+E E EConE ul er
+
+= log10
+
+1 - c^timplied,ConEuler c^t
+
+(49)
+
+EEEEmpEuler = log10
+
+1 - c^timplied,EmpEuler c^t
+
+The two statistics above are computed at each and every point on a grid of the three state
+
+variables, i.e., capital, employment and productivity. This test grid shares the same upper and
+
+lower bounds with the grid used by the projection method in section 3.2. However, it contains
+
+simply equispaced points (100 for capital, 100 for employment and 80 for productivity) that are not
+
+necessarily the collocation points. In other words, for the projection approximation, its accuracy
+
+is evaluated at the set of points other than the set on which the policy function is approximated.
+
+The two sets may nevertheless partially overlapping. Deviations in (48) and (49) from zero are
+
+interpreted by Judd (1992) and many others as the relative optimization error that results from
+
+using a particular approximation. EEE = -1 implies a one dollar error for every ten dollars spent
+
+and EEE = -3 implies a one dollar error for every thousand dollars spent.
+
+[Figure 2 about here.]
+
+Figure 2 depicts the consumption and the employment Euler equation error (the upper and the lower panel of the figure respectively) of the projection approximation in the capital-employment space. In this and all the other figures throughout the rest of this section, productivity is held at its steady state value (zero) unless otherwise specified. Since the policy function is approximated at the chosen collocation points, higher accuracy is achieved at and in the vicinity of those points: in the figure there is a lattice of high accuracy. The points where the edges of the lattice meet are the collocation points. Aside from this lattice, the projection approximation demonstrates a high degree of accuracy around the deterministic steady state. The quality of the approximation decreases, as capital and employment move away from their respective steady state value. In the
+
+18
+
+area where capital and employment are both very high/low, the approximation reaches its lowest accuracy level.
+[Figure 3 about here.]
+Since the consumption and the employment Euler equation error are both expressed in relation to the same approximated current consumption, EEEConEuler and EEEEmpEuler as given by (48) and (49) are directly comparable. Figure 3 depicts the difference between the consumption and the employment Euler equation error, i.e., EEEConEuler - EEEEmpEuler of the projection approximation. But for a few points the difference is smaller than zero in the entire capital-employment space. This implies that, with the projection approximation, the consumption Euler equation is in general better satisfied than the employment Euler equation.
+[Figure 4 about here.]
+Figure 4 plots the consumption and the employment Euler equation error of the third order perturbation in levels. This (and all the other perturbation) approximation is built around the deterministic steady state. As capital and employment deviate from their respective steady state value, the quality of approximation deteriorates. Like the projection approximation, the third order perturbation satisfies the consumption Euler equation better than the employment Euler equation, as the difference, EEEConEuler - EEEEmpEuler, is negative everywhere in the capital-employment space, see figure 5 below
+[Figure 5 about here.]
+To evaluate all the approximations and compare their performance on the entire three dimensional grid, the maximum and average Euler equation error are computed as in Judd (1992) and many others. Table 4 reports the results
+[Table 4 about here.]
+There are three important observations. First, all the approximations satisfy the consumption Euler equation better than the employment Euler equation, measured by both the max and the average error. Second, the projection approximation performs better than all the perturbations in
+19
+
+terms of the average error. This is not surprising, as all the perturbations are local approximations, built around only one point, i.e., the deterministic steady state on the grid. The projection method, however, allows its approximation to anchor on as many points (the collocation points) as desired on the grid, and therefore has a better global performance. Third, among all the perturbations and for the consumption Euler equation, higher order (for both level and log specifications) performs uniformly better than the preceding order. Between level and log specification, the first order approximation in levels is superior to the first order approximation in logs, in line with Aruoba et al. (2006). Yet this relationship is reversed at the second order and moving to the third order, the approximation in levels again outperforms the approximation in logs but only on average.
+Turning to the employment Euler equation, only the projection approximation and the third order perturbation in level are on average accurate. Yet the positive max errors suggest that none of the approximations is acceptable in some areas on the grid -- at the grid point where the Euler equation error is positive, the ratio of the implied to the actual current consumption is negative, meaning there is no consistent consumption plan can be made over two consecutive periods.16 It is then important to know in which areas the employment Euler equation error goes above zero since some areas, as noted by Judd et al. (2010) and Judd et al. (2012), will never be visited in the equilibrium of the model. The Euler equation error computed in such areas, regardless of its sign and magnitude, contributes least to the evaluation of an approximation.
+[Figure 6 about here.]
+Using the third order perturbation as an example, the upper panel of figure 6 locates such areas on the grid by plotting the employment Euler equation error in the capital-productivity space and holding employment at its upper bound. In the neighborhood of the lower-right corner of the plot where the productivity lower bound meets the capital upper bound, given employment is at its upper bound, the error goes beyond 0 and up to 3. Note that, to push the productivity down to its lower bound requires a sequence of negative productivity shock. Since simulated correlation based on the approximation suggests that both the capital and the employment are positively correlated with the shock, these two state variables would deviate from the deterministic steady state and move toward their respective lower, instead of upper bounds in response to such a sequence of
+16This is a qualitative inconsistency. To this end, a consistency is quantitative in nature if the corresponding Euler equation error is negative.
+20
+
+shock realizations. As the lower panel of figure 6 shows, in simulation the model never hits the lower-right corner of the grid where z = -0.06 (its lower bound), k = 42 and n = 0.98 (the two upper bounds).17 The Euler equation error computed in this area appears therefore, not informative and even misleading as it increases the average error.
+In this regard, Den Haan and Marcet's (1994) test presented in section 4.3 complements the Euler equation error test in evaluating the quality of the approximations of this model. Building its test statistic on the simulated time series in which the correlation among the state variables implied by the approximation has been taken into account, Den Haan and Marcet's (1994) test implicitly narrows down the test grid to the realized state space associated with the approximation. As table 3 reports, when examined using Den Haan and Marcet's (1994) test, both the projection approximation and the third order perturbation in level are accurate whereas the former is superior to the latter in the upper tail of the distribution.
+[Figure 7 about here.]
+Ignoring those redundant areas on the grid, the third order in levels outperforms all the other perturbations in satisfying the employment Euler equation. For comparison, figure 7 plots the -2 contours of the employment Euler equation error in the capital-employment space. For each perturbation, the area circled inside its -2 contour is the region where the employment Euler equation error is smaller than -2. In terms of the size of this -2 accuracy area, the third order in levels dominates all the others. Moreover, for both level and log specifications, higher order in general performs better than the preceding order and at first order, linear approximation is -2 accurate on a larger area than that of log-linearization, which potentially contributes to understanding the result from Den Haan and Marcet's (1994) test at this order.
+To summarize, the projection provides the most accurate approximation according to the Euler equation error test. All the approximations satisfy the consumption Euler equation better than the employment Euler equation. In addition, among all the perturbations, the third order in levels is the most accurate one, comparable to the projection approximation.
+17To produce the simulated grid, all the approximations are simulated in the environment described in section 4.2.
+21
+
+4.5 Simulated Moments Comparison
+This section presents the moments computed using the simulated series based on different approximations. All the approximations are simulated in the same environment as that described in section 4.1. For all the level approximations (the projection and the perturbation in levels at all three order), their simulated series are transformed by the natural logarithm before applying the Hodrick-Prescott filter.
+[Table 5 about here.]
+Table 5 reports the standard deviation of the selected model variables relative to that of output or labor productivity. Taking those generated by simulating the projection approximation as the benchmark since the projection approximation outperforms all the perturbations in terms of accuracy, all the relative volatilities generated by perturbations are very close to the benchmark, and to each other. The volatility of consumption, capital, employment and labor productivity in relation to that of output are even identical across all the approximations. The linear approximation tends to slightly overstate the relative volatility of vacancy and labor market tightness. For log-linearization, though it appears the least accurate approximation in terms of satisfying the employment Euler equation, the relative volatilities it generate are still very close to the benchmark.
+[Table 6 about here.]
+Moving to the (auto)correlation, as table 6 shows, the results from all the approximations are also very similar. This similarity among the simulated moments originates from the similarity among all the approximations in the neighborhood of the deterministic steady state and most frequently, the realizations of the model fall in that region.
+[Figure 8 about here.]
+Figure 8 plots, for example, the approximated policy function of the vacancy and the labor market tightness from the (log)linear approximation, the third order perturbation in levels and the projection on the employment grid, holding the other two state variables (capital and productivity) at their respective steady state value. In addition, the histogram of employment has been appended
+22
+
+to the plot in order to show the distribution of the employment realizations.18 The approximated policy function implies, in the vicinity of the steady state employment, that is, between 0.92 and 0.96, the corresponding values of the vacancy and the labor market tightness indicated by the four approximations are very similar, and this vicinity, as the histogram shows, happens to be the region in which most of the employment realizations fall. The simulated series and therefore the simulated moments, are accordingly similar across the four approximations.
+5 Conclusion
+In this paper I have solved a real business cycle model with labor market search frictions using the projection and the perturbation methods under the conventional quarterly calibration. I then implement Den Haan and Marcet's (1994) test and the Euler equation error test from Judd (1992) and Judd (1998) to evaluate the quality of all the approximated solutions. The results from the two tests suggest that the approximation provided by the projection method is the most accurate among all the approximations, and the third order perturbation in levels also achieves a degree of accuracy comparable to that of the projection approximation. Among all the perturbations and for both log and level specifications, the results from the Euler equation error test show that, higher order performs on average better than the preceding order.
+By comparing the respective test statistic for the consumption and the employment Euler equation, I find that across all the approximations, the consumption Euler equation is better satisfied than the employment Euler equation. Moreover, the results from Den Haan and Marcet's (1994) test suggest that the first order perturbation in levels is preferred to the first order perturbation in logs in satisfying the employment Euler equation. In satisfying the consumption Euler equation, the results from the Euler equation error test also indicates that the level specification performs better than the log specification at first order.
+To analyze the implications of the difference in accuracy among all the approximations, I compare the simulated moments based on different approximations and find that all of them are similar in value. Even for the approximations with a relatively low degree of accuracy such as the first order perturbation in levels and in logs, the simulated moments produced by them are very close
+18To produce the histogram, all the approximations are simulated in the environment described in section 4.2.
+23
+
+to those produced by the projection approximation. To explain this similarity, I simulate all the approximations and present the resulting histogram of their realizations and find that, for all the approximations, most of their realizations fall in the neighborhood of the deterministic steady state of the model and in this neighborhood, all the approximations behave similarly.
+24
+
+References
+ADJEMIAN, S., H. BASTANI, M. JUILLARD, F. MIHOUBI, G. PERENDIA, M. RATTO, AND S. VILLEMOT (2011): "Dynare: Reference Manual, Version 4," Dynare Working Papers 1, CEPREMAP.
+ANDERSON, G. S., A. LEVIN, AND E. SWANSON (2006): "Higher-Order Pertubation Solutions to Dynamic Discrete-Time Rational Expectations Models," Federal Reserve Bank of San Francisco Working Paper Series 2006-01.
+ANDOFATTO, D. (1996): "Business Cycles and Labor-Market Search," American Economic Review, 86(1), 112­132.
+ARUOBA, S. B., J. FERNA´ NDEZ-VILLAVERDE, AND J. F. RUBIO-RAM´IREZ (2006): "Comparing Solution Methods for Dynamic Equilibrium Economies," Journal of Economic Dynamics and Control, 30(12), 2477­2508.
+CALDARA, D., J. FERNA´ NDEZ-VILLAVERDE, J. RUBIO-RAM´IREZ, AND W. YAO (2012): "Computing DSGE Models with Recursive Preferences and Stochastic Volatility," Review of Economic Dynamics, 15(2), 188­206.
+DEN HAAN, W. J., AND J. DE WIND (2012): "Nonlinear and Stable Perturbation-Based Approximations," Journal of Economic Dynamics and Control, 36(10), 1477­1497.
+DEN HAAN, W. J., AND A. MARCET (1990): "Solving the Stochastic Growth Model by Parameterizing Expectations," Journal of Business & Economic Statistics, 8(1), 31­34.
+DEN HAAN, W. J., AND A. MARCET (1994): "Accuracy in Simulations," The Review of Economic Studies, 61(1), pp. 3­17.
+DEN HAAN, W. J., G. RAMEY, AND J. WATSON (2000): "Job Destruction and Propagation of Shocks," American Economic Review, 90(3), 482­498.
+GASPAR, J., AND K. L. JUDD (1997): "Solving Large-Scale Rational-Expectations Models," Macroeconomic Dynamics, 1(01), 45­75.
+HAGEDORN, M., AND I. MANOVSKII (2008): "The Cyclical Behavior of Equilibrium Unemployment and Vacancies Revisited," American Economic Review, 98(4), 1692­1706.
+JIN, H.-H., AND K. L. JUDD (2002): "Pertubation Methods for General Dynamic Stochastic Models," Mimeo April.
+JUDD, K. L. (1992): "Projection Methods for Solving Aggregate Growth Models," Journal of Economic Theory, 58(2), 410­452.
+(1998): Numerical Methods in Economics. MIT Press, Cambridge, MA.
+JUDD, K. L., AND S.-M. GUU (1997): "Asymptotic Methods for Aggregate Growth Models," Journal of Economic Dynamics and Control, 21(6), 1025­1042.
+25
+
+JUDD, K. L., L. MALIAR, AND S. MALIAR (2010): "A Cluster-Grid Projection Method: Solving Problems with High Dimensionality," Working Paper 15965, National Bureau of Economic Research.
+(2012): "Merging Simulation and Projection Approaches to Solve High-Dimensional Problems," NBER Working Papers 18501, National Bureau of Economic Research, Inc.
+JUDD, K. L., AND T. M. MERTENS (2013): "Equilibrium Existence and approximation of Incomplete Market Models with Substantial Heterogeneity," Mimeo January.
+LAN, H., AND A. MEYER-GOHDE (2013): "Solving DSGE Models with a Nonlinear Moving Average," Journal of Economic Dynamics and Control, 37(12), 2643­2667.
+(2014): "Solvability of Perturbation Solutions in DSGE Models," Journal of Economic Dynamics and Control, 45, pp.366 ­ 388.
+MERZ, M. (1995): "Search in the labor market and the real business cycle," Journal of Monetary Economics, 36(2), 269­300.
+MICHEL, J. (2011): "Local approximation of DSGE models around the risky steady state," wp.comunite 0087, Department of Communication, University of Teramo.
+MORTENSEN, D. T., AND C. A. PISSARIDES (1994): "Job Creation and Job Destruction in the Theory of Unemployment," Review of Economic Studies, 61, 397­425.
+PETRONGOLO, B., AND C. A. PISSARIDES (2001): "Looking into the Black Box: A Survey of the Matching Function," Journal of Economic Literature, 39(2), 390­431.
+PETROSKY-NADEAU, N., AND L. ZHANG (2013): "Solving the DMP Model Accurately," Working Paper 19208, National Bureau of Economic Research.
+PISSARIDES, C. A. (1985): "Short-Run Equilibrium Dynamics of Unemployment, Vacancies, and Real Wages," American Economic Review, 75(4), 676­690.
+(2000): Equilibrium Unemployment Theory. MIT Press, Cambridge, Massachusetts, second edn.
+(2009): "The Unemployment Volatility Puzzle: Is Wage Stickiness the Answer?," Econometrica, 77(5), 1339­1369.
+SCHMITT-GROHE´ , S., AND M. URIBE (2004): "Solving Dynamic General Equilibrium Models Using a Second-Order Approximation to the Policy Function," Journal of Economic Dynamics and Control, 28(4), 755­775.
+SHIMER, R. (2005): "The Cyclical Behavior of Equilibrium Unemployment and Vacancies," American Economic Review, 95(1), 25­49.
+UHLIG, H. (1999): "A Toolkit for Analysing Nonlinear Dynamic Stochastic Models Easily," in Computational Methods for the Study of Dynamic Economies, ed. by R. Marimon, and A. Scott, chap. 3, pp. 30­61. Oxford University Press.
+26
+
+VETTER, W. J. (1973): "Matrix Calculus Operations and Taylor Expansions," SIAM Review, 15(2), 352­369.
+27
+
+A Appendices
+A.1 Taylor Expansion
+
+The M-th order Taylor approximation of (21) at the deterministic steady state (25) is
+
+Corollary A.1. An M-th order Taylor Approximation of (21) is written as
+
+(A-1)
+
+ yt
+
+=
+
+M j=0
+
+1 j!
+
+M- j i=0
+
+1 i!
+
+yz
+
+j
+
+i i
+
+(zt - z)[ j]
+
+Proof. From Vetter (1973), a multidimensional Taylor expansion is given by
+
+(A-2)
+
+(
+
+W(B)
+p×1) (s×1)
+
+=
+
+W
+
+(B¯)
+
++
+
+M n=1
+
+1 n!
+
+DBnT
+
+nW
+
+(B¯)
+
+(B
+
+-
+
+B¯)[n]
+
++
+
+RM+1
+
+(B¯,
+
+B)
+
+(A-3)
+
+where
+
+RM+1
+
+(B¯, B)
+
+=
+
+1 M!
+
+B
+=B¯ DBMT+M1+1W ()
+
+Is  (B - )[M]
+
+d
+
+Differentiating (21) M times, a Taylor approximation at the deterministic steady state z is
+
+yt
+
+=
+
+1 0!
+
+1 0!
+
+y
+
++
+
+1 1!
+
+y
+
++
+
+1 2!
+
+y2
+
+2
+
++
+
+.
+
+.
+
+.
+
++
+
+1 M!
+
+yM
+
+M
+
++1 1!
+
+1 0!
+
+yz
+
++
+
+1 1!
+
+yz
+
++
+
+1 2!
+
+yz2
+
+2
+
++
+
+.
+
+.
+
+.
+
++
+
+(M
+
+1 -
+
+1)!
+
+yzM-1
+
+M-1
+
+(zt - z)
+
++1 2!
+
+1 0!
+
+yz2
+
++
+
+1 1!
+
+yz2
+
+
+
+
+
++
+
+1 2!
+
+yz2
+
+2
+
+2
+
++
+
+.
+
+.
+
+.
+
++
+
+(M
+
+1 -
+
+2)!
+
+yz2
+
+M-2
+
+M-2
+
+(zt - z)[2]
+
+...
+
++
+
+1 M!
+
+1 0!
+
+yzM
+
+(zt
+
+-
+
+z)[M]
+
+Writing the foregoing more compactly yields (A-1).
+
+A.2 Projection Appendix
+
+Starting with the capital grid, for any element of the set, kti  [kmin, kmax] with i being a positive
+
+integer for indexing purpose, the linear transformation
+
+(A-4)
+
+(kti)
+
+=
+
+2(kti - kmin) kmax - kmin
+
+- 1,
+
+i = 1, 2, ...
+
+ensures that (kti) is bounded to the set [-1, 1]. I choose nk elements from the set, collected in
+
+the vector kt = kt1 kt2 . . . ktnk , such that after applying the linear transformation (A-4) to kt,
+
+the elements of the resulting vector (kt ) = (kt1) (kt2) . . . (ktnk)  are the nk roots of the
+
+following nkth Chebyshev polynomial basis
+
+(A-5)
+
+T ((kt)) = T0 T1 ((kt)) T2 ((kt)) . . . Tnk ((kt))
+
+28
+
+where Ti(·)  cos(i arccos(·)) is the ith Chebyshev polynomial with T0 = 1 and T ((kt)) is of dimension (nk + 1) × (nk + 1).
+Analogous to my choice of elements from the capital set, I choose nn and nz elements from these two sets, nt = nt1 nt2 . . . ntnn  and z = zt1 zt2 . . . ztnz , that after being transformed by (·), are the nn and nz roots of the following nnth and nzth Chebyshev polynomial basis respectively
+
+(A-6)
+
+T ((nt)) = T0 T1 ((nt)) T2 ((nt)) . . . Tnn ((nt))
+
+(A-7)
+
+T ((zt)) = T0 T1 ((zt)) T2 ((zt)) . . . Tnz ((zt))
+
+where T ((nt)) and T ((zt)) are of dimension (nn + 1) × (nn + 1) and (nz + 1) × (nz + 1) respec-
+
+tively.
+
+As in Judd (1992), Aruoba et al. (2006) and Caldara et al. (2012), the multidimensional basis
+
+of the approximated policy function is the Kronecker product of the above three one-dimensional
+
+basis
+
+(A-8)
+
+X (kt, nt, zt) = T ((kt))  T ((nt))  T ((zt))
+
+with dimension (ng ×ng) where ng = (nk +1)×(nn +1)×(nz +1) is the number of all triplets of the collocation points along three dimensions, i.e., the number of grid points in the three-dimensional
+
+state space [kmin, kmax] × [nmin, nmax] × [zmin, zmax]. With this multidimensional basis, the approximated policy function of consumption and vacancy writes
+
+(A-9)
+
+c^t = X (kt, nt, zt )c = Pc(kt , nt, zt ; c)
+
+(A-10)
+
+v^t = X (kt, nt, zt )v = Pv(kt , nt, zt ; v)
+
+where^ indicates these are approximated policy functions, and c and v are two vectors of coefficients to be determined. Both c^t and v^t are of dimension (ng × 1).
+I solve for the unknown coefficients c and v from the two Euler equations (12) and (15) using den Haan and Marcet's (1990) functional iteration: at each grid point i
+
+1. use j-th iteration of the coefficients, cj and vj, to compute
+
+(A-11)
+
+nti+1 = (1 - )nti + m0Pv kti, nti, zti; vj 1- (1 - nti), i = 1, 2, ..., ng
+
+(A-12)
+
+kti+1 = (1 - )kti + ezti (kti)(nti)1- - Pc kti, nti, zti; cj
+
+- vPc(kti, nti, zti; vj) - m0u(1 - nti)
+
+(A-13)
+
+cti+1 = Pc kti+1, nti+1, zti + t ; cj
+
+29
+
+(A-14)
+
+vti+1 = Pv kti+1, nti+1, zti + t ; vj
+
+2. given (A-11) - (A-14) and approximating the conditional expectation with the Gauss-Hermite
+
+quadrature, the Euler equation for consumption (12) writes
+
+(A-15)
+
+c^ti -1 =  m Pc r=1 ×
+
+kti+1,
+
+nti+1,
+
+zti
+
++
+
+ 2r
+
+;
+
+cj
+
+-1
+
+1 -  +  exp
+
+ zti + 2r
+
+(kti+1)-1(nti+1)1-
+
+r 
+
+where r and r are Gauss-Hermite quadrature points and weights. From the foregoing solve
+
+for c^ti. Analogously, the Euler equation for employment (15) writes
+
+(A-16)
+
+v^ti
+
+
+
+=
+
+(1
+
+- )m0 v
+
+(1
+
+-
+
+nti )
+
+c^ti
+
+
+
+m
+×
+
+Pc
+
+kti+1,
+
+nti+1,
+
+zti
+
++
+
+ 2r;
+
+cj
+
+-1
+
+r=1
+
+×
+
+- nti+1 -1/ Pc
+
+kti+1
+
+,
+
+nti+1,
+
+zti
+
++
+
+ 2r
+
+;
+
+cj
+
+ + (1 - ) exp zti + 2r
+
+kti+1  nti+1 - + u
+
+from the foregoing solve for v^ti
+
+v(1 - )Pv
+
+kti+1,
+
+nti+1,
+
+zti
+
++
+
+ 2r
+
+;
+
+vj
+
+
+
++
+
+-
+
+v 1-
+
+Pv
+
+(1 - )m0 1 kti+1, nti+1, zti
+
+- +
+
+nti+1  2r
+
+;
+
+vj
+
+1 - nti+1
+
+r 
+
+3. repeat step 1 - 2 for all ng grid points, get an estimation of the new coefficients with the
+
+following regression
+
+(A-17)
+
+^ j+1 = cj+1 vj+1 = X (kt, nt, zt )X (kt , nt, zt ) -1 X (kt , nt, zt ) c^t v^t
+
+where X (kt, nt, zt) is the multidimensional basis defined by (A-8). Then obtain the ( j + 1)-th
+
+iteration of the coefficients with the following updating rule
+
+(A-18)
+
+ j+1 = ^ j+1 + (1 - ) j
+
+where   (0, 1] is a parameter for stabilizing the iteration.
+
+4. repeat step 1-3 till  j+1 -  j is smaller than a desired level of tolerance.
+
+The choice of parameters for the iteration is summarized in Table 7.
+
+30
+
+[Table 7 about here.] 31
+
+symbol
+     z
+
+Table 1: Quarterly Calibration
+
+value
+-1.25 0.36 0.026 0.99 0.95 0.0073
+
+symbol
+  ss nss v u
+
+value
+0.036 0.5 0.72 0.94 0.0875 0.1451
+
+Table 2: Second moments from Data and Projection Solution
+
+Statistic Data Model c/y 0.40 0.34 k/y 0.22 0.29 n/y 0.54 0.22 y 1.87 1.05
+
+Statistic Data Model u/y 6.11 3.37 v/y 7.31 7.31 /p 19.10 10.32 p/y 0.68 0.84 (u, v) -0.894 -0.1957
+
+Table 3: DHM Accuracy Test, T = 500
+
+Linear Log-linear Perturbation 2 Perturbation 2 in Log Perturbation 3 Perturbation 3 in Log Projection
+
+JT for Consumption Euler JT for Employment Euler
+
+< 5% > 95%
+
+< 5% > 95%
+
+4.5 6.2 5.6 6.2 4.5 5.5 6.4 6.0 4.5 5.6 6.4 6.0 5.4 5.2
+
+4.2 12.0 2.0 40.8 4.5 9.5 5.7 11.0 4.6 10.1 6.5 11.0 5.4 5.3
+
+32
+
+Table 4: Euler Equation Error Test
+
+Linear Log-linear Perturbation 2 Perturbation 2 in Log Perturbation 3 Perturbation 3 in Log Projection
+
+Consumption Euler
+
+Employment Euler
+
+max. error avg. error max. error avg. error
+
+-3.25 -3.07 -3.63 -4.11 -3.93 -4.12 -2.95
+
+-3.98 -3.91 -4.86 -4.98 -5.27 -5.25 -5.50
+
+2.22 0.45 4.17 4.24 3.30 3.25 3.70
+
+-0.47 -0.64 -0.93 -0.78 -1.14 -0.68 -1.79
+
+Table 5: Relative Standard Deviation from Data and Model
+
+Statistic Data Model I Method
+
+c/y
+
+0.40 0.34 0.34 0.34 0.34 0.34
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+k/y
+
+0.22 0.29 0.29 0.29 0.29 0.29
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+n/y
+
+0.54 0.22 0.22 0.22 0.22 0.22
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+y 1.87 1.05 (PJ) 1.05 (P3) 1.05 (P2) 1.05 (LN) 1.05 (LLN)
+
+Statistic Data Model I Method
+
+u/y
+
+6.11 3.37 3.39 3.40 3.42 3.38
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+v/y
+
+7.31 7.31 7.31 7.34 7.40 7.30
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+/p
+
+19.10
+
+10.32 10.32 10.25 10.72 10.31
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+p/y 0.68 0.84 0.84 0.84 0.84 0.84
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+ PJ:projection, P3: 3rd order perturbation, P2: 2nd order perturbation, LN: linearization, LLN: loglinearization
+
+33
+
+Table 6: Correlation and Autocorrelation from Data and Model
+
+Statistic Data Model I Method Statistic Data Model I Method
+
+(u, v)
+
+-0.8949
+
+-0.1957 -0.2000 -0.1975 -0.1952 -0.1970
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+(u, )
+
+-0.971
+
+-0.554 -0.553 -0.550 -0.544 -0.556
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+(u, p)
+
+-0.408
+
+-0.677 -0.677 -0.676 -0.674 -0.677
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+(v, )
+
+0.975
+
+0.925 0.924 0.927 0.922 0.924
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+(v, p)
+
+0.364
+
+0.813 0.813 0.814 0.812 0.815
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+(, p)
+
+0.396
+
+0.953 0.953 0.953 0.946 0.955
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+(ut, ut-1) 0.936
+
+0.795 0.795 0.795 0.796 0.796
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+(vt, vt-1) 0.940
+
+0.329 0.329 0.331 0.328 0.329
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+(t, t-1) 0.941
+
+0.597 0.600 0.595 0.597 0.599
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+(pt, pt-1) 0.878
+
+0.660 0.660 0.660 0.660 0.660
+
+(PJ) (P3) (P2) (LN) (LLN)
+
+ PJ:projection, P3: 3rd order perturbation, P2: 2nd order perturbation, LN: linearization, LLN: loglinearization
+
+Table 7: Parameters of the Iteration
+
+symbol value source
+
+Number of collocation points for capital Number of collocation points for employment Number of collocation points for productivity Number of Gauss-Hermite points Tolerance for convergence
+
+nk nn nz m
+
+11 11 9 9 1e - 14
+
+Aruoba et al. (2006)
+Aruoba et al. (2006) Judd (1992)
+
+34
+
+Figure 1: Simulated Density
+
+0.35
+
+Density of k
+
+0.3
+
+0.25
+
+0.2
+
+0.15
+
+0.1
+
+0.05
+
+0 30 31 32 33 34 35 36 k
+
+Density of v
+80 70 60 50 40 30 20 10
+0 0.025 0.03 0.035 0.04 0.045 0.05 v
+
+Density of q 6 5 4 3 2 1 0
+0.6 0.7 0.8 0.9 q
+
+Linear Pert.2 Pert.3 Log-linear Projection Det.SS
+37 38 39
+
+0.055
+
+0.06
+
+0.065
+
+1 1.1
+
+Density of n
+80
+60
+40
+20
+0 0.92 0.925 0.93 0.935 0.94 0.945 0.95 0.955 n
+Density of f
+8 7 6 5 4 3 2 1 0
+0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 f
+Density of theta 3.5
+3 2.5
+2 1.5
+1 0.5
+0 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 1.1 1.2 1.3 theta
+
+35
+
+nn
+
+0.96 0.94 0.92
+0.9 0.88 0.86
+0.96 0.94 0.92
+0.9 0.88 0.86
+
+Figure 2: EEE of Projection, z = 0
+Consumption Euler Equation Error EEE(Log 10) Det.SS
+30 32 34 36 38 40 k
+Employment Euler Equation Error -3
+EEE(Log 10) Det.SS -3
+30 32 34 36 38 40 k
+36
+
+-4 -5 -6 -7 -8 -9 -10 -11
+-2 -3 -4 -5 -6 -7 -8 -9
+
+Difference in EEE
+
+Figure 3: Difference in EEE, z = 0
+Difference in Euler Equation Error
+
+2
+
+0
+
+-2
+
+-4
+
+-6 1
+
+0.95 45
+
+0.9 0.85
+
+40 35 30
+
+n 0.8 25
+
+k
+
+37
+
+nn
+
+0.96 0.94 0.92
+0.9 0.88 0.86
+0.96 0.94 0.92
+0.9 0.88 0.86
+
+Figure 4: EEE of Projection, z = 0
+Consumption Euler Equation Error EEE(Log 10) Det.SS
+30 32 34 36 38 40 k
+Employment Euler Equation Error -1
+EEE(Log 10) Det.SS
+30 32 34 36 38 40 k
+38
+
+-5 -6 -7 -8 -9 -10 -11
+-1 -2 -3 -4 -5 -6 -7
+
+Difference in EEE
+
+Figure 5: Difference in EEE, z = 0
+Difference in Euler Equation Error
+
+2
+
+0
+
+-2
+
+-4
+
+-6
+
+-8 1
+
+0.95 45
+
+0.9 0.85
+
+40 35 30
+
+n 0.8 25
+
+k
+
+39
+
+zz
+
+Figure 6: Employment EEE of Perturbation 3 (n = nmax) and Simulated Grid
+
+Employment Euler Equation Error 0.06 0.04
+
+3 2 1
+
+0.02 0
+
+0 -0.02 -0.04 -0.06
+
+-1
+
+-2
+
+-3
+
+-4
+
+30 32 34 36 38 40 k
+
+-5
+
+Simulated Grid, perturbation 3
+simulated grid pt. Det.SS
+
+0.06 0.04 0.02
+0 -0.02 -0.04 -0.06
+30
+
+35 k
+
+0.96 0.94 0.92 0.9 0.88 40 0.86 n
+40
+
+n
+
+Figure 7: Employment EEE of Perturbations, -2 Contour
+0.96 0.94 0.92
+0.9 Linear Log-linear Log Pert.2
+0.88 Pert.2 Pert.3
+0.86 Log Pert.3 Det.SS 30 32 34 36 38 40 k
+41
+
+Figure 8: Approx. Policy Rule and Histogram
+
+v (z=0, k=kss)
+
+linear
+
+0.15
+
+pert.3 projection
+
+loglinear
+
+0.1
+
+0.05
+
+theta v
+
+10000 5000 0
+
+0.86 0.86
+
+1.2 1.1
+1 0.9 0.8 0.7 0.6 0.5
+10000
+5000
+0
+
+0.86 0.86
+
+0.88 0.88
+0.88 0.88
+
+0.9 0.92 n
+
+0.94
+
+0.9 0.92 n
+theta (z=0, k=kss)
+
+0.94
+
+0.9 0.92 n
+
+0.94
+
+0.9 0.92 n
+
+0.94
+
+0.96
+0.96 linear pert.3 projection loglinear
+0.96
+0.96
+
+42
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Principal Component Analysis in an Asymmetric Norm" by Ngoc Mai Tran, Maria Osipenko and Wolfgang Karl Härdle, January 2014.
+002 "A Simultaneous Confidence Corridor for Varying Coefficient Regression with Sparse Functional Data" by Lijie Gu, Li Wang, Wolfgang Karl Härdle and Lijian Yang, January 2014.
+003 "An Extended Single Index Model with Missing Response at Random" by Qihua Wang, Tao Zhang, Wolfgang Karl Härdle, January 2014.
+004 "Structural Vector Autoregressive Analysis in a Data Rich Environment: A Survey" by Helmut Lütkepohl, January 2014.
+005 "Functional stable limit theorems for efficient spectral covolatility estimators" by Randolf Altmeyer and Markus Bibinger, January 2014.
+006 "A consistent two-factor model for pricing temperature derivatives" by Andreas Groll, Brenda López-Cabrera and Thilo Meyer-Brandis, January 2014.
+007 "Confidence Bands for Impulse Responses: Bonferroni versus Wald" by Helmut Lütkepohl, Anna Staszewska-Bystrova and Peter Winker, January 2014.
+008 "Simultaneous Confidence Corridors and Variable Selection for Generalized Additive Models" by Shuzhuan Zheng, Rong Liu, Lijian Yang and Wolfgang Karl Härdle, January 2014.
+009 "Structural Vector Autoregressions: Checking Identifying Long-run Restrictions via Heteroskedasticity" by Helmut Lütkepohl and Anton Velinov, January 2014.
+010 "Efficient Iterative Maximum Likelihood Estimation of HighParameterized Time Series Models" by Nikolaus Hautsch, Ostap Okhrin and Alexander Ristig, January 2014.
+011 "Fiscal Devaluation in a Monetary Union" by Philipp Engler, Giovanni Ganelli, Juha Tervala and Simon Voigts, January 2014.
+012 "Nonparametric Estimates for Conditional Quantiles of Time Series" by Jürgen Franke, Peter Mwita and Weining Wang, January 2014.
+013 "Product Market Deregulation and Employment Outcomes: Evidence from the German Retail Sector" by Charlotte Senftleben-König, January 2014.
+014 "Estimation procedures for exchangeable Marshall copulas with hydrological application" by Fabrizio Durante and Ostap Okhrin, January 2014.
+015 "Ladislaus von Bortkiewicz - statistician, economist, and a European intellectual" by Wolfgang Karl Härdle and Annette B. Vogt, February 2014.
+016 "An Application of Principal Component Analysis on Multivariate TimeStationary Spatio-Temporal Data" by Stephan Stahlschmidt, Wolfgang Karl Härdle and Helmut Thome, February 2014.
+017 "The composition of government spending and the multiplier at the Zero Lower Bound" by Julien Albertini, Arthur Poirier and Jordan RoulleauPasdeloup, February 2014.
+018 "Interacting Product and Labor Market Regulation and the Impact of Immigration on Native Wages" by Susanne Prantl and Alexandra SpitzOener, February 2014.
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasrecahrcwhaws assupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+019 "Unemployment benefits extensions at the zero lower bound on nominal interest rate" by Julien Albertini and Arthur Poirier, February 2014.
+020 "Modelling spatio-temporal variability of temperature" by Xiaofeng Cao, Ostap Okhrin, Martin Odening and Matthias Ritter, February 2014.
+021 "Do Maternal Health Problems Influence Child's Worrying Status? Evidence from British Cohort Study" by Xianhua Dai, Wolfgang Karl Härdle and Keming Yu, February 2014.
+022 "Nonparametric Test for a Constant Beta over a Fixed Time Interval" by Markus Reiß, Viktor Todorov and George Tauchen, February 2014.
+023 "Inflation Expectations Spillovers between the United States and Euro Area" by Aleksei Netsunajev and Lars Winkelmann, March 2014.
+024 "Peer Effects and Students' Self-Control" by Berno Buechel, Lydia Mechtenberg and Julia Petersen, April 2014.
+025 "Is there a demand for multi-year crop insurance?" by Maria Osipenko, Zhiwei Shen and Martin Odening, April 2014.
+026 "Credit Risk Calibration based on CDS Spreads" by Shih-Kang Chao, Wolfgang Karl Härdle and Hien Pham-Thu, May 2014.
+027 "Stale Forward Guidance" by Gunda-Alexandra Detmers and Dieter Nautz, May 2014.
+028 "Confidence Corridors for Multivariate Generalized Quantile Regression" by Shih-Kang Chao, Katharina Proksch, Holger Dette and Wolfgang Härdle, May 2014.
+029 "Information Risk, Market Stress and Institutional Herding in Financial Markets: New Evidence Through the Lens of a Simulated Model" by Christopher Boortz, Stephanie Kremer, Simon Jurkatis and Dieter Nautz, May 2014.
+030 "Forecasting Generalized Quantiles of Electricity Demand: A Functional Data Approach" by Brenda López Cabrera and Franziska Schulz, May 2014.
+031 "Structural Vector Autoregressions with Smooth Transition in Variances ­ The Interaction Between U.S. Monetary Policy and the Stock Market" by Helmut Lütkepohl and Aleksei Netsunajev, June 2014.
+032 "TEDAS - Tail Event Driven ASset Allocation" by Wolfgang Karl Härdle, Sergey Nasekin, David Lee Kuo Chuen and Phoon Kok Fai, June 2014.
+033 "Discount Factor Shocks and Labor Market Dynamics" by Julien Albertini and Arthur Poirier, June 2014.
+034 "Risky Linear Approximations" by Alexander Meyer-Gohde, July 2014 035 "Adaptive Order Flow Forecasting with Multiplicative Error Models" by
+Wolfgang Karl Härdle, Andrija Mihoci and Christopher Hian-Ann Ting, July 2014 036 "Portfolio Decisions and Brain Reactions via the CEAD method" by Piotr Majer, Peter N.C. Mohr, Hauke R. Heekeren and Wolfgang K. Härdle, July 2014 037 "Common price and volatility jumps in noisy high-frequency data" by Markus Bibinger and Lars Winkelmann, July 2014 038 "Spatial Wage Inequality and Technological Change" by Charlotte Senftleben-König and Hanna Wielandt, August 2014 039 "The integration of credit default swap markets in the pre and postsubprime crisis in common stochastic trends" by Cathy Yi-Hsuan Chen, Wolfgang Karl Härdle, Hien Pham-Thu, August 2014
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+040 "Localising Forward Intensities for Multiperiod Corporate Default" by Dedy Dwi Prastyo and Wolfgang Karl Härdle, August 2014.
+041 "Certification and Market Transparency" by Konrad Stahl and Roland Strausz, September 2014.
+042 "Beyond dimension two: A test for higher-order tail risk" by Carsten Bormann, Melanie Schienle and Julia Schaumburg, September 2014.
+043 "Semiparametric Estimation with Generated Covariates" by Enno Mammen, Christoph Rothe and Melanie Schienle, September 2014.
+044 "On the Timing of Climate Agreements" by Robert C. Schmidt and Roland Strausz, September 2014.
+045 "Optimal Sales Contracts with Withdrawal Rights" by Daniel Krähmer and Roland Strausz, September 2014.
+046 "Ex post information rents in sequential screening" by Daniel Krähmer and Roland Strausz, September 2014.
+047 "Similarities and Differences between U.S. and German Regulation of the Use of Derivatives and Leverage by Mutual Funds ­ What Can Regulators Learn from Each Other?" by Dominika Paula Galkiewicz, September 2014.
+048 "That's how we roll: an experiment on rollover risk" by Ciril Bosch-Rosa, September 2014.
+049 "Comparing Solution Methods for DSGE Models with Labor Market Search" by Hong Lan, September 2014.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

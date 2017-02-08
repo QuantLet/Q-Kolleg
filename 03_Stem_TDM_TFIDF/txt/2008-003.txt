@@ -1,0 +1,712 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2008-003
+The Bayesian Additive Classification Tree
+Applied to Credit Risk Modelling
+Junni L. Zhang* Wolfgang H‰rdle**
+* Peking University, China ** Humboldt-Universit‰t zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+The Bayesian Additive Classification Tree Applied to Credit Risk Modelling Junni L. Zhang1, Wolfgang K. H®ardle2
+1Department of Business Statistics and Econometrics, Guanghua School of Management, Peking University, Beijing 100871, P. R. China; email: zjn@gsm.pku.edu.cn. 2Center for Applied Statistics and Economics, Wirtschaftswissenschaftliche Fakult®at, Humboldt-Universit®at zu Berlin, Spandauer Strae 1, 10178, Berlin, Germany; email: haerdle@wiwi.hu-berlin.de.
+Abstract: We propose a new nonlinear classification method based on a Bayesian "sum-of-trees" model, the Bayesian Additive Classification Tree (BACT), which extends the Bayesian Additive Regression Tree (BART) method into the classification context. Like BART, the BACT is a Bayesian nonparametric additive model specified by a prior and a likelihood in which the additive components are trees, and it is fitted by an iterative MCMC algorithm. Each of the trees learns a different part of the underlying function relating the dependent variable to the input variables, but the sum of the trees offers a flexible and robust model. Through several benchmark examples, we show that the BACT has excellent performance. We apply the BACT technique to classify whether firms would be insolvent. This practical example is very important for banks to construct their risk profile and operate successfully. We use the German Creditreform database and classify the solvency status of German firms based on financial statement information. We show that the BACT outperforms the logit model, CART and
+1
+
+the Support Vector Machine in identifying insolvent firms. Key words and phrases: Classification and Regression Tree, Financial Ratio, Misclassification Rate, Accuracy Ratio JEL-Codes: C14, C11, C45, C01
+2
+
+1 Introduction
+Classification techniques have been popularly used in many fields. Standard classification tools include linear and quadratic discriminant analysis and the logistic model. The support vector machine (SVM) (Vapnik, 1995, 1997) recently arises as an important nonlinear classification tool. It maps the input space nonlinearly into a high dimensional feature space, and tries to find linear separating hyperplanes for the classes in the feature space, penalizing the distances of misclassified cases to the hyperplanes. The SVM has been widely and successfully applied to classification problems in many domains and often shown to have excellent performance compared to other classification methods.
+Decision trees compose an important category of nonlinear classification methods. Ever since the introduction of the classification and regression tree (CART) by Breiman et al. (1984), it has attracted strong interest from researchers and practitioners. Figure 1 shows an example of a classification tree, where the root node (t1) contains all training observations, and the training data are recursively partitioned by values of the input variables (x's) until reaching the leaf (terminal) nodes (t3, t4, t6 and t7) where the classification decision (for y) is made for all observations contained therein. For regression problems in which the dependent variable is continuous, a predicted value for the dependent variable would be assigned for all observations contained in each leaf node.
+Traditional search methods for CART models use locally greedy algorithms to find the partitions. The Bayesian approaches for CART models (Chipman et al., 1998; Denison et al., 1998; Wu et al., 2007) specify a formal prior distribution for trees and other parameters and use Markov Chain Monte Carlo methods to sample them from the posterior distribution.
+3
+
+Figure 1: Example of a classification tree.
+Chipman et al. (2006) proposed the Bayesian Additive Regression Tree (BART), in which the mean of a continuous dependent variable is approximated by a sum of trees rather than a single tree. This "sum-of-trees" model is defined by a prior and a likelihood, and fitted by iterative MCMC algorithm. Each individual tree explains a different portion of the underlying mean function, but the sum of these trees turns out to be a flexible and adaptive model. Chipman et al. (2006) showed that BART outperforms several competitive models, including LASSO (Efron et al., 2004), gradient boosting (Friedman, 2001), random forests (Breiman, 2001), and neural networks with one layer of hidden units. We will extend BART into the classification context, and therefore term the resulting classification technique as the Bayesian Additive Classification Tree (BACT).
+To investigate the differences among the logit model, SVM, CART and BACT, we plot in Figure 2 the contours of these models trained to classify the solvency status of German firms using the German Creditreform database based on only two variables -- the ratio of operating income to total assets (x3 in Figure 2) and the ratio of accounts payable to
+4
+
+total sales (x24 in Figure 2). Details of this application will be discussed in Section 4. The contours for the logit model are linear, thus making it inflexible for complex applications. The SVM finds flexible smooth curves in the input space (linear hyperplanes in the feature space) that can separate the classes. The CART is based on a single tree which recursively partitions the observations by the input variables, and hence the contours are piecewise linear. The BACT is based on the sum of many trees, so the contours are not constrained to be piecewise linear as in CART; although these contours are not as smooth as in SVM, they are quite flexible in explaining complex structure.
+The rest of this paper is organized as follows. Section 2 will describe the BACT in detail. Section 3 will use several benchmark examples from the UCI Machine Learning Repository to compare the performance of the BACT with the logit model and the SVM. Section 4 will discuss our application to classification of solvency status of Germany firms using the German Creditreform database. Section 5 then concludes.
+2 The Bayesian Additive Classification Tree (BACT)
+2.1 The Model
+Consider a binary classification problem in which an dependent variable Y  {1, 0} needs to be predicted based on a set of input variables x = (x1, ∑ ∑ ∑ , xp) . The majority of classification models assume that there is a latent continuous variable Y  that determines
+5
+
+Figure 2: The contour plots for the logit model, SVM, CART, BACT. The pluses and stars represent insolvent firms and solvent firms respectively. The numbers by the contours indicate the probabilities of insolvency.
+6
+
+the value of Y as follows
+
+  Y = 1 if Y   0  Y = 0 if Y  < 0
+
+In the context of generalized linear models (GLM), the relationship of Y  and x is
+
+(1)
+
+Y  = 0 + 1x1 + ∑ ∑ ∑ + pxp + ,
+
+where the distribution of  determines the link function, e.g. logit or probit. The generalized additive models (GAM, Hastie and Tibshirani (1990)) replace each linear term in the GLM by a more generalized functional form and relate Y  to x by
+
+Y  = 0 + f1(x1) + ∑ ∑ ∑ + fp(xp) + ,
+
+where each fj is an unspecified smooth function. Following the idea of the BART in Chipman et al. (2006), we assume that Y  is related
+to x through an additive model, where each additive component is a tree based on all input variables (rather than a flexible function based on a single input variable as in GAM). In order to formally introduce the model, we first introduce some notation. Let m denote the number of trees to be used. For j = 1, ∑ ∑ ∑ , m, let Tj denote the j'th tree with a set of partition rules based on the input variables, and let Lj denote the number of leaf nodes in Tj; for l = 1, ∑ ∑ ∑ , Lj, let µjl denote the (continuous) predicted value associated with the l'th leaf node in Tj, and let Mj = {µj1, µj2, ∑ ∑ ∑ , µjLj }. For a given value of x, let g(x, Tj, Mj) denote the predicted value associated with the leaf node that an observation with input variables being x would land in based on the partition rules for Tj. Thus Y  is formally modelled as
+
+Y  = g(x; T1, M1) + g(x; T2, M2) + ∑ ∑ ∑ + g(x; Tm, Mm) + , 7
+
+(2)
+
+and we further assume that   N (0, 1), using a probit-like link.
+
+2.2 Prior Specification
+
+In order to make inferences from the model given by (1) and (2) in a Bayesian way, we
+
+need to specify a joint prior distribution for the unknown tree structures and leaf nodes
+
+parameters. We assume a priori that the tree structures and the leaf node parameters have
+
+independent distributions, so the full prior distribution can be written as
+
+m m Lj
+
+p{(T1, M1), (T2, M2), ∑ ∑ ∑ , (Tm, Mm)} = p(Tj)
+
+p(µjl).
+
+j=1 j=1 l=1
+
+We further assume that every tree follows the same prior distribution, and every µjl follows
+
+the same prior distribution. So the task of prior specification is reduced to specifying the
+
+prior distribution for a single tree T and that for a single µjl parameter. For a single tree T , we need to specify the prior distributions for its partition rules,
+
+including whether to further split a node or leave it as a leaf node, and if a further split is
+
+needed, which input variable and what values to be used for that split. We use the prior
+
+distribution for a single tree T as in Chipman et al. (2006). The prior probability of splitting
+
+any node n in tree T is
+
+psplit(n, T )  (1 + dn)-,
+
+where dn is the depth of node n in tree T (the depth of node n is the length of the path from the root node to node n; e.g., in Figure 1, the node t1 has depth 0, and the nodes t2 and t3 have depth 1).  and  here are positive hyperparameters, hence the deeper a node is, the smaller probability there is to further split it, or the larger probability that this node becomes a leaf node. It turns out that the performance of BACT is not very sensitive to the
+
+8
+
+Table 1: Prior distribution on number of terminal nodes based on different values of  and .
+
+  prior probability of trees with 1 terminal node prior probability of trees with 2 terminal nodes prior probability of trees with 3 terminal nodes prior probability of trees with 4 terminal nodes prior probability of trees with  5 terminal nodes
+
+Setting 1 0.5 2 0.5 0.383 0.098 0.017 0.003
+
+Setting 2 0.95 2 0.05 0.552 0.275 0.092 0.031
+
+Setting 3 0.95 0.1 0.05 0.012 0.004 0.002 0.932
+
+choice of alpha and beta. We tried three different settings listed in Table 1 where a priori the trees range from small size to large size, and the resulting performance was quite similar. So we just pick  = .95 and  = 2 as in Chipman et al. (2006). If a node needs to be split, the prior for the associated splitting rules assigns equal probability to each available input variable and equal probability on each available rule given the variable.
+The prior distribution of µjl is taken to be a conjugate normal distribution µjl  N (0, µ2) (conjugate because  in (2) follows a normal distribution). From (2), we can see that the expected value of Y  is equal to the sum of m different µjl parameters (recall that g(x, Tj, Mj) is the µjl parameter associated with the leaf node that an observation with input variables being x would land in based on the partition rules for Tj); because of the a priori independence of µjl's, the prior distribution for the expected value of Y  is N (0, mµ2). Combining this with (1), it can be inferred that a priori each observation has probability 0.5 belonging to class 1 and probability 0.5 belonging to class 0.
+To specify µ2, we use the following procedure. We first estimate the range of Y  (to be explained soon), and then choose µ2 such that there is at least 95% prior probability that the
+9
+
+expected value of Y  is in the estimated range. Let the training data be D = {(xi, yi)}Ni=1, where N is the number of observations in the training data. We first randomly sample yi for each observation i in the training data from truncated standard normal distributions such that the relationship in (1) holds between yi and the observed yi. Suppose that the sampled values are y(0) = {yi(0)}Ni=1, and denote the minimum and maximum values of yi(0) as min(y(0)) and max(y(0)) respectively. Then [min(y(0)), max(y(0))] is a very rough estimate of the range of Y . We choose an initial µ2(0) such that there is at least 95% prior probability that the expected value of Y  is in this interval, i.e., [-2mµ2(0), 2mµ2(0)] covers [min(y(0)), max(y(0))] and therefore µ2(0) = max - min(y(0))/2m, max(y(0))/2m . We then run the Markov Chain Monte Carlo (MCMC) algorithm to be described in Section 2.3 to generate posterior samples of yi, and suppose that we obtain one posterior draw of y(1) = {yi(1)}Ni=1 after dropping the first B1 posterior draws used to reach convergence. We assume this set of yi can be used to estimate reasonably the range of the true underlying Y , and choose the value of µ2 for further analysis such that there is at least 95% prior probability that the expected value of Y  is in the interval [min(y(1)), max(y(1))], i.e., µ2 = max - min(y(1))/2m, max(y(1))/2m .
+2.3 Generation of Posterior Samples and Inference
+We use the data augmentation method (Tanner and Wong, 1987) by treating y = {yi}Ni=1 as missing data, and then use the Gibbs sampler to generate samples from the posterior distribution p{(T1, M1), (T2, M2), ∑ ∑ ∑ , (Tm, Mm), y|D}.
+Let T(j) denote the m - 1 trees other than Tj, and let M(j) denote the parameters
+10
+
+associated with the leaf nodes in T(j). The Gibbs sampler composes of drawing m successive
+
+draws of (Tj, Mj) for j = 1, ∑ ∑ ∑ , m from p{(Tj, Mj)|T(j), M(j), y, D} followed by draw of
+
+y from p{y|(T1, M1), (T2, M2), ∑ ∑ ∑ , (Tm, Mm), D}. The draws of (Tj, Mj) can be generated
+
+similar to Chipman et al. (2006). Let y^i =
+
+m j=1
+
+g(xi;
+
+Tj
+
+,
+
+Mj
+
+)
+
+denote
+
+the
+
+fitted
+
+value
+
+for
+
+observation i from the m trees. Then yi (i = 1, ∑ ∑ ∑ , N ) can be independently generated
+
+from truncated normal distributions:   yi  N (y^i, 1) and yi  0
+ yi  N (y^i, 1) and yi < 0
+
+if yi = 1 if yi = 0
+
+After µ2 has been chosen according to the procedure described in Section 2.2, we can
+
+drop the first B2 posterior draws used to reach convergence, and use subsequent S posterior
+
+draws for inference. Denote these S posterior draws as {(T1(s), M1(s)), ∑ ∑ ∑ , (Tm(s), Mm(s))}Ss=1.
+
+Given the s'th draw, the probability that an observation with input variables x belongs to
+
+class 1 is 
+
+m j=1
+
+g(x,
+
+Tj(s),
+
+Mj(s))
+
+, where  is the cumulative distribution function of stan-
+
+dard normal distribution. Therefore, the posterior average probability that an observation
+
+with input variables x belongs to class 1 can be estimated as
+
+1 S
+
+S
+
+
+
+s=1
+
+m
+g(x, Tj(s), Mj(s))
+j=1
+
+.
+
+(3)
+
+We can use (3) to classify observations in training data or other data: if the probability
+
+calculated from (3) is larger than 0.5, then the observation is classified into class 1; otherwise
+
+it is classified into class 0.
+
+11
+
+Table 2: For five benchmark data sets from the UCI Machine Learning Repository, the number of cases, the number of variables, and the average misclassification rates for the test data using the logit model, the SVM and the BACT.
+
+Data Set breast cancer ionosphere diabetes sonar German credit
+
+# Cases 683 351 768 208 1000
+
+# Variables 9 34 8 60 30
+
+Logit 3.8% 12.8% 21.8% 29.8% 23.6%
+
+SVM 2.8% 4.5% 25.2% 19.4% 27.3%
+
+BACT 3.3% 7.2% 24.8% 17.2% 23.6%
+
+3 Benchmark Examples
+To compare the performance of the BACT with the logit model and SVM (in which radial basis function is used as the kernel, and the parameters are chosen by cross-validation), we use five data sets for binary classification from the UCI Machine Learning Repository (Asuncion and Newman, 2007): breast cancer, ionosphere, diabetes, sonar, and German credit. Columns 2-3 in Table 2 summarize the number of cases and the number of variables for these data sets. Throughout the rest of the paper, in the BACT method, we fix m = 200, B1 = 500, B2 = 1000 and S = 1000.
+We partition each data set randomly into 80% of training data and 20% of test data. The training data is used to fit the models, and misclassification rate on the test data is calculated. Such procedure is repeated for 20 times, and columns 4-6 in Table 2 report the average misclassification rates on the test data using the logit model, the SVM and the BACT. We can see that the BACT has comparable performance with the SVM, and has no worse performance than the logit model except for the "diabetes" data set.
+
+12
+
+4 Classification of Solvency Status of German Firms
+We use the German Creditreform database, which contains financial statement information on 20,000 solvent and 1,000 insolvent firms in Germany and spans the period from 1996 to 2002. Information on the insolvent firms were collected two years prior to insolvency. Chen et al. (2007); H®ardle et al. (2008) applied SVM to classify the solvency status of German firms, with the former using the German Creditreform database. We will preprocess the data set in the same way as Chen et al. (2007) do, and compare the results of our BACT with those of the logit model, CART and SVM.
+Following Chen et al. (2007), we clean the data of firms whose characteristics are very different from the others. We first eliminate firms within industries with small percentage in the industry composition and are left with 949 insolvent firms and 16583 solvent firms in four main industries -- Construction, Manufacturing, Wholesale & Retail Trade and Real Estate. We then exclude those firms whose asset size is less than 105 EUR or greater than 108 EUR, because the credit quality of small firms often depends as much on the finances of a key individual as on the firm itself and largest firms rarely go bankrupt in Germany. We further exclude the solvent firms in 1996 due to lack of insolvent firms in that year. We also eliminate firms with zero value for some variables used as denominators in calculating financial ratios to be used in classification. Several apparent outliers are then deleted and we end up with a data set with 783 insolvent firms and 9,575 solvent firms (due to slightly different ways of deleting outliers, our remaining solvent firms differ a little from the 9,583 solvent firms in Chen et al. (2007)).
+We adopt the same set of financial variables to be used for classification as in Chen et al.
+13
+
+(2007) and list them in Table 3. The five number summary of these financial variables are listed in Table 4 for insolvent firms and solvent firms separately. In order to avoid sensitivity to outliers in applying the SVM, Chen et al. (2007) truncated each financial variable to be between its 5% quantile and 95% quantile. The BACT, however, only uses the ordering of values of the input variables in the partition rules, so there is no need to do such truncation.
+We use the data from 1997 to 1999 to train the model, and use the data from 2000 to 2002 to test the resulting model. The training set contains 387 insolvent firms and 3535 solvent firms, and the test set contains 396 insolvent firms and 6040 solvent firms. Because the density of insolvent firms is rather low, we need to oversample the insolvent firms in order for the models to pick up the patterns predictive of insolvency (e.g., Berry and Linoff (2000), chap. 5). This is done through the bootstrap technique (Efron and Tibshirani, 1993; Sobehart et al., 2001). For each bootstrap sample, a training subset is constructed as follows. We use all 387 insolvent firms in the training set and randomly sample 387 solvent firms from the training set. This subset of 774 firm with 50% being insolvent is then used to train the model. When training the CART model, the training subset is further randomly partitioned into two parts stratified by the solvency status of the firms. The first part comprises of 80% of the training subset and is used to grow the tree, and the second part comprises of the remaining 20% of the training subset and is used to prune the tree. Performance measures are then evaluated using all observations (396 insolvent firms and 6040 solvent firms) in the test set. The average performance measures over 30 bootstrap samples are then calculated. We can compare average performance measures across different models.
+We consider two performance measures: Accuracy Ratio (AR) (Sobehart and Keenan,
+14
+
+Table 3: Definition of financial variables to be used for classification for the Creditreform data.
+
+Var. Definition
+
+x1 Net Income/Total Assets
+
+x2 Net Income/Total Sales
+
+x3 Operating Income/Total Assets
+
+x4 Operating Income/Total Sales
+
+x5 Earnings before Interest and Tax/Total Assets
+
+x6 Earnings Before Interest, Tax, Depreciation and Amortization/Total Assets
+
+x7 Earnings before Interest and Tax/Total Sales
+
+x8 Own Funds/Total Assets
+
+x9
+
+(Own Funds - Intangible Assets) /(Total Assets - Intangible Assets - Cash and Cash Equivalents - Lands and Buildings)
+
+x10 Current Liabilities/Total Assets
+
+x11 (Current Liabilities - Cash and Cash Equivalents)/Total Assets
+
+x12 Total Liabilities/Total Assets
+
+x13 Debt/Total Assets
+
+x14 Earnings before Interest and Tax/Interest Expense
+
+x15 Cash and Cash Equivalents/Total Assets
+
+x16 Cash and Cash Equivalents/Current Liabilities
+
+x17 (Cash and Cash Equivalents - Inventories)/Current Liabilities
+
+x18 Current Assets/Current Liabilities
+
+x19 (Current Assets - Current Liabilities)/Total Assets
+
+x20 Current Liabilities/Total Liabilities
+
+x21 Total Assets/Total Sales
+
+x22 Inventories/Total Sales
+
+x23 Accounts Receivable/Total Sales
+
+x24 Accounts Payable/Total Sales
+
+x25 log(Total Assets)
+
+x26 Increase (Decrease) in Inventories/Inventories
+
+x27 Increase (Decrease) in Liabilities/Total Liabilities
+
+x28 Increase (Decrease) in Cash Flow/Cash and Cash Equivalents
+
+15
+
+Table 4: Five number summary (minimum, lower quartile, median, upper quartile, maximum) of the financial variables for insolvent firms and solvent firms.
+
+Insolvent Firms
+
+Solvent Firms
+
+Var. min Q1 mdn. Q3 max min Q1 mdn. Q3 max
+
+x1
+
+-1.51 -0.02 0.00 0.02 1.13
+
+-4.82 0.00 0.02 0.06
+
+5.92
+
+x2
+
+-5.41 -0.02 0.00 0.01 6.10 -17.13 0.00 0.01 0.03
+
+15.91
+
+x3
+
+-0.97 -0.04 0.00 0.03 1.14
+
+-4.82 0.00 0.03 0.09
+
+5.97
+
+x4
+
+-3.38 -0.02 0.00 0.02 10.15 -44.81 0.00 0.02 0.04
+
+20.39
+
+x5
+
+-0.99 -0.01 0.02 0.05 1.15
+
+-1.51 0.02 0.05 0.11
+
+5.95
+
+x6
+
+-0.91 0.03 0.07 0.11 1.17
+
+-1.46 0.06 0.11 0.18
+
+5.95
+
+x7
+
+-3.55 -0.01 0.01 0.04 10.27 -39.63 0.01 0.02 0.05
+
+14.53
+
+x8
+
+0.00 0.00 0.05 0.14 0.96
+
+0.00 0.05 0.14 0.28
+
+0.99
+
+x9
+
+-0.86 0.00 0.05 0.17 2.31
+
+-2.68 0.05 0.16 0.37
+
+49.18
+
+x10
+
+0.01 0.37 0.52 0.73 1.00
+
+0.00 0.25 0.42 0.64
+
+4.13
+
+x11
+
+-0.35 0.33 0.49 0.69 0.99
+
+-0.86 0.17 0.36 0.58
+
+4.12
+
+x12
+
+0.01 0.54 0.76 0.89 1.00
+
+0.00 0.42 0.65 0.82
+
+4.37
+
+x13
+
+0.00 0.09 0.21 0.37 0.91
+
+0.00 0.02 0.15 0.33
+
+0.98
+
+x14 -17658.06 -0.56 1.05 1.92 433.40 -22796.04 0.86 2.16 6.55 516896.73
+
+x15
+
+0.00 0.00 0.02 0.06 0.44
+
+0.00 0.01 0.03 0.11
+
+0.90
+
+x16
+
+0.00 0.01 0.03 0.12 25.01
+
+0.00 0.01 0.08 0.30
+
+40.61
+
+x17
+
+0.01 0.43 0.68 0.97 57.44
+
+0.00 0.59 0.94 1.58 238.37
+
+x18
+
+0.03 1.00 1.26 1.84 62.63
+
+0.06 1.11 1.58 2.67 989.76
+
+x19
+
+-0.69 0.00 0.15 0.36 0.92
+
+-3.45 0.06 0.25 0.47
+
+0.98
+
+x20
+
+0.07 0.62 0.84 0.99 1.18
+
+0.01 0.56 0.85 1.00
+
+1.00
+
+x21
+
+0.07 0.40 0.61 0.94 97.26
+
+0.02 0.32 0.48 0.74 828.76
+
+x22
+
+0.00 0.08 0.16 0.34 89.96
+
+-0.14 0.05 0.11 0.21 451.09
+
+x23
+
+0.00 0.07 0.12 0.18 0.87
+
+0.00 0.05 0.09 0.14
+
+21.85
+
+x24
+
+0.00 0.09 0.14 0.19 43.96
+
+0.00 0.04 0.07 0.11
+
+61.29
+
+x25
+
+11.72 14.07 14.87 15.76 18.25
+
+11.51 14.25 15.41 16.62
+
+18.42
+
+x26 -46.89 -0.09 0.00 0.26 2.83 -282.51 -0.01 0.00 0.06 145.12
+
+x27 -12.75 -0.04 0.00 0.11 1.00 -28.91 -0.04 0.00 0.10
+
+1.00
+
+x28 -1283.20 -0.61 0.00 0.18 1.00 -2513.39 -0.27 0.00 0.26
+
+1.75
+
+16
+
+2001; Engelmann et al., 2003) and misclassification rate. AR is calculated using the Cumu-
+
+lative Accuracy Profiles (CAP) (Sobehart and Keenan, 2001; Engelmann et al., 2003) curve.
+
+To obtain the CAP curve, the firms are first ordered by risk scores from riskiest to safest. For
+
+BACT and the Logit model, the risk score is simply the predicted probability of insolvency;
+
+for SVM, the risk score can be calculated as distance to the separating hyperplane. The
+
+higher the risk score is, the riskier the firm is. For a given fraction q of the total number of
+
+firms, the CAP curve is constructed by calculating the fraction r(q) of the insolvent firms
+
+whose risk scores are equal to or larger than the minimum score at fraction q.
+
+Figure 3 plots the CAP curve for the test set of the Creditreform data where the scoring
+
+model is the BACT model trained using one bootstrap training subset. In the ideal case, the
+
+insolvent firms will be assigned the highest risk scores, and therefore the CAP curve would
+
+be increasing linearly and then stay at one. For a random model without any discriminative
+
+power, the fraction q of all firms with the highest risk scores will contain fraction q of all
+
+insolvent firms, and therefore the corresponding CAP curve will be a straight line connecting
+
+the points (0, 0) and (1, 1). AR is defined as the ratio of the area between the CAP curve
+
+for a scoring model and that for the random model to the area between the CAP curve for
+
+the ideal case and that for the random model. The value of AR lies between zero and one,
+
+with zero indicating no discriminative power of the scoring model and one indicating perfect
+
+discriminative power. Mathematically, AR is defined as
+
+AR 
+
+1 0
+
+rmodel
+
+(q)dq
+
+1 0
+
+rideal(q)dq
+
+- -
+
+1 2
+1 2
+
+,
+
+(4)
+
+where rmodel(q) and rideal(q) indicate r(q) for the scoring model and the ideal case respec-
+
+tively,
+
+and
+
+the
+
+integrals
+
+can
+
+be
+
+approximated
+
+by
+
+1 N
+
+N i=1
+
+r(i/N
+
+)
+
+where
+
+N
+
+is
+
+the
+
+number
+
+of
+
+17
+
+fraction of insolvent companies 0.0 0.2 0.4 0.6 0.8 1.0
+
+observations in the test set.
+
+ideal case
+
+scoring model
+
+random model
+
+0.0 0.2 0.4 0.6 0.8 1.0 fraction of all firms
+Figure 3: The CAP curve for the test set of the Creditreform data where the scoring model is the BACT model trained using one bootstrap training subset.
+We also consider three types of misclassification rates: the overall misclassification rate, the type I misclassification rate and type II misclassification rate. Here type I misclassification refers to the case when the firm is in fact insolvent, but the model classifies the firm as solvent; whereas type II misclassification refers to the case when the firm is in fact solvent, but the model classifies the firm as insolvent. Financial institutions usually seek to keep either type of misclassification rate as low as possible (Sobehart et al., 2001).
+Table 5 reports the average values of AR in (4) and the three types of misclassification rates for the Logit model, CART and BACT. Apparently, BACT outperforms the Logit model and CART in all aspects except for average Type I misclassification rate for which BACT is slightly worse than CART.
+18
+
+Table 5: The average values of AR and the three types of misclassification rates for the Logit model, CART and BACT.
+
+Performance Measure AR Overall Misclassification Rate Type I Misclassification Rate Type II Misclassification Rate
+
+Logit 52.1% 30.2% 28.3% 30.3%
+
+CART 58.7% 33.8% 27.2% 34.3%
+
+BACT 60.4% 26.6% 27.6% 26.5%
+
+Rather than using all data from 2000 to 2002 as the test set, Chen et al. (2007)
+
+used a test subset for each bootstrap sample, which comprises of all insolvent firms and a
+
+random sample of the same number of solvent firms in the test set. They reported that the
+
+median
+
+AR
+
+value
+
+for
+
+30
+
+bootstrap
+
+samples
+
+was
+
+60.5%,
+
+using
+
+1 10
+
+10 i=1
+
+p(i/10)
+
+to
+
+approximate
+
+the integrals in calculating the AR value. The median overall misclassification rate was
+
+calculated as 28.2%. If we adopt the same procedure, BACT yields a median AR value of
+
+66.5% and median overall classification rate as 27.2%. So BACT also outperforms SVM in
+
+identifying the insolvent firms.
+
+5 Concluding Remarks
+In this paper, we propose the Bayesian Additive Classification Tree as a general nonlinear classification method. We show that, based on the sum of many trees, the BACT can yield flexible class boundaries, and that it has excellent performance compared with the logit model, CART and SVM, as demonstrated through several benchmark examples and a real application to credit risk modelling.
+Because the partitions in each tree depend only on the ordering of the values of the
+19
+
+input variables rather than the values themselves, the BACT is robust to extreme values in the input variables, and the results do not change with monotone transformation of any input variable. Hence little data processing is needed when using the BACT technique. Another thing to note is that although we only discuss binary classification in this paper, extension to multi-class classification is straightforward and left as future research.
+Acknowledgement
+This work was supported by Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk". Junni L. Zhang's research was also sponsored by Chinese NSF grant 10401003 and USA NIH 1 R03 TW007197-01A2.
+20
+
+References
+Asuncion, A. and Newman, D. (2007), "UCI Machine Learning Repository," Http://www.ics.uci.edu/mlearn/MLRepository.html, University of California, Irvine, School of Information and Computer Sciences.
+Berry, M. and Linoff, G. (2000), Mastering Data Mining, John Wiley and Sons.
+Breiman, L. (2001), "Random forests," Machine Learning, 5≠32.
+Breiman, L., Friedman, J. H., Olshen, R. A., and Stone, C. J. (1984), Classification and Regression Trees, CRC Press.
+Chen, S., H®ardle, W. K., and Moro, R. A. (2007), "Modeling Default Risk with Support Vector Machines," To appear in Journal of Quantitative Finance.
+Chipman, H. A., George, E. I., and McCulloch, R. E. (1998), "Bayesian CART model search," Journal of the American Statistical Association, 935≠948.
+-- (2006), "BART: Bayesian Addtive Regression Trees," Technical Report, Graduate School of Business, University of Chicago.
+Denison, D., Mallick, B., and Smith, A. (1998), "A Bayesian CART Algorithm," Biometrika, 363≠377.
+Efron, B., Hastie, T., Johnstone, I., and Tibshirani, R. (2004), "Least angle regression," Annals of Statitics, 407≠499.
+Efron, B. and Tibshirani, R. J. (1993), An introduction to the bootstrap, Chapman and Hall. 21
+
+Engelmann, B., Hayden, E., and Tasche, D. (2003), "Testing rating accuracy," Risk, 82≠86. Friedman, J. H. (2001), "Greedy function approximation: A gradient boosting machine,"
+The Annals of Statistics, 1189≠1232. H®ardle, W. K., Moro, R. A., and Sch®afer, D. (2008), "Estimating Probabilities of Default
+With Support Vector Machines," to appear in Journal of Banking and Finance. Hastie, T. J. and Tibshirani, R. J. (1990), Generalized Additive Models, Chapman and Hall. Sobehart, J. and Keenan, S. (2001), "Measuring default risk accurately," Risk. Sobehart, J., Keenan, S., and Stein, R. (2001), "Benchmarking Quantitative Default Risk
+Models: A Validation Methodology," Algo Research Quarterly. Tanner, M. A. and Wong, W. H. (1987), "The calculation of posterior distributions by data
+augmentation (with discussion)," Journal of American Statistical Association, 528≠550. Vapnik, V. (1995), The Nature of Statistical Learning Theory, Springer, New York, NY. -- (1997), Statistical Learning Theory, Wiley, New York, NY. Wu, Y., Tjelmeland, H., and West, M. (2007), "Bayesian CART: prior specification and
+posterior simulation," Journal of Computational and Graphical Statistics, in press.
+22
+
+SFB 649 Discussion Paper Series 2008
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Testing Monotonicity of Pricing Kernels" by Yuri Golubev, Wolfgang H‰rdle and Roman Timonfeev, January 2008.
+002 "Adaptive pointwise estimation in time-inhomogeneous time-series models" by Pavel Cizek, Wolfgang H‰rdle and Vladimir Spokoiny, January 2008.
+003 "The Bayesian Additive Classification Tree Applied to Credit Risk Modelling" by Junni L. Zhang and Wolfgang H‰rdle, January 2008.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

@@ -1,0 +1,769 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2009-004
+New recipes for estimating default
+intensities
+Alexander Baranovski* Carsten von Lieres* André Wilch*
+* WestLB AG, Düsseldorf, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+New recipes for estimating default intensities
+Alexander Baranovski, Carsten von Lieres and André Wilch (all WestLB AG)1
+Abstract: This paper presents a new approach to deriving default intensities from CDS or bond spreads that yields smooth intensity curves required e.g. for pricing or risk management purposes. Assuming continuous premium or coupon payments, the default intensity can be obtained by solving an integral equation (Volterra equation of 2nd kind). This integral equation is shown to be equivalent to an ordinary linear differential equation of 2nd order with time dependent coefficients, which is numerically much easier to handle. For the special case of Nelson Siegel CDS term structure models, the problem permits a fully analytical solution. A very good and at the same time simple approximation to this analytical solution is derived, which serves as a recipe for easy implementation. Finally, it is shown how the new approach can be employed to estimate stochastic term structure models like the CIR model.
+Keywords: CDS spreads, bond spreads, default intensity, credit derivatives pricing, spread risk modelling, credit risk modelling, loan book valuation, CIR model
+JEL classification: C13, C20 and C22
+Disclaimer: The ideas presented below reflect the personal view of the authors and are not necessarily identical to the official methodology used at WestLB AG
+Acknowledgements: The partial financial support from the Deutsche Forschungsgemeinschaft via SFB 649 "Ökonomisches Risiko" is gratefully acknowledged.
+Introduction
+CDS and bond spread curves as well as the implied default intensities derived from these spread curves are key input to many applications, for instance credit derivatives pricing or spread risk and credit risk models for risk management purposes. Typically, the output of such pricing or risk models is quite sensitive to the way such spread and intensity curves are estimated from observable market quotes. It is common practice to make certain simplifying assumptions in the estimation procedure; a prominent example is the assumption of piecewise constant default intensities that are derived by "bootstrapping" the CDS quotes observed for different maturities. However, such procedures are often not stable with respect to outliers (e.g. due to data quality issues), and generally produce curves containing discontinuities and jumps.
+This paper proposes a stable estimation procedure that avoids the shortcomings outlined above and at the same time is numerically easy to implement. The method relies on a standard model class commonly used to fit the observed term-structure of quotes for CDS or bond spreads, namely Nelson Siegel type models.2 The default intensity is represented as the solution of an integral equation (a Volterra equation of 2nd kind) that is derived from the standard pricing approach for CDS or defaultable debt instruments by making the assumption of continuous premium or coupon payments. This integral equation may be transformed to an ordinary linear differential equation of 2nd order with time dependent coefficients, the numerical treatment of which is straightforward.
+The mechanics and the performance of the new fitting procedure is demonstrated using the example of Nelson Siegel type functions fitted to CDS spreads observed on an arbitrarily chosen trade day (25.03.2008). Nelson Siegel functions have the advantage of permitting a closed form analytical
+1 Alexander_Baranovski@WestLB.de, Carsten_von_Lieres@WestLB.de, Andre_Wilch@WestLB.de 2 This model class may be generalized to a much broader class with sufficient degrees of freedom to accommodate almost any term-structure shape ­ results will be presented in a separate paper.
+
+solution to the 2nd order differential equation mentioned above. Apart from this feature, there is no necessity to stick to the Nelson Siegel functions for the fitting procedure to work. In fact, we have developed a very general class of exponential-polynomial functions with sufficient degrees of freedom to accommodate almost any term-structure shape and containing the Nelson Siegel- or Svensonmodels as special cases. Details will be presented in a separate article.
+Finally, the estimation of stochastic default intensity models based on the new procedures to fit default intensities is demonstrated for the CIR model.
+Default intensity as solution of a Volterra equation of 2nd kind
+In the sequel, the case of CDS spread curves considered in order to derive smooth default intensities; however, the ideas may be transferred in a straightforward way also to bond spreads.
+Following the standard approach to CDS pricing [Hull 2003], the expected values of default leg and premium leg should be equal. The expectation of the present value of the premium payments is given by
+
+n
+E(PVPr emium ) = s  ti  D(ti )  E(I >ti ) i =1
+where s = s(T) denotes the quoted CDS spread for maturity T, 0 < t1 < ... < tn = T are the premium payment dates, ti = ti ­ ti-1 (t0 = 0, usually ti = 0.25 years), and  is the stochastic timing of default. In the context of a default intensity model based on a deterministic default intensity (t) and short rate r(t), this expression gets the following form:
+
+ [ ] (1)
+
+E(PVPr emium ) =
+
+n i =1
+
+s  ti
+
+
+
+exp
+
+-
+
+ti 0
+
+r(u) + (u) du  =
+
+s
+
+n
+ti
+i =1
+
+
+
+f (ti )
+
+The function f is defined as
+
+(2)
+
+f
+
+(t
+
+)
+
+=
+
+exp
+
+-
+
+t
+
+0
+
+[r(u)
+
++
+
+
+
+(u)]du
+
+
+
+The usual definitions of discount factor and survival probability have been used:
+
+D(ti
+
+)
+
+=
+
+exp
+
+-
+
+ti 0
+
+r(u)du
+
+
+
+E(I >ti
+
+)
+
+=
+
+P(
+
+>
+
+ti )
+
+=
+
+exp -
+
+ti 0
+
+
+
+(u
+
+)du
+
+
+
+The assumption of a deterministic default intensity and short rate will be relaxed below, where a CIR model is assumed for (t).
+Assuming continuous premium payments, equation (1) may be approximated by
+
+T
+E(PVPr emium )  s  f (t)dt
+0
+The present value of the default leg is given by:
+
+PVDefault =   D( )  I T
+
+Assuming a fixed (non-stochastic) loss given default , the expectation of the present value of default payments is:
+
+ E(PVDefault
+
+)
+
+=
+
+
+
+
+
+E(D(
+
+)I
+
+T
+
+)
+
+=
+
+
+
+
+
+T 0
+
+D(t ) (t )
+
+exp
+
+-
+
+t 0
+
+ (u )du
+
+dt
+
+which may be rewritten as
+
+T
+E(PVDefault ) =   (t) f (t)dt
+0
+
+Summing up the previous formulae, the pricing equation E(PVPr emiúm ) = E(PVDefault ) becomes
+
+TT
+(3) s(T )   f (t)dt =    (t) f (t)dt
+00
+
+This is an integral equation for the function f defined in equation (2).
+
+For the time being suppose that the CDS-spread curve s(t) as well as the risk free short rate r(t) are given. Differentiating the defining equation of f yields the following expression:
+
+(4)
+
+ (t )
+
+=
+
+-
+
+f '(t) f (t)
+
+-
+
+r(t)
+
+Inserting equation (4) into equation (3), one obtains the central result:
+
+(5) f (T ) = 1 - T  s(T ) + r(t) f (t)dt
+
+0 
+
+
+
+This is a Volterra equation of 2nd kind for the function f.
+
+Equivalent representation as 2nd order differential equation
+In principle, the Volterra equation (5) may be solved numerically in order to obtain the default intensity (t). However, numerical procedures for solving integral equations directly are complex and sometimes even unstable. Therefore another approach to solving equation (3) is proposed that relies on solving an ordinary linear differential equation and is therefore numerically much easier to handle.
+
+By differentiating equation (5) once, one gets the following expression:
+
+(6) f (T ) = - s(T ) T f (t)dt - s(T ) f (T ) - r(T ) f (T )
+
+0
+
+
+
+Rearranging terms leads to
+
+(7)
+
+T 0
+
+f
+
+(t)dt
+
+=
+
+-
+
+ s(T
+
+)
+
+
+
+f (T ) +
+
+f
+
+(T
+
+)
+
+
+
+ 
+
+s(T 
+
+)
+
++ r(T ) 
+
+Further differentiation of (6) yields
+
+(8) f (T ) = - s(T ) T f (t)dt - 2 s(T ) f (T ) - s(T )  f (T ) - r(T ) f (T ) - r(T ) f (T )
+
+0
+
+
+
+By inserting equation (7) in equation (8), and rearranging terms, one finally obtains the structure of a differential equation for f:
+
+(9)
+
+f  +
+
+fg +
+
+f
+
+h = 0
+
+with
+
+g
+
+=r
+
++s 
+
+-
+
+s s
+
+and
+
+h
+
+= r'+ 2s 
+
+-
+
+s s
+
+ 
+
+r
+
++
+
+s 
+
+ . 
+
+Equation (9) is a linear differential equation of 2nd order with time dependent coefficients and can easily be solved numerically, using the following initial conditions:
+
+f (0) = 1 (10) f '(0) = -(0) - r(0)
+(0) = s(0) 
+
+Comparison to common practise: The bootstrapping approach revisited
+Assuming the default intensity  to be constant over the time interval [0, T], the integral equation (3) simplifies to
+
+
+
+[0,T ]
+
+=
+
+s(T ) 
+
+Now suppose that observations of the spread s are given for different maturities T1 < ... < Tm (e.g. m = 5 and T1 = 1Y, T2 = 3Y, T3 = 5Y, T4 = 7Y, T5 = 10Y) and assume a piecewise constant structure for  of the form
+
+m
+(11) (t) = k I (Tk-1,Tk ] (t) with T0 = 0. k =1
+By inserting this representation (11) into equation (3), one obtains the following solution:
+
+ ( )   ( ) ( ) ( ) ( )(12)
+
+s Tk
+
+k
+
+ 
+
+Jj
+j =1
+
+j
+
+
+
+exp
+
+j -1 i =1
+
+i+1 - i
+
+Ti
+
+
+
+=
+
+
+
+
+
+  
+
+k j =1
+
+
+
+j
+
+J
+
+j
+
+j
+
+
+
+exp
+
+j -1 i =1
+
+i+1 - i
+
+Ti 
+
+( )  ( )Tj
+where J j  j = D(t)  exp -  j  t dt , k = 1, 2, ..., m.
+T j -1
+This set of equations (12) may be solved recursively w.r.t. 1, 2, ..., m: The first equation (for k = 1) leads to the solution 1 = s(T1)/ which is then inserted into the second equation (for k = 2). This in turn produces a nonlinear equation for 2 which can be solved e.g. by the Newton method. Continuing in a similar manner, one obtains the default intensities 3, ..., m for all the remaining maturity buckets.
+
+The special case of Nelson Siegel: Exact analytical solution and numerical
+recipe
+In order to demonstrate how the estimation procedure proposed in this paper works in practice, and how it performs in comparison to the standard bootstrapping approach, it is applied using a parametric class of curves proposed by C. Nelson and A. Siegel [Nelson 1987]. However, the estimation procedure does not rely on any specific model class and works with other types of curves as well (see footnote 1).
+
+In a first step, Nelson Siegel curves are fitted to the observed CDS quotes on an arbitrarily chosen trade day (25.03.2008, source: MarkIT). Also, a Nelson Siegel model for the short rate is fitted to the quoted the EURIBOR term structure. The results are plotted in figure 1.
+
+Euribor and associated short rate
+
+CDS spread
+
+0.046 0.045 0.044 0.043
+
+EURIBOR short rate
+
+800 AA
+700 A BBB
+600 BB B
+500
+400
+
+rate
+CDS spread [bps]
+
+0.042
+
+300
+
+0.041
+
+200
+
+0.04
+0.039 1 5 9 13 17 21 25 29 33 37 41 45 49 53 57 61 65 69 73 77 81 85 89 93 97 101 105 109 113 117 121 tenor [months]
+
+100
+0 1 8 15 22 29 36 43 50 57 64 71 78 85 92 99 106 113 120 tenor [months]
+
+Figure 1: Short rate and CDS spread curves from fitting a Nelson-Siegel model to quotes as of 25.03.2008
+
+Substituting the fitted curves s(t) and r(t) = 0.045 ­ (0.000613 + 0.0059 t) exp(-0.617 t) for the CDS spreads and short rate as well as a fixed loss given default  = 0.6 and the initial conditions (10) into the second order differential equation (9), a numerical integration of the ODE leads to a solution for f. By use of (4) one obtains the default intensity  from f and subsequently the probability of default (PD) according to the relation
+
+PD
+
+(T
+
+)
+
+=
+
+1
+
+-
+
+exp
+
+-
+
+T
+
+0
+
+
+
+(u
+
+)du
+
+
+
+The results for  and PD are shown in figure 2.
+
+Default intensity
+CDS implied default rate on 25.03.08 AA A BBB BB B
+9.00% 8.00% 7.00% 6.00% 5.00% 4.00% 3.00% 2.00% 1.00% 0.00%
+1 5 9 13 17 21 25 29 33 37 41 45 49 53 57 61 65 69 73 77 81 85 89 93 97 101 105 109 113 117 time [months]
+
+Probability of default
+
+60.00%
+
+PD term structure AA A BBB BB B
+
+50.00%
+
+40.00%
+
+30.00%
+
+20.00%
+
+10.00%
+
+0.00% 1 5 9 13 17 21 25 29 33 37 41 45 49 53 57 61 65 69 73 77 81 85 89 93 97 101 105 109 113 117 time [months]
+
+rate [% ] PD [% ]
+
+Figure 2: Default intensity and cumulative probability of default derived from Nelson-Siegel fitting as of 25.03.2008
+Comparison to bootstrapping approach For the sake of comparison, also the standard bootstrapping method is applied to the data set described above. Applying recursion formula (12) to the averaged quotes as of 25.03.2008 referring to European A-rated corporates, one obtains the piece-wise constant default intensity represented in figure 3. The corresponding smooth default intensity curve implied by the proposed fitting procedure is also plotted. One clearly sees that especially for maturities below 5 years, the piecewise constant function displays an economically unintuitive behaviour (large jump sizes) and is potentially vulnerable to anomalies in the data (zig-zag behaviour). These disadvantages are avoided in the Nelson Siegel fitting approach.
+default rates 0.04
+
+0.03
+
+0.02
+
+0.01
+
+years 0 2 4 6 8 10
+Figure 3: Default intensity for European A-rated corporates as of as of 25.03.2008
+
+Closed form solution to Nelson-Siegel fitting problem
+A further advantage of the Nelson-Siegel fitting procedure is worth mentioning: The differential equation (9) even permits a closed form analytical solution if the spot rate is assumed to be constant (r(t) = r ). For example, the default probability implied from the European A-rated CDS contracts with Nelson-Siegel fitting function s(t) = 0.013 ­ 0.0094 exp(- t) on the trading day 25.03.2008 calculates as
+
+PD(t
+
+)
+
+=
+
+1
+
+-
+
+e(r
+
+-
+
+)t
+
+- 0.025
+
+(t
+
+)
+
+(t
+
+)0.152
+
+ -
+
+0.166
+
+
+
++
+
+0.995
+ (t)
+
+ 
+
++
+
+0.197
+
+
+
+e0.025
+
+(t
+
+)
+1
+
+F1
+
+(2,1.85,-0.025
+
+(t
+
+))
+
+where  = 0.369, (t) = exp(- t), r = 0.0434 and 1F1(a,b,z) is the Kummer confluent hyper geometric
+function. The parameter  governs the exponential decay rate in a Nelson-Siegel fit of the CDS spreads. Clearly, the numerical solution fnumerical to equation (9) based on the fitted continuous spot rate curve r(t) differs from the analytical solution fanalytical based on a constant average spot rate r . But it turns out that the PD-estimates derived from fnumerical and fanalytical are numerically identical.
+
+Simple approximation formula for default probabilities
+When analysing the behaviour of the fitting procedure, it turns out that some of the parameters are amazingly stable over time. This observation is at the basis of an approximation formula to the exact PD term structure that directly refers to the CDS spread curves. The focal point is that the ratio of CDS
+spread curves and PD term structure µR(t,x) = CDSR(t,x) / PDR(t,x) = s(t,x) / PDR(t,x) is stable over time for a large range of rating classes (the subscript R denotes rating classes, while the arguments t and x refer to term structure and trading date). For the rating classes from AA to BBB, the relation
+µR(t,x) = µ(t) holds for the analysed period from 07.01.08 until 21.04.08. Numerically, one finds the following relation:
+
+( )( ) ( )PDR t, x = 0.065 + 0.468e-0.039t + 0.835e-0.222t -1CDSR t, x ,
+x, R = AA A  BBB, 0.5  t [ years]  10
+The analyzed period contains quite an erratic behaviour of implied cumulative default probabilities, as is shown in figure 4 for A-rated corporates.
+default probabilitis 0.25
+
+0.20
+
+0.15
+
+0.10
+
+0.05
+
+days 0 10 20 30 40 50 60 70
+Figure 4: Implied term-structure of cumulative default probabilities for A-rated corporates with t = 1, 3, 5, 7, and 10 years. The underlying observation period covers quotes from 07.01.08 until 21.04.08.
+This gives confidence in the validity of the approximation formula also for future periods. Figure 5 demonstrates the performance of the approximation by comparing µ(t) to the nonlinear fit µR(t,x).
+m-ratio 1.2
+
+1.0
+
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+maturity @months D 0 20 40 60 80 100
+Figure 5: Comparison of µ(t) (dotted curve) to the nonlinear fit µR(t,x) (continuous curve).
+Fitting of stochastic models of default intensity: CIR Model
+The above approach also provides a good starting point for fitting stochastic models of default intensities and short rates. In the sequel, the case of a stochastic default intensity obeying the CIR (Cox Ingersoll Ross) model is considered as an example which could be easily extended to a more general setting. In the framework of the CIR model [Cox 1985], the stochastic default intensity is given by
+
+d =   ( - )dt +  dW
+
+with a Wiener process W. The equation (2) for f generalizes as follows:
+
+(13)
+
+fCIR
+
+(t
+
+)
+
+=
+
+D(t)
+
+
+
+E
+
+exp
+
+-
+
+t
+
+0
+
+ (u )du
+
+
+
+
+
+
+(0)
+
+
+
+
+D(t)
+
+
+
+exp(-
+
+A(t
+
+)
+
+
+
+
+
+(0)
+
++
+
+C(t
+
+))
+
+with an affine term structure exp(-A(t) (0) + C(t)) defined through by the coefficients (see e.g. [McNeil 2005] for a derivation)
+
+( )A(t) =
+
+(
+
+2
++ )+ 2
+
+e  t
+
+-1
+
+-1
+
+( )C(t) =
+
+2 2
+
+
+ ln(
+
+2  e( + )t / 2
++  ) et -1 +
+
+2
+
+ 
+
+ =  2 + 2 2
+
+This function fCIR solves the differential equation (9). The solution can be obtained by the numerical methods described above. Given this solution for fCIR and the discount rates D(t), equation (13) allows
+to estimate the three parameters ,  and  of the CIR process for . Standard nonlinear regression techniques may be employed to solve the minimization problem:
+
+[ ( )]i
+
+fCIR (ti ) D-1(ti ) - exp
+
+-
+
+A(ti ) s(0)   -1 + C(ti )
+
+2
+
+ min
+{ , , }
+
+The first term in the brackets represents the survival probability implied by the fitting procedure described above while the second term represents the survival probability implied by the CIR model
+(depending on ,  and ). Figure 6 demonstrates the results of such a non-linear regression fit based on the market data observed on 25.03.2008. The following values were obtained for the CIR
+parameters:  = 2.74,  = 450.73 and  = -2.38.
+
+survival probability 1.00
+0.95
+0.90
+0.85
+0.80
+0.75
+years 0 2 4 6 8 10
+Figure 6: Survival probabilities implied by the Nelson Siegel fitting procedure (blue curve) and CIR model with fitted parameters ,  and  (red curve) for 25.03.2008
+
+Outlook
+In this article a new procedure for estimating default intensities based on observed CDS spreads or bond spreads has been presented. The procedure has two main advantages:
+1. The default intensity naturally becomes a continuous function of t and no economically unintuitive discontinuities arise.
+2. The procedure is stable w.r.t. outliers and noisy data (e.g. due to erroneous CDS-quotes) because is relies on a preceding smoothing procedure.
+The new estimation procedure also serves as a stable basis for fitting stochastic default intensity models like.
+
+Future research will be conducted to analyse the effect of more general model classes in the context of the new estimation procedure for default intensities. We expect such generalized model classes to provide interesting economic insight into the time evolution of CDS or bond spreads and the associated default intensities. Accordingly, the statistical properties of such models will also be subject of further investigation.
+References
+[Hull 2003]: Hull, J.C.,and White, A., 2003. The valuation of Credit Default Swap Options, Journal of Derivatives, 10(3), 40-50
+[Cox 1985]: Cox, J.C., Ingersoll, J.E., and Ross, S.A., 1985. A Theory of the Term Structure of Interest Rates, Econometrica, 53, 385-407
+[Nelson 1987]: C. Nelson and A. Siegel, 1987. Parsimonious modelling of yield curves, J. of Business 60 (1987), 473 489
+[McNeil 2005]: A. McNeil, R. Frey and P. Embrechts. Quantitative Risk Management, Princeton University Press 2005
+
+SFB 649 Discussion Paper Series 2009
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Implied Market Price of Weather Risk" by Wolfgang Härdle and Brenda López Cabrera, January 2009.
+002 "On the Systemic Nature of Weather Risk" by Guenther Filler, Martin Odening, Ostap Okhrin and Wei Xu, January 2009.
+003 "Localized Realized Volatility Modelling" by Ying Chen, Wolfgang Karl Härdle and Uta Pigorsch, January 2009.
+004 "New recipes for estimating default intensities" by Alexander Baranovski, Carsten von Lieres and André Wilch, January 2009.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

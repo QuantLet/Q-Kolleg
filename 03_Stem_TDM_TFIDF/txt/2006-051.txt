@@ -1,0 +1,2504 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2006-051
+Regression methods in pricing American and Bermudan options using consumption processes
+Denis Belomestny* Grigori N. Milstein** Vladimir Spokoiny*
+* Weierstrass Institute for Applied Analysis and Stochastics, Berlin, Germany
+** Ural State University, Ekaterinburg, Russia
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+Regression methods in pricing American and Bermudan options using consumption processes
+Belomestny, Denis 
+Weierstrass-Institute Mohrenstr. 39, 10117 Berlin, Germany
+belomest@wias-berlin.de
+Milstein, Grigori N.
+Ural State University Lenin Str. 51, 620083 Ekaterinburg, Russia
+Grigori.Milstein@usu.ru
+Spokoiny, Vladimir
+Weierstrass-Institute Mohrenstr. 39, 10117 Berlin, Germany
+spokoiny@wias-berlin.de
+Abstract
+Here we develop methods for efficient pricing multidimensional discretetime American and Bermudan options by using regression based algorithms together with a new approach towards constructing upper bounds for the price of the option. Applying the sample space with payoffs at the optimal stopping times, we propose sequential estimates for continuation values, values of the consumption process, and stopping times on the sample paths. The approach admits constructing both low and upper bounds for the price by Monte Carlo simulations. The methods are illustrated by pricing Bermudan swaptions and snowballs in the Libor market model.
+Keywords: American and Bermudan options, Low and Upper bounds, Monte Carlo simulations, Consumption process, Regression methods, Optimal stopping times
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 Economic Risk.
+This work was finished while the author was a visitor of the Weierstrass-Institute fu®r Angewandte Analysis und Stochastik (WIAS), Berlin, due to the financial supports from this institute and DFG (grant No. 436 RUS 17/137/05) which are gratefully acknowledged.
+1
+
+belomestny, d., milstein, g. and spokoiny, v. AMS 2000 Subject Classification: 60H30, 65C05, 91B28
+
+2
+
+1 Introduction
+Valuation of high-dimensional American and Bermudan options is one of the most difficult numerical problems in financial engineering. Besides its practical relevance, investigations in this field are of great theoretical importance because pricing of the American style options is an archetype for high-dimensional optimal stopping problems. Several approaches have been proposed recently for pricing such options using Monte Carlo simulation technique (see, e.g. [1]-[14], [16]-[20], [24, 25, 27] and references therein). With simulation approaches it is often an open question whether or not an obtained numerical result is sufficiently accurate. As a rule, during the realization of a numerical procedure there arise many errors of different kind which are difficult to take into account. That is why in a number of works (see, e.g. [3, 4, 8, 16, 17, 19, 20, 24, 25]), different procedures are proposed that are able to produce lower and upper bounds for the true price. The knowledge of lower and upper bounds makes possible to evaluate the accuracy of price estimates. Our aim is to construct effective numerical methods providing with both lower and upper bounds for the price of American and Bermudan options.
+In [3] we develop an approach for pricing American options both in the case of discretetime and continuous-time financial models. The approach is based on the fact that an American option is equivalent to a European one with a consumption process involved (the so called Earlier Exercise Premium representation). It allows us, in principle, to construct iteratively a sequence v1, V 1, v2, V 2, v3, ..., where v1, v2, v3, ..., is an increasing sequence of lower bounds and V 1, V 2, ..., is a decreasing sequence of upper bounds. Unfortunately, the construction of the above sequence of bounds requires very laborious calculations. Even V 2 is, as a rule, too expensive. In [4] we propose to use an increasing sequence of low bounds for constructing both upper bound and low bound at initial position (t0, X0). It is assumed that the sequence is not too expensive from computational point of view. This can be achieved by using local low bounds which take into account a small number of steps ahead. The method of [4] is suitable for getting rough estimates. However, for obtaining more accurate results one needs rather expensive calculations.
+Let us consider a discrete-time financial model
+(Bti , Xti ) = (Bti , Xt1i , ..., Xtdi ), i = 0, 1, ..., I,
+where Bti is price of a scalar riskless asset (we assume that Bti is deterministic and Bt0 = 1) and Xti = (Xt1i, ..., Xtdi) is price vector of risky assets. Along with index ti we shall use below the index i, writing (ti, Xi) instead of (ti, Xti). Let fi(x) be a payoff at time ti provided that Xti = Xi = x, x  X  Rd, where X is a state space (e.g., X = Rd, X = R+d ).
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+3
+
+We assume that the modelling is based on the filtered space (, F , (Fi)0iI, P ), where the probability measure P is the risk-neutral pricing measure for the problem
+under consideration, and Xi is a Markov chain with respect to the filtration (Fi)0iI . With respect to the probability measure P the discounted process Xi/Bi is a mar-
+tingale and the price ui(Xi) of the American option is given by
+
+ui(x) = sup BiE
+ Ti,I
+
+f (Xti,x) B
+
+.
+
+(1.1)
+
+In (1.1) Xttji,x is the value of Markov chain at instant tj  ti starting at ti from x, Ti,I is set of stopping times  taking values in {i, i + 1, ..., I}.
+The value process ui (Snell envelope) can be determined by induction as follows:
+
+uI(x) = fI(x), ui(x) = max fi(x), BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+, i = I - 1, ..., 0.
+
+(1.2)
+
+We see that theoretically the problem of evaluating u0(X0), the price of the discrete-time American option at the initial position (t0, X0), is easily solved using iteration procedure (1.2). However, if X is high dimensional and I is large, the iteration procedure is not practical.
+In order to use regression methods for sequential evaluation of ui, one can consider the (d + 1)-dimensional sample
+
+(mXi,
+
+Bi Bi+1
+
+ui+1
+
+(mXi+1
+
+)),
+
+m=
+
+1, ..., M,
+
+i
+
+=
+
+0, ..., I
+
+- 1,
+
+(1.3)
+
+from
+
+(Xi,
+
+Bi Bi+1
+
+ui+1(Xi+1)),
+
+where
+
+(ti,
+
+mXi)
+
+are
+
+M
+
+independent
+
+trajectories
+
+all
+
+starting
+
+from the point (t0, X0) (see, e.g., [27] and [14]). The use of procedure (1.2) and sample
+
+(1.3) for sequential evaluating ui(Xi) together with modern methods of multidimensional
+
+approximation (see e.g., [12], [28] and references therein) can give effective algorithms for
+
+pricing American and Bermudan options (see e.g. [5], [18]). The samples using optimal
+
+stopping times  ti,x =  i,x were first introduced in [22] (see [11] and [14] as well). They
+
+are from (Xi,
+
+Bi B
+
+f (Xti+1,Xi+1 ))
+
+=
+
+(Xi,
+
+Bi B
+
+f
+
+(Xti,Xi
+
+)),
+
+with
+
+
+
+=
+
+ ti+1,Xi+1
+
+and have the
+
+form
+
+(mXi,
+
+Bi B
+
+f (mXti+1,
+
+mXi+1 ))
+
+=
+
+(mXi,
+
+Bi B
+
+f (mXti,
+
+mXi )),
+
+ =  ti+1, ,mXi+1
+
+m = 1, ..., M.
+
+(1.4)
+
+Applying (1.3), we use some estimate ui+1(Xi+1) instead of ui+1(Xi+1) while applying (1.4), we can employ an estimate  =  ti+1, Xi+1 for  ti+1, Xi+1. This makes possible to
+
+construct a low bound for continuation value (low continuation value) and an upper
+
+bound for consumption process (upper consumption process). If the payoff at (ti, mXi)
+is less or equal to a low continuation value, then first, the position (ti, mXi) belongs to the continuation region (consequently, it is natural to take  ti, mXi =  ti+1, )mXi+1 and
+
+second the consumption process at (ti, mXi) is equal to zero. Otherwise the position
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+4
+
+(ti, mXi) can belong either to the exercise region or to the continuation region. In the latter case we compute the upper consumption process at (ti, mXi) as a difference between the payoff and the low continuation value and set  ti, mXi = ti. As a result all the positions (ti, mXi) are equipped with stopping times and consumption processes. Due to this it becomes possible to find the low and upper bounds for the price of the option under consideration at the initial position (t0, X0).
+In Section 2, we recall the approach (see [3], [4]) to pricing American and Bermudan options using consumption processes in the form suitable for our purposes. Furthermore, we give here a comparison with the dual approach (see [24], [16]) for the first time. In Section 3, we propose a number of algorithms for subsequent estimating optimal stopping times and continuation values using different regression methods. Special attention is paid to linear regression methods (see [22] and [11]). In contrast to other works using the regression approach in pricing American and Bermudan options, we construct together with an estimate of continuation value an upper consumption process. Section 4 gives formulas for the Monte Carlo calculation of low and upper bound at the initial position (t0, X0). Section 5 is devoted to simulations: the results of numerical experiments for Bermudan swaptions and cancellable snowballs in a full factor Libor market model confirm efficiency of the proposed algorithms.
+
+2 The approach based on consumption processes
+To be self-contained, let us briefly recall the approach to pricing American and Bermudan options using consumption processes [3].
+
+2.1 The continuation value, the continuation and exercise regions.
+
+For the considered American option, let us introduce the continuation value
+
+Ci(x) = BiE
+
+ui+1(Xi+1 Bi+1
+
+)
+
+|Xi
+
+=
+
+x
+
+, i = 0, ..., I - 1; CI(x) = fI(x),
+
+the continuation region C and the exercise (stopping) region E :
+
+(2.1)
+
+C = {(ti, x) : fi(x) < Ci(x)} , E = {(ti, x) : fi(x)  Ci(x)} .
+
+(2.2)
+
+Clearly, (tI, x)  E for any x. Let Xji,x, j = i, i + 1, ..., I, be the Markov chain starting at the step i from the point
+x : Xii,x = x, and mXji,x, m = 1, ..., M, be independent trajectories of the Markov chain.
+The Monte Carlo estimator ui(x) for ui(x) (in the case when E is known) has the form
+
+ui(x)
+
+=
+
+1 M
+
+M m=1
+
+Bi B
+
+f
+
+(mXi,x),
+
+(2.3)
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+5
+
+where  is the first time at which Xji,x gets into E (of course,  in (2.3) depends on i, x, and m :  =m  i,x). Thus, for estimating ui(x), it is sufficient to examine sequentially the position (tj, mXji,x) for j = i, i + 1, ..., I whether it belongs to E or not.
+Let us give a simple sufficient condition for moving along the trajectory using a low
+
+bound v. Introduce the set
+
+Cv =
+
+(tk, x) : fk(x) < BkE
+
+vk+1(Xk+1) Bk+1
+
+|Xk
+
+=
+
+x
+
+.
+
+Since Cv  C, the sufficient condition consists in fulfilment of the inclusion (tj, mXji,x)  Cv .
+Clearly, if vi1, ..., vil are some lower bounds, then the function vi(x) = max1kl vik(x) is a lower bound as well. Besides, fi(x) is also a lower bound. Henceforth we consider
+lower bounds satisfying the inequality vi(x)  fi(x).
+
+2.2 Equivalence of American options to European ones with consumption processes involved.
+
+For 0  i  I - 1 equation (1.2) can be rewritten in the form
+
+ui(x) = BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
++ fi(x) - BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
++
+.
+
+Introduce the functions
+
+i(x) = fi(x) - BiE
+
+ui+1(Xi+1 Bi+1
+
+)
+
+|Xi
+
+=
+
+x
+
++
+, i = I - 1, ..., 0.
+
+Due to (2.4), we have
+
+(2.4) (2.5)
+
+uI-1(XI-1) = BI-1E
+
+fI (XI BI
+
+)
+
+|FI-1
+
++ I-1(XI-1),
+
+uI-2(XI-2) = BI-2E
+
+uI-1(XI-1) BI-1
+
+|FI-2
+
++ I-2(XI-2)
+
+= BI-2E
+
+fI (XI BI
+
+)
+
+|FI-2
+
++ BI-2E
+
+I-1(XI BI-1
+
+-1)
+
+|FI-2
+
++ I-2(XI-2).
+
+Doing in just the same way further, we get
+
+ui(Xi) = BiE
+
+fI (XI BI
+
+)
+
+|Fi
+
+I-(i+1)
+
++ Bi
+
+E
+
+k=1
+
+I -k (XI BI-k
+
+-k
+
+)
+
+|Fi
+
++i(Xi), i = 0, ..., I - 1.
+
+(2.6)
+
+Putting X0 = x and recalling that B0 = 1, we obtain
+
+u0(x) = E
+
+fI (XI ) BI
+
+I-1
++ 0(x) + E
+i=1
+
+i(Xi) Bi
+
+.
+
+(2.7)
+
+Formula (2.7) gives the value of the European option with the payoff function fi(x) and with the consumption process i defined by (2.5).
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+6
+
+2.3 Upper and low bounds using consumption processes.
+
+The obtained result about equivalence of the discrete-time American option to the European option with the consumption process cannot be used directly because ui(x) and consequently i(x) are unknown. We take advantage of the discovered connection in the following way (see [3]).
+Let vi(x) be a lower bound on the true option price ui(x). We introduce the function (upper consumption process)
+
+i,v(x) = fi(x) - BiE
+
+vi+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
++
+, i = 0, ..., I - 1.
+
+(2.8)
+
+Clearly,
+
+i,v(x)  i(x).
+
+Hence the price Vi(x) of the European option with the payoff function fi(x) and with the upper consumption process i,v(x) is an upper bound: Vi(x)  ui(x).
+Conversely, if Vi(x) is an upper bound on the true option price ui(x) and
+
+i,V (x) = fi(x) - BiE
+
+Vi+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
++
+, i = 0, ..., I - 1,
+
+(2.9)
+
+then
+
+i,V (x)  i(x).
+
+and the price vi(x) of the European option with the low consumption process i,V (x) is a lower bound: vi(x)  ui(x).
+Thus, starting from a lower bound vi1(x), one can construct the upper bound Vi1(x) as the European option with the consumption process i,v1(x) and so on. This procedure gives us the sequences vi1(x)  vi2(x)  vi3(x)  ...  ui(x), and Vi1(x)  Vi2(x)  ...  ui(x). All the bounds vk and V k can in principle be evaluated by the Monte Carlo simulations. However each further step of the procedure requires labor-consuming
+calculations and in practice it is possible to realize only a few steps of this procedure.
+In this connection, much attention is given to variance reduction technique and some
+constructive methods reducing statistical errors are proposed (see [3]).
+
+2.4 Comparison with the dual approach
+
+Without loss of generality we assume in this section that Bi  1. The dual approach, developed in [24] and [16] is based on the following observation. For any 0  i  I and any supermartingale (Sj)ijI with Si = 0 we have that
+
+ui(Xi) = sup E (f (X )|Fi)  sup E (f (X ) - S |Fi)
+
+ Ti,I
+
+ Ti,I
+
+E
+
+max
+ijI
+
+(fj (Xj )
+
+-
+
+Sj )
+
+|Fi
+
+,
+
+(2.10)
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+7
+
+hence the right-hand side provides an upper bound for ui(Xi). It can be shown that the equality in (2.10) is attained at the martingale part of the Doob-Meyer decomposition of the price process ui:
+
+Mi = 0,
+
+j
+
+Mj =
+
+(ul(Xl) - E (ul(Xl)|Fl-1)) ,
+
+l=i+1
+
+i < j  I.
+
+The duality representation provides a simple way to estimate the Snell envelope from above, using a lower approximation process {vi(Xi)}. Let M v be the martingale
+
+M0v = 0; Mjv = Mjv-1 + vj(Xj) - E (vj(Xj)|Fj-1)
+jj
+= vl(Xl) - E (vl(Xl)|Fl-1) , 1  j  I.
+l=1 l=1
+
+(2.11)
+
+Then, for any 0  i  I the process Mij = Mjv - Miv, j = i, . . . , I, is a martingale with Mii = 0 and according to (2.10)
+
+ViD(Xi) := E
+
+max
+ijI
+
+fj(Xj) - Mij
+
+|Fi
+
+ ui(Xi).
+
+In particular, for i = 0
+
+V0D(X0) = v0(X0) + E max
+0jI
+
+j-1
+fj(Xj) - vj(Xj) + (E (vl+1(Xl+1)|Fl) - vl(Xl))
+l=0
+
+The upper bound V0(X0) obtained in section 2.3 can be transformed to
+
+I-1
+V0(X0) = E (fI (XI )) + E [fi(Xi) - E (vi+1(Xi+1)|Fi)]+
+i=0
+I-1
+= v0(X0) + E (max {fi(Xi), E (vi+1(Xi+1)|Fi)} - vi(Xi)) ,
+i=0
+
+where it is assumed that
+
+. (2.12) (2.13)
+
+fi(Xi)  vi(Xi), i = 0, . . . , I - 1, vI (XI ) = fI (XI ).
+It is interesting to compare V0 and V0D starting from the same low bound vi. A comprehensive comparison of V0(X0) and V0D(X0) seems to be difficult and we restrict ourselves to some examples. First, we construct examples where V0(X0)  V0D(X0). Let us define
+ := min {0  i  I - 1 : fi(Xi)  E (vi+1|Fi)} ,
+
+and  = I if fi(Xi) < E (vi+1|Fi) for all i. We see that if  = I or
+
+fi(Xi)  E (vi+1(Xi+1)|Fi) , i  ,
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+8
+
+with probability 1, then
+
+ -1
+
+V0(X0) = v0(X0) + E (E (vi+1(Xi+1)|Fi) - vi(Xi))
+
+i=0
+
+I-1
+
++ E(f (X ) - v (X )) + E
+
+(fj(Xj) - vj(Xj))  V0D(X0).
+
+j= +1
+
+The strict inequality V0 < V0D is achieved in the following simple example with I = 3. Due to (2.12), the dual price at time 0 can be computed via the formula
+
+V0D = E max{f0, f1 - v1 + Ev1, max{f2, E(u3|F2)} + Ev1 + E(v2|F1) - v1 - v2}
+
+= E max{f0, f1 - v1 + Ev1, E(v2|F1) + u2 - v2 - v1 + Ev1}
+
+= E max{f0, max{f1, E(v2|F1) + u2 - v2} - v1 + Ev1},
+
+(2.14)
+
+where we use the equality u2 = max{f2, E(u3|F2)} and the dependence of quantities involved on the underlying process Xi is not shown explicitly for the sake of simplicity. Formula (2.13) gives
+
+V0 = E max{f0, Ev1} + E(max{f1, E(v2|F1)} - v1) + E(max{f2, E(v3|F2)} - v2).
+Let us take constant payoffs satisfying
+
+(2.15)
+
+f0 < f1 < f2 < f3, f1 + f2 < f0 + f3.
+
+Clearly, ui = f3, i = 0, . . . , 3 and any low bound vi satisfies
+
+f0  v0  f3, f1  v1  f3, f2  v2  f3, v3 = f3.
+
+Formula (2.15) gives V0 = f3 and (2.14) implies V0D = E max{f0, E(v2|F1) + f3 - v2 + Ev1 - v1}.
+
+Clearly,
+
+V0D  E[E(v2|F1) + f3 - v2 + Ev1 - v1] = f3.
+
+If v1 and v2 are such that the inequality
+
+E(v2|F1) + f3 - v2 + Ev1 - v1  f0
+
+is fulfilled with probability 1, then V0D = f3. However, if
+
+E(v2|F1) + f3 - v2 + Ev1 - v1 < f0
+
+with positive probability, then
+
+(2.16)
+
+max{f0, E(v2|F1) + f3 - v2 + Ev1 - v1} > E(v2|F1) + f3 - v2 + Ev1 - v1
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+9
+
+with the same probability and consequently V0D > V0. The inequality (2.16) is achieved, for example, if Ev1 is close to f1, E(v2|F1) is close to f2 and v1 and v2 are equal to f3
+with positive probability. At the same time it is possible to construct examples when V0D  V0. Indeed, let us take vi(Xi) = fi(Xi) for all i = 0, . . . , I - 1, then according to (2.12)
+
+j-1
+
+V0D = f0 + E
+
+max
+0jI
+
+(E (fl+1|Fl) - fl)
+
+l=0
+
+and due to (2.13)
+
+I-1
+V0 = f0 + (E (fi+1|Fi) - fi)+  V0D.
+i=0
+
+However, the method based on the representation (2.6) has some advantages over dual
+
+approach. First, V0(X0) depends on vi monotonically that is if we have two low bounds v and v such that vi(Xi)  vi(Xi) for all i, then V0(X0)  V0(X0). This immediately follows from the first line in (2.13). For the dual method this is not always the case.
+
+Indeed, with three exercises (I = 2) formula (2.12) gives
+
+V0D = E max{f0, E(v1|F0) + u1 - v1}.
+
+Consider the case when the probability of event A := {Ev1 - u1 - v1  f0} is positive and v1 < u1 -  with some constant  > 0. Then taking v1 = v1 + /2 on A and v1 = v1 +  outside A we obtain
+
+V0D := E max{f0, E(v1|F0) + u1 - v1} > V0D,
+
+though v1 > v1. Second, adaptive local low bounds of the form
+
+vi(x)
+
+=
+
+max
+1kl
+
+vik (x),
+
+i = 0, . . . , I - 1,
+
+where v1(x), . . . , vl(x) are low bounds at x ordered according to their complexity and l may depend on x, can be used to construct V0(X0) (see [4]). Third, V0(X0) is computationally less expensive than V0(X0). It is also worthwhile mentioning that our approach allows us to construct low bounds using upper ones.
+
+2.5 Bermudan options.
+
+As before we consider the discrete-time model
+
+(Bi, Xi) = (Bi, Xi1, ..., Xid), i = 0, 1, ..., I.
+
+However, now an investor can exercise his right only at time belonging to the set of stopping times S = {s1, ..., sl} within {0, 1, ..., I} where sl = I. The price ui(Xi) of the Bermudan option is given by
+
+ui(Xi) = sup BiE
+ TS[i,I]
+
+f
+
+(X B
+
+)
+
+|Fi
+
+,
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+10
+
+where TS[i,I] is the set of stopping times  taking values in {s1, ..., sl}  {i, i + 1, ..., I}. The value process ui is determined as follows:
+
+uI(x) = fI(x),  max
+ui(x) = 
+
+fi(x), BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+, i  S,
+
+BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+, i / S.
+
+Thus, we obtain that the Bermudan option is equivalent to the European option with
+
+the payoff function fi(x) and with the consumption process i defined by
+
+  i(x) = 
+
+fi(x) - BiE
+
+ui+1(Xi+1 Bi+1
+
+)
+
+|Xi
+
+=
+
+x
+
+0, i / S.
+
++
+, i  S,
+
+From here all the results for discrete-time American options obtained in this section can
+
+be carried over to the Bermudan options. For example, if vi(x) is a lower bound of the
+
+true option price ui(x), the price Vi(x) of the European option with the payoff function
+
+fI(x) and with the consumption process
+
+  i,v(x) = 
+
+fi(x) - BiE
+
+vi+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+0, i / S,
+
++
+, i  S,
+
+is an upper bound: Vi(x)  ui(x).
+
+3 Optimal stopping times and algorithms with low continuation values
+The samples with optimal stopping times are introduced first in [22] (see [11] as well).
+
+3.1 Basic relations for optimal stopping times
+The optimal stopping time  i,x =  ti,x depends on the initial position (ti, x). It is defined recurrently by the dynamic programming principle in the following way. We set
+
+ I,x =  T,x = T,  i,x = ti{Ci(x)fi(x)} +  i+1,Xii+,x1 {Ci(x)>fi(x)}
+= ti{ui(x)=fi(x)} +  i+1,Xii+,x1 {ui(x)>fi(x)}, i = I - 1, ..., 0.
+
+(3.1)
+
+Thus, for any position (ti, x), the optimal stopping time  i,x is either equal to ti :  i,x = ti, or  i,x > ti. It is also clear that (ti, x) is a stopping point (i.e.,  i,x = ti) iff (ti, x)  E (i.e., (ti, x) belongs to the exercise region). The instant  i,x is the first one at which the
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+11
+
+trajectory (tj, Xji,x) either gets into E during i  j  I -1 or  i,x = I. So, ( i,x, Xi,ix,x)  E (see (2.2). Let us give some recurrence relations for ui(x) and Ci(x) :
+
+ui(Xi) = max{fi(Xi), Ci(Xi)}, uI(x) = f (x),
+
+Ci(Xi) =
+
+Bi Bi+1
+
+E(ui+1(Xi+1)|Xi
+
+),
+
+CI(x) = f (x),
+
+Ci(Xi)
+
+=
+
+Bi Bi+1
+
+E(max{fi+1
+
+(Xi+1
+
+),
+
+Ci+1
+
+(Xi+1)}|Xi
+
+),
+
+ui(Xi)
+
+=
+
+max{fi(Xi),
+
+Bi Bi+1
+
+E(ui+1(Xi+1)|Xi)}.
+
+(3.2a) (3.2b) (3.2c) (3.2d)
+
+We note that
+
+ui+1(Xi+1) = Bi+1E
+
+f
+
+(Xti+1 B
+
+,Xi+1
+
+)
+
+|Xi+1
+
+,
+
+(3.3)
+
+E(ui+1(Xi+1)|Xi) = E
+
+Bi+1E
+
+f
+
+(Xti+1,Xi+1 B
+
+)
+
+|Fi+1
+
+= Bi+1E
+
+f
+
+(Xti+1,Xi+1 B
+
+)
+
+|Xi
+
+,
+
+|Fi
+
+where
+
+ =  ti+1,Xi+1 .
+
+Hence due to (3.2b),
+
+Ci(Xi) = BiE
+
+f
+
+(Xti+1,Xi+1 B
+
+)
+
+|Xi
+
+.
+
+We emphasize that for any stopping time   ti+1 the function
+
+vi+1(x) = Bi+1E
+
+f (Xti+1,x) B
+
+is a low bound for ui+1(x). Since
+
+Ci(x) = sup BiE
+ Ti+1,I
+
+f
+
+(Xti+1 B
+
+,Xi+1
+
+)
+
+|Xi
+
+=
+
+x
+
+= sup BiE
+ Ti+1,I
+
+f (Xti,x) B
+
+,
+
+the function
+
+ci(x) = BiE
+
+f (Xti,x) B
+
+is a low continuation value for any stopping time   ti+1.
+
+(3.4)
+(3.5) (3.6) (3.7) (3.8)
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+12
+
+3.2 Subsequent estimating optimal stopping times
+
+Considering Ci(x) as a regression function (see (3.5)), it is natural to introduce after [22] and [11] the sample
+
+(mXi,
+
+Bi B
+
+f (mXti+1,
+
+mXi+1 ))
+
+=
+
+(mXi,
+
+Bi B
+
+f (mXti,
+
+mXi )),
+
+ =  ti+1, ,mXi+1 m = 1, ..., M,
+
+(3.9)
+
+from (Xi,
+
+Bi B
+
+f (Xti+1,Xi+1 ))
+
+=
+
+(Xi,
+
+Bi B
+
+f (Xti,Xi )),
+
+where
+
+
+
+=  ti+1,Xi+1 .
+
+We are about to use (3.10) for subsequent constructing an estimate  ti, mXi for op-
+
+timal stopping time  ti, mXi . Clearly,  I, mXI =  I, mXI = I. Let  ti+1, ,mXi+1 i =
+
+I - 1, ..., 1, (in reality  ti+1, )mXi+1 be known. Using the sample (3.10) at the step ti, we
+
+evaluate Ci(mXi) as a regression due to (3.5). Let Ci(mXi) be an estimate of Ci(mXi)
+
+(we recall that knowledge of Ci(mXi) gives ui(mXi) due to (3.2a)). If fi(mXi)  Ci(mXi) then  ti, mXi = ti, otherwise  ti, mXi =  ti+1, mXi+1 (see (3.1)). As a result we obtain the
+
+sample like (3.10) at the step ti-1:
+
+(mXi-1,
+
+Bi-1 B
+
+f
+
+(m
+
+Xti
+
+,
+
+mXi ))
+
+=
+
+(mXi-1,
+
+Bi-1 B
+
+f
+
+(mXti-1
+
+,
+
+mXi-1 )),
+
+ =  ti, mXi , m = 1, ..., M.
+
+(3.10)
+
+Coming to  t1, mX1, we can evaluate u0(X0). Indeed, since X0 is a nonrandom vector, we have (see (3.2d) and (3.4)
+
+u0(X0)
+
+=
+
+max{f0(X0),
+
+1 B1
+
+E (u1 (X1t0 ,X0
+
+)}
+
+=
+
+max
+
+f0(X0), E
+
+f (Xt1,X1 ) B
+
+,  =  t1,X1 . (3.11)
+
+So, our main problem is to evaluate the continuation value Ci(mXi) using sample (3.10). There are a lot of nonparametric regression methods to attain this objective
+
+(see, e.g., [15]). In the next subsection we propose some algorithms basing both on local
+
+modelling and least squares estimation. In contrast to other works using the regression
+
+approach in pricing American options, we construct together with the estimate Ci(mXi)
+
+an upper consumption process.
+
+The most appropriate are methods for which the estimate Ci(mXi) is a low continu-
+
+ation value. Then we are able to construct both a low and an upper bounds.
+
+3.3 Algorithms with the local Monte Carlo approach
+
+For every position (ti, mXi), m = 1, ...M, let us construct N = Ni,m additional inde-
+
+pendent trajectories on [ti, ti+1], i.e., the trajectories with the length of one step. To the
+
+instant ti+1
+
+we
+
+obtain
+
+N +1
+
+points
+
+n
+
+X ti, mXi
+ti+1
+
+,
+
+n
+
+=
+
+0, 1, ..., N, where we put
+
+X0
+
+ti, mXi ti+1
+
+=m
+
+Xi+1.
+
+Introduce
+
+the
+
+notation
+
+m,nXi+1
+
+:=n
+
+X ti, m
+ti+1
+
+Xi
+
+.
+
+Let
+
+m,n
+
+:=
+
+ ti+1,
+
+.m,n Xi+1
+
+Due
+
+to
+
+(3.5) and the Monte Carlo approach (let us note that m,n =  ti+1, m,nXi+1 is equal to
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+13
+
+ ti, mXi provided  ti, mXi  ti+1; see also (3.7)) , we have
+
+Ci(mXi) = BiE
+
+f
+
+(Xti+1 B
+
+,Xi+1
+
+)
+
+|Xi
+
+=m
+
+Xi
+
+Bi N+
+
+1
+
+N n=0
+
+fm,n
+
+(Xtmi+,1n, m,n Bm,n
+
+Xi+1
+
+)
+
+.
+
+(3.12)
+
+For
+
+every
+
+point
+
+m,nXi+1
+
+=n
+
+X ti, mXi
+ti+1
+
+we
+
+find
+
+the
+
+nearest
+
+one
+
+among
+
+k Xi+1 ,
+
+k
+
+=
+
+1, ...M,
+
+let it be k(m,n)Xi+1. For the position (ti+1, k(m,n)Xi+1), it is known the estimate k(m,n)
+
+of the optimal stopping time  ti+1, .k(m,n)Xi+1 To avoid confusion, let us emphasize that
+
+the points m,nXi+1 lie on the trajectories starting from the same position (ti, mXi)
+
+while the points k(m,n)Xi+1 lie on the trajectories which have different starting positions
+
+(ti,
+
+k(m,n)Xi). For any
+
+point
+
+Xi+1
+
+=
+
+X ti, mXi
+ti+1
+
+one
+
+can define the
+
+stopping 
+
+=  (Xi+1) 
+
+ti+1 analogously to k(m,n), i.e., first, you find the nearest point to Xi+1 among kXi+1, k =
+
+1, ...M, say kXi+1, and second, for the position (ti+1, kXi+1) you know the estimate k of the optimal stopping time  ti+1, kXi+1 which you take as  :  =  (Xi+1) = k. Clearly,
+
+for the points m,nXi+1 this stopping time  =  (m,nXi+1) := m,n coincides with k(m,n).
+
+Introduce
+
+Ci(x) = BiE
+
+f
+
+(Xti+1,Xi+1 B
+
+)
+
+|Xi
+
+=
+
+x
+
+.
+
+From (3.7) and (3.8) it follows
+
+Ci(x) = Ci(x) + ri(x),
+
+(3.13)
+
+where ri(x)  0, i.e. Ci(x) is a low continuation value at the position (ti, x). Analogously to (3.12) we have
+
+Ci(mXi)
+
+=
+
+Bi N +1
+
+N n=0
+
+f (X )m,n
+
+ti+1, m,nXi+1 m,n
+
+Bm,n
+
++ i(mXi)
+
+=
+
+Bi N +1
+
+N n=0
+
+f (X )k(m,n)
+
+ti+1, m,nXi+1 k(m,n)
+
+Bk(m,n)
+
++ i(mXi),
+
+(3.14)
+
+where i(mXi) is the Monte Carlo error which becomes small with increasing N. Let us
+
+pay
+
+attention
+
+that
+
+in
+
+general
+
+the
+
+points
+
+X ti+1,
+m,n
+
+m,n Xi+1
+
+do
+
+not
+
+belong
+
+to
+
+the
+
+considered
+
+sample of M independent trajectories all starting from the initial point (t0, X0). That is
+
+why the sum in (3.14) cannot be taken as an estimate for the continuation value Ci(mXi).
+
+For the continuation value, it is natural to introduce the estimate
+
+Ci(mXi)
+
+=
+
+Bi N +1
+
+N n=0
+
+f (XB ) .k(m,n)
+
+ti+1, k(m,n)Xi+1 k(m,n)
+k(m,n)
+
+(3.15)
+
+Let us note that in (3.15) and in (3.14) we consider the trajectories Xsti+1, k(m,n)Xi+1 and Xsti+1, m,nXi+1 starting from different positions (ti+1, k(m,n)Xi+1) and (ti+1, m,nXi+1) but
+with the same sources of randomness. If M is large, the points m,nXi+1 and k(m,n)Xi+1
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+14
+
+are at a short distance and we get
+
+Ci(mXi)
+
+=
+
+Bi N +1
+
+N n=0
+
+f (X )k(m,n)
+
+ti+1, m,nXi+1 k(m,n)
+
+Bk(m,n)
+
+- i(mXi)
+
+= Ci(mXi) - i(mXi) - i(mXi),
+
+where the approximation error i is small. From (3.13) we obtain
+
+(3.16)
+
+Ci(mXi) = Ci(mXi) + i(mXi) - ri(mXi),
+
+(3.17)
+
+where i = -i - i. We can claim that the estimate Ci(mXi) is a low continuation value at the position
+(ti, mXi) within the accuracy depending on N and M , because i becomes small with
+
+increasing M and N and ri  0. It should be noted that ri essentially depends on a
+
+procedure of subsequent estimating optimal stopping times and can be comparatively
+
+large (i.e. ri justified.
+
+0) if the procedure is unsuccessful. Thus the following theorem is
+
+Theorem 3.1. The estimate Ci(mXi) is a low continuation value within the accuracy depending on N (the accuracy determined by the Monte Carlo error) and M (the accuracy determined by the approximation error).
+
+Corollary 3.2. Consider the consumption
+
+i(mXi) = [fi(mXi) - Ci(mXi)]+.
+
+(3.18)
+
+Because i(mXi) = [fi(mXi) - Ci(mXi) + ri(mXi) - i(mXi)]+, we have
+
+i(mXi)  i(mXi), if ri  i, [i(mXi) - i(mXi) + ri(mXi)]+  i(mXi)  i(mXi), if i > ri.
+
+(3.19)
+
+We see that i(mXi) is an upper consumption in the most typical case ri  i, otherwise it can be not an upper bound however in such a case i(mXi) is insignificantly distinguished from i(mXi), i.e., i(mXi) is an upper consumption within the accuracy depending on M and N .
+
+3.4 Algorithms with the local Monte Carlo approach, continuation
+
+For the estimate (3.15) we use one nearest point k(m,n)Xi+1 among mXi+1, m = 1, ..., M,
+
+to
+
+every
+
+point
+
+m,nXi+1.
+
+Now
+
+let
+
+us
+
+for
+
+every
+
+point
+
+m,nXi+1
+
+=n
+
+X ti, mXi
+ti+1
+
+find
+
+a
+
+few
+
+(say
+
+Km,n) nearest ones among mXi+1, m = 1, ...M. Let us denote them by k[m,n]Xi+1, k =
+
+1, ..., Km,n (in contrast to k(m, n), the function k[m, n] is a multifunction). The estimates
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+15
+
+k[m,n] of the optimal stopping times k[m,n] :=  ti+1, k[m,n]Xi+1 are known. Then the following expression
+
+vi+1(nXttii+, 1mXi )
+
+=
+
+Bi+1 Km,n
+
+Km,n k=1
+
+f (X )ti+1, k[m,n]Xi+1
+k[m,n]
+Bk[m,n]
+
+(3.20)
+
+is a low
+
+bound
+
+for
+
+ui+1(x)
+
+at the
+
+position
+
+(ti+1,
+
+Xn
+
+ti, mXi ti+1
+
+)
+
+(of
+
+course,
+
+within the
+
+accuracy
+
+of approximation).
+
+Clearly,
+
+Ci(mXi)
+
+=
+
+Bi Bi+1
+
+∑
+
+N
+
+1 +1
+
+N
+vi+1(nXttii+, 1mXi )
+n=0
+
+=
+
+Bi N +1
+
+N n=0
+
+1 Km,n
+
+Km,n k=1
+
+f (X )ti+1, k[m,n]Xi+1
+k[m,n]
+Bk[m,n]
+
+(3.21)
+
+is a low continuation value at (ti, mXi) (of course, within the accuracy depending on M and N ).
+
+The estimate (3.15) is the particular case of (3.21) when Km,n = 1.
+
+Remark 3.3. For estimate (3.21), analogs of Theorem 3.1 and Corollary 3.2 are true as well.
+
+3.5 Algorithms with k-NN estimates
+
+In the previous algorithms we construct Ni,m additional trajectories for every point mXi,
+
+m = 1, ...M. Let us consider N = Ni,m nearest points m,1Xi, ...,m,N Xi to the point
+
+mXi instead of constructing the additional trajectories. All the points m,1Xi, ...,m,N Xi
+
+belong to the set { mXi, m = 1, ...M }. We have m,nXi(+ti1, m,nXi) =m,n Xi+1, n =
+
+0, 1, ..., N, m,0Xi =m Xi, m,0Xi+1 =m Xi+1, with known m,n =  ti+1, m,nXi+1 and
+
+f
+
+(X (ti+1,
+ ti+1,
+
+)m,n Xi+1 )
+m,n Xi+1
+
+(let
+
+us
+
+note
+
+that
+
+we
+
+use
+
+another
+
+notation
+
+in
+
+this
+
+subsection
+
+and,
+
+in
+
+particular, we emphasize that the points m,nXi+1 belong to the set { mXi+1, m =
+
+1, ...M }). Then analogously to (3.15), we evaluate:
+
+Ci(mXi)
+
+=
+
+Bi N +1
+
+N n=0
+
+fm,n
+
+(X ti+1, m,nXi+1
+m,n
+Bm,n
+
+)
+
+.
+
+(3.22)
+
+This estimate is an analog of (3.15). To get an analog of (3.21) let us find for every point m,nXi+1 =m,n Xi(+ti1, m,nXi) a few (say Km,n) nearest ones among mXi+1, m =
+1, ...M. Denote them by m,n,kXi+1, k = 1, ..., Km,n. Then
+
+Ci(mXi)
+
+=
+
+Bi
+
+∑
+
+N
+
+1 +
+
+1
+
+N n=0
+
+1 Km,n
+
+Km,n k=1
+
+ti+1, m,n,kXi+1
+f (X )m,n,k B ,m,n.k
+
+(3.23)
+
+where m,n,k are known estimates of the optimal stopping times m,n,k :=  ti+1, .m,n,kXi+1 We note that m,n,kXi+1 in (3.23) are distinguished from m,n,kXi+1 in (3.21).
+
+Remark 3.4. For estimate (3.23) analogs of Theorem 3.1 and Corollary 3.2 are true as well.
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+16
+
+Remark 3.5. k-NN estimates belong to the class of local averaging estimates (see [15]). One can use other estimates of this class, for example, kernel estimates and local polynomial kernel estimates. Note, that the latter type of estimates can be helpful for estimating deltas.
+
+3.6 Linear regression
+
+Regression-based methods approximate the continuation value using a basis function
+
+expansion:
+
+K
+Ci(x)  irr(x), i = 0, 1, . . . , I - 1,
+r=1
+
+where {r(x)}rK=1 is a set of basis functions each mapping X to R. In the notations
+
+Ci(x)  i (x)
+
+with
+
+i = (i1, . . . , iK ), (x) = (1(x), . . . , K (x)) .
+
+Vector i can be estimated using the sample
+
+(mXi,
+
+Bi Bm
+
+fm (mXtmi+1,
+
+mXi+1 )),
+
+m =  ti+1, ,mXi+1
+
+m = 1, . . . , M,
+
+as
+
+i = A-1V .
+
+Here A is the K ◊ K matrix with qr entry
+
+1 M
+
+M
+q (m Xi )r (m Xi )
+m=1
+
+and V is the K-vector with rth entry
+
+1 M
+
+M m=1
+
+r
+
+(m
+
+Xi)
+
+Bi
+
+fm
+
+(Xtmi+1, Bm
+
+)m Xi+1 .
+
+The estimate i then defines an estimate
+
+Ci(x) = i (x)
+
+of the continuation value at an arbitrary point x in the state space X. Now, if fi(mXi)  Ci(mXi) then  ti, mXi = ti, otherwise  ti, mXi =  ti+1, mXi+1 (see (3.1)). As a result we
+obtain at the step ti-1 the sample :
+
+(mXi-1,
+
+Bi-1 Bm
+
+fm (mXtmi,
+
+mXi ))
+
+=
+
+(mXi-1,
+
+Bi-1 Bm
+
+fm
+
+(m
+
+Xtmi-1,
+
+mXi-1 )),
+
+m =  ti, mXi , m = 1, ..., M.
+
+belomestny, d., milstein, g. and spokoiny, v.
+Theorem 3.6. The estimate Ci(mXi) = i (mXi)
+is a low continuation value within the accuracy depending on K and M.
+
+17 (3.24)
+
+Proof. Having Cj(x), x  X, j = 0, ..., I - 1, one can define a stopping time  for
+every trajectory Xttji, x, j = i, ..., I, in the following way. If Ci(x)  fi(x), then we put  ti, x = ti. If Ci(x) > fi(x), then we put  ti, x > ti. Further, if Ci+1(Xttii+, 1x)  fi+1(Xttii+, 1x), then we put  ti, x = ti+1, and so on. If Cj(Xttji, x) > fj(Xttji, x) for all j = i, ..., I - 1, then we put  ti, x = I. Clearly,  ti, mXi =  ti, mXi, m = 1, ..., M, i.e.,  is an extension
+
+of  . Let us introduce the value
+
+Ci(x) = BiE
+
+f
+
+(Xti+1 B
+
+,Xi+1
+
+)
+
+|Xi
+
+=
+
+x
+
+,  =  ti+1, Xi+1 .
+
+(3.25)
+
+Due to (3.7) and (3.8), Ci(x) is a low continuation value, i.e.,
+
+Ci(x) = Ci(x) - ri(x),
+
+(3.26)
+
+where ri(x)  0. But for the conditional expectation (3.25), Ci(x) can be considered as an estimate by the linear regression method. Therefore
+
+Ci(x) = Ci(x) + i(x),
+
+(3.27)
+
+where i(x) is the regression error which depends on K and M. From (3.26) and (3.27) we obtain
+
+Ci(mXi) = Ci(mXi) - i(mXi) - ri(mXi).
+
+(3.28)
+
+Theorem 3.6 is proved.
+
+Remark 3.7. Formally, the theorem is true even if the error i(x) is large. But its significance manifests itself when i(x) is rather small (this can be reached due to successful choice of 1(x), . . . , K(x) and sufficiently large M ). Then Ci(mXi) is really (not only within the accuracy depending on K and M ) a low continuation value.
+
+4 Global low and upper bounds
+
+Aiming to estimate the price of the American option at a fixed position (t0, x0), we simulate the independent trajectories mXi, i = 1, ..., I, m = 1, ..., M, of the process Xi, starting at the instant t = t0 from x0 : X0 = x0.
+For constructing the global low bound we use formula (3.11). Indeed (3.11) gives the following estimate
+
+u0(X0) = max
+
+f0(X0),
+
+B0 M
+
+M m=1
+
+fm (Xtm1, mX1 ) Bm
+
+, m =  t1, mX1 .
+
+(4.1)
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+18
+
+We note that (4.1) always is a low bound for u0(X0) even if m is not equal to optimal stopping time  t1, mX1 .
+
+To construct the global upper bound we use Subsection 2.3. Let vi(x) be a low bound and (ti, mXi) be the position on the m-th trajectory at the time instant ti. We calculate the low continuation value
+
+ci,v(mXi) = BiE
+
+vi+1(mXi+1) Bi+1
+
+|Fi
+
+(4.2)
+
+at the position (ti, mXi). If
+
+fi(mXi) < ci,v(mXi),
+
+(4.3)
+
+then (ti, mXi)  C (see (2.2)) and we move one step ahead along the trajectory to the next position (ti+1, mXi+1). Otherwise if
+
+fi(mXi)  ci,v(mXi),
+
+(4.4)
+
+then we cannot say definitely whether the position (ti, mXi) belongs to C or to E. In spite of this fact we do one step ahead in this case as well. Let us recall that the true consumption at (ti, x) is equal to
+
+i (x) = [fi (x) - Ci (x)]+
+
+(4.5)
+
+(see (2.5) and (2.1)). Thus, it is natural to define the upper consumption i,v at any position (ti, mXi) by the formula
+
+i,v(mXi) = [fi(mXi) - ci,v(mXi)]+.
+
+(4.6)
+
+Obviously, ci,v  Ci and hence i,v  i. Therefore, the price Vi(x) of the European option with payoff function fi(x) and upper consumption process i,v is an upper bound on the price ui(x) of the original American option. In the case (4.3) i,v(mXi) = i(mXi) = 0 and we do not get any error. If (4.4) holds and besides ci,v(mXi) < Ci(mXi), we get an error. If i,v(mXi) is large, then it is in general impossible to estimate this error, but if i,v(mXi) is small, the error is small as well.
+Having found i,v, we can construct an estimate V0(x0) of the upper bound V0(x0) for u0(x0) by the formula
+
+V0(x0)
+
+=
+
+1 M
+
+M m=1
+
+fI (mXI ) BI
+
++
+
+1 M
+
+I-1 M i=0 m=1
+
+i,v
+
+(mXi) Bi
+
+.
+
+(4.7)
+
+Note that for the construction of an upper bound V0 one can use different local low bounds depending on a position. This opens various opportunities for adaptive procedures (see [4]). For instance, if i,v(mXi) is large, then it is reasonable to use a more powerful local instrument at the position (ti, mXi).
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+19
+
+Instead of using a low bound for constructing a global upper one, one can use low continuation values, in particular, those from Section 3. So, let Ci(mXi) be a low continuation value. Then (compare with (4.6))
+
+i(mXi) = [fi(mXi) - Ci(mXi)]+
+
+(4.8)
+
+is an upper consumption value and the corresponding global upper bound is given by the
+
+formula
+
+V0(x0)
+
+=
+
+1 M
+
+M m=1
+
+fI (mXI ) BI
+
++
+
+1 M
+
+I-1 M i=0 m=1
+
+i(mXi) Bi
+
+.
+
+(4.9)
+
+Remark 4.1. In reality (see (3.19)) the global upper bound is equal to V0(x0) + , where   0 when M, N  . Therefore we have u0(X0)  u0(X0)  V0(x0) + , i.e. the accuracy is evaluated by the difference V0(x0) +  - u0(X0) (not by V0(x0) - u0(X0)). In practice, it may be happened that V0(x0)  u0(X0). Clearly, in such a case the accuracy is evaluated by .
+
+5 Simulations
+
+5.1 Bermudan max calls on d assets
+
+This is a benchmark example studied in [9], [16] and [24] among others. Specifically, the model with d identical assets is considered where each underlying has dividend yield . The risk-neutral dynamic of assets is given by
+
+dXtk Xtk
+
+=
+
+(r
+
+- )dt + dWtk,
+
+k = 1, ..., d,
+
+where Wtk, k = 1, ..., d, are independent one dimensional Brownian motions and r, ,  are constants. At any time t  {t0, ..., tI} the holder of the option may exercise it and
+
+receive the payoff
+
+f (Xt) = (max(Xt1, ..., Xtd) - K)+.
+
+We take ti = iT /I, i = 0, ..., I, with T = 3, I = 9 and apply the local Monte Carlo method described in the section 3.3. The number of outer Monte Carlo simulations M = 10000 and the number of inner Monte Carlo simulations N = 100. The results are presented in Table 1 in dependence on x0 with X0 = (X01, . . . , X0d)T , X01 = ... = X0d = x0. Monte-Carlo error is computed using M outer trajectories. The true values are quoted from [14].
+The good quality of low bound u0(X0) comparatively to the upper bound V0(X0) can be attributed to the fact that V0(X0) uses local estimates of continuation values in an additive form while u0(X0) is based on suboptimal stopping family which depends only on the sign of difference between the payoff and continuation value. Also note, that values of upper bound lie outside 95% confidence interval around the true value. This is again due to the local estimation error and can be cured by increasing the number of inner simulations N .
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+20
+
+Table 1: Bounds (with 95% confidence intervals) for Bermudan max call with parameters K = 100, r = 0.05,  = 0.2,  = 0.1 and different d and x0
+
+d x0 Lower Bound Upper Bound True Value
+
+u0(X0)
+
+V0(X0)
+
+90 7.965±0.239 8.417±0.082
+
+8.08
+
+2 100 13.644±0.300 14.493±0.113
+
+13.90
+
+110 20.875±0.370 22.014±0.165
+
+21.34
+
+90 16.795±0.315 19.0126±0.153 16.71
+
+5 100 26.265±0.379 29.340±0.183
+
+26.21
+
+110 36.790±0.437 40.630±0.208
+
+36.84
+
+5.2 Bermudan swaptions in the Libor market model
+
+Let us consider the Libor market model with respect to a tenor structure 0 = T0 < T1 < . . . < TI in the spot Libor measure P . The dynamics of the forward Libor
+Li(t), 0  t  Ti, i = 1, . . . , I - 1, is governed by the SDE
+
+dLi
+
+i
+=
+j=(t)
+
+j LiLj i j 1 + jLj
+
+dt + Li i
+
+dW ,
+
+Li(0) = L0i ,
+
+t  [0, Ti],
+
+(5.1)
+
+where j = Tj+1 - Tj are day count factors, t  i(t) = (i,1(t), . . . , i,d(t)) are deter-
+ministic volatility vector functions defined in [0, Ti] (called factor loadings), and (t) := min{m : Tm > t} denotes the next reset date at time t. In (5.1) W (t), 0  t  TI-1, is a standard d-dimensional Wiener process under the measure P  with d, 1  d < I, being the number of driving factors. The spot Libor measure P  is induced by the numeraire
+
+(t)-1
+
+B(t) := B(t)(t)
+
+(1 + iLi(Ti)),
+
+i=0
+
+(5.2)
+
+where Bi(t), i = 0, . . . , I, is the value of a zero coupon bond with face value 1 at Ti. At a tenor date Ti, i = 1, ..., n - 1, we have (see [14])
+
+Bn(Ti)
+
+=
+
+n-1 j=i
+
+1
+
++
+
+1 j Lj
+
+(Ti)
+
+,
+
+n = 1, . . . , I.
+
+(5.3)
+
+Note, that in (5.2) and (5.3) we set by definition
+
+l k
+
+=
+
+1
+
+for
+
+k
+
+>
+
+l
+
+and
+
+L0(T0)
+
+=
+
+L00
+
+is
+
+a
+
+constant. It is also worth mentioning that Bn(t), n = 1, . . . , I - 1, are uniquely defined
+
+by Libors on the tenor grid only (fortunately, we need values of B(t) only there as well).
+
+A European swaption with maturity Ti and strike  gives the right to contract at Ti for
+
+paying a fixed coupon  and receiving floating Libor at the settlement dates Ti+1, . . . , TI.
+
+The corresponding payoff at maturity Ti is given by
+
+
+I-1
+
++
+
+fi(Li(Ti), . . . , LI-1(Ti)) :=  Bj+1(Ti)j(Lj(Ti) - ) .
+
+j=i
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+21
+
+Note, that by setting Lj(t) = Lj(Tj), t > Tj, for j = 0, . . . , I - 1, we can define fi as a function of the whole Libors vector (L0(Ti), . . . , LI-1(Ti)). A Bermudan swaption issued at t = 0 gives the right to obtain
+
+fi(Li(Ti), . . . , LI-1(Ti))
+
+at an exercise date i  {s1, . . . , sl = I - 1}  {1, . . . , I - 1}, to be decided by the option holder. Its risk-neutral price is given by
+
+u0(L0(0), . . . , LI-1(0)) = sup E
+ TS
+
+f (L (T ), . . . , LI-1(T )) B(T )
+
+F0
+
+,
+
+where TS is the set of stopping times  taking values in {s1, ..., sl}. For our simulation study we use the Libor volatility structure
+
+i(t) = cig(Ti - t)ei, where g(s) = g + (1 - g + as)e-bs,
+
+(5.4)
+
+with ei being d-dimensional unit vectors, decomposing an input correlation matrix of rank d and g  0, a  0, b  0, ci > 0 being the constants (see [25]). For generating Libor models with different numbers of factors d, we take as a basis a correlation structure of
+the form
+ij = exp(-|i - j|), i, j = 1, . . . , I - 1,
+which has full rank for  > 0, and then for a particular choice of d we deduce from  a rank-d correlation matrix (d) with decomposition (ijd) = ei ej, 1  i, j < I, by principal component analysis. We take as model parameters a flat 10% initial Libor curve (i.e. Li0 = 0.1 for i = 0, 1, . . . , I - 1) over a 40 period quarterly tenor structure, and the parameters
+
+I = 41, i = 0.25, ci  0.2, a = 1.5, b = 3.5, g = 0.5,  = 0.0413.
+
+We consider Bermudan swaptions with yearly exercise opportunities, hence (i are equal to a quarter year) si = 4i, i = 1, . . . , 10. For a "practically exact" numerical integration of the SDE, we used the log-Euler scheme with t = /5.
+
+Now, we apply the regression method described in section 3.5, where at each exercise
+
+date Tsi the value of the European swaption
+
+Si(Lsi (Tsi ), . . . , Ln-1(Tsi )) = B(Tsi )E
+
+fsi+1 (Lsi+1 (Tsi+1 ), . . . , Ln-1(Tsi+1 )) B(Tsi+1 )
+
+Fsi
+
+which we can exercise at the next exercise date Tsi+1 is used as a basis function together with a powers up to second order of the immediate payoff fsi. Although closed form expressions for European swaptions do not exist in a Libor market model, there do exist
+
+very accurate (typically better than 0.3% relative error) formulas (see [25]) which we use
+
+for the computation of Si. The resulting low bound u0 and upper bound V0 are given in Table 2 for different numbers of factors d and different coupons . True values (computed with less than 1% relative
+
+error) are quoted from [19].
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+22
+
+d  u0 V0 True Value
+
+0.08 1094.8±1.2 1096.1±2.0 1096.1
+
+40 0.10 338.2±1.0 341.2±1.3
+
+339.3
+
+0.12 96.4±0.5 100.0±0.6
+
+97.2
+
+0.08 1096.3±1.3 1096.6±2.0 1096.5
+
+10 0.10 344.3±1.0 346.7±1.3
+
+344.7
+
+0.12 101.7±0.6 104.9±0.7
+
+101.3
+
+0.08 1108.1±1.5 1110.5±2.4 1109.2
+
+1 0.10 381.7±1.2 384.7±1.6
+
+382.1
+
+0.12 121.2±0.7 123.1±0.8
+
+121.3
+
+Table 2: Prices of bermudan swaptions ◊104
+
+5.3 Cancellable Snowballs in the Libor market model
+
+Let us consider a snowball swap contract. According to this contract one has to pay, instead of floating Libor, so called Snowball coupons which follow the following term sheet. One pays on a semi-annual base a constant rate I over the first year and in the forthcoming years (Previous Coupon+A-Libor)+, where A increases as specified in the contract. A cancellable snowball swap is a snowball which may be cancelled (exercised) after the first year. Here we consider this cancellable snowball product in a Libor market model (5.1). The snowballs coupons Ki, settled at Ti+1, i = 0, . . . , I - 1, are specified by
+
+Ki = I, i = 0, 1, Ki = (Ki-1 + Ai - Li(Ti))+, i = 2, . . . , I - 1.
+
+We consider the contract where A increases on an annual base in such a way that A2 = S
+
+Ai+1 = Ai + s (i mod 2),
+
+with S and s given in the contract. The value u0 of the cancellable snowball swap at
+
+T0 = 0 is given by
+
+
+
+u0(L0(0),
+
+.
+
+.
+
+.
+
+,
+
+LI-1(0))
+
+=
+
+sup
+ TS
+
+E
+
+
+
+ j=1
+
+fj(L2(T2), . . . , Lj-1(Tj-1) B  (Tj )
+
+F0 ,
+
+where TS is the set of stopping times  taking values in {2, . . . , I} and
+
+fj(L2(T2), . . . , Lj-1(Tj-1)) = j-1(Lj-1(Tj-1) - Kj-1), j = 1, . . . , I.
+
+Note, that predictable cashflows fj can take negative values. Since we are going to use linear regression method it is important to find a good basis functions. One possible way
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+23
+
+would be to include still alive Europeans
+
+
+
+max
+j<pI
+
+E
+
+
+
+p q=1
+
+fq (L) B  (Tq )
+
+Fj 
+
+at Tj but unfortunately there is no analytical representation for them. However, an
+
+approximation can be found (see [6]) using the fact that for any j + 1  p  I
+
+  
+
+E
+
+p
+
+q=j+1
+
+fq (L) B  (Tq )
+
+Fj 
+
+=
+
+1
+
+- Bp(Tj) B  (Tj )
+
+-
+
+E
+
+p
+
+q=j+1
+
+Kq-1q-1 B  (Tq ) 
+
+Fj 
+
+
+
+=
+
+1
+
+- Bp(Tj) B  (Tj )
+
+-
+
+Kj j B(Tj+1)
+
+-
+
+E
+
+p
+
+q=j+2
+
+Kq-1q-1 B  (Tq )
+
+Fj .
+
+Replacing in the last summand Kq-1 by
+
+Kq-1 = (Kj + Aq-1 - Lq-1(Tq-1))+, j + 2  q  p,
+
+where 0 <  < 1 is a constant which may depend on p and is to be found using optimization, we get a reasonable approximation quality. The value of
+
+E
+
+Kq-1q-1 B  (Tq )
+
+Fj
+
+=
+
+Bq (Tj B(Tj
+
+) )
+
+EBq
+
+(Kj + Aq-1 - Lq-1(Tq-1))+q-1 Fj
+
+,
+
+where EBq denotes the expectation in respect to Tq forward measure, can be calculated using the Black's formula. Finally, the quadratic polynomials of the spot Libor Lj(Tj) complete the set of basis function at Tj, j = 2, . . . , I. As a numerical example let us consider 6yr Snowball with i = 0.5yr (I = 12) and take I = 0.079, S = 0.01. Further, the volatility structure (5.4) with a = 0.976, b = 2, g = 1.5 is employed and the correlation matrix is given by
+
+ij = exp
+
+|j I
+
+- -
+
+i| 2
+
+log
+
+
+
+,
+
+1  i, j  I - 1,
+
+with  = 0.663. The tenor structure, initial Libor curve and factor loadings ci are shown in Table 3. The results in dependence on s are presented in Table 4.
+
+6 Acknowledgment
+This work was finished while the second author was a visitor of the Weierstrass-Institute fu®r Angewandte Analysis und Stochastik (WIAS), Berlin, due to the financial supports from this institute and DFG (grant No. 436 RUS 17/137/05) which are gratefully acknowledged.
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+24
+
+Tenors 0.0 0.5 1 1.5 2 2.5 L0 0.023 0.025 0.027 0.027 0.031 0.031 ci 0.153 0.143 0.14 0.140 0.139
+Tenors 3 3.5 4 4.5 5 5.5 L0 0.033 0.034 0.036 0.036 0.038 0.039 ci 0.138 0.137 0.136 0.135 0.134 0.132
+
+Table 3: Tenor structure, initial Libor curve and factor loadings
+
+s u0
+
+V0
+
+0.005 64.8±2.4 67.4±2.2
+
+0.004 101.9±2.3 107.3±1.9
+
+0.003 139.8±2.2 143.3±1.7
+
+Table 4: Prices of cancellable snowballs ◊104
+References
+[1] L. Andersen and M. Broadie (2001). A primal-dual simulation algorithm for pricing multidimensional American options. Working paper, Columbia Business School, New York.
+[2] V. Bally, G. Pag`es, J. Printems (2005). A quantization tree method for pricing and hedging multidimensional American options. Mathematical Finance, 15, No. 1, 119-168.
+[3] D. Belomestny, G.N. Milstein (2006). Monte Carlo evaluation of American options using consumption processes. International Journal of Theoretical and Applied Finance, 9, No. 4, 1-27.
+[4] D. Belomestny, G.N. Milstein (2005). Adaptive simulation algorithms for pricing American and Bermudan options by local analysis of financial market. WIASPreprint No. 1022, Berlin.
+[5] D. Belomestny, G.N. Milstein, V. Spokoiny (2006). Regression methods in pricing American and Bermudan options using consumption processes. WIAS-Preprint No. 1145, Berlin.
+[6] C. Bender, A. Kolodko, J. Schoenmakers (2005). Iterating Snowballs and related path dependent callables in a multi-factor Libor model. Preprint No. 1061, WIAS, Berlin.
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+25
+
+[7] P. Boyle, M. Broadie, P. Glasserman (1997). Monte Carlo methods for security pricing. Journal of Economic Dynamics and Control, 21, 1267-1321.
+[8] M. Broadie and J. Detemple (1996), American option valuation: New bounds, approximations and a comparison of existing methods. The Review of Financial Studies, 9, 1211≠1250.
+[9] M. Broadie, P. Glasserman (1997). Pricing American-style securities using simulation. J. of Economic Dynamics and Control, 21, 1323-1352.
+[10] J. Carriere (1996). Valuation of early-exercise price of options using simulations and nonparametric regression. Insuarance: Mathematics and Economics, 19, 19-30.
+[11] E. Cl¥ement, D. Lamberton, P. Protter (2002). An analysis of a least squares regression algorithm for American option pricing. Finance and Stochastics, 6, 449-471.
+[12] R.A. DeVore (1998). Nonlinear approximation. Acta Numer., 7, 51-150.
+[13] D. Egloff (2005). Monte Carlo algorithms for optimal stopping and statistical learning. Ann. Appl. Probab. 15, no. 2, 1396-1432.
+[14] P. Glasserman (2004). Monte Carlo Methods in Financial Engineering. Springer.
+[15] L. Gy®orfi, M. Kohler, A. Krzyzak, H. Walk (2002). A Distribution-Free Theory of Nonparametric Regression. Springer.
+[16] M. Haugh, L. Kogan (2004). Pricing American options: a duality approach. Opeations Research, 52, No. 2, 258≠270.
+[17] F. Jamshidian (2003). Minimax optimality of Bermudan and American claims and their Monte Carlo upper bound approximation. Working paper.
+[18] V. Kargin (2005). Lattice option pricing by multidimensional interpolation. Math. Finance, 15, No. 4, 635≠647.
+[19] A. Kolodko, J. Schoenmakers (2004). Upper bounds for Bermudan style derivatives. Monte Carlo Methods and Appl., 10(3-4), 331-343.
+[20] A. Kolodko, J. Schoenmakers (2006). Iterative construction of the optimal Bermudan stopping time. Finance and Stochastics, 10, No. 1, 27-49.
+[21] D. Lamberton, B. Lapeyre (1996). Introduction to Stochastic Calculus Applied to Finance. Chapman & Hall.
+[22] F.A. Longstaff, E.S. Schwartz (2001). Valuing American options by simulation: a simple least-squares approach. Review of Financial Studies, 14, 113-147.
+[23] G.N. Milstein, M.V. Tretyakov (2005). Numerical Analysis of Monte Carlo evaluation of Greeks by finite differences. J. of Computational Finance, 8, No. 3, 1-33.
+
+belomestny, d., milstein, g. and spokoiny, v.
+
+26
+
+[24] L.C.G. Rogers (2001). Monte Carlo valuation of American options. Mathematical Finance, 12, 271-286.
+[25] J. Schoenmakers (2005). Robust Libor Modelling and Pricing of Derivative Products. Chapman & Hall/CRC.
+[26] A.N. Shiryaev (1999). Essentials of Stochastic Finance: Facts, Models, Theory. World Scientific.
+[27] J. Tsitsiklis, B. Van Roy (1999). Regression methods for pricing complex American style options. IEEE Trans. Neural. Net., 12, 694-703.
+[28] H. Wendland (2005). Scattered Data Approximation. Cambridge: Cambridge University Press.
+
+SFB 649 Discussion Paper Series 2006
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Calibration Risk for Exotic Options" by Kai Detlefsen and Wolfgang K. H‰rdle, January 2006.
+002 "Calibration Design of Implied Volatility Surfaces" by Kai Detlefsen and Wolfgang K. H‰rdle, January 2006.
+003 "On the Appropriateness of Inappropriate VaR Models" by Wolfgang H‰rdle, Zdenk Hl·vka and Gerhard Stahl, January 2006.
+004 "Regional Labor Markets, Network Externalities and Migration: The Case of German Reunification" by Harald Uhlig, January/February 2006.
+005 "British Interest Rate Convergence between the US and Europe: A Recursive Cointegration Analysis" by Enzo Weber, January 2006.
+006 "A Combined Approach for Segment-Specific Analysis of Market Basket Data" by Yasemin Boztu and Thomas Reutterer, January 2006.
+007 "Robust utility maximization in a stochastic factor model" by Daniel Hern·ndez≠Hern·ndez and Alexander Schied, January 2006.
+008 "Economic Growth of Agglomerations and Geographic Concentration of Industries - Evidence for Germany" by Kurt Geppert, Martin Gornig and Axel Werwatz, January 2006.
+009 "Institutions, Bargaining Power and Labor Shares" by Benjamin Bental and Dominique Demougin, January 2006.
+010 "Common Functional Principal Components" by Michal Benko, Wolfgang H‰rdle and Alois Kneip, Jauary 2006.
+011 "VAR Modeling for Dynamic Semiparametric Factors of Volatility Strings" by Ralf Br¸ggemann, Wolfgang H‰rdle, Julius Mungo and Carsten Trenkler, February 2006.
+012 "Bootstrapping Systems Cointegration Tests with a Prior Adjustment for Deterministic Terms" by Carsten Trenkler, February 2006.
+013 "Penalties and Optimality in Financial Contracts: Taking Stock" by Michel A. Robe, Eva-Maria Steiger and Pierre-Armand Michel, February 2006.
+014 "Core Labour Standards and FDI: Friends or Foes? The Case of Child Labour" by Sebastian Braun, February 2006.
+015 "Graphical Data Representation in Bankruptcy Analysis" by Wolfgang H‰rdle, Rouslan Moro and Dorothea Sch‰fer, February 2006.
+016 "Fiscal Policy Effects in the European Union" by Andreas Thams, February 2006.
+017 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, March 2006.
+018 "The Bologna Process: How student mobility affects multi-cultural skills and educational quality" by Lydia Mechtenberg and Roland Strausz, March 2006.
+019 "Cheap Talk in the Classroom" by Lydia Mechtenberg, March 2006. 020 "Time Dependent Relative Risk Aversion" by Enzo Giacomini, Michael
+Handel and Wolfgang H‰rdle, March 2006. 021 "Finite Sample Properties of Impulse Response Intervals in SVECMs with
+Long-Run Identifying Restrictions" by Ralf Br¸ggemann, March 2006. 022 "Barrier Option Hedging under Constraints: A Viscosity Approach" by
+Imen Bentahar and Bruno Bouchard, March 2006.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "How Far Are We From The Slippery Slope? The Laffer Curve Revisited" by Mathias Trabandt and Harald Uhlig, April 2006.
+024 "e-Learning Statistics ≠ A Selective Review" by Wolfgang H‰rdle, Sigbert Klinke and Uwe Ziegenhagen, April 2006.
+025 "Macroeconomic Regime Switches and Speculative Attacks" by Bartosz Makowiak, April 2006.
+026 "External Shocks, U.S. Monetary Policy and Macroeconomic Fluctuations in Emerging Markets" by Bartosz Makowiak, April 2006.
+027 "Institutional Competition, Political Process and Holdup" by Bruno Deffains and Dominique Demougin, April 2006.
+028 "Technological Choice under Organizational Diseconomies of Scale" by Dominique Demougin and Anja Schˆttner, April 2006.
+029 "Tail Conditional Expectation for vector-valued Risks" by Imen Bentahar, April 2006.
+030 "Approximate Solutions to Dynamic Models ≠ Linear Methods" by Harald Uhlig, April 2006.
+031 "Exploratory Graphics of a Financial Dataset" by Antony Unwin, Martin Theus and Wolfgang H‰rdle, April 2006.
+032 "When did the 2001 recession really start?" by Jˆrg Polzehl, Vladimir Spokoiny and Ctlin Stric, April 2006.
+033 "Varying coefficient GARCH versus local constant volatility modeling. Comparison of the predictive power" by Jˆrg Polzehl and Vladimir Spokoiny, April 2006.
+034 "Spectral calibration of exponential LÈvy Models [1]" by Denis Belomestny and Markus Reiﬂ, April 2006.
+035 "Spectral calibration of exponential LÈvy Models [2]" by Denis Belomestny and Markus Reiﬂ, April 2006.
+036 "Spatial aggregation of local likelihood estimates with applications to classification" by Denis Belomestny and Vladimir Spokoiny, April 2006.
+037 "A jump-diffusion Libor model and its robust calibration" by Denis Belomestny and John Schoenmakers, April 2006.
+038 "Adaptive Simulation Algorithms for Pricing American and Bermudan Options by Local Analysis of Financial Market" by Denis Belomestny and Grigori N. Milstein, April 2006.
+039 "Macroeconomic Integration in Asia Pacific: Common Stochastic Trends and Business Cycle Coherence" by Enzo Weber, May 2006.
+040 "In Search of Non-Gaussian Components of a High-Dimensional Distribution" by Gilles Blanchard, Motoaki Kawanabe, Masashi Sugiyama, Vladimir Spokoiny and Klaus-Robert M¸ller, May 2006.
+041 "Forward and reverse representations for Markov chains" by Grigori N. Milstein, John G. M. Schoenmakers and Vladimir Spokoiny, May 2006.
+042 "Discussion of 'The Source of Historical Economic Fluctuations: An Analysis using Long-Run Restrictions' by Neville Francis and Valerie A. Ramey" by Harald Uhlig, May 2006.
+043 "An Iteration Procedure for Solving Integral Equations Related to Optimal Stopping Problems" by Denis Belomestny and Pavel V. Gapeev, May 2006.
+044 "East Germany's Wage Gap: A non-parametric decomposition based on establishment characteristics" by Bernd Gˆrzig, Martin Gornig and Axel Werwatz, May 2006.
+045 "Firm Specific Wage Spread in Germany - Decomposition of regional differences in inter firm wage dispersion" by Bernd Gˆrzig, Martin Gornig and Axel Werwatz, May 2006.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+046 "Produktdiversifizierung: Haben die ostdeutschen Unternehmen den Anschluss an den Westen geschafft? ≠ Eine vergleichende Analyse mit Mikrodaten der amtlichen Statistik" by Bernd Gˆrzig, Martin Gornig and Axel Werwatz, May 2006.
+047 "The Division of Ownership in New Ventures" by Dominique Demougin and Oliver Fabel, June 2006.
+048 "The Anglo-German Industrial Productivity Paradox, 1895-1938: A Restatement and a Possible Resolution" by Albrecht Ritschl, May 2006.
+049 "The Influence of Information Costs on the Integration of Financial Markets: Northern Europe, 1350-1560" by Oliver Volckart, May 2006.
+050 "Robust Econometrics" by Pavel CÌzek and Wolfgang H‰rdle, June 2006. 051 "Regression methods in pricing American and Bermudan options using
+consumption processes" by Denis Belomestny, Grigori N. Milstein and Vladimir Spokoiny, July 2006.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

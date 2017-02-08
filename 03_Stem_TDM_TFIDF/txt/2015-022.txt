@@ -1,0 +1,689 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2015-022
+Risk Related Brain Regions Detected with 3D Image FPCA
+Ying Chen*,*3 Wolfgang K. Härdle**
+He Qiang* Piotr Majer**
+* National University of Singapore, Singapore ** Humboldt-Universität zu Berlin, Germany *3 Singapore Management University,Singapore This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Risk Related Brain Regions Detected with 3D Image FPCA
+Ying Chen1,3, Wolfgang K. H¨ardle2,4, He Qiang1, and Piotr Majer2
+1Department of Statistics and Applied Probability, National University of Singapore, Singapore 2Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. Center for Applied Statistics & Economics, Humboldt-Universita¨t zu Berlin, Germany 3Risk Management Institute, National University of Singapore, Singapore
+4Sim Kee Boon Institute (SKBI) for Financial Economics at Singapore Management University, Singapore
+Abstract
+Risk attitude and perception is reflected in brain reactions during RPID experiments. Given the fMRI data, an important research question is how to detect risk related regions and to investigate the relation between risk preferences and brain activity. Conventional methods are often insensitive to or misrepresent the original spatial patterns and interdependence of the fMRI data. In order to cope with this fact we propose a 3D Image Functional Principal Component Analysis (3D Image FPCA) method that directly converts the brain signals to fundamental spatial common factors and subject-specific temporal factor loadings via proper orthogonal decomposition. Simulation study and real data analysis show that the 3D Image FPCA method improves the quality of spatial representations and guarantees the contiguity of risk related regions. The selected regions provide signature scores and carry explanatory power for subjects' risk attitudes. For in-sample analysis, the 3D Image method perfectly classifies both strongly and weakly risk averse subjects. In out-of-sample, it achieves 73-88% overall accuracy, with 90-100% rate for strongly risk averse subjects, and 49-71% for weakly risk averse subjects. This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 Economic Risk.
+1
+
+Keywords: Decision Making; fMRI; Neuroeconomics; Risk Attitude; RPID.
+JEL code: C3, C6, C9, C14, D8.
+1 Introduction
+How the brain makes decisions has attracted much attention. It is important to understand which parts of the human brain regulate specific decision-making tasks and which neural processes drive investment decisions (see Rangel, Camerer and Montague, 2008; Mohr, Biele, Krugel, Li and Heekeren, 2010). Among others, neuroeconomics is the science that investigates such relationships and has identified decision-making-related brain regions. Lateral orbifrontal cortex (lOFC) and medial orbifrontal cortex (mOFC) are found to be related to evaluation and contrast of risky or sure choices, Tobler, O'Doherty, Dolan and Schultz (2007). Anterior insula (aINS) and ventrolateral prefrontal cortex (VLPFC) are linked to value processing, risk and uncertainty, Mohr, Biele and Heekeren (2010). Parietal Cortex risk are associated with value processing and selective attention, van Bo¨mmel, Song, Majer, Mohr, Heekeren and Ha¨rdle (2013). These regions are contiguous in modest size relative to the visual or audial cortex, where activation patterns are important but hard to detect.
+Most neuroeconomics studies involved risk perception and investment decision (RPID) experiments, where subjects were given risk related tasks and needed to make decision. Simultaneously, their brain reactions or neural images were collected by functional magnetic resonance imaging (fMRI) scanner. The fMRI data records the changes in brain's blood flow at volume and oxygen level during neural activity. The blood-oxygen-level-dependent (BOLD) signals are captured on 3-dimensional (3D) spatial maps of brain voxels over time.
+The general linear model (GLM) has been widely used to analyze the fMRI data to identify decision-making-related brain regions activated by the stimulus, see Friston, Holmes, Worsley, Poline, Frith and Frackowiak (1995). It models the BOLD signals at each voxel independently by a predefined experiment design matrix. The design matrix is a combination of stimulus signals, representing predicted neural response, and a haemodynamic response function. The model-based technique is simple with parsimonious parametric structure. However it only considers the neural information that are pre-defined by the design matrix. Any neural activity other than the apriori
+2
+
+specified modeling is ignored. Moreover, it completely discards the spatial patterns and interdependence of the BOLD signals of brain, by modeling voxels separately.
+On the contrary, model-free analysis techniques have the potential to detect the risk related regions without making any constraint or subjective assumptions. Principal Component Analysis (PCA) has been used to extract fundamental factors to represent the BOLD signals via orthogonal decomposition, see Lai and Fang (1999), Baumgartner, Ryner, Richter, Summers, Jarmasz and Somorjai (2000), Andersen, Gash and Avison (1999). In the analysis, the fMRI data is firstly vectorized to discrete multivariate data, based on which one performs orthogonal decomposition to obtain eigenvectors. The eigenvectors contain the spatial information and thus help to elaborate the decision-making regions. The PCA however faces challenge when applied to the high resolution and high dimensional vectorized fMRI data. After vectorization, the dimensionality of data can be larger than 220,000. This reduces estimation accuracy and feasibility of the conventional eigen-decomposition. Singular Value Decomposition (SVD) is thus adopted with a reduced dimension of covariance matrix, see Golub and Reinsch (1970). Moreover, PCA, conducted in a discrete framework, cannot guarantee the contiguity of risk related regions with discrete eigenvector or spatial factors. The fundamental unit of interest, on the other hand, should be contiguous region in brain rather than discrete voxels, see Heller, Stanley, Yekutieli, Rubin and Benjamini (2006).
+This motivates the adoption of Functional Principal Component Analysis (FPCA), see Rao (1958), Ramsay and Silverman (1997). In FPCA, the vectorized fMRI data is represented with continuous curves and decomposed to spatial factors and factor loadings, without losing much variability. The spatial factors are used to represent the risk related region. The temporal and subject behaviors of the fMRI data are pushed to the factor loadings, which represent the time evolution of the signals and interpret the risk altitude of each specific subject. van B¨ommel et al. (2013) hypothesized that the temporal variability of factor loadings associated with risk related regions are related to risk altitude of individuals. Viviani, Gron and Spitzer (2005) implemented FPCA to the smoothed or functional fMRI data of 3 subjects, where single subject was considered separately. Long, Brown, Triantafyllou, Aharon, Wald and Solo (2005) developed a cross-subject FPCA under the existence of non-stationary noise. Compared to the studies, Zipunnikov, Caffo, Yousem, Davatzikos, Schwartz and Crainiceanu (2011) reached higher computational efficiency. The estimation is however eventually conducted using the SVD approach in the discrete multivariate space. The existing FPCA method is essentially applicable for the functional data
+3
+
+defined in one-dimensional domain IR. It is thus referred to 1D FPCA in our study. To implement the 1D FPCA to the BOLD signals naturally defined on 3-dimensional domain, it is necessary to map or vectorize the 3D location coordinates to 1D domain. Given the high resolution of fMRI data, without sufficient knowledge of spatial interdependence of the brain, the mapping design potentially reduces accuracy and efficiency of the functional factor identification.
+The recent works on high dimensional functional data analysis enable the development of advanced methodologies. Chen and Mu¨ller (2012) introduced the notions of mean, modes, variations of high dimensional functional data, and provided consistency proofs under certain assumptions. Based on these definitions, one can directly analyze high dimensional functional data, such as the fMRI data defined in IR3, without any mapping or vectorization to 1D domain. In our study, we propose a model-free 3D Image FPCA method to identify risk related regions and extract subject temporal signals for multiple subjects, while taking the raw spatial information into consideration. The subject specific temporal dependence is represented by factor loadings which we named signature scores. The flexibility and parsimony of the 3D Image FPCA improves quality of spatial representation, which is of particular interest, as hemodynamic response to the stimulus is subtle and spatially constrained.
+A simulation study and real data analysis show that the 3D Image FPCA method improves the quality of spatial representations with accurately detected risk related regions. The selected regions carry explanatory power for subjects' risk attitudes. In the application of risk classification, the proposed method reaches 100% accuracy for in sample analysis. In out-of-sample cross validation, it achieves 73-88% overall accuracy, with 90-100% correctly classifying strongly risk averse subjects, and 49-71% for weakly risk averse subjects.
+The remainder of the paper is structured as follows. Section 2 presents the experiment and data, the 3D Image FPCA methodology and the factor loading estimation procedure. Section 3 illustrates the performance of the proposed 3D Image FPCA method compared to several alternatives. In Section 4, we implement the 3D Image FPCA to real data. Our interest is to detect the active brain regions during decisionmaking under risk and to classify risk attitude of the studied subjects based on the estimated factor loadings. Section 5 concludes.
+4
+
+2 Data and Methods
+2.1 Experiment and data
+Our study is based on the same data used in van B¨ommel et al. (2013) and Mohr, Biele and Heekeren (2010). The sample consists of 17 native German, healthy, right-handed volunteers. The data were collected during an RPID experiment that composed of two phases. In the presentation phase, subjects were provided a random Gaussian distributed return stream, with 10 observations sequentially displayed over 2 × 10 seconds. After that, in the decision phase, subjects were exposed to one of 3 types of tasks and had to give an answer within the next 7 seconds. The 3 types of tasks included the decision task, where subjects chose either a 5% fixed return (sure choice) or the investment of the random return stream just showed (risky choice). In the other two tasks subjects reported their subjective expected return (scaling from 5% to 15%) and perceived risk (from 0 = no risk to 100 = maximum risk) of the just displayed investment. Figure 1 displays graphic illustration of the experimental setup. Each trial was repeated 27 times, with the types of tasks randomly selected. In total, there were 3 × 27 trails for each subject. During the entire experiment, the subjects were placed in the fMRI scanner and high resolution (91 × 109 × 91) images were acquired every 2.5 seconds. The return streams were independent from others, randomly drawn from the Gaussian distribution with means of 6%, 9%, or 12% and standard deviations of 1%, 5% or 9%. There were 9 possible distributional combinations.
+Let Yt(j)(x1, x2, x3) denote the observed fMRI data of subject j = 1, · · · , J at time point t = 1, · · · , N . In our study, J = 17 subjects and N = 1360 scanned images. The parameters x1, x2, x3 are used to represent the 3D coordinator locations of each voxel in brain. For the data at hand, the dimension are [1, 91] × [1, 109] × [1, 91], i.e. around 106 voxels per scan. The objective is to identify spatial factors to represent "risk activation" regions. It is assumed that the subjects share common risk activation regions of brain, see Majer, Mohr, Heekeren and Ha¨rdle (2015). Panel data analysis is called for and therefore the average fMRI data are considered across subjects:
+J
+Y¯t(x1, x2, x3) = J -1 Yt(j)(x1, x2, x3), t = 1, · · · , N,
+j=1
+The raw data is considered as a discrete sample of the continuous BOLD process, denoted as {ft(x1, x2, x3) : x1  P1, x2  P2, x3  P3}, defined in a bounded cube
+5
+
+Figure 1: Graphic illustration of one trail of the RPID experiment. 6
+
+P1 × P2 × P3  IR3. In order to obtain contiguous risk regions, the data is converted to functional domains using smoothing with tensor B-splines. In this way, we obtain a series of contiguous 3D brain image for the average fMRI data, which is denoted as {ft(x1, x2, x3)}Nt=1, the respective brain signal data at each scan t.
+Our interest is to detect contiguous risk related regions and to decipher the relationship between brain reactions projected into signature scores and risk attitude and perception of the subjects.
+
+2.2 3D Image FPCA
+
+The spatial functional factors are obtained by proper orthogonal decomposition in such a way that the first factor accounts for as much of the variability in the data as possible, and each succeeding functional factor in turn has the highest variance possible under the constraint that it is uncorrelated with the preceding ones. The details of estimation are presented in subsection 2.3. The orthogonal decomposition of the functional data is:
+
+
+f (x1, x2, x3) = µ(x1, x2, x3) + f - µ,   (x1, x2, x3),
+=1
+
+(1)
+
+where µ(x1, x2, x3) = E[f (x1, x2, x3)] is the mean function, estimated using the average of functional data over time. f - µ,  represents the demeaned factor loadings and  (x1, x2, x3) denotes the -th functional factors for the averaged functional data containing common spatial information.
+
+The functional factors consist of both active regions and chaotic noises of fMRI scanner or other signal sources. To remove the impact of noises, the risk related active regions are identified as those with significant values of the common spatial factors, trimmed e.g. at 99.95% quantile of the functional factors and above or 0.05% quantile and below. The non-active voxels are eliminated and replaced with zeros. Moreover, instead of using all the functional factors, only the first L factors are considered fundamental and necessary, e.g. with sufficient variance explained. The final selected functional factors are denoted as  (x1, x2, x3), with = 1, · · · , L.
+The temporal factor loadings of each individual subject are estimated with the help of a multilinear regression on the raw fMRI data. The multilinear regression is formulated with the common spatial factors and designed for each individual subject
+
+7
+
+j = 1, · · · , J:
+
+L
+Yt(j)(x1, x2, x3) = Z(,jt) (x1, x2, x3) + (tj)(x1, x2, x3).
+=1
+
+(2)
+
+where (tj)(x1, x2, x3) denotes the idiosyncratic noise of the j-th subject, which is
+
+independently identically distributed with zero mean and constant variance. The
+
+subject-specific
+
+temporal
+
+factor
+
+loadings
+
+Z
+
+(j) ,t
+
+are
+
+estimated
+
+independently
+
+for
+
+each
+
+scan t by minimizing the ordinary least squares:
+
+min
+
+Z
+
+(j) ,t
+
+x1,x2,x3
+
+L2
+Yt(j)(x1, x2, x3) - Z(,jt)l(x1, x2, x3)
+=1
+
+The choice of L is based on both the specificity of factors interpretation and the averaged explained variance by factors:
+
+J
+
+EV (L) = J-1
+
+1-
+
+j=1
+
+N t=1
+
+x1,x2,x3 {Yt(j)(x1, x2, x3) -
+
+L =1
+
+Z
+
+(,jt)l(x1,
+
+x2,
+
+x3)}2
+
+N t=1
+
+x1,x2,x3{Yt(x1, x2, x3) - Y¯t(x1, x2, x3)}2
+
+(3)
+
+2.3 Estimate functional factors
+
+The 3D image data {ft(x1, x2, x3) : x1  P1, x2  P2, x3  P3, t = 1, · · · , N } is represented as:
+
+f (x) = C(x),
+
+(4)
+
+where x = (x1, x2, x3) represents the 3D voxel locations, and the functional data are f (x) = [f1(x1, x2, x3), · · · , fN (x1, x2, x3)] . (x) = [1(x1, x2, x3), 2(x1, x2, x3), . . . , K3(x1, x2, x3)] are the 3D basis functions generated by tensor products of univariate splines, and C is the N × K3 coefficient matrix.
+
+Denote the covariance function of the 3D image data as:
+
+G(x, s) = Cov{f (x), f (s)}
+
+(5)
+
+and it can be estimated by:
+N
+G(x, s) = N -1 ft(x)ft(s)
+t=1
+
+(6)
+
+8
+
+The covariance operator V is defined as
+
+Vf =
+
+G(·, x)f (x) dx.
+
+P1 P2 P3
+
+Similarly to the orthogonal decomposition of the multivariate PCA, V  =  with 
+
+and  representing eigenvalue and eigenvector, for the 3D image functional data we
+
+have:
+
+V =
+
+G(·, x)(x) dx = ,
+
+P1 P2 P3
+
+(7)
+
+where  and  denote the eigenfunction and eigenvalue respectively. The eigenvalues
+
+are real and non-negative 1 > 2 > · · ·  0 with respect to the eigenfunctions 1, 2, · · · , where 1 is the spatial factor of the fMRI data that explains the largest
+
+variation, with 1 being the largest explained variation.
+
+Plugging (4) into (6) yields the estimation of the covariance function:
+
+G(s, x) = N -1 (s)C C(x),
+
+and the orthogonal decomposition equation as
+
+N -1 (s)C C(x) (x)b d(x) =  (s)b,
+
+where the eigenfunction  =  b and b is a coefficient vector.
+
+Define W =
+
+(x) (x)dx, we can obtain the eigenfunction, the spatial factors
+
+of the fMRI data, by solving:
+
+N -1W 1/2C CW 1/2u = u,
+
+(8)
+
+where u = W 1/2b and the coefficient vector b satisfies bi W bi = 1 and bi W bj = 0.
+For the fMRI data represented in a manifold functional form ft(j)(x1, x2, x3), the multi-subject 3D Image FPCA estimation procedure can now be summarized as follows:
+
+1. Take the average Y¯t(x1, x2, x3) of the raw 3D fMRI data across all subjects j = 1, · · · , J and obtain the smooth 3D image functional data ft(x1, x2, x3).
+2. Perform 3D Image FPCA to extract common spatial functional factors via orthogonal decomposition (8). Detect the significant active regions with e.g. 0.05%- and 99.95%+ quantiles of the common factors. It serves as the final
+
+9
+
+common spatial factors  (x1, x2, x3).
+
+3. Given the common factors  (x1, x2, x3), estimate the subject-specific temporal
+
+factor
+
+loadings
+
+Z
+
+(j) ,t
+
+with
+
+the
+
+multilinear
+
+regression
+
+(2)
+
+and
+
+classify
+
+the
+
+risk
+
+attitude of each subject.
+
+3 Simulation
+In this section, we investigate the performance of the 3D Image FPCA method by performing a number of simulation studies under known data generating processes. The risk related regions however will not be utilized in the spatial factors identification. Instead, they are retained to evaluate the accuracy of the identification results. Our interest is to see whether the 3D Image FPCA is able to accurately detect the risk related regions and whether it is able to deliver robust results compared to the alternative 1D FPCA approach.
+
+3.1 Normal factor loadings
+
+We design our simulation studies to properly reflect the real data at hand. In the first experiment, we simulate fMRI data within a "brain" defined in the dimensions of [1, 91] × [9, 100] × [11, 81]. The brain activities are activated in 5 risk related regions. They are Parietal Cortex at location [51, 53] × [25, 27] × [60, 62], VLPFC at [27, 29] × [89, 91]×[38, 40], lOFC at [54, 56]×[97, 99]×[30, 32], aINS at [63, 65]×[75, 77]×[37, 39], and DLPFC at [66, 68] × [77, 79] × [53, 55], each within a 3 × 3 × 3 cube. These 5 regions correspond to the nonzero part of the spatial functional factors. They are constant across the data generation.
+
+We generate 3D image data, with 1 000 scans, to represent the brain signals recorded by the fMRI scanner during RPID experiments:
+
+5
+ft(x1, x2, x3) = Z t (x1, x2, x3) + t(x1, x2, x3), t = 1, · · · , 1 000
+=1
+
+(9)
+
+where  (x1, x2, x3) is the th functional factor defined in the 3D locations (x1, x2, x3), with = 1, · · · , 5. Z t is the temporal factor loading of the th factor at scan t. The temporal factor loadings are Gaussian distributed, with mean zero and standard de-
+viation learned from the real data, with value of 7.6, 5.8, 5.2, 1.8, and 1.7 respectively.
+
+10
+
+The random noise t(x1, x2, x3) is standard normal distributed and independent from each other. The generation is repeated 100 times.
+Apply two methods to identify the spatial functional factors, i.e. the proposed 3D Image FPCA and the alternative 1D FPCA. In the 1D FPCA, the 3D image data ft(x1, x2, x3) is vectorized to 1D functional data denoted as ft(v), with v = vec(x1, x2, x3) and then decomposed:
+
+ft(v) = µ(v) + ft - µ,   (v)
+=1
+where v is the 1D mapping index, ft(v) is the vectorized fMRI data, ft - µ,  is the demeaned factor loading. We follow the work of Zipunnikov et al. (2011), where SVD approach is adopted for the 1D FPCA problem to avoid the curse of dimensionality. In both methods, the active regions are defined as the trimmed spatial functional factors over the 99.999% quantile and below the 0.001% quantile.
+Both methods detect the active regions. As illustration, Figure 2 displays the active region lOFC associated with evaluating and contrasting different option choices (Tobler et al., 2007). From left to right, one observes the generated (true) region, the identified regions by the 3D Image FPCA in the middle and 1D FPCA on the right. Further comparisons show that the proposed 3D Image FPCA performs better in several aspects. The 3D Image FPCA explains 56.3% of the total variance of the fMRI data, more than 55.2% by the 1D FPCA, see Table 1. The 3D Image FPCA method provides more clear-cut results, with identified spacial factors corresponding to only one actual regions, and simultaneously less mis-detection of wrongly identify the non-active regions. Table 2 reports the average percentage of the true regions detected by each estimated functional factor. While more than 60% of the estimated functional factors in the 3D Image FPCA method correspond to exactly one region, the alternative method only has 43.33% one-to-one match. In terms of mis-detection, named 0 region, only 28% wrongly detect non-active regions using the 3D Image FPCA, against 36.83% mis-detection of the alternative.
+More importantly, the 3D Image FPCA identifies contiguous regions instead of discrete voxels. Figure 3 displays the contour plot of the risk region lOFC. The detected region using the 1D FPCA method consists of discrete voxels, due to the adoption of SVD. It reaches estimation efficiency but at cost of contiguity. The 3D Image FPCA, on the contrary, provides contiguous risk regions because of its mathematical properties.
+11
+
+Factor
+
+1 2 3 4 5 6 Total
+
+3D Image FPCA 24.2% 4.5% 4.2% 9.9% 1.7% 11.7% 56.3%
+
+1D FPCA 19.2% 0.7% 1.6% 21.5% 4.8% 7.4% 55.2%
+
+Table 1: Explained variance by different number of spatial factors.
+
+Figure 2: Functional factors on lOFC. From left to right are the generated (true) region, the estimated region with the 3D Image FPCA and the estimated region with the 1D FPCA method.
+
+3.2 HRF factor loadings
+
+In the second experiment, we consider a more realistic situation by incorporating the haemodynamic response function (HRF) in the RPID experiment, see Grinband, Wager, Lindquist, Ferrera and Hirsch (2008), Heller et al. (2006). The HRF is generated by a double gamma function:
+
+h(t) = ( t ) ea1 -(t-a1b1)/b1 - c( t ) ea2 -(t-a2b2)/b2
+
+a1b1
+
+a2b2
+
+12
+
+Figure 3: Contour plot of the active region on lOFC. On the left is the estimated region with 3D Image FPCA and on the right is the estimated region with 1D FPCA method.
+
+0 region 1 region 2 regions 3 regions
+
+3D Image FPCA 28.00% 60.67% 11.33%
+
+0.00%
+
+1D FPCA 36.83% 43.33% 19.50%
+
+0.33%
+
+Table 2: Average percentage of the estimated functional factors that detect the true regions.
+
+where a1 = 6, a2 = 12, b1 = b2 = 0.9 and c = 0.35, see Glover (1999),Worsley, Liao, Aston, Petre, Duncan, Morales and Evans (2002). Figure 4 gives an illustration of the simulated double gamma function and the generated factor loadings with HRF. The active regions are defined same as before.
+Table 3 reports the variance explained by the 3D Image FPCA and the 1D FPCA. The 3D Image FPCA explained more variation than the alternative, with 69.5% variation against 55.9%. Moreover, in the 3D Image FPCA, 70% of the detected risk regions correspond to exactly one active region; 23.33% are mis-detected and less than 7% are mixture of risk regions. The alternative 1D FPCA method has only 54% of one-to-one match, more than 30% mis-detection and 15% of mixture, see Table 4. Again, the 3D Image FPCA accurately and reasonably detects a contiguous region, while the 1D FPCA gives discrete voxels, see Figure 5 for the contour plot of the detected risk region on lOFC using the two methods.
+
+13
+
+Figure 4: Simulated factor loadings. On top is the double gamma function. The bottom is the simulated factor loadings, which are sum of the double gamma function and normal random noise. The red dots are time points that the stimulus are triggered.
+3.3 Robust testing
+Question remains on whether relative good performance of the 3D Image FPCA is stable. We repeat the above two experiments with different designs on the active regions. In other words, the spatial factors of the fMRI data are different. In particular, the 5 active regions are generated with varying size to reflect a more realistic situation in accordance with the study of Mohr, Biele, Krugel, Li and Heekeren (2010). They are defined at location [51, 54]×[25, 28]×[60, 63] for Parietal Cortex (64 voxels), [27, 29]× [88, 91] × [38, 41] for VLPFC (48 voxels), [52, 59] × [92, 99] × [28, 35] for lOFC (512 voxels), [62, 66] × [74, 78] × [37, 39] for aINS (75 voxels), and [64, 70] × [73, 79] × [51, 57] for DLPFC (343 voxels). The factor loadings and the noise level remain the same as in the previous experiments. Both normal and HRF factor loadings are considered. Each data generation is repeated 100 times.
+We implement the 3D Image FPCA and 1D FPCA to the generated fMRI data. As the average number of voxels in each simulated active region is about eight times the number of previous simulation, the active regions are determined as the voxels over
+14
+
+Factor
+
+1 2 3 4 5 6 Total
+
+3D Image FPCA 25.9% 4.9% 7.0% 16.2% 5.7% 9.8% 69.5%
+
+1D FPCA 20.5% 2.2% 3.3% 17.8% 1.2% 10.7% 55.9%
+
+Table 3: Explained variance by different number of spatial factors.
+
+0 region 1 region 2 regions 3 regions
+
+3D Image FPCA 23.33% 70.00% 6.67%
+
+0%
+
+1D FPCA 31.33% 54.00% 14.67%
+
+0%
+
+Table 4: Average percentage of the estimated functional factors that detect the true regions.
+
+the 99.992% quantile and below the 0.008% quantile. It turns out that the relative performance is similar as before. The 3D Image FPCA explains more variance than the 1D FPCA. The values of variance explained are 42.7% and 42.4% for Normal and HRF cases, see Table 5. The 3D Image FPCA provides better identification, see Table 6 for the average percentage of the true regions detected by each estimated factor. In the Normal scenario, 62.67% of estimated functional factor associate with exactly one region, 27% mis-detection and 10.33% mixture. On the contrary, the alternative method performs worse with less one-to-one match at 52.33%, more misdetection at 32.17% and mixture at 15.5%. In the HRF scenario, the 3D Image FPCA still outperforms the alternative with 79.67% one-to-one match, 18.50% misdetection and 1.83% mixture, compared to 61.33%, 27.67% and 11.00% by 1D FPCA. Similarly, the 3D Image FPCA method provides realistic contiguous regions, while the alternative 1D FPCA detects discrete voxels, see Figure 6 for the contour plot of the risk region lOFC as illustration.
+
+Factor 3D Image FPCA (normal)
+1D FPCA (normal) 3D Image FPCA (HRF)
+1D FPCA (HRF)
+
+1 20.1% 10.2% 19.3% 9.8%
+
+2 0.5% 9.9% 0.8% 10.1%
+
+3 7.2% 7.5% 7.2% 7.5%
+
+4 5.0% 5.0% 5.1% 5.0%
+
+5 4.9% 4.8% 4.9% 4.8%
+
+6 5.1% 5.1% 5.1% 5.1%
+
+Total 42.7% 42.5% 42.4% 42.3%
+
+Table 5: Explained variance by different number of spatial factors.
+
+The simulation study shows that the proposed 3D Image FPCA outperforms the alternative approach, with higher variance explained and better quality of risk related regions detected. The relative good performance is stable for different scenarios with
+15
+
+Figure 5: Contour plot of the active region on lOFC. On the left is the estimated region with 3D Image FPCA and on the right is the estimated region with 1D FPCA method.
+
+3D Image FPCA (normal) 1D FPCA (normal)
+3D Image FPCA (HRF) 1D FPCA (HRF)
+
+0 region 27.00% 32.17% 18.50% 27.67%
+
+1 region 62.67% 52.33% 79.67% 61.33%
+
+2 regions 10.33% 15.50% 1.83% 11.00%
+
+3 regions 0.00% 0.00% 0.00% 0.00%
+
+Table 6: Average percentage of the estimated functional factors that detect the true regions.
+
+16
+
+Figure 6: Contour plot of the active region on lOFC. The left column is the estimated region in 3D Image FPCA and the right column is the estimated region with 1D FPCA method. The top row is the result under normal factor loadings setup and bottom row is the result under HRF factor loadings setup.
+various parameters.
+4 Empirical Results
+Now we implement the 3D Image FPCA method to real data. We discuss the selection of key model parameters and analyze the common risk related regions. We extract subject specific temporal signals, named signature scores, and classify the subjects with different risk perception.
+The data consists of 17 subjects participating the RPID experiment. During the entire experiment, the participating subjects were placed in the fMRI scanner and the high resolution image data were recorded every 2.5 seconds. The B-spline technique is used to functionalize the cross-subject average fMRI data, as the first step of implementing the proposed 3D Image FPCA. In each direction, 16 knots are used in the smoothing procedure. In total, there are 4096 knots. For 1D FPCA, we
+17
+
+use B-splines to functionalize the vectorized fMRI data. The same number of knots 4096 is used for fair comparison. The computational time is nontrivial though. It took 52 hours for the parallelized program to run on 12 cores of a ProLiant BL680c G7 server with Intel(R) Xeon(R) CPU E7-4860 @ 2.27GHz processors and 252 GB memory.
+L = 1 L = 2 L = 4 L = 6 L = 20 3D Image FPCA 86.03% 88.93% 90.05% 92.78% 94.34%
+1D FPCA 70.06% 81.62% 87.85% 92.82% 95.27%
+Table 7: Explained variance by different number of spatial factors.
+One important parameter in our study is the number of spatial factors as well as the corresponding signature scores, denoted by L. The higher the number of spatial factors, the better the in-sample accuracy of the fitted model. On the other hand, too large L may lead to over-fitting and poor out-of-sample performance. The selection of the number of factors may rest on the explained variation for different model specification, see Ha¨rdle and Majer (2014). Table 7 presents the explained variance averaged over the 17 subjects for different numbers L. It shows that 86% variation in the data is attributed to the first spatial factor, which can be interpreted as the typical brain activity during the RPID experiment. Alternatively, the dominant component only explains 70% variation in the 1D FPCA approach. The inclusion of the subsequent factors = 2, ..., 6 contributes to the in-sample fit, with an approximate 1% increase each, and extends the fMRI signal dynamics captured. Simultaneously, more spatial factors allow to identify some important risk related regions associated with decision making under risk, which have relatively small effects and do not contribute decisively to the explained variation. For example, aINS is highly relevant to risk perception and investment decisions but in modest size relative to visual or audial cortex, Rangel et al. (2008). Thus, L = 20 is chosen in our study. In this case, 94% of variation is explained by the 3D Image FPCA method and 95% by the alternative 1D FPCA. Although 3D Image FPCA explains less than the alternative in this case, it is worth mentioning that higher variance explained is not equivalent to better performance, given that the choice of large number potentially increases the probability of explaining stochastic signal noises. We will continue the performance comparison of the two methods in the later risk classification.
+18
+
+4.1 Risk related regions 
+The 3D Image FPCA technique is utilized to capture the fundamental spatial maps under risk decisions. We assume that all subjects exhibit homogenous brain structure. In other words, the spatial maps are common for all, while the individual differences are represented by the subject specific scores as in (2). The identified spatial factors are used to represent the brain regions with significant activity during the RPID experiment. In particular, L = 20 spatial factors are considered, which are trimmed at  99.95% and  0.05% of the empirical quantiles, to show the active risk related regions. Figure 7 displays 6 identified risk related regions  (x1, x2, x3) with = 3, 4, 5, 12, 18, 19 that have been found to be associated with decision making under risk. They are 3 and 12 and are located in the Parietal Cortex and attributed to risk related processes and selective attention (see Behrmann, Geng and Shomstein, 2004; Rangel et al., 2008); 4 related to the VLPFC region that stands for value processing; the regions mOFC and lOFC picked up by 5 that is associated with evaluating and contrasting of different choice options (Tobler et al., 2007), the aINS region captured by 18 and related to risk and uncertainty, and the DLPFC area highlighted by 19 (Heekeren, Marrett and Ungerleider, 2008).
+
+4.2
+
+Subject
+
+specific
+
+signature
+
+scores
+
+Z
+
+(j) ,t
+
+The temporal behaviors of the individual brain activities are represented by the sub-
+
+ject
+
+specific
+
+signature
+
+Z
+
+(j) ,t
+
+with
+
+j
+
+=
+
+1, · · ·
+
+, 17,
+
+= 1, · · · , 20, and t = 1, · · · , 1360.
+
+Given the risk related regions common for all subjects, the individual risk perception
+
+and altitude during decision making under risk are reflected in the series of the tem-
+
+poral activation. An interesting question is whether the extracted subject specific
+
+signature scores properly reflect the risk preference of individual. Among others, for
+
+the active brain regions that have been found to be related to risk and uncertainty,
+
+the respective signature scores are expected to carry important information about
+
+risk preferences. Understanding those variations requires a careful investigation and
+
+is presented in the following risk classification study.
+
+4.2.1 Risk attitudes
+Mohr, Biele, Krugel, Li and Heekeren (2010) quantify the risk preference of the 17 subjects in the same experiment with the help of psychological risk-return (PRR)
+
+19
+
+(a)
+(b)
+(c)
+(d)
+(e)
+(f)
+Figure 7: Selected identified risk related regions  , = 3, 4, 5, 12, 18, 19. (a) Estimated function 3 in Parietal Cortex ; (b) 4 in VLPFC; (c) 5 in mOFC and lOFC; (d) 12 in Parietal Cortex ; (e) 18 in aINS; (f) 19 in DLPFC.
+20
+
+model:
+
+Vj(x) = µj(x) - jj(x)
+
+(10)
+
+where Vj(x) is the value of investment x by subject j, µj(x) is the respective expected return, j(x) is the perceived risk, and j is a subject specific weight coefficient and reflects the risk altitude of subject j. Given the displayed streams of returns in the RPID experiment and the subjects' answers to the two tasks, i.e. subjective expected return and perceived risk, the risk weight j is estimated in a logistic regression framework. In total, 7 subjects (j = 2, 5, 6, 8, 10, 11, 17) are categorized as weakly risk averse with the risk weight j < 5, and the rest 10 subjects are classified as strongly risk averse, with higher risk attitudes. The dichotomization and derived risk attitudes j are presented in Figure 8.
+
+4.2.2 Risk classification
+
+The aim of risk classification analysis is to investigate the possible relation between neural processes underlying investment decisions and subjects' risk preferences. A classification method is proposed to predict individual's risk attitude without any information on his decision behavior. Instead, the classification is performed solely on the extracted signature scores. The RPID consists of 3 types of tasks, we here only focus on the decision task, where subject chooses between risky investment return or sure fixed 5% return, and thus his risk attitude contributes to the perceived value of the displayed return streams and plays a key role in the decision process. The other two tasks, i.e. subjective expected return and perceived risk, have been utilized in the estimation of risk altitudes and will be used to verify the classification accuracy. Moreover, the analysis is performed for each subject based on 6 signature scores Z(,jt),
+= 3, 4, 5, 12, 18, 19, of the active brain regions that have been found to be related to risk and uncertainty.
+
+Each subject was exposed to 27 decision tasks and had to make a choice within
+
+the next 7 seconds in the RPID experiment. To investigate the brain reactions to
+
+the investment decision task of different groups being strongly / weakly risk averse, 3
+
+consequent observations after the s-th stimulus at scan ts are considered, covering the
+
+decision making period over 7.5 seconds. The 3 signature scores are demeaned by the
+
+score
+
+at
+
+the
+
+exact
+
+stimulus
+
+time
+
+point
+
+Z
+
+j ,ts
+
+to
+
+capture
+
+the
+
+peak
+
+of
+
+the
+
+haemodynamic
+
+response function. Compute the average to stand for the average reaction to stimulus
+
+21
+
+s:
+
+Z
+
+(j) ,ts
+
+=
+
+1 3
+
+3
+
+Z
+
+(j) ,,ts
+
++
+
+-
+
+Z
+
+(j) ,ts
+
+ =1
+
+and the standard deviation of the 27 average reactions is computed and considered
+
+as empirical characteristics of subject's risk preference. For each subject, 6 standard
+
+deviations are obtained and will be used in the risk classification analysis. For the
+
+alternative 1D FPCA method, similar procedures are applied to extract the variables
+
+for risk classification.
+
+The classification analysis is performed via Support Vector Machines (SVM), Cortes and Vapnik (2005), H¨ardle and Simar (2015). The subjects are classified based on their 6 standard deviations of the average reactions to decision task. For the learning part, the strongly risk averse subjects are denoted with 1 and the weakly risk averse subjects with -1. The classification performance is validated by the estimated risk attitudes, see Section 4.2.2.
+
+We first evaluate the in-sample predictive power of the 3D Image FPCA on risk preferences, shown in Figure 8. The 17 subjects were perfectly classified, with 100% correction for both strongly and weakly risk averse groups. The in sample classification however utilizes all information of the 17 subjects, which may cause the problem of over-fitting. We continue the analysis for out-of-sample to investigate whether the proposed method has a stable performance for different data sets. Leave-k-out cross validation is adopted, which iteratively partition data to two subsets, i.e. the training set and the test sets with k subjects, and repeatedly performs analysis on the training set and predicts the test set. The prediction accuracy measurements are averaged among the validation sets. The algorithm can be formulated as follows:
+
+1. divide the data into training set and test set (leave-k-out method) 2. apply the cross validation and find the optimal SVM parameters 3. classify the test data 4. repeat 1-3 for all different test sets 5. average the classification rate over all iterations 4.
+
+Table 8 reports the classification rate (in percentage) by leave-k-out cross validation for k = 1, · · · , 6. The classification rate is relatively stable, though it reduces slowly as k increases. The 3D Image FPCA method provides consistently better classification rate than the alternative 1D FPCA. The the overall classification rate of 3D
+22
+
+Figure 8: Risk attitudes and SVM scores of 17 subjects. Subjects with risk attitude< 5 are marked as red circles, otherwise as blue squares.
+Image FPCA reaches 73 - 82% for the tuned SVM algorithm with the optimal parameters. The classification is remarkably better for the strongly risk averse subjects, with 90 - 100% labeled correctly. For the weakly risk averse subjects 49 - 71% were categorized accurately. For the 1D FPCA, the classification rate of overall is 66-76%. It varies between 81 - 90% for strongly risk averse subjects and 46 - 57% for weakly risk averse subjects. In summary, the analysis shows that the signature scores of the selected risk related regions carry explanatory power for subjects' risk attitudes derived from their choice in the RPID experiment. The risk preferences can be classified by the volatility (standard deviation) of the signature signals with an considerable accuracy. The proposed 3D Image FPCA method has stronger classification power compared to the alternative 1D FPCA.
+5 Conclusion
+Techniques for fMRI analysis may be generally divided into model-based and datadriven approaches. In the first class the benchmark is the GLM, which focuses on task-related, predefined effects. It has been repeatedly applied in neuroscience and has allowed to explore some of neurobiological processes underlying decision making under uncertainty. However, its inherited limitations are especially visible in the
+23
+
+Overall
+
+Strong
+
+Weak
+
+k 3D Image 1D 3D Image 1D 3D Image 1D
+
+1 88 76 100 90 71 57
+
+2 82 76 100 89 55 56
+
+3 79 73 98 87 53 54
+
+4 77 72 95 85 51 52
+
+5 74 69 92 83 50 49
+
+6 73 66 90 81 49 46
+
+Table 8: SVM classification rate in percentage points by leave-k-out for the 3D Image FPCA and 1D FPCA methods.
+
+field of neuroeconomics, where the signal may be subtle, hard to model and detect. Therefore, over last years, one observes a rapid growth in research devoted to modelfree fMRI techniques and a leading example is the FPCA. There are various studies that investigate brain data in the functional analysis framework, see, e.g., Viviani et al. (2005), Long et al. (2005) or Zipunnikov et al. (2011). Nevertheless, a full potential offered by functional data analysis in application to brain dynamics is so far not explored. Up to date, the natural anatomical spatial brain structure is not fully addressed in the FPCA studies, as the high-dimensional BOLD signals are artificially vectorized or projected first. This can lead to a less accurate representation and a smaller portion of variation explained by the model, as reported in Table 8. In fact, the activation detection performance, being at heart of neuroscience, may be obstructed by the inadequately addressed spatial dependence in IR3 high-resolution brain images.
+In this paper we proposed the 3D Image FPCA methodology that is directly applicable to the 3D image data. Thus, the anatomical brain structure (Talairach and Tournoux, 1988; Desikan, Segonne, Fischl, Quinn, Dickerson, Blacker, Buckner, Dale, Maguire, Hyman, Albert and Killiany, 2006) is preserved and efficiently embraced in the estimation procedure. Moreover, this novel statistical technique is a model-free, dimension reduction approach with relatively low number of parameters. The 3D Image FPCA decomposes the fMRI BOLD signals into spatial factors, representing the common spatial maps for all subjects, and subject specific signature scores which are distinctive for each individual. The spatial factors capture the brain regions with the highest variability throughout experiment and consequently represent the activation pattern. The representation precision is controlled by the number of factors L and even subtle effects can be detected. The signature scores mimic possibly different temporal activation patterns for each subject (i.e., related to the risk attitude) and correspond to the neural activity of a particular region of interest. As a result, the
+24
+
+3D Image FPCA addresses the key limitations of the benchmark GLM and conventional 1D FPCA methods. These findings are evidenced by our extensive simulation study, where in different setups, accurate detections and modeling performance were achieved. Furthermore, our technique outperforms the 1D FPCA competitor as the preservation of the spatial brain structure really pays off.
+We apply the 3D Image FPCA to investigate neural processes that underlie decision making under risk. The RPID experiment with 17 subjects, each with N = 1360 images of 91 × 109 × 91 voxels, was considered in our study. In the experiment, subjects where exposed to 27 × 3 RPID tasks, where the investment decision trials were repeated 27 times. The number of spatial factors is set to L = 20, with 6 of them have been reported in the decision neuroscience literature. The 6 spatial factors are the Parietal Cortex attributed to risk related processes and selective attention, the VLPFC related to value processing, the mOFC and lOFC that correspond to evaluation of different choice options. Moreover, our technique detected the aINS that is commonly correlated with risk and uncertainty and the DLPFC which is frequently identified in the decision making context. We conclude that our results are in line with van Bo¨mmel et al. (2013) and Mohr, Biele, Krugel, Li and Heekeren (2010) and the 3D Image FPCA, as a model-free technique, yields the same results as these model-based analysis.
+Investment decision may be described as a process of evaluating and contrasting of various choices with uncertain outcomes. In this framework the risk preferences are the crucial factor which affects the subjective value of investment. To improve our understanding of the underlying neural activities we provided the statistical analysis of the extracted signature scores selected in the decision making context. The focus is on the variability in the HRF after the decision stimulus, captured by the score series. The standard deviations derived form the subject-specific responses served as an input in the SVM classifier. For the leave-k-out cross validation, we report the overall classification rate at 73 - -82%, where all the strongly risk averse subjects are correctly labeled at 90 - -100% and the weakly risk averse subjects have 49 - -71%. the overall classification rate of 3D Image FPCA reaches 73 - -82% for the tuned SVM algorithm with the optimal parameters. The classification is remarkably better for the strongly risk averse subjects, with labeled correctly. For the weakly risk averse subjects. It is worth noting that the proposed 3D Image FPCA method is remarkably superior to the 1D FPCA competitor in terms of classification analysis. One can conclude that the extracted low dimensional representations exhibit the explanatory power for subjects' risk preferences. Without knowing subjects' answers
+25
+
+one can clearly predict the risk attitude with a high accuracy.
+References
+Andersen, A. H., Gash, D. M. and Avison, M. J. (1999). Principal component analysis of the dynamic response measured by fMRI: a generalized linear systems framework, Magnetic Resonance Imaging 17(6): 795­815.
+Baumgartner, R., Ryner, L., Richter, W., Summers, R., Jarmasz, M. and Somorjai, R. (2000). Comparison of two exploratory data analysis methods for fMRI: fuzzy clustering vs. principal component analysis, Magnetic Resonance Imaging 18(1): 89­94.
+Behrmann, M., Geng, J. and Shomstein, S. (2004). Parietal cortex and attention, Current Opinion in Neurobiology 14: 212­217.
+Chen, D. and Mu¨ller, H.-G. (2012). Nonlinear manifold representations for functional data, The Annals of Statistics 40(1): 1­29.
+Cortes, C. and Vapnik, V. (2005). The nature of statistical learning theory, Machine Learning 20: 273­297.
+Desikan, R. S., Segonne, F., Fischl, B., Quinn, B. R., Dickerson, B. C., Blacker, D., Buckner, R. L., Dale, A. M., Maguire, R. P., Hyman, B. T., Albert, S. A. and Killiany, R. J. (2006). An automated labeling system for subdividing the human cerebral cortex on MRI scans into gyral based regions of interest, NeuroImage 31(3): 968­980. DOI: 10.1016/j.neuroimage.2006.01.021.
+Friston, K., Holmes, A., Worsley, K., Poline, J., Frith, C. and Frackowiak, R. (1995). Statistical parametric maps in functional imaging: A general linear approach, Human Brain Mapping 2: 189­210.
+Glover, G. H. (1999). Deconvolution of impulse response in event-related bold fmri¡ sup¿ 1¡/sup¿, Neuroimage 9(4): 416­429.
+Golub, G. H. and Reinsch, C. (1970). Singular value decomposition and least squares solutions, Numerische Mathematik 14(5): 403­420.
+Grinband, J., Wager, T. D., Lindquist, M., Ferrera, V. P. and Hirsch, J. (2008). Detection of time-varying signals in event-related fMRI designs, Neuroimage 43(3): 509­520.
+26
+
+Ha¨rdle, W. K. and Majer, P. (2014). Yield curve modeling and forecasting using semiparametric factor dynamics, The European Journal of Finance pp. 1­21.
+Ha¨rdle, W. and Simar, L. (2015). Applied Multivariate Statistical Analysis, 4th edition, Springer.
+Heekeren, H., Marrett, S. and Ungerleider, L. (2008). The neural systems that mediate human perceptual decision making, Nat Rev Neurosci 9: 467­479.
+Heller, R., Stanley, D., Yekutieli, D., Rubin, N. and Benjamini, Y. (2006). Clusterbased analysis of FMRI data, NeuroImage 33(2): 599­608.
+Lai, S.-H. and Fang, M. (1999). A novel local pca-based method for detecting activation signals in fMRI, Magnetic resonance imaging 17(6): 827­836.
+Long, C., Brown, E., Triantafyllou, C., Aharon, I., Wald, L. and Solo, V. (2005). Nonstationary noise estimation in functional MRI, NeuroImage 28(4): 890­903.
+Majer, P., Mohr, P. N., Heekeren, H. R. and H¨ardle, W. K. (2015). Portfolio decisions and brain reactions via the CEAD method, Psychometrika . DOI: 10.1007/s11336-015-9441-5.
+Mohr, P., Biele, G. and Heekeren, H. (2010). Neural Processing of Risk, Journal of Neuroscience 30(19): 6613­6619.
+Mohr, P. N. C., Biele, G., Krugel, L. K., Li, S.-C. and Heekeren, H. R. (2010). Neural foundations of risk-return trade-off in investment decisions, NeuroImage 49: 2556­2563.
+Ramsay, J. and Silverman, B. (1997). Functional Data Analysis, Springer, New York.
+Rangel, A., Camerer, C. and Montague, P. (2008). A framework for studying the neurobiology of value-based decision making, Nat Rev Neurosci 9: 545­556.
+Rao, C. R. (1958). Some statistical methods for comparison of growth curves, Biometrics 14(1): 1­17.
+Talairach, J. and Tournoux, P. (1988). Co-Planar Stereotaxic Atlas of the Human Brain: 3-D Proportional System: An Approach to Cerebral Imaging (Thieme Classics), Thieme, Stuttgart. ISBN: 9783137117018.
+Tobler, P., O'Doherty, J., Dolan, R. and Schultz, W. (2007). Reward value coding distinct from risk attitude-related uncertainty coding in human reward systems, J Neurophysiol 97: 1621­1632.
+27
+
+van Bo¨mmel, A., Song, S., Majer, P., Mohr, P. N. C., Heekeren, H. R. and H¨ardle, W. K. (2013). Risk Patterns and Correlated Brain Activities. Multidimensional Statistical Analysis of fMRI Data in Economic Decision Making Study, Psychometrika . DOI: 10.1007/s11336-013-9352-2.
+Viviani, R., Gron, G. and Spitzer, M. (2005). Functional principal component analysis of fMRI data, Human Brain Mapping 24: 109­129.
+Worsley, K. J., Liao, C., Aston, J., Petre, V., Duncan, G., Morales, F. and Evans, A. (2002). A general statistical analysis for fmri data, Neuroimage 15(1): 1­15.
+Zipunnikov, V., Caffo, B., Yousem, D. M., Davatzikos, C., Schwartz, B. S. and Crainiceanu, C. (2011). Functional principal component model for highdimensional brain imaging, NeuroImage 58(3): 772­784.
+28
+
+SFB 649 Discussion Paper Series 2015
+
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001 002
+003
+004 005
+006 007 008 009 010 011 012 013 014 015 016 017
+018 019 020 021
+
+"Pricing Kernel Modeling" by Denis Belomestny, Shujie Ma and Wolfgang Karl Härdle, January 2015. "Estimating the Value of Urban Green Space: A hedonic Pricing Analysis of the Housing Market in Cologne, Germany" by Jens Kolbe and Henry Wüstemann, January 2015. "Identifying Berlin's land value map using Adaptive Weights Smoothing" by Jens Kolbe, Rainer Schulz, Martin Wersing and Axel Werwatz, January 2015. "Efficiency of Wind Power Production and its Determinants" by Simone Pieralli, Matthias Ritter and Martin Odening, January 2015. "Distillation of News Flow into Analysis of Stock Reactions" by Junni L. Zhang, Wolfgang K. Härdle, Cathy Y. Chen and Elisabeth Bommes, January 2015. "Cognitive Bubbles" by Ciril Bosch-Rosay, Thomas Meissnerz and Antoni Bosch-Domènech, February 2015. "Stochastic Population Analysis: A Functional Data Approach" by Lei Fang and Wolfgang K. Härdle, February 2015. "Nonparametric change-point analysis of volatility" by Markus Bibinger, Moritz Jirak and Mathias Vetter, February 2015. "From Galloping Inflation to Price Stability in Steps: Israel 1985­2013" by Rafi Melnick and till Strohsal, February 2015. "Estimation of NAIRU with Inflation Expectation Data" by Wei Cui, Wolfgang K. Härdle and Weining Wang, February 2015. "Competitors In Merger Control: Shall They Be Merely Heard Or Also Listened To?" by Thomas Giebe and Miyu Lee, February 2015. "The Impact of Credit Default Swap Trading on Loan Syndication" by Daniel Streitz, March 2015. "Pitfalls and Perils of Financial Innovation: The Use of CDS by Corporate Bond Funds" by Tim Adam and Andre Guettler, March 2015. "Generalized Exogenous Processes in DSGE: A Bayesian Approach" by Alexander Meyer-Gohde and Daniel Neuhoff, March 2015. "Structural Vector Autoregressions with Heteroskedasticy" by Helmut Lütkepohl and Aleksei Netsunajev, March 2015. "Testing Missing at Random using Instrumental Variables" by Christoph Breunig, March 2015. "Loss Potential and Disclosures Related to Credit Derivatives ­ A CrossCountry Comparison of Corporate Bond Funds under U.S. and German Regulation" by Dominika Paula Galkiewicz, March 2015. "Manager Characteristics and Credit Derivative Use by U.S. Corporate Bond Funds" by Dominika Paula Galkiewicz, March 2015. "Measuring Connectedness of Euro Area Sovereign Risk" by Rebekka Gätjen Melanie Schienle, April 2015. "Is There an Asymmetric Impact of Housing on Output?" by Tsung-Hsien Michael Lee and Wenjuan Chen, April 2015. "Characterizing the Financial Cycle: Evidence from a Frequency Domain Analysis" by Till Strohsal, Christian R. Proaño and Jürgen Wolters, April 2015.
+
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2015
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 " Risk Related Brain Regions Detected with 3D Image FPCA" by Ying Chen, Wolfgang K. Härdle, He Qiang and Piotr Majer, April 2015.
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasrecahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+
