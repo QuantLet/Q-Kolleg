@@ -1,0 +1,4756 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2016-057
+Factorisable Multi-Task Quantile Regression
+Shih-Kang Chao * Wolfgang K. Härdle *²
+Ming Yuan *³
+* Purdue University, United States of America *² Humboldt-Universit¨at zu Berlin, Germany *³ University of Wisconsin-Madison, United States of America This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Factorisable Multi-Task Quantile Regression
+
+Shih-Kang Chao
+
+Wolfgang K. Ha¨rdle July 7, 2016
+
+Ming Yuan§
+
+Abstract
+For many applications, analyzing multiple response variables jointly is desirable because of their dependency, and valuable information about the distribution can be retrieved by estimating quantiles. In this paper, we propose a multi-task quantile regression method that exploits the potential factor structure of multivariate conditional quantiles through nuclear norm regularization. We jointly study the theoretical properties and computational aspects of the estimating procedure. In particular, we develop an e cient iterative proximal gradient algorithm for the non-smooth and non-strictly convex optimization problem incurred in our estimating procedure, and derive oracle bounds for the estimation error in a realistic situation where the sample size and number of iterative steps are both finite. The finite iteration analysis is particular useful when the matrix to be estimated is big and the computational cost is high. Merits of the proposed methodology are demonstrated through a Monte Carlo experiment and applications to climatological and financial study. Specifically, our method provides an objective foundation for spatial extreme clustering, and gives a refreshing look on the global financial systemic risk. Supplementary materials for this article are available online.
+KEY WORDS: Factor model; Fast iterative shrinkage-thresholding algorithm; Multivariate Regression; Spatial extreme; Financial risk.
+Financial support from the Deutsche Forschungsgemeinschaft (DFG) via SFB 649 "Economic Risk", IRTG 1792, Einstein Foundation Berlin via the Berlin Doctoral Program in Economics and Management Science (BDPEMS), and National Science Foundation and National Institute of Health of the US are gratefully acknowledged.
+Department of Statistics, Purdue University, West Lafayette, IN 47906. E-mail: skchao74@purdue.edu. Tel: +1 (765) 496-9544. Fax: +1 (765) 494-0558. Partially supported by O ce of Naval Research (ONR N00014-15-1-2331).
+Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. - Center for applied Statistics and Economics, Humboldt-Universita¨t zu Berlin, Unter den Linden 6, 10099 Berlin, Germany. Email: haerdle@wiwi.hu-berlin.de. Sim Kee Boon Institute for Financial Economics, Singapore Management University, 50 Stamford Road, Singapore 178899, Singapore.
+§Department of Statistics, University of Wisconsin-Madison, 1300 University Avenue, Madison, WI 53706, U.S.A. Email: myuan@stat.wisc.edu.
+1
+
+1. Introduction
+
+In a variety of applications in economics (Koenker and Hallock (2001)), biology (Briollais and Durrieu (2014)), ecology (Cade and Noon (2003)), and atmospheric sciences (for example, Friederichs and Hense (2007); Bremnes (2004); Reich et al. (2011); Reich (2012)), the interest is in the conditional quantiles of the response variable. For a single response variable, quantile regression (Koenker and Bassett; 1978) is widely acknowledged as a very convenient and e cient method to estimate conditional quantiles. However, we are often required to consider a multi-task framework, in which the responses Y = (Y1, ..., Ym) are predicted by a common vector X = (X1, ..., Xp), where p, m grow with sample size n. Existing literature on the multi-task quantile regression either assumes a particular structure between the response variables and predictors (Fan et al.; 2015), or considers a factor model where the factors do not depend on the quantile levels (Ando and Tsay; 2011; Chen et al.; 2015) with p, m much smaller than n.
+To analyze noncanonical and asymmetric data arising from many applications, we consider a flexible quantile factor model that allows the factor to vary with the quantile level, while making no assumption on the association between the response and prediction variables. Given factors fk (X) for k = 1, ..., r for a quantile level 0 <  < 1, we assume the conditional quantile qj( |Xi) for Yj in Y at  has a linear expression in terms of fk (X),
+
+Xr
+
+qj( |X) =
+
+kj, fk (X),
+
+k=1
+
+j = 1, ..., m,
+
+(1.1)
+
+where kj, 2 R is the factor loading, and r is fixed and much less than the sample size n. The factors fk (X) are flexible for analyzing Yj, which possibly depends on X in a
+very irregular way. An important special example is the two-piece normal distribution, which is a combination of two centered normal distributions with dierent variances at the origin. The two-piece normal distribution is especially suitable for modeling the asymmetric
+
+2
+
+likelihood of upward and downward movement, which is exploited by the Bank of England for making inflation rate prediction intervals (Wallis; 1999, 2014). However, if Yj follows a two-piece normal distribution whose variances for the left and right part of the distribution are two distinct functions of X, traditional approaches such as principal component analysis (PCA) fail to correctly estimate the factors for Y , since PCA ignores the fact that they are asymmetric and non-Gaussian. Consequently, the resulting factors are misleading.
+Because the factors fk (X) are latent, direct estimation of the parameters kj, for k = 1, ..., r and j = 1, ..., m is not feasible. Therefore, we need additional assumptions. If the transformations fk (Xi) are linear in X, that is, fk (Xi) d=ef '>k, Xi, where 'k, = ('k1, , ..., 'kp, )> 2 Rp, we can rewrite the model (1.1) as
+
+qj( |Xi) = (  )>jXi, i = 1, ..., n,
+
+(1.2)
+
+where  is defined in an obvious manner, and (  )j is the jth column of matrix  . We note that factors fk (X) are frequently assumed linear in X in applied statistics and financial econometrics; see, for example, Section 2.2 and Chapter 8 of Reinsel and Velu (1998) for
+practical examples.
+The main focus of this paper is on estimating the matrix  in (1.2). After a factorization of the estimated matrix, we obtain the estimated factors and loadings simultaneously; see Section 2.2 for further detail. We may identify  2 arg minS2Rpm Q (S), where Q (S) d=ef E[Qb (S)] and
+
+Qb (S) d=ef (mn)
+
+Xn Xm 1 
+
+Yij
+
+i=1 j=1
+
+Xi>Sj .
+
+(1.3)
+
+where  (u) = u( 1{u  0}) is the "check function" that forces Xi>Sj to be close to the  quantile of Yj as argued in the seminal paper of Koenker and Bassett (1978). Qb is similar
+to the loss function used in Koenker and Portnoy (1990).
+
+3
+
+The number of unknown parameters mp may be larger than n in our model, which makes the direct estimation of (1.3) infeasible. We make a key observation that  in (1.2) is of rank r , which is assumed much less than p, m. This observation motivates us to the estimator
+
+b
+
+d=ef
+
+arg
+
+min
+S2Rpm
+
+L (S) d=ef Qb (S) +
+
+ kSk
+
+,
+
+(1.4)
+
+where kSk is the nuclear norm (sum of singular values) and  is a user supplied tuning parameter. Nuclear norm encourages the sparsity in the rank of the solution b , see Yuan et al. (2007); Bunea et al. (2011); Negahban and Wainwright (2011); Negahban et al. (2012) for the application of nuclear norm penalty in a multivariate mean regression framework.
+Despite of theoretical properties of b (see appendix), solving (1.4) exactly for the matrix b is di cult in practice because the first term on the right of (1.4) is neither smooth nor strictly convex. Our first contribution is an e cient algorithm that generates a sequence of matrices ,t, which converges to b as the number of iterations t ! 1. The algorithm combines the popular smoothing procedure of Nesterov (2005) and the Fast Iterative Shrinkage-Thresholding Algorithm (FISTA) of Beck and Teboulle (2009). A convergence analysis shows that it requires O(1/) iterations for the dierence in loss function in (1.4) evaluated at the two neighboring steps to be less than , which is more e cient than O(1/2) iterations required by the general subgradient method.
+The property of the approximating sequence ,t is further characterized by a novel error bound for the Frobenius norm k ,t  kF under finite sample and finite iterative steps. We are interested in finite iteration because when p, m are large, one iteration may take a lot of time as a singular value decomposition is required in each step. Hence, in practice one cannot compute too many iterations. Our theoretical results provide a rule for determining the number of iterations that ensures the oracle rate of the resulting estimator. The proof is founded on one of our intermediate results that the dierence ,t  lies in a starshaped set rather than a cone. This result shares a similar flavor to the estimation for
+4
+
+high-dimensional matrix, which is not exactly sparse in rank; see Negahban et al. (2012). In
+
+the bulk of the proof of our main theorem, we apply modern random matrix theory which
+
+gives a very sharp bound on the spectral norm of a sum of random matrices. Finally, under
+
+the realistic situation of finite sample and finite iteration, we derive realistic bounds for the
+
+estimation error for factors and loadings, using a state-of-the-art bound of Yu et al. (2015)
+
+on the distance between subspaces spanned by the eigenvectors of two matrices.
+
+We demonstrate the performance of our estimator by a Monte Carlo experiment, with
+
+data generated from a two-piece normal distribution; see (4.1) for the data generating model.
+
+In order to show how our estimator performs for asymmetric data, we consider both high
+
+and low asymmetry. We compare our estimator with an oracle estimator, which is estimated
+
+under the knowledge of the true rank of  . The simulation results show that the dierence
+
+between k ,t
+
+ kF and the oracle dierence k
+
+or ,t
+
+ kF is around 5-10% of the oracle
+
+dierence. The number of iterations required is generally below 40. Both the error and the
+
+required number of iteration increases when  is close to 0 and 1.
+
+We remark that the our computational method and theoretical tool may be interesting
+
+for other multi-task learning problems with non-smooth loss functions that are not strictly
+
+convex, such as the support vector machine.
+
+We show that some modern scientific challenges in climatology and finance may be ad-
+
+dressed with our method. In climatology, the study of inference methods for spatial extreme
+
+is a highly active research area (Davison et al.; 2012). We quantify spatial dependence of
+
+extreme temperature across China with our method, which provides an objective rule for
+
+spatial extreme clustering. Spatial clustering based on extreme behavior of atmospheric
+
+variables has attracted much interest recently (Bernard et al.; 2013; Bador et al.; 2015),
+
+because summarizing the data originally observed at a large collection of locations by very
+
+few spatial clusters is essential for avoiding the hefty computational cost (Castruccio et al.;
+
+2015) required by the statistical inference of spatial extremes. For financial study, we show
+
+5
+
+via global stock price data that the stock price of firms with large market value and high leverage (the ratio of short and long term debt over common equity) tend to be more vulnerable to systemic risk. Our finding is consistent with the finding of White et al. (2015), but our computational method is scalable to a higher dimension.
+The rest of this paper is organized as follows. Section 2 is devoted to the algorithm for finding a good approximating sequence ,t approximating b defined in (1.4), the estimation of factors and loadings, the choice of  and the analysis of the convergence properties of the algorithm. In Section 3, the oracle properties of ,t and the estimator for factors and loadings are investigated. In Section 4, a Monte Carlo experiment is presented. In Section 5, we analyze challenging scientific questions using our method. Proofs are shifted to the supplementary material.
+Notations. In the rest of the paper, we sometimes suppress " " in  , b ,  etc. for brevity, when it does not cause confusion. Given two scalars x and y, x ^ y d=ef min{x, y} and x_y d=ef max{x, y}. 1(x  0) is an index function, which is equal to 1 when x  0 and 0 when x > 0. For a vector v 2 Rp, let kvk1, kvk2 and kvk1 be the vector `1, `2 and `1 norm. For a matrix A = (Aij) 2 Rpm, denote the singular values of A: 1(A) 2(A) ... p^m(A), and we usually write the singular value decomposition (abbreviated as SVD henceforth) A = UDV>. We sometimes also write max(A) and min(A) for the largest and smallest singular values of A. Let kAk = max(A), kAk and kAkF be the spectral, nuclear and Frobenius norm of a matrix A. If A 2 Rpm, for a probability distribution PX for X 2 Rp, define
+
+kAkL2 2(PX ) d=ef m 1EPX kA>Xik22.
+
+(1.5)
+
+Denote Aj and Ai as the jth column vector and the ith row vector of A. Ip denotes the p  p identity matrix. For any two matrices A, B 2 Rpm, h·, ·i : Rnm  Rnm ! R
+
+6
+
+denotes the trace inner product given by hA, Bi = tr(AB>). Define the empirical measure
+
+of (Yi, Xi) by Pn, and the true underlying measure by P with the corresponding expectation
+
+as E. For a function f : Rp ! R, and Zi 2 Rp, define the empirical process Gn(f ) =
+
+n
+
+1/2
+
+Pn
+i=1
+
+{f
+
+(Zi)
+
+E[f (Zi)]}. Define the "check" function and its subgradient by
+
+ (u) d=ef u( 1{u  0}),  (u) d=ef  1(u  0).
+
+For vectors a1, ..., am in Rp, denote [a1 a2 ... am] 2 Rpm a matrix with aj being its jth column. Let 0p be a p-vector of zeros.
+Definition 1.1 (Sub-Gaussian variable and sub-Gaussian norm). A random variable X is called sub-Gaussian if there exists some positive constant K2 such that P(|X| > t)  exp(1 t2/K22) for all t 0. The sub-Gaussian norm of X is defined as kXk 2 = supp 1 p 1/2(E|X|p)1/p.
+
+2. Computation
+In this section, we discuss an e cient algorithm that generates a sequence to approximate the solution of (1.4), which we call "QISTA". Section 2.1 describes the ideas of the algorithm, which is stated formally in Algorithm 1. Section 2.2 explains the computation of factors and loadings. Section 2.3 discusses the choice of tuning parameter . Section 2.4 gives an algorithmic convergence result in Theorem 2.3, whose proof is in the supplementary material.
+
+2.1. A Generalization of FISTA to Non-smooth Loss Function
+Obtaining the exact solution for (1.4) is di cult because Qb (S) defined in (1.3) is neither smooth nor strictly convex. In this section we describe an algorithm that generates a sequence of ,t which approximates b. The major challenge is that the subgradient of Qb (S)
+
+7
+
+is not Lipschitz, so the FISTA algorithm of Beck and Teboulle (2009) cannot be applied straightforwardly. To resolve this problem, we need to find a "nice" surrogate for Qb (S).
+To develop the ideas, recall from (1.4) that the objective function to be minimized is
+
+Xn Xm
+
+L (S) = (mn) 1
+
+ Yij
+
+i=1 j=1
+
+Xi>Sj + kSk = Qb (S) + kSk,
+
+(2.1)
+
+where Qb (S) is neither smooth nor strictly convex. To handle this problem, we introduce the dual variables ij:
+
+Qb (S) =
+
+Xn Xm
+
+max (mn) 1
+
+ij Yij
+
+ij 2[ 1, ]
+
+i=1 j=1
+
+Xi>Sj .
+
+(2.2)
+
+See Section S.1.1 in the supplementary material for a proof of (2.2). To smooth this func-
+tion, denote the matrix  = (ij) for i = 1, ..., n, j = 1, ..., m, we consider a smooth approximation to Qb (S) as in equation (2.5) of Nesterov (2005):
+
+n Qb,(S) d=ef max (mn) 1Qe (S, )
+ij 2[ 1, ]
+
+ 2
+
+o kk2F ,
+
+(2.3)
+
+where
+
+Qe (S, ) d=ef
+
+Pn
+i=1
+
+Pm
+j=1
+
+ij
+
+Yij
+
+Xi>Sj , and  > 0 is a smoothing regularization
+
+constant depending on m, n and the desired accuracy. When  ! 0, the approximation is
+
+getting closer to the function before smoothing, as shown in Figure 2.1. Qb,(S) defined in
+
+(2.3) has Lipschitz gradient
+
+rQb,(S) d=ef (mn) 1X>[[(mn) 1(Y XS)]] ,
+
+(2.4)
+
+where X = [X1 X2 ... Xn]>, [[A]] = ([[Aij]] ) performs component-wise truncation on a
+
+8
+
+real matrix A to the interval [ 1,  ]; in particular,
+
+8 >>>>>><, [[Aij]] = >:>>>>>A ij, 1,
+
+if Aij  ; if  1 < Aij <  ; if Aij   1.
+
+Observe that (2.4) is similar to the subgradient X{ 1(Y XS  0)} of Qb (S), where the operator  1(·  0) applies component-wise to the matrix Y XS with a slight abuse of notation. The major dierence lies in the fact that (2.4) replaces the discrete non-Lipschitz  1(Y XS  0) with a Lipschitz function [[ 1(Y XS)]] . Figure 2.1 illustrates this in a univariate framework with m = n = 1 and X = 1.
+
+-0.5 0.0 0.5
+
+=0.5 =0.2
+
+=0.05
+
+0.0
+Figure 2.1: The solid line is the function  (u) =  1(u  0) with  = 0.5, which has a jump at the origin. The dashed line corresponds to the smoothing gradient [[ 1(Y XS)]] associated with  = 0.5. As  decreases to 0.05, we observe that the smoothing approximation function is closer to  (u).
+
+Now, we replace the optimization problem involving L (S) in (2.1) by the one involving
+
+Le (S) d=ef Qb,(S) + kSk,
+
+(2.5)
+
+where we recall the definition of Qb,(S) in (2.3). Since the gradient of Qb,(S) is Lipschitz,
+
+9
+
+we may apply FISTA of Beck and Teboulle (2009) for minimizing (2.5). Define S (·) to be the proximity operator on Rpm:
+
+S (S) d=ef U(D Ipm)+V>,
+
+(2.6)
+
+where Ipm is the p  m rectangular identity matrix with the main diagonal elements equal to 1, and the SVD S = UDV>. See Theorem S.4.2 in the supplementary material for more detail for the proximity operator. We are now ready to state Algorithm 1 for the optimization problem (1.4). The name of the algorithm reflects the fact that it is an ISTA algorithm for regression quantiles.
+
+Algorithm 1: Quantile Iterative Shrinkage-Thresholding Algorithm (QISTA)
+
+1 Input: Y, X, 0 <  < 1,
+
+,  = 10
+
+6, T (chosen as (2.12))  =
+
+ 2mn
+
+,
+
+M
+
+=
+
+1 m2n2
+
+kXk2;
+
+2 Initialization: ,0 = 0, ,1 = 0, step size 1 = 1;
+
+3 for t = 1, 2, ..., T do
+
+4
+
+,t = S /pM ,t
+
+1 M
+
+rQb,(,t)
+
+;
+
+5
+
+t+1 = 1+
+
+;1+4
+
+2 t
+
+2
+
+6
+
+,t+1 =
+
++ (,t
+
+t1
+t+1
+
+,t
+
+,t 1);
+
+7 end
+
+8 Output: ,T
+
+2.2. Computing Factors and Loadings
+To obtain the factors fk (X) = '>k, Xi and loadings kj, for j = 1, ..., m and k = 1, ..., r which are related to  as in (1.1), by matrix factorization, we may decompose  =   , where  2 Rpr and  2 Rrm, and identify 'k, as kth column of  and kj, as kj entry of  . However, decomposition  =   is not unique, since for any invertible matrix P 2 Rrr, we have   =  PP 1  . Therefore, we need extra r2 restrictions to fix a matrix P.
+We apply the constraint in equation (2.14) on page 28 of Reinsel and Velu (1998): if
+10
+
+singular value decomposition  = U D V>, then we set
+
+ = V and  = D>U>.
+
+(2.7)
+
+We also allow for other choices. For any t, given ,t at t iteration from Algorithm 1, we can estimate the factors and
+loadings using (2.7):
+
+fbk (Xi) = ( ,t)>kXi = k,t(U,t)>kXi, b  = V,t,
+
+(2.8)
+
+where V,t 2 Rmm, D,t 2 Rpm and U,t 2 Rpp are from the singular value decomposition ,t = U,tD,tV>,t, and k,t is the kth largest singular value of ,t.
+Remark 2.1 (Sign identifiability). The sign in (2.7) is in general indeterminable. Nonetheless, this issue can often be addressed in practice based on the first factor f11(Xi) f12(Xi) for 1 > 2. For implementation, we suggest estimate both fb11(Xi) and fb12(Xi) (say 1 = 0.9, 2 = 0.1), and determine the sign so that fb11(Xi) fb12(Xi). This approach works well in our empirical analysis. Though the monotonicity of empirical quantile curves
+can be violated (Chernozhukov et al.; 2010; Dette and Volgushev; 2008) and the factors fb11(Xi) fb12(Xi) for 1 2 may cross, working with more extreme quantiles (e.g., 1 = 0.9, 2 = 0.1) can often resolve the problem.
+
+2.3. Tuning
+For the implementation of Algorithm 1, it is crucial to appropriately select . We propose to select based on the "pivotal principle". We define the random variable
+
+ = (nm) 1kX>Wf k, 11
+
+(2.9)
+
+where (Wf )ij = 1(Uij  0)  , {Uij} are i.i.d. uniform (0,1) random variables for i = 1, ..., n and j = 1, ..., m, independent from X1, ..., Xn. The random variable  is pivotal conditioning on design X, as it does not depend on unknown  . Notice that (nm) 1X>Wf = rQb (  ), which is the subgradient of Qb (  ) defined in (3.1) evaluated at the true matrix
+ . Set
+
+ = 2 ·  (1 |X),
+
+(2.10)
+
+where  (1 |X) d=ef (1 )-quantile of  conditional on X, for 0 <  < 1 close to 1, for instant  = 0.9. The choice of  will be justified theoretically in Section 3.
+Remark 2.2. Using the theory we develop in Section 3, in principle one can select based on (3.7), but this does not adapt to the data Xi. (2.10) is inspired by the high-dimensional quantile regression estimation in Belloni and Chernozhukov (2011).
+
+2.4. Algorithmic Convergence Analysis
+
+An analysis of the performance of Algorithm 1 is given by the following theorem.
+
+Theorem 2.3 (Convergence analysis of Algorithm 1). Let { ,t}Tt=0 be the sequence generated by Algorithm 1, b be the optimal solution for minimizing (2.1) and ,1 = limt!1 ,t be a minimizer of Le (S) defined in (2.5). Then for any t and  > 0,
+
+L ( ,t)
+
+L (b )
+
+
+
+3(
+
+_
+
+{1 4
+
+ })2 + 4k
+
+,0
+(t
+
++
+
+,1k2FkXk2 1)2mn
+
+.
+
+(2.11)
+
+On the other hand, if we require L ( ,t) L (b )  , then
+
+t
+
+2
+
+k p
+
+,1q
+
+ mn 1
+
+,0kFkXk . 3( _{1  })2 4
+
+(2.12)
+
+12
+
+See Section S.1.2 in the supplementary material for a proof for Theorem 2.3. The first term on the right-hand side of (2.11) is related to the smoothing error, which cannot be made small by increasing the number of iterations, but can only be reduced by choosing a smaller smoothing parameter . The second term is related to the fast iterative shrinkagethresholding algorithm (FISTA) of Beck and Teboulle (2009).
+Remark 2.4 (Convergence Speed). The algorithm of Beck and Teboulle (2009) yields the convergence rate O(1/p). In our case, the smoothing error deteriorates the convergence rate and at best we have O(1/), which is comparable to the rate from a smoothing optimization method of Nesterov (2005). Our rate is an improvement from O(1/2) of the general subgradient method.
+Remark 2.5 (Eect of  ). The quantile level  enters the numerical bound (2.11) by 1 ( _ {1  })2/2 1/2, which increases when  is getting close to the boundary of the interval (0, 1).
+Remark 2.6. Algorithm 1 requires SVD in each iteration, and may be computationally expensive when p, m are very large. Hence, we will derive the bounds for ,t under finite t in Section 3. An alternative approach is to formulate the optimization problem (1.4) into a semidefinite program and then apply available solvers. See, for example, Jaggi and Sulovsk´y (2010). This approach avoids performing SVD in each step, but in general it requires O(1/) steps to reach an -accurate solution.
+3. Oracle Properties
+In this section we investigate the theoretical properties of the estimator generated by Algorithm 1. Section 3.1 focuses on the estimator ,t from the tth iteration of Algorithm 1, and develops a oracle bound for this matrix. Section 3.2 is concerned with the estimation of the factors and loadings, which are defined in Section 2.2.
+13
+
+3.1. Oracle Properties of ,t
+
+In this section, we present the non-asymptotic oracle bounds of the estimator ,t generated by Algorithm 1, which shows that our estimator approximates the true matrix well without knowing the support (defined later) of the true matrix. The main result is Theorem 3.6.
+In order to develop ideas, we introduce some useful notations. The subgradient for Qb (S) is the matrix
+
+rQb (S) d=ef (nm)
+
+Xn 1 XiW,i(S)> = (nm)
+
+1X>W (S) 2 Rpm,
+
+i=1
+
+where X = [X1 ... Xn]> 2 Rnp is the design matrix and
+
+(3.1)
+
+W,i(S) d=ef 1(Yij Xi>Sj  0)  1jm , W (S) = [W,1(S) ... W,n(S)]> 2 Rnm.
+
+We write W,i( ) d=ef W,i and W d=ef W ( ). For developing the error bounds, we make the following assumptions:
+
+(A1) (Sampling setting) Samples (X1, Y1), ..., (Xn, Yn) are i.i.d. copies of (X, Y ) random
+
+vectors
+
+in
+
+Rp+m.
+
+F1 Yij |Xi
+
+(
+
+|x)
+
+=
+
+x>
+
+j( ).
+
+(A2) (Covariates) Let X  (0, X) whose density exists. Suppose 0 < min(X) <
+
+max(X) < 1, and there exist constants Bp, c1, c2 > 0 such that kXik and the
+
+sample
+
+covariance
+
+matrix
+
+b X
+
+=
+
+1 n
+
+X>X
+
+satisfies
+
+P min(b X ) c1 min(X ), max(b X )  c2 max(X ), kXik  Bp
+
+1 n, (3.2)
+
+for a sequence n ! 0.
+
+14
+
+(A3) (Conditional densities) There exist constants f¯ > 0, f > 0 and f¯0 < 1 such that
+
+max sup
+jm x,y
+
+fYj|X (y|x)
+
+ f¯,
+
+max sup
+jm x,y
+
+@ @yj
+
+fYj
+
+|X
+
+(y
+
+|x)
+
+ f¯0,
+
+min
+jm
+
+inf x
+
+fYj |X
+
+(x>
+
+j |x)
+
+f,
+
+where fYj|X is the conditional density function of Yj on X.
+Assumption (A1) allows us to compute with ease the second moment and the tail probability of some empirical processes (see Remark S.3.4). (A1) may be replaced by m-dependent or weak dependent conditions, but we would need a modified random matrix theory (see the proof for the detail of Theorem 3.6). We leave this for future study. In Assumption (A2), we assume E[X] = 0 for simplicity and it can be easily generalized. Bp is usually assumed uniformly bounded by a constant independent of p in multitask learning literature (for example, p.2 of Maurer and Pontil (2013) and Theorem 1 of Yousefi et al. (2016)). For the condition (3.2), when the X is from a p-Gaussian distribution N (0, X), Lemma 9 in Wainwright (2009) shows that (3.2) holds with c1 = 1/9, c2 = 9 and n = 4 exp( n/2). Vershynin (2012b) discusses the condition (3.2) for a more general class of random vector X. (A3) is common in quantile regression literature, see for example Belloni and Chernozhukov (2011); Belloni et al. (2011).
+In what follows, we define the "support" of matrices by projections.
+
+Definition 3.1. For A 2 Rpm with rank r, the singular value decomposition of A is
+
+A
+
+=
+
+Pr
+j=1
+
+(A)ujvj>. The support of A is defined by (S1, S2) in which S1 = span{u1, ..., ur}
+
+and S2 = span{v1, ..., vr}. Define the projection matrix on S1: P1 d=ef U[1:r]U>[1:r], in which
+
+U[1:r] = [u1 ... ur] 2 Rpr; P2 d=ef V[1:r]V[>1:r], where V[1:r] = [v1 ... vr] 2 Rmr. Denote
+
+P1? = Ipr P1 and P?2 = Imr P2. For any matrix S 2 Rpm, define
+
+PA(S) d=ef P1SP2; PA?(S) d=ef P?1 SP?2 .
+
+15
+
+Define for any a 0,
+
+K( ; a) d=ef S 2 Rpm : kP?(S)k  3kP (S)k + a .
+
+(3.3)
+
+See Remark 3.2 for more discussion of the set K( ; a).
+
+An important equality we will use repeatedly in the proofs is that for any S, A 2 Rpm,
+
+kSk
+
+=
+
+kP A (S)k
+
++
+
+kP
+
+? A
+
+(S)k,
+
+which
+
+essentially
+
+corresponds
+
+to
+
+the
+
+decomposability
+
+of
+
+nuclear norm. See Definition 1 on page 541 of Negahban et al. (2012). Moreover, the rank
+
+of PA(S) is at most rank(A). We remind the readers that singular vectors corresponding to nonzero distinct singular
+
+values are uniquely defined, and unique up to a unitary transformation for those correspond-
+
+ing to repeated nonzero singular values. The singular vectors corresponding to 0 singular
+
+values are not unique. However, in Definition 3.1 we do not require a unique choice of
+
+singular vectors as the nuclear norm is invariant to unitary transformations.
+
+Remark 3.2 (Shape of K( ; a)). The shape of K( ; a) is not a cone when a > 0, but is still a star-shaped set. This set has a similar shape as the set defined in equation (17) on page 544 in Negahban et al. (2012). The reader is referred to their Figure 1 on page 544 for an illustration of that set.
+
+Remark 3.3. For any 2 Rpm, from (A2),
+
+k
+
+k2 L2(PX )
+
+=
+
+m
+
+1Ek
+
+>Xik22 = m
+
+Xm
+1
+
+j=1
+
+> j
+
+E[Xi
+
+Xi>]
+
+j
+
+m 1 min(X )k k2F. (3.4)
+
+Moreover, by kP ( )kF  k kF, we have a bound
+
+k kL2(PX )
+
+
+
+min(X
+
+)
+
+1/2 k
+
+m
+
+k2F
+
+
+
+min(X
+
+)
+
+1/2 kP
+
+(
+
+m
+
+)kF.
+
+(3.5)
+
+We first present some preliminary results. The next lemma gives the bound for n 1kX>Wk, 16
+
+which leads to a bound for krQb( )k. The detailed proof can be found in the supplementary material.
+
+Lemma 3.4. Under assumptions (A1) and (A2),
+
+1 n
+
+kX>Wk
+
+
+
+p C
+
+max(X ){ _ (1
+
+rr
+
+ )}
+
+p
+
++ n
+
+m
+
+,
+
+where
+
+C
+
+=4
+
+2
+
+c2 C0
+
+log
+
+8
+
+(3.6)
+
+with probability greater than 1 3e (p+m) log 8 n, where C0 and c2 are absolute constants given by Lemma S.4.3 in the supplementary material and Assumption (A2).
+
+Please see Section S.2.1 for a proof of Lemma 3.4. We will take
+
+=
+
+2
+
+C m
+
+p
+
+max(X ){
+
+_ (1
+
+r
+
+ )}
+
+p
+
++ n
+
+m
+
+.
+
+(3.7)
+
+Define for any  > 0,
+
+gn() d=ef ( _ {1
+
+
+
+})2
+
+nm 2
+
+.
+
+(3.8)
+
+Sometimes we write gn() = gn. The constant gn() is the smoothing error, and  controls the level of smoothing, as explained in Section 2.1. In Algorithm 1 we recommend  = /(2mn),
+
+but we allow for other choices. Define
+
+e (a)
+
+d=ef
+
+3f 8 f¯0
+
+inf
+2K( ,a) 6=0
+
+PPjm=mj=1 1EE[|[X|Xi>i>
+
+j |2] j |3
+
+3/2
+]
+
+,
+
+(3.9)
+
+which controls the strict convexity of Q (S).
+
+Lemma 3.5. Under assumptions (A1)-(A3), is set as (3.7). Let ,1 be the minimizer
+
+17
+
+of Le (S) defined in (2.5). Under the condition on r:
+
+sr
+
+C (c3) f
+
+c2
+
+max(X ) + min(X )
+
+Bp
+
+p r
+
+(m
+
++
+
+p)(log p mn
+
++
+
+log
+
+m)
+
++
+
+p C2(c3)gn()
+
+<
+
+e (gn),
+
+(3.10)
+
+then with probability greater than 1 n 16(pm)1 c23 3 exp{ (p + m) log 8},
+
+k ,1
+
+sr
+
+kL2(PX )
+
+
+
+4
+
+C (c3) f
+
+c2
+
+max(X ) + min(X )
+
+Bp
+
+p r
+
+(m
+
++
+
+p)(log p mn
+
++
+
+log
+
+m)
+
++
+
+p 4 C2(c3)gn()
+
+(3.11)
+
+pp k ,1 kF  m/ min(X )k ,1 kL2(PX), where C (c3) = 16 log 8{ _ (1  )}/C0 +
+p 32 2c3, C0 and c2 are absolute constants given by Lemma S.4.3 in the supplementary mate-
+p rial and Assumption (A2); C2(c3) = (4f ) 1(c3C1 Bp/ max(X)+3) where C1 is a universal
+constant. r = rank( ) and gn() is defined in (3.8).
+
+See Section S.2.2 for a proof of Lemma 3.5. When the level of smoothness gn() ! 0 (or when  ! 0), the bound (3.11) converges to the oracle bound of b (A.6) in Theorem A.2.
+
+The key ingredient in the proof is a new tail probability bound for the empirical process Gn{Qb ( + ) Qb ( )}, which builds on a sharp bound for the spectral norm of a partial sum of random matrices. See Maurer and Pontil (2013) and Tropp (2011) for more details
+
+of such a bound.
+
+Define
+
+sr
+
+hn()
+
+d=ef
+
+4
+
+C (c3) f
+
+c2
+
+max(X ) +
+
+2 min
+
+(X
+
+)
+
+Bp
+
+p r
+
+(m + p)(log p + log m) n
+
+p
+
++ 4 C2(c3)m min(X ) 1gn()
+
+(3.12)
+
+18
+
+which is essentially the convergence rate of k ,1 kF. Moreover, define
+
+an,t(, ) d=ef ( _ {1
+
+ })2mn + 8c22(k
+
+k2F (t
+
++ +
+
+h2n) m2 ax(X 1)2m
+
+)
+
+.
+
+(3.13)
+
+an,t(, ) is related to the algorithmic convergence rate (2.11).
+
+Theorem 3.6. Under assumptions (A1)-(A3), and is set as (3.7). Let { ,t}Tt=1 be a sequence generated by Algorithm 1. Under the growth condition of r,
+
+s C (c3) c2
+f
+
+max(X ) + min(X )
+
+Bp
+
+r
+
+p r
+
+(m
+
++
+
+p)(log p mn
+
++
+
+log
+
+m)
+
++
+
+q C2(c3)an,t(,
+
+)
+
+<
+
+e (an,t(,
+
+)),
+
+(3.14)
+
+then with probability greater than 1 2 n 32(pm)1 c23 6 exp{ (p + m) log 8},
+
+k ,t
+
+s
+
+kL2(PX )
+
+
+
+4
+
+C (c3) f
+
+c2
+
+r
+
+max(X ) + min(X )
+
+Bp
+
+p r
+
+(m + p)(log p + log m) mn
+
+q
+
++ 4 C2(c3)an,t(, ),
+
+(3.15)
+
+pp k ,t kF  m/ min(X )k ,t kL2(PX), where C (c3) = 16 log 8{ _ (1  )}/C0 +
+p 32 2c3, C0 and c2 are absolute constants given by Lemma S.4.3 in the supplementary mate-
+p rial and Assumption (A2); C2(c3) = (4f ) 1(c3C1 Bp/ max(X)+3) where C1 is a universal
+constant. r = rank( ) and an,t(, ) is defined in (3.13).
+
+See Section S.2.4 for a proof of Theorem 3.6. In the first term in (3.15), there are three main components in (A.6), which correspond to the rank, covariates X and conditional density of Y given X. When p and m are fixed with respect to n, the errors decrease in n 1/2. However, the error will diverge to infinity if p or m grows faster than n, which corresponds to the result for the multivariate regression for mean, see Negahban and Wainwright (2011), Koltchinskii et al. (2011) among others. r(p + m) can be interpreted as the true number of
+
+19
+
+unknown parameters. The covariates can influence the bounds (A.6) through the condition number max(X)/ min(X) of the covariance matrix X and Bp. The estimation at  close to 0 or 1 is di cult as  _ (1  ) grows when  moves away from 0.5. For the second term on the right hand side of (3.15), an,t(, ) can be made small by choosing ,  small and increasing t, and the bound (3.15) would be close to (A.6).
+Remark 3.7 (Comment on e). In Lemma 3.5 and Theorem 3.6, the growth conditions (3.10) and (3.14) are crucial for guaranteeing the strong convexity of Q (S). It is easy to see that e (an,t(, )) < e (gn) since an,t(, ) > gn and K( , gn)  K( , an,t(, )). We note that e (0) is related to the "restricted nonlinearity constant" in the Lasso for quantile regression of Belloni and Chernozhukov (2011). In Section S.4.1, we discuss these growth conditions in more detail.
+Remark 3.8 (Not exactly sparse ). When is not exactly sparse in rank (the number of nonzero singular values is not sparse), we may characterize the error by using the devise of Negahban et al. (2012). Let V  Rm and U  Rp be two subspaces with dimension r, let M = { 2 Rpm : row space of  V, column space of  U }; M? = { 2 Rpm : row space of  V?, column space of  U ?} (defined similarly as in Example 3 on page 542 of Negahban et al. (2012)). For any matrix S 2 Rpm,
+
+PM(S) = PU SPV , PM? (S) = P>U SP>V ,
+
+where PV = VV>, P?V = Imr PV , V = [v1 ... vr], and {vj}rj=1 is a set of orthonormal basis for V; analogously, PU = UU>, PU? = Ipr PU , U = [u1 ... ur], and {uj}jr=1 is a
+
+set of orthonormal basis for U . Moreover, we have the decomposability: for any matrix S,
+
+kSk
+
+=
+
+kP M (S)k
+
++
+
+kP
+
+> M
+
+(S)k.
+
+It can be shown that when
+
+2krQb( )k, with probability greater than 1 n
+
+20
+
+16(pm)1 c23 3 exp{ (p + m) log 8}, the dierence ,t = ,t
+
+lies in the set
+
+K(M, 4kP?M( )k + 2an,t(, )/ ) d=ef 2 Rpm : kP?M( )k  3kPM(
+
+)k + 4kP?M( )k + 2bn,t(, )
+
+,
+
+(3.16)
+
+where bn,t(, ) > 0 is an appropriately adapted version of an,t(, ) for kP?M( )k. The oracle property of ,t can be shown via similar argument as showing Theorem 3.6, and we leave out the detail. The proof for (3.16) is in Section S.4.2.
+
+3.2. Realistic Bounds for Factors and Loadings
+
+In this section we discuss the bounds for the estimated factors and loadings, defined in (2.8). The bounds will be stated in terms of k ,t kF, and then Theorem 3.6 can be applied for finding the explicit rate for the factors and loadings.
+First we observe that by Mirsky's theorem, the singular values can be consistently estimated.
+
+Lemma 3.9. Let { ,t}Tt=1 be a sequence generated by Algorithm 1, then for any t,
+
+pX^m j ( ,t)
+j=1
+
+j( ) 2  k ,t
+
+k2F.
+
+(3.17)
+
+The proof of Lemma 3.9 is a straightforward application of Mirsky's theorem (see, e.g., Theorem 4.11 on page 204 of Stewart and Sun (1990)). The detail is omitted.
+
+Theorem 3.10. If the nonzero singular values of matrix  are distinct, then with the choice of b  and fbk (Xi) in (2.8) for a given t,
+
+1
+
+|( b  )>j(
+
+ )j| 
+
+2(2k
+
+min{
+
+2 j
+
+k+k 1( )
+
+,t
+j2(
+
+kF)k ,t
+
+),
+
+2 j
+
+(
+
+)
+
+kF j2+1( )}
+
+(3.18)
+
+21
+
+If, in addition, let the SVDs  = U D V> and ,t = Ub  Db  Vb >, suppose (Ub  )>j(U )j 0,
+
+then
+
+ fbk (Xi) fk (Xi)  kXik k ,t
+
+s
+
+kF + 2 k( )
+
+(2k k + k ,t kF)k ,t
+
+min{
+
+2 k
+
+1(
+
+)
+
+k2( ), k2( )
+
+ kF k2+1( )}
+(3.19)
+
+See Section S.2.6 for a proof for Theorem 3.10. The oracle inequalities in Theorem 3.6 can then be applied to find the exact rate for the loadings and factors.
+Remark 3.11. The condition (Ub  )>j(U )j 0 essentially says that the sign of (Ub  )j is correctly chosen, which can usually be done in practice. See Remark 2.1 for more discussion.
+Remark 3.12 (Repeated singular values). Theorem 3.10 is under the condition that the singular values for are distinct. If there are repeated singular values, then the corresponding singular vectors are not uniquely defined, and we can only obtain a bound for the "canonical angle" (see, e.g., Yu et al. (2015)) of the subspaces generated by the singular vectors associated with the repeated singular values.
+
+4. Simulation
+In this section, we check the performance of the proposed method via Monte Carlo experiments, and compare with an oracle estimator computed under the knowledge of the true rank.
+Given two distinct matrices S1, S2 with nonnegative entries, rank(S1) = r1 and rank(S2) = r2, we simulate data from the two-piece normal model (Wallis; 2014)
+
+Yij =
+
+1(Uij)Xi> (S1)j1{Uij  0.5} + (S2)j1{Uij > 0.5} ,
+
+(4.1)
+
+i = 1, ..., n = 500; j = 1, ..., m = 300,
+
+22
+
+Uij are i.i.d. U (0, 1) independent of Xi. Xi 2 Rp follows a multivariate U ([0, 1]) distribution for p = 300 with covariance matrix  in which ij = 0.1  0.8|i j| for j = 1, ..., p. See Falk (1999) for more details on simulating Xi. The conditional quantile function qj( |x) of Yij on x for the distribution of Yij is
+
+qjl ( |x) = 1( )x> S11{  0.5} + S21{ > 0.5} d=ef x>(  )j,
+
+(4.2)
+
+where  is defined in an obvious manner. The number of repetitions is 500. In our simulation study, we fix S1 with rank(S1) = 2. However, we consider two models
+for S2:
+
+I. Model ES (equally sparse): S2ES with rank(SE2 S) = 2;
+
+II. Model AS (asymmetrically sparse): SA2 S with rank(SA2 S) = 6.
+
+The entries of S1, SE2 S and S2AS will be randomly selected. The specific steps for generating these matrices are detailed in Section S.4.3. We only note here that the singular values of
+
+matrices S1 and Sl2 for l 2 {ES, AS} are randomly selected and are all distinct. We apply Algorithm 1 with  = 5%, 10%, 20%, 80%, 90%, 95% to compute the estimator
+
+bl 
+
+for
+
+l 
+
+,
+
+defined
+
+in
+
+(4.2),
+
+where
+
+l
+
+2
+
+{ES, AS}.
+
+The tuning parameter
+
+is selected as
+
+described in Section 2.3. We stop the algorithm when the change in the loss function L (S)
+
+(defined in (2.1)) from two consecutive iterations is less than 10 6. The performance of
+
+bl 
+
+is measured by the Frobenius error:
+
+k
+
+l ,
+
+b
+
+l 
+
+k,
+
+for
+
+l
+
+2
+
+{ES, AS}.
+
+The results for
+
+prediction error have similar pattern as the Frobenius error, so we do not report them here.
+
+We
+
+also
+
+report
+
+the
+
+average
+
+number
+
+of iterations
+
+for
+
+running
+
+Algorithm
+
+1.
+
+The
+
+error
+
+of
+
+bl 
+
+is compared with that of an oracle estimator computed using the knowledge of true rank r1 or r2l d=ef rank(S2l ) depending on  (or l 2 {ES, AS}). The oracle estimator is computed in
+
+a similar way as Algorithm 1, while we replace the soft thresholding operator S by a hard
+
+23
+
+thresholding operator, which truncates all but the first r1 or r2l singular values to 0. The iteration stops when the change in the function Qb (S) is less than 10 6.
+The mean and standard deviation of the Frobenius errors is in Table 4.2. When the
+
+variance is larger ( = 1), we have greater errors as expected. The errors vary with  , which
+
+is almost 2 times higher when  is close to 0.05 and 0.95 than when  is 0.2 and 0.8. If we
+
+compare
+
+the
+
+error
+
+of
+
+b
+
+l 
+
+,
+
+for
+
+l
+
+2
+
+{ES, AS}
+
+to
+
+that
+
+of
+
+the
+
+the
+
+oracle
+
+estimator,
+
+the
+
+oracle
+
+estimators always have smaller errors for all  . However, their dierence is at most around
+
+5-10% of the oracle error. In addition, the standard deviation of the oracle Frobenius error
+
+is
+
+also
+
+less
+
+than
+
+that
+
+of
+
+b
+
+l 
+
+.
+
+When we compare the errors of the two models ES and AS, we find that their errors
+
+are compatible when  is less than 0.5. Nonetheless, when  is greater than 0.5, the errors pp
+of the model AS is around r2AS/r2ES = 6/2  1.732 times of that of the model ES.
+The oracle estimator also shows a similar pattern. This is consistent with our error bounds,
+
+which predicts that the model with a larger rank would have greater errors.
+
+The mean of number of iterations is reported in Table 4.1. More iterations are required
+
+when  is close to 0 and 1 and when
+
+is larger.
+
+Estimating
+
+bl 
+
+for l = AS
+
+requires more
+
+iterations than for l = ES, when  is greater than 0.5. The pattern coincides with the
+
+algorithmic convergence analysis in Section 2.4.
+
+Table 4.1: Averaged number of iterations.
+
+ 0.05 0.1 0.2 0.8 0.9 0.95 = 0.5
+ES 20.9 18.0 16.0 16.0 18.0 20.3 AS 20.8 18.0 16.0 23.0 25.1 28.7
+=1
+ES 26.5 23.0 21.0 20.6 23.0 26.0 AS 26.5 23.1 21.0 29.1 32.9 37.1
+
+24
+
+Table 4.2: Averaged Frobenius errors with standard deviations. "Or." denotes the oracle estimator, which is estimated under the knowledge of true rank. The numbers in parentheses are standard deviations of the errors.
+
+ ES ES Or. AS AS Or.
+ES ES Or. AS AS Or.
+
+0.05
+60.995
+(0.253)
+57.261
+(0.191)
+60.978
+(0.263)
+57.239
+(0.202)
+118.245
+(0.570)
+113.636
+(0.427)
+118.259
+(0.530)
+113.647
+(0.387)
+
+0.1
+48.746
+(0.227)
+44.926
+(0.152)
+48.724
+(0.220)
+44.911
+(0.164)
+93.419
+(0.420)
+88.781
+(0.338)
+93.434
+(0.412)
+88.788
+(0.308)
+
+0.2 0.8 = 0.5
+
+34.302 33.973
+(0.209) (0.202)
+30.006 29.853
+(0.116) (0.118)
+34.289 60.487
+(0.207) (0.539)
+30.002 54.922
+(0.120) (0.744)
+=1
+
+64.289
+(0.387)
+58.913
+(0.238)
+64.291
+(0.380)
+58.911
+(0.224)
+
+63.634
+(0.382)
+58.593
+(0.221)
+120.338
+(1.151)
+108.754
+(0.711)
+
+0.9
+48.375
+(0.217)
+44.735
+(0.152)
+85.997
+(0.567)
+80.583
+(0.464)
+92.519
+(0.372)
+88.365
+(0.301)
+170.904
+(1.273)
+161.303
+(0.929)
+
+0.95
+60.604
+(0.247)
+57.007
+(0.184)
+108.310
+(0.820)
+102.663
+(0.572)
+117.365
+(0.438)
+113.099
+(0.378)
+217.185
+(1.547)
+205.371
+(1.188)
+
+Remark 4.1. If the true rank is known, an alternative approach to compute the oracle estimator is to apply the classical quantile regression equation with Yij on Xi to get a primary estimator for , and then truncate all but r1 or r2l singular values of the primary estimator to attain low rankness. However, this gives huge Frobenius and prediction errors, and we do not report the results here.
+5. Empirical Analysis
+In this section, we use our method to study important scientific problems in finance and climatology. Section 5.1 is devoted to spatial clustering based on extreme temperature. In Section 5.2, we analyze global financial risk. To keep our discussion brief, we omit " -
+25
+
+quantile" when it does not cause confusion; for example, the expression " -quantile of Yj has high loading in f1 (Xi)" will be shortened to "Yj has high loading in f1 (Xi)".
+5.1. Spatial Clustering with Extreme Temperature
+Spatial clustering is particularly crucial for modern climatological modeling in a datarich environment, where the size of a grid can be very large. In a relevant study, Bador et al. (2015) construct spatial clusters in Europe that visualize the spatial dependence in extreme high temperature in summer. They argue that mean and correlation based methods fail to capture such distributional features of extreme events. In this section, we apply our method to a daily temperature data set of the year 2008 from m = 159 weather stations around China, which is downloaded from the website of Research Data Center of CRC 649 of Humboldt-Universit¨at zu Berlin. The ideas and technique we demonstrate in this section can be applied on even larger data with big m.
+Let Yij be the temperature (in Celsius) at j weather station on i day, where i = 1, ..., n = 365 and j = 1, ..., m. Before applying our method, we remove the common mean of Yij by fitting a curve with typical smoothing spline, see Section S.4.4 for more details. In Figure 5.1, the lower left subfigure is the fitted mean curve, which shows a seasonal pattern. After removing the mean, the temperature curves of 159 weather stations are shown in the upper left panel of Figure 5.1. We note that the de-trended curves also demonstrate seasonality: the dispersion is larger in winter than in summer.
+We apply Algorithm 1 on the de-trended temperature curves. Let bl, l = 1, ..., p be B-spline basis functions with equally distributed knots on [0, 1] interval, we choose Xi = (b1(i/365), ..., bp(i/365)) for i = 1, ..., 365. The number of basis function is selected as p = dn2/5e = 11, which is slightly larger than the rate suggested by the asymptotic theory if we assume the curves are smooth. We take  = 1% and 99%. The tuning parameter is selected by the method in Section 2.3, and the estimated value is = 0.000156.
+26
+
+Detrended Temperature ( ° C)
+-30 -10 10 30
+
+-100 -50 0 50 100 150
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+1st factor
+
+Temperature ( ° C)
+-5 0 5 15 25
+
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 Time
+Figure 5.1: Upper left panel: The temperature time series in excess to national mean of the 159 weather stations around China; Lower left panel: the fitted temperature common mean curve estimated by smoothing spline; Right panel: The plot for the first factor, in which the black lines corresponds to 1% quantile factors and the blue lines corresponds to 99% quantile factors.
+The right panel in Figure 5.1 presents the first factors f10.01(Xi) and f10.99(Xi). The two factors enclose a region that is wide in the ends and narrow in the middle. This is related to the fact that the dispersion in temperature among weather stations tends to be higher in winter and lower in summer, as shown in the upper left panel in Figure 5.1. The other factors are rather small in absolute value relative to the first factor, so we do not include them in the analysis for brevity.
+The upper left (right) panels in Figure 5.2 show the locations of the weather stations, and the color corresponds to the magnitude of the factor loadings to f10.01(Xi) (f10.99(Xi)). In the upper left panel in Figure 5.2, stations in northeastern China are highly associated with the factor f10.01(Xi), while the stations in southern China have zero or even slightly negative association to the factor f10.01(Xi). The upper right panel in Figure 5.2 show the opposite pattern to the factor f10.99(Xi). These loadings quantify the spatial correlation in extremely high (0.99 quantile) or low (0.01 quantile) temperatures at these weather stations, which provides a foundation for spatial clustering. However, the cuto points of the loadings for
+27
+
+Latitude 20 25 30 35 40 45 50
+
+ = 0.01 Factor Loadings
+Tulihe
+
+0.20
+
+0.15
+
+Yushu
+
+0.10 0.05
+
+Dongfang
+
+0.00
+
+80 90 100 110 120 130 Longitude
+
+Dongfang
+
+Latitude 20 25 30 35 40 45 50
+
+ = 0.99 Factor Loadings
+Tulihe
+
+0.20
+
+0.15
+
+Yushu
+
+0.10 0.05
+
+Dongfang
+
+0.00
+
+80 90 100 110 120 130 Longitude
+
+0.20
+
+0.15
+
+0.10
+
+Loadings on factor 1 of 99% QR
+
+0.05
+
+0.00
+
+Yushu Tulihe
+0.00 0.05 0.10 0.15 0.20
+Loadings on factor 1 of 1% QR
+Figure 5.2: Upper panels: plot of the locations of weather stations. The color scale corresponds to the magnitude of their  = 0.01 (left) and  = 0.99 factor loading. Lower panel: tail to tail plot for temperature data. Each point is a pair (( b 0.01)1j, ( b 0.99)1j) for weather stations j = 1, ..., 159.
+determining the clusters have to be carefully chosen, which we leave for future study. The tail to tail plot in Figure 5.2 showing the loadings for the first factor at  = 1% and
+99% demonstrates a nearly "L" shape, which shows that the temperature of each station seems to be associated with either the lower tail factor or the upper tail factor, but not both. We highlight three stations in Tulihe, Dongfang, and Yushu which are located in the far right, far top, and center in Figure 5.2.
+28
+
+5.2. Global Financial Risk
+Quantifying global financial risk in a high-dimensional setting is a very challenging task. White et al. (2015) estimate the lower quantiles ( = 0.01) of stock returns from m = 230 largest global financial firms with a vector autoregressive (VAR) model, and show that stock returns of the firms with large market value and high leverage tend to be more vulnerable to systemic shock. However, their method does not scale up to high dimensionality because of excessive computational cost, so they estimate bivariate VAR for the quantiles (qYij ( ), qMi( )) for each stock return Yj, where Mi is a global market index. In the sequel, we analyze all stocks jointly and compare our findings with the results of White et al. (2015).
+We analyze the same set of daily stock closing prices as White et al. (2015) with the same time frame from January 1, 2000 to August 6, 2010. The dataset is downloaded from Dr. Manganelli's personal website. See Table 1 of White et al. (2015) for a detailed breakdown of the stocks by sector and country, as well as their averaged market value and leverage (the ratio of short and long term debt over common equity) over the data period. We use daily log-returns of the stock closing prices and this results in n = 2765.
+We consider a multivariate model which jointly incorporates multiple asset returns. Let Yi,j be the asset return for j firm, where j = 1, ..., m and i = 1, ..., n. We consider qj( |Xi) = Xi>(  )j, where
+
+Xi = (|Yi 1,1|, ..., |Yi 1,m|, Yi 1,1, ..., Yi 1,m)> 2 R2m,
+
+(5.1)
+
+and Y d=ef max{ Y, 0}. The choice of Xi aims to capture asymmetric contribution of lag return to the quantile of stock price, which is suggested in the Conditional Autoregressive Value-at-Risk (CAViaR) literature, see Engle and Manganelli (2004). We estimate via the nuclear norm regularized multivariate quantile regression with  = 0.01 and 0.99. We estimate the factor and loadings as (2.8) in Section 2.2. To select the tuning parameter ,
+29
+
+applying the procedure described in Section 2.3 gives = 0.02468 for  = 0.01. By symmetry we also apply the same for  = 0.99.
+We present the estimated first factors for the quantile regression at  = 0.01 and 0.99 in Figure 5.3. The other factors are very small in scale compared to the first factor. Both first factors f10.01(Xi) and f10.99(Xi) are volatile and moving away from 0 at the end of 2008 and in the first quarter of 2009, and mid 2010, which corresponds to the periods of financial crisis and European debt crisis. In later analysis, we treat f10.01(Xi) as an indicator for global financial risk.
+1st factor
+
+-150 -100 -50 0 50
+
+2000
+
+2002
+
+2004
+
+2006
+
+Date
+
+2008
+
+2010
+
+Figure 5.3: The time series plots for the first factor. The black lines correspond to 0.01 quantile factors and the blue lines correspond to 0.99 quantile factors.
+
+The left panel of Figure 5.4 is the "tail to tail" plot with  = 0.01 and 0.99, in which each point is the pair of loadings (( b 0.01)1j, ( b 0.99)1j) defined in (2.8), for j = 1, ..., 230. The values (( b 0.01)1j, ( b 0.99)1j) are all positive. The fact that they distribute around the reverse diagonal line suggests that the log-returns of these stocks are roughly equally associated to the two extreme quantile factors. However, we observe that the points become more disperse and deviate from the reverse diagonal line when moving northeast.
+The right panel of Figure 5.4 plots the firms based on their averaged market value and leverage, and the color scale depends on the magnitude of the  = 0.01 factor loading of the corresponding stock. Our finding shows that high loadings associated with f10.01(Xi) are usually found for those stocks whose underlying firms have large market value and high
+30
+
+leverage, which aligns with the results of White et al. (2015). In particular, as shown by the
+
+right panel of Figure 5.4, the firms with certain combinations of market value and leverage
+
+tend to have high loading associated with f10.01(Xi) in 0.01 quantile of their stock returns. This seems to be an interesting direction for future study.
+
+Lastly, we note that the algorithmic convergence results in Section 2.4 apply straightfor-
+
+wardly on financial time series data. However, an extension of the theory in Section 3.1 may
+
+be required in order to bound the estimation error for the time series data.
+
+Loadings of factor 1 of 99% MQR 0.00 0.05 0.10 0.15
+Leverage (log) 2468
+
+AMERICANHINUTNLT.GINPG. TON BCSH. REGIONS FINL.NEW CITIGROUP ALLIED IRISH BANKS HARTFORD FINL.SVS.GP. STATE STREET
+KBC GROUP
+
+ = 0.01 Factor Loadings
+SLM
+
+BANK OF IRELAND ALLIED IRISH BANKS
+
+MORGAN STANLEY LLOYDS BANKING GROUP
+
+KBC GROUP STATE STREET
+
+CITIGROUP AMERICAN INTL.GP.
+BANK OF AMERICA
+
+HUNTINGTMOANRBSCHSAHRL.LEG&IIOLNSLSEFYINL.PNNEFCIWFFTIHNLT.HSIVRSD.GBPA.NCORP
+
+0.14 0.12 0.10 0.08
+
+LINCOLNHANRATTF. ORD FINL.SVS.GP. XL GROUP
+
+0.06 0.04
+
+0.02
+
+0.00
+
+0.05
+
+0.10
+
+0.15
+
+Loadings of factor 1 of 1% MQR
+
+0.00
+7 8 9 10 11 12 Market Value (log million)
+
+Figure 5.4: Left panel: tail to tail plot. Each point is a pair (( b 0.01)1j, ( b 0.99)1j) for stocks j = 1, ..., 230; Right panel: the plot of firms based on their averaged market value and leverage over the data period. The color scale corresponds to the magnitude of their  = 0.01 factor loading.
+
+APPENDIX: Oracle Properties for Exact Optimizer b
+In this section, we present the bounds for the exact minimizer b for (1.4). Though b is di cult to obtain in practice and is therefore not very useful, it is however very pedagogical to study the bounds of b, as many ideas applied there will be crucial for proving our main results.
+For a this section, define  d=ef e (0). Note that   e (gn)   (an,t(, )).
+31
+
+Lemma A.1. Under assumptions (A1)-(A3), 2krQb( )k and the growth condition on
+
+r:
+
+f
+
+1pm32p2c3prs c2
+
+r
+
+max(X ) + Bp min(X )
+
+log
+
+m
+
++ n
+
+log
+
+p
+
++
+
+r
+
+
+
+rm min(X )
+
+<  ,
+
+(A.1)
+
+where c2 is an absolute constant given by Assumption (A2). Then
+
+kb
+
+sr
+
+p kL2(PX)  128 2c3f
+
+1
+
+p r
+
+c2 max(X ) + Bp min(X )
+
+log
+
+m
+
++ n
+
+log
+
+p
+
++
+
+p 42
+
+r
+
+f
+
+mr min(X
+
+)
+
+,
+
+kb
+
+sr
+
+kF
+
+
+
+p 16 2
+
+C (c3) f
+
+s
+
+max(X ) m2 in(X )
+
+r
+
+log(p n
+
++
+
+m)
+
++
+
+r
+
+p 16 2
+f
+
+prm min(X )
+
+kb
+
+k
+
+
+
+128
+
+C (c3) f
+
+max(X ) m2 in(X )
+
+log(p + n
+
+m)
+
+r
+
++
+
+128 f
+
+mr min(X )
+
+(A.2) (A.3) (A.4)
+
+kb
+
+p kF  m/
+
+min(X )kb
+
+with probability greater than 1
+
+kL2(PX) and kb
+
+p k  4 rm/
+
+min(X )kb
+
+16(pm)1 c32 n, where r = rank( ).
+
+kL2(PX ),
+
+Please see Section S.3.1 for a proof of Lemma A.1.
+
+Theorem A.2. Assume that assumptions (A1)-(A3) hold and select as (3.7). Under the
+
+growth condition on r:
+
+sr
+
+C (c3) f
+
+c2
+
+max(X ) + min(X )
+
+Bp
+
+p r
+
+(m +
+
+p)(log p mn
+
++ log m)
+
+<
+
+ ,
+
+(A.5)
+
+where
+
+C (c3)
+
+d=ef
+
+p 16 log
+
+8{
+
+_
+
+(1
+
+ )}/C0
+
+p + 32 2c3,
+
+C0
+
+and
+
+c2
+
+are
+
+absolute
+
+constants
+
+given
+
+by Lemma S.4.3 in the supplementary material and Assumption (A2). Then
+
+sr
+
+kb
+
+kL2(PX )
+
+
+
+4
+
+C (c3) f
+
+c2
+
+max(X ) + min(X )
+
+Bp
+
+p r
+
+(m
+
++
+
+p)(log p mn
+
++
+
+log
+
+m)
+
+,
+
+(A.6)
+
+32
+
+kb
+
+p kF  m/
+
+min(X )kb
+
+with probability greater than 1
+
+kL2(PX) and kb
+
+p k  4 rm/
+
+min(X )kb
+
+kL2(PX ),
+
+n 16(pm)1 c23 3 exp{ (p + m) log 8}, where r = rank( ).
+
+Please see Section S.3.2 for a proof of Theorem A.2.
+
+Remark A.3 (Uniformity in  ). All the bounds Theorem A.2, 3.5 and 3.6 can be made uniformly in  by replacing the constant  _(1  ) by 1 and keeping the rest unchanged. This is based on the observation that  enters those bounds only through the constant  _ (1  ).
+
+References
+Ando, T. and Tsay, R. S. (2011). Quantile regression models with factor-augmented predictors and information criterion, Econometrics Journal 14: 1­24.
+Bador, M., Naveau, P., Gilleland, E., Castella´, M. and Arivelo, T. (2015). Spatial clustering of summer temperature maxima from the CNRM-CM5 climate model ensembles & E-OBS over Europe, Weather and Climate Extremes pp. 17­24.
+Beck, A. and Teboulle, M. (2009). A fast iterative shrinkage-thresholding algorithm for linear inverse problems, SIAM Journal on Imaging Sciences 2(1): 183­202.
+Belloni, A. and Chernozhukov, V. (2011). `1-penalized quantile regression in highdimensional sparse models, The Annals of Statistics 39(1): 82­130.
+Belloni, A., Chernozhukov, V. and Fern´andez-Val, I. (2011). Conditional quantile processes based on series or many regressors. arXiv preprint arXiv:1105.6154.
+Bernard, E., Naveau, P. and Vrac, M. (2013). Clustering of maxima: Spatial dependencies among heavy rainfall in france, Journal of Climate 26(20): 7929­7937.
+Bhatia, R. and Kittaneh, F. (1990). Norm inequalities for partitioned operators and an application, Mathematische Annalen 287: 719­726. 33
+
+Bremnes, J. B. (2004). Probabilistic forecasts of precipitation in terms of quantiles using NWP model output, Monthly Weather Review 132(1): 338­347.
+Briollais, L. and Durrieu, G. (2014). Application of quantile regression to recent genetic and -omic studies, Human Genetics 133: 951­966.
+Bunea, F., She, Y. and Wegkamp, M. H. (2011). Optimal selection of reduced rank estimators of high-dimensional matrices, The Annals of Statistics 39(2): 1282­1309.
+Cade, B. S. and Noon, B. R. (2003). A gentle introduction to quantile regression for ecologists, Frontiers in Ecology and the Environment 1(8): 412­420.
+Cai, J.-F., Cand`es, E. J. and Shen, Z. (2010). A singular value thresholding algorithm for matrix completion, SIAM Journal on Optimization 20(4): 1956­1982.
+Castruccio, S., Huser, R. and Genton, M. G. (2015). High-order composite likelihood inference for max-stable distributions and processes, Journal of Computational and Graphical Statistics .
+Chen, L., Dolado, J. J. and Gonzalo, J. (2015). Quantile factor models.
+Chernozhukov, V., Fern´andez-Val, I. and Galichon, A. (2010). Quantile and probability curves without crossing, Econometrica 78(3): 1093­1125. URL: http://dx.doi.org/10.3982/ECTA7880
+Davison, A., Padoan, S. A. and Ribatet, M. (2012). Statistical modeling of spatial extremes, Statistical Science 27: 161­186.
+Dette, H. and Volgushev, S. (2008). Non-crossing non-parametric estimates of quantile curves, Journal of the Royal Statistical Society: Series B 70(3): 609­627.
+Engle, R. and Manganelli, S. (2004). CAViaR: Conditional autoregressive value at risk by regression quantiles, Journal of Business & Economic Statistics 22: 367­381. 34
+
+Falk, M. (1999). A simple approach to the generation of uniformly distributed random variables with prescribed correlation, Communications in Statistics - Simulation and Computation 28(3): 785­791.
+Fan, J., Xue, L. and Zou, H. (2015). Multi-task quantile regression under the transnormal model, Journal of the American Statistical Association .
+Friederichs, P. and Hense, A. (2007). Statistical downscaling of extreme precipitation events using censored quantile regression, Monthly Weather Review 135(6): 2365­2378. URL: http://dx.doi.org/10.1175/MWR3403.1
+Jaggi, M. and Sulovsky´, M. (2010). A simple algorithm for nuclear norm regularized problems, Proceedings of the 27th International Conference on Machine Learning.
+Ji, S. and Ye, J. (2009). An accelerated gradient method for trace norm minimization, Proceedings of the 26th International Conference on Machine Learning.
+Knight, K. (1998). Limiting distributions for L1 regression estimators under general conditions, The Annals of Statistics 26(2): 755­770.
+Koenker, R. (2005). Quantile Regression, Cambridge University Press, New York.
+Koenker, R. and Bassett, G. S. (1978). Regression quantiles, Econometrica 46(1): 33­50.
+Koenker, R. and Hallock, K. F. (2001). Quantile regression, Journal of Economic Perspectives 15(4): 143­156.
+Koenker, R. and Portnoy, S. (1990). M estimation of multivariate regressions, Journal of American Statistical Association 85(412): 1060­1068.
+Koltchinskii, V., Lounici, K. and Tsybakov, A. B. (2011). Nuclear-norm penalization and optimal rates for noisy low-rank matrix completion, The Annals of Statistics 39(5): 2243­ 2794. 35
+
+Ledoux, M. and Talagrand, M. (1991). Probability in Banach Spaces (Isometry and processes), Ergebnis der Mathematik und ihrer Grenzgebiete, Springer-Verlag.
+Maurer, A. and Pontil, M. (2013). Excess risk bounds for multitask learning with trace norm regularization, JMLR: Workshop and Conference Proceedings 30: 1­22.
+Negahban, S. N., Ravikumar, P., Wainwright, M. J. and Yu, B. (2012). A unified framework for high-dimensional analysis of M -estimators with decomposable regularizers, Statistical Science 27(4): 538­557.
+Negahban, S. N. and Wainwright, M. J. (2011). Estimation of (near) low-rank matrices with nose and high-dimensional scaling, The Annals of Statistics 39(2): 1069­1097.
+Nesterov, Y. (2005). Smooth minimization of non-smooth functions, Mathematical Programming 103(1): 127­152.
+Reich, B. J. (2012). Spatiotemporal quantile regression for detecting distributional changes in environmental processes, Journal of the Royal Statistical Society: Series C (Applied Statistics) 61(4): 535­553.
+Reich, B. J., Fuentes, M. and Dunson, D. B. (2011). Bayesian spatial quantile regression, Journal of American Statistical Association 106(493): 6­20.
+Reinsel, G. C. and Velu, R. P. (1998). Multivariate Reduced-Rank Regression, Springer, New York.
+Stewart, G. W. and Sun, J.-G. (1990). Matrix Perturbation Theory, Academic Press.
+Tropp, J. A. (2011). User-friendly tail bounds for sums of random matrices, Foundations of computational mathematics 12(4): 389­434.
+van der Vaart, A. W. and Wellner, J. A. (1996). Weak convergence and empirical processes: with applications to statistics, Springer. 36
+
+Vershynin, R. (2012a). Compressed Sensing, Theory and Applications, Cambridge University Press, chapter 5, pp. 210­268.
+Vershynin, R. (2012b). How close is the sample covariance matrix to the actual covariance matrix?, Journal of Theoretical Probability 25(3): 655­686.
+Wainwright, M. J. (2009). Sharp thresholds for high-dimensional and noisy sparsity recovery using `1-constrained quadratic programming (Lasso), IEEE Transactions on Information Theory 55: 2183­2202.
+Wallis, K. F. (1999). Asymmetric density forecasts of inflation and the Bank of England's fan chart, National Institute Economic Review 167: 106­112.
+Wallis, K. F. (2014). The two-piece normal, binormal, or double Gaussian distribution: Its origin and rediscoveries, Statistical Science 29(1): 106­112.
+White, H., Kim, T.-H. and Manganelli, S. (2015). VAR for VaR: measuring systemic risk using multivariate regression quantiles, Journal of Econometrics 187: 169­188.
+Yousefi, N., Lei, Y., Kloft, M., Mollaghasemi, M. and Anagnastapolous, G. (2016). Local rademacher complexity-based learning guarantees for multi-task learning, ArXiv Preprint Arxiv 1602.05916 .
+Yu, Y., Wang, T. and Samworth, R. J. (2015). A useful variant of the Davis­Kahan theorem for statisticians, Biometrika 102(2): 315­323.
+Yuan, M., Ekici, A., Lu, Z. and Monteiro, R. (2007). Dimension reduction and coe cient estimation in multivariate linear regression, Journal of the Royal Statistical Society: Series B 69(3): 329­346.
+37
+
+SUPPLEMENTARY MATERIAL: FACTORISABLE MUITI-TASK QUANTILE REGRESSION
+
+In this supplementary material, we provide the proofs and technical detail for the materials shown in the main body. Section S.1 presents the convergence analysis for the algorithm. Section S.2 presents the proof for the oracle properties of ,t. Section S.3 contains the proof for the oracle properties of b. Section S.4 discusses technical detail and remarks. Section S.5 lists some auxiliary results.
+
+S.1: Proofs for Algorithmic Convergence Analysis
+
+S.1.1. Proof of (2.2)
+To see that this equation holds, note that for each pair of i, j, when Yij Xi> j > 0, ij =  , since  is the largest "positive" value in the interval [ 1,  ]. When Yij Xi> j  0, ij =  1 since  is the smallest "negative" value in the interval [ 1,  ]. This verifies the equation.
+Remark S.1.1. It is necessary to choose [ 1,  ] rather than { 1,  } for the support of ij in (2.2) (though both choices fulfill the equation). The previous choice is an interval and is therefore a convex set, and the conditions given in Nesterov (2005) is fulfilled.
+
+S.1.2. Proof of Theorem 2.3
+Recall the definition of L (S) and Qb (S) in (2.1), Le (S) and Qb,(S) in (2.5) and (2.3). We note a comparison property in (2.7) of Nesterov (2005), for an arbitrary S 2 Rpm,
+
+Qb,(S)
+
+
+
+Qb (S)
+
+
+
+Qb,(S)
+
++
+
+
+
+max
+2[ 1, ]nm
+
+kk2F 2
+
+(S.1.1)
+
+1
+
+where
+
+X
+
+max
+2[ 1, ]nm
+
+kkF2
+
+=
+
+max
+2[ 1, ]nm
+
+in,jm
+
+i2j
+
+
+
+(
+
+_
+
+{1
+
+ })2nm.
+
+Recall that b is a minimizer of L (S) defined in (2.1). Thus, for an arbitrary S 2 Rpm,
+
+Le (b)  L (b)  L (S)  Le (S) + ( _ {1
+
+
+
+})2
+
+nm 2
+
+,
+
+(S.1.2)
+
+where the first inequality is from the first inequality of (S.1.1), the second is the definition of the minimizer b, and the third inequality is from the second inequality of (S.1.1). Recall that ,1 = limt!1 ,t is a minimizer of Le (S), then (S.1.2) gives
+
+Le ( ,1)  Le (b)  Le ( ,1) + ( _ {1
+
+
+
+})2
+
+nm 2
+
+,
+
+(S.1.3)
+
+where the first is from the definition of ,1 as a minimizer of Le (S) and the second inequality is from (S.1.2), which holds for any arbitrary matrix S 2 Rpm.
+Now we focus on bounding
+
+L ( ,t)
+
+L (b)  L ( ,t) Le ( ,t) + Le ( ,t) + L (b) Le (b) .
+
+Le ( ,1) + Le ( ,1)
+
+Le (b) (S.1.4)
+
+The third term on the right-hand side of (S.1.4) is bounded by (S.1.3). For any matrix S, by the choice of  = /(2mn) in Algorithm 1, we have from (S.1.1) that
+
+L (S)
+
+Le (S)
+
+
+
+ nm(
+
+_
+
+{1 2
+
+ })2
+
+
+
+(
+
+_ {1 4
+
+ })2 .
+
+(S.1.5)
+
+Hence, both L ( ,t) Le ( ,t) and L (b) Le (b) satisfy (S.1.5). Lemma S.1.3 implies that the gradient of Qb,( ) is Lipschitz continuous with Lipschitz
+2
+
+constant M . By Theorem 4.1 of Ji and Ye (2009) or Theorem 4.4 of Beck and Teboulle (2009) (applied in general real Hilbert space, see their Remark 2.1), we have
+
+Le ( ,t)
+
+Le (
+
+,1)
+
+
+
+2M k
+
+,0
+(t +
+
+1)2,1kF2 ,
+
+(S.1.6)
+
+where
+
+M
+
+is
+
+given
+
+in
+
+Lemma
+
+S.1.3.
+
+Since
+
+
+
+=
+
+/(2mn),
+
+M
+
+=
+
+2 mn
+
+kXk2
+
+by
+
+Lemma
+
+S.1.3.
+
+Putting the bounds (S.1.3), (S.1.5) and (S.1.6) into (S.1.4), we have
+
+L ( ,t)
+
+L (b)
+
+
+
+3(
+
+_
+
+{1 4
+
+ })2 + 4k
+
+,0
+(t
+
++
+
+,1kF2 1)2
+
+kXk2 mn
+
+.
+
+(S.1.7)
+
+Hence, the proof of (2.11) is completed. Setting the right-hand side of (S.1.7) to be  and solve it for T yields the bound (2.12).
+
+S.1.3. Technical Details for Theorem 2.3
+Lemma S.1.2. For any S,  2 Rpm, Qe (S, ) can be expressed as Qe (S, ) = h XS, i+ hY, i.
+
+Proof of Lemma S.1.2. One can show by elementary matrix algebra that
+
+Qe (S, ) = Xn Xm ij Yij
+i=1 j=1
+
+Xi>Sj
+
+Xn Xm = ijYij
+i=1 j=1
+
+= hY, i + h XS, i.
+
+Xn Xm ij Xi>Sj
+i=1 j=1
+
+The proof is therefore completed.
+Lemma S.1.3. For any  > 0, Qb,(S) is a well-defined, convex and continuously dierentiable function in S with the gradient rQb,(S) = (mn) 1X>(S) 2 Rpm, where (S)
+
+3
+
+is the optimal solution to (2.3), namely
+
+(S) = [[(mn) 1(Y XS)]] .
+
+(S.1.8)
+
+The gradient rQb,(S) is Lipschitz continuous with the Lipschitz constant M = (m2n2) 1kXk2.
+
+Proof of Lemma S.1.3. In view of Lemma S.1.2, we have from (2.3) that
+
+n Qb,(S) = max (mn) 1hY, i + (mn) 1h XS, i
+ij 2[ 1, ]
+
+ 2
+
+o kk2F
+
+.
+
+(S.1.9)
+
+Qb,(S) matches the form in (2.5) on page 131 of Nesterov (2005), with their b() =
+
+(mn) 1hY, i which is a continuous convex function, and their A = (mn) 1X which
+
+maps from the vector space Rpm to the space Rnm (the model setting described below
+
+(2.2)
+
+on
+
+page
+
+129
+
+of
+
+Nesterov
+
+(2005)),
+
+and
+
+their
+
+d2()
+
+=
+
+ 2
+
+kk2F.
+
+Therefore, applying
+
+Theorem 1 of Nesterov (2005), with 2 = 1, d() = kk2F/2, the gradient rQb,(S) =
+
+(mn) 1X>(S) 2 Rpm, where (S) is the optimal solution to (2.3):
+
+(S) = [[(mn) 1(Y XS)]] ,
+and the Lipschitz constant of rQb,(S) is kXk/(n2m2), where kXk is the spectral norm of X (see line 8 on page 129 of Nesterov (2005)). Hence, the proof is completed.
+
+S.2: Proofs for Non-Asymptotic Bounds
+S.2.1. Proof for Lemma 3.4
+Applying the same E-net argument on the unit Euclidean sphere Sm 1 = {u 2 Rm : kuk2 = 1} as in the first part of the proof of Lemma 3 in Negahban and Wainwright (2011)
+4
+
+(page 6 to the beginning of page 7 in their supplemental materials), we obtain
+
+
+
+P
+
+1 n
+
+kX>Wk
+
+ 4s = P sup 1 v>X>Wu
+nv2Sp 1
+u2Sm 1
+
+
+
+4s  8p+m sup P |hXv, Wui|
+
+v2Sp 1,u2Sm 1
+
+n
+
+kuk=kvk=1
+
+(S.2.1)
+
+ s.
+
+To bound n 1hXv, Wui = n 1 Pin=1hv, Xiihu, W,ii, first we show the sub-Gaussianity of hu, W,ii. Since |Wij|   _ (1  ). It follows by Lemma S.4.3 (Hoeding's inequality) that
+
+P hu, W,ii
+
+ s  exp 1
+
+{
+
+_
+
+C 0 s2
+
+
+
+(1  )}kuk22
+
+=
+
+exp
+
+ 1
+
+C 0 s2  _ (1
+
+ ) .
+
+It can also be concluded that (see Definition 5.7 and discussion of Vershynin (2012a)) p
+khu, W,iik 2 =  _ (1  ). We apply Lemma S.4.3 again to bound n 1 Pni=1hv, Xiihu, W,ii. Conditioning on Xi,
+we have
+
+ Xn P n 1 hv, Xiihu, W,ii
+i=1
+
+ s  exp 1
+  exp 1
+
+{ {
+
+_ _
+
+(1 (1
+
+C 0n))s}}C2cn02nk1s2PX nik=1 h.v,
+
+ Xii2
+
+where
+
+the
+
+second
+
+inequality
+
+follows
+
+from
+
+the
+
+fact
+
+that
+
+kvk2
+
+=
+
+1
+
+and
+
+n
+
+1
+
+Pn
+i=1
+
+hv,
+
+Xi
+
+i2
+
+
+
+kX>X/nk  c2kXk on the event that (A2) holds.
+
+To summarize, on the event that (A2) holds,
+
+
+
+P
+
+1 n
+
+kX>Wk
+
+ 4s
+
+ 
+
+8p+m exp 
+exp 1
+
+ 1
+{
+
+_
+
+C 0 ns2
+
+
+
+{ _ (1  )}c2kXk
+
+(1
+
+C 0 ns2  )}c2kX k
+
++
+
+(p
+
++
+
+m)
+
+log
+
+ 8.
+
+5
+
+Therefore,
+
+rr
+
+1 n
+
+kX>Wk
+
+
+
+4
+
+·
+
+2 log 8 { _ (1
+
+ )}c2kX k C0
+
+p
+
++ n
+
+m
+
+,
+
+with probability greater than 1 3e (p+m) log 8 n, as e < 3.
+
+S.2.2. Proof for Lemma 3.5
+
+We proceed as the proof for Lemma A.1. To simplify the notations in this proof, let
+
+b 1 = ,1
+
+,
+
+r
+
+d=ef
+
+p 4 r/
+
+min(X ), r,m d=ef m1/2r.
+
+Define
+
+cn
+
+d=ef
+
+p 16 2m
+
+1/2gn
+
+qp 1 c2 max(X ) + Bp log m + log p,
+
+where is chosen as in (3.7); recall from (S.3.1),
+
+pq
+
+p
+
+dn = 8 2r c2 max(X ) + Bp log m + log p.
+
+Let
+
+1 : event that Assumption (A2) holds;
+
+2 : event Ae(u)  c3(udn + cn) for c3 > 1;
+
+3 : event
+
+1 n
+
+kX>Wk
+
+
+
+p C
+
+max(X ){ _ (1
+
+r
+
+ )}
+
+p
+
++ n
+
+m
+
+,
+
+where
+
+C
+
+=
+
+p 42
+
+c2 C0
+
+log
+
+8,
+
+Ae(u) d=ef
+k
+
+ sup Gn m
+kL2(PX )u, 2K( ,gn)
+
+Xm
+1 j=1
+
+ {Yij
+
+Xi>( j +
+
+j )}
+
+ {Yij
+
+Xi> j} . (S.2.2)
+
+6
+
+Note that the probability of event P(1 \ 2 \ 3) 1 from Assumption (A2), Lemma 3.4 and Lemma S.2.3. Set
+
+n 16(pm)1 c32 3e (p+m) log 8
+
+s
+
+u=
+
+n
+
+1/2c3
+
+cn
+
+4 f
+
++
+
+4 f
+
+gn
+
++
+
+4 f
+
+(n
+
+1/2c3dn +
+
+r,m).
+
+(S.2.3)
+
+It can be shown via the relation (S.2.6) and similar steps as in the proof for Theorem A.1 in Section S.3.1 (here, using Lemma S.2.3 and Lemma S.2.2 instead), that on 1 \ 2 we have an expression similar to (S.3.5),
+
+0 > inf Q ( + ) Q ( ) n 1/2c3(dnu + cn) k kL2(PX )=u, 2K( ,gn)
+
+(r,mu + 2gn/ ) gn,
+
+Finally, since e (2gn/ ) > u/4 by (3.10), we obtain from Lemma S.2.2 (i) that
+
+0 > inf 1 f u2 4k kL2(PX )=u, 2K( ,gn)
+
+n 1/2c3(dnu + cn)
+
+(r,mu + 2gn/ ) gn.
+
+(S.2.4)
+
+With our choice of u in (S.2.3), the right-hand side of (S.2.4) is 0, and we get a contradiction. To complete the proof, by the choice for in (3.7), we can bound the expression in (S.2.3) by
+
+n 1/2cn
+
+=
+
+p16 m 2C 
+
+1/2
+
+r gn()m
+s
+
+p
+
+n +
+
+m
+
+(
+
+max(X ){ _ (1
+
+r
+
+ )}) 1/2
+
+c2
+
+max(X
+
+)
+
++
+
+Bp
+
+log
+
+m
+
++ n
+
+log
+
+p
+
+
+
+C
+
+p16 2C 
+
+gn()
+
+s
+
+c2 +
+
+Bp m(log m + log p)
+
+max(X )
+
+p+m
+
+ C1
+
+Bp max(X
+
+)
+
+gn(),
+
+(S.2.5)
+
+where C1 is a constant depending on X. Combining (S.2.5) with other terms in (S.2.3) we complete the proof of (3.11).
+
+7
+
+The bounds in Frobenius norm is from k
+
+k2 L2(PX )
+
+in Remark 3.3. Thus, the proof is completed.
+
+( min(X )/m)k k2F implied by (3.4)
+
+S.2.3. Technical Details for Lemma 3.5
+
+Lemma S.2.1. Suppose
+
+2krQb( )k and 1 = ,1 . Then 1 2 K( , 2gn/ ).
+
+Proof for Lemma S.2.1. We recall that ,1 minimizes Le (S), where Le (S) is defined in (2.5). Also recall that L (S) is defined in (2.1). For gn() defined in (3.8), we have
+
+L ( ,1)  Le ( ,1) + gn  Le (b) + gn  L (b) + gn  L ( ) + gn,
+
+(S.2.6)
+
+where the first inequality is by the second inequality in (S.1.1), the second follows by the definition of ,1, the third inequality is from the first inequality in (S.1.1), and the last inequality is from the definition of b.
+Now, by exactly the same argument for obtaining (S.3.7), we have
+
+( krQb ( )k)kP?( 1)k  ( + krQb ( )k)kP ( 1)k + gn.
+
+By 2krQb( )k, we get
+
+1 2
+
+kP ? (
+
+1)k
+
+
+
+3 2
+
+kP
+
+(
+
+1)k + gn.
+
+Hence, kP?( 1)k  3kP ( 1)k + 2gn/ .
+
+Lemma S.2.2. Under assumptions (A2) and (A3), we have
+
+(i) If 2 K( , 2gn/ ), k kL2(PX)  e (2gn/ ), then Q ( + ) Q ( ) where e is defined in (3.9);
+
+1 4
+
+f
+
+k
+
+k2 L2(PX
+
+)
+
+,
+
+(ii) If
+
+q
+
+2 K( , 2gn/ ), k k  4
+
+krm
+min(X )
+
+kL2(PX) + 2gn/ , where r = rank( ).
+
+8
+
+Proof for Lemma S.2.2. The proof follows by similar argument for obtaining Lemma S.3.2 and is omitted for brevity.
+
+Lemma S.2.3. Under Assumptions (A1)-(A3),
+
+n P Ae(u)
+
+
+
+p 8 2c3(ru+2m
+
+1/2gn/
+
+q ) (c2
+
+po max(X ) + Bp) log m + log p
+
+1 16(pm)1 c23
+
+n,
+
+p where c3 > 1, r = 4 r/ min(X) and r = rank( ). Proof of Lemma S.2.3. Proceed analogously as the proof of Lemma S.3.3, we arrive with the same equation as (S.3.16):
+
+sup
+k kL2(PX )u 2K( ,gn)
+
+Xn Xm "ij Xi>
+i=1 j=1
+
+j  sup m1/2k
+k kL2(PX )u 2K( ,gn)
+
+k
+
+max
+jm
+
+Xn "ij Xi
+i=1
+
+ m1/2(m,rk
+
+kL2(PX ) + 2gn/
+
+) max jm
+
+Xn "ijXi ,
+i=1
+
+Continue as in the proof of Lemma S.3.3, we get an expression similar to (S.3.20),
+
+
+
+P{Ae(u) > s|}  8m(p + 1) exp
+
+µs 4
+
+exp 2µ2(ru + 2m 1/2gn/ )2(c2 max(X ) + Bp) .
+
+(S.2.7)
+
+Minimize the expression (S.2.7) with respect to µ gives
+
+ P{Ae(u) > s|}  8m(p + 1) exp
+
+s2 128(ru + 2m 1/2gn/ )2(c2 max(X ) + Bp)
+
+.
+
+Take
+
+p qp s = 8 2c3(ru + 2m 1/2gn/ ) (c2 max(X ) + Bp) log m + log p
+
+to finish the proof.
+
+9
+
+S.2.4. Proof of Theorem 3.6
+
+We proceed as the proof for Theorem A.2. To simplify the notations, let ,t = ,t
+
+r
+
+d=ef
+
+p 4 r/
+
+min(X ), r,m d=ef m1/2r.
+
+Define
+
+ecn
+
+d=ef
+
+p 16 2m
+
+1/2an,t(, )
+
+qp 1 c2 max(X ) + Bp log m + log p,
+
+,
+
+where is chosen as in (3.7); recall from (S.3.1),
+
+pq
+
+p
+
+dn = 8 2r c2 max(X ) + Bp log m + log p.
+
+Let
+
+1 : event that Assumption (A2) holds;
+
+2 : event ,t 2 K( , an,t(, ));
+
+3 : event
+
+1 n
+
+kX>Wk
+
+
+
+p C
+
+max(X ){ _ (1
+
+4 : event Be(u)  c3(udn + ecn) for c3 > 1,
+
+r
+
+ )}
+
+p
+
++ n
+
+m
+
+;
+
+where
+
+Be(u) d=ef
+
+sup
+k kL2(PX )u, 2K( ,an,t(,))
+
+ Xm Gn m 1
+j=1
+
+ {Yij
+
+Xi>( j + j)}
+
+ {Yij
+
+Xi> j} . (S.2.8)
+
+Note that the probability of event P(1 \ 2 \ 3 \ 4) 1 2 n 32(pm)1 c23 6 exp{ (p + m) log 8} from Assumption (A2), Lemma 3.4, Lemma S.2.4 and Lemma S.2.6.
+
+10
+
+Set
+
+s
+
+u=
+
+n
+
+1/2c3ecn
+
+4 f
+
++
+
+4 f
+
+an,t(,
+
+)
+
++
+
+4 f
+
+(n
+
+1/2c3dn +
+
+r,m).
+
+(S.2.9)
+
+It can be shown via the relation (S.2.11) and similar steps as in the proof for Lemma A.1 in Section S.3.1 (here, using Lemma S.2.6 and Lemma S.2.5 instead), that on 1 \ 2 \ 3 we have an expression similar to (S.3.5),
+
+0 > inf Q ( + ) Q ( ) n 1/2c3(dnu + ecn) k kL2(PX )=u, 2K( ,an,t(,))
+
+(r,mu + 2an,t(, )/ ) an,t(, ),
+
+Finally, since e (2an,t(, )/ ) > u/4 by (3.14), we obtain from Lemma S.2.5 (i) that
+
+0>
+
+k
+
+inf
+kL2(PX )=u,
+
+1 4
+
+f
+
+u2
+
+2K( ,an,t(,))
+
+n 1/2c3(dnu + ecn)
+
+(r,mu + 2an,t(, )/ ) an,t(, ). (S.2.10)
+
+With our choice of u in (S.2.9), the right-hand side of (S.2.10) is 0, and we get a contradiction.
+
+The bounds in Frobenius norm is from k
+
+k2 L2(PX )
+
+in Remark 3.3. Thus, the proof is completed.
+
+( min(X )/m)k kF2 implied by (3.4)
+
+S.2.5. Technical Details for the Proof of Theorem 3.6
+
+Lemma S.2.4. Let ,t = ,t
+
+and
+
+,t 2 K( ; an,t(, )) with probability 1
+
+2krQb ( )k. Suppose (A1)-(A3) hold. Then n 16(pm)1 c32 3 exp{ (p + m) log 8}, where
+
+K( ; an,t(, )), an,t(, ) are defined in (3.3) and (3.13).
+
+Proof of Lemma S.2.4. Recall the function Qb, (·) defined in (2.3). ,1 is the minimizer
+
+11
+
+of the loss function Qb, (S) + kSk. Therefore,
+
+0  Qb, ( ) Qb, ( ,1) + k k k ,1k  Qb, ( ) Qb, ( ,t) + k k k ,tk + Le ( ,t) Le ( ,1)  Qb ( ) Qb ( ,t) + k k k ,tk + Rn,t(, )  krQb ( )k kP ( ,t)k + kP?( ,t)k + (kP ( ,t)k kP?( ,t)k) + Rn,t(, ), (S.2.11)
+where the first inequality is from the definition of 1, the second inequality is by the definition of Le in (2.5), and Rn,t(, ) in the third inequality is defined by
+
+Rn,t(, ) d=ef 2 sup Qb (S) Qb, (S) + Le ( ,t) Le ( ,1) ; S2Rpm
+
+(S.2.12)
+
+the last inequality follows by exactly the same argument for obtaining S.3.7 in Lemma S.3.1. We note that with probability 1 n 16(pm)1 c32 3 exp{ (p + m) log 8},
+
+Rn,t(, )  ( _ {1  ( _ {1
+
+ })2nm + 4k
+
+,0 ,1kF2 kXk2 (t + 1)2 mn
+
+ })2nm + 8c22(k
+
+k2F + h2n) m2 ax(X ) (t + 1)2m
+
+= an,t(, ),
+
+where the first inequality is from (S.1.1) and (S.1.6), and the second follows by Lemma 3.5, and kXk2/n = m2 ax(b X )  c2 max(X ) with probability greater than 1 n from Assumption (A2). The last equality is the definition of an,t(, ) in (3.13).
+Rearrange expression (S.2.11) to get,
+
+( krQb ( )k)kP?( b )k  ( + krQb ( )k)kP ( b )k + an,t(, ).
+
+12
+
+By 2krQb ( )k,
+
+1 2
+
+kP ? (
+
+b
+
+)k
+
+
+
+3 2
+
+kP
+
+( b )k + an,t(, ).
+
+Hence, kP?( b )k  3kP ( b )k + 2an,t(, )/ .
+
+Lemma S.2.5. Under assumptions (A2) and (A3), we have
+
+(i) If 2 K( , 2an,t(, )/ ), k kL2(PX)  e (2an,t(, )/ ), where e is defined in (3.9),
+
+then Q ( + ) Q ( )
+
+1 4
+
+f
+
+k
+
+k2 L2(PX
+
+);
+
+(ii) If
+
+q
+
+2 K( , 2gn/ ), k k  4
+
+krm
+min(X )
+
+kL2(PX) + 2gn/ , where r = rank( ).
+
+Proof for Lemma S.2.2. The proof follows by similar argument for obtaining Lemma S.3.2 and is omitted for brevity.
+
+Lemma S.2.6. Under assumptions (A1)-(A3),
+
+np
+
+q po
+
+P B(t)  8 2c3(ru + 2m 1/2an,t(, )/ ) (c2 max(X ) + Bp) log m + log p
+
+1 16(pm)1 c23 n,
+
+p where c3 > 1, r = 4 r/ min(X) and r = rank( ).
+
+Proof for Lemma S.2.6. The proof follows by similar arguments in the proof of Lemma S.2.3, and replace gn by an,t(, ) there. We omit the details for brevity.
+
+S.2.6. Proof of Theorem 3.10
+In this proof, we abbreviate k2( ), k2( ,t), (Vb  )k and (V )k, (Ub  )k and (U )k by k, bk, Vb k and Vk, Ub k and Uk.
+
+13
+
+To prove (3.18), since  = V and b  = V,t, by Theorem 3 of Yu et al. (2015),
+
+sin cos
+
+1(|Vb >jVj|)
+
+
+
+2(2k
+
+min{
+
+2 j
+
+k+k 1( )
+
+,t
+
+2 j
+
+(
+
+kF)k ,t ), j2( )
+
+kF j2+1( )}
+
+(S.2.13)
+
+where by the fact that |Vb >jVj|  1,
+
+q
+
+sin cos
+
+1(|Vb >jVj|)
+
+=
+
+1 q
+
+(1
+
+q (Vb >jVj)2 = (1 |Vb >jVj|)2 = 1
+
+Vb >jVj)(1 + Vb >jVj) Vb >jVj .
+
+Similar bound like (3.18) also holds for Ub j, by the discussion below Theorem 3 of Yu et al. (2015).
+For a proof for inequality (3.19), by direct calculation,
+
+fbk (Xi)
+
+fk (Xi) = bkUb >kXi
+
+k U>k Xi
+
+ bkUb >k
+
+kU>k kXik
+
+ bk 
+ bk
+  bk
+
+k Ub k + k Ub k Uk kXik q
+k + k (Ub k Uk)>(Ub k Uk) kXik q
+k + k 2(1 Ub >kUk) kXik
+
+(S.2.14)
+
+where we apply the fact that kUb k = 1. By assumption Ub >kUk 0, Ub >kUk = |Ub >kUk|. Apply Lemma 3.9 and the bound (S.2.13) with V being replaced by U to (S.2.14), then (3.19) is proved. Thus, the proof for this theorem is completed.
+
+S.3: Proof for Oracle Properties for Exact Optimizer b
+
+14
+
+S.3.1. Proof for Lemma A.1
+
+To simplify the notations in this proof, let b = b
+
+,
+
+r,m
+
+d=ef
+
+p 4 2m/
+
+min(X ) and
+
+s
+
+dn
+
+d=ef
+
+pp 32 2 r
+
+c2
+
+max(X ) + min(X )
+
+Bp
+
+p log
+
+m
+
++
+
+log
+
+p.
+
+(S.3.1)
+
+1 : event that Assumption (A2) holds; 2 : event A(t)  tc3dn for c3 > 1,
+
+where
+
+A(t) d=ef
+k
+
+sup
+kL2(PX )t,
+
+ Gn m
+2K( )
+
+Xm
+1 j=1
+
+ {Yij
+
+Xi>( j +
+
+j )}
+
+ {Yij
+
+Xi> j} . (S.3.2)
+
+Note that the probability of event P(1 \ 2) 1 (A2) and Lemma S.3.3. Set
+
+n 16(pm)1 c32 from Assumption
+
+t = 4f
+
+1c3n
+
+1/2dn + 4
+
+r,m f
+
+>
+
+0.
+
+(S.3.3)
+
+Suppose to the contrary that k b kL2(PX) > t is true, together with b 2 K( ) from Lemma S.3.1, so from the fact that b minimizes Qb (S) + kSk,
+
+0 > inf Qb ( + ) Qb ( ) + (k + k k k), k kL2(PX ) t, 2K( )
+
+(S.3.4)
+
+where the strict negativity is from the uniqueness of minimizer b as argued in Remark 2.1 in Koenker (2005). As argued in the proof of Theorem 2 of Belloni and Chernozhukov (2011),
+
+15
+
+from the facts that
+1. Qb (·) + k · k is convex;
+2. K( ) is a cone,
+(S.3.4) forces the value of Qb ( + ) + k + k on { : k kL2(PX) t, 2 K( )} to be less than that evaluated at = 0. Convexity implies that Qb ( + ) + k + k evaluated at { : k kL2(PX) = t, 2 K( )} must be smaller than that evaluated at = 0. Thus, we have the inequality
+
+0 > inf Qb ( + ) Qb ( ) + (k + k k k). k kL2(PX )=t, 2K( )
+With regard of the definition A(t) in (S.3.2), it can be further deducted that
+
+0 > inf Q ( + ) Q ( ) n 1/2A(t) + (k + k k k), k kL2(PX )=t, 2K( )
+By triangle inequality, k + k k k  k k  r,mk kL2(PX) = r,mt on the set {k kL2(PX) = t, 2 K( )}. Furthermore, on event 1 \ 2, it holds from Lemma S.3.2 (ii) that
+
+0 > inf Q ( + ) Q ( ) n 1/2c3dnt k kL2(PX )=t, 2K( )
+
+r,mt,
+
+(S.3.5)
+
+Finally, since  > t/4 by (A.1) and t = k kL2(PX), we obtain from Lemma S.3.2 (i) that
+
+0> k
+
+inf
+kL2(PX )=t,
+
+1 f t2 2K( ) 4
+
+n 1/2c3dnt
+
+r,mt.
+
+(S.3.6)
+
+With our choice of t in (S.3.3), the right-hand side of (S.3.6) is 0, and we get a contradiction.
+
+Thus, we established the inequality (A.2).
+
+The bounds in Frobenius and nuclear norm are from k
+
+k2 L2(PX )
+
+( min(X )/m)k kF2
+
+16
+
+implied by (3.4) in Remark 3.3 and k b k  r,mk b kL2(PX) from the fact that b 2 K( ) (Lemma S.3.1) and Lemma S.3.2 (ii). Thus, the proof is completed.
+
+S.3.2. Proof for Theorem A.2
+
+Let events 1 and 2 be defined as in the proof of Theorem A.2, and
+
+3 =
+
+the event that
+
+1 n
+
+kX>
+
+W
+
+k
+
+
+
+p C kX k{
+
+_
+
+(1
+
+r
+
+ )}
+
+p
+
++ n
+
+m
+
+.
+
+Note that the probability P(1\2\3) 1 n 16(pm)1 c23 3e (p+m) log 8. On 1\2\3, the bounds (A.2) and (3.6) hold. Substituting with (3.7) in (A.2) yields bounds (A.6).
+The bounds in Frobenius and nuclear norm can be deducted by the same argument as in the proof of Theorem A.2. Hence, the proof is completed.
+
+S.3.3. Technical Details for Theorem A.2
+
+The following lemma asserts that the empirical error b lies in the cone K( ).
+
+Lemma S.3.1. Suppose That is, b 2 K( ).
+
+2krQb( )k and b = b . Then kP?( b )k  3kP ( b )k.
+
+Proof for Lemma S.3.1. Recall that b = b ,
+
+0  Qb ( ) Qb (b) + (k k kbk) (b is the minimizer of Qb (S) + kSk)
+
+ krQb ( )kk b k + (k k kbk)
+
+ krQb ( )k kP ( b )k + kP?( b )k + (kP ( )k kP?(b)k kP (b)k)
+
+ krQb ( )k kP ( b )k + kP?( b )k + (kP ( b )k kP?( b )k),
+
+(S.3.7)
+
+17
+
+where the second inequality follows from the definition of subgradient:
+
+Qb (b) Qb ( ) hrQb ( ), b i,
+
+and Ho¨lder's inequality; the third inequality is from the fact that P?( ) = 0 and for any S, kSk = kP (S)k + kP?(S)k (the discussion after Definition 3.1) ; the fourth inequality is from the triangle inequality.
+Rearrange expression (S.3.7) to get,
+
+( krQb ( )k)kP?( b )k  ( + krQb ( )k)kP ( b )k.
+
+Choose 2krQb ( )k,
+
+1 2
+
+kP ? (
+
+b
+
+)k
+
+
+
+3 2
+
+kP
+
+( b )k.
+
+Hence, kP?( b )k  3kP ( b )k.
+
+Lemma S.3.2. Under assumptions (A2), (A3), we have
+
+(i) If k kL2(PX)  4 , where  = e (0), and 2 K( ), then Q ( + ) Q ( )
+
+1 4
+
+f
+
+k
+
+k2L2(PX );
+
+(ii) If 2 K( ), k
+
+q
+
+k  4
+
+krm
+min(X )
+
+kL2(PX), where r = rank( ).
+
+Proof for Lemma S.3.2.
+
+1. Let Q,j( j) = E[ (Yij v, u 2 R,
+
+Xi> j)]. From Knight's identity (Knight; 1998), for any
+
+Zv
+ (u v)  (u) = v  (u) + 1{u  z} 1{u  0} dz.
+0
+
+(S.3.8)
+
+Putting u = Yij Xi> j in (S.3.8), and v = Xi> j, E[ v  (u)] = 0 for all j and i, by the definition of = arg minS E[Qb (S)]. Therefore, using law of iterative expectation
+18
+
+and mean value theorem, we have by (A3) that
+
+Q,j ( j + j ) Q,j ( j )
+
+ Z Xi> =E
+
+j
+FYj|Xi (Xi>
+
+j + z|Xi)
+
+FYj|Xi (Xi> j |Xi)dz
+
+=
+
+ Z0 Xi> E
+
+f
+
+E(0Xi> 4
+
+j
+zfYj j )2
+
+|Xi (Xi> j |Xi) +
+
++
+
+f
+
+E(Xi> 4
+
+j )2
+
+z2 2
+
+fY0 j|Xi (Xi>
+
+1 6
+
+f¯0E[|Xi>
+
+j + z|Xi)dz j |3]
+
+(S.3.9)
+
+for z 2 [0, z]. Now, for 2 K( ), the condition
+
+k
+
+kL2(PX )
+
+
+
+4
+
+=
+
+3f 2 f¯0
+
+inf
+2K( ) 6=0
+
+PPmj=mj=1 1EE[|[X|Xi>i>
+
+j |2] 3/2 j |3]
+
+implies
+
+fm
+
+1 Xm E(Xi> 4
+
+j=1
+
+ j )2
+
+1 6
+
+f¯0m
+
+Xm 1 E[|Xi>
+
+j |3]
+
+j=1
+
+Therefore,
+
+Q ( +
+
+)
+
+Q ( )
+
+fm
+
+1 Xm E(Xi> 4
+
+j )2
+
+=
+
+1 4
+
+f
+
+k
+
+kL2 2(PX ).
+
+j=1
+
+2. By the decomposability of nuclear norm, estimate
+
+2 K( ) and (3.5) in Remark 3.3, we can
+
+k
+
+k = kP (
+
+)k + kP?(
+
+)k  4kP (
+
+p )k  4 rkP (
+
+)kF
+
+r 4
+
+rm min(X
+
+)
+
+k
+
+kL2(PX ).
+
+19
+
+Lemma S.3.3. Under Assumptions (A1)-(A3),
+
+ P A(t)
+
+
+
+s pp t32 2c3 r
+
+c2
+
+max(X ) + min(X )
+
+Bp
+
+p log
+
+m
+
++
+
+log
+
+p
+
+1 16(pm)1 c32 n,
+
+where c3 > 1 and r = rank( ).
+
+Proof
+
+for
+
+Lemma
+
+S.3.3.
+
+To
+
+simplify
+
+notations,
+
+let
+
+r
+
+d=ef
+
+p 4 r/
+
+min(X ).
+
+Let {"ij }in,jm
+
+be independent Rademacher random variables independent from Yij and Xi for all i, j.
+
+Denote P" and E" as the conditional probability and the conditional expectation with respect
+
+to {"ij}in,jm, given Yij and Xi. Denote
+
+ ij
+
+(·)
+
+d=ef
+
+ {Yij
+
+Xi> j
+
+·}
+
+ {Yij
+
+Xi> j}.
+
+(S.3.10)
+
+ ij
+
+(·)
+
+is
+
+a
+
+contraction
+
+in
+
+the
+
+sense
+
+that
+
+ ij
+
+(0)
+
+=
+
+0,
+
+and
+
+for
+
+all
+
+a,
+
+b
+
+2
+
+R,
+
+ ij
+
+(a)
+
+ ij
+
+(b)
+
+ |a
+
+b|. 8i = 1, ..., n, j = 1, ..., m.
+
+(S.3.11)
+
+First, we note that for any satisfying 2 K( ) and k kL2(PX)  t,
+
+  Xm
+
+
+
+Var Gn m 1
+
+ ij
+
+(Xi>
+
+j )
+
+j=1
+
+ Xm
+
+= Var m 1
+
+ ij
+
+(Xi>
+
+ j)  m
+
+1
+
+Xm
+
+ E(
+
+ ij
+
+(Xi>
+
+j=1 j=1
+
+ m 1 Xm E(Xi> j)2  t2,
+
+j=1
+
+j ))2 
+
+(S.3.12)
+
+where the first equality and the second inequality follows from elementary computations and i.i.d. assumption (A1), the third inequality is a result of (S.3.11), and the last inequality applies (3.4) in Remark 3.3.
+To apply Lemma 2.3.7 of van der Vaart and Wellner (1996), we observe from Chebyshev's
+
+20
+
+inequality that for any s > 0,
+
+  Xm
+
+inf P
+k kL2(PX )t, 2K( )
+
+Gn m 1
+
+ ij
+
+(Xi>
+
+j=1
+
+
+
+j )
+
+<
+
+s 2
+
+  Xm
+
+
+
+=1
+
+sup
+
+P Gn m 1
+
+ ij
+
+(Xi>
+
+j )
+
+k kL2(PX )t, 2K( )
+
+j=1
+
+p Taking s 8t, we have
+
+ s 2
+
+1
+
+4
+
+t2 s2
+
+.
+
+1 2
+
+
+
+k
+
+inf
+kL2(PX )t,
+
+  Xm P Gn m 1
+2K( ) j=1
+
+ ij
+
+(Xi>
+
+
+
+j )
+
+<
+
+s 2
+
+.
+
+Thus, applying Lemma 2.3.7 of van der Vaart and Wellner (1996), we have
+
+ Xn Xm
+
+P{A(t) > s}  4P
+
+sup n 1/2m 1
+
+"ij
+
+ ij
+
+(Xi>
+
+k kL2(PX )t
+
+i=1 j=1
+
+2K( )
+
+
+
+j )
+
+>
+
+s 4
+
+.
+
+(S.3.13)
+
+Now we restrict the A(t) on the event  on which (3.2) in (A2) holds, with P() 1 n. Applying Markov's inequality, for an arbitrary constant µ > 0, the right-hand side of (S.3.13) can be bounded by
+
+P{A(t) > s|}
+
+  4 exp
+
+  
+
+µs 4
+
+E E" exp
+
+µ
+k
+
+sup
+kL2(PX )t
+
+n
+
+1/2m
+
+Xn Xm 1 "ij
+i=1 j=1
+
+2K( )
+
+ ij
+
+(Xi>
+
+j )
+
+. (S.3.14)
+
+Now recall (S.3.11), the comparison theorem for Rademacher processes (Lemma 4.12 in
+
+21
+
+Ledoux and Talagrand (1991)) implies the right-hand side of (S.3.14) is bounded by
+
+P{A(t) > s|}
+
+  4 exp
+
+  
+
+µs 4
+
+E E" exp
+
+2µ sup
+k kL2(PX )t
+
+2K( )
+
+Xn Xm
+
+n 1/2m 1
+
+"ij Xi>
+
+i=1 j=1
+
+j
+
+ . (S.3.15)
+
+To obtain a bound for the right-hand side of (S.3.15), we note that
+
+Xn Xm "ij Xi>
+i=1 j=1
+
+h Xn
+
+Xn
+
+Xn i>
+
+j = tr
+
+"i1Xi
+
+"i2Xi ...
+
+"imXi
+
+i=1 i=1
+
+i=1
+
+k
+
+k sup Xm  Xn "ijXi>a2 1/2 a2Sp 1 j=1 i=1
+
+Xn
+
+ m1/2k
+
+k
+
+max
+jm
+
+"ijXi ,
+
+i=1
+
+
+
+(S.3.16)
+
+where the first inequality is from Ho¨lder's inequality, and the second inequality is elementary.
+
+Now we apply random matrix theory to bound the right-hand side of (S.3.16). Using
+
+matrix dilations (see, for example Section 2.6 of Tropp (2011)), we have
+
+01
+
+Xn "ij Xi
+
+=
+
+Xn "ij @B 0p
+
+Xi AC .
+
+i=1 i=1 Xi> 0
+
+(S.3.17)
+
+0 Notice that the random matrix "ij B@ 0p
+Xi>
+
+1
+Xi AC is self adjoint and symmetric conditional 0
+
+22
+
+on Xi. We now obtain
+
+
+
+Xn Xm
+
+E" exp 2µ sup n 1/2m 1
+
+"ij Xi> j
+
+k kL2(PX )t
+
+i=1 j=1
+
+2K( )
+
+
+Xn
+
+ E"
+
+exp
+
+2µr
+
+t
+
+max
+jm
+
+n
+
+1/2
+
+n
+
+1/2
+
+"ij Xi>
+
+i=1 0
+
+1
+
+
+
+
+
+m
+
+max
+jm
+
+E"
+
+exp
+
+2µrtn
+
+1/2
+
+n
+
+1/2 Xn "ij B@
+i=1
+
+0p Xi>
+
+Xi AC 0
+
+0
+
+
+
+ m2(p + 1) max exp jm
+
+4µ2r2t2
+
+ max n
+
+1
+
+Xn
+
+log
+
+ E"
+
+exp
+
+ "ij
+
+B@
+
+i=1
+
+0p Xi>
+
+1
+Xi AC 0
+
+ (S.3.18)
+
+where the first inequality is from Lemma S.3.2(ii) and (S.3.16), the second inequality follows from (S.3.17), Lemma S.3.2 (ii) ( 2 K( )), and the fact that
+
+E[max jm
+
+exp(|Zj |)]
+
+
+
+m
+
+max
+jm
+
+E[exp(|Zj |)],
+
+for any random variable Zj 2 R.
+
+The third inequality is by Theorem (ii) of Maurer and Pontil (2013) by the symmetric distribution of "ij, where for a self adjoint matrix A,
+
+exp(A)
+
+d=ef
+
+I
+
++
+
+X1
+
+Aj j!
+
+j=1
+
+log(exp(A)) d=ef A.
+
+23
+
+From equation (2.4) on page 399 of Tropp (2011), for any j,
+
+0
+
+ E" exp "ij @B
+
+0p
+
+Xi>
+
+1
+Xi CA 0
+
+01
+
+=
+
+
+
+1 2
+
+exp
+
+@B
+
+0p Xi>
+
+Xi CA 0
+
+ + exp
+
+01
+
+4
+
+
+
+exp
+
+1 2
+
+B@
+
+XiXi> 0
+
+0p CA Xi>Xi
+
+,
+
+0 @B 0p
+Xi>
+
+1
+Xi AC 0
+
+where "A 4 B" means the B A is positive semidefinite for two matrices A, B. From
+
+equation (2.8) on page 399 of Tropp (2011), the logarithm defined above preserves the order
+
+4. Hence, the last inequality in (S.3.18) is bounded by
+
+0
+
+ 2m(p + 1) exp 4µ2r2t2
+
+ max n
+
+1
+
+Xn
+
+1 2
+
+@B
+
+i=1
+
+XiXi> 0
+
+1
+
+0p
+
+ CA
+
+Xi>Xi
+
+ 2m(p + 1) exp 2µ2r2t2 max(b X + Bp) ,
+
+(S.3.19)
+
+where the last inequality follows from a bound for the spectral norm for block matrices in equation (2) of Theorem 1 in Bhatia and Kittaneh (1990), and Assumption (A2).
+Putting (S.3.19) into (S.3.14), we obtain
+
+ P{A(t) > s|}  8m(p + 1) exp
+
+
+µs 4
+
+ E
+
+
+exp
+
+2µ2r2t2
+
+max(b X + Bp)
+
+ 
+
+ 8m(p + 1) exp
+
+µs 4
+
+exp 2µ2r2t2(c2 max(X ) + Bp) .
+
+(S.3.20)
+
+Minimizing the expression (S.3.20) with respect to µ gives
+
+ P{A(t) > s|}  8m(p + 1) exp
+
+s2 128r2t2(c2 max(X ) + Bp)
+
+.
+
+(S.3.21)
+
+24
+
+Taking
+
+pq
+
+p
+
+s = t8 2c3r (c2 max(X ) + Bp) log m + log p
+
+p pq
+
+p
+
+= t32 2c3 r (c2 max(X ) + Bp)/ min(X ) log m + log p.
+
+p Notice that by the above choice, s 8t for large enough p, m, so that the symmetrization (S.3.13) is valid. Recall that P() 1 n. The proof is then completed.
+
+Remark S.3.4. Note that both Lemma 2.3.7 of van der Vaart and Wellner (1996) and Lemma 4.12 of Ledoux and Talagrand (1991) applied in the proof of Lemma S.3.3 can be applied on arbitrary (Yij, Xi), regardless whether they are i.i.d. or not. The random matrix theory applied in the proof may also be generalized to matrix martingales; see Section 7 of Tropp (2011) for more details.
+Remark S.3.5. It can be observed that Lemma S.3.3 is valid uniformly for any 0 <  < 1.
+
+S.4: Miscellaneous Technical Detail
+
+S.4.1. Detail on Remark 3.7
+
+Suppose kXk  B for some constant B > 0 almost surely, if not, under (A2) this holds with high probability. For any 2 K( , a), where a = 0, 2gn()/ or 2an,t(, )/ ,
+
+Xm E[|Xi>
+j=1
+
+Xm j|3]  E[|Xi> j|2]Bk k
+
+j=1
+ Xm  E[|Xi>
+j=1
+
+j
+
+|2]3/2B
+
+r 4
+
+
+
+r min(X )
+
++
+
+m1/2k
+
+a kL2(PX )
+
+25
+
+where the first inequality is from Ho¨lder's inequality, the second is from Lemma S.3.2 (ii), Lemma S.2.2 (ii), and Lemma S.2.5 (ii). Hence,
+
+E[|Xi> j|2]3/2 E[|Xi> j|3]
+
+B
+
+r
+1
+
+
+
+r min(X )
+
++
+
+m1/2k
+
+a kL2(PX )
+
+1
+
+(S.4.1)
+
+Below we discuss three cases corresponding to the conditions required for the theoretical
+
+results in Section 3.
+
+Case I: a = 0. (A.1) holds when r is small and n is large enough. In particular, the
+
+right-hand side of (S.4.1) is large when r is small enough. On the other hand, the left-hand
+
+side of (A.1) is small whenever n is large enough, because that is a constant multiplied by
+
+the rate of kb
+
+kL2(PX ).
+
+Case II: a = 2gn()/ . (3.10) holds when r(resp. n) is su ciently small(resp. large), and
+
+the smoothing error gn() is su ciently small. If  = /(2mn), we need to select  small
+
+enough.
+
+Case III: a = 2an,t(, )/ . (3.14) holds when r(resp. n) is su ciently small(resp. large), and the rate an,t(, ) is su ciently small. an,t(, ) is made small when we increase t and choose a small , if  = /(2mn).
+
+S.4.2. Detail on Remark 3.8
+We first note an inequality
+
+k ,tk
+
+k
+
+k
+
+
+
+2kP
+
+? M
+
+(
+
+)k + kPM(
+
+,t)k
+
+kP?M( ,t)k,
+
+(S.4.2)
+
+which can be shown by exactly the same argument for showing inequality (52) in Lemma
+3 on page 27 in the supplementary material of Negahban et al. (2012), because the nuclear norm is decomposable with respect to (M, M?).
+
+26
+
+It can be shown by similar argument for showing (S.2.11) that
+
+0  Qb ( ) Qb ( ,t) + k k k ,tk + Rn,t(, )
+
+ krQb ( )k kPM( ,t)k + kPM? ( ,t)k
+
++
+
+(2kP
+
+? M
+
+(
+
+)k + kPM(
+
+,t)k
+
+kPM? ( ,t)k) + Rn,t(, ),
+
+(S.4.3)
+
+where the first inequality follows by the first three lines in (S.2.11), and the second inequality is from (S.4.2).
+Rearrange expression (S.4.3) to get,
+
+( krQb ( )k)kPM? ( b )k  ( + krQb ( )k)kPM( b )k + 2 kPM? ( )k + Rn,t(, ).
+
+By 2krQb ( )k,
+
+1 2
+
+kPM? (
+
+b
+
+)k
+
+
+
+3 2
+
+kPM( b )k + 2
+
+kPM? (
+
+)k + Rn,t(, ).
+
+As argued in the proof for Lemma S.2.4, we have P(Rn,t(, )  an,t(, )) 1 n 16(pm)1 c23 3 exp{ (p + m) log 8}. Thus, the proof for (3.16) is completed.
+
+S.4.3. Details for Generating matrices S1 and S2 in Section 4
+
+Given (r1, r2), S1 and S2 are selected with the following procedure:
+
+1. Generate vectors {a1, ..., ar1} and {b1, ..., br2}, where aj1, bj2 2 Rp, and aj1k1, bj2k2 
+
+U (0, 1) i.i.d. for j1 = 1, ..., r1, j2 = 1, ..., r2, k1, k2 = 1, ..., p;
+
+2.
+
+Set
+
+the
+
+columns
+
+of
+
+S1
+
+and
+
+S2
+
+by
+
+(S1)j
+
+=
+
+Pr1
+k=1
+
+k,j
+
+ak
+
+and
+
+(S2)j
+
+=
+
+Pr2
+k=1
+
+k,jbk for
+
+j = 1, ..., m, where k,j, k,j are independent random variables in U [0, 1] for k = 1, ..., p
+
+and j = 1, ..., m.
+
+27
+
+In our simulation, the first two nonzero singular values for S1 are ( 1(S1), 2(S1)) = (179.91, 26.51) and the rest singular value is 0. For SE2 S, the first two nonzero singular values are ( 1(S2ES), 2(S2ES)) = (175.48, 25.74) and the rest is 0. For SE2 S, the first six nonzero singular values are ( 1(SA2 S), ..., 6(S2AS)) = (473.40, 29.87, 25.66, 23.89, 23.58, 22.16) and the rest is 0.
+
+S.4.4. Detail on Mean Removing
+
+Estimation of mean function and smoothing are done jointly by minimizing
+
+µb(s)
+
+d=ef
+
+arg
+
+min
+µ2S
+
+Xn
+
+Xm
+
+ Yij
+
+i=1 j=1
+
+µ(i/365)2
+
+Z +
+
+[D2µ(s)]2ds
+
+(S.4.4)
+
+where  > 0 is a smoothing parameter selected by generalized cross-validation, and S is a space of cubic B-splines. The computation is performed with the command smooth.spline in R.
+
+S.5: Auxiliary Lemmas
+
+Definition S.4.1. Let X = Rpn with inner product hA, Bi = tr(A>B) and k · k be the induced norm. f : X ! R a lower semicontinuous convex function. The proximity operator
+
+of f , Sf : X ! X :
+
+
+
+Sf (Y)
+
+d=ef
+
+arg
+
+min
+X2X
+
+f
+
+(X)
+
++
+
+1 2
+
+kX
+
+Yk2 , 8Y 2 X .
+
+Theorem S.4.2 (Theorem 2.1 of Cai et al. (2010)). Suppose the singular decomposition of Y = UDV> 2 Rpm, where D is a p  m rectangular diagonal matrix and U and V are
+
+28
+
+unitary matrices. The proximity operator S (·) associated with k · k is S (Y) d=ef U(D Ipm)+V>,
+
+(S.5.1)
+
+where Ipm is the p  m rectangular identity matrix with diagonal elements equal to 1.
+
+Lemma S.4.3 (Hoeding's Inequality, Proposition 5.10 of Vershynin (2012a)). Let X1, ..., Xn be independent centered sub-gaussian random variables, and let K = maxi kXik 2. Then for every a = (a1, ..., an)> 2 Rn and every t 0, we have
+
+ Xn P aiXi
+i=1
+
+ t  e · exp
+
+C 0 t2 K 2 kak22
+
+ ,
+
+where C0 > 0 is a universal constant.
+
+Lemma S.4.4 (Hoeding's Inequality: classical form). Let X1, ..., Xn be independent random variables such that Xi 2 [ai, bi] almost surely, then
+
+ Xn P Xi
+i=1
+
+ t  2 exp
+
+Pin=1(2bti2
+
+ ai)2 .
+
+29
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001
+002 003
+004 005 006
+007 008 009 010
+011 012
+013 014
+015 016 017
+018 019 020
+
+"Downside risk and stock returns: An empirical analysis of the long-run and short-run dynamics from the G-7 Countries" by Cathy Yi-Hsuan Chen, Thomas C. Chiang and Wolfgang Karl Härdle, January 2016. "Uncertainty and Employment Dynamics in the Euro Area and the US" by Aleksei Netsunajev and Katharina Glass, January 2016. "College Admissions with Entrance Exams: Centralized versus Decentralized" by Isa E. Hafalir, Rustamdjan Hakimov, Dorothea Kübler and Morimitsu Kurino, January 2016. "Leveraged ETF options implied volatility paradox: a statistical study" by Wolfgang Karl Härdle, Sergey Nasekin and Zhiwu Hong, February 2016. "The German Labor Market Miracle, 2003 -2015: An Assessment" by Michael C. Burda, February 2016. "What Derives the Bond Portfolio Value-at-Risk: Information Roles of Macroeconomic and Financial Stress Factors" by Anthony H. Tu and Cathy Yi-Hsuan Chen, February 2016. "Budget-neutral fiscal rules targeting inflation differentials" by Maren Brede, February 2016. "Measuring the benefit from reducing income inequality in terms of GDP" by Simon Voigts, February 2016. "Solving DSGE Portfolio Choice Models with Asymmetric Countries" by Grzegorz R. Dlugoszek, February 2016. "No Role for the Hartz Reforms? Demand and Supply Factors in the German Labor Market, 1993-2014" by Michael C. Burda and Stefanie Seele, February 2016. "Cognitive Load Increases Risk Aversion" by Holger Gerhardt, Guido P. Biele, Hauke R. Heekeren, and Harald Uhlig, March 2016. "Neighborhood Effects in Wind Farm Performance: An Econometric Approach" by Matthias Ritter, Simone Pieralli and Martin Odening, March 2016. "The importance of time-varying parameters in new Keynesian models with zero lower bound" by Julien Albertini and Hong Lan, March 2016. "Aggregate Employment, Job Polarization and Inequalities: A Transatlantic Perspective" by Julien Albertini and Jean Olivier Hairault, March 2016. "The Anchoring of Inflation Expectations in the Short and in the Long Run" by Dieter Nautz, Aleksei Netsunajev and Till Strohsal, March 2016. "Irrational Exuberance and Herding in Financial Markets" by Christopher Boortz, March 2016. "Calculating Joint Confidence Bands for Impulse Response Functions using Highest Density Regions" by Helmut Lütkepohl, Anna StaszewskaBystrova and Peter Winker, March 2016. "Factorisable Sparse Tail Event Curves with Expectiles" by Wolfgang K. Härdle, Chen Huang and Shih-Kang Chao, March 2016. "International dynamics of inflation expectations" by Aleksei Netsunajev and Lars Winkelmann, May 2016. "Academic Ranking Scales in Economics: Prediction and Imdputation" by Alona Zharova, Andrija Mihoci and Wolfgang Karl Härdle, May 2016.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+021 022
+023 024
+025
+026 027
+028 029 030
+031
+032 033
+034 035
+036
+037 038
+039
+
+"CRIX or evaluating blockchain based currencies" by Simon Trimborn and Wolfgang Karl Härdle, May 2016. "Towards a national indicator for urban green space provision and environmental inequalities in Germany: Method and findings" by Henry Wüstemann, Dennis Kalisch, June 2016. "A Mortality Model for Multi-populations: A Semi-Parametric Approach" by Lei Fang, Wolfgang K. Härdle and Juhyun Park, June 2016. "Simultaneous Inference for the Partially Linear Model with a Multivariate Unknown Function when the Covariates are Measured with Errors" by Kun Ho Kim, Shih-Kang Chao and Wolfgang K. Härdle, August 2016. "Forecasting Limit Order Book Liquidity Supply-Demand Curves with Functional AutoRegressive Dynamics" by Ying Chen, Wee Song Chua and Wolfgang K. Härdle, August 2016. "VAT multipliers and pass-through dynamics" by Simon Voigts, August 2016. "Can a Bonus Overcome Moral Hazard? An Experiment on Voluntary Payments, Competition, and Reputation in Markets for Expert Services" by Vera Angelova and Tobias Regner, August 2016. "Relative Performance of Liability Rules: Experimental Evidence" by Vera Angelova, Giuseppe Attanasi, Yolande Hiriart, August 2016. "What renders financial advisors less treacherous? On commissions and reciprocity" by Vera Angelova, August 2016. "Do voluntary payments to advisors improve the quality of financial advice? An experimental sender-receiver game" by Vera Angelova and Tobias Regner, August 2016. "A first econometric analysis of the CRIX family" by Shi Chen, Cathy YiHsuan Chen, Wolfgang Karl Härdle, TM Lee and Bobby Ong, August 2016. "Specification Testing in Nonparametric Instrumental Quantile Regression" by Christoph Breunig, August 2016. "Functional Principal Component Analysis for Derivatives of Multivariate Curves" by Maria Grith, Wolfgang K. Härdle, Alois Kneip and Heiko Wagner, August 2016. "Blooming Landscapes in the West? - German reunification and the price of land." by Raphael Schoettler and Nikolaus Wolf, September 2016. "Time-Adaptive Probabilistic Forecasts of Electricity Spot Prices with Application to Risk Management." by Brenda López Cabrera , Franziska Schulz, September 2016. "Protecting Unsophisticated Applicants in School Choice through Information Disclosure" by Christian Basteck and Marco Mantovani, September 2016. "Cognitive Ability and Games of School Choice" by Christian Basteck and Marco Mantovani, Oktober 2016. "The Cross-Section of Crypto-Currencies as Financial Assets: An Overview" by Hermann Elendner, Simon Trimborn, Bobby Ong and Teik Ming Lee, Oktober 2016. "Disinflation and the Phillips Curve: Israel 1986-2015" by Rafi Melnick and Till Strohsal, Oktober 2016.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+040 041 042 043 044 045 046 047 048 049 050 051
+052 053
+054 055
+056
+057
+
+"Principal Component Analysis in an Asymmetric Norm" by Ngoc M. Tran, Petra Burdejová, Maria Osipenko and Wolfgang K. Härdle, October 2016. "Forward Guidance under Disagreement - Evidence from the Fed's Dot Projections" by Gunda-Alexandra Detmers, October 2016. "The Impact of a Negative Labor Demand Shock on Fertility - Evidence from the Fall of the Berlin Wall" by Hannah Liepmann, October 2016. "Implications of Shadow Bank Regulation for Monetary Policy at the Zero Lower Bound" by Falk Mazelis, October 2016. "Dynamic Contracting with Long-Term Consequences: Optimal CEO Compensation and Turnover" by Suvi Vasama, October 2016. "Information Acquisition and Liquidity Dry-Ups" by Philipp Koenig and David Pothier, October 2016. "Credit Rating Score Analysis" by Wolfgang Karl Härdle, Phoon Kok Fai and David Lee Kuo Chuen, November 2016. "Time Varying Quantile Lasso" by Lenka Zbonakova, Wolfgang Karl Härdle, Phoon Kok Fai and Weining Wang, November 2016. "Unraveling of Cooperation in Dynamic Collaboration" by Suvi Vasama, November 2016. "Q3-D3-LSA" by Lukas Borke and Wolfgang K. Härdle, November 2016. "Network Quantile Autoregression" by Xuening Zhu, Weining Wang, Hangsheng Wang and Wolfgang Karl Härdle, November 2016. "Dynamic Topic Modelling for Cryptocurrency Community Forums" by Marco Linton, Ernie Gin Swee Teo, Elisabeth Bommes, Cathy Yi-Hsuan Chen and Wolfgang Karl Härdle, November 2016. "Beta-boosted ensemble for big credit scoring data" by Maciej Zieba and Wolfgang Karl Härdle, November 2016. "Central Bank Reputation, Cheap Talk and Transparency as Substitutes for Commitment: Experimental Evidence" by John Duffy and Frank Heinemann, December 2016. "Labor Market Frictions and Monetary Policy Design" by Anna Almosova, December 2016. "Effect of Particulate Air Pollution on Coronary Heart Disease in China: Evidence from Threshold GAM and Bayesian Hierarchical Model" by Xiaoyu Chen, December 2016. "The Effect of House Price on Stock Market Participation in China: Evidence from the CHFS Micro-Datal" by Xiaoyu Chen and Xiaohao Ji, December 2016. "Factorisable Multi-Task Quantile Regression" by Shih-Kang Chao, Wolfgang K. Härdle and Ming Yuan, December 2016.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+

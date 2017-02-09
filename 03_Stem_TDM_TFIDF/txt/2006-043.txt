@@ -1,0 +1,968 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2006-043
+An Iteration Procedure for Solving Integral Equations Related to Optimal Stopping Problems
+Denis Belomestny* Pavel V. Gapeev**
+* Weierstrass Institute for Applied Analysis and Stochastics, Berlin, Germany
+** Russian Academy of Sciences, Institute of Control Sciences, Moscow, Russia
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+An iteration procedure for solving integral equations related to optimal stopping problems
+Denis Belomestny and Pavel V. Gapeev
+A new algorithm for finding value functions of finite horizon optimal stopping problems in one-dimensional diffusion models is presented. It is based on a time discretization of the corresponding integral equation. The proposed iterative procedure for solving the discretized integral equation converges in a finite number of steps and delivers in each step a lower or an upper bound for value of discretized problem on the whole time interval. The remarks on the application of the method for solving integral equations related to some optimal stopping problems are given.
+1 Introduction
+Optimal stopping problems with finite time horizon play an important role in the literature on stochastic control (see e.g. [29] for general theory). One of the interesting and important problems in this domain is the pricing early exercise American options which has come from the mathematical theory of modern finance. This problem was first studied by McKean [17] who derived a freeboundary problem for the value function and the optimal stopping boundary of an early exercise American option and obtained a countable system of nonlinear integral equations for the boundary. Kim [14], Jacka [11], and Carr, Jarrow and Myneni [4] (see also Myneni [18]) have independently arrived at a nonlinear integral equation for the exercise boundary of the American put option which follows from the more general early exercise premium (EEP) representation. The uniqueness of solution has been recently proven by Peskir [22].
+(corresponding author) Weierstraß Institute for Applied Analysis and Stochastics (WIAS), Mohrenstr. 39, D-10117 Berlin, Germany, e-mail: belomest@wias-berlin.de
+Russian Academy of Sciences, Institute of Control Sciences, Profsoyuznaya Str. 65, 117997 Moscow, Russia, email: gapeev@cniica.ru
+This research was supported by Deutsche Forschungsgemeinschaft through the SFB 649 Economic Risk.
+Mathematics Subject Classification 2000. Primary 65D15, 60G40, 91B28. Secondary 65D30, 60J60, 60J65.
+Key words and phrases: Optimal stopping, finite horizon, diffusion process, upper and lower bounds, Black-Scholes model, American put option, Asian option, Russian option, Bayesian sequential testing problem, disorder detection problem.
+1
+
+Since the value function and the stopping boundary of a general finite horizon optimal stopping problem cannot be found in an explicit form, some different numerical procedures for calculating the value and the boundary have been proposed. Carr [3] presented a method based on the randomization of the horizon using the Erlang distribution, which is equivalent to taking the Laplace transform of the initial value of an American put option. In that case, the solution of the related free-boundary problem can be derived in a closed form. Hou, Little and Pant [10] have established a new representation for the American put option and proposed an efficient numerical algorithm for solving the corresponding nonlinear integral equation for the optimal exercise boundary. Pedersen and Peskir [20] (see also [6]-[7]) have used the backward induction method and simple time discretization of the nonlinear integral equation for obtaining the optimal stopping boundary. Kolodko and Schoenmakers [15] presented a policy iteration method for computing the optimal Bermudan stopping time. In recent years, Monte Carlo based methods have become rather popular (see e.g. Rogers [25], Haugh and Kogan [9], and Glasserman [8] for an overview). In [1] an iterative Monte-Carlo procedure has been proposed which makes use of the earlier exercise premium representation for American and Bermudan options. The method of [1] can be considered as an analogue to the classical Picard iteration method applied for the proof of existence of solutions of integral equations (cf. e.g. Tricomi [31]) having the advantage that it allows to obtain an upper bound for the value function from a lower one and the lower bound from an upper one. In this paper, we propose a modification of this method, which employees along with the expected reward at the finite time horizon the value function and the stopping boundary of the corresponding perpetual optimal stopping problem (see also Shiryaev et al. [28], Shiryaev [30], Novikov and Shiryaev [19]). Moreover, the convergence of the new algorithm under some regularity conditions is established and the rates of convergence are obtained.
+The paper is organized as follows. In Section 2, we give a formulation of a finite horizon optimal stopping problem for one-dimensional diffusion processes with a general gain function and discuss different forms of the analogues of EEP representation. In Section 3, we construct a simple time discretization of the corresponding integral equation and propose a numerical iteration procedure for solving it, which produces in each step lower or upper bounds for the solution and arrives at it in a finite number of steps. We stress that as opposite to the backward induction, in each step the procedure delivers an approximation on the whole time interval and not only for the several last time intervals. The main results of the paper are formulated in Lemma 3 and Theorem 4. In Section 4, we illustrate the action of this method on the problems of pricing early exercise American put and Asian options in Black-Scholes models as well as on the finite horizon Bayesian sequential testing and disorder detection problems for Wiener processes. We conclude the paper by pointing out some related open problems.
+2
+
+2 Formulation of the problem
+
+In this section we recall general results from [29], [12] and [20] (see also [17], [14], [11], [4] and [22]) and formulate the problem of estimating the value function of an optimal stopping problem in a one-dimensional diffusion model with finite time horizon.
+2.1. For a precise formulation of the finite horizon optimal stopping problem for diffusion processes, let us consider a probability space (, F, Q) with a standard Brownian motion B = (Bt)0tT started at zero. Suppose that the process X = (Xt)0tT solves the stochastic differential equation:
+
+dXt = µ(Xt) dt + (Xt) dBt (X0 = x)
+
+(2.1)
+
+where x  E is a given number from the connected state space E  R of
+
+the process X . Here µ(x) is a drift and (x) > 0 for x  E is a diffusion
+
+coefficient.
+
+In the present paper we consider the problem of computing the value func-
+
+tion:
+
+V (t, x) = sup Et,x e- G(t + , Xt+ )
+0 T -t
+
+(2.2)
+
+where the supremum is taken over all stopping times  of the process X (i.e.
+with respect to the natural filtration (Ft+u)0uT -t generated by the process (Xt+u)0uT -t ). Here Et,x denotes the expectation with respect to the initial measure Qt,x when the process (Xt+u)0uT -t starts at Xt = x for some x  E , and  > 0 is a discounting factor.
+Throughout the paper we assume that the gain function G(t, x) satisfies
+some regularity conditions (see [32], [12] and [20]) implying the existence of a
+strictly decreasing continuous function b(t) such that the first passage time:
+
+b = inf{0  u  T - t | Xt+u  b(t + u)} = inf{0  u  T - t | V (t + u, Xt+u)  G(t + u, Xt+u)}
+
+(2.3)
+
+is optimal and the value function (2.2) admits the following representation which is called early exercise premium representation in the case of American option problems:
+
+T -t
+
+V (t, x) = e-(T -t) Et,x G(T, XT ) -
+
+e-u Et,x H(t + u, Xt+u)
+
+0
+
+× I(Xt+u  b(t + u)) du
+
+T -t
+
+= e-(T -t) Et,x G(T, XT ) -
+
+e-u Et,x H(t + u, Xt+u)
+
+0
+
+× I(V (t + u, Xt+u)  G(t + u, Xt+u) du
+
+(2.4)
+
+where
+
+H(t, x) = (Gt + µ(x)Gx + (2(x)/2)Gxx - G)(t, x)
+
+(2.5)
+
+3
+
+for all (t, x)  [0, T ] × E and I( · ) denotes the indicator function. Among the regularity conditions mentioned above we refer the following:
+
+(t, x)  G(t, x) is C1,2 on [0, T ] × E x  H(t, x) is decreasing on E for each 0  t  T t  H(t, x) is decreasing on [0, T ] for each x  E
+
+(2.6) (2.7) (2.8)
+
+(cf. Theorem 4.3, Propositions 4.4 and 4.5 in [12]). Note that the problem (2.2) turns out to be non-trivial if there exists a continuous function a(t) such that:
+
+H(t, x) > 0 for x  E such that x < a(t) H(t, x) = 0 for x  E such that x = a(t) H(t, x) < 0 for x  E such that x > a(t)
+
+(2.9) (2.10) (2.11)
+
+hold for all (t, x)  [0, T ] × E . Then it follows by applying It^o's formula that a(t) < b(t) for all 0 < t < T . Following the lines of [20], in the sequel we assume that conditions (2.6)-(2.11) hold. Further conditions on the functions G(t, x) and H(t, x) will be imposed below.
+It is also known (see [20], [14] and [11]-[12]) that the stopping boundary b(t) of the finite horizon optimal stopping problem (2.2) solves the nonlinear integral equation:
+
+G(t, b(t)) = e-(T -t) Et,b(t) G(T, XT )
+
+(2.12)
+
+T -t
+- e-u Et,b(t) H(t + u, Xt+u) I(Xt+u  b(t + u)) du
+0
+
+for all 0  t  T and x  E . By using the change-of-variable formula with local times on curves (see [21]), it was proven in [20] (see also [22]-[24] and [6]-[7]) that the equation (2.12) admits a unique solution. Note that the nonlinear integral equation (2.4) is preferable over the equation (2.12), which involves the optimal stopping boundary since it allows a clear generalization to the multidimensional case. Generally, the equations (2.4) and (2.12) cannot be solved in an explicit form and numerical methods have to be used.
+
+2.2. By means of standard arguments based on the strong Markov property it can be shown that the arbitrage-free price (2.2) solves the following parabolic free-boundary problem (see [17]):
+
+(Vt + µ(x)Vx + (2(x)/2)Vxx)(t, x) = V (t, x) for x  E, V (t, x) x=b(t) = G(t, x) x=b(t) (instantaneous stopping) Vx(t, x) x=b(t) = Gx(t, x) x=b(t) (smooth fit) V (t, x) > G(t, x) for x  E such that x < b(t) V (t, x) = G(t, x) for x  E such that x > b(t)
+
+x < b(t) (2.13) (2.14)
+(2.15)
+(2.16) (2.17)
+
+where the condition (2.14) is satisfied for all 0  t  T and the condition (2.15) is satisfied for all 0  t < T .
+
+4
+
+Note that the superharmonic characterization of the value function (see [5] and [29]) implies that (2.2) is the smallest function satisfying (2.13)-(2.14) and (2.16)-(2.17).
+2.3. Let us denote by V (t, x) and b(t) the value function and the stopping boundary of the related infinite horizon optimal stopping problem defined by (2.2)-(2.3) under T = . In the sequel, we will consider only the optimal stopping problems such that V (t, x) = V (x) and b(t) = b holds for all 0  t  T and x  E . Moreover, we will assume that the limit:
+
+G(x)
+
+=
+
+lim
+T 
+
+e-(T -t)
+
+Et,x
+
+G(T, XT )
+
+exists and is finite.
+
+(2.18)
+
+Then, letting T tend to infinity in (2.4) and (2.12), we obtain:
+
+V (x) = G(x) - = G(x) -
+
+
+
+e-u Et,x H(t + u, Xt+u) I(Xt+u  b) du
+
+(2.19)
+
+0
+
+
+
+e-u Et,x H(t + u, Xt+u) I(V (Xt+u)  G(t + u, Xt+u) du
+
+0
+
+and
+
+G(t, b) = G(b)
+
+(2.20)
+
+
+- e-u Et,b H(t + u, Xt+u) I(V (Xt+u)  G(t + u, Xt+u) du
+0
+
+for all 0  t  T and x  E , where the functions V (x) and the number b are uniquely determined by the equations (2.19) and (2.20), respectively.
+From the formulas (2.4) and (2.19) it follows that:
+
+
+
+V (t, x) = V (t, x) -
+
+e-u Et,x H(t + u, Xt+u)
+
+0
+
+× I(b(t + u)  Xt+u > b) du
+
+T -t
+
+= V (t, x) -
+
+e-u Et,x H(t + u, Xt+u)
+
+0
+
+× I(V (t + u, Xt+u)  G(t + u, Xt+u) < V (Xt+u) du
+
+(2.21)
+
+where we set:
+
+V (t, x) = V (t, x) + e-(T -t) Et,x G(T, XT )
+
+- e-u Et,x H(t + u, Xt+u) I(Xt+u  b)
+T -t
+
+(2.22)
+
+for all 0  t  T and x  E . The expressions (2.4) and (2.21) serve as the basis
+for our algorithm. Note that (2.21) has an advantage over (2.4), since it involves
+probabilities of Xt belonging to a bounded intervals which are numerically easier to compute by using Monte Carlo methods than those for unbounded intervals.
+
+5
+
+3 Main results and proofs
+
+In this section, we approximate the initial model by discretizing the integral equation (2.21) and propose an iteration procedure which solves the discretized integral equation in a finite number of steps. We prove uniform convergence of this solution to the initial value function as the discretization becomes finer and determine the rate of convergence.
+
+3.1. In order to construct an approximation for the equation (2.21), let us
+fix some arbitrary 0  t  T and n  N and introduce a partition of the time
+interval [0, T - t] . Let u0 = 0 and ui = in with n = (T - t)/n implying that ui - ui-1 = n for every i = 1, . . . , n . Taking into account the structure
+of the expression (2.21), let us define the approximation Vn(t + u, x) for the price V (t + u, x) as a solution of the equation:
+
+n
+
+Vn(t + u, x) = V (t + u, x) -
+
+e-ui Et+u,x H (t + ui, Xt+ui )
+
+i= un/(T -t)
+
+× I(bn(t + ui)  Xt+ui > b) n
+
+n
+
+= V (t + u, x) -
+
+e-ui Et+u,x H (t + ui, Xt+ui )
+
+i= un/(T -t)
+
+(3.1)
+
+× I(Vn(t + ui, Xt+ui )  G(t + ui, Xt+ui ) < V (Xt+ui ) n
+
+where the estimate bn(t+u) for the boundary b(t+u) is defined as the maximum
+of the intersection curve of Vn(t + u, x) with G(t + u, x) and the perpetual stopping boundary b. Here z denotes the largest integer part of a positive number z > 0. It is clear that the equation (3.1) has a unique solution which can be obtained by means of backward induction in a finite number of steps. This implies that the (piecewise constant) function Vn(t+u, x) is uniquely determined by (3.1) for all 0  u  T - t and x  E . Let us set Vn0(t + u, x) = G(t + u, x) and define the function Vn1(t + u, x) by the formula:
+
+n
+
+Vn1(t + u, x) = V (t + u, x) -
+
+e-ui Et+u,x H(t + ui, Xt+ui ) (3.2)
+
+i= un/(T -t)
+
+× I(Vn0(t + ui, Xt+ui )  G(t + ui, Xt+ui ) < V (Xt+ui ) n
+
+and the function Vn2(t + u, x) by the formula:
+
+n
+
+Vn2(t + u, x) = V (t + u, x) -
+
+e-ui Et+u,x H(t + ui, Xt+ui ) (3.3)
+
+i= un/(T -t)
+
+× I(Vn1(t + ui, Xt+ui )  G(t + ui, Xt+ui ) < V (Xt+ui ) n
+
+for all 0  u  T - t , x  E such that Vn2(t + u, x)  Vn0(t + u, x) , and Vn2(t + u, x) = Vn0(t + u, x) elsewhere. Let us now define sequentially the functions
+
+6
+
+Vnm(t + u, x) for every m  N , m  3 by the formula:
+
+n
+
+Vnm(t + u, x) = V (t + u, x) -
+
+e-ui Et+u,x H(t + ui, Xt+ui ) (3.4)
+
+i= un/(T -t)
+
+× I(Vnm-1(t + ui, Xt+ui )  G(t + ui, Xt+ui ) < V (Xt+ui ) n
+
+for all 0  u  T - t and x  E .
+
+Remark 1 It is easily seen from (3.1) that, by construction in (3.2)-(3.4), we have:
+Vn2k-1(t + u, x)  Vn(t + u, x) for 0  u  T - t, x  E, k  N (3.5)
+where the sequence (Vn2k-1(t + u, x))kN is monotone decreasing, and
+Vn2k(t + u, x)  Vn(t + u, x) for 0  u  T - t, x  E, k  N. (3.6)
+where the sequence (Vn2k(t + u, x))kN is monotone increasing for each 0  u  T - t , x  E and every n  N fixed. Moreover, any lower estimate Vn2k-2(t + u, x) for Vn(t + u, x) produces the upper one Vn2k-1(t + u, x) , and any upper estimate Vn2k-1(t + u, x) produces the lower one Vn2k(t + u, x) for each 0  u  T - t , x  E and every k  N .
+Remark 2 For every m < n the function u  Vnm(t + u, x) is an estimate for Vn(t + u, x) on the whole interval [0, T - t] for each 0  t  T and x  E fixed. This fact shows the advantage of the proposed method over the standard backward induction.
+
+3.2. Let us now show that the sequence of functions (Vnm(t + u, x))kN from (3.2)-(3.4) converges to the function Vn(t+u, x) in n steps for all 0  u  T -t , x  E and every n  N .
+
+Lemma 3 For each 0  t  T fixed we have Vnm(t + u, x) = Vn(t + u, x) for all 0  u  T - t and x  E and for every m  n .
+
+Proof. Let us fix some 0  t  T and n  N . Then, by construction of Vnm(t + u, x) in (3.2)-(3.4), the equalities:
+
+n
+
+Vn2k+1(t + u, x) - Vn2k(t + u, x) = -
+
+e-ui Et+u,x H (t + ui, Xt+ui )
+
+i= un/(T -t)
+
+× I(Vn2k(t + ui, Xt+ui )  G(t + ui, Xt+ui ) < Vn2k-1(t + ui, Xt+ui )) n (3.7)
+
+7
+
+and
+
+n
+
+Vn2k+2(t + u, x) - Vn2k+1(t + u, x) = -
+
+e-ui Et+u,x H (t + ui, Xt+ui )
+
+i= un/(T -t)
+
+× I(Vn2k(t + ui, Xt+ui )  G(t + ui, Xt+ui ) < Vn2k+1(t + ui, Xt+ui )) n (3.8)
+
+are satisfied for all 0  u  T - t and x  E and for every k  N .
+In order to prove the desired assertion, we should use the mathematical induction principle. First, we note that Vnm(T, x) = G(T, x) for all x  E and m  N . For checking the induction basis, it is enough to observe that if m = 2k
+with k = 0 then (3.8) implies the equality:
+
+Vn2(t + u, x) - Vn1(t + u, x) = -e-un Et+u,x H(t + un, Xt+un )
+
+(3.9)
+
+× I(Vn0(t + un, Xt+un )  G(t + un, Xt+un ) < Vn1(t + un, Xt+un )) n = 0
+
+which holds for all (n - 1)(T - t)/n  u  T - t , where we have t + un = T by definition of the partition.
+
+3.3. We now prove that the solution of the discretized equation (3.1) converges to V (t + u, x) uniformly on [0, T - t] as n tends to infinity. For this, let us further denote:
+
+F (t, x; t + u, y) = Et,x H(t + u, Xt+u) I(Xt+u  y) for all 0  u  T - t and x, y  E .
+
+(3.10)
+
+Theorem 4 Suppose that the conditions (2.6)-(2.11) and (2.18) are satisfied. Assume that the function:
+
+x  G(t, x) is monotone and convex on E with |Gx(t, x)|   (3.11) for some  > 0 and the function:
+
+y  F (t, x; t + u, y) is C1 on E
+
+(3.12)
+
+and
+
+|Fy(t, x; t + u, y)|  Cu
+
+(3.13)
+
+holds for all 0  t  T , 0 < u  T - t and x, y  E and some C > 0. Let Vn(t + u, x) be a solution of the discretized equation (3.1). Then there exists
+some t  [0, T ] close enough to T such that the sequence (Vn(t + u, x))nN converges to V (t + u, x) uniformly for 0  u  T - t and x  E with the rate 1/n when n tends to infinity.
+
+8
+
+Proof. First, we observe that the representations (2.4) and (3.1) imply:
+
+Vn(t, x) - V (t, x)
+
+(3.14)
+
+T -t
+
+n
+
+ e-u F (t, x; t + u, b(t + u)) du - e-ui F (t, x; t + ui, b(t + ui)) n
+
+0 i=1
+
+n
++ e-ui F (t, x; t + ui, b(t + ui)) - F (t, x; t + ui, b(t + ui)) n
+
+i=1
+
+for all 0  t  T and x  E . In order to deal with the first term on the righthand side of (3.14), we can use the estimate for Riemann sum approximation and obtain:
+
+T -t
+e-u F (t, x; t + u, b(t + u)) du
+0
+
+-
+
+n
+
+e-ui F (t, x; t + ui, b(t + ui)) n
+
+
+
+C1 n
+
+i=1
+
+(3.15)
+
+for n  N and C1 > 0 fixed. As to the second term in (3.14), we can make use of the mean value theorem and the inequality (3.13) to get:
+
+F (t, x; t + ui, b(t + ui)) - F (t, x; t + ui, bn(t + ui))
+
+(3.16)
+
+= Fy(t, x; t + ui, i) bn(t + ui) - b(t + ui)  Cui bn(t + ui) - b(t + ui)
+
+for some i  E and every i = 1, . . . , n . From the assumption (2.6), by mean value theorem it follows that:
+
+G(t + ui, b(t + ui)) - G(t + ui, b(t + ui)) = Gx(t + ui, i) bn(t + ui) - b(t + ui)
+
+(3.17)
+
+for some i  E and every i = 1, . . . , n . Then, using (3.17) and taking into account (3.11), from (3.16) it follows that:
+
+F (t, x; t + ui, b(t + ui)) - F (t, x; t + ui, b(t + ui))
+ Cui G(t + ui, bn(t + ui)) - G(t + ui, b(t + ui)) = Cui Vn(t + ui, bn(t + ui)) - V (t + ui, b(t + ui))  Cui Vn(t + ui, xi) - V (t + ui, xi)
+
+(3.18)
+
+9
+
+for some xi  E such that xi  (bn(t)  b(t), bn(t)  b(t)) . Hence, combining (3.14)-(3.18), we get:
+
+Vn(t + ui, xi) - V (t + ui, xi)
+
+(3.19)
+
+ sup sup Vn(t + ui, xi) - V (t + ui, xi)
+ui[0,T -t] xiE
+
+feo-raul/l0uist
+
+ T and every i = 1, . . . , n. By virtue of the fact that decreasing, straightforward calculations show that the
+
+the function inequalities:
+
+n i=1
+
+e-ui
+
+Cui
+
+n
+
+
+
+C 
+
+T -t 0
+
+e-uu
+
+du
+
+
+
+C2
+
+ T
+
+-
+
+t
+
+(3.20)
+
+hold for all 0  t  T and some C2 > 0 fixed. Therefore, combining (3.15)(3.20), from (3.14) we obtain:
+
+Vn(t, x) - V (t, x)
+
+
+
+C1 n
+
++
+
+ C2 T
+
+-
+
+t
+
+(3.21)
+
+× sup sup Vn(t + ui, xi) - V (t + ui, xi)
+ui[0,T -t] xiE
+
+for all 0  t  T and x  E . Hence, we have:
+
+sup sup Vn(t + u, x) - V (t + u, x)
+u[0,T -t] xE
+
+(3.22)
+
+
+
+C1 n
+
+ + C2 T
+
+- t sup sup
+u[0,T -t] xE
+
+Vn(t + u, x) - V (t + u, x)
+
+for all 0  t  T and x  E .
+
+
+
+Let us now choose some t  [0, T ] such that C2 T - t  1/2 . Then it
+
+follows from (3.22) that:
+
+sup sup
+u[0,T -t] xE
+
+Vn(t + u, x) - V (t + u, x)
+
+
+
+2C1 n
+
+(3.23)
+
+for all n  N such that n  N . This completes the proof of the theorem.
+
+3.4. In principle, one could construct directly the estimate for the value
+function (2.2) without use of discretization by the following iterative scheme. Let us set V 0(t, x) = G(t, x) and define the function V 1(t, x) by the formula:
+
+T -t
+
+V 1(t, x) = V (t, x) -
+
+e-u Et,x H(t + u, Xt+u)
+
+(3.24)
+
+0
+
+× I(V 0(t + u, Xt+u)  G(t + u, Xt+u) < V (Xt+u) du
+
+and the function Vn2(t, x) by the formula:
+
+T -t
+
+V 2(t, x) = V (t, x) -
+
+e-u Et,x H(t + u, Xt+u)
+
+(3.25)
+
+0
+
+× I(V 1(t + u, Xt+u)  G(t + u, Xt+u) < V (Xt+u) du
+
+10
+
+for all 0  t  T , x  E such that V 2(t, x)  V 0(t, x) , and V 2(t, x) = V 0(t, x) elsewhere. Let us now define sequentially the functions V m(t, x) for every m 
+N , m  3 by the formula:
+
+T -t
+
+V m(t, x) = V (t, x) -
+
+e-u Et,x H(t + u, Xt+u)
+
+(3.26)
+
+0
+
+× I(V m-1(t + u, Xt+u)  G(t + u, Xt+u) < V (Xt+u) du
+
+for all 0  t  T and x  E .
+
+Remark 5 Again, by the construction, we have:
+
+V 2k-1(t, x)  V (t, x) for 0  t  T, x  E, k  N
+
+(3.27)
+
+where the sequence (V 2k-1(t, x))kN is monotone decreasing, and V 2k(t, x)  V (t, x) for 0  t  T, x  E, k  N.
+
+(3.28)
+
+where the sequence (V 2k(t, x))kN is monotone increasing for each 0  t  T , x  E and every n  N fixed. Moreover, any lower estimate V 2k-2(t, x) for V (t, x) produces the upper one V 2k-1(t, x) , and any upper estimate V 2k-1(t, x) produces the lower one V 2k(t, x) for each 0  t  T , x  E and every k  N . The question of convergence of the sequence (V m(t, x))mN to the value function
+V (t, x) for each 0  t  T , x  E is left open here.
+
+4 Examples
+In this section we give some remarks on the application of the iterative procedure introduced above to solving nonlinear integral equations arising from some optimal stopping problems with finite time horizon.
+
+Example 6 (Early exercise American put option [17], [22]). Suppose that in (2.2) we have G(t, x) = (K - x)+ and  = r for some K, r > 0 fixed. Assume
+that in (2.1) we have µ(x) = rx , (x) = x for x  E = (0, ) and some
+ > 0, and hence H(t, x) = -rK in (2.5). In this case, as an analogue of the
+formula (3.10), we have:
+
+F (0, x; t, y) = -rK P0,x Xt  y
+
+(4.1)
+
+= -rK 
+
+1 t
+
+log
+
+y x
+
+-
+
+r
+
+-
+
+2 2
+
+t
+
+for all
+
+t>0
+
+and
+
+x, y > 0 , where
+
+ (x) = (1/ 2)
+
+x -
+
+e-y2/2dy
+
+.
+
+Thus, the
+
+conditions (3.11)-(3.13) as well as the other essential assumptions of Theorem
+
+4 are satisfied (see [2]).
+
+11
+
+Example 7 (Early exercise Asian option [24], [16]). Suppose that in (2.2) we have G(t, x) = (1 - x/t)+ and  = 0 . Assume that in (2.1) we have
+µ(x) = (1 - rx) , (x) = x for all x  E = (0, ) and some r,  > 0 , and
+hence H(t, x) = ((1/t + r)x - 1)/t in (2.5). In this case, as an analogue of the
+formula (3.10), we have:
+
+F (0, x; t, y) = E0,x H(t, x) I(Xt  y)
+
+=
+
+ 0
+
+1 0t
+
+1 t
+
++
+
+r
+
+x
+
++ s
+
+a
+
+-
+
+1
+
+(4.2)
+
+I
+
+x+a s
+
+
+
+y
+
+f (t, s, a) ds da
+
+for all t > 0 and x, y > 0 , where
+
+f (t, s, a)
+
+=
+
+ 22 3/23
+
+sr/2 a2 t
+
+exp
+
+×
+
+
+exp
+0
+
+-
+
+2z2 2t
+
+22 2t
+
+-
+
+-
+
+4s 2a
+
+(r
+
++ 2/2)2 22
+
+t
+
+-
+
+2 2a
+
+(1
+
++
+
+cosh z
+
+sinh z sin
+
+4z 2t
+
+s) dz
+
+(4.3)
+
+for all t > 0 and s, a > 0. Thus, it can be verified that the conditions (3.11)(3.13) as well as the other essential assumptions of Theorem 4 are satisfied.
+
+Example 8 (Bayesian Wiener sequential testing problem with finite horizon [29; Chapter IV, Section 3], [6]). Suppose that in (2.2) we have G(t, x) = -t - ax  b(1 - x) for some a, b > 0 fixed and  = 0 . Assume that in (2.1) we have µ(x) = 0 , (x) = x(1 - x) for all x  E = (0, 1) and some  > 0, and hence H(t, x) = 1 in (2.5). In this case, as an analogue of the formula (3.10), we have:
+
+F (0, x; t, y) = P0,x Xt  y = x  1 log t
+
+y 1-x 1-y x
+
+
+
+-
+
+ 2
+
+t
+
++ (1 - x) 
+
+1 log t
+
+y 1-x 1-y x
+
+
+
++
+
+ 2
+
+t
+
+(4.4)
+
+for all t > 0 and x, y  (0, 1) . Thus, it can be verified that the conditions (3.11)(3.13) as well as the other essential assumptions of Theorem 4 are satisfied.
+
+Example 9 (Wiener disorder detection problem with finite horizon [29; Chapter IV, Section 4], [7]). Suppose that in (2.2) we have G(t, x) = -(1 - x) and  = 0 . Assume that in (2.1) we have µ(x) = (1 - x) , (x) = x(1 - x) for all x  E = (0, 1) and some ,  > 0 . The reward of the related optimal stopping problem contains also an integral and thus, as an analogue of the formula (3.10), we have:
+
+F (0, x; t, y) = E0,x Xt I(Xt  y) + (1 - Xt) I(Xt  y)
+y1
+= z p(x; t, z) dz + (1 - z) p(x; t, z) dz
+0y
+
+(4.5)
+
+12
+
+for all t > 0 and x, y  (0, 1) , where an explicit expression for the marginal density function p is derived in [7; Section 4]. It can be verified that the conditions (3.11)-(3.13) as well as the other essential assumptions of Theorem 4 are satisfied (see [7]).
+
+Example 10 (Early exercise Russian option [26]-[27], [23]). Suppose that in (2.2) we have G(t, x) = x . Assume that in (2.1) we have:
+
+dXt = -rXt dt + Xt dBt + dRt (X0 = x)
+
+(4.6)
+
+where
+
+Rt =
+
+t 0
+
+I (Xu
+
+=
+
+1)
+
+d
+
+max0vu Su
+
+Su
+
+(4.7)
+
+and St = exp(Bt + (r + 2/2)t) for all t  0 and some r,  > 0 , and hence H(t, x) = -(r + )x for all x  E = (0, ) in (2.5). In this case, as an
+
+analogue of the formula (3.10) we have:
+
+F (0, x; t, y) = E0,x H(t, x) I(Xt  y)
+
+
+=-
+1
+
+ 0
+
+mx s
+
+I
+
+mx s
+
+
+
+y
+
+f (t, s, m) ds dm
+
+(4.8)
+
+for all t > 0 and x, y > 0 , where
+
+f (t, s, m)
+
+=
+
+2 3 2t3
+
+log(m2/s) sm
+
+exp
+
+-
+
+log2(m2/s) 22t
+
++
+
+ 
+
+log s -
+
+2 2
+
+t
+
+(4.9)
+
+for 0 < s  m and m  1 with  = r/ + /2 . Thus, it can be shown that in this case the condition (3.13) is not satisfied. This can be explained by the fact that there is a reflection term (4.7) in the equation (4.6). Therefore, one should find another arguments to prove the assertion of Theorem 4 for this case.
+
+Acknowledgments. This paper was written during the time when the second author was visiting Weierstraß Institute for Applied Analysis and Stochastics (WIAS) Berlin and he is thankful for the and hospitality. Financial support from the DFG-Sonderforschungsbereich 649 Economic Risk at Humboldt University of Berlin is gratefully acknowledged.
+
+References
+[1] Belomestny, D. and Milstein, G. N. (2005). Adaptive simulation algorithms for pricing American and Bermudan options by local analysis of the financial market. WIAS Preprint 1022. To appear in International Journal of Theoretical and Applied Finance.
+[2] Belomestny, D. and Gapeev, P. V. (2006). An iteration procedure for solving integral equations related to American put options. WIAS Preprint 1105 (10 pp).
+
+13
+
+[3] Carr, P. (1998). Randomization and the American put. Review of Financial Studies 11 (597­626).
+[4] Carr, P., Jarrow, R. and Myneni, R. (1992). Alternative characterization of American put options. Math. Finance 2 (78­106).
+[5] Dynkin, E. B. (1963). The optimum choice of the instant for stopping a Markov process. Soviet Math. Dokl. 4 (627­629).
+[6] Gapeev, P. V. and Peskir, G. (2004). The Wiener sequential testing problem with finite horizon. Stochastics and Stochastic Reports 76 (59­ 75).
+[7] Gapeev, P. V. and Peskir, G. (2006). The Wiener disorder problem with finite horizon. Research Report No. 435, Dept. Theoret. Statist. Aarhus (22 pp). To appear in Stochastic Processes and Applications.
+[8] Glasserman, P. (2004). Monte Carlo Methods in Financial Engineering. Springer, New York.
+[9] Haugh, M. B. and Kogan, L. (2004). Pricing American options: a duality approach. Operation Research 52 (258­270).
+[10] Hou, C., Little, T. and Pant, V. (2000). A new integral representation of the early exercise bounday for American put options. J. Comput. Finance 3 (73­96).
+[11] Jacka, S. D. (1991). Optimal stopping and the American put. Math. Finance 1 (1­14).
+[12] Jacka, S. D. and Lynn, J. R. (1992). Finite horizon optimal stopping, obstacle problems and the shape of the continution region. Stoch. Stoch. Rep. 39 (25­42).
+[13] Karatzas, I. and Shreve, S. E. (1998). Methods of Mathematical Finance. Springer, New York.
+[14] Kim, I. J. (1990). The analytic valuation of American options. Rev. Financial Stud. 3 (547­572).
+[15] Kolodko, A. and Schoenmakers, J. (2005). Iterative construction of the optimal Bermudan stopping time. Finance Stochast. 10(1) (27­ 49).
+[16] Kramkov, D. O. and Mordecki, E. (1994). Integral opton. Theory Probab. Appl. 39(1) (201­211).
+[17] McKean, H. P. Jr. (1965). Appendix: A free boundary problem for the heat equation arising form a problem of mathematical economics. Ind. Management Rev. 6 (32­39).
+14
+
+[18] Myneni, R. (1992). The pricing of the American option. Ann. Appl. Probab. 2(1) (1­23).
+[19] Novikov, A. A. and Shiryaev, A. N. (2004). On an effective solution of the optimal stopping problem for random walks. Theor. Probab. Appl. 49(2) (373­382).
+[20] Pedersen, J. L. and Peskir, G. (2002). On nonlinear integral equations arising in problems of optimal stopping. Proc. Functional Anal. VII (Dubrovnik 2001), Various Publ. Ser. 46 (159­175).
+[21] Peskir, G. (2005). A change-of-variable formula with local time on curves. J. Theoret. Probab. 18(3) (499­535).
+[22] Peskir, G. (2005). On the American option problem. Math. Finance. 15(1) (169-181).
+[23] Peskir, G. (2005). The Russian option: Finite horizon. Finance Stochast. 9 (251-267).
+[24] Peskir, G. and Uys, N. (2005). On Asian options of American type. In the Volume Exotic Options and Advanced Levy Models. Wiley, Chichester (217-235).
+[25] Rogers, L. C. G. (2002). Monte Carlo valuation of American options. Math. Finance 12 (271­286).
+[26] Shepp, L. A. and Shiryaev, A. N. (1993). The Russian option: reduced regret. Ann. Appl. Probab. 3(3) (631­640).
+[27] Shepp, L. A. and Shiryaev, A. N. (1994). A new look at the pricing of Russian options. Theory Probab. Appl. 39(1) (103­119).
+[28] Shiryaev, A. N., Kabanov, Y. M., Kramkov, D. O. and Melnikov, A. V. (1994). On the pricing of options of European and American types, II. Continuous time. Theory Probab. Appl. 39 (61­102).
+[29] Shiryaev, A. N. (1978). Optimal Stopping Rules. Springer, Berlin.
+[30] Shiryaev, A. N. (1999). Essentials of Stochastic Finance. World Scientific, Singapore.
+[31] Tricomi, F. G. (1957). Integral Equations. Interscience Publishers, London and New York.
+[32] van Moerbeke, P. (1976). On optimal stopping and free-boundary problems. Arch. Rational Mech. Anal. 60 (101­148).
+15
+
+SFB 649 Discussion Paper Series 2006
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Calibration Risk for Exotic Options" by Kai Detlefsen and Wolfgang K. Härdle, January 2006.
+002 "Calibration Design of Implied Volatility Surfaces" by Kai Detlefsen and Wolfgang K. Härdle, January 2006.
+003 "On the Appropriateness of Inappropriate VaR Models" by Wolfgang Härdle, Zdenk Hlávka and Gerhard Stahl, January 2006.
+004 "Regional Labor Markets, Network Externalities and Migration: The Case of German Reunification" by Harald Uhlig, January/February 2006.
+005 "British Interest Rate Convergence between the US and Europe: A Recursive Cointegration Analysis" by Enzo Weber, January 2006.
+006 "A Combined Approach for Segment-Specific Analysis of Market Basket Data" by Yasemin Boztu and Thomas Reutterer, January 2006.
+007 "Robust utility maximization in a stochastic factor model" by Daniel Hernández­Hernández and Alexander Schied, January 2006.
+008 "Economic Growth of Agglomerations and Geographic Concentration of Industries - Evidence for Germany" by Kurt Geppert, Martin Gornig and Axel Werwatz, January 2006.
+009 "Institutions, Bargaining Power and Labor Shares" by Benjamin Bental and Dominique Demougin, January 2006.
+010 "Common Functional Principal Components" by Michal Benko, Wolfgang Härdle and Alois Kneip, Jauary 2006.
+011 "VAR Modeling for Dynamic Semiparametric Factors of Volatility Strings" by Ralf Brüggemann, Wolfgang Härdle, Julius Mungo and Carsten Trenkler, February 2006.
+012 "Bootstrapping Systems Cointegration Tests with a Prior Adjustment for Deterministic Terms" by Carsten Trenkler, February 2006.
+013 "Penalties and Optimality in Financial Contracts: Taking Stock" by Michel A. Robe, Eva-Maria Steiger and Pierre-Armand Michel, February 2006.
+014 "Core Labour Standards and FDI: Friends or Foes? The Case of Child Labour" by Sebastian Braun, February 2006.
+015 "Graphical Data Representation in Bankruptcy Analysis" by Wolfgang Härdle, Rouslan Moro and Dorothea Schäfer, February 2006.
+016 "Fiscal Policy Effects in the European Union" by Andreas Thams, February 2006.
+017 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, March 2006.
+018 "The Bologna Process: How student mobility affects multi-cultural skills and educational quality" by Lydia Mechtenberg and Roland Strausz, March 2006.
+019 "Cheap Talk in the Classroom" by Lydia Mechtenberg, March 2006. 020 "Time Dependent Relative Risk Aversion" by Enzo Giacomini, Michael
+Handel and Wolfgang Härdle, March 2006. 021 "Finite Sample Properties of Impulse Response Intervals in SVECMs with
+Long-Run Identifying Restrictions" by Ralf Brüggemann, March 2006. 022 "Barrier Option Hedging under Constraints: A Viscosity Approach" by
+Imen Bentahar and Bruno Bouchard, March 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "How Far Are We From The Slippery Slope? The Laffer Curve Revisited" by Mathias Trabandt and Harald Uhlig, April 2006.
+024 "e-Learning Statistics ­ A Selective Review" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, April 2006.
+025 "Macroeconomic Regime Switches and Speculative Attacks" by Bartosz Makowiak, April 2006.
+026 "External Shocks, U.S. Monetary Policy and Macroeconomic Fluctuations in Emerging Markets" by Bartosz Makowiak, April 2006.
+027 "Institutional Competition, Political Process and Holdup" by Bruno Deffains and Dominique Demougin, April 2006.
+028 "Technological Choice under Organizational Diseconomies of Scale" by Dominique Demougin and Anja Schöttner, April 2006.
+029 "Tail Conditional Expectation for vector-valued Risks" by Imen Bentahar, April 2006.
+030 "Approximate Solutions to Dynamic Models ­ Linear Methods" by Harald Uhlig, April 2006.
+031 "Exploratory Graphics of a Financial Dataset" by Antony Unwin, Martin Theus and Wolfgang Härdle, April 2006.
+032 "When did the 2001 recession really start?" by Jörg Polzehl, Vladimir Spokoiny and Ctlin Stric, April 2006.
+033 "Varying coefficient GARCH versus local constant volatility modeling. Comparison of the predictive power" by Jörg Polzehl and Vladimir Spokoiny, April 2006.
+034 "Spectral calibration of exponential Lévy Models [1]" by Denis Belomestny and Markus Reiß, April 2006.
+035 "Spectral calibration of exponential Lévy Models [2]" by Denis Belomestny and Markus Reiß, April 2006.
+036 "Spatial aggregation of local likelihood estimates with applications to classification" by Denis Belomestny and Vladimir Spokoiny, April 2006.
+037 "A jump-diffusion Libor model and its robust calibration" by Denis Belomestny and John Schoenmakers, April 2006.
+038 "Adaptive Simulation Algorithms for Pricing American and Bermudan Options by Local Analysis of Financial Market" by Denis Belomestny and Grigori N. Milstein, April 2006.
+039 "Macroeconomic Integration in Asia Pacific: Common Stochastic Trends and Business Cycle Coherence" by Enzo Weber, May 2006.
+040 "In Search of Non-Gaussian Components of a High-Dimensional Distribution" by Gilles Blanchard, Motoaki Kawanabe, Masashi Sugiyama, Vladimir Spokoiny and Klaus-Robert Müller, May 2006.
+041 "Forward and reverse representations for Markov chains" by Grigori N. Milstein, John G. M. Schoenmakers and Vladimir Spokoiny, May 2006.
+042 "Discussion of 'The Source of Historical Economic Fluctuations: An Analysis using Long-Run Restrictions' by Neville Francis and Valerie A. Ramey" by Harald Uhlig, May 2006.
+043 "An Iteration Procedure for Solving Integral Equations Related to Optimal Stopping Problems" by Denis Belomestny and Pavel V. Gapeev, May 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

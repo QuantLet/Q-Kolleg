@@ -1,0 +1,1203 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2016-020
+Academic Ranking Scales in Economics:
+Prediction and Imputation
+Alona Zharova* Andrija Mihoci* Wolfgang Karl Härdle*
+* Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Academic Ranking Scales in Economics:
+Prediction and Imputation
+Alona Zharova, Andrija Mihociand Wolfgang Karl Härdle§
+Abstract
+Publications are a vital element of any scientist's career. It is not only the number of media outlets but aslo the quality of published research that enters decisions on jobs, salary, tenure, etc. Academic ranking scales in economics and other disciplines are, therefore, widely used in classification, judgment and scientific depth of individual research. These ranking systems are competing, allow for different disciplinary gravity and sometimes give orthogonal results. Here a statistical analysis of the interconnection between Handelsblatt (HB), Research Papers in Economics (RePEc, here RP) and Google Scholar (GS) systems is presented. Quantile regression allows us to successfully predict missing ranking data and to obtain a so-called HB Common Score and to carry out a cross-rankings analysis. Based on the merged ranking data from different data providers, we discuss the ranking systems dependence, analyze the age effect and study the relationship between the research expertise areas and the ranking performance.
+JEL classification: C14, C53, C81, M10 Keywords: scientometrics, ranking, quantile regression, Handelsblatt, RePEc, Google Scholar
+Financial support from the German Research Foundation (DFG) via Collaborative Research Center 649 "Economic Risk" and International Research Training Group 1792 "High Dimensional Non Stationary Time Series", Humboldt-Universität zu Berlin, is gratefully acknowledged. We are thankful for the research assistance provided by Marius Sterling.
+Humboldt-Universität zu Berlin, School of Business and Economics, Ladislaus von Bortkiewicz Chair of Statistics and Collaborative Research Center 649 "Economic Risk", Spandauer Str. 1, 10178 Berlin, Germany, tel: +49 (0)30 2093 5708, E-mail: zharovaa@hu-berlin.de
+Brandenburg University of Technology, Chair of Economic Statistics and Econometrics, ErichWeinert-Str. 1, 03046 Cottbus, Germany
+§Humboldt-Universität zu Berlin, C.A.S.E. - Center for Applied Statistics and Economics, Spandauer Str. 1, 10178 Berlin, Germany and School of Business, Singapore Management University, 50 Stamford Road, Singapore 178899
+1
+
+1 Introduction
+Academic ranking, as a tool of scientometrics, provides a platform for the evaluation of research results at universities, research centers, institutes, interdisciplinary groups, etc. Ranking systems indeed play an important role in performance comparison and the clarification of individual contribution to the overall institution ranking. For instance, the decisions made during recruitment processes at German universities (economic fields) are typically supported by HB rankings, see Schläpfer and Schneider (2010). The distribution of financial resources at universities is moreover based on performance-related schemes that among others include the comparison of the achieved research results, see Oberschelp and Jaeger (2010).
+The evaluation phase of research results is often accompanied by missing observations within certain academic ranking systems. Employed statistical tools from quantile regression enable us here to impute and predict the missing ranking data. Since the focus of academic ranking lies additionally on finding the leading outcomes that significantly contribute to the excellence in research, our work deals with performance comparison among researchers utilizing ranking observations from Handelsblatt (HB), Research Papers in Economics (RP) and Google Scholar (GS) databases.
+The goals of this paper include: (i) Developing a forecasting methodology for treatment of incomplete ranking data, (ii) Analyzing the relationship strength between HB, RP and GS rankings and (iii) Understanding the influence of age and investigated research fields on the academic ranks of scientists among analyzed ranking systems.
+Our research questions correspondingly include: How to impute a cross ranking for business (BWL) and economic (VWL) sciences as well as to predict an academic rank for researchers, not included in a particular ranking system? How strong is the relation between HB, RP and GS rankings? Does the age, respectively the research area, influence academic ranks? How do the ranking scores change for different age groups and selected research fields in economics?
+2
+
+This paper considers different perspectives for the comparison of research results. Within one ranking system the analysis is straightforward. The challenge arises when the comparison has to be made jointly, through different ranking scales or ranking systems, see Wohlrabe (2011). Consider the HB ranking system that consists of several different rankings itself. Data are therefore often incomplete; for example, a top rated researcher of one ranking may not be listed in the other one(s) and vice versa. Such situations require a careful treatment of missing data. In mitigating these issues, we propose suitable quantile regression and correlation techniques in our work, while the conducted empirical study focuses on the dependence structure between HB, RP and GS ranking systems.
+Quantile regression receives currently a relatively strong attention from the research community. A comprehensive description of quantile regression is given in Koenker (2005); the rapidly growing literature shows a variety of approaches and applications. Härdle and Song (2010) construct a uniform confidence band for quantile regression, Fitzenberger and Wilke (2005) provide an empirical application of quantile regression to duration data, Guo et al. (2013) fulfill a functional data analysis of generalized regression quantiles. A statistical analysis of linear as well as nonlinear models with the help of quantile regression through the estimation of conditional quantile curves has been proposed by Spokoiny et al. (2013). Here we employ a quantile (median) regression in order to impute missing academic rankings data.
+Based on the conducted analysis, we show that a median regression model successfully interpolates the missing academic rankings. Academic rankings data exhibit different correlation structures between underlying sub-rankings of HB, RP and GS, whereas the academic ranking variation has been documented to be quite sensitive to the age changes. For example, the rank of younger as well as advanced age scientists is marginally changing (increasing) stronger than the rank of middle-age researchers. Interestingly, researchers from mathematical and quantitative methods' fields possess the leading positions across all three discussed ranking systems, whereas scientists specializing in microeconomics, international economics and general economics are presented in the dominant ranking
+3
+
+part within HB, RP and GS respectively. The proposed approach as well as the findings of this research can be successfully used in practice (i) by selection committee in the recruitment process at universities (economic fields), (ii) as a unique tool in decion making related to the allocation of research funds, (iii) for collaborative purposes and grant proposal applications, etc. Our calculated HB Common Score finally can be used for a simultaneous comparison of candidates' profiles from business (BWL) and economic sciences (VWL). The paper is structured as follows. The description of ranking systems and our data source is presented in Section 2. Section 3 describes the data and introduces the implementation of the predicting techniques. Section 4 discusses the HB, RP and GS comparison results and provides evidence on the impact of age and the research fields on ranking performance. Finally, Section 5 concludes.
+2 Academic Ranking Systems and Scales
+For our comparison purposes we choose three ranking systems, namely HB, RP and GS, that are mostly used in economic and business fields among the German speaking countries, such as Germany, Austria and Switzerland. In this paper we repeatedly use the terms ranking, rank and score. The first one represents the academic system or scale that deals with the selected researchers. Rank denotes the position of each individual within the ranking scheme, while the score denotes the number of points assigned to a particular person. The analysis was furthermore carried out using R and MATLAB. In order to enhance the transparency of this research, all the used programming codes are available on the web-based repository hosting service and collaboration platform GitHub (accessed 22 Apr 2016) and QuantNet (accessed 05 Mai 2016).
+4
+
+2.1 Handelsblatt
+The HB rankings provide the lists of the most active publishing researchers in business and economic fields in Germany, Austria and Switzerland, as well as German speaking researchers outside of these countries. The rankings have been developed by the Konjunkturforschungsstelle (KOF) of the ETH Zürich on behalf of HB and German Association for Social Policy (Verein für Sozialpolitik). For this purpose the publication data from several external databases, as well as the data from the Forschungsmonitoring (accessed 14 Oct 2015) are used. The HB ranking has an established reputation among the German speaking economists, since it influences decision making at universities regarding the distribution of funds, the recruitment process and performance evaluations, Schläpfer (2011).
+HB creates and publishes a journal ranking out of selected journals which are indexed in the The American Economic Association's electronic bibliography ­ EconLit, see Combes and Linnemer (2010). Every journal from the HB list receives a weight between 0.05 and 1, where a higher weight indicates a better rank. As reported by Gygli et al. (2014), the individual researcher's rank is built from the number of weighted publications in relevant journals divided by the number of coauthors.
+HB considers two fields: business sciences (BWL) and economics sciences (VWL). Within each field we analyze three sub-rankings from 2009 to 2015, namely the Researcher Life's Work (LW), Current Researchers (CR) and Researchers Under 40 (U40). This gives us a total of six BWL and VWL sub-rankings that are usually published once in two years. The CR ranking is based on the rated researchers' publications in predetermined journals over the last five years, whereas the U40 ranking considers all scientists younger than 40 years. The LW ranking, finally, takes all rated researchers publications from the HB journals list into account. It is worth noting that every researcher can be present either in VWL or in BWL rankings. Although inside each of these fields the person can belong to any ranking of LW, CR or U40 (the last only if additionally younger than 40).
+5
+
+It is interesting to trace the rank development over time in an orthogonal coordinate system, as well as to represent a high-dimensional data (up to four dimensions for VWL) of each year in the same scale, namely LW, CR or U40. This task may be performed using parallel coordinates plots, Härdle and Simar (2015), see Figures 1 and 3, for VWL and BWL, respectively. The coordinates representing a single year are drawn in parallel axes and the ranking scores of the selected researchers in various years are connected through the axes with straight lines. Each line represents rankings of a single person through the analyzed years. Red dashed lines denote the three quartiles (25%, 50% and 75%). All variables on the y-axis are scaled to maximum equal to one and minimum equal to zero. The maximal score of each year is shown on the upper x-axis, due to the dynamics of the maximal scores over time.
+
+One can promptly detect a positive trend of the LW and CR rankings for both fields, VWL and BWL. This tendency has been confirmed by the plotted quartiles as well as the maximum ranking score for each year. Outside the quartiles, one may identify outliers evident from the boxplots in Figures 2 (VWL) and 4 (BWL).
+
+28.41
+1
+
+29.00
+
+29.70
+
+10.91
+
+9.98
+
+8.21
+
+8.76
+
+1
+
+2.50 3.23 4.00 5.16
+1
+
+VWL
+
+0 2011
+
+2013
+
+2015
+
+0 2010 2011 2013 2015
+
+0 2010 2011 2013 2015
+
+LW CR U40
+
+Figure 1: Parallel coordinates plots for standardized scores (y-axis) of researchers within HB VWL sub-rankings from 2010 to 2015. Green lines represent scores of researchers with a specific ranking score for each year. Red dashed lines denote the three quartiles (25%, 50% and 75%). Upper x-axis numbers show the maximum ranking score for the corresponding year. Plotted are scores of researchers that are listed in all analyzed years.
+ARRpcphb
+
+For better understanding of a distributional spread the related data are summarized using boxplots in Figure 2 and Figure 4. By contrast, the LW boxplots for both VWL and BWL appear to have almost similar centers with a slight positive trend. The data
+6
+
+VWL
+
+30 20 10
+2011 2013 2015
+LW
+
+10 8 6 4 2
+2010 2011 2013 2015
+CR
+
+5
+4
+3
+2
+1 2010 2011 2013 2015
+U40
+
+Figure 2: Boxplots for ranking scores of researchers within HB VWL sub-rankings: LW
+
+(158 observations), CR (28) and U40 (16) from 2010 to 2015. The red lines denote the
+
+median, whereas the dotted lines display the mean.
+
+ARRboxhb
+
+27.97
+
+32.48
+
+33.80
+
+11.63
+
+9.11
+
+9.19 4.11
+
+7.10
+
+8.86
+
+111
+
+BWL
+
+0 2009
+
+2012
+
+2014
+
+0 2009
+
+2012
+
+2014
+
+0 2009
+
+2012
+
+2014
+
+LW CR U40
+
+Figure 3: Parallel coordinates plots for standardized scores (y-axis) of researchers within HB BWL sub-rankings from 2009 to 2014. Green lines represent scores of researchers with a specific ranking score for each year. Red dashed lines denote the three quartiles (25%, 50% and 75%). Upper x-axis numbers show the maximum ranking score for the corresponding year. Plotted are scores of researchers that are listed in all analyzed years.
+ARRpcphb
+
+BWL
+
+30 20 10
+2009 2012 2014
+LW
+
+10
+6
+2 2009 2012 2014
+CR
+
+8 6 4 2
+2009 2012 2014
+U40
+
+Figure 4: Boxplots for scores of researchers within HB BWL sub-rankings: LW (128
+
+observations), CR (37) and U40 (12) from 2009 to 2014. The red lines denote the median,
+
+whereas the dotted lines display the mean.
+
+ARRboxhb
+
+7
+
+of VWL U40 for 2015 seems to have larger variability than the other ones. The pairwise comparison of the LW, CR and U40 rankings from VWL with the corresponding ones from BWL indicates similar distribution. Almost all boxplots are skewed to the right, as the top whiskers, connected to the larger scores, are much longer than the bottom ones. Strikingly, the U40 scores improve significantly over time that indicates a distinct increase of young researchers' performance for the last several years. Also interesting is the slight increasing change of the BWL CR scores in 2009 ­ 2014.
+For the research in this paper we utilize VWL LW 2015 and BWL LW 2014 rankings, as they are the most recent ones and have the largest number of different considered researchers equal to 500. In order to perform the analyses of the research fields and researcher' age on the score, we have to eliminate the persons with missing observation, i.e. with no information on age or research fields. Thus, the age data is available for 458 persons, while 448 have information about the research area provided by HB.
+2.2 Research Papers in Economics
+The RP ranking system collects the bibliographic data of journal articles, books, working papers and other scientific media outlets. It contains around 2 million research items from more than 2300 journals and 4300 working paper series. Although the RP project offers a broad spectrum of services, in this paper we focus solely on author ranking that relies on data from more than 46 thousand registered researchers, see RePEc (accessed 22 Apr 2016).
+The main idea of RP author ranking is to monthly publish a list of top 5% of researchers based on a average rank score. For each author this score is calculated based on a two step procedure. Firstly the authors are individually ranked within each of the 36 separate sub-rankings, excluding the w-index, a special case of the h-index. Secondly, a harmonic mean of the individual ranks represents this average rank score. For convenience, all subrankings are listed in the Table 4 in Appendix. In contrast to HB and GS, one should
+8
+
+note that within the RP system the top-ranked scientists receive the smallest score and vice versa. For more details, we refer to Zimmermann (2013) and the corresponding RP webpage.
+Contrary to HB, all RP sub-rankings receive the same weight while providing the average rank score, although they per se may impose a weighting scheme. To boost the HB score, for instance, an author is considering the journal ranking list, whereas in order to improve the RP score, researchers have to work on other publication aspects, such as the number of citations, abstract views, etc. Since the HB ranks are available up to 2015 inclusive, the RP data have been collected for December 2015 for comparison purposes. The highdimensional structure of RP ranks is introduced with the help of parallel coordinates plot in Figure 24 in Appendix.
+2.3 Google Scholar
+Different from HB and RP, GS concentrates on citation data, Hamermesh (2015). For every researcher it provides information about the number of citations per paper, the total number of citations, as well as the values of the h-index and the i10-index. While calculating its metrics, as it is shown by Dilger and Müller (2011), GS takes all types of research publications into account. GS has a good coverage in social sciences, economics, finance and business administration, see also Harzing and Wal (2008), which makes it a desirable choice for our research purposes.
+For our comparison through ranking scales we use GS number of citations. The parallel coordinates plot in Figure 5 gives an insight on the development of citation count for selected researchers over time. The upper x-axis numbers denote the maximum number of citations across all researchers for the corresponding years. As it can be inferred from these values, the maximum number of citations increases steadily over time, as does the citation count of top scientists. The relative position of best researchers does not show any significant temporal change. We attribute the visible decrease in 2015 to the time lag
+9
+
+14286
+1
+
+15264
+
+15930
+
+17027
+
+17674
+
+20475
+
+21980
+
+19081
+
+Citations
+
+0 2008
+
+2009
+
+2010
+
+2011
+
+2012
+
+2013
+
+2014
+
+2015
+
+Figure 5: Parallel coordinates plot for standardized GS citations (y-axis) from 2008 to
+
+2015 for selected 1357 researchers. Upper x-axis numbers show the maximum number of
+
+citations for the corresponding year.
+
+ARRpcpgscit
+
+effect (time between publishing of the research work and its citing by other scientists).
+#104
+0.2
+
+Citations
+
+0.1
+
+0 2008 2009 2010 2011 2012 2013 2014 2015
+Figure 6: Enlarged boxplot for GS citations from 2008 to 2015 for selected 1357 researchers. The red lines denote the median, whereas the dotted lines represent the mean.
+AARRboxgscit
+A positive trend of the number of citations is observed over the years on the enlarged lower part of the boxplot in Figure 6. The medians are slightly increasing with similar distributions of citations for all years. The largest values in the sample are outliers and are depicted as blue circles. All GS boxplots indicate relatively small spread of data (interquartile range) that can be seen from the box lengths.
+10
+
+3 Data
+Based on the academic ranking systems introduced in the previous section, we present the database used in this paper and provide the corresponding summary statistics in Subsection 3.1 and in Subsection 3.2 the methodology for treatment of missing HB ranking data for the selected scientists.
+3.1 Data and Descriptive Statistics
+Our paper aims to compare ranking data from HB, RP and GS scales. Using information from one ranking system can be inadequate for comparison of individuals. The HB ranking, for example, does not account for the information about monographs, although in German speaking countries this art of publication remains quite popular, as discussed in Wohlrabe (2013). For researchers of advanced age thus a lower rank may be expected. As there exists a relatively strong correlation between HB and country-specific RP rankings, according to Wohlrabe (2011), it is reasonable to consider more ranking systems in performance evaluation.
+Our paper correspondingly considers HB (data from 2014 ­ 2015), RP (December 2015) and GS data (December 2015). In order to take into account both economic and business sciences, we select two main HB rankings with data available for 500 scientists: (i) the VWL LW in 2015 for 250 persons and (ii) BWL LW in 2014 for 250 persons. In December 2015, 2304 researchers have been listed in RP top 5% author ranking. From them, 1027 had a GS profile with corresponding GS scores. The detailed descriptive statistics is shown in Table 5, which is for convenience included in the Appendix.
+A more detailed view on the data merging results is depicted in the mosaic plot, Figure 7. Consider the 500 scientists in HB. There are 122 persons that have also a RP score, but not a GS profile. Similarly, 260 persons have a HB and GS, but no RP ranking data. Finally, there are 84 researchers for which the HB, RP and GS data are available.
+11
+
+HB
+No
+
+Yes
+
+Yes No Yes No
+GS
+
+10000
+
+500
+
+RP
+No
+
+260
+
+Yes
+
+2304 1027
+
+122 84
+
+Figure 7: Mosaic plot for the number of researchers, when merging of HB, RP and GS
+
+rankings takes place or not (Yes/No). The number of GS profiles is quite large and is
+
+here shown only figurative. Ranking data of researchers in 2015 (RP, GS and HB VWL
+
+LW) and 2014 (HB BWL LW) have been used.
+
+ARRmosage
+
+In our research it is convenient to utilize the data of these 84 scientists, if not specified differently.
+
+3.2 Predicting the Handelsblatt Common Score
+Recall from Section 2.1, there are 500 researchers that are included either in the VWL (250 persons) or the BWL (250 persons) ranking list. As it follows from the mosaic plot in Figure 7, 84 researchers have ranks in all three ranking systems (HB, RP and GS). A closer look at the data indicates that these 84 HB researchers belong either to VWL LW or to BWL LW rankings. By predicting and imputing the unobserved rankings, here the VWL LW scores can be compared with the BWL LW scores of researchers. For this purpose, we transform the HB sub-rankings into one unique rank, the so-called HB Common Score. For its computation we consider linear as well as quantile (median) regression.
+12
+
+3.2.1 Quantile Regression
+One can describe a relationship between two variables through a linear regression (LR) model, see, e.g., Härdle and Simar (2015)
+
+yi = 0 + 1xi + i, i = 1, . . . , n,
+
+(1)
+
+where 0 denotes the intercept and 1 depicts the regression line slope with i denoting the error term. Here n stands for the sample size, i.e., in our case the number of scientists. The response observation of individual i is denoted by yi, and xi is the i-th value of the regressor.
+Referring to Koenker and Bassett (1978) and Koenker and Hallock (2001), we introduce the quantile regression (QR) model related to the linear regression (1) as
+
+yi = 0() + 1()xi + (i), i = 1, . . . , n,
+
+(2)
+
+where   (0, 1) denotes the quantile level and the error i() has  -quantile zero. For instance, setting  = 0.5, results in median quantile regression.
+In the estimation of the linear regression model, the estimates of the unknown intercept and the slope parameter are found by least square minimization
+
+n
+0, 1 = arg min (yi - 0 - 1xi)2. 0,1 i=1
+
+(3)
+
+In median quantile regression the estimates of the parameters are obtained by the minimization of the sum of absolute residuals
+
+n
+
+0(0.5), 1(0.5)
+
+=
+
+arg
+
+min
+0(0.5) ,1(0.5)
+
+i=1
+
+|yi
+
+-
+
+0(0.5)
+
+-
+
+1(0.5)xi|.
+
+13
+
+(4)
+
+The linear model (1) defines the relation between dependent variable and regressors, as an average through the conditional mean function. On the contrary, the quantile regression (2) offers a broader perspective, since it models the conditional  -th quantile, providing the possibility to depict the interconnections at various points, see Koenker (2015) and Baum (2013). For instance, for  = 0.5 the conditional median function is resulting, a functional that is of bounded influence, i.e. robust w.r.t. outliers.
+The analysis of data with thick tail, non-normal errors may not only become challenging, but also biasing for the linear model, and indeed our data has many outliers. For the sake of brevity we refer to the figures presented. In summary, the quantile regression is robust in the presence of outliers and therefore we use median quantile regression for further analysis.
+
+3.2.2 Parameter Estimation and Estimation Quality
+Consider for convenience the top 100 VWL LW (yi) as well as the top 100 BWL LW (xi) scores, i = 1, . . . , 100, and then fit the equation (4). Denote the estimated model parameters by 0(0.5) and 1(0.5). Then the estimated HB Common Scores (VWL LW), using the analyzed n = 100 pairs (yi, xi), are found by
+
+yi = 0(0.5) + 1(0.5)xi, i = 1, . . . , 100
+
+(5)
+
+Empirical results show an excellent explanatory performance. Figure 8 includes the scatterplot with the imposed fitted median quantile regression line, as well as the Quantile­ Quantile (QQ) plot of the associated residuals versus the quantiles of the normal distribution. The fitted least squares regression line lies below the fitted quantile regression line. The least squares approach provides a prediction of mean VWL LW score given the average values of the BWL LW score. The quantile regression gives a forecast of the  -th quantile of VWL LW; in our case the median. Note that here the fit of least squares is
+
+14
+
+affected by the outliers, thus by relatively high and low scores.
+
+VWL LW Sample Quantiles of BWL LW
+
+30 q
+
+25 20 15 10 5
+
+q q qq q q qq q
+qqqqqq qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+
+q q
+
+q q
+
+5 10 15 20 25
+BWL LW
+
+30
+
+4 2 0 -2 -4 -6
+
+q q qqq qqq
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+
+q
+
+q
+
+q
+
+-8
+-10 q -3 -2 -1 0 1 2 3
+Theo. Quantiles from Normal Distr.
+
+Figure 8: Scatterplot and Quantile Regression Fit (left) of the HB on VWL LW vs BWL
+
+LW for a sample of 100 top researchers within these rankings. Superimposed on the
+
+plot is the 0.50 quantile regression line (solid blue) and the least squares estimate of
+
+the conditional mean function (dashed red line). The coefficient of determination of the
+
+median regression equals to 0.93. A QQ plot (right) of the same sample of data versus a
+
+normal distribution.
+
+ARRqrqqhb
+
+The estimation quality is illustrated by the QQ plot, where empirical quantiles from the quantile median regression function are depicted on y-axis and x-axis fits theoretical quantiles from a given distribution, as introduced in Ricci (2005). The QQ plot (right plot in Figure 8) includes the residuals from the quantile regression that are plotted against the theoretical quantiles of the normal distribution.
+The estimated parameters of the quantile regression analysis, summarized in Table 1, are used for the HB Common Score estimation. The goodness-of-fit results are presented in Table 2. The standard error (SE) of the estimates in Table 1 reflects a relatively low variability. The coefficient of determination from Table 2, as a goodness-of-fit measure, is equal to 0.93. This means that the variation of the VWL LW is quite convincingly explained by the quantile regression, i.e., there exist a strong dependence of VWL LW with respect to BWL LW. The quantile regression analysis consequently enables us to predict the HB Common Score for researches that have different HB scores.
+15
+
+Est. SE t p-value BWL LW 1(0.5) -0.28 0.21 -1.37 0.1725
+0(0.5) 1.07 0.04 27.71 0.0000 Table 1: Estimated regression model parameters (Est.) for rankings between VWL LW (dependent variable) and BWL LW (explanatory variable) for HB researchers. We provide the standard error of estimates (SE), the test statistic t for testing whether the null hypothesis that the true parameter equals 0 and the associated p-value.
+MSE r2 BWL LW 0.9976 0.9308 Table 2: Mean squared error (MSE) and coefficient of determination of the regression model for rankings between VWL LW (dependent variable) and BWL LW (explanatory variable) for HB researchers.
+The so-called HB Common Score is represented either by the existing VWL LW score or the predicted one. For 250 researchers of VWL LW their existing scores depict HB Common Scores. The remaining 250 VWL LW scores have been predicted from BWL LW and now represent the HB Common Score (HB CS). In total, 500 HB Common Scores are associated to the 500 researchers.
+4 Score Comparison
+As was implied in Section 3.2, the HB Common Score can be used for further comparison with other ranking scales in Section 4. In Subsection 4.1 we investigate the relations between HB, RP and GS. The influence of age on ranking scores is examined in Subsection 4.2, whereas Subsection 4.3 shows the results of research fields analysis.
+4.1 HB, RP and GS
+From now on when we write HB, RP or GS we mean HB Common Score, RP average rank score and GS citations, if it is not stated differently.
+16
+
+For visualizing the data distribution we produce histograms and corresponding boxplots in Figure 9 for HB, RP and GS.
+
+200 100 500
+100 50 250
+
+0 0
+
+qqqqqqqqqqqqqqq qqqq q q
+
+10 20
+HB
+
+30
+
+q
+
+0 0
+
+1
+RP
+
+2 x103
+
+0
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqq qq qqq qqqq qqq q q q q q
+012
+GGSS x105
+
+Figure 9: Histogram of HB (500 observations, Common Score), RP (2304, total score
+
+×103) and GS (1357, citations ×105) rankings for December 2015.
+
+ARRhismer
+
+The distributions of HB and GS scores of researchers are asymmetric, right-skewed and single-peaked. The heavy tails stretching away from the peaks indicate the presence of many outliers that fall outside the overall pattern, here associated with extreme values. We have a concentration of data in the left part and a long tail to the right. This represents the vast majority of scientists with lower ranks, with few persons possessing very high ranks. In the RP scores distribution, in contrast, one can identify multiple peaks close together, slight symmetry, but no apparent pattern. This can be explained by the structure of RP average rank score, as it is calculated from 36 another sub-rankings that was discussed in Section 2.2.
+The data seem to be centered for HB around 6.41 points, for RP at 1100 scores and for GS at 5332 citations, as depicted at the boxplots on the lower part of Figure 9. This implies that roughly half of ranks are given to the scientists possessing ranks less than the mentioned levels.
+The parallel coordinates plot in Figure 10 shows a moderate and positive dependence between HB, RP and GS scores. The RP is here rescaled in order to show all the best individuals as a maximum value on the upper scale. The three quartiles (25%, 50% and 75%) indicate a considerable number of outliers that influence the results. This can be
+17
+
+1
+
+Ranking Score
+
+0 HB RP GS
+
+Figure 10: Parallel coordinate plot for three variables (HB, RP and GS) on 84 researchers
+
+for December 2015. RP values are rescaled. Red lines denote the three quartiles (25%,
+
+50% and 75%).
+
+ARRpcpmer
+
+8 #104
+
+0 #103
+
+0 #103
+
+GS RP RP
+
+11 4
+
+22
+
+0 0 10 20 30
+HB
+
+0 4 8 0 10 20 30
+
+GS #104
+
+HB
+
+Figure 11: Scatterplots of HB, RP and GS rankings for 84 researchers in December 2015. The correlation equals to 0.44 for HB­GS plot, -0.64 for GS­RP and -0.46 for HB­RP.
+ARRscamer
+
+18
+
+confirmed, while removing the extreme scores from HB and GS. The result is shown in Figure 25 in Appendix.
+Figures 11 and 12 present two dimensional scatterplots and corresponding density estimate for pairs of HB and GS, RP and GS, as well as HB and RP. The contour lines indicate the height of the density. Some separate distributions could be identified in this two dimensional space, but they have visible overlappings.
+
+HB 2e-09 1e-09
+RP
+
+x103 6 4e-09
+6e-09
+3 8e-09 1e-08 1.1e-08
+0
+
+3e-09 4e-09
+
+-3
+-6 0
+
+3e-09 2e-09
+
+9e-09 7e-09
+5e-09
+
+2e-09
+
+0.5 1
+GS
+
+2e-09
+
+1e-09
+
+1.5 x104
+
+x103
+6 5e-09 7e-09
+3 19ee--0089
+
+1e-09 3e-09
+
+1e-09 4e-09
+
+8e-09
+
+0
+
+-3 -6
+
+1e-09
+
+6e-09 4e-09 2e-09
+0
+
+1
+
+GS
+
+2 x104
+
+1e-09 1e-09
+
+HB
+
+2e-07
+
+4e-07 2e-07
+
+6e-07
+
+2e-07 8e-07
+
+4e-07 6e-07 1e-06
+
+2e-07
+
+2e-07 2e-07 2e-07
+
+8e-07 8e-07 1e-06 6e-07 8e-07
+
+2e-07 4e-07
+2e-07 6e-07 2e-07
+2e-07
+
+1e-06 8e-07 4e-07
+
+6e-07 6e-07 4e-07
+
+x102 4 2 0 -2 -4
+012
+RP x103
+
+6e-07 4e-07 8e-07
+6e-07
+
+6e-07
+4e-07 4e-07
+
+2e-07 4e-07 6e-07
+
+8e-07 8e-07
+
+Figure 12: Contour plots of the kernel density of HB and GS (left), GS and RP (center),
+
+as well as HB and RP (right). The contour lines indicate the height of the density. Here
+
+the data of 84 researchers from 2015 is analyzed.
+
+ARRdenmer2d
+
+The relationship between HB, RP and GS scores is further analyzed with correlation matrix in Figure 13 for the full data frame consisting of 42 factors. Here we use the HB Common Score and also include the age of researchers as an additional factor. The descriptive statistics is introduced in Table 6 in Appendix.
+The correlation plot reveals that a lot of variables indicate a strong linear relationship. In particular, the correlation between GS citations and other variables varies mainly moderate to strong. The HB Common Score shows in the most cases moderate correlation. The visible clusters that characterize RP data corresponding to the groups of rankings introduced in Table 4. The negative correlation between RP average rank and other variables is due to the difference in scales, as explained in Section 2.2.
+One can notice that the RP and GS citations and h-index show a very strong correlation. These pairwise relations are additionally explored through the scatterplots and hexagon
+19
+
+rp_anb.works rp_dnb.works rp_between rp_nb.works rp_anb.pages rp_nb.pages hb_age_today rp_aabs.views gs_i_index rp_adownloads rp_abs.views rp_downloads gs_h_index rp_nep.cites hb_commonscore rp_h.index rp_sc.works rp_asc.works gs_total_cites rp_ncauthors rp_rcauthors rp_wsc.works rp_ad.cites rp_anb.cites rp_d.cites rp_nb.cites rp_awsc.works rp_sc.pages rp_adsc.cites rp_dsc.cites rp_asc.cites rp_sc.cites rp_wdsc.cites rp_awdsc.cites rp_wsc.pages rp_asc.pages rp_wsc.cites rp_awsc.cites rp_awsc.pages rp_close rp_students rp_average_rank
+
+rp_anb.works 100 94 56 84 60 61 41 49 64 30 37 28 43 33 26 22 17 21 28 6 5 -4 7 5 5 3 -13 0 -4 -5 -3 -7 -3 -3 -15 -13 -5 -8 -18 -53 -46 -48 rp_dnb.works 100 71 89 54 66 44 53 71 34 47 32 53 30 26 22 21 24 36 6 4 -3 13 13 8 9 -6 3 0 -2 3 -2 1 3 -9 -1 0 -2 -5 -64 -47 -51 rp_between 100 68 57 67 34 60 78 47 62 49 55 30 23 25 22 18 36 10 8 3 15 14 12 12 -2 5 2 1 -1 0 0 1 -4 5 -1 -2 -2 -73 -36 -48 rp_nb.works 100 44 65 22 59 76 39 60 43 65 37 24 41 44 36 42 20 18 21 20 18 23 22 7 22 7 10 6 9 13 8 12 8 9 3 15 -69 -37 -61 rp_anb.pages 100 89 53 64 56 51 56 51 33 42 62 38 26 22 30 31 30 7 22 28 25 25 7 22 14 14 14 14 10 10 15 15 11 7 6 -32 -18 -33 rp_nb.pages 100 32 70 72 59 71 65 55 51 49 46 41 31 41 31 29 18 33 32 34 31 10 32 18 20 12 17 18 16 22 22 15 9 15 -55 -30 -54 hb_age_today 100 35 40 21 23 15 31 8 48 28 22 30 27 18 20 13 16 23 11 18 25 7 11 8 19 15 5 9 1 1 16 16 1 -28 -41 -21 rp_aabs.views 100 68 93 90 90 59 33 40 49 46 52 42 36 35 31 44 42 38 34 33 21 30 25 25 24 22 25 17 15 18 22 16 -54 -45 -59 gs_i_index 100 54 71 59 90 47 38 66 61 52 67 47 45 39 43 46 45 48 32 30 28 32 30 31 30 26 21 17 30 27 11 -72 -47 -62 rp_adownloads 100 83 94 49 27 36 46 42 52 34 41 40 25 44 40 37 31 32 18 35 26 29 25 23 30 12 15 17 26 10 -44 -32 -53 rp_abs.views 100 92 69 39 38 60 50 44 50 45 42 35 47 44 48 43 27 26 32 35 30 31 32 30 31 20 26 28 18 -59 -26 -64 rp_downloads 100 58 35 43 56 52 50 41 43 41 36 48 45 44 37 32 31 38 34 31 30 30 32 24 26 21 27 16 -46 -31 -59 gs_h_index 100 54 36 81 70 58 78 62 60 51 59 61 63 64 42 45 46 51 48 49 50 46 39 34 48 46 26 -65 -50 -70 rp_nep.cites 100 36 60 46 45 57 69 67 36 56 54 57 55 27 37 49 51 43 45 50 48 28 38 44 40 18 -34 -27 -65 hb_commonscore 100 60 57 47 36 51 51 48 34 53 50 53 57 33 44 42 48 45 39 40 46 36 42 45 26 -19 -23 -39 rp_h.index 100 81 70 76 84 83 68 74 76 78 79 59 61 64 69 66 69 66 62 58 51 66 62 40 -45 -32 -77 rp_sc.works 100 90 60 73 72 92 60 63 63 66 83 66 57 61 57 61 60 56 60 48 61 58 42 -40 -39 -68 rp_asc.works 100 59 74 73 80 65 67 60 64 90 58 63 59 63 58 57 61 52 50 57 63 49 -38 -42 -68 gs_total_cites 100 75 73 53 85 89 87 91 47 64 80 83 84 85 82 80 58 61 84 82 52 -34 -32 -64 rp_ncauthors 100 100 69 78 81 82 83 67 59 77 81 80 82 80 77 57 53 80 78 45 -25 -9 -75 rp_rcauthors 100 69 76 79 80 82 68 59 76 80 80 82 79 77 57 53 80 79 46 -23 -8 -75 rp_wsc.works 100 57 62 61 64 91 66 58 64 62 66 64 60 69 48 67 64 50 -21 -24 -55 rp_ad.cites 100 97 96 93 51 68 96 93 90 88 91 95 63 66 85 88 55 -14 -15 -63 rp_anb.cites 100 95 97 57 67 94 92 95 93 90 92 63 66 90 93 57 -14 -14 -62 rp_d.cites 100 98 50 67 93 97 88 92 95 92 62 62 90 87 49 -17 -6 -62 rp_nb.cites 100 56 67 90 95 92 96 94 90 63 63 94 91 51 -18 -8 -61 rp_awsc.works 100 58 55 55 62 59 55 55 62 51 60 63 57 -20 -27 -55 rp_sc.pages 100 70 71 68 70 71 70 95 91 71 68 82 -13 -26 -51 rp_adsc.cites 100 96 95 92 96 100 64 70 91 94 60 2 -13 -55 rp_dsc.cites 100 94 97 100 97 67 67 96 93 56 -3 -8 -55 rp_asc.cites 100 97 93 96 67 70 96 100 64 -3 -14 -56 rp_sc.cites 100 97 93 68 66 100 97 59 -6 -6 -55 rp_wdsc.cites 100 97 67 66 97 94 56 -3 -9 -55 rp_awdsc.cites 100 66 70 93 95 61 2 -13 -55 rp_wsc.pages 100 88 68 67 90 -8 -16 -47 rp_asc.pages 100 65 68 92 1 -33 -42 rp_wsc.cites 100 97 59 -5 -8 -54 rp_awsc.cites 100 64 -1 -11 -55 rp_awsc.pages 100 -4 -25 -43 rp_close 100 38 52 rp_students 100 32 rp_average_rank 100
+
+1 0.8 0.6 0.4 0.2 0 -0.2 -0.4 -0.6 -0.8 -1
+
+Figure 13: Correlation matrix of 42 factors of HB, RP and GS for 84 researchers in
+
+December 2015. The color depicts the strength of correlation: from positive (blue) to
+
+negative (red).
+
+ARRcormer
+
+20
+
+GS GS GS GS
+
+x104 3
+
+2
+
+1
+
+0 0
+
+12
+RP
+
+3
+
+2
+
+1
+
+3 x103
+
+0 0
+
+12
+RP
+
+Counts 322 285 250 218 188 160 134 111 90 71 54 40 27 17 10 4 1
+3
+
+Figure 14: Scatterplot (left) and hexagon plot (right) of RP and GS citations for 1024
+
+researchers in December 2015. Correlation coefficient equals to 0.70.
+
+ARRhexcit
+
+150
+100
+50
+0 20
+
+40
+RP
+
+60
+
+150
+100
+50
+0 80 20
+
+40
+RP
+
+60
+
+Counts 49 44 39 35 30 26 23 19 16 13 11 8 6 5 3 2 1
+80
+
+Figure 15: Scatterplot (left) and hexagon plot (right) of RP and GS h-index for 928
+
+researchers equals to 2015. Correlation coefficient equals to 0.68.
+
+ARRhexhin
+
+21
+
+plots on the Figures 14 and 15 correspondingly. The Figures indicate a positive linear relationship between the two. However, there are some outliers that do not follow the trend.
+
+4.2 Influence of Age
+
+Our research question is to study whether the age influences the rankings of scientists. As the age data is available only for 458 persons from HB, we also reduce the full datasets within RP and GS to the top 458 observations, see Section 2. The scatterplots, hexagonplots and boxplots in Figures 16 ­ 20 show the relations between age and ranking scores in a more detailed way.
+
+30 25 20 15 10
+5 0
+30 40 50 60 70 80 90
+Age
+
+x102 0
+2
+4
+30 40 50 60 70 80 90
+Age
+
+x105
+2.0
+1.5
+1.0
+0.5
+0.0 30 40 50 60 70 80 90
+Age
+
+Figure 16: Scatterplots for age and ranking scores of HB, RP and GS for Top-458 scientists
+
+within each ranking system for December 2015.
+
+ARRscaage
+
+HB HB RP RP GS GS
+
+Counts 9
+30 8 7 6 5
+20 4 3 3
+10 2 1 1
+30 40 50 60 70 80 90
+Age
+
+0 Counts 6
+5 23
+2
+42 1
+30 40 50 60 70 80 90
+Age
+
+Counts
+
+25
+
+20 21
+
+18
+
+15 14 12
+
+10
+
+9 7
+
+5 53
+
+2
+
+01
+
+30 40 50 60 70 80 90
+
+Age
+
+Figure 17: Hexagon plots for age and ranking scores of HB, RP and GS for Top-458
+
+scientists within each ranking system for December 2015.
+
+ARRhexage
+
+From Figures 16 ­ 17 one can make several observations. First, there exists a positive 22
+
+relationship between age and HB ranks. For RP it is difficult to identify any pattern of data points. Here it is important to note that some RP rankings are standardized with respect to age, see Table 4 in Appendix. At the same time it seems to be a very weak association between age and GS.
+For research aggregate we divide ranking scores of scientists into nine groups with respect to their age with the step of five years, starting from persons younger than 36 years old and summing up with ones older that 70 years. The overall patterns of response for the age groups are described on the boxplots in Figures 18 ­ 20.
+The notable high box length of ranks from RP age groups gives an indication of the high sample variability. On the other hand, the comparatively short boxplots from GS age groups indicate that GS researchers have only slight difference on the introduced scale. In the same way, the boxplots of HB are comparatively tall. This suggests that top 458 of HB scientists have relatively different ranking scores. Almost all age groups of HB moreover indicate the presence of heavy tails in the direction of higher ranks, as in some cases the length of the whiskers exceeds the length of the boxes.
+
+35
+
+30
+
+25
+
+HB
+
+20
+
+15
+
+10
+
+5
+
+<36 36-40 41-45 46-50 51-55 56-60 61-65 66-70 70>
+Age
+
+Figure 18: Boxplots for age and ranking scores of HB for Top-458 scientists within each
+
+ranking system for December 2015. The red lines denote the median, whereas the dotted
+
+lines introduce the mean.
+
+ARRboxage
+
+A further analysis enables us to summarize, that ranks of younger researchers are increas23
+
+GS
+RP
+
+0
+200
+400
+<36 36-40 41-45 46-50 51-55 56-60 61-65 66-70 70>
+Age Figure 19: Boxplots for age and ranking scores of RP for Top-458 scientists within each ranking system for December 2015. The red lines denote the median, whereas the dotted lines introduce the mean. For comparison purposes the scale is inverted. ARRboxage
+
+#105
+
+2
+
+1.5
+
+1
+
+0.5
+
+0 36-40 41-45 46-50 51-55 56-60 61-65 66-70 70>
+Age
+
+Figure 20: Boxplots for age and ranking scores of GS for Top-458 scientists within each
+
+ranking system for December 2015. The red lines denote the median, whereas the dotted
+
+lines introduce the mean.
+
+ARRboxage
+
+24
+
+ing, whereas the middle-age group has relative consistency or slight decline and then the next growth, now between scientists of advanced age, could be observed. One of the possible explanations of this observation could originate from a scientific path in academia. In order to get a position in a university, young researchers are motivated to write more papers and produce other significant outputs. While the middle-age researchers, who usually have stable position, are more concentrated on teaching, long-term projects and other duties. The slight increase of ranking scores of older persons could be explained by experience in writing papers, acknowledgment among scientific community, enlarged research network they are working within and other reasons. As a result, this lead to a higher number of works, citations, indexes, number of papers downloads, etc.
+
+The relative comparison of three academic rankings through the age groups in a fourdimensional plot (HB, RP and GS scores and age) is represented by a mosaic plot in Figure 21. We consider three academic rankings with the Top-458 researchers from each one. Here HB, RP and GS scores are shown by green, blue and red colors respectively. The width of columns represents the number of persons within each age group, whereas the colored dot represent zero.
+
+<36-40 41-45
+q
+
+46-50
+
+Age
+
+51-55
+
+56-60
+
+61-65
+
+66-70
+
+70>
+
+HB GS
+
+Ranking
+
+RP
+
+Figure 21: Mosaic plot of HB (green), RP (blue) and GS (red) scores for Top-458 scientists
+
+within each ranking system for December 2015. The width of the columns represents the
+
+number of persons within each age group.
+
+ARRmosagegr
+
+This plot shows that the majority of younger extraordinary researchers belong to the HB 25
+
+group. Among middle-aged ones the slight domination of GS over RP system is visible. At the same time the scientists of advanced age are mostly located in RP and partly in GS.
+4.3 Research Fields
+The field of research of every scientist provided by HB and GS enable us to enrich our data set by adding this factor and to perform a comparative analysis. From 500 researchers in HB only 448 persons have information about subject fields. This constrain forces to reduce the GS dataset, by taking 448 best ones, thus enabling the comparison. From RP we also select top 448 persons, though from merged data with GS or HB, see Figure 7. As a result, the RP scientists that originally do not have any information about areas of research receive these from their GS profiles or HB ranking system. Therefore, we receive a dataset that contains best 448 scientists within each of the discussed ranking system with their main research field.
+In order to analyze the influence of research area on ranking scores, all researchers were divided into 19 groups of subject fields according to the well-known in economic sciences Journal of Economic Literature (JEL) classification, see JEL (accessed 22 Apr 2016). The explanation of JEL codes is given in Table 8 in Appendix.
+A B C D E F G H I J K L M N O P Q R Z Total GS 86 3 53 32 43 67 46 13 5 22 0 13 12 0 29 0 13 9 2 448 HB 1 2 49 73 49 39 59 1 6 10 3 48 67 1 24 0 8 4 4 448 RP 72 2 50 41 68 73 42 14 4 26 1 13 2 1 22 1 7 6 3 448
+Table 3: Frequency Table for JEL codes and ranking scores of HB, RP and GS for Top-448 scientists within each ranking system for December 2015.
+A distribution of scores of researchers within research areas (JEL codes) and corresponding ranking systems can be clearly seen on the comparative histograms in Figure 22. The generated from our data set frequency Table 3, as well as the corresponding percentage values on the Table 9, show that more than 16% of selected HB researches come from mi-
+26
+
+croeconomics. They are followed by the scientists from business field, financial economics, mathematical and quantitative methods, as well as macroeconomics and monetary economics, with over 10% within each research area.
+
+RP HB GS
+
+80 60 40 20
+0 A B C D E F GH I J K LMNO P Q R Z
+
+60 40 20
+0 A B C D E F GH I J K LMNO P Q R Z
+
+60 40 20
+0 A B C D E F GH I J K LMNO P Q R Z
+
+Figure 22: Comparative histogram for JEL codes and ranking scores of GS (upper/red),
+
+HB (middle/green) and RP (lower/blue) for Top-458 scientists within each ranking system
+
+for December 2015.
+
+ARRmossub
+
+A distinct difference is introduced by RP, where international economics, as well as general economics and teaching hold the leading positions with over 16% each one. These are accompanied by macroeconomics and monetary economics along with mathematical and quantitative methods with over 15% and 11% respectively. In the same manner the dominant research area of GS is presented by general economics and teaching with more than 19% of researchers. Besides, international economics produces above 14% of GS, while mathematical and quantitative methods, as well as financial economics, make 11% and 10% correspondingly. However, the mathematical and quantitative methods is the only research field among compared ones which has over 10% across all three ranking systems.
+To sum up, we present a mosaic plot in Figure 23 that gives us an advantage of relative simultaneous comparison of ranking systems through the subject fields in a four dimen-
+27
+
+ABC D E
+
+JELcodes
+F G H I J K L M N O PQ RZ
+q qq
+
+Ranking
+RP HB GS
+
+Figure 23: Mosaic plot of JEL codes and ranking scores of GS (upper), HB (middle) and
+
+RP (lower) for Top-458 scientists within each ranking system for December 2015. The
+
+width of the columns represents the number of persons within each research area and
+
+dots represent zero.
+
+ARRmossub
+
+sional space. Width of columns, illustrating the aggregated amount of people within each research area, brings us to the following important conclusions. Since F column is a widest one, the largest number of researchers possessing the leading positions among HB, RP and GS fulfill their research in international economics. Such fields as macroeconomics and monetary economics, general economics and teaching, mathematical and quantitative methods, microeconomics and financial economics illustrate a little difference. On the contrary the presence of scientists from economic systems, economic history, as well as law and economics in the top positions of discussed ranking systems is rather uncommon.
+
+28
+
+5 Conclusions
+Summing up the results, it can be concluded that the quantile median regression model successfully predicts the missing ranking data in HB. It has been demonstrated that there exist different correlation structures between underlying sub-rankings of HB, RP and GS. Moreover, it was shown that there is a considerable improvement of young researchers within HB for the last several years. The results obtained show that the academic ranking variation is sensitive to the age. Particularly, the rank of younger and advanced-age scientists is marginally changing (increasing) stronger than that of middle-age researchers. In addition, individuals from such research field as mathematical and quantitative methods possess the leading positions across all three discussed ranking systems. Whereas, persons from microeconomics, international economics, as well as general economics and teaching introduce the dominant part within HB, RP and GS respectively. Summarizing this contribution we have shown that the comparison of academic ranking scales reveals hidden information across and inside the ranking systems.
+29
+
+References
+Baum, C. (2013). Quantile regression, Lecture notes on Applied Econometrics, Boston College .
+Combes, P.-P. and Linnemer, L. (2010). Inferring Missing Citations - A Quantitative Multi-Criteria Ranking of all Journals in Economics, HAL-SHS (00520325).
+Dilger, A. and Müller, H. (2011). Ein Forschungsleistungsranking auf der Grundlage von Google Score, Diskussionpapier des Instituts für Organisationsökonomik .
+Fitzenberger, B. and Wilke, R. (2005). Using Quantile Regression for Duration Analysis, ZEW, Mannheim (Discussion Paper, No. 05-65).
+Forschungsmonitoring, P. (accessed 14 Oct 2015). Verein für Socialpolitik, http: //htmldb-hosting.net/pls/htmldb/f?p=193:4:3942442368081138::NO:::.
+GitHub (accessed 22 Apr 2016). ARR Project, http://www.github.com/QuantLet/ARR.
+Guo, M., Zhou, L., Huang, J. and Härdle, W. (2013). Functional data analysis of generalized regression quantiles, Statistics and Computing 25(2): 189­202.
+Gygli, S., Müller-Dröge, H. and Schläpfer, J. (2014). HB BWL-Ranking 2014 - Methodik und Zeitschriftengewichte.
+Hamermesh, D. (2015). Citations in Economics: Measurement, Uses and Impacts, NBER Working Paper Nov 2015(21754).
+Härdle, W. and Simar, L. (2015). Applied Multivariate Statistical Analysis, 4th ed., Springer Verlag, Berlin Heidelberg, ISBN 978-3-662-45170-0, e-ISBN 978-3-662-451717 (580 p).
+Härdle, W. and Song, S. (2010). Confidence bands in quantile regression, Econometric Theory 26(4): 1180­1200.
+Harzing, A. and Wal, R. (2008). Google Scholar as a new source for citation analysis, Ethics in science and environmental politics 8: 61­73. 30
+
+JEL (accessed 22 Apr 2016). JEL (Journal of Economic Literature) Classification System, https://www.aeaweb.org/econlit/jelCodes.php?view=jel.
+Koenker, R. (2005). Quantile Regression, Quantile Regression, Econometric Society Monograph, Cambridge University Press, Cambridge, ISBN 0-521-84573-4, ISBN 0521-60827-9.
+Koenker, R. (2015). Quantile Regression in R: A Vignette, www.cran.r-project.org (Version: March 25, 2015) .
+Koenker, R. and Bassett, G. (1978). Regression Quantiles, Econometrica 46(1): 33­50.
+Koenker, R. and Hallock, K. (2001). Quantile Regression, Journal of Economic Perspectives 15(4): 143­156.
+Oberschelp, A. and Jaeger, M. (2010). Leistungsvergleiche als Instrument der Hochschulsteuerung: Ansätze, organisatorischer Kontext und Unterstützung des Steuerungshandelns, Bibliotheksdienst 49(5): 475­494.
+QuantNet (accessed 05 Mai 2016). QuantNet, http://quantlet.de/d3/ia/.
+RePEc (accessed 22 Apr 2016). Research Papers in Economics, http://repec.org.
+Ricci, V. (2005). Fitting Distributions wih R, Release 0.4 ­ 21 February 2005 .
+Schläpfer, F. (2011). Reformbedarf bei der Rating-Agentur für Ökonomen, Neue Züricher Zeitung 198: 23.
+Schläpfer, F. and Schneider, F. (2010). Messung der akademischen Forschungsleistung in den Wirtschaftswissenschaften: Reputation vs. Zitierhaufigkeiten, Perspektiven der Wirtschaftspolitik 11(4): 325­339.
+Spokoiny, V., Wang, W. and Härdle, W. (2013). Local quantile regression, Journal of Statistical Planning and Inference 143(7): 1109­1129.
+Wohlrabe, K. (2011). Das Handelsblatt- und das RePEc-Ranking im Vergleich, ifo Schnelldienst 17: 66­71. 31
+
+Wohlrabe, K. (2013). Einige Anmerkungen zum Handelsblatt-Ranking 2013, ifo Schnelldienst 23: 79­83.
+Zimmermann, C. (2013). Academic Rankings with RePEc, Econometrics 1(3): 249­280.
+32
+
+6 Appendix
+
+Criteria Number of Works 1 NbWorks 2 DNbWorks 3 ANbWorks 4 ScWorks 5 AScWorks
+6 WScWorks 7 AWScWorks
+Citation Counts 8 NbCites 9 ANbCites 10 ScCites 11 AScCites
+12 WScCites 13 AWScCites
+14 DCites 15 ADCites
+16 DScCites 17 ADScCites
+18 WDScCites 19 AWDScCites
+20 HIndex 21 WIndex (-) 22 NCAuthors 23 RCAuthors
+Journal Page Counts 24 NbPages 25 ScPages 26 WSCPages 27 ANbPages
+28 AScPages 29 AWScPages
+Journal Page Counts 30 AbsViews 31 AAbsViews 32 Downloads 33 ADownloads
+Co-Authorship Networks 34 Close
+35 Betweenn
+Others 36 Students
+37 NEPCites
+
+Description
+Simple Count Count of distinct Works Count of distinct Works divided by number of authors on each work Count with simple impact factor weights Count with simple impact factor weights divided by number of authors on each work Count with recursive impact factor weights Count with recursive impact factor weights divided by number of authors on each work
+Simple citation count Citation count divided by number of authors on each work Citation count with simple impact factor weights Citation count with simple impact factor weights divided by number of authors on each work Citation count with recursive impact factor weights Citation count with recursive impact factor weights divided by number of authors on each work Citation count discounted by age Citation count discounted by age and divided by number of authors on each work Citation count with discounted impact factor weights Citation count with discounted impact factor weights divided by number of authors on each work Citation count with recursive discounted impact factor weights Citation count with recursive discounted factor weights divided by number of authors on each work h-index Wu-index Count of citing registered authors Rank weighted count of citing registered authors
+Simple page count Page count divided by number of authors on each work Page count with simple impact factor weights Page count with simple impact factor weights divided by number of authors on each work Page count with recursive impact factor weights Page count with recursive impact factor weights divided by number of authors on each work
+Total abstract views in the past 12 months Total abstract views per author in the past 12 months Total downloads in the past 12 months Total downloads per author in the past 12 months
+The average number of degrees of separation through co-authorship with all other registered authors The frequency the author appears on the shortest path through coauthorship between any two other registered authors
+Average rank across all other criteria for the set of graduates registered in RePEc and listed in RePEc Genealogy Citation breadth across fields
+
+Table 4: Subrankings of RP. W-index is not taken into account while calculating the average rank score.
+
+33
+
+Count Mean St.dev Median Min
+
+Max
+
+HB
+
+VWL2015 LW
+
+250 7.6 3.8 6.2 4.3 29.7
+
+VWL2015 CR
+
+100 3.1 1.1 2.7 2.2
+
+8.8
+
+VWL2015 U40
+
+100 2.7 0.9 2.4 1.8
+
+6.2
+
+BWL2014 LW
+
+250 7.4 3.6 6.4 4.3 33.8
+
+BWL2014 CR
+
+100 4.3 1.3 3.9 3.0
+
+9.2
+
+BWL2014 U40
+
+100 3.7 1.5 3.3 2.1
+
+9.3
+
+RP
+
+Average Rank Score 2304 1107.0 631.7 1100.0 2.8 2194.0
+
+GS
+
+Total Cites
+
+1438 10190.0 19831.2 5332.0 0.0 234200.0
+
+Table 5: Descriptive statistics for HB, RP and GS values. Count means the number of observations, mean is the average of values, St.dev - standard deviation, max and min maximum and minimum values.
+
+Code A B C D E F G H I J K L M
+N O P Q R Y Z
+
+Research field General Economics and Teaching History of Economic Thought, Methodology, and Heterodox Approaches Mathematical and Quantitative Methods Microeconomics Macroeconomics and Monetary Economics International Economics Financial Economics Public Economics Health, Education, and Welfare Labor and Demographic Economics Law and Economics Industrial Organization Business Administration and Business Economics / Marketing / Accounting / Personnel Economics Economic History Economic Development, Innovation, Technological Change, and Growth Economic Systems Agricultural and Natural Resource Economics / Environmental and Ecological Economics Urban, Rural, Regional, Real Estate, and Transportation Economics Miscellaneous Categories Other Special Topics
+
+Table 8: JEL Classification System
+
+34
+
+1
+
+Rank
+
+0
+
+rank aabs.views abs.views
+ad.cites adown.loads
+adsc.cites anb.cites anb.pages anb.works asc.cites asc.pages asc.works awdsc.cites awsc.cites awsc.pages awsc.works bet.weenn
+close d.cites dnb.works down.loads dsc.cites h.index nb.cites nb.pages nb.works ncau.thors nep.cites rcau.thors sc.cites sc.pages sc.works stu.dents wdsc.cites wsc.cites wsc.pages wsc.works
+
+Figure 24: Parallel coordinates plot for RP average rank score and ranks from 36 sub-
+
+rankings for 2304 researchers in December 2015. The red dashed lines denote three
+
+quartiles (25%, 50% and 75%) that are shown for all individuals.
+
+ARRpcprp
+
+1
+
+Ranking Score
+
+0 HB RP GS
+Figure 25: Parallel coordinate plot for three variables (HB, RP and GS) on 82 researchers. Two outliers from HB and GS are removed. Red lines denote the three quartiles (25%, 50% and 75%). RP values are rescaled.
+35
+
+HB Age Common Score
+RP Average Rank Score Aabs-Views Score Abs-Views Score Ad-Cites Score Adownloads Score Adsc-Cites Score Anb-Cites Score Anb-Pages Score Anb-Works Score Asc-Cites Score Asc-Pages Score Asc-Works Score Awdsc-Cites Score Awsc-Cites Score Awsc-Pages Score Awsc-Works Score Between Score Close Score D-Cites Score Dnb-Works Score Downloads Score Dsc-Cites Score H-Index Score Nb-Cites Score Nb-Pages Score Nb-Works Score Ncauthors Score Nep-Cites Score Rcauthors Score Sc-Cites Score Sc-Pages Score Sc-Works Score Students Score Wdsc-Cites Score Wsc-Cites Score Wsc-Pages Score Wsc-Works Score
+GS Total Cites H Index I Index
+
+Count
+936 500
+2304 1435 1529 1922 1410 1874 1936 1415 1319 1890 1680 1823 1821 1835 1614 1718 1148 1223 1889 1343 1444 1840 2017 1951 1521 1456 1898 1764 1897 1889 1762 1884 1093 1787 1834 1681 1791
+1438 1438 1438
+
+Mean
+47.3 7.6
+1107.0 2640.0 4447.0 299.6 738.6 852.7 1321.0 877.2 109.3 13320.0 13610.0 1381.0 180.0 685.0 682.8
+79.8 10.8 4.6 500.8 128.5 1273.0 1444.0 19.4 2113.0 1211.0 185.8 1113.0 82.1 854.7 21610.0 19410.0 2025.0 814.1 306.5 1114.0 980.2 116.9
+10190.0 32.9 66.0
+
+St.dev
+9.5 3.8
+631.7 2544.7 3494.7 304.0 685.9 880.0 1432.8 430.8
+58.6 15007.4 9677.1 1010.8
+186.9 785.3 500.7 63.1
+9.3 0.2 494.8 66.1 992.3 1468.3 7.4 2275.9 581.4 94.1 844.1 6.9 633.8 24319.3 13171.2 1402.1 575.2 313.3 1271.3 678.3 90.2
+19831.2 20.2 69.4
+
+Median
+45.0 6.4
+1100.0 1861.0 3323.0 200.4 520.6 570.2 856.7 754.3
+92.3 8274.0 10600.0 1046.0 118.8 420.1 524.3
+58.4 7.9 4.6 342.8 111.0 950.0 956.3 17.0 1385.0 1046.0 161.0 834.0 82.3 645.2 13500.0 15450.0 1567.0 711.2 201.6 697.3 782.2 87.7
+5332.0 29.0 46.0
+
+Min
+29.0 4.3
+2.8 1052.0 1860.0
+98.9 287.0 244.3 404.5 463.5 55.8 3405.0 5414.0 555.8 48.7 162.3 250.8 28.3
+3.6 4.0 162.5 68.0 511.0 418.9 12.0 640.0 658.0 97.0 425.0 69.2 326.8 5548.0 8056.0 851.8 4.3 83.1 265.4 377.1 43.8
+0.0 0.0 0.0
+
+Max
+75.0 35.8
+2194.0 36870.0 44760.0 3378.0 7766.0 10300.0 16800.0 4486.0
+903.7 162100.0 115800.0 10210.0
+2081.0 8311.0 5334.0 592.5
+94.7 4.8 5878.0 1091.0 10950.0 17640.0 78.0 29620.0 6722.0 1288.0 7787.0 93.9 5722.0 313000.0 167500.0 14870.0 2202.0 3580.0 15220.0 7587.0 1007.0
+234200.0 177.0 814.0
+
+Table 6: Descriptive statistics for 42 factors of HB, RP and GS values. Count means the number of observations, mean is the average of values, St.dev - standard deviation, max and min - maximum and minimum values. 36
+
+HB <36 36-40 41-45 46-50 51-55 56-60 61-65 66-70 >70
+RP <36 36-40 41-45 46-50 51-55 56-60 61-65 66-70 >70
+GS <36 36-40 41-45 46-50 51-55 56-60 61-65 66-70 >70
+
+Count
+4 33 97 117 90 53 39 18 7
+1 2 15 30 72 94 90 66 88
+0 5 26 52 86 101 74 55 59
+
+Mean
+6.3 5.7 6.8 7.2 7.9 9.3 9.4 10.0 12.2
+341.8 372.4 276.7 291.2 291.8 247.1 205.7 219.5 214.8
+­ 10240.0 12600.0 12860.0 18780.0 22640.0 25360.0 22680.0 51730.0
+
+St.dev
+1.6 1.5 2.8 2.4 3.9 4.0 6.2 5.3 8.5
+­ 40.8 117.8 140.0 123.0 142.5 137.9 129.3 147.2
+­ 1182.5 4745.0 5179.4 22906.8 20020.8 22591.8 17533.9 61926.0
+
+Median
+5.8 5.2 5.9 6.7 6.7 8.1 6.9 7.2 9.0
+341.8 372.4 306.1 304.8 305.0 240.1 184.4 211.1 189.1
+­ 10840.0 11200.0 11070.0 13460.0 14340.0 17290.0 17740.0 20680.0
+
+Min
+5.0 4.3 4.4 4.4 4.3 4.6 4.4 5.0 5.0
+341.8 343.6 89.7
+5.2 2.8 11.4 12.7 9.0 3.4
+­ 8758.0 8075.0 7924.0 8012.0 7932.0 8190.0 7931.0 8022.0
+
+Max
+8.6 9.8 22.8 15.6 27.1 22.4 35.8 23.6 29.7
+341.8 401.3 473.3 479.7 479.5 487.5 475.2 452.8 489.0
+­ 11470.0 28400.0 29670.0 212800.0 127300.0 161000.0 92730.0 234200.0
+
+Table 7: Descriptive statistics for HB, RP and GS values through age groups. Count means the number of observations, mean is the average of values, St.dev - standard deviation, max and min - maximum and minimum values.
+
+37
+
+ABCD E FGH I J HB 0.22 0.45 10.94 16.29 10.94 8.71 13.17 0.22 1.34 2.23 RP 16.07 0.45 11.16 9.15 15.18 16.29 9.38 3.12 0.89 5.80 GS 19.20 0.67 11.83 7.14 9.60 14.96 10.27 2.90 1.12 4.91
+K L M N O P Q R Z Total HB 0.67 10.71 14.96 0.22 5.36 0.00 1.79 0.89 0.89 100.00 RP 0.22 2.90 0.45 0.22 4.91 0.22 1.56 1.34 0.67 100.00 GS 0.00 2.90 2.68 0.00 6.47 0.00 2.90 2.01 0.45 100.00
+Table 9: The percentage values for the frequency Table 3 for JEL codes and ranking scores of HB, RP and GS for Top-448 scientists within each ranking system for December 2015.
+38
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001
+002 003
+004 005 006
+007 008 009 010
+011 012
+013 014
+015 016 017
+018 019 020
+
+"Downside risk and stock returns: An empirical analysis of the long-run and short-run dynamics from the G-7 Countries" by Cathy Yi-Hsuan Chen, Thomas C. Chiang and Wolfgang Karl Härdle, January 2016. "Uncertainty and Employment Dynamics in the Euro Area and the US" by Aleksei Netsunajev and Katharina Glass, January 2016. "College Admissions with Entrance Exams: Centralized versus Decentralized" by Isa E. Hafalir, Rustamdjan Hakimov, Dorothea Kübler and Morimitsu Kurino, January 2016. "Leveraged ETF options implied volatility paradox: a statistical study" by Wolfgang Karl Härdle, Sergey Nasekin and Zhiwu Hong, February 2016. "The German Labor Market Miracle, 2003 -2015: An Assessment" by Michael C. Burda, February 2016. "What Derives the Bond Portfolio Value-at-Risk: Information Roles of Macroeconomic and Financial Stress Factors" by Anthony H. Tu and Cathy Yi-Hsuan Chen, February 2016. "Budget-neutral fiscal rules targeting inflation differentials" by Maren Brede, February 2016. "Measuring the benefit from reducing income inequality in terms of GDP" by Simon Voigts, February 2016. "Solving DSGE Portfolio Choice Models with Asymmetric Countries" by Grzegorz R. Dlugoszek, February 2016. "No Role for the Hartz Reforms? Demand and Supply Factors in the German Labor Market, 1993-2014" by Michael C. Burda and Stefanie Seele, February 2016. "Cognitive Load Increases Risk Aversion" by Holger Gerhardt, Guido P. Biele, Hauke R. Heekeren, and Harald Uhlig, March 2016. "Neighborhood Effects in Wind Farm Performance: An Econometric Approach" by Matthias Ritter, Simone Pieralli and Martin Odening, March 2016. "The importance of time-varying parameters in new Keynesian models with zero lower bound" by Julien Albertini and Hong Lan, March 2016. "Aggregate Employment, Job Polarization and Inequalities: A Transatlantic Perspective" by Julien Albertini and Jean Olivier Hairault, March 2016. "The Anchoring of Inflation Expectations in the Short and in the Long Run" by Dieter Nautz, Aleksei Netsunajev and Till Strohsal, March 2016. "Irrational Exuberance and Herding in Financial Markets" by Christopher Boortz, March 2016. "Calculating Joint Confidence Bands for Impulse Response Functions using Highest Density Regions" by Helmut Lütkepohl, Anna StaszewskaBystrova and Peter Winker, March 2016. "Factorisable Sparse Tail Event Curves with Expectiles" by Wolfgang K. Härdle, Chen Huang and Shih-Kang Chao, March 2016. "International dynamics of inflation expectations" by Aleksei Netsunajev and Lars Winkelmann, May 2016. "Academic Ranking Scales in Economics: Prediction and Imdputation" by Alona Zharova, Andrija Mihoci and Wolfgang Karl Härdle, May 2016.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+

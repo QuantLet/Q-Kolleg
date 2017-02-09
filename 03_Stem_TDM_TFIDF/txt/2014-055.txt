@@ -1,0 +1,2886 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2014-055
+Estimating the Spot Covariation of Asset Prices
+­ Statistical Theory and
+Empirical Evidence
+Markus Bibinger* Markus Reiss*
+Nikolaus Hautsch** Peter Malec***
+*Humboldt-Universität zu Berlin, Germany **University of Vienna, Austria,
+and Center for Financial Studies, Germany ***University of Cambridge, United Kindom This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Estimating the Spot Covariation of Asset Prices ­ Statistical Theory and Empirical Evidence
+
+Markus Bibinger
+
+Nikolaus Hautsch Peter Malec§ October 2014
+
+Markus Reiss¶
+
+Abstract
+We propose a new estimator for the spot covariance matrix of a multi-dimensional continuous semi-martingale log asset price process which is subject to noise and non-synchronous observations. The estimator is constructed based on a local average of block-wise parametric spectral covariance estimates. The latter originate from a local method of moments (LMM) which recently has been introduced by Bibinger et al. (2014). We extend the LMM estimator to allow for autocorrelated noise and propose a method to adaptively infer the autocorrelations from the data. We prove the consistency and asymptotic normality of the proposed spot covariance estimator. Based on extensive simulations we provide empirical guidance on the optimal implementation of the estimator and apply it to high-frequency data of a cross-section of NASDAQ blue chip stocks. Employing the estimator to estimate spot covariances, correlations and betas in normal but also extreme-event periods yields novel insights into intraday covariance and correlation dynamics. We show that intraday (co-)variations (i) follow underlying periodicity patterns, (ii) reveal substantial intraday variability associated with (co-)variation risk, (iii) are strongly serially correlated, and (iv) can increase strongly and nearly instantaneously if new information arrives.
+Keywords: local method of moments, spot covariance, smoothing, intraday (co-)variation risk
+JEL classification: C58, C14, C32
+Financial support from the Deutsche Forschungsgemeinschaft via SFB 649 "Economic Risk" and FOR 1735 "Structural Inference in Statistics: Adaptation and Efficiency" is gratefully acknowledged. Hautsch also acknowledges financial support from the Wiener Wissenschafts-, Forschungs- und Technologiefonds (WWTF). Malec thanks the Cambridge INET for financial support.
+Department of Mathematics, Humboldt-Universita¨t zu Berlin. Email: bibinger@math.hu-berlin.de. Address: Unter den Linden 6, D-10099 Berlin, Germany.
+Faculty of Business, Economics and Statistics, University of Vienna and Center for Financial Studies, Frankfurt. Email: nikolaus.hautsch@univie.ac.at. Address: Oskar-Morgenstern-Platz 1, A-1090 Vienna, Austria.
+§Faculty of Economics, University of Cambridge. Email: pm563@cam.ac.uk. Address: Sidgwick Avenue, Cambridge CB3 9DD, United Kingdom.
+¶Department of Mathematics, Humboldt-Universita¨t zu Berlin. Email: mreiss@math.hu-berlin.de. Address: Unter den Linden 6, D-10099 Berlin, Germany.
+1
+
+1 Introduction
+Recent literature in financial econometrics and empirical finance reports strong empirical evidence for distinct time variations in daily and long-term correlations between asset prices. Clearly rejecting the constancy of covariances over time underlines the importance of suitable econometric models to capture covariance dynamics and challenges risk management, portfolio management and asset pricing. Surprisingly little, however, is known about intraday variations of asset return covariances. While the literature proposes several approaches to estimate spot variances1, there is a lack of empirical approaches and corresponding statistical theory to estimate spot covariances using high-frequency data.
+In this paper, we aim at filling this gap in the literature and propose an estimator for the spot covariance matrix of a multi-dimensional continuous semi-martingale log asset price process which is observed at non-synchronous times under noise. The estimator is constructed based on local averages of block-wise parametric spectral covariance estimates. The latter are estimated employing the local method of moments (LMM) estimator proposed by Bibinger et al. (2014), which is shown to be a rate-optimal and asymptotically efficient estimator for the integrated covariation. As the LMM estimator builds on locally constant approximations of the underlying covariance process and estimates them block-wise, it provides a natural setting to construct a spot covariance estimator.
+Our methodological contribution is as follows: First, we extend the LMM method to allow for autocorrelated market microstructure noise and propose consistent estimators of the autocorrelations. Second, we derive a stable central limit theorem, showing the consistency and asymptotic normality of the resulting spot covariance estimator. Apart from being (to our best knowledge) the first estimator for a spot covariance matrix, an important result is that the rate-optimality of the underlying LMM estimator carries over to the spot estimator. It is shown that it converges considerably faster than existing spot estimators. We provide simulation-based evidence on an optimal implementation of the estimator depending on the choice of underlying smoothing parameters. Finally, an important objective of this paper is to provide first empirical evidence on the intraday behavior of spot covariances, correlations and asset price betas.
+The quantification of spot covariance estimators is useful for intraday risk management, market microstructure research, but also for market surveillance and monitoring. For instance, with the availability of estimates of (co-)volatilities in the market, intraday traders can assess intraday correlation risks. Empirical studies on the role of high-frequency trading, the impact of market fragmentation and the usefulness of volatility circuit breakers might heavily
+1See, e.g., Kristensen (2010), Mykland and Zhang (2008), Mancini et al. (2012), Bos et al. (2012) or Zu and Boswijk (2014).
+2
+
+benefit from the availability of high-frequency covariance estimators which are applicable in higher dimensions. Moreover, analyzing the behavior of spot (co-)volatilities on days with distinct information arrival or (flash) crashes provides important insights into high-frequency dependence structures and their reaction to common shocks. For example, it is an empirically well-documented fact that correlations are higher and diversification opportunities are smaller during bear markets than during bull markets at a lower frequency level (see, e.g., De Santis and Gerard, 1997; Longin and Solnik, 2001). This raises the question if such changing correlation structures might be observed also on an intraday level, e.g., during "flash crash" periods. Finally, spot covariance estimates are a necessary building block for co-jump tests (see Bibinger and Winkelmann, 2013).
+Our study is mainly related to two fields of literature. First, there is a vast body of papers on the estimation of integrated covariance matrices, while accounting for market microstructure noise and the asyncronicity of observations. Starting from the seminal realized covariance estimator by Barndorff-Nielsen and Shephard (2004) which neglects both types of frictions, Hayashi and Yoshida (2011) propose a consistent and efficient estimator under asynchronicity, but in the absence of microstructure noise. Estimators accounting for both types of frictions are, among others, the quasi maximum likelihood estimator by Ait-Sahalia et al. (2010), the multivariate realized kernel estimator by Barndorff-Nielsen et al. (2011), the multivariate preaveraging estimator by Christensen et al. (2013), the two-scale estimator by Zhang (2011), and the LMM estimator by Bibinger et al. (2014). Second, there is considerable literature on spot volatility estimation. A nonparametric (kernel-type) estimator in the absence of microstructure noise is put forward by Foster and Nelson (1996), Fan and Wang (2008) and Kristensen (2010). To account for noise, the predominant approach is to compute a difference quotient based on a noise-robust integrated volatility estimator, e.g., the (univariate) realized kernel, the preaveraging estimator or the two-scale estimator. Here, examples include Mykland and Zhang (2008), Mancini et al. (2012), Bos et al. (2012) and Zu and Boswijk (2014). Finally, estimators that are robust to jumps, but neglect microstructure noise are put forward, e.g., by Ait-Sahalia and Jacod (2009), Andersen et al. (2009) and Bandi and Reno (2009).
+Interestingly, the problem of estimating the spot covariance matrix in the presence of microstructure noise and asynchronicity effects has not yet been addressed in a study on its own. Our paper thus bridges the gap between the two fields of literature outlined above. Compared to integrated (co-)variance estimators, spot estimators inherently feature slower convergence rates due to the additional smoothing involved. Hence, to maximize precision, as many observations as possible should be used. The latter can be achieved by employing data sampled at the highest frequency possible, i.e., at tick-by-tick level. Hansen and Lunde (2006) and, more recently, Ait-Sahalia et al. (2011), however, show that at this frequency, microstructure noise appears
+3
+
+to violate the traditional i.i.d. assumption, exhibiting more complex dependence structures. Extending the LMM estimator to allow for serially dependent noise and proposing a datadriven procedure to select the order of serial dependence is therefore a crucial step to make the estimator applicable to spot covariance estimation and to benefit from its optimality properties. In particular, we show that it satisfies a central limit theorem at almost optimal rate.
+The approach presented here does not account for jumps in the log-price process. From a methodological point of view, an extension to disentangle jumps and continuous components utilizing a truncation technique as in Bibinger and Winkelmann (2013) appears feasible. In the given framework, however, due to additional tuning parameters involved this would require a comprehensive extension, which would dilute the main new estimation ideas. Consequently, our proposed spot covariance estimator does not separate between a diffusive and jump component. For our empirical results and corresponding conclusions, this is not a limitation since in any case, potential jumps are consistently captured by the spot estimator. Moreover, Christensen et al. (2014) show that, when considering data sampled at the tick-by-tick level, jumps are detected far less frequently than based on a coarser sampling grid.
+Based on extensive simulation studies, we investigate the impact of different choices of the relevant input parameters on the estimator's finite sample precision and provide guidance of how to choose these parameters in applications. Moreover, we demonstrate that the proposed procedure for estimating the order of serial dependence in the microstructure noise process performs well under realistic conditions.
+Applying the spot covariance estimator to four years of trade and quote data for 30 of the most liquid constituents of the NASDAQ100 and an ETF tracking the latter, provide novel empirical evidence on the intraday behavior of covariances and correlations. First, there is a distinct intraday seasonality pattern with covariances declining and correlations increasing throughout the day, while betas remain relatively stable. Second, spot (co-)variation reveals substantial intraday variability and thus reflect (co-)variation risk. Third, spot (co-)variation is strongly serially correlated within a day and across days. Finally, spot covariances and correlations substantially change during flash crashes or the arrival of fundamental information. We show that in these extreme scenarios, spot covariances and variances of the 30 blue chips strongly and nearly instantaneously shoot up, causing the resulting correlations either to substantially increase or decrease. These novel insights show that dependence structures between assets can be very variable and sensitive to news. It turns out that our estimator is able to capture extreme (co-)variance movements on a high time resolution.
+The remainder of the paper is structured as follows. Section 2 introduces the proposed spot estimator, gives its asymptotic properties and shows how to estimate underlying noise autocovariances. In Section 3, we present a simulation study analyzing the estimator's sensitivity
+4
+
+to the choice of input parameters and examining the performance of the procedure for estimating the autocovariance structure of the noise process. Section 4 provides empirical evidence on spot (co-)variances, correlations and betas based on NASDAQ data. Finally, Section 5 concludes.
+
+2 Estimation of Spot Covariances
+
+2.1 Theoretical Setup and Assumptions
+
+Let (Xt)t0 denote the d-dimensional efficient log-price process. In line with the literature and motivated by well-known no-arbitrage arguments, we assume that Xt follows a continuous Ito^ semi-martingale
+
+tt
+Xt = X0 + bs ds + s dBs, t  [0, 1],
+00
+
+(1)
+
+defined on a filtered probability space , F , (F )t0 , P with drift bs, d-dimensional standard Brownian motion Bs and instantaneous volatility matrix s. The latter yields the (d × d)dimensional spot covariance matrix s = ss , which is our object of interest. We consider a setting in which discrete and non-synchronous observations of the process (1) are diluted by
+market microstructure noise, i.e.,
+
+Yi(p) = Xt((ipp)) +
+
+(p) i
+
+,
+
+i
+
+=
+
+0, . .
+
+.
+
+,
+
+np,
+
+p = 1, . . . , d ,
+
+(2)
+
+with observation times ti(p), and observation errors i(p). Observed returns for component p  {1, . . . , d} are given by
+
+iY (p) = Yi(p) - Yi(-p1) = iX(p) + i (p)
+
+=
+
+Xt((ipp))
+
+-
+
+X (p)
+t(i-p)1
+
++
+
+(p) i
+
+-
+
+i(-p)1,
+
+i = 1, . . . , np.
+
+(3)
+
+Let n = min np denote the number of observations of the "slowest" asset. In Section 2.3,
+1pd
+we consider high-frequency asymptotics with n/np  p for constants 0 < p  1, such that the asymptotic variance-covariance matrices for estimators of s are regular. Feasible inference on  based on the considered methods, however, is tractable even in a broader framework with different speeds in increasing sample sizes. For this technical generalization, we refer to Bibinger et al. (2014).
+Below we summarize the assumptions on the instantaneous volatility matrix and drift process, noise properties and observation times. Convergence rates of spot estimators crucially depend on the smoothness of the underlying functions. We therefore consider balls in Ho¨lder
+
+5
+
+spaces of order   (0, 1] and with radius R > 0:
+
+C,R([0, 1], E) = {f : [0, 1]  E| f   R} ,
+
+f  :=
+
+f  + sup
+x=y
+
+f (x) - f (y) |x - y|
+
+,
+
+where · denotes the usual spectral norm and f  := supt[0,1] f (t) for functions on [0, 1]. In our setup, we have E = Rd×d for matrix-valued functions, E = Rd for vectors or E = [0, 1] for distribution functions.
+First, for the drift process in (1), we only assume a very mild regularity:
+
+Assumption 1. (bs)s[0,1] is an (Fs)-adapted process with bs  C,R([0, 1], Rd) for some R <  and some  > 0.
+
+Furthermore, the assumptions regarding the instantaneous volatility matrix process in (1) can be summarized as:
+
+Assumption 2. (i) (s)s[0,1] follows an (Fs)-adapted process satisfying s = ss   uniformly for some strictly positive definite matrix .
+(ii) (s)s[0,1] satisfies s = f s(1), s(2) with f : R2d×2d  Rd×d being a continuously differentiable function in all coordinates, where
+· For   (0, 1/2], s(1) is a continuous Ito^ semi-martingale of the form (1) with ca`dla`g adapted volatility of volatility ~s satisfying ~ s = ~s~s  ~ uniformly for some strictly positive definite matrix ~ . The drift of (1) is an adapted ca`dla`g process. For   (1/2, 1], (1) vanishes.
+· s(2)  C,R [0, 1], Rd×d with some R < .
+Hence, s is a function of a continuous Ito^ semi-martingale s(1) and an additional component s(2). The latter can capture intraday periodicity effects (see, e.g., Andersen and Bollerslev, 1997). The larger , the more restrictive becomes Assumption 2. If  > 1/2, the semimartingale component vanishes and s is exclusively driven by the component s(2). Hence, the more interesting case is   1/2. Importantly, the above assumptions also allow for leverage effects, i.e., a non-zero correlation between s and the Brownian motion Bs in (1). It is natural to develop results under this general smoothness assumption as it is commonly known that in nonparametric estimation problems, the underlying regularity determines the size of smoothing windows and a fortiori the resulting (optimal) convergence rates.
+Our assumptions on the microstructure noise process in (2) are stated in observation time, which is in line with, e.g., Hansen and Lunde (2006) and Barndorff-Nielsen et al. (2011):
+
+6
+
+Assumption 3. (i) = { (ip), i = 0, . . . , np, p = 1, . . . , d} is independent of X and has
+
+independent components, i.e.,
+
+(p) i
+
+is
+
+independent
+
+of
+
+(q) j
+
+for
+
+all
+
+i,
+
+j
+
+and
+
+p
+
+=
+
+q.
+
+(ii) At least the first eight moments of i(p), i = 0, . . . , np, exist for each p = 1, . . . , d.
+
+(iii)
+
+(p) i
+
+,
+
+i
+
+=
+
+0,
+
+.
+
+.
+
+.
+
+,
+
+np,
+
+follows
+
+an
+
+R-dependent
+
+process
+
+for
+
+some
+
+R
+
+<
+
+,
+
+implying
+
+that
+
+Cov
+
+i(p),
+
+(p) i+u
+
+= 0 for u > R and each p = 1, . . . , d. Define by
+
+R
+
+p = 0(p) + 2
+
+u(p), with u(p) := Cov
+
+(p) i
+
+,
+
+(p) i+u
+
+, u  R,
+
+u=1
+
+(4)
+
+the component-wise long-run noise variances, where the u(p), 0  u  R, are constant for all 0  i  n - u. We impose that p > 0 for all p.
+
+The independence between noise and the efficient price, as stated in part (i) of Assumption 3, is standard in the literature (see, e.g., Zhang et al., 2005).2 Considering serially dependent noise is non-standard and motivated by empirical results, e.g., in Hansen and Lunde (2006). The moving-average-type dependence structure in the noise process in part (iii) of Assumption 3 follows, e.g., Hautsch and Podolskij (2013), implying the long-run variance (4).
+Finally, we assume that the timing of observations in (2) is driven by c.d.f.'s Fp governing the transformations of observation times to equidistant sampling schemes by means of suitable quantile transformations:
+
+Assumption 4. There exist differentiable cumulative distribution functions Fp, p = 1, . . . , d, such that the observation regimes satisfy ti(p) = Fp-1(i/np) , 0  i  np, p  {1, . . . , d}, where Fp  C,R [0, 1], [0, 1] , p = 1, . . . , d, with  being the smoothness exponent in Assumption 2
+for some R < .
+
+Assumption 4 implies that observation times are either non-stochastic or random, but independent from the log-price process. A treatment of endogenous times in the given theoretical framework is beyond the scope of this paper. See Koike (2014) for a recent study of endogenous times and Li et al. (2014) for a study in a setting neglecting microstructure noise.
+Combining time-invariant (long-run) noise variances p and locally different observation frequencies from Assumptions 3 and 4 implies locally varying noise levels:
+
+Definition 1. In the asymptotic framework with n/np  p, where 0 < p < , p = 1, . . . , d, for n  , we define the continuous-time noise level matrix
+
+Hs = diag (pp(Fp-1) (s))1/2 1pd .
+2For the case of endogenous noise, see, e.g., Kalnina and Linton (2008).
+
+(5)
+
+7
+
+Note that for equally-spaced observations, we have Fp(s) = s, such that (Fp-1) (s) = 1. Then, the p-specific (asymptotic) noise level is (pp)1/2 with p expressing the inverse of the sample size of the p-th process relative to the "slowest" process. Hence, having less frequent observations on a sub-interval is equivalent to having higher noise dilution by microstructure effects on this sub-interval. This interplay between noise and liquidity has been discussed by Bibinger et al. (2014).
+
+2.2 Local Method of Moments Estimation of the Spot Covariance Matrix
+
+Our approach for estimating the instantaneous covariance matrix rests upon the concept of the local method of moments (LMM) introduced in Bibinger et al. (2014). We partition the interval [0, 1] into equidistant blocks [khn, (k + 1)hn], k = 0, . . . , hn-1 - 1, with the block length hn asymptotically shrinking to zero, hn  0 as n  . The key idea is to approximate the underlying process (1) in model (2) by a process with block-wise constant covariance matrices and noise levels. In the (more simplified) setting of Bibinger et al. (2014), it is shown that such a locally constant approximation induces an estimation error for the integrated covariation, which, however, can be asymptotically neglected for sufficient smoothness of t and Fp if the block sizes hn shrink sufficiently fast with increasing n. This opens the path to construct an asymptotically efficient estimator of the integrated covariation matrix based on optimal block-wise estimates.
+In the present setting, we build on the idea of block-wise constant approximations of the underlying covariance and noise process and show that it allows constructing a consistent spot covariance estimator, which can attain an optimal rate. A major building block is the construction of an unbiased estimator of the block-wise covariance matrix khn = khnkhn based on the local spectral statistics
+
+Sjk = jh-n 1
+
+np
+
+Yi(p) - Yi(-p1)
+
+jk
+
+ti(-p)1 + ti(p) 2
+
+i=1
+
+,
+1pd
+
+(6)
+
+where jk denote orthogonal sine functions with (spectral) frequency j, whose derivatives jk form another orthogonal system corresponding to the eigenfunctions of the covariance operator
+
+of a Brownian motion, and are given by
+
+
+
+jk(t) =
+
+2hn sin j
+
+jhn-1 (t - khn)
+
+1[khn,(k+1)hn)(t), j  1 .
+
+(7)
+
+8
+
+The statistics (6) de-correlate the noisy observations (3) and can be thought of as representing their block-wise principal components.3 They bear some resemblance to the pre-averaged returns as employed in Jacod et al. (2009). While pre-averaging estimators, however, utilize rolling (local) windows around each observation, our approach relies on fixed blocks and optimal combinations in the spectral frequency domain. It can be shown that
+
+Cov(Sjk) = (khn + 2j2hn-2Hnk )(1 + O(1)),
+
+(8)
+
+where Hkn denotes the block-wise constant diagonal noise level matrix with entries Hkn (pp) = n-p 1p(Fp-1) (khn) ,
+
+(9)
+
+and (Fp-1) (khn) denotes the inverse of the block-wise constantly approximated observation
+frequency evaluated at khn. The relation (8) suggests estimating khn based on the empirical covariance SjkSjk, which is bias-corrected by the noise-induced term 2j2h-n 2Hnk .
+An initial (pre-) estimator of the spot covariance matrix at time s  [0, 1], s, is then con-
+structed based on bias-corrected block-wise empirical covariances SjkSjk, which are averaged across spectral frequencies j = 1, . . . , Jnp, and a set of adjacent blocks,
+
+vec ^ kprhen
+
+Us,n
+
+Jnp
+
+= (Us,n - Ls,n + 1)-1
+
+(Jnp)-1 vec
+
+k=Ls,n
+
+j=1
+
+SjkSjk - 2j2hn-2H^ nk
+
+,
+
+(10)
+
+with the vec operator stacking the elements of a (d × d)-matrix into a d2 × 1 -vector column-
+
+wise, while Ls,n the length of the
+
+= max{ shn-1 -Kn, 0} smoothing window obeys
+
+and Us,n = min{ sh-n 1 Us,n - Ls,n + 1  2Kn
+
++Kn, h-n 1 + 1. H^ nk is a
+
+-1}, such that 
+n-consistent
+
+estimator of Hnk with p-th diagonal element
+
+H^ kn
+
+(pp) =
+
+^p hn khnti(p)(k+1)hn
+
+ti(p) - ti(-p)1 2.
+
+(11)
+
+Details on the construction of the estimator of the component-wise long-run noise variances, ^p, are provided in Section 2.5 below.
+For each spectral frequency j, the statistic SjkSjk - 2j2h-n 2H^ nk is an (asymptotically) unbiased though inefficient estimator of khn. Averaging across different frequencies therefore increases the estimator's efficiency. Equally weighting as in (10), however, is not necessarily
+optimal. A more efficient estimator can be devised by considering (10) as the pre-estimated spot
+
+3Somewhat related approaches for a univariate framework can be found in Hansen et al. (2008) and Curci and Corsi (2012).
+
+9
+
+covariance matrix and then, derive estimated optimal weight matrices W^ j, yielding the final LMM spot covariance matrix estimator as
+
+Us,n Jn
+
+vec ^ s = (Us,n - Ls,n + 1)-1
+
+W^ j H^ kn, ^ pkrhen
+
+k=Ls,n j=1
+
+× vec SjkSjk - 2j2hn-2H^ nk .
+
+(12)
+
+As outlined in detail in Bibinger et al. (2014), the true optimal weights are given proportionally to the local Fisher information matrices according to
+
+Wj Hnk , khn
+
+= Jn khn + 2u2h-n 2Hkn -2 -1 khn + 2j2hn-2Hnk -2
+u=1
+= Ik-1Ijk,
+
+(13)
+
+with Ijk being the Fisher information matrix associated with block k and spectral frequency j, given by
+
+Ijk = khn + 2j2hn-2Hnk -2,
+
+(14)
+
+and Ik =
+
+Jn j=1
+
+Ijk
+
+denoting
+
+the
+
+k-specific
+
+Fisher
+
+information
+
+(exploiting
+
+the
+
+independence
+
+across frequencies j). Here, A2 = A  A denotes the Kronecker product of a matrix with itself
+
+and A-2 = A-1  A-1 = (A  A)-1. We show in Section 2.3 that the estimator (12), which
+
+builds on the idealized model considered in Bibinger et al. (2014), is consistent and satisfies a
+
+stable CLT under the more realistic and general assumptions of Section 2.1.
+
+For practical purposes, note that, while both the pilot estimator (10) and the LMM estima-
+
+tor (12) are symmetric, none is guaranteed to yield positive semi-definite estimates. Confidence
+
+is based on estimated Fisher information matrices, which are by construction positive-definite.
+
+For the estimates themselves, we can set negative eigenvalues equal to zero, which is tantamount
+
+to a projection on the space of positive semi-definite matrices. This adjustment does not affect
+
+the asymptotic properties of the estimator as outlined below, but only improves the finite sample
+
+performance.
+
+2.3 Asymptotic Properties
+As a prerequisite for the discussion of the central limit theorem for the estimator (12), some considerations regarding Kn, which determines the length of the smoothing window, are needed. For this purpose, suppose that a certain smoothness   (0, 1] of the instanta-
+
+10
+
+neous volatility matrix is granted according to Assumption 2. Then, a simple computation
+yields COV ^ s = O Kn-1 , implying a bias-variance trade-off in the mean square error MSE ^ s := E (^ s - s)2 . More precisely, for a specific  > 0, we have
+
+MSE ^ s = OP Kn-1 + OP Kn2h2n ,
+
+(15)
+
+where the first term originates from the variance and the second term is induced by the squared
+
+bias. Consequently, for given hn  log(n)n-1/2, which optimally balances noise and dis-
+
+cretization
+
+error
+
+as
+
+derived
+
+in
+
+Bibinger et 
+
+al.
+
+(2014),
+
+choosing
+
+Kn
+
+
+
+n/(2+1)
+
+minimizes
+
+the
+
+MSE and facilitates an estimator with Kn convergence rate. Finally, the desired central limit
+
+theorem for the estimator (12) requires a slight undersmoothing, resulting in a smaller choice of
+
+Kn:
+
+Theorem 1. We assume a setup with observations of the type (2), a signal (1) and the validity of Assumptions 1-4. Then, for hn = 1 log (n)n-1/2, Kn = 2n(log (n))-1 with constants 1, 2 and 0 <  < (2+1)-1, for Jn   and n/np  p with 0 < p < , p = 1, . . . , d, as n  , the spot covariance matrix estimator (12) satisfies the pointwise stable central limit
+theorem:
+
+n/2 vec ^ s - s d--(st) N 0, 2   1H/2 + 1H/2   s Z , s  [0, 1] ,
+
+(16)
+
+where H = H H-1H-1 1/2H, with noise level H from (5) and Z = COV(vec(ZZ )) for Z  N(0, Ed) being a standard normally distributed random vector.
+Theorem 1 is proved in Appendix A below. The convergence in (16) is stable, which is equivalent to joint weak convergence with any measurable bounded random variable defined on the same probability space as X. This allows for a feasible version of the limit theorem if we re-scale the estimator by the implicitly obtained estimated variance:
+
+Corollary 1. Under the assumptions of Theorem 1, the spot covariance matrix estimator (12) satisfies the feasible central limit theorem given by
+
+(Us,n - Ls,n + 1)1/2 V^ sn -1/2 vec ^ s - s d N 0, Z , s  [0, 1] ,
+
+(17a)
+
+where
+
+Us,n
+V^ sn = (Us,n - Ls,n + 1)-1
+k=Ls,n
+
+Jn
+I^jk
+j=1
+
+-1
+,
+
+(17b)
+
+11
+
+with Us,n and Ls,n defined as in (10) and (12). I^jk is defined according to (14) with Hkn and khn, k = 0, . . . , hn-1 - 1, replaced by the estimators (10) and (11), respectively.
+Unlike in (16), in which we obtain a mixed normal limiting distribution, the matrix Z is completely known. It is given by twice the "symmetrizer matrix" introduced by Abadir and Magnus (2005, ch. 11) and corresponds to the covariance structure of the empirical covariance of a d-dimensional (standard) Gaussian vector.
+The asymptotic variance-covariance matrix in (16) is the same instantaneous process that appears integrated over [0, 1] as variance-covariance matrix of the integrated covariance matrix estimator in Bibinger et al. (2014). Accordingly, Theorem 1 is in line with the results on classical realized volatility in the absence of noise for d = 1 and the nonparametric Nadaraya-Watsontype kernel estimator by Kristensen (2010) with asymptotic variance 2s4 R k2(z) dz, where k denotes the used kernel. In our case, the estimator is of histogram-type and the rectangle kernel does not appear in the asymptotic variance. Let us point out that estimator (12), building on optimal combinations over spectral frequencies, is more advanced than a usual histogramestimator. When comparing our nonparametric estimator (12), e.g., to the aforementioned one by Kristensen (2010), in our case, the actual bandwidth is (2Kn + 1)hn (or smaller), since we smooth over (up to) (2Kn + 1) adjacent blocks of length hn. In this context, one can as well think of employing hn-1 de-noised block statistics as underlying observations.
+Regarding the convergence rate in (16), we may focus on the case   1/2, which is tantamount to the spot volatility matrix process (s)s[0,1] being at least as smooth as a continuous semi-martingale. This assumption yields the rate n1/8-, for any  > 0, such that we almost attain the optimal rate n1/8, which is obviously lower than the corresponding rate for integrated (co-)variance estimators in the setting with noise, n1/4. Notably, our spot covariance matrix estimator (12) converges considerably faster than existing noise-robust spot volatility estimators based on the difference quotient of, e.g., pre-averaging estimates (Zu and Boswijk, 2014). Though the undersmoothed estimator satisfying (16) has a slightly slower convergence rate than the optimal one, the two-step approach (12) with combinations over different frequencies strongly reduces the estimator's variance (compared to simpler methods). This is well confirmed in our finite-sample simulations in Section 3.
+Theorem 1 and Corollary 1 hold for estimation points s  [0, 1], both in the interior and in the boundary region of the unit interval. This result is a consequence of the estimators (10) and (12) being of histogram-type, implying that smoothing is conducted by averaging over a set of adjacent blocks, which merely needs to contain time t, and does not have to be centered around the point of estimation. The above property is a major difference compared to kernel-based spot volatility estimators, as e.g., the one proposed by Kristensen (2010), which require suitable
+12
+
+correction methods to eliminate the so-called boundary bias, thus making implementation more involved.
+Finally, Theorem 1 may be employed to deduce asymptotic results for the estimators of spot correlations and spot betas. These can be considered as the instantaneous counterparts to the integrated quantities studied, e.g., in Andersen et al. (2003) and Barndorff-Nielsen and Shephard (2004). In this context, focus on those elements of the spot covariance matrix t, t  [0, 1], involving only the indices p, q  {1, . . . , d}. Further, denote the spot correlation and beta estimators based on (12) by ^s(pq) = ^ (spq)/ ^ s(pp)^ (sqq) and ^s(pq) = ^ (spq)/^ (spp). Then, Theorem 1 implies by simple application of the Delta-method that
+
+n/2 vec ^(spq) - (spq) d--(st) N 0, AV,s , n/2 vec ^s(pq) - s(pq) d--(st) N 0, AV,s ,
+
+s  [0, 1] , s  [0, 1] ,
+
+(18a) (18b)
+
+with
+
+AV,s
+
+= s(pp)s(qq)AV(sp-1)d+q,(p-1)d+q +
+
+4
+
+(spq) 2 (spp) 3s(qq)
+
+AV(sp-1)d+p,(p-1)d+p
+
+(18c)
+
++
+
+4
+
+(spq) 2 (sqq) 3(spp)
+
+AVs(q-1)d+q,(q-1)d+q
+
+-
+
+(spq) s(pp)
+
+AV(sp-1)d+q,(p-1)d+p
+
+-
+
+s(pq) (sqq)
+
+AV(sp-1)d+q,(q-1)d+q
+
++
+
+2
+
+(spq) 2 s(pp)s(qq)
+
+2 AV(sp-1)d+p,(q-1)d+q ,
+
+AV,s = (spp) -2AV(sp-1)d+q,(p-1)d+q + s(pq) 2 s(pp) -4AVs(p-1)d+p,(p-1)d+p (18d)
+
+- 2(sp,q) (sp,p) -3AVs(p-1)d+q,(p-1)d+p ,
+
+where AVs denotes the asymptotic variance-covariance matrix in (16). Feasible versions of the central limit theorems (18a) and (18b) can be readily obtained analogously to Corollary 1.
+
+2.4 Choice of Inputs
+The proposed spot covariance matrix estimator (12) depends on four input parameters to be chosen: (i) the block length hn, (ii) the maximum spectral frequency Jn, (iii) the maximum frequency for the pre-estimator (10), Jnp, as well as (iv) the length of the smoothing window, Kn.
+For (i) , Theorem 1 requires that hn = O log (n)n-1/2 . (ii) is given by minp nphn , but a spectral cut-off Jn = O log (n) can be chosen, since the weights decay fast with increasing frequency j, making higher frequencies asymptotically negligible. The effect of
+
+13
+
+quickly diminishing weights implies that (iii) should be fixed at a value not "too large", e.g., Jnp = 5. The reason is that the cut-off directly determines the (uniform) weights in the preestimator (10). For (iv), we generally set Kn = O n/(2+1) . The latter choice implies undersmoothing, thereby forfeiting rate-optimality of the estimator, but provides us a central limit theorem. Under the "continuous semi-martingale or smoother" assumption (  1/2) for
+the spot volatility matrix process, which seems admissible in most financial applications, we set Kn = O n1/4- for any  > 0.
+In practice, we introduce proportionality parameters for (i), (ii) and (iv), i.e. hn = h log (n)n-1/2, Jn = J log (n) and Kn = K n1/4- , where h, J , K > 0 and  denotes a small positive number. This approach is in line with the selection of the window
+length in the context of pre-averaging estimators (Jacod et al., 2009). We discuss the specific
+choice of the above input parameters in more detail in Sections 3 and 4.2.
+
+2.5 Estimating Noise Autocovariances
+
+According to part (i) of Assumption 3, the estimation of the long-run noise variance p, p = 1, . . . , d, defined in (4), only requires estimates of component-wise auto-covariances, but no covariances across processes. Therefore, for ease of exposition, we restrict the analysis to d = 1, focusing on a one-dimensional model with n + 1 observations of Yi = Xti + i, i = 0, . . . , n. Further, we set u = u(1) = Cov( i, i+u) for the u-th order autocovariance, while the long-run variance is now simply denoted by . Following part (iii) of Assumption 3, for some R  0, we may neglect all dependencies u, u > R. Hence, i, i = 0, . . . , n, is an R-dependent process and the returns iY have a MA(R)-structure.
+Fix R  0 as the order of serial dependence. We shall discuss below how to choose R from the data in practice. We successively estimate the autocovariances by
+
+n
+^R = (2n)-1
+i=1
+n
+^r - ^r+1 = (2n)-1
+i=1
+
+iY iY
+
+R n-r
+
+2 + n-1
+
+iY i+rY ,
+
+r=1 i=1
+
+r n-u
+
+2 + n-1
+
+iY i+uY , 0  r  R - 1 .
+
+u=1 i=1
+
+(19a) (19b)
+
+In particular, this includes
+
+n
+
+^0 - ^1 = (2n)-1
+
+iY 2 ,
+
+i=1
+
+(19c)
+
+which is the classical estimator of 0 in an i.i.d. setting as in Zhang et al. (2005). The estimators 
+are n-consistent and satisfy central limit theorems. To construct an estimator for the variance
+
+14
+
+of ^r, denote for q, r, r  {0, . . . , R}
+
+n-(r(q+r ))
+
+~qrr = n-1
+
+iY i+rY, i+qY i+q+r Y - [^r - ^r+1 - (^r-1 - ^r)]
+
+i=1
+
+× [^r - ^r +1 - (^r -1 - ^r )] ,
+
+(20)
+
+where ^r - ^r+1, ^r-1 - ^r, ^r - ^r +1 and ^r -1 - ^r are computed according to (19b). Then, the variance of ^r, 0  r  R, is consistently estimated by
+
+Var(^r) = n-1 Vrn+1 + Vrn + 2Crn,r+1 ,
+
+
+
+with Crn,r+1
+
+=
+
+^ 000 4
+
++
+
+1 2
+
+r
+^0u0 +
+
+r
+
+r+1
+
+u=1
+
+u=0 u =1
+
+R
+^0uu + 2 ^uq u
+q=1
+
+ ,
+
+(21a) (21b)
+
+and Vrn = Crn,r. Particularly, for r = R, we have Var(^R) = n-1VRn. Below, we give a feasible central limit theorem, which entails an asymptotic distribution-free test of the hypotheses HQ0 : u = 0 for all u  Q, Q = R + 1.
+Theorem 2. Under Assumption 3, the following central limit theorem applies to the estimators defined by (19a) and (19b):
+
+n(Vrn + Vrn+1 + 2Crn,r+1)-1/2 ^r - r -d N(0, 1) .
+
+(22)
+
+Consequently, under H0Q:
+
+TQn(Y ) = n/VQn ^Q -d N(0, 1) .
+
+(23)
+
+Theorem 2 is proved in Appendix A. The statistic TQn(Y ) serves as a test statistic for the significance of non-zero autocovariances for certain lags. An accurate strategy to select the order of serial dependence R thus requires computing the test statistics TQn(Y ) for Q  Q~ = R~ + 1 large enough and incorporating all autocovariances until the first hypothesis of a zero autocovariance cannot be rejected for a given significance level. Then, denoting the determined order by R^, an estimate of the long-run noise
+variance, ^, is obtained according to (4) based on the individual estimates ^0, . . . , ^R^.
+
+3 Simulation Study
+We conduct a simulation study to examine two issues. First, we analyze the impact of different choices of the input parameters h, J and K introduced in Section 2.4 on the estimator's
+15
+
+finite sample performance. Second, we study the precision of the procedure for estimating the long-run noise variance  as outlined in Section 2.5. As these issues are not related to the dimensionality of the process, we set d = 1 for reasons of parsimony.
+We assume that the efficient log-price process incorporates both a stochastic and a nonstochastic seasonal volatility component, which is modeled by a Flexible Fourier Form as introduced by Gallant (1981). Correspondingly, we assume the underlying process as given by
+
+dXt = µdt + t~tdBt,
+Q
+ln 2t = t + t2 + [,q cos(2qt) + ,q sin(2qt)] ,
+q=1
+
+(24a) (24b)
+
+where Bt is a standard Brownian motion and ~t the stochastic volatility component. The drift
+
+term is set to µ = 0.03. The seasonality component is normalized such that
+
+1 0
+
+t2dt
+
+=
+
+1
+
+with
+
+parameter values given by median estimates for mid-quotes of 30 highly liquid constituents of
+
+the NASDAQ100 in 2010-14. See Section 4.1 for a summary of the dataset. In this context, we
+
+employ the estimation procedure by Andersen and Bollerslev (1997).4 The stochastic volatility
+
+component ~t is assumed to follow one- and two-factor models according to Huang and Tauchen
+
+(2005). Details are provided in Appendix B. In all settings, we simulate the process in (24a) and
+
+(24b) by a Euler discretization scheme based on a one-second grid assuming 23, 400 seconds
+
+per trading day, while setting n = 23, 400.
+
+We dilute the observations of the efficient log-price process by serially dependent microstructure noise with R = 1, i.e., i =  i-1 + ui, ui  N 0, / (1 +  )2 , i = 1, . . . , n. To ensure
+
+that the absolute noise level is in line with the variation in the volatility process, we determine
+
+ by choosing the noise-to-signal ratio per trade 2 := n/
+
+1 0
+
+t4~t4dt
+
+(see
+
+Oomen,
+
+2006).
+
+We consider low-noise and high-noise scenarios, setting  = 0.659 and  = 1.941, respectively.
+
+These numbers correspond to the first and third quartile of respective estimates based on the
+
+NASDAQ data employed in our empirical applications. Here,  is estimated following the
+
+procedure from Section 2.5, while the integrated quarticity is approximated by the squared
+
+sub-sampled five-minute realized variance. Finally, we choose  = 0.441, yielding a first-order
+
+autocorrelation of 1 = 0.6, which is the median estimate for the underlying NASDAQ data.
+
+To investigate the impact of chosen input parameters, we compute the LMM estimator (12)
+
+over a grid of values for h, J and K. For each combination, we evaluate a normalized root
+
+mean integrated squared error, RMISE := M -1
+
+M m=1
+
+1 0
+
+^t2,m/
+
+~t2,m2t
+
+- 1 2 dt, where
+
+4We estimate the daily volatility component based on sub-sampled five-minute realized variances instead of a parametric GARCH approach. The number of sinusoids Q is chosen based on the BIC.
+
+16
+
+Table 1: RMISE-optimal values of h, J and K based on grid search. Normalized root mean integrated
+
+squared errors M -1
+
+M m=1
+
+1 0
+
+^t2,m/
+
+~t2,m2t
+
+- 1 2 dt computed for M = 3000 Monte Carlo repli-
+
+cations. "1F" and "2F" represent a one- and two-factor model for the stochastic volatility component of
+
+the efficient log-price, respectively.  denotes the square root of the noise-to-signal ratio per trade, i.e.,
+
+2 := n/
+
+1 0
+
+4t ~t4dt.
+
+Normalized
+
+RMISEs
+
+are
+
+reported
+
+in
+
+percentage
+
+points.
+
+ Vol. Spec. h J K RMISE
+
+0.659
+
+1F 2F
+
+0.20 12.0 0.3 0.05 2.0 1.2
+
+3.11 4.80
+
+1.941
+
+1F 2F
+
+0.20 8.0 0.4 0.05 1.5 1.2
+
+4.37 5.84
+
+^t2,m is the spot variance estimate for time t in replication m, ~t2,m is the corresponding true stochastic volatility component and M is the number of replications.
+Table 1 reports the values of the input parameters yielding minimal RMISEs for M = 3000. For the setting including the one-factor stochastic volatility model ("1F") and a low noise level, the RMISE-optimal values of the input parameters yield a configuration with h-n 1 = 77 blocks spanning about 5 minutes each, a spectral cut-off Jn = 120 and a smoothing window of Kn = 4 blocks. A higher noise level implies a decrease in the cut-off to Jn = 80 and a lengthening of the smoothing window to Kn = 5 blocks. In the two-factor specification ("2F"), the rougher volatility paths result in a smaller optimal value of h, translating into hn-1 = 305 blocks with length of only about 1 minute and 15 seconds each. For the high noise level, the cut-off reduces to Jn = 15, while the smoothing window lengthens to Kn = 15. In general, we see that the two-step method (12) clearly outperforms a simple histogram estimator which relies only on the first frequency Jn = 1.
+The effect of a deviation from the RMISE-optimal values of h, J and K is illustrated in Figure 1 for the one-factor model assuming a high noise level. The plots depict RMISEs for a grid of two of the three input parameters, while the third one is fixed at its optimal value. Evidently, the performance of the estimator is not overly sensitive to the choice of h. Unless the latter is set to an extremely low value or K is extremely small, resulting in excessive undersmoothing, the RMISE is fairly stable. Regarding J , only very small choices imply a considerable reduction in the estimator's precision, as the spectral frequencies are cut off too early. Finally, although K appears to be the most influential parameter, deviations from its "optimal" value imply rather mild increases in the RMISE in both directions. We can conclude that the performance of the spot covariance matrix estimator (12) is quite robust for a range of sensible input choices.
+To evaluate the proposed estimator of the long-run noise variance, we consider microstructure noise processes based on different orders of serial dependence R. Hence, we assume
+
+17
+
+RMISE RMISE
+
+25
+
+20
+
+15
+
+10
+
+5
+
+0
+0.1 0.18 0.26 0.34 0.42
+h 0.5
+
+20 17 14 11 8 5
+J
+
+(a) K = 0.4
+
+30
+
+20
+
+10
+
+0
+0.1 0.18 0.26 0.34 0.42
+h 0.5
+
+1 0.84 0.68 0.52 0.36 0.2
+K
+
+(b) J = 8
+
+20
+
+15
+
+RMISE
+
+10
+
+5
+
+0 20
+17 14 11 8 5
+J
+
+1 0.84 0.68 0.52 0.36 0.2
+K
+
+(c) h = 0.2
+
+Figure 1: RMISE depending on input parameters (one-factor model and high noise level). Normalized
+
+root mean integrated squared errors M -1
+
+M m=1
+
+1 0
+
+^t2,m/
+
+~t2,mt2
+
+- 1 2 dt computed for M = 3000
+
+Monte Carlo replications and reported in percentage points. In each subplot, the remaining input
+
+parameter is fixed at its optimal value according to Table 1.
+
+18
+
+Table 2: Descriptive statistics of the estimated order of serial dependence R and estimated long-run
+
+variance  of the noise process. R denotes the true order of dependence of the noise process. The settings
+
+are: (i) R = 0, (ii) R = 1 with  ,1 = 0.5, and (iii) R = 2 with  ,1 = 0.5 and  ,2 = 0.3. "1F" and "2F"
+represent a one- and two-factor model for the stochastic volatility component of the efficient log-price, respectively. R^ and ^ are computed following Section 2.5 using  = 0.05 and Q~ = 15. BIAS(^) and STD(^) are re-scaled by 103. Results based on M = 5000 Monte Carlo replications.
+
+R Vol. Spec.
+
+R¯^ STD R^
+
+BIAS(^)
+
+STD(^)
+
+0 1F 2F
+
+0.00
+
+0.05
+
+0.002
+
+1.985
+
+0.00
+
+0.05
+
+0.000
+
+3.467
+
+1 1F 2F
+
+1.13 0.71 -0.031 2.305 1.11 0.61 -0.026 3.186
+
+2 1F 2F
+
+2.35 1.28 -0.092 2.046 2.37 1.34 -0.073 2.678
+
+i = R(L) ui, R(L) :=
+
+R r=0
+
+
+
+,rLr,  ,0
+
+=
+
+1 , ui
+
+
+
+N
+
+0, /R(1)2
+
+, i = 1, . . . , n.
+
+We
+
+employ the following settings: (i) R = 0, (ii) R = 1 with  ,1 = 0.5, and (iii) R = 2 with
+
+ ,1 = 0.5 and  ,2 = 0.3. Moreover, we select a high noise level by setting  = 3, which can
+
+be considered as a "stress test" for the proposed procedure.
+
+For M = 5000 replications, Table 2 shows means and standard deviations for the estimates
+
+of R, as well as biases and standard deviations for the estimates of the long-run noise variance  based on  = 0.05 and Q~ = 15. We observe that the procedure proposed in Section 2.5 slightly
+
+over-estimates R, resulting in more conservative estimates of the order of serial dependence in
+
+the noise process. Moreover, when comparing the results for the one- and two-factor stochastic
+
+volatility model, the precision of the estimate of R is similar. The two-factor model, however,
+
+consistently implies a higher volatility in the estimates of . Generally, we can conclude that
+
+the proposed approach provides a satisfactory precision in a realistic scenario.
+
+4 Empirical Study
+4.1 Data
+We consider mid-quote and trade data at the highest possible frequency for 30 of the most liquid constituents of the NASDAQ100 index as well as the PowerShares QQQ Trust, an ETF tracking the NASDAQ100. The sample period is from May 2010 to April 2014. Mid-quotes are computed from first-level limit order book data provided by the LOBSTER database.5 The latter reconstructs the order book from a message stream, which is part of NASDAQ's historical TotalView-ITCH data and contains all limit order submissions, cancellations and executions on each trading day (see Huang and Polak, 2011). Accordingly, the corresponding transaction
+5See https://lobster.wiwi.hu-berlin.de/.
+19
+
+data can be read out from the above message files directly. A crucial advantage of the resulting datasets, e.g., compared to similar ones sampled from the Trade and Quote (TAQ) database, is the fact that all recorded events are time stamped with at least millisecond precision, which allows for an econometric analysis at the highest resolution possible. Despite the "clean" nature of the data, resulting from the latter being directly taken from NASDAQ's message stream, we handle remaining errors in the trade and mid-quote samples using the cleaning procedures proposed by Barndorff-Nielsen et al. (2009).
+Table 3 gives summary statistics of ask and bid quotes recorded whenever the underlying limit order book changes, i.e., induced by a submission of a limit or market order or a cancellation of an existing limit order.6 The number of limit order book updates is enormous, amounting to several hundred thousands for some stocks. It turns out, however, that a considerable amount of best ask/bid quote revisions equals zero. This is most remarkable for Microsoft, where this number amounts to more than 99%. Since this sheer amount of data makes the computation of the estimators challenging and cumbersome, we construct the estimators employing quote revisions. Table 3 also reports the long-run noise variance estimates computed according to Section 2.5 and the corresponding noise-to-signal ratios per observation. It is shown that there is a considerable variation of the noise-to-signal ratio across the different assets. Finally, we find strong empirical support for significant autocorrelations in the noise process, clearly violating the traditional i.i.d. assumption.
+We use the mid-quote revisions for the NASDAQ100 constituents to estimate 30 × 30 spot covariance matrices according to (12), yielding pair-wise spot covariances and correlations, as well as individual volatilities. Further, we also include the QQQ ETF and estimate 31 × 31 spot covariance matrices to obtain estimates of spot betas with QQQ as market proxy. In both cases, we select the relevant inputs as discussed in Section 2.4. The corresponding proportionality parameters are set to the values found to be "optimal" in the simulation study of Section 3. Taking a more conservative stance, we rely on the "1F"-setting assuming a high noise level.7 Hence, we set h = 0.2, J = 8, K = 0.4 and Jnp = 5.
+Table 4 reports summary statistics for the number of blocks, the spectral cut-off and the length of the smoothing window as induced by the underlying data for both the entire sample and each year. On average, we use approximately 23 blocks per day, resulting in an average block length of 17 minutes. Spectral frequencies are cut off at nearly 54, while the average length of the smoothing window is about 2 blocks, translating into roughly half an hour. Regarding the evolution over time, the average number of blocks increases from the first to second year,
+6All tables and figures underlying the empirical study are given in the Appendix C. 7We alternatively compute spot covariances using the configuration that is optimal in the"2F"-scenario and employing transaction prices and find qualitatively similar results. For sake of brevity, we do not report them here.
+20
+
+subsequently drops, only to increase again in the last year. Each time, changes in the block number are accompanied by moves of the spectral cut-off and the length of the smoothing window in the same direction. Notably, the variation in all three inputs is considerably higher in the first two years than in the last two years of the sample.
+4.2 Intraday Behavior of Spot (Co-)Variances
+Figure 2 shows the cross-sectional deciles of across-day averages of spot covariances and correlations for each asset pair. Figure 3 depicts the underlying volatilities and betas with respect to the ETF tracking the NASDAQ100 index. We observe distinct intraday seasonality patterns. Covariances clearly decline at the beginning of the trading day, stabilize around noon on a widely constant level and slightly increase before market closure. Interestingly, the resulting correlations show a reverse pattern and significantly increase during the first trading hour. The latter is caused by spot volatilities, that decay faster than the corresponding covariances at the beginning of the trading day. Hence, the (co-)variability between assets is highest after start of trading which might be caused by the processing of common information. The assets' idiosyncratic risk, however, as reflected by spot volatilities, is even higher, overcompensating the effect of high covariances and leading to lower correlations at the beginning of the trading day. Interestingly, spot volatilities drop significantly faster than underlying covariances during the first trading hour. Shortly after opening, spot volatilities are approximately twice as high as the (average) daily (based on the open-to-close integrated variance estimate) volatility, but strongly decline thereafter. This makes correlations sharply increasing between 10:00 and 11:00 am. Accordingly, we observe that median spot correlations range between approximately 0.2 and 0.4 across a day.8 This is in contrast to a daily correlation (computed from the open-to-close integrated covariance estimate) of approximately 0.32 and shows that even on average, intraday variability of correlations and covariances is substantial. Moreover, daily covariances tend to vary widely in locksteps with the volatility of the underlying ETF, making the corresponding betas close to be constant across the day. Hence, systematic risk (with respect to the NASDAQ100) varies much less than idiosyncratic risk.
+In Figure 4, we compute, for each asset pair and each point during the day, the standard deviation of spot covariances and correlations across days. We observe that the across-day variability in covariances is highest after market opening and shortly before closure. A similar picture is also observed for spot volatilities in Figure 5. We associate these patterns with effects arising from (overnight) information processing in the morning and increased trading activities in the afternoon, where traders tend to re-balance or close positions before the end of trading.
+8Note that we obtain very similar pictures for absolute correlations and covariances. Hence, during the analyzed period, correlations between NASDAQ100 assets are widely positive.
+21
+
+Hence, idiosyncratic effects seem to become stronger during these periods, increasing the variability of (co-)variances. Interestingly, the across-day standard deviations in correlations show a reverse pattern. Thus, across-day variability in intraday correlations is lowest at the beginning of trading, increases until mid-day and is widely constant during the afternoon hours. Here, increased across-day covariance and volatility risk seem to compensate each other. Likewise, the daily variability of spot betas is widely constant through different intra-day time points (except for the highest decile).
+To evaluate the intraday variability of all spot quantities, we compute a proxy for the total intraday variation normalized by the L1-norm, i.e.,
+
+ng ng -1
+
+V~fnorm = |f (ti) - f (ti-1)|
+
+|f (ti)| ti ,
+
+i=1 i=1
+
+where f (·) stands for the respective spot quantity of interest and ng denotes the number of underlying grid points per day. Figures 6 and 7 show the time series of cross-sectional medians of the corresponding intraday variation measures. The measures' normalization makes them comparable across days and quantities, while providing insights into intraday (co-)variation risks. We observe that the latter are strongly time-varying and are clustered over time. Hence, intraday (co-)variation risks seem to be relatively persistent, following some long-term movements. On individual days, we observe, nevertheless, exceptionally high intraday fluctuations of these quantities. These are likely days, where the market faces fundamental news arrival or unusual activities, e.g., induced by flash crashes. Indeed, in Section 4.3, we will focus on three selected days where markets are confronted with extreme events. These three days, corresponding to the dates 05/06/10, 12/27/12 and 04/23/13 (more details will follow in Section 4.3), are indicated by the vertical lines and indeed reflect salient intraday (co-)variation risks. Interestingly, normalized variations are highest for covariances and correlations, which might be also partly induced by higher estimation errors for covariances compared to variances. Accordingly, the variability of spot volatilities is generally lower, but can still be substantial on individual days. Confirming the findings above, the variability in betas is generally lowest. However, even betas ­ reflecting systematic risk ­ are far from being constant on selective days.
+Figure 8 reports the (averaged) autocorrelation functions (ACFs) of all four quantities with the figures being constructed such that one lag corresponds to approximately five minutes. We observe that all (co-)variability measures are strongly serially correlated across short time intervals with first-order autocorrelations being around 0.95. Nevertheless, the ACFs decay relatively fast within a day. This is most extreme for spot volatilities, where the ACF declines from 0.95 at the 5 minute lag to below 0.1 after approximately 3.5 hours. The noticeable seasonality pattern in the ACFs for covariances and volatilities underlines distinct daily autocorrelations, which
+
+22
+
+considerably exceed the intradaily autocorrelations at slightly smaller lags. For correlations and betas, this pattern is less pronounced. Here, long-term autocorrelations stabilize around 0.25 and decay very slowly.
+4.3 Event Studies
+The previous section shows that spot correlations and covariances can substantially vary during a day, even if these patterns are averaged across time and assets. Here, we aim at analyzing the behavior of spot (co-)variability in extreme market periods. The first study analyzes the flash crash on 05/06/10. Figure 9 shows the intraday movements of the QQQ ETF over the entire trading day and a time window starting at 1:30 pm. We associate individual time points with the following events:9 (1) At  2:00 pm, protests in Athens related to the Euro crisis trigger a sharp down movement of the Euro especially vs. the Yen. In the U.S., fund managers start large-scale short-selling of futures contracts on the S&P500 ("E-Mini"), leading to a trading volume which is six times higher than usual. (2) At  2:35 pm, the E-mini market makers cut back trading. (3) At 2:37 pm, NASDAQ stops routing orders to ARCA, the electronic trading platform of NYSE, due to huge lags in order acknowledgement. (4) At  2:45 pm, rumors spread suggesting that the decline occurred due to a "fat-finger" error of a Citigroup trader, and not because of an adverse news shock. This helps stabilizing markets and liquidity in futures trading rebounds. (5) At 3:01 pm, NASDAQ resumes routing to ARCA. Until market closure, trading remains erratic.
+Figure 10 shows the cross-sectional deciles of resulting spot covariances and correlations on this day. We observe that covariances are virtually constant during the morning, but nearly instantaneously increase shortly after 2:00 pm, i.e., after large-scale short selling of E-Mini futures started. The deciles show that the cross-sectional distribution of covariances across all asset pairs is very skewed, revealing huge upward shifts in some covariances, but only very moderate reactions in others. Figure 11, however, shows that the corresponding reactions in spot volatilities have been much stronger. This even leads to declining correlations with median correlations dropping from approx. 0.5 before 2:00 pm to approx. 0.3 around the peak of the crash. Hence, this event is characterized by an explosion of idiosyncratic risk, which overcompensates increases in covariances and ultimately decreases correlations. Likewise, systematic risk, as reflected by the corresponding spot betas significantly declines during this period. This is due to the fact that the spot volatility of the NASDAQ100 increases much stronger than the underlying covariances. Hence, we can summarize that the May 2010 flash
+9See http://online.wsj.com/news/articles/SB10001424052748704545004575353443450790402. For a detailed overview, we refer to CFTC and SEC (2010).
+23
+
+crash particularly moved spot volatilities, but not too much spot covariances, even reducing systematic risk.
+The next event study illustrates an extreme situation of different type. Here, we analyze intraday risk on 12/27/12, when at approximately 10:00 am the U.S. senate majority leader stated that a resolution of the U.S. "fiscal cliff" (i.e., budgetary deficits reaching the legal upper bound) before January 1, 2013, was unlikely due to lack of cooperation by Republicans.10 As shown in Figure 12, this caused prices to fall. Around 2:20 pm, a news release reported that the House of Representatives would convene on the following Sunday in an attempt to end the "fiscal cliff" crisis. This, in turn pushed the market significantly upwards. Figures 13 and 14 show that immediately after the announcement of this positive news, covariances rise significantly and more than triple (on average). Similarly, volatilities increase, as well, but on average only moderately. This is in sharp contrast to the (co-)variability patterns found for the May 2010 flash crash, where an explosion in idiosyncratic risk dominates. Consequently, the positive "fiscal cliff news" lead to a significant increase in spot correlations as co-movements dominate. Systematic risk as reflected by spot betas remains widely unchanged. Thus, covariances increase to the same extent as the volatility of the (NASDAQ100) market.
+Finally, we study a third type of event, which is characterized by completely non-anticipated (and ultimately wrong!) news. On 04/23/13 at around 1:07 pm, a fake tweet from the account of the Associated Press (AP) reported "breaking" news on two explosions in the White House, where the U.S. president (supposedly) got injured.11 At 1:10 pm, AP officially denied this message and suspended its twitter account at 1:14 pm. Figure 15 shows the underlying price process and the timing of the corresponding events. Our results in Figures 16 and 17 show that (co-)variances and correlations strongly increase even before 1:00 pm. While the latter finding suggests that rumors on the market might have been present even before the AP announcement, one has to take into account that our spot estimator actually computes the rolling mean over, on average, 5 block-wise estimates with each block being almost 17 minutes long. The increase in covariances is stronger than for volatilities, whereby correlations (on average) increase from approximately 0.2 to 0.8(!). As in the previous scenario, betas remain widely unaffected. Our estimates show that this effect has been present for approximately one hour.12 This finding is remarkable given that the flash crash itself lasted only a couple of minutes and is similar to the effects observed during the May 2010 flash crash. Hence, effects of (flash) crashes on covariances tend to remain in the market for a considerable time period.
+10See http://money.msn.com/now/post.aspx?post=73878f29-4fdb-45c5-baf6-0f83f40b821c&_p=986b65a2-3eea-479c-a4a0-ba9d3988b0e0.
+11See http://buzz.money.cnn.com/2013/04/23/ap-tweet-fake-white-house/?iid=EL. 12We double-checked that this is not induced by the choice of the smoothing window.
+24
+
+In summary, we conclude on the following findings: First, extreme (news) events cause abrupt upward shifts in (co-)variances. After the market has processed this news, (co-)variances move back, which again occurs relatively sharply. Our spot estimator seems to capture these effects quite well, since the observed reactions in the spot quantities are very well aligned with the timing of the underlying event. This indicates that the estimators are suitable to capture changes in dependence structures on a high time resolution. Second, correlations do change abruptly, as well, but the direction of the movements is ambiguous. Obviously, depending on the type of news, we observe that the magnitudes of changes in covariances can be much higher or smaller than those in volatilities. In the first case, the market tends to strongly co-move and seems to be driven by news, which affects all assets very similarly. In the second case, idiosyncratic effects dominate, leading to a decline in correlations. Third, betas seem to be least affected by these extreme scenarios. In a situation of increasing correlations, we observe that covariances tend to change by the same magnitude as the volatility of the market (NASDAQ100) index, leaving betas widely constant. Conversely, in a scenario with decreasing correlations, the dominance of idiosyncratic effects tends to lower betas and thus reduces systematic risk components.
+5 Conclusion
+In this paper, we introduce an estimator for spot covariance matrices, which is constructed based on local averages of block-wise estimates of locally constant covariances. The proposed estimator builds on the local method of moments approach introduced by Bibinger et al. (2014). We show how to extend the LMM approach to the case of autocorrelations in market microstructure noise and provide a suitable procedure for choosing the lag order in practice. For the resulting spot covariance matrix estimator, we derive a stable central limit theorem along with a feasible version that is straightforwardly applicable in empirical practice. An important result is that we are able to attain the optimal convergence rate, which is n1/8 under the assumption of a semi-martingale volatility matrix process with the efficient log-prices being subject to noise and a non-synchronous observation scheme.
+Extensive simulation exercises provide guidance on how to implement the estimator in practice and demonstrate its relative insensitivity with respect to the choice of block sizes, cut-offs and smoothing windows. Moreover, based on NASDAQ blue chip stocks, we provide detailed empirical evidence on the intraday behavior of spot covariances, correlations, volatilities and betas. We show that particularly the former three reveal distinct intraday seasonality patterns. Moreover, we analyze how spot covariances change in periods of extreme market movements and show that intraday changes of (co-)volatility structures can be quite distinct and considerable.
+25
+
+It turns out that our estimator is able to capture these changes quite accurately, which makes it a good candidate for analyzing the (co-)variability of assets on a high-frequency time scale.
+References
+ABADIR, K. M. AND J. R. MAGNUS (2005): Matrix algebra, vol. 1 of Econometric Exercises, Cambridge: Cambridge University Press.
+AIT-SAHALIA, Y., J. FAN, AND D. XIU (2010): "High-Frequency Estimates With Noisy and Asynchronous Financial Data," Journal of the American Statistical Association, 105, 1504­1516.
+AIT-SAHALIA, Y. AND J. JACOD (2009): "Testing for jumps in a discretely observed process," Annals of Statistics, 37, 184­222.
+AIT-SAHALIA, Y., L. ZHANG, AND P. A. MYKLAND (2011): "Ultra High Frequency Volatility Estimation with Dependent Microstructure Noise," Journal of Econometrics, 160, 160­165.
+ALTMEYER, R. AND M. BIBINGER (2014): "Functional Stable Limit Theorems for Efficient Spectral Covolatility Estimators," SFB 649 Discussion Papers SFB649DP2014-005, Sonderforschungsbereich 649, Humboldt University, Berlin, Germany.
+ANDERSEN, T. G. AND T. BOLLERSLEV (1997): "Intraday Periodicity and Volatility Persistence in Financial Markets," Journal of Empirical Finance, 4, 115­158.
+ANDERSEN, T. G., T. BOLLERSLEV, F. X. DIEBOLD, AND P. LABYS (2003): "Modeling and Forecasting Realized Volatility," Econometrica, 71, 579­625.
+ANDERSEN, T. G., D. DOBREV, AND E. SCHAUMBURG (2009): "Duration-Based Volatility Estimation," Global COE Hi-Stat Discussion Paper Series gd08-034, Institute of Economic Research, Hitotsubashi University.
+BANDI, F. M. AND R. RENO (2009): "Nonparametric Stochastic Volatility," Global COE Hi-Stat Discussion Paper Series gd08-035, Institute of Economic Research, Hitotsubashi University.
+BARNDORFF-NIELSEN, O. E., P. R. HANSEN, A. LUNDE, AND N. SHEPHARD (2009): "Realized Kernels in Practice: Trades and Quotes," Econometrics Journal, 12, C1­C32.
+------ (2011): "Multivariate realised kernels: consistent positive semi-definite estimators of the covariation of equity prices with noise and non-synchronous trading," Journal of Econometrics, 162, 149­169.
+26
+
+BARNDORFF-NIELSEN, O. E. AND N. SHEPHARD (2004): "Econometric Analysis of Realized Covariation: High Frequency Based Covariance, Regression, and Correlation in Financial Economics," Econometrica, 72, 885­925.
+BIBINGER, M., N. HAUTSCH, P. MALEC, AND M. REISS (2014): "Estimating the Quadratic Covariation Matrix from Noisy Observations: Local Method of Moments and Efficiency," Annals of Statistics, 42, 1312­1346.
+BIBINGER, M. AND L. WINKELMANN (2013): "Econometrics of Co-Jumps in High-Frequency Data with Noise," SFB 649 Discussion Papers SFB649DP2013-021, Sonderforschungsbereich 649, Humboldt University, Berlin, Germany.
+BILLINGSLEY, P. (1991): Probability and Measure, Springer, New York, 2 ed.
+BOS, C. S., P. JANUS, AND S. J. KOOPMAN (2012): "Spot Variance Path Estimation and Its Application to High-Frequency Jump Testing," Journal of Financial Econometrics, 10, 354­389.
+CFTC AND SEC (2010): "Findings Regarding the Market Events of May 6, 2010," Tech. rep., U.S. Commodity Futures Trading Commission and U.S. Securities & Exchange Commission.
+CHERNOV, M., A. R. GALLANT, E. GHYSELS, AND G. TAUCHEN (2003): "Alternative Models for Stock Price Dynamics," Journal of Econometrics, 116, 225 ­ 257.
+CHRISTENSEN, K., R. OOMEN, AND M. PODOLSKIJ (2014): "Fact or Friction: Jumps at Ultra High Frequency," Journal of Financial Economics, forthcoming.
+CHRISTENSEN, K., M. PODOLSKIJ, AND M. VETTER (2013): "On covariation estimation for multivariate continuous Ito^ semimartingales with noise in non-synchronous observation schemes." Journal of Multivariate Analysis, 120, 59­84.
+CURCI, G. AND F. CORSI (2012): "Discrete Sine Transform for Multi-Scales Realized Volatility Measures," Quantitative Finance, 12, 263­279.
+DE SANTIS, G. AND B. GERARD (1997): "International Asset Pricing and Portfolio Diversification with Time-Varying Risk," The Journal of Finance, 52, 1881­1912.
+FAN, J. AND Y. WANG (2008): "Spot Volatility Estimation for High-Frequency Data," Statistics and Its Interface, 1, 279­288.
+FOSTER, D. P. AND D. B. NELSON (1996): "Continuous Record Asymptotics for Rolling Sample Variance Estimators," Econometrica, 64, 139­174.
+27
+
+GALLANT, A. R. (1981): "On the Bias in Flexible Functional Forms and an Essentially Unbiased Form : The Fourier Flexible Form," Journal of Econometrics, 15, 211­245.
+HANSEN, P. R., J. LARGE, AND A. LUNDE (2008): "Moving Average-Based Estimators of Integrated Variance," Econometric Reviews, 27, 79­111.
+HANSEN, P. R. AND A. LUNDE (2006): "Realized Variance and Market Microstructure Noise," Journal of Business & Economic Statistics, 24, 127­161.
+HAUTSCH, N. AND M. PODOLSKIJ (2013): "Preaveraging-Based Estimation of Quadratic Variation in the Presence of Noise and Jumps: Theory, Implementation, and Empirical Evidence," Journal of Business & Economic Statistics, 31, 165­183.
+HAYASHI, T. AND N. YOSHIDA (2011): "Nonsynchronous covariation process and limit theorems," Stochastic Processes and their Applications, 121, 2416­2454.
+HUANG, R. AND T. POLAK (2011): "LOBSTER: Limit Order Book Reconstruction System," Technical report, Humboldt-Universita¨t zu Berlin.
+HUANG, X. AND G. TAUCHEN (2005): "The Relative Contribution of Jumps to Total Price Variance," Journal of Financial Econometrics, 3, 456­499.
+JACOD, J. (2012): "Statistics and high frequency data." Proceedings of the 7th Se´minaire Europe´en de Statistique, La Manga, 2007: Statistical methods for stochastic differential equations, edited by M. Kessler, A. Lindner and M. Sørensen.
+JACOD, J., Y. LI, P. A. MYKLAND, M. PODOLSKIJ, AND M. VETTER (2009): "Microstructure Noise in the Continous Case: the Pre-Averaging Approach," Stochastic Processes and their Applications, 119, 2803­2831.
+KALNINA, I. AND O. LINTON (2008): "Estimating Quadratic Variation Consistently in the Presence of Endogenous and Diurnal Measurement Error," Journal of Econometrics, 147, 47­59.
+KOIKE, Y. (2014): "Quadratic covariation estimation of an irregularly observed semimartingale with jumps and noise," preprint, arXiv:1408.0938.
+KRISTENSEN, D. (2010): "Nonparametric filtering of the realized spot volatility: a kernel-based approach," Econometric Theory, 26, 60­93.
+LI, Y., P. A. MYKLAND, E. RENAULT, L. ZHANG, AND X. ZHENG (2014): "Realized Volatility when Sampling Times are Possibly Endogenous," Econometric Theory, 30, 580­ 605.
+28
+
+LONGIN, F. AND B. SOLNIK (2001): "Extreme Correlation of International Equity Markets," The Journal of Finance, 56, 649­676.
+MANCINI, C., V. MATTIUSSI, AND R. RENO' (2012): "Spot Volatility Estimation Using Delta Sequences," Working Papers - Mathematical Economics 2012-10, Universita' degli Studi di Firenze, Dipartimento di Scienze per l'Economia e l'Impresa.
+MYKLAND, P. A. AND L. ZHANG (2008): "Inference for Volatility-Type Objects and Implications for Hedging," Statistics and Its Interface, 1, 255­278.
+OOMEN, R. C. (2006): "Comment on Hansen, P. R., and Lunde, A. (2006), "Realized Variance and Market Microstructure Noise"," Journal of Business & Economic Statistics, 24, 195­202.
+ZHANG, L. (2011): "Estimating Covariation: Epps Effect and Microstructure Noise," Journal of Econometrics, 160, 33­47.
+ZHANG, L., P. A. MYKLAND, AND Y. AIT-SAHALIA (2005): "A Tale of Two Time Scales: Determining Integrated Volatility With Noisy High-Frequency Data," Journal of the American Statistical Association, 100, 1394­1411.
+ZU, Y. AND P. H. BOSWIJK (2014): "Estimating Spot Volatility with High-Frequency Financial Data," Journal of Econometrics, forthcoming.
+
+A Proofs
+
+A.1 Preliminaries
+
+Consider the process
+
+t
+X~t = 0  sh-n 1 hn dBs ,
+
+(25)
+
+without drift and with block-wise constant volatility as a simplified approximation of X. In
+the following, we distinguish between the estimator of the spot covariance matrix (12) based on oracle optimal weights (13), ^ sor, and the adaptive estimator ^ s. Furthermore, we write ^ s(X~ + ) for the estimator built from observations in the simplified model in which X~ is
+observed in noise and denote the associated spectral statistics by:
+
+S~jk = jhn-1
+
+np i=1
+
+X~t(i(pp)) +
+
+(p) i
+
+-
+
+X~t(i(p-p))1
+
+-
+
+(p) i-1
+
+jk
+
+ti(p) -t(i-p)1 2
+
+.
+1pd
+
+(26)
+
+29
+
+On the compact interval [0, 1], it can be assumed that bs , s , ~bs , ~s are uniformly bounded. This is based on Jacod (2012), Lemma 6. 6 in Section 6. 3. For the order of the weights we have by Lemma C.1 of Bibinger et al. (2014) uniformly over all k that
+
+Wj Hnk , khn
+
+(log (n))-1 1 + j2(nhn2 )-1 -2 .
+
+(27)
+
+We introduce the short notation t¯i(p) = (1/2) ti(p) + ti(-p)1 . Recall the summation by parts identity from Altmeyer and Bibinger (2014) given by
+
+np-1
+
+Sj(kp)  -
+
+Yv(p) jk t¯v(p+)1 - jk t¯(vp)
+
+v=1
+
+
+
+- np-1 Yv(p)jk(t(vp)) t(vp+)1
+
+- 2
+
+t(vp-)1
+
+,
+
+v=1
+
+(28)
+
+with jk(t) = jk(t) = 2hn-1/2 cos jhn-1(t - khn) 1[khn,(k+1)hn](t). The first remainder,
+which is only due to end-effects when t0(p) = 0 or tn(pp) = 1, and the second remainder by application of the mean value theorem and passing to arguments tv(p) are asymptotically negligible.
+The following orthogonality approximations are satisfied by jk, jk:
+
+np
+jk t¯i(p) qk t¯i(p)
+i=1
+
+t(ip) - t(i-p)1
+
+1
+= (jq + O(1)) j2k(t) dt
+0
+= (jq + O(1))hn2 -2j-2,
+
+(29a)
+
+with jq = 1{j=q} being Kronecker's delta. Likewise,
+
+np-1 i=1
+
+jk
+
+ti(p)
+
+qk
+
+ti(p)
+
+ti(+p)1 - t(i-p)1 2
+
+1
+= (jq + O(1)) j2k(t) dt
+0
+= (jq + O(1)) .
+
+(29b)
+
+Moreover, we have the following approximations:
+
+np-1
+2jk t(il)
+i=1
+
+ti(+l)1 -ti(-l) 1 2
+
+2
+
+
+
+nl-1
+2jk
+
+t(il)
+
+t(i+l)1-ti(-l)1 (Fl-1) (khn) 2 nl
+
+i=1
+
+
+
+1
+2jk(t) dt
+0
+
+(Fl-1) (khn) nl
+
+,
+
+(30)
+
+30
+
+ti(l) - ti(-l)1 2 
+
+(Fl-1) (khn)nl-1 ti(l) - t(i-l)1
+
+khnt(il)(k+1)hn
+
+khnti(l)(k+1)hn
+
+= (Fl-1) (khn)nl-1hn ,
+
+(31)
+
+where the remainders are asymptotically negligible. The last quantity reflects the local variation of observation times similar to the (global) quadratic variation of time by Zhang et al. (2005).
+
+A.2 Proof of Theorem 1
+
+For the sake of notational brevity, we present the proof of Theorem 1 for time points that lie in the interior of the unit interval. Therefore, in (12), we have Ls,n = sh-n 1 - Kn, Us,n = shn-1 + Kn and Us,n - Ls,n + 1 = 2Kn + 1. For points in the boundary region, the proof proceeds completely analogous and requires only the obvious changes in the limits of
+summation, as well as in the resulting length of the smoothing window.
+Recall the notation from (4), where p, p = 1, . . . , d, refers to the long-run noise variance, namely the sum of all autocovariances, in component p.
+
+Lemma 1. By Assumption 3, we have for p, q  {1, . . . , d}, p = q, that
+
+E
+
+np
+
+(p) i
+
+jk
+
+ti(p)
+
+t(i+p)1 -ti(-p)1 2
+
+2
+
+= p Fp-1 pn-1 + O n-1 ,
+
+i=1
+
+(32a)
+
+E
+
+np
+
+i(p)jk
+
+ti(p)
+
+t(i+p)1 -t(i-p)1 2
+
+i=1
+
+nq
+
+i(q)jk
+
+ti(q)
+
+ti(+q)1 -t(i-q)1 2
+
+i=1
+
+= 0,
+
+(32b)
+
+E
+
+np
+
+(ip)jk ti(p)
+
+ti(+p)1 -ti(-p)1 2
+
+4
+
+= p2
+
+Fp-1
+
+23 p2n-2 + O n-2 ,
+
+i=1
+
+(32c)
+
+E
+
+np
+
+i(p)jk
+
+t(ip)
+
+t(i+p)1 -t(i-p)1 2
+
+2
+
+nq
+
+(iq)jk
+
+t(iq)
+
+t(i+q)1 -ti(-q)1 2
+
+2
+
+i=1 i=1
+
+= p Fp-1 pq Fq-1 qn-2 + O n-2 .
+
+(32d)
+
+31
+
+Proof. Using (31) and an analogous estimate, we infer that
+
+E
+
+np
+
+(p) i
+
+jk
+
+ti(p)
+
+t(i+p)1 -t(i-p)1 2
+
+2
+
+=E
+
+np
+
+(p) i
+
+22jk
+
+ti(p)
+
+ti(+p)1-ti(-p)1 2 2
+
+i=1 i=1
+
+np
++2
+
+R
+
+(p) i
+
+i(+p)ujk
+
+ti(p)
+
+jk
+
+t(i+p)u
+
+ti(+p)1 -t(i-p)1 2
+
+i=1 u=1
+
+× ti(+p)u+1-ti(+p)u-1
+2
+
+= p Fp-1 pn-1 + O n-1 .
+
+Here and frequently below, we consider simple approximations for jk(t) - jk(s) as t - s = O(n-1), using cos(t) - cos(s) = -2 sin((t - s)/2) sin((t + s)/2).
+We also introduce the shortcut iR,v = 1{|i-v|R} for the following calculations. Accordingly,
+the fourth moments yield
+
+E
+
+np
+
+(ip)jk
+
+t(ip)
+
+t(i+p)1 -t(i-p)1 2
+
+4
+
+=
+
+i=1
+
+E
+
+np
+
+(p) i
+
+(p) v
+
+(p) u
+
+r(p)jk
+
+ti(p)
+
+jk
+
+t(vp) jk
+
+tu(p) jk
+
+t(rp)
+
+ti(+p)1-ti(-p)1 tv(p+)1-tv(p-)1 22
+
+i,v,u,r=1
+
+× t(up+)1-t(up-)1 tr(p+)1-t(rp-)1
+22
+
+np
+=E
+i,v,u,r=1
+= p2 Fp-1
+
+(p) (p) (p) (p) i vur
+
+iR,vuR,r + iR,uvR,r + iR,rvR,u jk t(ip) jk tv(p)
+
+× jk t(up) jk 23 p2n-2 - Rn ,
+
+tr(p)
+
+ti(+p)1-ti(-p)1 tv(p+)1-tv(p-)1 t(up+)1-tu(p-)1 t(rp+)1-t(rp-)1 22 2 2
+
+with a remainder Rn, which satisfies for some constant C that
+np
+Rn C iR,vuR,r iR,u + vR,r + iR,r + vR,u + iR,uvR,r iR,v + uR,r + iR,r + vR,u
+i,v,u,r=1
++ iR,rvR,u iR,v + uR,r + iR,u + vR,r n-4
+= O nR3n-4 = O n-3 = O n-2 .
+
+Thus, Rn is of smaller order than the leading term. Roughly speaking, the expectation above vanishes if no two pairs of indices are in the range of autocorrelations. The terms where
+
+32
+
+both pairs are again correlated is asymptotically negligible. The statements for terms with p = q readily follow from the fact that we have non-correlated noise components and that E[ (ip)] = E[ v(q)] = 0 for all i, v.
+Decompose the estimation error of the estimator (12) as follows:
+
+n/2 vec ^ s - s = n/2 vec ^ sor(X~ + ) - s + n/2 vec ^ sor - ^ osr(X~ + + n/2 vec ^ s - ^ sor .
+
+Theorem 1 is implied by Proposition A.1, Proposition A.2 and Proposition A.3 below.
+
+Proposition A.1. On the assumptions of Theorem 1, for any s  (0, 1) it holds true that
+
+n/2 vec ^ osr(X~ + ) - s d--(st) N 0, 2   H1/2 + 1H/2   sZ .
+
+(33)
+
+Proof. We consider the estimator (12) under observations of the simplified process X~ + and associated spectral statistics S~jk in (26). By virtue of the identity
+
+COV vec S~jkS~mk = Ij-k1Z(jm + O(1)) ,
+
+(34)
+
+we deduce that the variance-covariance matrix is
+
+COV vec ^ sor
+
+shn-1 +Kn
+
+Jn
+
+= (2Kn + 1)-2 WjkCOV vec S~jkS~jk
+
+k= shn-1 -Kn
+
+j=1
+
+Wjk
+
++ O(Kn-1)
+
+sh-n 1 +Kn
+
+Jn
+
+= (2Kn + 1)-2Ik-1 IjkIj-k1ZIjkIk-1 + O(Kn-1)
+
+k= sh-n 1 -Kn
+
+j=1
+
+shn-1 +Kn
+= (2Kn + 1)-2Ik-1Z + O(Kn-1) ,
+k= shn-1 -Kn
+
+since the covariances between different blocks are asymptotically negligible, which can be seen by considering conditional expectations. Recall the definition of the symmetric matrices Ik and Ijk from (13). Having established the asymptotic equality (34), the asymptotic form of the variance-covariance matrix follows analogously to the proof of Corollary 4.3 of Bibinger et al. (2014). There, the asymptotic theory is pursued for continuous observations, but, once we have the illustration above for Ik-1, the analysis is the same. Using block-wise transformations which
+
+33
+
+diagonalize khn and transfer the noise level (5) to the identity matrix, i.e.,
+
+khn = OkHkhn khn Hkhn Ok ,
+
+with Ok being orthogonal matrices and khn being diagonal, we can infer the asymptotic form via
+
+COV vec ^ osr
+
+shn-1 +Kn
+= (2Kn + 1)-2 OkHk-1 -2I~k-1 Hk-1Ok
+k= shn-1 -Kn
+
+-2Z
+
++ O(Kn-1),
+
+with a diagonalized version I~k of Ik. Along the same lines as in the proof of Corollary 4.3 in Bibinger et al. (2014), we derive that
+
+COV vec ^ sor
+
+sh-n 1 +Kn
+
+= (2 + O(1))
+
+(2Kn + 1)-2
+
+k= sh-n 1 -Kn
+
+× khn  kHhn 1/2 + kHhn 1/2  khn Z ,
+
+with the short notation Hkhn = Hkhn Hk-h1n khn Hk-h1n 1/2Hkhn . The expression in Theorem 1 now follows using the smoothness of  and H granted by Assumptions 2-4. Therefore, to
+
+deduce the variance-covariance structure, it remains to prove that (34) is indeed valid. The
+
+computations rely on the preliminaries above, namely summation by parts, the orthogonality
+
+relations (29a) and (29b), as well as (30) and (31). For the signal term, we apply Lemma
+
+4.4 of Altmeyer and Bibinger (2014), which states that in our asymptotic framework we can,
+
+without loss of generality, consider the signal terms as stemming from synchronous observations.
+
+Though this Lemma directly follows from a basic approximation of jk(t) - jk(s) as (t - s)
+
+gets small, similarly as employed above, this is a main simplification of the analysis. Then,
+
+we obtain with X =
+
+n i=1
+
+iX
+
+jk
+
+(t¯i)
+
+from
+
+some
+
+synchronous
+
+reference
+
+observation
+
+scheme
+
+ti, i = 0, . . . , n, that
+
+COV vec 2j2h-n 2X X
+
+1 =
+n
+
+kh2n Z
+
+,
+
+with (29a) and by Ito^ isometry. As the noise level (5) is diagonal, we can restrict ourselves to variances
+
+Var 2j2h-n 2
+
+i(p)jk
+
+t(ip)
+
+ti(+p)1 -ti(-p)1 2
+
+2
+
+= 4j4h-n 42
+
+Hnk (pp)
+
+2
+,
+
+i
+
+34
+
+with Hkn as defined in (9), as well as by Lemma 1, (29b) and (30). The multiplication with Z/2 when evaluating the variance-covariance matrix of the vectorized diagonal matrix is performed by elementary matrix calculus. Using the same preliminaries again together with the independence of signal and noise, the form of cross terms is easily proved, such that we conclude (34). Considering the statistics
+
+shn-1 +Kn
+
+Jn
+
+kn = n/2
+
+(2Kn + 1)-1 Wj Hnk , khn Z~jk ,
+
+k= sh-n 1 -Kn
+
+j=1
+
+(35a)
+
+Z~jk = vec S~jkS~jk - j2h-n 2Hkn - khn , we obtain the following convergences:
+E kn Fkhn p 0 ,
+
+(35b) (35c)
+
+E kn(kn) Fkhn p 2   1H/2 + H1/2   sZ ,
+
+(35d)
+
+E kn(kn) kn(kn) Fkhn p 0 .
+
+(35e)
+
+The above analysis for the variance implies (35d). The bias condition (35c) is readily obtained using Lemma 1, summation by parts, Ito^ isometry for the signal part, as well as (29a) and (29b). The Lyapunov condition (35e) follows using analogous bounds as for the stable CLT of the integrated version in Altmeyer and Bibinger (2014). We are left to prove that n = n/2 vec ^ sor(X~ + ) - s satisfy
+
+E [Zg(n)]  E [Zg()] = E[Z]E [g()] ,
+
+(36)
+
+for any F-measurable bounded random variable Z and continuous bounded function g with
+
+ = 1/2  1H/4 s ZU + H1/4  1/2 s ZU
+
+(37)
+
+and U, U  Rd2 being two independent standard normally distributed vectors independent of F. (36) ensures that the central limit theorem (33) is stable. The limit  gives indeed the
+
+35
+
+asymptotic law of (33) as Z2 = 2Z and
+1/2  1H/4 s Z 1/2  1H/4 s Z = 2   1H/2 s Z ,
+because Z commutes with 1/2  H1/4 s and by the analogous transform for the second addend. The proof of (36) relies on separating the sequence of intervals with the blocks involved in ^ sor from the rest of [0, 1] and conditioning. Thereto, set
+
+X~ (n)t =
+
+An = [s - (Kn + 1)hn, s + (Kn + 1)hn] ,
+t
+0 1An (s) sh-n 1 hn dBs , X¯ (n)t = Xt - X~ (n)t .
+
+Denote with Hn the -field generated by X¯ (n)t and F0. Then, Hn nN is an isotonic sequence and nN Hn = F1. Since E[Z|Hn]  Z in L1(P) as n  , it is enough to show that E[Zg(n)]  E[Z]E[g()] for Z being Hn0-measurable for some n0  N. Observe that n includes only increments iX~ (p), p = 1, . . . , d, of X~ (n)t and uncorrelated from those of X¯ (n)t. For all n  n0, we conclude E[Zg(n)] = E[Z]E[g(n)]  E[Z]E[g()] by a
+standard central limit theorem. This proves (36) and completes the proof of Proposition A.1.
+
+Proposition A.2. On the assumptions of Theorem 1, for any s  (0, 1) it holds true that
+
+n/2 vec ^ osr - ^ sor(X~ + p 0 .
+
+(38)
+
+Proof. The left-hand side above equals
+
+n/2 vec ^ sor - sor(X~ +
+
+sh-n 1 +Kn Jn
+
+= n/2 2Kn + 1 -1
+
+Wj Hnk , khn
+
+k= sh-n 1 -Kn j=1
+
+× vec SjkSjk - S~jkS~jk .
+
+Using that
+
+SjkSjk - S~jkS~jk = S~jk Sjk - S~jk + Sjk - S~jkSjk  Sjk + S~jk Sjk - S~jk ,
+
+36
+
+and the order of the weights provided by (27), a crude estimate suffices here:
+
+n/2 vec ^ osr - osr(X~ +
+
+sh-n 1 -Kn Jn
+
+n/2 2Kn + 1 -1
+
+Wj Hkn, khn
+
+Sjk + S~jk
+
+k= sh-n 1 -Kn j=1
+
+
+
+Jn
+
+= Op n/2
+
+1 + j2(nh2n)-1 -1(log (n))-1 = Op n/2hn log (n)
+
+j=1
+
+Sjk - S~jk = Op(1) .
+
+This follows with
+Jn
+1  j-2nh2n
+j=1
+
+
+
+nhn
+
+Jn
+
+1 + j-2nhn2
+
+j=1 j=1
+
+log2 (n) ,
+
+and with COV(Sjk) = O 1 + j2(nhn2 )-1 2 and E[Sjk] = O(1).
+
+Proposition A.3. On the assumptions of Theorem 1, for any s  (0, 1) it holds true that
+
+n/2 vec ^ s - ^ osr p 0 .
+
+(39)
+
+Proof. We write the left-hand side above
+
+n/2 vec ^ s - ^ osr
+
+shn-1 -Kn Jn
+= n/2 2Kn + 1 -1
+k= shn-1 -Kn j=1
+
+W^ j ^ khn
+
+- Wj khn
+
+Zj k ,
+
+Zjk = vec SjkSjk - j2h-n 2Hkn - khn .
+By Proposition A.2, the expectation of Zjk is asymptotically negligible. To extend our asymptotic theory to an adaptive approach, we shall concentrate in the following on the error due to pre-estimating khn to determine the optimal weights in (13). The effect of an estimated noise level as in (11) is easily shown to be asymptotically negligible using Theorem 2 and (31). We
+
+37
+
+decompose the difference between adaptive and oracle estimator using
+
+W^ j ^ khn - Wj khn = W^ j ^ m(2Kn+1)hn - Wj m(2Kn+1)hn + + W^ j ^ khn - W^ j ^ m(2Kn+1)hn + Wj m(2Kn+1)hn - Wj khn ,
+
+where ^ m(2Kn+1)hn, m = 0, . . . , (2Kn + 1)-1hn-1 - 1, is a pre-estimator, which is constant on the coarse grid, such that it is constant over the smoothing window of ^ s from (12), and m(2Kn+1)hn is the locally constantly approximated true covariance matrix on the same coarse grid. We apply triangular inequality and prove that all three terms tend to zero in probability.
+For the first term, we obtain
+
+sh-n 1 -Kn
+
+Jn
+
+(2Kn + 1)-1
+
+k= shn-1 -Kn
+
+j=1
+
+W^ j ^ m(2Kn+1)hn
+
+- Wj m(2Kn+1)hn
+
+Zjk
+
+Jn
+
+ (2Kn + 1)-1
+
+W^ j ^ m(2Kn+1)hn - Wj m(2Kn+1)hn
+
+j=1
+
+sh-n 1 -Kn
+Zjk
+k= sh-n 1 -Kn
+
+
+Jn
+= Op Kn-1/2 n log (n) 1 + j2(nhn2 )-1 1  j-4n2hn4  = O n-/2 ,
+
+j=1
+
+as the weight matrices in this term do not depend on k if ^ -  = Op(n is the rate of the pre-estimator on the coarse grid and by (27), as well as Lemma C.2 in Bibinger et al. (2014). The latter is a key ingredient of this proof as it gives a uniform upper bound on the norm of the matrix derivatives of Wj() w.r.t. , such that we can use the -method. Actually some rate n = n-,  > 0, suffices here and we can ensure a much faster rate. Hence, it remains to show that the two other terms are negligible, as well. Since all weight matrices satisfy j Wj = Ed2×d2, i.e. their sum equals the identity matrix, we consider the
+
+38
+
+sum of the norms of the variance-covariance matrices of those terms, which is bounded by:
+
+sh-n 1 -Kn
+(2Kn + 1)-2
+k= sh-n 1 -Kn
+
+Jn
+COV
+j=1
+
+Wj m(2Kn+1)hn - Wj khn Zjk
+
+shn-1 -Kn
++ (2Kn + 1)-2
+k= shn-1 -Kn
+
+Jn
+COV
+j=1
+
+W^ j ^ m(2Kn+1)hn - W^ j ^ khn
+
+shn-1 -Kn
+
+
+Jn
+
+ (2Kn + 1)-2
+
+
+
+k= shn-1 -Kn j=1
+
+2
+Wj m(2Kn+1)hn - Wj khn
+
+1/22
+
+Zjk
+
+× COV Zjk
+
+
+
+sh-n 1 -Kn
+
+
+Jn
+
++ (2Kn + 1)-2
+
+
+
+k= shn-1 -Kn j=1
+
+W^ j ^ m(2Kn+1)hn - W^ j ^ khn 2
+
+× COV Zjk
+
+1/22 
+
+ = Op Kn-1
+
+Jn
+1  j-4n2h4n
+j=1
+
+1  j2(nh2n)-1
+
+2 n2  (Knhn)-2  = Op(n- .
+
+This completes the proof of Theorem 1. The feasible version (17a) readily follows from the induced consistency of I^k-1 ^ khn for Ik-1 khn .
+
+A.3 Proof of Theorem 2
+Observe that
+
+E [iY i+rY ] = E [i i+r ] + O(1) = E [ i i+r - i-1 i+r - i i+r-1 + i-1 i+r-1] = 2r - r-1 - r+1 = r,
+for r  1, 1  i  (n - r), and
+0 = 2(0 - 1) = E (iY )2 + O(1) .
+
+39
+
+The remainders stem from the signal terms X, which are of smaller order. Hence, by the definition of the estimators in (19b), it readily follows that
+
+R
+
+E [^R] = 0 - 1 +
+
+2u - u-1 - u+1 + O(1) = R + O(1),
+
+u=1
+
+and we have consistency of all ^r, 0  r  R. For the analysis of the variances of the estimators (19a)-(19c), denote by
+
+r|ir-k| = Cov (i i+r , k k+r ) .
+
+The variance of ^R for the maximum lag R > 1, for which j = 0 for j > R, becomes
+
+n n-R R
+Var(^R) = (2n)-2 Var (iY )2 + (2n)-2 2 Cov (iY )2, (i+uY )2
+
+i=1 i=1 u=1
+
+n-R R R
+
++ n-2
+
+Cov iY i+rY, iY i+r Y
+
+i=1 r=1 r =1
+
+R
+
++2 Cov iY i+rY, i+uY i+u+r Y
+
+u=1
+
+n-R R
+
++ n-2
+
+Cov (iY )2, iY i+rY
+
+i=1 r=1
+
+R
++2 Cov (iY )2, i+uY i+u+rY
+
+u=1
+
+= n-1
+
+R RR
+
+R
+
+1 4
+
+000
+
++
+
+1 2
+
+u00 +
+
+0rr + 2 urr
+
+u=1 r=1 r =1
+
+u=1
+
+RR
++ 00r + 2 0ur
+
++ O n-1
+
+r=1 u=1
+
+= n-1
+
+R RR
+
+R
+
+1 4
+
+000 + 2
+
+u00 +
+
+0rr + 2 rur
+
+u=1
+
+r=0 r =1
+
+u=1
+
++ O n-1 .
+
+Write the above variance as n-1VRn. By construction of r, 0  r  R - 1, we derive
+
+nVar(^r) + O(1) = Vrn+1 + Vrn + 2Crn,r+1,
+
+40
+
+where Vrn are defined analogously to VRn except replacing R by r < R and
+
+
+
+Crn,r+1
+
+=
+
+000 4
+
++
+
+1 2
+
+R
+
+u00 +
+
+r
+
+r+1
+
+u=1 u=0 u =1
+
+R
+
+u0u + 2
+
+quu
+
+q=1
+
+ .
+
+Inserting the observed returns iY as estimators of the noise increments i gives consistent estimators of the variances. Sufficient conditions for a central limit theorem can easily be shown here by applying, for example, Theorem 27.4 from Billingsley (1991).
+
+B Stochastic Volatility Specifications for Simulation Study
+Following Huang and Tauchen (2005), we consider one- and two-factor stochastic volatility models for the efficient log-price process in (24a). The one-factor specification reads
+
+~t = exp(0 + 1vt), dvt = vtdt + dWt,
+
+(40)
+
+where Wt is a standard Brownian motion with Corr(dWt, dBt) = . The parameter values are chosen as 0 = 0, 1 = 0.125,  = -0.025 and  = -0.62.
+The two-factor model introduced by Chernov et al. (2003) allows for more pronounced movements in the instantaneous volatility by a feedback mechanism. The corresponding parameterization is
+
+~t = s­exp(0 + 1v1,t + 2v2,t),
+
+dv1,t = 1v1,tdt+dW1,t, dv2,t = 2v2,tdt + (1 + vv2,t) dW2,t,
+
+s­exp(u) =
+
+exp(u) if u  u0
+
+exp(u0) 1 - u0 + u2/u0
+
+else,
+
+(41)
+
+where W1,t and W2,t are standard Brownian motions with Corr(dW1,t, dBt) = 1 and Corr(dW2,t, dBt) = 2. We consider the configuration 0 = -1.2, 1 = 0.04, 2 = 1.5, 1 = -0.137e-2, 2 = -1.386, v = 0.25, 1 = 2 = -0.3 and u0 = ln (1.5).
+
+C Tables and Figures
+
+41
+
+Table 3: Summary statistics for NASDAQ quote data. n: avg. # of observations. t: avg. duration in
+
+seconds between avg. duration in
+
+osebcseornvdastiobnestw. %ee(n|pYri|>ce0)c:h%anogfeos.bser^va:tio(1n0s6a×ss)oacviagte. dowf sitqhuparriecerocohtanogfelso.ng-tr(u|nYn|o>i0s)e:
+
+variance estimate for quote revisions based on Q~ = 50. ^: avg. noise-to-signal ratio per observation,
+
+where ^2 = n^/RV5ssm with RVs5sm denoting the sub-sampled five-minute realized variance. R^: avg. estimate of order of serial dependence in the noise process.
+
+Symbol
+
+
+
+n t %(|Y |>0) t(|Y |>0)
+
+^
+
+^
+
+R^
+
+AAPL MSFT GOOG CSCO ORCL INTC QCOM AMGN TEVA GILD AMZN EBAY NWSA DTV CELG INFY YHOO COST SPLS SBUX ADP ESRX ADBE FSLR BIIB SYMC JNPR BRCM AMAT CMCSA
+
+176608.121 440650.911
+59790.343 293862.329 320960.857 350144.419 321429.205 134118.345 107736.535 180836.653
+97905.278 271235.321 198976.385 156096.381
+76910.909 59641.755 250724.521 72083.358 137575.532 169759.285 108426.889 128535.116 161843.232 73666.222 51072.535 152508.502 160994.910 239822.793 155696.834 266752.353
+
+0.184 0.063 0.466 0.092 0.089 0.079 0.087 0.245 0.312 0.155 0.333 0.101 0.158 0.201 0.377 0.594 0.133 0.412 0.201 0.167 0.291 0.251 0.174 0.428 0.579 0.182 0.205 0.119 0.174 0.106
+
+49.720 0.759 50.918 0.628 1.390 0.681 4.064 13.509 7.557 6.696 47.455 3.336 1.176 6.187 24.930 22.721 1.061 21.294 1.184 6.190 7.240 11.346 4.353 31.716 37.997 1.212 4.310 3.563 0.775 1.558
+
+0.366 9.227 0.937 16.566 6.971 12.739 2.533 2.389 4.558 3.263 0.692 3.731 14.179 3.904 1.715 2.828 15.243 2.172 19.160 3.527 4.707 2.418 5.087 1.593 1.664 16.638 6.507 4.193 24.924 7.801
+
+0.005 0.098 0.022 0.055 0.203 0.086 0.209 0.215 0.216 0.272 0.033 0.362 0.212 0.209 0.202 0.165 0.200 0.106 0.122 0.227 0.204 0.229 0.238 0.817 0.229 0.127 0.545 0.473 0.093 0.144
+
+0.344 0.748 0.656 0.427 1.151 0.526 1.950 2.038 1.701 1.950 0.591 1.789 0.798 1.739 1.719 1.966 0.671 1.963 0.486 1.578 2.258 1.915 1.391 1.743 2.241 0.598 1.246 1.965 0.397 1.002
+
+12.083 2.734 8.877 1.507 3.713 1.976 7.604 6.461 4.507 6.729 10.475 6.286 1.919 4.930 7.219 3.088 2.455 5.998 1.373 5.748 4.586 6.195 3.779 7.862 5.594 1.462 3.436 6.293 0.968 3.194
+
+QQQ
+
+1063732.448 0.025
+
+0.784
+
+3.948 0.059 1.097 4.596
+
+42
+
+Table 4: Summary statistics of number of blocks, spectral cut-off and length of smoothing window for LMM estimator. No. of blocks hn-1 , spectral cut-off Jn and length of smoothing window Kn (in blocks) are chosen as described in Section 2.4, using the input parameters that are optimal in the
+"1F"-setting given a high noise level in the simulation study of Section 3: h = 0.2, J = 8 and K = 0.4.
+
+Sample
+
+Input
+
+q0.05
+
+Mean
+
+q0.95
+
+Std.
+
+05/10 ­ 04/14
+
+hn-1 Jn
+Kn
+
+18.000 48.000 2.000
+
+22.516 53.532 2.435
+
+29.000 60.000 3.000
+
+3.922 3.672 0.300
+
+05/10 ­ 04/11
+
+hn-1 Jn
+Kn
+
+18.000 48.000 2.000
+
+22.744 53.711 2.446
+
+30.000 60.000 3.000
+
+4.362 3.928 0.323
+
+05/11 ­ 04/12
+
+hn-1 Jn
+Kn
+
+18.650 49.000 2.000
+
+23.761 54.708 2.516
+
+32.000 61.350 3.000
+
+4.663 4.072 0.330
+
+05/12 ­ 04/13
+
+h-n 1 Jn
+Kn
+
+17.000 47.000 2.000
+
+20.495 51.450 2.280
+
+26.000 57.000 2.500
+
+2.587 2.883 0.262
+
+05/13 ­ 04/14
+
+h-n 1 Jn
+Kn
+
+19.000 50.000 2.000
+
+22.902 54.127 2.488
+
+27.000 58.000 3.000
+
+2.532 2.529 0.194
+
+43
+
+Avg. Covariance Deciles Avg. Correlation Deciles
+
+0.1 0.7
+
+0.075
+
+0.525
+
+0.05 0.35
+
+0.025
+
+0.175
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Covariances
+
+(b) Correlations
+
+Figure 2: Cross-sectional deciles of across-day averages of spot covariances and correlations. Spot estimates are first averaged across days for each asset pair. Subsequently, cross-sectional sample deciles of the across-day averages are computed. Solid horizontal line corresponds to the cross-sectional median of the across-day averages of integrated covariance and correlation estimates. These are based on the LMM estimator of the integrated (open-to-close) covariance matrix by Bibinger et al. (2014) accounting for serially dependent noise and using the same input parameter configuration as the spot estimators. Covariances are annualized.
+
+Avg. Beta Deciles Avg. Volatility Deciles
+
+1.4 1.05
+0.7
+
+0.9 0.675
+0.45
+
+0.35 0.225
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Betas
+
+(b) Volatilities
+
+Figure 3: Cross-sectional deciles of across-day averages of spot betas and volatilities. Spot estimates are first averaged across days for each asset. Subsequently, cross-sectional sample deciles of the across-day averages are computed. Solid horizontal line corresponds to the cross-sectional median of the across-day averages of integrated beta and volatility estimates. These are based on the LMM estimator of the integrated (open-to-close) covariance matrix by Bibinger et al. (2014) accounting for serially dependent noise and using the same input parameter configuration as the spot estimators. Volatilities are annualized.
+
+44
+
+Standard Deviation Deciles Standard Deviation Deciles
+
+0.25 0.35
+
+0.1875
+
+0.2625
+
+0.125
+
+0.175
+
+0.0625
+
+0.0875
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Covariances
+
+(b) Correlations
+
+Figure 4: Cross-sectional deciles of across-day standard deviations of spot covariances and correlations. First, sample standard deviations of spot estimates are computed across days for each asset pair. Subsequently, cross-sectional sample deciles of the across-day standard deviations are computed. Covariances are annualized.
+
+Standard Deviation Deciles Standard Deviation Deciles
+
+1.4 0.4
+
+1.05 0.3
+
+0.7 0.2
+
+0.35 0.1
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Betas
+
+(b) Volatilities
+
+Figure 5: Cross-sectional deciles of across-day standard deviations of spot betas and volatilities. First, sample standard deviations of spot estimates are computed across days for each asset. Subsequently, cross-sectional sample deciles of the across-day standard deviations are computed. Volatilities are annualized.
+
+45
+
+(a) Covariances
+
+(b) Correlations
+
+Figure 6: Cross-sectional medians of normalized intraday variation proxy for spot covariances
+
+and correlations. (Total) intraday variation normalized by the L1-norm is proxied by V~fnorm =
+
+ng i=1
+
+|f
+
+(ti)
+
+-
+
+f
+
+(ti-1)|
+
+ng i=1
+
+|f
+
+(ti)|
+
+ti
+
+-1, where ng
+
+is the number of grid points used.
+
+Lower
+
+and upper boundary of shaded area correspond to cross-sectional 10% and 90% percentiles, respectively.
+
+The horizontal dashed line corresponds to the across-day median. The vertical broken lines indicate three
+
+selected "event days".
+
+(a) Betas
+
+(b) Volatilities
+
+Figure 7: Cross-sectional medians of normalized intraday variation proxy for spot betas and
+
+volatilities. (Total) intraday variation normalized by the L1-norm is proxied by V~fnorm =
+
+ng i=1
+
+|f
+
+(ti)
+
+-
+
+f
+
+(ti-1)|
+
+ng i=1
+
+|f
+
+(ti)|
+
+ti
+
+-1, where ng
+
+is the number of grid points used.
+
+Lower
+
+and upper boundary of shaded area correspond to cross-sectional 10% and 90% percentiles, respectively.
+
+The horizontal dashed line corresponds to the across-day median. The vertical broken lines indicate three
+
+selected "event days".
+
+46
+
+Autocorrelation
+
+1
+0.7
+0.4
+0.1
+-0.2 0
+
+50 100 Lag
+(a) Covariance
+
+150
+
+Autocorrelation
+
+1 0.75
+0.5 0.25
+0 200 0
+
+50 100 Lag
+(b) Correlation
+
+150
+
+200
+
+11
+
+0.75 0.75
+
+Autocorrelation
+
+0.5 0.5
+
+0.25 0.25
+
+00
+
+0 50 100 150 200 0 50 100 150 200 Lag Lag
+
+(c) Beta
+
+(d) Volatility
+
+Figure 8: Avg. ACFs of spot covariance, correlation, beta and volatility estimates with one lag representing approximately five minutes. ACFs with corresponding confidence intervals are first computed for each asset or asset pair and subsequently averaged across all assets or pairs. Dashed lines correspond to cross-sectional averages of point-wise 95% confidence intervals (±1.96/ n).
+
+Autocorrelation
+
+47
+
+(a) Entire trading day
+
+(b) 1:30 pm ­ 4:00 pm
+
+Figure 9: QQQ transaction prices (05/06/10). (1): Protests in Athens trigger Euro down movement vs. Yen; U.S. fund managers short-sell E-Mini contracts in vast amounts. (2): E-Mini market makers cut back trading. (3): NASDAQ stops order routing to ARCA. (4): Rumors suggesting that decline occurred due to "fat-finger" error, and not bad news. (5): NASDAQ resumes routing to ARCA.
+
+Covariance Deciles Correlation Deciles
+
+8 0.9
+
+5.75 0.65
+
+3.5 0.4
+
+1.25 0.15
+
+-1 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+-0.1 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Covariances
+
+(b) Correlations
+
+Figure 10: Cross-sectional deciles of spot covariances and correlations (05/06/10). Solid horizontal line corresponds to the cross-sectional median of integrated covariance and correlation estimates. These are based on the LMM estimator of the integrated (open-to-close) covariance matrix by Bibinger et al. (2014) accounting for serially dependent noise and using the same input parameter configuration as the spot estimators. Covariances are annualized.
+
+48
+
+Beta Deciles Volatility Deciles
+
+7 2 1.5 5.25
+
+1 3.5
+
+0.5 1.75
+
+0 10:00
+
+11:00
+
+12:00 13:00 Time of Day
+
+14:00
+
+15:00
+
+16:00
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Betas
+
+(b) Volatilities
+
+Figure 11: Cross-sectional deciles of spot betas and volatilities (05/06/10). Solid horizontal line corresponds to the cross-sectional median of integrated beta and volatility estimates. These are based on the LMM estimator of the integrated (open-to-close) covariance matrix by Bibinger et al. (2014) accounting for serially dependent noise and using the same input parameter configuration as the spot estimators. Volatilities are annualized.
+
+Figure 12: QQQ transaction prices (12/27/12). (1): Senate Majority Leader states that resolution to "fiscal cliff" crisis before January 1, 2013, unlikely. (2): News that the House of Representatives will convene on the following Sunday in an attempt to end the "fiscal cliff" crisis.
+49
+
+Covariance Deciles Correlation Deciles
+
+0.12 1.2
+
+0.085
+
+0.85
+
+0.05 0.5
+
+0.015
+
+0.15
+
+-0.02 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+-0.2 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Covariances
+
+(b) Correlations
+
+Figure 13: Cross-sectional deciles of spot covariances and correlations (12/27/12). Solid horizontal line corresponds to the cross-sectional median of integrated covariance and correlation estimates. These are based on the LMM estimator of the integrated (open-to-close) covariance matrix by Bibinger et al. (2014) accounting for serially dependent noise and using the same input parameter configuration as the spot estimators. Covariances are annualized.
+
+Beta Deciles Volatility Deciles
+
+2.5 1.875
+
+0.7 0.525
+
+1.25 0.35
+
+0.625
+
+0.175
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Betas
+
+(b) Volatilities
+
+Figure 14: Cross-sectional deciles of spot betas and volatilities (12/27/12). Solid horizontal line corresponds to the cross-sectional median of integrated beta and volatility estimates. These are based on the LMM estimator of the integrated (open-to-close) covariance matrix by Bibinger et al. (2014) accounting for serially dependent noise and using the same input parameter configuration as the spot estimators. Volatilities are annualized.
+
+50
+
+(a) Entire trading day
+
+(b) 1:00 pm ­ 1:30 pm
+
+Figure 15: QQQ transaction prices (04/23/13). (1): Fake tweet from the account of AP stating "Breaking: Two Explosions in the White House and Barack Obama is injured". (2): Official denial by AP. (3): AP's twitter account suspended.
+
+Covariance Deciles Correlation Deciles
+
+0.3 1.2
+
+0.2125
+
+0.85
+
+0.125
+
+0.5
+
+0.0375
+
+0.15
+
+-0.05 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+-0.2 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Covariances
+
+(b) Correlations
+
+Figure 16: Cross-sectional deciles of spot covariances and correlations (04/23/13). Solid horizontal line corresponds to the cross-sectional median of integrated covariance and correlation estimates. These are based on the LMM estimator of the integrated (open-to-close) covariance matrix by Bibinger et al. (2014) accounting for serially dependent noise and using the same input parameter configuration as the spot estimators. Covariances are annualized.
+
+51
+
+Beta Deciles Volatility Deciles
+
+3.5 2.625
+
+0.9 0.675
+
+1.75 0.45
+
+0.875
+
+0.225
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+0 10:00
+
+11:00
+
+12:00 13:00 14:00 Time of Day
+
+15:00
+
+16:00
+
+(a) Betas
+
+(b) Volatilities
+
+Figure 17: Cross-sectional deciles of spot betas and volatilities (04/23/13). Solid horizontal line corresponds to the cross-sectional median of integrated beta and volatility estimates. These are based on the LMM estimator of the integrated (open-to-close) covariance matrix by Bibinger et al. (2014) accounting for serially dependent noise and using the same input parameter configuration as the spot estimators. Volatilities are annualized.
+
+52
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001 002 003 004 005 006 007 008 009 010 011 012 013 014 015 016 017 018
+
+"Principal Component Analysis in an Asymmetric Norm" by Ngoc Mai Tran, Maria Osipenko and Wolfgang Karl Härdle, January 2014. "A Simultaneous Confidence Corridor for Varying Coefficient Regression with Sparse Functional Data" by Lijie Gu, Li Wang, Wolfgang Karl Härdle and Lijian Yang, January 2014. "An Extended Single Index Model with Missing Response at Random" by Qihua Wang, Tao Zhang, Wolfgang Karl Härdle, January 2014. "Structural Vector Autoregressive Analysis in a Data Rich Environment: A Survey" by Helmut Lütkepohl, January 2014. "Functional stable limit theorems for efficient spectral covolatility estimators" by Randolf Altmeyer and Markus Bibinger, January 2014. "A consistent two-factor model for pricing temperature derivatives" by Andreas Groll, Brenda López-Cabrera and Thilo Meyer-Brandis, January 2014. "Confidence Bands for Impulse Responses: Bonferroni versus Wald" by Helmut Lütkepohl, Anna Staszewska-Bystrova and Peter Winker, January 2014. "Simultaneous Confidence Corridors and Variable Selection for Generalized Additive Models" by Shuzhuan Zheng, Rong Liu, Lijian Yang and Wolfgang Karl Härdle, January 2014. "Structural Vector Autoregressions: Checking Identifying Long-run Restrictions via Heteroskedasticity" by Helmut Lütkepohl and Anton Velinov, January 2014. "Efficient Iterative Maximum Likelihood Estimation of HighParameterized Time Series Models" by Nikolaus Hautsch, Ostap Okhrin and Alexander Ristig, January 2014. "Fiscal Devaluation in a Monetary Union" by Philipp Engler, Giovanni Ganelli, Juha Tervala and Simon Voigts, January 2014. "Nonparametric Estimates for Conditional Quantiles of Time Series" by Jürgen Franke, Peter Mwita and Weining Wang, January 2014. "Product Market Deregulation and Employment Outcomes: Evidence from the German Retail Sector" by Charlotte Senftleben-König, January 2014. "Estimation procedures for exchangeable Marshall copulas with hydrological application" by Fabrizio Durante and Ostap Okhrin, January 2014. "Ladislaus von Bortkiewicz - statistician, economist, and a European intellectual" by Wolfgang Karl Härdle and Annette B. Vogt, February 2014. "An Application of Principal Component Analysis on Multivariate TimeStationary Spatio-Temporal Data" by Stephan Stahlschmidt, Wolfgang Karl Härdle and Helmut Thome, February 2014. "The composition of government spending and the multiplier at the Zero Lower Bound" by Julien Albertini, Arthur Poirier and Jordan RoulleauPasdeloup, February 2014. "Interacting Product and Labor Market Regulation and the Impact of Immigration on Native Wages" by Susanne Prantl and Alexandra SpitzOener, February 2014.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasrecahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+019 "Unemployment benefits extensions at the zero lower bound on nominal interest rate" by Julien Albertini and Arthur Poirier, February 2014.
+020 "Modelling spatio-temporal variability of temperature" by Xiaofeng Cao, Ostap Okhrin, Martin Odening and Matthias Ritter, February 2014.
+021 "Do Maternal Health Problems Influence Child's Worrying Status? Evidence from British Cohort Study" by Xianhua Dai, Wolfgang Karl Härdle and Keming Yu, February 2014.
+022 "Nonparametric Test for a Constant Beta over a Fixed Time Interval" by Markus Reiß, Viktor Todorov and George Tauchen, February 2014.
+023 "Inflation Expectations Spillovers between the United States and Euro Area" by Aleksei Netsunajev and Lars Winkelmann, March 2014.
+024 "Peer Effects and Students' Self-Control" by Berno Buechel, Lydia Mechtenberg and Julia Petersen, April 2014.
+025 "Is there a demand for multi-year crop insurance?" by Maria Osipenko, Zhiwei Shen and Martin Odening, April 2014.
+026 "Credit Risk Calibration based on CDS Spreads" by Shih-Kang Chao, Wolfgang Karl Härdle and Hien Pham-Thu, May 2014.
+027 "Stale Forward Guidance" by Gunda-Alexandra Detmers and Dieter Nautz, May 2014.
+028 "Confidence Corridors for Multivariate Generalized Quantile Regression" by Shih-Kang Chao, Katharina Proksch, Holger Dette and Wolfgang Härdle, May 2014.
+029 "Information Risk, Market Stress and Institutional Herding in Financial Markets: New Evidence Through the Lens of a Simulated Model" by Christopher Boortz, Stephanie Kremer, Simon Jurkatis and Dieter Nautz, May 2014.
+030 "Forecasting Generalized Quantiles of Electricity Demand: A Functional Data Approach" by Brenda López Cabrera and Franziska Schulz, May 2014.
+031 "Structural Vector Autoregressions with Smooth Transition in Variances ­ The Interaction Between U.S. Monetary Policy and the Stock Market" by Helmut Lütkepohl and Aleksei Netsunajev, June 2014.
+032 "TEDAS - Tail Event Driven ASset Allocation" by Wolfgang Karl Härdle, Sergey Nasekin, David Lee Kuo Chuen and Phoon Kok Fai, June 2014.
+033 "Discount Factor Shocks and Labor Market Dynamics" by Julien Albertini and Arthur Poirier, June 2014.
+034 "Risky Linear Approximations" by Alexander Meyer-Gohde, July 2014 035 "Adaptive Order Flow Forecasting with Multiplicative Error Models" by
+Wolfgang Karl Härdle, Andrija Mihoci and Christopher Hian-Ann Ting, July 2014 036 "Portfolio Decisions and Brain Reactions via the CEAD method" by Piotr Majer, Peter N.C. Mohr, Hauke R. Heekeren and Wolfgang K. Härdle, July 2014 037 "Common price and volatility jumps in noisy high-frequency data" by Markus Bibinger and Lars Winkelmann, July 2014 038 "Spatial Wage Inequality and Technological Change" by Charlotte Senftleben-König and Hanna Wielandt, August 2014 039 "The integration of credit default swap markets in the pre and postsubprime crisis in common stochastic trends" by Cathy Yi-Hsuan Chen, Wolfgang Karl Härdle, Hien Pham-Thu, August 2014
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+040 "Localising Forward Intensities for Multiperiod Corporate Default" by Dedy Dwi Prastyo and Wolfgang Karl Härdle, August 2014.
+041 "Certification and Market Transparency" by Konrad Stahl and Roland Strausz, September 2014.
+042 "Beyond dimension two: A test for higher-order tail risk" by Carsten Bormann, Melanie Schienle and Julia Schaumburg, September 2014.
+043 "Semiparametric Estimation with Generated Covariates" by Enno Mammen, Christoph Rothe and Melanie Schienle, September 2014.
+044 "On the Timing of Climate Agreements" by Robert C. Schmidt and Roland Strausz, September 2014.
+045 "Optimal Sales Contracts with Withdrawal Rights" by Daniel Krähmer and Roland Strausz, September 2014.
+046 "Ex post information rents in sequential screening" by Daniel Krähmer and Roland Strausz, September 2014.
+047 "Similarities and Differences between U.S. and German Regulation of the Use of Derivatives and Leverage by Mutual Funds ­ What Can Regulators Learn from Each Other?" by Dominika Paula Galkiewicz, September 2014.
+048 "That's how we roll: an experiment on rollover risk" by Ciril Bosch-Rosa, September 2014.
+049 "Comparing Solution Methods for DSGE Models with Labor Market Search" by Hong Lan, September 2014.
+050 "Volatility Modelling of CO2 Emission Allowance Spot Prices with RegimeSwitching GARCH Models" by Thijs Benschopa, Brenda López Cabrera, September 2014.
+051 "Corporate Cash Hoarding in a Model with Liquidity Constraints" by Falk Mazelis, September 2014.
+052 "Designing an Index for Assessing Wind Energy Potential" by Matthias Ritter, Zhiwei Shen, Brenda López Cabrera, Martin Odening, Lars Deckert, September 2014.
+053 "Improved Volatility Estimation Based On Limit Order Books" by Markus Bibinger, Moritz Jirak, Markus Reiss, September 2014.
+054 " Strategic Complementarities and Nominal Rigidities" by Philipp König, Alexander Meyer-Gohde, October 2014.
+055 "Estimating the Spot Covariation of Asset Prices ­ Statistical Theory and Empirical Evidence" by Markus Bibinger, Markus Reiss, Nikolaus Hautsch, Peter Malec, October 2014.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

@@ -1,0 +1,2120 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2010-048
+Building Loss Models
+Krzysztof Burnecki* Joanna Janczura* Rafal Weron**
+* Hugo Steinhaus Center, Wroclaw University of Technology, Poland ** Institute of Organization and Management, Wroclaw University of
+Technology, Poland  
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Building Loss Models1
+Krzysztof Burnecki2, Joanna Janczura2, and Rafal Weron3
+Abstract: This paper is intended as a guide to building insurance risk (loss) models. A typical model for insurance risk, the so-called collective risk model, treats the aggregate loss as having a compound distribution with two main components: one characterizing the arrival of claims and another describing the severity (or size) of loss resulting from the occurrence of a claim. In this paper we first present efficient simulation algorithms for several classes of claim arrival processes. Then we review a collection of loss distributions and present methods that can be used to assess the goodness-of-fit of the claim size distribution. The collective risk model is often used in health insurance and in general insurance, whenever the main risk components are the number of insurance claims and the amount of the claims. It can also be used for modeling other non-insurance product risks, such as credit and operational risk.
+Keywords: Insurance risk model; Loss distribution; Claim arrival process; Poisson process; Renewal process; Random variable generation; Goodness-of-fit testing
+JEL: C15, C46, C63, G22, G32
+1 Chapter prepared for the 2nd edition of Statistical Tools for Finance and Insurance, P.Cizek, W.Härdle, R.Weron (eds.), Springer-Verlag, forthcoming in 2011. Research partially supported by Deutsche Forschungsgemeinschaft via SFB 649 ,,Ökonomisches Risiko", Humboldt-Universität zu Berlin.
+2 Hugo Steinhaus Center, Wroclaw University of Technology, Poland 3 Institute of Organization and Management, Wroclaw University of Technology, Poland
+
+1 Building Loss Models
+Krzysztof Burnecki, Joanna Janczura, and Rafal Weron
+
+1.1 Introduction
+
+A loss model or actuarial risk model is a parsimonious mathematical description of the behavior of a collection of risks constituting an insurance portfolio. It is not intended to replace sound actuarial judgment. In fact, according to Willmot (2001), a well formulated model is consistent with and adds to intuition, but cannot and should not replace experience and insight. Moreover, a properly constructed loss model should reflect a balance between simplicity and conformity to the data since overly complex models may be too complicated to be useful.
+
+A typical model for insurance risk, the so-called collective risk model, treats the aggregate loss as having a compound distribution with two main components: one characterizing the frequency (or incidence) of events and another describing the severity (or size or amount) of gain or loss resulting from the occurrence of an event (Kaas et al., 2008; Klugman, Panjer, and Willmot, 2008; Tse, 2009). The stochastic nature of both components is a fundamental assumption of a realistic risk model. In classical form it is defined as follows. If {Nt}t0 is a process counting claim occurrences and {Xk}k=1 is an independent sequence of positive independent and identically distributed (i.i.d.) random variables representing claim sizes, then the risk process {Rt}t0 is given by
+
+Nt
+Rt = u + c(t) - Xi.
+i=1
+
+(1.1)
+
+The non-negative constant u stands for the initial capital of the insurance
+
+company and the deterministic or stochastic function of time c(t) for the pre-
+
+mium from sold insurance policies. The sum {
+
+Nt i=1
+
+Xi
+
+}
+
+is
+
+the
+
+so-called
+
+ag-
+
+2 1 Building Loss Models
+
+gregate claim process, with the number of claims in the interval (0, t] being
+
+modeled by the counting process Nt. Recall, that the latter is defined as
+
+Nt = max{n :
+
+n i=1
+
+Wi
+
+
+
+t},
+
+where
+
+{Wi}i=0
+
+is
+
+a
+
+sequence
+
+of
+
+positive
+
+ran-
+
+dom variables and
+
+0 i=1
+
+Wi
+
+
+
+0.
+
+In the insurance risk context Nt is also
+
+referred to as the claim arrival process.
+
+The collective risk model is often used in health insurance and in general insurance, whenever the main risk components are the number of insurance claims and the amount of the claims. It can also be used for modeling other noninsurance product risks, such as credit and operational risk (Chernobai, Rachev, and Fabozzi, 2007; Panjer, 2006). In the former, for example, the main risk components are the number of credit events (either defaults or downgrades), and the amount lost as a result of the credit event.
+
+The simplicity of the risk process defined in eqn. (1.1) is only illusionary. In most cases no analytical conclusions regarding the time evolution of the process can be drawn. However, it is this evolution that is important for practitioners, who have to calculate functionals of the risk process like the expected time to ruin and the ruin probability, see Chapter ??. The modeling of the aggregate claim process consists of modeling the counting process {Nt} and the claim size sequence {Xk}. Both processes are usually assumed to be independent, hence can be treated independently of each other (Burnecki, Ha¨rdle, and Weron, 2004). Modeling of the claim arrival process {Nt} is treated in Section 1.2, where we present efficient algorithms for four classes of processes. Modeling of claim severities and testing the goodness-of-fit is covered in Sections 1.3 and 1.4, respectively. Finally, in Section 1.5 we build a model for the Danish fire losses dataset, which concerns major fire losses in profits that occurred between 1980 and 2002 and were recorded by Copenhagen Re.
+
+1.2 Claim Arrival Processes
+
+In this section we focus on efficient simulation of the claim arrival process
+
+{Nt}. This process can be simulated either via the arrival times {Ti}, i.e. mo-
+
+ments when the ith claim occurs, or the inter-arrival times (or waiting times)
+
+Wi = Ti - Ti-1, i.e. the time periods between successive claims (Burnecki and
+
+Weron, 2005). Note that in terms of Wi's the claim arrival process is given by
+
+Nt =
+
+ n=1
+
+I (Tn
+
+
+
+t).
+
+In what follows we discuss four examples of {Nt},
+
+namely the classical (homogeneous) Poisson process, the non-homogeneous
+
+Poisson process, the mixed Poisson process and the renewal process.
+
+1.2 Claim Arrival Processes
+
+3
+
+1.2.1 Homogeneous Poisson Process (HPP)
+The most common and best known claim arrival process is the homogeneous Poisson process (HPP). It has stationary and independent increments and the number of claims in a given time interval is governed by the Poisson law. While this process is normally appropriate in connection with life insurance modeling, it often suffers from the disadvantage of providing an inadequate fit to insurance data in other coverages with substantial temporal variability.
+Formally, a continuous-time stochastic process {Nt : t  0} is a (homogeneous) Poisson process with intensity (or rate)  > 0 if (i) {Nt} is a counting process, and (ii) the waiting times Wi are independent and identically distributed and follow an exponential law with intensity , i.e. with mean 1/ (see Section 1.3.2). This definition naturally leads to a simulation scheme for the successive arrival times Ti of the Poisson process on the interval (0, t]:
+Algorithm HPP1 (Waiting times)
+Step 1: set T0 = 0
+Step 2: generate an exponential random variable E with intensity 
+Step 3: if Ti-1 + E < t then set Ti = Ti-1 + E and return to step 2 else stop
+Sample trajectories of homogeneous (and non-homogeneous) Poisson processes are plotted in the top panels of Figure 1.1. The thin solid line is a HPP with intensity  = 1 (left) and  = 10 (right). Clearly the latter jumps more often.
+Alternatively, the homogeneous Poisson process can be simulated by applying the following property (Rolski et al., 1999). Given that Nt = n, the n occurrence times T1, T2, . . . , Tn have the same distribution as the order statistics corresponding to n i.i.d. random variables uniformly distributed on the interval (0, t]. Hence, the arrival times of the HPP on the interval (0, t] can be generated as follows:
+Algorithm HPP2 (Conditional theorem)
+Step 1: generate a Poisson random variable N with intensity t
+Step 2: generate N random variables Ui distributed uniformly on (0, 1), i.e. Ui  U(0, 1), i = 1, 2, . . . , N
+Step 3: set (T1, T2, . . . , TN ) = t · sort{U1, U2, . . . , UN }
+
+4 1 Building Loss Models
+
+Number of events per day N(t) N(t)
+
+70 (t)=1+0t
+60 (t)=1+0.1t 50 (t)=1+1t
+40
+30
+20
+10
+0 0 2 4 6 8 10 t
+80 Claim intensity
+70 November-December
+
+70 (t)=10+0cos(2t)
+60 (t)=10+1cos(2t) 50 (t)=10+10cos(2t)
+40
+30
+20
+10
+0 012345 t
+
+60
+
+50
+
+40
+
+30 0 0.5 1 1.5 2 2.5 3 Time (years)
+
+Figure 1.1: Top left panel : Sample trajectories of a NHPP with linear intensity (t) = a + b · t. Note that the first process (with b = 0) is in fact a HPP. Top right panel : Sample trajectories of a NHPP with periodic intensity (t) = a + b · cos(2t). Again, the first process is a HPP. Bottom panel : Intensity of car accident claims in Greater Wroclaw area, Poland, in the period 1998-2000 (data from one of the major insurers in the region). Note, the larger number of accidents in late Fall/early Winter due to worse weather conditions.
+STF2loss01.m
+
+In general, this algorithm will run faster than HPP1 as it does not involve a loop. The only two inherent numerical difficulties involve generating a Poisson random variable and sorting a vector of occurrence times. Whereas the latter problem can be solved, for instance, via the standard quicksort algorithm implemented in most statistical software packages (like sortrows.m in Matlab), the former requires more attention.
+
+1.2 Claim Arrival Processes
+
+5
+
+A straightforward algorithm to generate a Poisson random variable would take
+
+N = min{n : U1 · . . . · Un < exp(-)} - 1,
+
+(1.2)
+
+which is a consequence of the properties of the HPP (see above). However, for large , this method can become slow as the expected run time is proportional to . Faster, but more complicated methods are available. Ahrens and Dieter (1982) suggested a generator which utilizes acceptance-complement with truncated normal variates for  > 10 and reverts to table-aided inversion otherwise. Stadlober (1989) adapted the ratio of uniforms method for  > 5 and classical inversion for small 's. Ho¨rmann (1993) advocated the transformed rejection method, which is a combination of the inversion and rejection algorithms. Statistical software packages often use variants of these methods. For instance, Matlab's poissrnd.m function uses the waiting time method (1.2) for  < 15 and Ahrens' and Dieter's method for larger values of .
+Finally, since for the HPP the expected value of the process E(Nt) = t, it is natural to define the premium function as c(t) = ct, where c = (1 + )µ and µ = E(Xk). The parameter  > 0 is the relative safety loading which "guarantees" survival of the insurance company. With such a choice of the premium function we obtain the classical form of the risk process:
+
+Nt
+Rt = u + (1 + )µt - Xi.
+i=1
+
+(1.3)
+
+1.2.2 Non-Homogeneous Poisson Process (NHPP)
+The choice of a homogeneous Poisson process implies that the size of the portfolio cannot increase or decrease. In addition, it cannot describe situations, like in motor insurance, where claim occurrence epochs are likely to depend on the time of the year (worse weather conditions in Central Europe in late Fall/early Winter lead to more accidents, see the bottom panel in Figure 1.1) or of the week (heavier traffic occurs on Friday afternoons and before holidays). For modeling such phenomena the non-homogeneous Poisson process (NHPP) is much better. The NHPP can be thought of as a Poisson process with a variable (but predictable) intensity defined by the deterministic intensity (or rate) function (t). Note that the increments of a NHPP do not have to be stationary. In the special case when the intensity takes a constant value (t) = , the NHPP reduces to the homogeneous Poisson process with intensity .
+
+6 1 Building Loss Models
+
+The simulation of the process in the non-homogeneous case is slightly more
+complicated than for the HPP. The first approach, known as the thinning or
+rejection method, is based on the following fact (Bratley, Fox, and Schrage,
+1987; Ross, 2002). Suppose that there exists a constant  such that (t)   for all t. Let T1, T2, T3, . . . be the successive arrival times of a homogeneous Poisson process with intensity . If we accept the ith arrival time Ti with probability (Ti)/, independently of all other arrivals, then the sequence {Ti}i=0 of the accepted arrival times (in ascending order) forms a sequence of the arrival times of a non-homogeneous Poisson process with the rate function
+(t). The resulting simulation algorithm on the interval (0, t] reads as follows:
+
+Algorithm NHPP1 (Thinning) Step 1: set T0 = 0 and T  = 0 Step 2: generate an exponential random variable E with intensity  Step 3: if T  + E < t then set T  = T  + E else stop Step 4: generate a random variable U distributed uniformly on (0, 1) Step 5: if U < (T )/ then set Ti = T  ( accept the arrival time) Step 6: return to step 2
+
+As mentioned in the previous section, the inter-arrival times of a homogeneous Poisson process have an exponential distribution. Therefore steps 2­3 generate the next arrival time of a homogeneous Poisson process with intensity . Steps 4­5 amount to rejecting (hence the name of the method) or accepting a particular arrival as part of the thinned process (hence the alternative name). Note, that in this algorithm we generate a HPP with intensity  employing the HPP1 algorithm. We can also generate it using the HPP2 algorithm, which in general is much faster.
+
+The second approach is based on the observation that for a NHPP with rate
+
+function (t) the increment Nt - Ns, 0 < s < t, is distributed as a Poisson
+
+random variable with intensity  =
+
+t s
+
+(u)du
+
+(Grandell,
+
+1991).
+
+Hence, the
+
+cumulative distribution function Fs of the waiting time Ws is given by
+
+Fs(t) = P(Ws  t) = 1 - P(Ws > t) = 1 - P(Ns+t - Ns = 0) =
+
+s+t t
+
+= 1 - exp -
+
+(u)du = 1 - exp - (s + v)dv .
+
+s0
+
+1.2 Claim Arrival Processes
+
+7
+
+If the function (t) is such that we can find a formula for the inverse Fs-1 for each s, we can generate a random quantity X with the distribution Fs by using the inverse transform method. The simulation algorithm on the interval (0, t], often called the integration method, can be summarized as follows:
+Algorithm NHPP2 (Integration)
+Step 1: set T0 = 0
+Step 2: generate a random variable U distributed uniformly on (0, 1)
+Step 3: if Ti-1 + Fs-1(U ) < t set Ti = Ti-1 + Fs-1(U ) and return to step 2 else stop
+
+The third approach utilizes a generalization of the property used in the HPP2
+
+algorithm. Given that Nt = n, the n occurrence times T1, T2, . . . , Tn of the non-homogeneous Poisson process have the same distributions as the order
+
+statistics corresponding to n independent random variables distributed on the
+
+interval (0, t], each with the common density function f (v) = (v)/
+
+t 0
+
+(u)du,
+
+where v  (0, t]. Hence, the arrival times of the NHPP on the interval (0, t] can
+
+be generated as follows:
+
+Algorithm NHPP3 (Conditional theorem)
+
+Step 1: generate a Poisson random variable N with intensity
+
+t 0
+
+(u)du
+
+Step 2: generate N random variables Vi, i = 1, 2, . . . N with density f (v) =
+
+(v)/
+
+t 0
+
+(u)du.
+
+Step 3: set (T1, T2, . . . , TN ) = sort{V1, V2, . . . , VN }.
+
+The performance of the algorithm is highly dependent on the efficiency of the computer generator of random variables Vi. Simulation of Vi's can be done either via the inverse transform method by integrating the density f (v) or via the acceptance-rejection technique using the uniform distribution on the interval (0, t) as the reference distribution. In a sense, the former approach leads to Algorithm NHPP2, whereas the latter one to Algorithm NHPP1.
+Sample trajectories of non-homogeneous Poisson processes are plotted in the top panels of Figure 1.1. In the top left panel realizations of a NHPP with linear intensity (t) = a + b · t are presented for the same value of parameter
+
+8 1 Building Loss Models
+
+a. Note, that the higher the value of parameter b, the more pronounced is the increase in the intensity of the process. In the top right panel realizations of a NHPP with periodic intensity (t) = a + b · cos(2t) are illustrated, again for the same value of parameter a. This time, for high values of parameter b the events exhibit a seasonal behavior. The process has periods of high activity (grouped around natural values of t) and periods of low activity, where almost no jumps take place. Such a process is much better suited to model the seasonal intensity of car accident claims (see the bottom panel in Figure 1.1) than the HPP.
+
+Finally, we note that since in the non-homogeneous case the expected value of
+
+the process at time t is E(Nt) =
+
+t 0
+
+(s)ds,
+
+it
+
+is
+
+natural
+
+to
+
+define
+
+the
+
+premium
+
+function as c(t) = (1 + )µ
+
+t 0
+
+(s)ds.
+
+Then
+
+the
+
+risk
+
+process
+
+takes
+
+the
+
+form:
+
+t Nt
+Rt = u + (1 + )µ (s)ds - Xi.
+0 i=1
+
+(1.4)
+
+1.2.3 Mixed Poisson Process
+In many situations the portfolio of an insurance company is diversified in the sense that the risks associated with different groups of policy holders are significantly different. For example, in motor insurance we might want to make a difference between male and female drivers or between drivers of different age. We would then assume that the claims come from a heterogeneous group of clients, each one of them generating claims according to a Poisson distribution with the intensity varying from one group to another.
+Another practical reason for considering yet another generalization of the classical Poisson process is the following. If we measure the volatility of risk processes, expressed in terms of the index of dispersion Var(Nt)/ E(Nt), then often we obtain estimates in excess of one ­ a value obtained for the homogeneous and the non-homogeneous cases. These empirical observations led to the introduction of the mixed Poisson process (MPP), see Rolski et al. (1999).
+In the mixed Poisson process the distribution of {Nt} is given by a mixed Poisson distribution (Rolski et al., 1999). This means that, conditioning on an extrinsic random variable  (called a structure variable), the random variable {Nt} has a Poisson distribution. Typical examples for  are two-point, gamma and general inverse Gaussian distributions (Teugels and Vynckier, 1996). Since
+
+1.2 Claim Arrival Processes
+
+9
+
+for each t the claim numbers {Nt} up to time t are Poisson variates with intensity t, it is now reasonable to consider the premium function of the form
+c(t) = (1 + )µt. This leads to the following representation of the risk process:
+
+Nt
+Rt = u + (1 + )µt - Xi.
+i=1
+
+(1.5)
+
+The MPP can be generated using the uniformity property: given that Nt = n, the n occurrence times T1, T2, . . . , Tn have the same joint distribution as the order statistics corresponding to n i.i.d. random variables uniformly distributed on the interval (0, t] (Albrecht, 1982). The procedure starts with the simulation
+of n as a realization of Nt for a given value of t. This can be done in the following way: first a realization of a non-negative random variable  is generated and,
+conditioned upon its realization, Nt is simulated according to the Poisson law with parameter t. Then we simulate n uniform random numbers in (0, t). After rearrangement, these values yield the sample T1  . . .  Tn of occurrence times. The algorithm is summarized below.
+
+Algorithm MPP1 (Conditional theorem)
+Step 1: generate a mixed Poisson random variable N with intensity t
+Step 2: generate N random variables Ui distributed uniformly on (0, 1), i.e. Ui  U(0, 1), i = 1, 2, . . . , N
+Step 3: set (T1, T2, . . . , TN ) = t · sort{U1, U2, . . . , UN }
+
+1.2.4 Renewal Process
+Generalizing the homogeneous Poisson process we come to the point where instead of making  non-constant, we can make a variety of different distributional assumptions on the sequence of waiting times {W1, W2, . . .} of the claim arrival process {Nt}. In some particular cases it might be useful to assume that the sequence is generated by a renewal process, i.e. the random variables Wi are i.i.d., positive with a distribution function F . Note that the homogeneous Poisson process is a renewal process with exponentially distributed inter-arrival times. This observation lets us write the following algorithm for the generation of the arrival times of a renewal process on the interval (0, t]:
+
+10 1 Building Loss Models
+Algorithm RP1 (Waiting times)
+Step 1: set T0 = 0
+Step 2: generate an F -distributed random variable X
+Step 3: if Ti-1 + X < t then set Ti = Ti-1 + X and return to step 2 else stop
+An important point in the previous generalizations of the Poisson process was the possibility to compensate risk and size fluctuations by the premiums. Thus, the premium rate had to be constantly adapted to the development of the claims. For renewal claim arrival processes, a constant premium rate allows for a constant safety loading (Embrechts and Klu¨ppelberg, 1993). Let {Nt} be a renewal process and assume that W1 has finite mean 1/. Then the premium function is defined in a natural way as c(t) = (1 + )µt, like for the homogeneous Poisson process, which leads to the risk process of the form (1.3).
+1.3 Loss Distributions
+There are three basic approaches to deriving the loss distribution: empirical, analytical, and moment based. The empirical method, presented in Section 1.3.1, can be used only when large data sets are available. In such cases a sufficiently smooth and accurate estimate of the cumulative distribution function (cdf) is obtained. Sometimes the application of curve fitting techniques ­ used to smooth the empirical distribution function ­ can be beneficial. If the curve can be described by a function with a tractable analytical form, then this approach becomes computationally efficient and similar to the second method.
+The analytical approach is probably the most often used in practice and certainly the most frequently adopted in the actuarial literature. It reduces to finding a suitable analytical expression which fits the observed data well and which is easy to handle. Basic characteristics and estimation issues for the most popular and useful loss distributions are discussed in Sections 1.3.2-1.3.8. Note, that sometimes it may be helpful to subdivide the range of the claim size distribution into intervals for which different methods are employed. For example, the small and medium size claims could be described by the empirical claim size distribution, while the large claims ­ for which the scarcity of data eliminates the use of the empirical approach ­ by an analytical loss distribution.
+In some applications the exact shape of the loss distribution is not required. We may then use the moment based approach, which consists of estimating
+
+1.3 Loss Distributions
+
+11
+
+only the lowest characteristics (moments) of the distribution, like the mean and variance. However, it should be kept in mind that even the lowest three or four moments do not fully define the shape of a distribution, and therefore the fit to the observed data may be poor. Further details on the moment based approach can be found e.g. in Daykin, Pentikainen, and Pesonen (1994).
+Having a large collection of distributions to choose from, we need to narrow our selection to a single model and a unique parameter estimate. The type of the objective loss distribution can be easily selected by comparing the shapes of the empirical and theoretical mean excess functions. Goodness-of-fit can be measured by tests based on the empirical distribution function. Finally, the hypothesis that the modeled random event is governed by a certain loss distribution can be statistically tested. In Section 1.4 these statistical issues are thoroughly discussed.
+
+1.3.1 Empirical Distribution Function
+
+A natural estimate for the loss distribution is the observed (empirical) claim size
+
+distribution. However, if there have been changes in monetary values during
+
+the observation period, inflation corrected data should be used. For a sample
+
+of observations {x1, . . . , xn} the empirical distribution function (edf) is defined
+
+as:
+
+Fn(x)
+
+=
+
+1 n
+
+#{i
+
+:
+
+xi
+
+
+
+x},
+
+(1.6)
+
+i.e. it is a piecewise constant function with jumps of size 1/n at points xi. Very often, especially if the sample is large, the edf is approximated by a continuous, piecewise linear function with the "jump points" connected by linear functions, see Figure 1.2.
+
+The empirical distribution function approach is appropriate only when there is a sufficiently large volume of claim data. This is rarely the case for the tail of the distribution, especially in situations where exceptionally large claims are possible. It is often advisable to divide the range of relevant values of claims into two parts, treating the claim sizes up to some limit on a discrete basis, while the tail is replaced by an analytical cdf.
+
+If the claim statistics are too sparse to use the empirical approach it is desirable to find an explicit analytical expression for a loss distribution. It should be stressed, however, that many standard models in statistics ­ like the Gaussian distribution ­ are unsuitable for fitting the claim size distribution. The main
+
+12 1 Building Loss Models
+
+cdf(x) cdf(x)
+
+1
+0.8
+0.6
+0.4
+0.2 Empirical df (edf)
+0 012345 x
+
+1
+0.8
+0.6
+0.4
+0.2 Lognormal cdf Approx. of the edf
+0 012345 x
+
+Figure 1.2: Left panel : Empirical distribution function (edf) of a 10-element log-normally distributed sample with parameters µ = 0.5 and  = 0.5, see Section 1.3.5. Right panel : Approximation of the edf by a continuous, piecewise linear function superimposed on the theoretical distribution function.
+STF2loss02.m
+
+reason for this is the strongly skewed nature of loss distributions. The lognormal, Pareto, Burr, and Weibull distributions are typical candidates to be considered in applications. However, before we review these probability laws we introduce two very versatile distributions ­ the exponential and gamma.
+
+1.3.2 Exponential Distribution
+
+Consider the random variable with the following density and distribution functions, respectively:
+
+f (x) = e-x, x > 0, F (x) = 1 - e-x, x > 0.
+
+(1.7) (1.8)
+
+This distribution is called the exponential distribution with parameter (or intensity)  > 0. The Laplace transform of (1.7) is
+
+L(t) d=ef
+
+ 0
+
+e-txf (x)dx
+
+=
+
+
+
+ +
+
+t,
+
+t > -,
+
+(1.9)
+
+1.3 Loss Distributions
+
+13
+
+yielding the general formula for the k-th raw moment
+
+mk
+
+d=ef
+
+(-1)k
+
+
+
+kL(t) tk
+
+t=0
+
+=
+
+k! k
+
+.
+
+(1.10)
+
+The mean and variance are thus -1 and -2, respectively. The maximum
+
+likelihood estimator (equal to the method of moments estimator) for  is given
+
+by:
+
+^
+
+=
+
+1 m^ 1
+
+,
+
+(1.11)
+
+where
+
+m^ k
+
+=
+
+1 n
+
+n
+
+xik ,
+
+i=1
+
+(1.12)
+
+is the sample k-th raw moment.
+
+To generate an exponential random variable X with intensity  we can use
+
+the inverse transform (or inversion) method (Devroye, 1986; Ross, 2002). The
+
+method consists of taking a random number U distributed uniformly on the
+
+interval
+
+(0, 1)
+
+and
+
+setting
+
+X
+
+=
+
+F -1(U ),
+
+where
+
+F -1(x)
+
+=
+
+-
+
+1 
+
+log(1
+
+-
+
+x)
+
+is
+
+the
+
+inverse of the exponential cdf (1.8).
+
+In
+
+fact
+
+we
+
+can
+
+set
+
+X
+
+=
+
+-
+
+1 
+
+log U
+
+since
+
+(1 - U ) has the same distribution as U .
+
+The exponential distribution has many interesting features. As we have seen in Section 1.2.1, it arises as the inter-occurrence time of the events in a HPP. It has the memoryless property, i.e. P(X > x + y|X > y) = P(X > x). Further, the n-th root of the Laplace transform (1.9) is
+
+1
+
+L(t) =
+
+
+
+n
+,
+
++t
+
+(1.13)
+
+which is the Laplace transform of a gamma variate (see Section 1.3.4). Thus the exponential distribution is infinitely divisible.
+The exponential distribution is often used in developing models of insurance risks. This usefulness stems in a large part from its many and varied tractable mathematical properties. However, a disadvantage of the exponential distribution is that its density is monotone decreasing (see Figure 1.3), a situation which may not be appropriate in some practical situations.
+
+14 1 Building Loss Models
+
+0.8 100 Exp(0.3) Exp(1)
+0.6 MixExp(0.5,0.3,1)
+0.4 10-1
+
+pdf(x) pdf(x)
+
+0.2
+
+0 10-2
+
+02468
+
+02468
+
+xx
+
+Figure 1.3: Left panel: A probability density function (pdf) of a mixture of two exponential distributions with mixing parameter a = 0.5 superimposed on the pdfs of the component distributions. Right panel: Semi-logarithmic plots of the pdfs displayed in the left panel. The exponential pdfs are now straight lines with slopes -. Note, the curvature of the pdf of the mixture of two exponentials.
+STF2loss03.m
+
+1.3.3 Mixture of Exponential Distributions
+
+Using the technique of mixing one can construct a wide class of distributions. The most commonly used in applications is a mixture of two exponentials, see Chapter ??. In Figure 1.3 a pdf of a mixture of two exponentials is plotted together with the pdfs of the mixing laws. Note, that the mixing procedure can be applied to arbitrary distributions.
+
+The construction goes as follows. Let a1, a2, . . . , an denote a series of non-
+
+negative weights satisfying
+
+n i=1
+
+ai
+
+=
+
+1.
+
+Let F1(x), F2(x), . . . , Fn(x)
+
+denote
+
+an
+
+arbitrary sequence of exponential distribution functions given by the parame-
+
+ters 1, 2, . . . , n, respectively. Then, the distribution function:
+
+nn
+F (x) = aiFi(x) = ai {1 - exp(-ix)} ,
+i=1 i=1
+
+(1.14)
+
+is called a mixture of n exponential distributions (exponentials). The density
+
+1.3 Loss Distributions
+
+15
+
+function of the constructed distribution is
+nn
+f (x) = aifi(x) = aii exp(-ix),
+i=1 i=1
+
+(1.15)
+
+where f1(x), f2(x), . . . , fn(x) denote the density functions of the input exponential distributions. The Laplace transform of (1.15) is
+
+L(t)
+
+=
+
+n i=1
+
+ai
+
+i i +
+
+t,
+
+t > - i=m1i.n..n{i},
+
+(1.16)
+
+yielding the general formula for the k-th raw moment
+
+mk
+
+=
+
+n i=1
+
+ai
+
+k! ik
+
+.
+
+(1.17)
+
+The mean is thus
+
+n i=1
+
+aii-1.
+
+The maximum likelihood and method of mo-
+
+ments estimators for the mixture of n (n  2) exponential distributions can
+
+only be evaluated numerically.
+
+Simulation of variates defined by (1.14) can be performed using the composition
+approach (Ross, 2002). First generate a random variable I, equal to i with probability ai, i = 1, ..., n. Then simulate an exponential variate with intensity I . Note, that the method is general in the sense that it can be used for any set of distributions Fi's.
+
+1.3.4 Gamma Distribution
+
+The probability law with density and distribution functions given by:
+
+f (x)
+
+=
+
+
+
+(x)-1
+
+e-x ()
+
+,
+
+x > 0,
+
+F (x) =
+
+x 0
+
+(s)-1
+
+e-s ()
+
+ds,
+
+x > 0,
+
+(1.18) (1.19)
+
+where  and  are non-negative, is known as the gamma (or Pearson's Type III) distribution. In the above formulas
+
+
+
+(a) d=ef
+
+y a-1 e-y dy ,
+
+0
+
+(1.20)
+
+16 1 Building Loss Models
+
+is the standard gamma function. Moreover, for  = 1 the integral in (1.19):
+
+(, x)
+
+d=ef
+
+1 ()
+
+x
+s-1e-sds,
+0
+
+(1.21)
+
+is called the incomplete gamma function. If the shape parameter  = 1, the
+
+exponential distribution results. If  is a positive integer, the distribution is
+
+called an Erlang (2) distribution
+
+law. with
+
+If
+
+
+
+=
+
+1 2
+
+and
+
+
+
+=
+
+ 2
+
+then
+
+it
+
+is
+
+ degrees of freedom, see the top
+
+called panels
+
+a chi-squared in Figure 1.4.
+
+Moreover, a mixed Poisson distribution with gamma mixing distribution is
+
+negative binomial.
+
+The gamma distribution is closed under convolution, i.e. a sum of independent gamma variates with the same parameter  is again gamma distributed with this . Hence, it is infinitely divisible. Moreover, it is right-skewed and approaches a normal distribution in the limit as  goes to infinity.
+
+The Laplace transform of the gamma distribution is given by:
+
+L(t) =
+
+ +t
+
+
+,
+
+t > -.
+
+(1.22)
+
+The k-th raw moment can be easily derived from the Laplace transform:
+
+mk
+
+=
+
+( + k) ()k
+
+.
+
+(1.23)
+
+Hence, the mean and variance are
+
+E(X )
+
+=
+
+ 
+
+,
+
+Var(X )
+
+=
+
+ 2
+
+.
+
+(1.24) (1.25)
+
+Finally, the method of moments estimators for the gamma distribution parameters have closed form expressions:
+
+^
+
+=
+
+m^ 12 m^ 2 - m^ 12
+
+,
+
+^
+
+=
+
+m^ 1 m^ 2 - m^ 12
+
+,
+
+(1.26) (1.27)
+
+but maximum likelihood estimators can only be evaluated numerically.
+
+1.3 Loss Distributions
+
+17
+
+pdf(x)
+
+0.6 100 Gamma(1,2)
+0.5 Gamma(2,1) Gamma(3,0.5)
+0.4 10-1
+
+pdf(x)
+
+0.3 0.2 10-2
+
+0.1
+
+0 10-3
+
+02468
+
+02468
+
+xx
+
+pdf(x)
+
+0.5 0.4 0.3 0.2 0.1
+0 0
+
+LogN(2,1) LogN(2,0.1) LogN(0.5,2)
+5 10 15 20 25 x
+
+pdf(x)
+
+100 10-1 10-2 10-3
+0
+
+5 10 15 20 25 x
+
+Figure 1.4: Top panels: Three sample gamma pdfs, Gamma(, ), on linear and semi-logarithmic plots. Note, that the first one (black solid line) is an exponential law, while the last one (dashed blue line) is a 2 distribution with  = 6 degrees of freedom. Bottom panels: Three sample log-normal pdfs, LogN(µ, ), on linear and semilogarithmic plots. For small  the log-normal distribution resembles the Gaussian.
+STF2loss04.m
+
+Unfortunately, simulation of gamma variates is not straightforward. For  < 1 a simple but slow algorithm due to J¨ohnk (1964) can be used, while for  > 1 the rejection method is more optimal (Bratley, Fox, and Schrage, 1987; Devroye, 1986). The gamma law is one of the most important distributions for modeling because it has very tractable mathematical properties. As we have seen above it is also very useful in creating other distributions, but by itself is rarely a reasonable model for insurance claim sizes.
+
+18 1 Building Loss Models
+
+1.3.5 Log-Normal Distribution
+
+Consider a random variable X which has the normal distribution with density
+
+fN (x)
+
+=
+
+1 2
+
+exp
+
+-
+
+1 2
+
+(x
+
+- µ)2 2
+
+,
+
+- < x < .
+
+(1.28)
+
+Let Y = eX so that X = log Y . Then the probability density function of Y is given by:
+
+f (y)
+
+=
+
+fN
+
+(log
+
+y
+
+)
+
+1 y
+
+=
+
+1 2y
+
+exp
+
+-
+
+1 2
+
+(log
+
+y- 2
+
+µ)2
+
+,
+
+y > 0, (1.29)
+
+where  > 0 is the scale and - < µ <  is the location parameter. The distribution of Y is called log-normal; in econometrics it is also known as the Cobb-Douglas law. The log-normal cdf is given by:
+
+F (y) = 
+
+log y - µ 
+
+,
+
+y > 0,
+
+(1.30)
+
+where (·) is the standard normal (with mean 0 and variance l) distribution function. The k-th raw moment mk of the log-normal variate can be easily derived using results for normal random variables:
+
+mk = E Y k = E ekX = MX(k) = exp
+
+µk
+
++
+
+2k2 2
+
+,
+
+(1.31)
+
+where MX (z) is the moment generating function of the normal distribution. In particular, the mean and variance are
+
+E(X )
+
+=
+
+exp
+
+µ
+
++
+
+2 2
+
+,
+
+Var(X) = exp 2 - 1 exp 2µ + 2 ,
+
+(1.32) (1.33)
+
+respectively. For both standard parameter estimation techniques the estimators are known in closed form. The method of moments estimators are given by:
+
+µ^
+
+=
+
+2 log
+
+1 n
+
+n
+
+xi
+
+-
+
+1 2
+
+log
+
+1 n
+
+n
+
+xi2
+
+,
+
+i=1 i=1
+
+^2
+
+=
+
+log
+
+1 n
+
+n
+
+x2i
+
+- 2 log
+
+1 n
+
+n
+
+xi
+
+,
+
+i=1 i=1
+
+(1.34) (1.35)
+
+1.3 Loss Distributions
+
+19
+
+while the maximum likelihood estimators by:
+
+µ^
+
+=
+
+1 n
+
+n
+
+log(xi),
+
+i=1
+
+^2
+
+=
+
+1 n
+
+n
+
+{log(xi) - µ^}2 .
+
+i=1
+
+(1.36) (1.37)
+
+Finally, the generation of a log-normal variate is straightforward. We simply have to take the exponent of a normal variate.
+
+The log-normal distribution is very useful in modeling of claim sizes. For large  its tail is (semi-)heavy ­ heavier than the exponential but lighter than powerlaw, see the bottom panels in Figure 1.4. For small  the log-normal resembles a normal distribution, although this is not always desirable. It is infinitely divisible and closed under scale and power transformations. However, it also suffers from some drawbacks. Most notably, the Laplace transform does not have a closed form representation and the moment generating function does not exist.
+
+1.3.6 Pareto Distribution
+
+Suppose that a variate X has (conditional on ) an exponential distribution with intensity  (i.e. with mean -1, see Section 1.3.2). Further, suppose that  itself has a gamma distribution (see Section 1.3.4). The unconditional distribution of X is a mixture and is called the Pareto distribution. Moreover, it can be shown that if X is an exponential random variable and Y is a gamma random variable, then X/Y is a Pareto random variable.
+
+The density and distribution functions of a Pareto variate are given by:
+
+f (x)
+
+=
+
+(
+
+ + x)+1
+
+,
+
+x > 0,
+
+F (x)
+
+=
+
+1-
+
+ +x
+
+
+,
+
+x > 0,
+
+(1.38) (1.39)
+
+respectively. Clearly, the shape parameter  and the scale parameter  are both positive. The k-th raw moment:
+
+mk
+
+=
+
+k
+
+k!
+
+( - k) ()
+
+,
+
+(1.40)
+
+20 1 Building Loss Models
+
+pdf(x) pdf(x)
+
+1 Par(0.5,2)
+0.8 Par(2,0.5) Par(2,1)
+0.6
+0.4
+0.2
+0 012345 x
+
+100 10-1 10-2 10-3 10-4
+
+100 101 x
+
+102
+
+Figure 1.5: Three sample Pareto pdfs, Par(, ), on linear and doublelogarithmic plots. The thick power-law tails of the Pareto distribution (asymptotically linear in the log-log scale) are clearly visible.
+STF2loss05.m
+
+exists only for k < . The mean and variance are thus:
+
+E(X )
+
+=
+
+
+
+ -
+
+1
+
+,
+
+Var(X )
+
+=
+
+(
+
+-
+
+2 1)2(
+
+-
+
+2)
+
+,
+
+(1.41) (1.42)
+
+respectively. Note, that the mean exists only for  > 1 and the variance only for  > 2. Hence, the Pareto distribution has very thick (or heavy) tails, see Figure 1.5. The method of moments estimators are given by:
+
+^
+
+=
+
+2
+
+m^ 2 - m^ 12 m^ 2 - 2m^ 12
+
+,
+
+^
+
+=
+
+m^ 1m^ 2 m^ 2 - 2m^ 21
+
+,
+
+(1.43) (1.44)
+
+where, as before, m^ k is the sample k-th raw moment (1.12). Note, that the estimators are well defined only when m^ 2 - 2m^ 12 > 0. Unfortunately, there are no closed form expressions for the maximum likelihood estimators and they
+can only be evaluated numerically.
+
+Like for many other distributions the simulation of a Pareto variate X can be conducted via the inverse transform method. The inverse of the cdf (1.39)
+
+1.3 Loss Distributions
+
+21
+
+has a simple analytical form F -1(x) =  (1 - x)-1/ - 1 . Hence, we can set X =  U -1/ - 1 , where U is distributed uniformly on the unit interval. We have to be cautious, however, when  is larger but very close to one. The theoretical mean exists, but the right tail is very heavy. The sample mean will, in general, be significantly lower than E(X).
+The Pareto law is very useful in modeling claim sizes in insurance, due in large part to its extremely thick tail. Its main drawback lies in its lack of mathematical tractability in some situations. Like for the log-normal distribution, the Laplace transform does not have a closed form representation and the moment generating function does not exist. Moreover, like the exponential pdf the Pareto density (1.38) is monotone decreasing, which may not be adequate in some practical situations.
+
+1.3.7 Burr Distribution
+
+Experience has shown that the Pareto formula is often an appropriate model for the claim size distribution, particularly where exceptionally large claims may occur. However, there is sometimes a need to find heavy-tailed distributions which offer greater flexibility than the Pareto law, including a non-monotone pdf. Such flexibility is provided by the Burr distribution and its additional shape parameter  > 0. If Y has the Pareto distribution, then the distribution of X = Y 1/ is known as the Burr distribution, see the top panels in Figure 1.6. Its density and distribution functions are given by:
+
+f (x)
+
+=
+
+
+
+
+
+(
+
+x -1 + x )+1
+
+,
+
+F (x)
+
+=
+
+1-
+
+  + x
+
+
+,
+
+x > 0, x > 0,
+
+(1.45) (1.46)
+
+respectively. The k-th raw moment
+
+mk
+
+=
+
+1 ()
+
+k/
+
+
+
+1
+
++
+
+k 
+
+
+
+
+
+-
+
+k 
+
+,
+
+(1.47)
+
+exists only for k <  . Naturally, the Laplace transform does not exist in a closed form and the distribution has no moment generating function as it was the case with the Pareto distribution.
+
+22 1 Building Loss Models
+
+pdf(x)
+
+1.2 100 Burr(0.5,2,1.5)
+1 Burr(0.5,0.5,5) Burr(2,1,0.5)
+0.8
+0.6 10-2
+0.4
+0.2
+0 10-4 02468 x
+
+pdf(x)
+
+100 x
+
+102
+
+pdf(x)
+
+1.2 Weib(1,0.5)
+1 Weib(1,2) Weib(0.01,6)
+0.8
+0.6
+0.4
+0.2
+0 012345 x
+
+pdf(x)
+
+100
+10-2
+10-4 012345 x
+
+Figure 1.6: Top panels: Three sample Burr pdfs, Burr(, ,  ), on linear and double-logarithmic plots. Note, the heavy, power-law tails. Bottom panels: Three sample Weibull pdfs, Weib(,  ), on linear and semilogarithmic plots. We can see that for  < 1 the tails are much heavier and they look like power-law.
+STF2loss06.m
+
+The maximum likelihood and method of moments estimators for the Burr distribution can only be evaluated numerically. A Burr variate X can be generated using the inverse transform method. The inverse of the cdf (1.46) has a simple analytical form F -1(x) =  (1 - x)-1/ - 1 1/ . Hence, we can set X =  U -1/ - 1 1/ , where U is distributed uniformly on the unit interval. Like in the Pareto case, we have to be cautious when   is larger but very close to one. The sample mean will generally be significantly lower than E(X).
+
+1.4 Statistical Validation Techniques
+
+23
+
+1.3.8 Weibull Distribution
+
+If V is an exponential variate, then the distribution of X = V 1/ ,  > 0, is called the Weibull (or Frechet) distribution. Its density and distribution functions are given by:
+
+f (x) =  x -1e-x ,
+
+x > 0,
+
+F (x) = 1 - e-x ,
+
+x > 0,
+
+(1.48) (1.49)
+
+respectively. For  = 2 it is known as the Rayleigh distribution. The Weibull
+
+law is roughly symmetrical for the shape parameter   3.6. When  is smaller
+
+the distribution is right-skewed, when  is larger it is left-skewed, see the bottom
+
+panels in Figure 1.6. We can also observe that for  < 1 the distribution
+
+becomes heavy-tailed. In this case, like for the Pareto and Burr distributions,
+
+the moment generating function is infinite. The k-th raw moment can be shown
+
+to be
+
+mk = -k/ 
+
+1
+
++
+
+k 
+
+.
+
+(1.50)
+
+Like for the Burr distribution, the maximum likelihood and method of moments estimators can only be evaluated numerically. Similarly, Weibull variates can be generated using the inverse transform method.
+
+1.4 Statistical Validation Techniques
+Having a large collection of distributions to choose from we need to narrow our selection to a single model and a unique parameter estimate. The type of the objective loss distribution can be easily selected by comparing the shapes of the empirical and theoretical mean excess functions. The mean excess function, presented in Section 1.4.1, is based on the idea of conditioning a random variable given that it exceeds a certain level.
+Once the distribution class is selected and the parameters are estimated using one of the available methods the goodness-of-fit has to be tested. A standard approach consists of measuring the distance between the empirical and the fitted analytical distribution function. A group of statistics and tests based on this idea is discussed in Section 1.4.2.
+
+24 1 Building Loss Models
+
+1.4.1 Mean Excess Function
+
+For a claim amount random variable X, the mean excess function or mean residual life function is the expected payment per claim on a policy with a fixed amount deductible of x, where claims with amounts less than or equal to x are completely ignored:
+
+e(x) = E(X - x|X > x) =
+
+ x
+
+{1 - F (u)} 1 - F (x)
+
+du
+
+.
+
+(1.51)
+
+In practice, the mean excess function e is estimated by e^n based on a representative sample x1, . . . , xn:
+
+e^n(x)
+
+=
+
+#{i
+
+xi>x xi : xi > x}
+
+-
+
+x.
+
+(1.52)
+
+Note, that in a financial risk management context, switching from the right tail to the left tail, e(x) is referred to as the expected shortfall (Weron, 2004).
+
+When considering the shapes of mean excess functions, the exponential distribution plays a central role. It has the memoryless property, meaning that whether the information X > x is given or not, the expected value of X - x is the same as if one started at x = 0 and calculated E(X). The mean excess function for the exponential distribution is therefore constant. One in fact easily calculates that for this case e(x) = 1/ for all x > 0.
+
+If the distribution of X is heavier-tailed than the exponential distribution we find that the mean excess function ultimately increases, when it is lightertailed e(x) ultimately decreases. Hence, the shape of e(x) provides important information on the sub-exponential or super-exponential nature of the tail of the distribution at hand.
+
+Mean excess functions for the distributions discussed in Section 1.3 are given by the following formulas (and plotted in Figure 1.7):
+
+· exponential:
+
+e(x)
+
+=
+
+1 
+
+;
+
+· mixture of two exponentials:
+
+e(x)
+
+=
+
+a 1
+
+exp(-1x)
+
+a exp(-1x) +
+
++ (1
+
+1-a 2
+
+exp(-2x)
+
+- a) exp(-2x)
+
+;
+
+1.4 Statistical Validation Techniques
+
+150
+Log-normal
+Gamma (<1) Gamma (>1) 100 Mix-Exp
+
+150 100
+
+e(x) e(x)
+
+50 50
+
+Pareto Weibull (<1) Weibull (>1) Burr
+
+25
+
+0 5 10 15 20 x
+
+0 5 10 15 20 x
+
+Figure 1.7: Left panel: Shapes of the mean excess function e(x) for the lognormal, gamma (with  < 1 and  > 1) and a mixture of two exponential distributions. Right panel: Shapes of the mean excess function e(x) for the Pareto, Weibull (with  < 1 and  > 1) and Burr distributions.
+STF2loss07.m
+
+· gamma:
+
+e(x)
+
+=
+
+ 
+
+·
+
+1
+
+-F 1-
+
+(x,  F (x,
+
++ 1, ) , )
+
+-
+
+x
+
+=
+
+-1 {1 + o(1)} ,
+
+where F (x, , ) is the gamma distribution function (1.19);
+
+· log-normal:
+
+e(x)
+
+=
+
+exp
+
+µ
+
++
+
+2 2
+
+1-
+
+ln x-µ-2 
+
+1-
+
+ln x-µ 
+
+=
+
+2x ln x -
+
+µ
+
+{1
+
++
+
+o(1)}
+
+,
+
+-x=
+
+where o(1) stands for a term which tends to zero as u  ;
+
+· Pareto:
+
+e(x)
+
+=
+
+ 
+
++ -
+
+x 1
+
+,
+
+ > 1;
+
+26 1 Building Loss Models
+
+· Burr:
+
+e(x)
+
+=
+
+1/ 
+
+
+
+-
+
+1 
+
+
+
+1
+
++
+
+1 
+
+()
+
+·
+
+  + x
+
+-
+·
+
+·
+
+1-B
+
+1
+
++
+
+1 
+
+,
+
+
+
+-
+
+1 
+
+,
+
+
+
+x + x
+
+=
+
+
+
+x -
+
+1
+
+{1
+
++
+
+o(1)}
+
+,
+
+ > 1,
+
+-x=
+
+where (·) is the standard gamma function (1.20) and
+
+B(a, b, x)
+
+d=ef
+
+(a + b) (a)(b)
+
+x
+ya-1(1 - y)b-1dy,
+0
+
+is the beta function;
+
+(1.53)
+
+· Weibull:
+
+e(x)
+
+=
+
+ (1 + 1/ ) 1/
+
+1-
+
+1
+
++
+
+1 
+
+,
+
+x
+
+=
+
+x1- 
+
+{1 + o(1)} ,
+
+exp (x ) - x =
+
+where (·, ·) is the incomplete gamma function (1.21).
+
+1.4.2 Tests Based on the Empirical Distribution Function
+
+A statistics measuring the difference between the empirical Fn(x) and the fitted F (x) distribution function, called an edf statistic, is based on the vertical difference between the distributions. This distance is usually measured either by a supremum or a quadratic norm (D'Agostino and Stephens, 1986).
+The most popular supremum statistic:
+
+D = sup |Fn(x) - F (x)| ,
+x
+
+(1.54)
+
+is known as the Kolmogorov or Kolmogorov-Smirnov statistic. It can also be written in terms of two supremum statistics:
+
+D+ = sup {Fn(x) - F (x)} and D- = sup {F (x) - Fn(x)} ,
+xx
+
+1.4 Statistical Validation Techniques
+
+27
+
+where the former is the largest vertical difference when Fn(x) is larger than F (x) and the latter is the largest vertical difference when it is smaller. The Kolmogorov statistic is then given by D = max(D+, D-). A closely re-
+lated statistic proposed by Kuiper is simply a sum of the two differences, i.e. V = D+ + D-.
+
+The second class of measures of discrepancy is given by the Cramer-von Mises
+
+family
+
+
+
+Q = n {Fn(x) - F (x)}2 (x)dF (x),
+
+(1.55)
+
+-
+
+where (x) is a suitable function which gives weights to the squared difference {Fn(x) - F (x)}2. When (x) = 1 we obtain the W 2 statistic of Cramer-von Mises. When (x) = [F (x) {1 - F (x)}]-1 formula (1.55) yields the A2 statistic
+of Anderson and Darling. From the definitions of the statistics given above, suitable computing formulas must be found. This can be done by utilizing the
+transformation Z = F (X). When F (x) is the true distribution function of X, the random variable Z is uniformly distributed on the unit interval.
+
+Suppose that a sample x1, . . . , xn gives values zi = F (xi), i = 1, . . . , n. It can be easily shown that, for values z and x related by z = F (x), the corresponding vertical differences in the edf diagrams for X and for Z are equal. Consequently,
+edf statistics calculated from the empirical distribution function of the zi's compared with the uniform distribution will take the same values as if they
+were calculated from the empirical distribution function of the xi's, compared with F (x). This leads to the following formulas given in terms of the order statistics z(1) < z(2) < · · · < z(n):
+
+D+
+
+=
+
+max
+1in
+
+i n
+
+-
+
+z(i)
+
+,
+
+D-
+
+=
+
+max
+1in
+
+z(i)
+
+-
+
+(i
+
+- n
+
+1)
+
+,
+
+D = max(D+, D-),
+
+V = D+ + D-,
+
+W2 =
+
+n
+
+z(i)
+
+-
+
+(2i - 2n
+
+1)
+
+2
+
++
+
+1 12n
+
+,
+
+i=1
+
+(1.56)
+(1.57) (1.58) (1.59) (1.60)
+
+28 1 Building Loss Models
+
+A2
+
+=
+
+-n
+
+-
+
+1 n
+
+(2i
+
+-
+
+1)
+
+n
+
+log z(i) + log(1 - z(n+1-i)) =
+
+i=1
+
+=
+
+-n
+
+-
+
+1 n
+
+n
+
+(2i - 1) log z(i)+
+
+i=1
+
++(2n + 1 - 2i) log(1 - z(i)) .
+
+(1.61) (1.62)
+
+The general test of fit is structured as follows. The null hypothesis is that a specific distribution is acceptable, whereas the alternative is that it is not:
+
+H0 : Fn(x) = F (x; ), H1 : Fn(x) = F (x; ),
+
+where  is a vector of known parameters. Small values of the test statistic T are evidence in favor of the null hypothesis, large ones indicate its falsity. To see how unlikely such a large outcome would be if the null hypothesis was true, we calculate the p-value by:
+
+p-value = P (T  t),
+
+(1.63)
+
+where t is the test value for a given sample. It is typical to reject the null hypothesis when a small p-value is obtained.
+However, we are in a situation where we want to test the hypothesis that the sample has a common distribution function F (x; ) with unknown . To employ any of the edf tests we first need to estimate the parameters. It is important to recognize that when the parameters are estimated from the data, the critical values for the tests of the uniform distribution (or equivalently of a fully specified distribution) must be reduced. In other words, if the value of the test statistics T is d, then the p-value is overestimated by PU (T  d). Here PU indicates that the probability is computed under the assumption of a uniformly distributed sample. Hence, if PU (T  d) is small, then the p-value will be even smaller and the hypothesis will be rejected. However, if it is large then we have to obtain a more accurate estimate of the p-value.
+Ross (2002) advocates the use of Monte Carlo simulations in this context. First the parameter vector is estimated for a given sample of size n, yielding ^, and the edf test statistics is calculated assuming that the sample is distributed according to F (x; ^), returning a value of d. Next, a sample of size n of F (x; ^)distributed variates is generated. The parameter vector is estimated for this simulated sample, yielding ^1, and the edf test statistics is calculated assuming
+
+1.5 Applications
+
+29
+
+that the sample is distributed according to F (x; ^1). The simulation is repeated as many times as required to achieve a certain level of accuracy. The estimate of the p-value is obtained as the proportion of times that the test quantity is at least as large as d.
+An alternative solution to the problem of unknown parameters was proposed by Stephens (1978). The half-sample approach consists of using only half the data to estimate the parameters, but then using the entire data set to conduct the test. In this case, the critical values for the uniform distribution can be applied, at least asymptotically. The quadratic edf tests seem to converge fairly rapidly to their asymptotic distributions (D'Agostino and Stephens, 1986). Although, the method is much faster than the Monte Carlo approach it is not invariant ­ depending on the choice of the half-samples different test values will be obtained and there is no way of increasing the accuracy.
+As a side product, the edf tests supply us with a natural technique of estimating the parameter vector . We can simply find such ^ that minimizes a selected edf statistic. Out of the four presented statistics A2 is the most powerful when the fitted distribution departs from the true distribution in the tails (D'Agostino and Stephens, 1986). Since the fit in the tails is of crucial importance in most actuarial applications A2 is the recommended statistic for the estimation scheme.
+
+1.5 Applications
+In this section we illustrate some of the methods described earlier in the chapter. We conduct the analysis for the Danish fire losses dataset, which concerns major fire losses in Danish Krone (DKK) that occurred between 1980 and 2002 and were recorded by Copenhagen Re. Here we consider only losses in profits. The Danish fire losses dataset has been adjusted for inflation using the Danish consumer price index.
+1.5.1 Calibration of Loss Distributions
+We first look for the appropriate shape of the distribution. To this end we plot the empirical mean excess function for the analyzed data set, see Figure 1.8. Since the function represents an empirical mean above some threshold level, its values for high x's are not credible, and we do not include them in the plot.
+
+en(x) (DKK million)
+
+30 1 Building Loss Models
+12
+10
+8
+6
+4
+2
+0 0 2 4 6 8 10 12 14 16 18 x (DKK million)
+Figure 1.8: The empirical mean excess function e^n(x) for the Danish fire data. STF2loss08.m
+Before we continue with calibration let us note, that in recent years outlierresistant or so-called robust estimates of parameters are becoming more widespread in risk modeling. Such models ­ called robust (statistics) models ­ were introduced by P.J. Huber in 1981 and applied to robust regression analysis (Huber, 2004). Under the robust approach the extreme data points are eliminated to avoid a situation when outliers drive future forecasts in an unwanted (such as worst-case scenario) direction. One of the first applications of robust analysis to insurance claim data can be found in Chernobai et al. (2006). In that paper top 1% of the catastrophic losses were treated as outliers and excluded from the analysis. This procedure led to an improvement of the forecasting power of considered models. Also the resulting ruin probabilities were more optimistic than those predicted by the classical model. It is important to note, however, that neither of the two approaches ­ classical or robust ­ is preffered over the other. Rather, in the presence of outliers, the robust model can be used to complement to the classical one. Due to space limits, in this chapter we will only present the results of the latter. The robust approach can be easily conducted following the steps detailed in this Section.
+The Danish fire losses show a super-exponential pattern suggesting a lognormal, Pareto or Burr distribution as the most adequate for modeling. Hence, in what follows we fit only these three distributions. We apply two estimation schemes: maximum likelihood and A2 statistics minimization. Out of the three fitted distributions only the log-normal has closed form expressions for
+
+1.5 Applications
+
+31
+
+Table 1.1: Parameter estimates obtained via the A2 minimization scheme and test statistics for the fire loss amounts. The corresponding p-values based on 1000 simulated samples are given in parentheses.
+
+Distributions: Parameters:
+
+Tests:
+
+D V W2 A2
+
+log-normal µ=12.525 =1.5384
+0.0180
+(0.020)
+0.0326
+(0.012)
+0.0932
+(0.068)
+0.9851
+(0.005)
+
+Pareto =1.3127 =4.0588 · 105
+0.0262
+(<0.005)
+0.0516
+(<0.005)
+0.2322
+(<0.005)
+2.6748
+(<0.005)
+
+Burr =0.9844 =1.0585 · 106  =1.1096
+0.0266
+(<0.005)
+0.0496
+(<0.005)
+0.2316
+(<0.005)
+1.8894
+(<0.005)
+
+STF2loss08t.m
+
+the maximum likelihood estimators. Parameter calibration for the remaining distributions and the A2 minimization scheme is carried out via a simplex numerical optimization routine. A limited simulation study suggests that the A2 minimization scheme tends to return lower values of all edf test statistics than maximum likelihood estimation. Hence, it is exclusively used for further analysis.
+The results of parameter estimation and hypothesis testing for the Danish fire loss amounts are presented in Table 1.1. The log-normal distribution with parameters µ = 12.525 and  = 1.5384 returns the best results. It is the only distribution that passes any of the four applied tests (D, V , W 2, and A2) at a reasonable level. The Burr and Pareto laws yield worse fits as the tails of the edf are lighter than power-law tails. As expected, the remaining distributions return even worse fits. Hence, we suggest to use the log-normal distribution as a model for the Danish fire loss amounts.
+
+32 1 Building Loss Models
+
+Number of events Aggregate number of losses
+
+60 50 40 30 20 10
+0 0 5 10 15 20 Time (years)
+
+2000 1500 1000
+500 0 0
+
+Aggregate #losses HPP fit NHPP fit
+
+5 10 15 Time (years)
+
+20
+
+Figure 1.9: Left panel : The quarterly number of losses for the Danish fire data. Right panel : The aggregate number of losses and the mean value function E(Nt) of the calibrated HPP and NHPP. Clearly the latter model gives a better fit to the data.
+STF2loss09.m
+
+1.5.2 Simulation of Risk Processes
+We conduct empirical studies for Danish fire losses recorded by Copenhagen Re. The data concerns major Danish fire losses in Danish Krone (DKK), occurred between 1980 and 2002 and adjusted for inflation. Only losses of profits connected with the fires are taken into consideration. We start the analysis with a HPP with a constant intensity 1. Studies of the quarterly numbers of losses and the inter-occurrence times of the fires lead us to the conclusion that the annual intensity of 1 = 98.39 gives the best fitted HPP. However, as we can see in the right panel of Figure 1.9, the fit is not very good suggesting that the HPP is too simplistic. A renewal process would also give unsatisfactory results as the data reveals a clear increasing trend in the number of quarterly losses, see the left panel in Figure 1.9. This leaves us with the NHPP. We tested different exponential and polynomial functional forms, but a simple linear intensity function 2(s) = c + ds gives the best fit. Applying the least squares procedure we arrive at the following values of the parameters: c = 17.99 and d = 7.15. Processes with both choices of the intensity function, 1 and 2(s), are illustrated in the right panel of Figure 1.9, where the accumulated number of fire losses and mean value functions for all 23 years of data are depicted.
+
+1.5 Applications
+
+33
+
+Capital (DKK million) Capital (DKK million)
+
+3000 2500 2000 1500 1000
+500 0 0
+
+5 10 15 Time (years)
+
+20
+
+3000 2500 2000 1500 1000
+500 0 0
+
+5 10 15 Time (years)
+
+20
+
+Figure 1.10: The Danish fire data simulation results for a NHPP with lognormal claim sizes (left panel ) and a NHPP with Burr claim sizes (right panel ). The dotted lines are the sample 0.001, 0.01, 0.05, 0.25, 0.50, 0.75, 0.95, 0.99, 0.999-quantile lines based on 3000 trajectories of the risk process.
+STF2loss10.m
+
+After describing the claim arrival process we have to find an appropriate model for the loss amounts. In Section 1.5.1 a number of distributions were fitted to loss sizes. The log-normal distribution with parameters µ = 12.525 and  = 1.5384 produced the best results. The Burr distribution with  = 0.9844,  = 1.0585 · 106, and  = 1.1096 overestimated the tails of the empirical distribution, nevertheless it gave the next best fit.
+The simulation results are presented in Figure 1.10. We consider a hypothetical scenario where the insurance company insures losses resulting from fire damage. The company's initial capital is assumed to be u = 400 million DKK and the relative safety loading used is  = 0.5. We choose two models of the risk process whose application is most justified by the statistical results described above: a NHPP with log-normal claim sizes and a NHPP with Burr claim sizes. In both panels the thick solid blue line is the "real" risk process, i.e. a trajectory constructed from the historical arrival times and values of the losses. The different shapes of the "real" risk process in the two panels are due to the different forms of the premium function c(t) which has to be chosen accordingly to the type of the claim arrival process. The dashed red line is a sample trajectory. The thin solid lines are the sample 0.001, 0.01, 0.05, 0.25,
+
+34 1 Building Loss Models
+0.50, 0.75, 0.95, 0.99, 0.999-quantile lines based on 3000 trajectories of the risk process. We assume that if the capital of the insurance company drops bellow zero, the company goes bankrupt, so the capital is set to zero and remains at this level hereafter.
+Comparing the log-normal and Burr claim size models, we can conclude that in the latter model extreme events are more likely to happen. This is manifested by wider quantile lines in the right panel of Figure 1.10. Since for log-normal claim sizes the historical trajectory is above the 0.01-quantile line for most of the time, and taking into account that we have followed a non-robust estimation approach of loss severities, we suggest to use this specification for further risk process modeling using the 1980-2002 Danish fire losses dataset.
+
+Bibliography
+Ahrens, J. H. and Dieter, U. (1982). Computer generation of Poisson deviates from modified normal distributions, ACM Trans. Math. Soft. 8: 163­179.
+Albrecht, P. (1982). On some statistical methods connected with the mixed Poisson process, Scandinavian Actuarial Journal: 1­14.
+Bratley, P., Fox, B. L., and Schrage, L. E. (1987). A Guide to Simulation, Springer-Verlag, New York.
+Burnecki, K., Ha¨rdle, W., and Weron, R. (2004). Simulation of Risk Processes, in J. Teugels, B. Sundt (eds.) Encyclopedia of Actuarial Science, Wiley, Chichester, 1564­1570.
+Burnecki, K., Kukla, G., and Weron, R. (2000). Property insurance loss distributions, Physica A 287: 269-278.
+K. Burnecki and R. Weron (2005). Modeling of the Risk Process, in P. Cizek, W. Ha¨rdle, R. Weron (eds.) Statistical Tools for Finance and Insurance, Springer-Verlag, Berlin, 319­339.
+Chernobai, A., Burnecki, K., Rachev, S. T., Trueck, S. and Weron, R. (2006). Modelling catastrophe claims with left-truncated severity distributions, Computational Statistics 21: 537-555.
+Chernobai, A.S., Rachev, S.T., and Fabozzi, F.J. (2007). Operational Risk: A Guide to Basel II Capital Requirements, Models, and Analysis, Wiley.
+D'Agostino, R. B. and Stephens, M. A. (1986). Goodness-of-Fit Techniques, Marcel Dekker, New York.
+Daykin, C.D., Pentikainen, T., and Pesonen, M. (1994). Practical Risk Theory for Actuaries, Chapman, London.
+
+36 Bibliography
+Devroye, L. (1986). Non-Uniform Random Variate Generation, SpringerVerlag, New York.
+Embrechts, P. and Klu¨ppelberg, C. (1993). Some aspects of insurance mathematics, Theory Probab. Appl. 38: 262­295.
+Grandell, J. (1991). Aspects of Risk Theory, Springer, New York.
+Hogg, R. and Klugman, S. A. (1984). Loss Distributions, Wiley, New York.
+Ho¨rmann, W. (1993). The transformed rejection method for generating Poisson random variables, Insurance: Mathematics and Economics 12: 39­45.
+Huber, P. J. (2004). Robust statistics, Wiley, Hoboken.
+J¨ohnk, M. D. (1964). Erzeugung von Betaverteilten und Gammaverteilten Zufallszahlen, Metrika 8: 5-15.
+Kaas, R., Goovaerts, M., Dhaene, J., and Denuit, M. (2008). Modern Actuarial Risk Theory: Using R, Springer.
+Klugman, S. A., Panjer, H.H., and Willmot, G.E. (2008). Loss Models: From Data to Decisions (3rd ed.), Wiley, New York.
+Panjer, H.H. (2006). Operational Risk : Modeling Analytics, Wiley.
+Panjer, H.H. and Willmot, G.E. (1992). Insurance Risk Models, Society of Actuaries, Chicago.
+Rolski, T., Schmidli, H., Schmidt, V., and Teugels, J. L. (1999). Stochastic Processes for Insurance and Finance, Wiley, Chichester.
+Ross, S. (2002). Simulation, Academic Press, San Diego.
+Stadlober, E. (1989). Sampling from Poisson, binomial and hypergeometric distributions: ratio of uniforms as a simple and fast alternative, Math. Statist. Sektion 303, Forschungsgesellschaft Joanneum Graz.
+Stephens, M. A. (1978). On the half-sample method for goodness-of-fit, Journal of the Royal Statistical Society B 40: 64-70.
+Teugels, J.L. and Vynckier, P. (1996). The structure distribution in a mixed Poisson process, J. Appl. Math. & Stoch. Anal. 9: 489­496.
+Tse, Y.-K. (2009). Nonlife Actuarial Models: Theory, Methods and Evaluation, Cambridge University Press, Cambridge.
+
+Bibliography
+
+37
+
+Weron, R. (2004). Computationally Intensive Value at Risk Calculations, in J. E. Gentle, W. Ha¨rdle, Y. Mori (eds.) Handbook of Computational Statistics, Springer, Berlin, 911­950.
+Willmot, G. E. (2001). The nature of modelling insurance losses, The Munich Re Inaugural Lecture, December 5, 2001, Toronto.
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Volatility Investing with Variance Swaps" by Wolfgang Karl Härdle and Elena Silyakova, January 2010.
+002 "Partial Linear Quantile Regression and Bootstrap Confidence Bands" by Wolfgang Karl Härdle, Ya'acov Ritov and Song Song, January 2010.
+003 "Uniform confidence bands for pricing kernels" by Wolfgang Karl Härdle, Yarema Okhrin and Weining Wang, January 2010.
+004 "Bayesian Inference in a Stochastic Volatility Nelson-Siegel Model" by Nikolaus Hautsch and Fuyu Yang, January 2010.
+005 "The Impact of Macroeconomic News on Quote Adjustments, Noise, and Informational Volatility" by Nikolaus Hautsch, Dieter Hess and David Veredas, January 2010.
+006 "Bayesian Estimation and Model Selection in the Generalised Stochastic Unit Root Model" by Fuyu Yang and Roberto Leon-Gonzalez, January 2010.
+007 "Two-sided Certification: The market for Rating Agencies" by Erik R. Fasten and Dirk Hofmann, January 2010.
+008 "Characterising Equilibrium Selection in Global Games with Strategic Complementarities" by Christian Basteck, Tijmen R. Daniels and Frank Heinemann, January 2010.
+009 "Predicting extreme VaR: Nonparametric quantile regression with refinements from extreme value theory" by Julia Schaumburg, February 2010.
+010 "On Securitization, Market Completion and Equilibrium Risk Transfer" by Ulrich Horst, Traian A. Pirvu and Gonçalo Dos Reis, February 2010.
+011 "Illiquidity and Derivative Valuation" by Ulrich Horst and Felix Naujokat, February 2010.
+012 "Dynamic Systems of Social Interactions" by Ulrich Horst, February 2010.
+013 "The dynamics of hourly electricity prices" by Wolfgang Karl Härdle and Stefan Trück, February 2010.
+014 "Crisis? What Crisis? Currency vs. Banking in the Financial Crisis of 1931" by Albrecht Ritschl and Samad Sarferaz, February 2010.
+015 "Estimation of the characteristics of a Lévy process observed at arbitrary frequency" by Johanna Kappusl and Markus Reiß, February 2010.
+016 "Honey, I'll Be Working Late Tonight. The Effect of Individual Work Routines on Leisure Time Synchronization of Couples" by Juliane Scheffel, February 2010.
+017 "The Impact of ICT Investments on the Relative Demand for HighMedium-, and Low-Skilled Workers: Industry versus Country Analysis" by Dorothee Schneider, February 2010.
+018 "Time varying Hierarchical Archimedean Copulae" by Wolfgang Karl Härdle, Ostap Okhrin and Yarema Okhrin, February 2010.
+019 "Monetary Transmission Right from the Start: The (Dis)Connection Between the Money Market and the ECB's Main Refinancing Rates" by Puriya Abbassi and Dieter Nautz, March 2010.
+020 "Aggregate Hazard Function in Price-Setting: A Bayesian Analysis Using Macro Data" by Fang Yao, March 2010.
+021 "Nonparametric Estimation of Risk-Neutral Densities" by Maria Grith, Wolfgang Karl Härdle and Melanie Schienle, March 2010.
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Fitting high-dimensional Copulae to Data" by Ostap Okhrin, April 2010. 023 "The (In)stability of Money Demand in the Euro Area: Lessons from a
+Cross-Country Analysis" by Dieter Nautz and Ulrike Rondorf, April 2010. 024 "The optimal industry structure in a vertically related market" by
+Raffaele Fiocco, April 2010. 025 "Herding of Institutional Traders" by Stephanie Kremer, April 2010. 026 "Non-Gaussian Component Analysis: New Ideas, New Proofs, New
+Applications" by Vladimir Panov, May 2010. 027 "Liquidity and Capital Requirements and the Probability of Bank Failure"
+by Philipp Johann König, May 2010. 028 "Social Relationships and Trust" by Christine Binzel and Dietmar Fehr,
+May 2010. 029 "Adaptive Interest Rate Modelling" by Mengmeng Guo and Wolfgang Karl
+Härdle, May 2010. 030 "Can the New Keynesian Phillips Curve Explain Inflation Gap
+Persistence?" by Fang Yao, June 2010. 031 "Modeling Asset Prices" by James E. Gentle and Wolfgang Karl Härdle,
+June 2010. 032 "Learning Machines Supporting Bankruptcy Prediction" by Wolfgang Karl
+Härdle, Rouslan Moro and Linda Hoffmann, June 2010. 033 "Sensitivity of risk measures with respect to the normal approximation
+of total claim distributions" by Volker Krätschmer and Henryk Zähle, June 2010. 034 "Sociodemographic, Economic, and Psychological Drivers of the Demand for Life Insurance: Evidence from the German Retirement Income Act" by Carolin Hecht and Katja Hanewald, July 2010. 035 "Efficiency and Equilibria in Games of Optimal Derivative Design" by Ulrich Horst and Santiago Moreno-Bromberg, July 2010. 036 "Why Do Financial Market Experts Misperceive Future Monetary Policy Decisions?" by Sandra Schmidt and Dieter Nautz, July 2010. 037 "Dynamical systems forced by shot noise as a new paradigm in the interest rate modeling" by Alexander L. Baranovski, July 2010. 038 "Pre-Averaging Based Estimation of Quadratic Variation in the Presence of Noise and Jumps: Theory, Implementation, and Empirical Evidence" by Nikolaus Hautsch and Mark Podolskij, July 2010. 039 "High Dimensional Nonstationary Time Series Modelling with Generalized Dynamic Semiparametric Factor Model" by Song Song, Wolfgang K. Härdle, and Ya'acov Ritov, July 2010. 040 "Stochastic Mortality, Subjective Survival Expectations, and Individual Saving Behavior" by Thomas Post and Katja Hanewald, July 2010. 041 "Prognose mit nichtparametrischen Verfahren" by Wolfgang Karl Härdle, Rainer Schulz, and Weining Wang, August 2010. 042 "Payroll Taxes, Social Insurance and Business Cycles" by Michael C. Burda and Mark Weder, August 2010. 043 "Meteorological forecasts and the pricing of weather derivatives" by Matthias Ritter, Oliver Mußhoff, and Martin Odening, September 2010. 044 "The High Sensitivity of Employment to Agency Costs: The Relevance of Wage Rigidity" by Atanas Hristov, September 2010. 045 "Parametric estimation of risk neutral density functions" by Maria Grith and Volker Krätschmer, September 2010.
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+046 "Mandatory IFRS adoption and accounting comparability" by Stefano Cascino and Joachim Gassen, October 2010.
+047 "FX Smile in the Heston Model" by Agnieszka Janek, Tino Kluge, Rafal Weron, and Uwe Wystup, October 2010.
+048 "Building Loss Models" by Krzysztof Burnecki, Joanna Janczura, and Rafal Weron, October 2010.
+
+

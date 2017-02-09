@@ -1,0 +1,2038 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2011-080
+Sparse Non Gaussian Component Analysis by Semidefinite Programming
+Elmar Diederichs* Anatoli Juditsky** Arkadi Nemirovski*** Vladimir Spokoiny*
+* Weierstrass Institute (WIAS) Berlin, Germany ** Université J. Fourier Grenoble, France
+*** Georgia Institute of Technology Atlanta, USA
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Noname manuscript No. (will be inserted by the editor)
+Sparse Non Gaussian Component Analysis by Semidefinite Programming
+Elmar Diederichs  , Anatoli Juditsky, Arkadi Nemirovski, Vladimir Spokoiny  ,
+the date of receipt and acceptance should be inserted later
+Abstract Sparse non-Gaussian component analysis (SNGCA) is an unsupervised method of extracting a linear structure from a high dimensional data based on estimating a low-dimensional non-Gaussian data component. In this paper we discuss a new approach to direct estimation of the projector on the target space based on semidefinite programming which improves the method sensitivity to a broad variety of deviations from normality. We also discuss the procedures which allows to recover the structure when its effective dimension is unknown.
+Keywords: dimension reduction, non-Gaussian components analysis, feature extraction
+Mathematical Subject Classification: 62G07, 62H25, 62H30, 90C48, 90C90 JEL-Classification: C14
+1 Introduction
+Numerous statistical applications are confronted today with the so-called curse of dimensionality (cf. [13, 31]). Using high-dimensional datasets implies an exponential increase of computational effort for many statistical routines, while the data thin out in the local neighborhood of any given point and classical statistical methods become unreliable. When a random phenomenon is observed in the high dimensional This author acknowledge financial support from the DFG research center Matheon "Mathematics for key technologies" (FZT 86) in Berlin.  Financial support by the German Research Foundation (DFG) through the Collaborative Research Center 649 "Economic Risk" is gratefully acknowledged Elmar Diederichs Weierstrass Institute Mohrenstr. 39, 10117 Berlin, Germany E-mail: diederic@wias-berlin.de Anatoli Juditsky LJK, Universit´e J. Fourier, BP 53, 38041 Grenoble cedex 9, France E-mail: juditsky@imag.fr Arkadi Nemirovski ISyE, Georgia Institute of Technology Atlanta, Georgia 30332, USA E-mail: nemirovs@isye.gatech.edu Vladimir Spokoiny Weierstrass Institute and Humboldt University, Mohrenstr. 39, 10117 Berlin, Germany E-mail: spokoiny@wiasberlin.de
+
+2
+space Rd the "intrinsic dimension" m covering degrees of freedom associated with same features may be much smaller than d. Then introducing structural assumptions allows to reduce the problem complexity without sacrificing any statistical information [17, 25]. In this study we consider the case where the phenomenon of interest is (approximately) located in a linear subspace I. When compared to other approaches which involve construction of nonlinear mappings from the original data space onto the "subspace of interest", such that isomaps [29], local-linear embedding [13] or Laplacian eigenmaps [4], a linear mapping appears attractive due to its simplicity -- it may be identified with a simple object, the projector  from Rd onto I. To find the structure of interest a statistician may seek for the non-Gaussian components of the data distribution, while its Gaussian components, as usual in the statistical literature may be treated as non-informative noise.
+Several techniques of estimating the "non-Gaussian subspace" have been proposed recently. In particular, NGCA (for Non-Gaussian Component Analysis) procedure, introduced in [6], and then developed into SNGCA (for Sparse NGCA) in [10], is based on the decomposition the problem of dimension reduction into two tasks: the first one is to extract from the data a set {j } of candidate vectors j which are "close" to I . The second is to recover an estimation  of the projector  on I from {j }. In this paper we discuss a new method of SNGCA based on Semidefinite Relaxation of a nonconvex minmax problem which allows for a direct recovery of . When compared to previous implementations of the SNGCA in [6, 7, 10], the new approach "shortcuts" the intermediary stages and makes the best use of available information for estimation of I. Furthermore, it allows to treat in a transparent way the case of unknown dimension m of the target space I.
+The paper is organized as follows: in Section 2 we present the setup of SNGCA and briefly review some existing techniques. Then in Section 3 we introduce the new approach to recovery of the non-Gaussian subspace and analyze its accuracy. Further we provide a simulation study in Section 5, where we compare the performance of the proposed algorithm SNGCA to that of some known projective methods of feature extraction.
+
+2 Sparse Non-Gaussian Component Analysis
+2.1 The setup
+The Non-Gaussian Component Analysis (NGCA) approach is based on the assumption that a high dimensional distribution tends to be normal in almost any randomly selected direction. This intuitive fact can be justified by the central limit theorem when the number of directions tends to infinity. It leads to the NGCA-assumption: the data distribution is a superposition of a full dimensional Gaussian distribution and a low dimensional non-Gaussian component. In many practical problems like clustering or classification, the Gaussian component is uninformative and it is treated as noise. The approach suggests to identify the non-Gaussian component and to use it for the further analysis.
+
+The NGCA set-up can be formalized as follows; cf. [6]. Let X1, ..., XN be i.i.d. from a distribution P in Rd describing the random phenomenon of interest. We suppose that P possesses a density  w.r.t. the Lebesgue measure on Rd , which can be decomposed as follows:
+
+(x) = µ, (x)q(T x).
+
+(1)
+
+3
+Here µ, denotes the density of the multivariate normal distribution N (µ, ) with parameters µ  Rd (expectation) and   Rd×d positive definite (covariance matrix). The function q : Rm  R with m  d is positive and bounded. T  Rm×d is an unknown linear mapping. We refer to I = range T as target or non-Gaussian subspace. Note that though T is not uniquely defined, I is well defined, same as the Euclidean projector  on I .In what follows, unless it is explicitly specified otherwise, we assume that the effective dimension m of I is known a priori. For the sake of simplicity we assume that the expectation of X vanishes: E[X] = 0.
+The model (1) allows for the following interpretation (cf. Section 2 of [6]): suppose that the observation X  Rd can be decomposed into X = Z + , where Z is an "informative low-dimensional signal" such that Z  I, I being an m-dimensional subspace of Rd, and  is independent and Gaussian. One can easily show (see, e.g., Lemma 1 of [6]) that in this case the density of X can be represented as (1).
+
+2.2 Basics of SNGCA estimation procedure
+
+The estimation of I relies upon the following result, proved in [6]: suppose that the function q is smooth, then for any smooth function  : Rd  R the assumptions of (1) and E[X] = 0 ensure that for
+
+() d=ef E (X) = (x) (x) dx,
+
+(2)
+
+there is a vector   I such that
+
+|() - |2  -1E[X(X)] 2
+where  denotes the gradient of  and | · |p is the standard p-norm on Rd. In particular, if  satisfies E[X(X)] = 0 , then ()  I . Consequently
+
+|(I - )()|2  -1 x(x)(x) dx ,
+2
+where I is the d -dimensional identity matrix and  is the Euclidean projector on I .
+
+(3)
+
+The above result suggests the following two-stage estimation procedure: first compute a set of estimates { } of elements {j } of I , then recover an estimation of I from { }. This heuristics has been first used to estimate I in [6]. To be more precise, the construction implemented in [6] can be summarized as follows: let for a family {h }, = 1, ..., L of smooth bounded (test) functions on Rd
+
+ d=ef E[Xh (X)],  d=ef E[h (X)],
+
+(4)
+
+and let
+
+NN
+ d=ef N -1 Xih (Xi),  d=ef N -1 h (Xi)
+i=1 i=1
+
+(5)
+
+be their "empirical counterparts". The set of "approximating vectors" { } used in [6] is as follows:
+
+ =  - -1 , = 1, ..., L, where  is an estimate of the covariance matrix . The projector estima-
+
+tion at the second stage is  =
+
+m j=1
+
+ej
+
+eTj
+
+,
+
+where
+
+ej ,
+
+j
+
+=
+
+1, ..., m,
+
+are
+
+m
+
+principal
+
+eigenvectors
+
+of
+
+the
+
+matrix
+
+L =1
+
+
+
+T .
+
+A
+
+numerical
+
+study,
+
+provided
+
+in
+
+[6],
+
+has
+
+shown
+
+that
+
+the
+
+above
+
+procedure
+
+can
+
+be
+
+used
+
+successfully to recover I. On the other hand, such implementation of the two-stage procedure possesses
+
+4
+
+two important drawbacks: it relies upon the estimation of the covariance matrix  of the Gaussian com-
+
+ponent, which can be hard even for moderate dimensions d. Poor estimation of  then will result in badly
+
+estimated vectors  , and as a result, poorly estimated I. Further, using the eigenvalue decomposition of
+
+the matrix
+
+L =1
+
+
+
+T
+
+entails
+
+that
+
+the
+
+variance
+
+of
+
+the
+
+estimation
+
+
+
+of
+
+the
+
+projector
+
+
+
+on
+
+I
+
+is
+
+propor-
+
+tional to the number L of test-functions. As a result, the estimation procedure is restricted to utilizing
+
+only relatively small families {h }, and is sensitive to the initial selection of "informative" test-functions.
+
+To circumvent the above limitations of the approach of [6] a different estimation procedure has been
+proposed in [10]. In that procedure the estimates  of vectors from the target space are obtained by the method, which was referred to as convex projection. Let c  RL and let
+
+L
+(c) = c 
+l=1
+
+L
+(c) = c  .
+l=1
+
+Observe that (c)  I conditioned that (c) = 0 . Indeed, if (x) = 0 , and by (3),
+(c) = c E[h (X)]  I.
+
+c h (x) , then
+
+c E[Xh (X)] =
+
+Therefore, the task of estimating   I reduces to that of finding a "good" corresponding coefficient vector. In [10] vectors {cj } are computed as follows: let
+LL
+(c) = c  and (c) = c  , = 1, ..., L
+l=1 l=1
+and let j  Rd, j = 1, ..., J constitute a set of probe unit vectors. Then it holds
+
+cj = arg minc |j - (c)|2 | (c) = 0, |c|1  1 ,
+
+(6)
+
+and we set j = (cj ) = cj  . Then I is recovered by computing m principal axes of the minimal volume ellipsoid (Fritz-John ellipsoid) containing the estimated points {±j }jJ=1 .
+
+The recovery of I through the Fritz-John ellipsoid (instead of eigenvalue decomposition of the matrix j jT ) allows to bound the estimation error of I by the maximal error of estimation  of elements of
+the target space (cf. Theorem 3 of [10]), while the 1-constraint on the coefficients cj allows to control efficiently the maximal stochastic error of the estimations j (cf. Theorem 1 of [10, 28]). On the other hand, that construction heavily relies upon the choice of the probe vectors j . Indeed, in order to recover the projector on I, the collection of j should comprise at least m vectors with non-vanishing projection on the target space. To cope with this problem a multi-stage procedure has been used in [10]: given a set {j }k=0 of probe vectors an estimation Ik=0 is computed, which is used to draw new probe vectors {j }k=1 from the vicinity of Ik=0; these vectors are employed to compute a new estimation Ik=1, and so on. The iterative procedure improves significantly the accuracy of the recovery of I. Nevertheless, the
+choice of "informative" probe vectors at the first iteration k = 0 remains a challenging task and hitherto
+is a weak point of the procedure.
+
+5
+3 Structural Analysis by Semidefinite Programming
+In the present paper we discuss a new choice of vectors  which solves the initialization problem of probe vectors for the SNGCA procedure in quite a particular way. Namely, the estimation procedure we are to present below does not require any probe vectors at all.
+
+3.1 Informative vectors in the target space
+
+Further developments are based on the following simple observation. Let  and  be defined as in (4),
+
+and let U = [1, ..., L]  Rd×L, G = [1, ..., L]  Rd×L. Using the observation in the previous section
+
+we conclude that if c  RL satisfies Gc =
+
+L =1
+
+c
+
+
+
+= 0 then U c =
+
+L =1
+
+c
+
+
+
+belongs to I. In other
+
+words, if  is the Euclidean projector on I, then
+
+(I - )U c = 0.
+
+Suppose now that the set {h } of test functions is rich enough in the sense that vectors U c span I when
+c spans the subspace Gc = 0. Recall that we assume the dimension m of the target space to be known. Then projector  on I is fully identified as the optimal solution to the problem
+
+
+
+
+
+
+
+
+
+=
+
+arg
+
+min
+
+
+ max |(I
+c
+
+
+-
+
+)U c|22
+
+
+
+
+
+
+ is a projector on an   
+m-dimensional subspace of Rd .
+
+c  RL, Gc = 0
+
+  
+
+(7)
+
+In practice vectors  and  are not available, but we can suppose that their "empirical counterparts" ­ vectors  ,  , = 1, ..., L can be computed, such that for a set A of probability at least 1 - ,
+
+| -  |2  N , | -  |2  N , = 1, ..., L.
+
+(8)
+
+Indeed, it is well known (cf., e.g., Lemma 1 in [10] or [30]) that if functions h (x) = f (x,  ), = 1, ..., L, are used, where f is continuously differentiable,   Rd are vectors on the unit sphere and f and xf are bounded, then (8) holds with
+
+N = C1 maxxRd, ||2=1 |xf (x, )|2N -1/2 min{d, ln L} + ln -1, N = C2 maxxRd, ||2=1 |xf (x, )|2N -1/2 min{d, ln L} + ln -1,
+
+(9)
+
+where C1, C2 are some absolute constants depending on the smoothness properties and the second moments of the underlying density.
+
+Then for any c  RL such that |c|1  1 we can control the error of approximation of with their empirical versions. Namely, we have on A:
+
+c  and
+
+c
+
+max
+|c|1 1
+
+c ( -  )  N and max
+|c|1 1 2
+
+c ( -  )  N .
+2
+
+6
+
+Let now U = [1, ..., L], G = [1, ..., L]. When substituting U and G for U and G into (7) we come to the following minmax problem:
+
+
+
+
+
+
+
+min
+
+
+max
+c
+
+ |(I
+
+
+-
+
+)U c|22
+
+
+
+
+
+
+
+ is a projectoron an m-dimensional   
+
+subspace of Rd
+
+.
+
+c  RL, |c|1  1, |Gc|2 
+
+  
+
+(10)
+
+Here we have substituted the constraint Gc = 0 with the inequality constraint |Gc|2  for some > 0 in order to keep the optimal solution c to (7) feasible for the modified problem (10) (this will be the
+case with probability at least 1 -  if  N ).
+
+As we will see in a moment, when c runs the N -neighborhood of intersection CN of the standard hyperoctahedron {c  RL, |c|1  1} with the subspace Gc = 0, vectors U c span a close vicinity of the
+target space I.
+
+3.2 Solution by Semidefinite Relaxation
+Note that (10) is a hard optimization problem. Namely, the candidate maximizers ci of (10) are the extreme points of the set CN = {c  RL, |c|1  1, |Gc|2  N }, and there are O(Ld) of such points. In order to be efficiently solvable, the problem (10) is to be "reduced" to a convex-concave saddle-point problem, which is, to the best of our knowledge, the only class of minmax problems which can be solved efficiently (cf. [18]).
+
+Thus the next step is to transform the problem in (10) into a convex-concave minmax problem using the Semidefinite Relaxation (or SDP-relaxation) technique (see e.g., [5, Chapter 4]). We obtain the relaxed version of (10) in two steps. First, let us rewrite the objective function (recall that I -  is also a projector, and thus an idempotent matrix):
+
+|(I - )U c|22 = cT U T (I - )2U c = cT U T (I - )U c = trace U T (I - )U X ,
+
+where the positive semidefinite matrix X = ccT is the "new variable". The constraints on c can be easily rewritten for X:
+
+1. the constraint |c|1  1 is equivalent to |X|1  1 (we use the notation |X|1 =
+
+L i,j=1
+
+|Xij
+
+|);
+
+2. because X is positive semidefinite, the constraint |Gc|2  is equivalent to into trace [GXGT ]  2.
+
+The only "bad" constraint on X is the rank constraint: rank X = 1, and we simply remove it. Now we
+
+are done with the variable c and we arrive at
+
+
+
+
+
+
+
+ min max trace
+
+U T (I - )U X
+
+ X
+
+
+
+
+
+
+
+ is a projector on an m-dimensional   
+
+subspace of Rd
+
+.
+
+X
+
+0, |X|1  1, trace [GXGT ] 
+
+2
+
+  
+
+Let us recall that an m-dimensional projector  is exactly a symmetric d × d matrix of rank  = m and trace  = m, with the eigenvalues 0  i()  1, i = 1, ..., d. Once again we remove the "difficult" rank constraint rank  = m and finish with
+
+min max trace U T (I - P )U X
+
+0 P I, trace P = m,
+
+PX
+
+X 0, |X|1  1, trace [GXGT ]  2
+
+(11)
+
+7
+(we write P Q if the matrix Q - P is positive semidefinite). There is no reason for an optimal solution P of (11) to be a projector matrix. If an estimation of  which is itself a projector is needed, one can use instead the projector  onto the subspace spanned by m principal eigenvectors of P .
+
+Note that (11) is a linear matrix game with bounded convex domains of its arguments - positive semidefinite matrices P  Rd×d and X  RL×L.
+
+We are about to describe the accuracy of the estimation  of . To this end we need an identifiability assumption on the system {h } of test functions as follows:
+
+Assumption 1 Suppose that there are vectors c1, ..., cm, m  m  L such that |ck|1  1 and Gck = 0, k = 1, ..., m, and non-negative constants µ1, . . . , µm such that
+
+We denote µ = µ1 + . . . + µm.
+
+m
+ µkU ckcTk U T .
+k=1
+
+(12)
+
+In other words, if Assumption 1 holds, then the true projector  on I is µ× convex combination of rank-one matrices U ccT U T where c satisfies the constraint Gc = 0 and |c|1 = 1.
+
+Theorem 1 Suppose that the true dimension m of the subspace I is known and that  N as in (8).
+
+Let P be an optimal solution to (11) and let  be the projector onto the subspace spanned by m principal
+
+eigenvectors of P . Then with probability  1 - :
+
+(i) for any c such that |c|1  1 and Gc = 0,
+
+ |(I - )U c|2  m + 1((
+
++ N )-m1in() + 2N );
+
+(ii) further, if Assumption 1 holds then
+
+trace (I - P )  µ(( + N )-m1in() + 2N )2,
+
+(13)
+
+and (here A 2 =
+
+ - 
+
+2 2
+
+ 2µ(m-1in()(
+
++ N ) + 2N )2 ,
+
+ = (m + 1)  (1 - µ(-m1in()( + N ) + 2N )2)-1
+
+i,j Ai2j
+
+1/2
+=
+
+trace [AT A] 1/2 is the Frobenius norm of A).
+
+(14)
+
+Note that if we were able to solve the minimax problem in (10), we could expect its solution, let us call it , to satisfy with high probability
+
+|(I - )U c|2  ( + N )-m1in() + 2N
+
+(cf. the proof of Lemma 1 in the appendix). If we compare this bound to that of the statement (i) of Theorem 1, we conclude that the loss of the accuracy resulting from the substitution of (10) by its treatable
+ approximation (11) is bounded with m + 1. In other words, the "price" of the SDP-relaxation in our
+ case is m + 1 and does not depend on problem dimensions d and L. Furthermore, when Assumption 1 holds true, we are able to provide the bound on the accuracy of recovery of projector  which is seemingly as good as if we were using instead of  the solution  of (10).
+
+8
+
+Suppose now that the test functions h (x) = f (x,  ) are used, with l on the unit sphere of Rd, that
+
+= N
+
+is chosen, and that Assumption 1 holds with "not too large" µ, e.g., µ 
+
+1 2
+
+(
+
++N )m-1in()+N .
+
+When substituting the bounds of (9) for N and N into (14) we obtain the bound for the accuracy of
+
+the estimation  (with probability 1 - ):
+
+ - 
+
+2 2
+
+
+
+C(f )µN -1
+
+min(d, ln L) + ln -1
+
+where C(f ) depends only on f . This bound claims the root- N consistency in estimation of the nonGaussian subspace with the log-price for relaxation and estimation error.
+
+3.3 Case of unknown dimension m
+
+The problem (11) may be modified to allow the treatment of the case when the dimension m of the target space is unknown a priori. Namely, consider for   0 the following problem
+
+
+
+ min t
+
+trace P  t, maxX trace U T (I - P )U X  2, 0
+
+P
+
+I, 
+
+P,t 
+
+X 0, |X|1  1, trace [GXGT ]  2
+
+
+
+(15)
+
+The problem (15) is closely related to the 1-recovery estimator of sparse signals (see, e.g., the tutorial [8] and the references therein) and the trace minimization heuristics widely used in the Sparse Principal Component Analysis (SPCA) (cf. [2, 3]). As we will see in an instant, when the parameter  of the problem is "properly chosen", the optimal solution P of (15) possesses essentially the same properties as that of the problem (11).
+
+A result analogous to that in Theorem 1 holds:
+
+Theorem 2 Let P , X and t = trace P be an optimal solution to (15) (note that (15) is clearly solvable), m = t ,1 and let  be the projector onto the subspace spanned by m principal eigenvectors of P . Suppose that  N as in (8) and that
+
+  -m1in()( + N ) + N .
+
+(16)
+
+Then with probability at least 1 - : (i)
+ t  m and |(I - )U c|2  m + 1( + 2N );
+(ii) furthermore, if Assumption 1 hold then
+
+trace (I - P )  µ( + N )2,
+
+and
+
+ - 
+
+2 2
+
+
+
+2µ(
+
++
+
+N )2
+
+(m + 1)  (1 - µ( + N )2)-1
+
+(17)
+
+(here A 2 =
+
+1/2
+
+i,j Ai2j
+
+is the Frobenius norm of A).
+
+1 Here a is the smallest integer  a.
+
+The proof of the theorems is postponed until the appendix.
+
+9
+
+The estimation procedure based on solving (15) allows to infer the target subspace I without a priori knowledge of its dimension m. When the constraint parameter  is close to the right-hand side of (16), the accuracy of the estimation will be close to that, obtained in the situation when dimension m is known. However, the accuracy of the estimation heavily depends on the precision of the available (lower) bound for min(). In the high-dimensional situation this information is hard to acquire, and the necessity to compute this quantity may be considered as a serious drawback of the proposed procedure.
+
+4 Solving the saddle-point problem (11)
+
+We start with the following simple observation: by using bisection or Newton search in  (note that the objective of (15) is obviously convex in 2) we can reduce (15) to a small sequence to feasibility
+problems, closely related to (11): given t0 report, if exists, P such that
+
+
+
+ trace U T (I - P )U X  2, 0 P I, trace P  t0, 
+
+max .
+
+X
+
+X 0, |X|1  1, trace [GXGT ]  2
+
+
+
+In other words, we can easily solve (15) if for a given m we are able to find an optimal solution to (11). Therefore, in the sequel we concentrate on the optimization technique for solving (11).
+
+4.1 Dual extrapolation algorithm
+
+In what follows we discuss the dual extrapolation algorithm of [22] for solving a version of (11) in which, with a certain abuse, we substitute the inequality constraint trace GXGT  2 with the equality constraint trace [GXGT ] = 0. This way we come to the problem:
+
+where
+
+min max trace U T (I - P )U X
+P P XX
+
+(18)
+
+X = {X  SL, X 0, |X|1  1, trace [GT GX] = 0}
+
+(here SL stands for the space of L × L symmetric matrices) and
+
+P = {P  Sd, 0 P I, trace [P ]  m}.
+
+Observe first that (18) is a matrix game over two convex subsets (of the cone) of positive semidefinite matrices. If we use a large number of test functions, say L2  106, the size of the variable X rules out the possibility of using the interior-point methods. The methodology which appears to be adequate in this case is that behind dual extrapolation methods, recently introduced in [19­22]. The algorithm we use belongs to the family of subgradient descent-ascent methods for solving convex-concave games. Though the rate of convergence of such methods is slow -- their precision is only O(1/k) , where k is the iteration count, their iteration is relatively cheap, what makes the methods of this type appropriate in the case of high-dimensional problems when the high accuracy is not required.
+
+10
+
+We start with the general dual extrapolation scheme of [22] for linear matrix games. Let En and Em be two Euclidean spaces of dimension n and m respectively, and let A  En and B  Em be closed and
+convex sets. We consider the problem
+
+min max x, Ay + a, x + b, y .
+xA yB
+
+(19)
+
+Let · x and · y be some norms on En and Em respectively. We say that dx (resp., dy) is a distance-
+
+generating function of A (resp., of B) if dx (resp., dy) is strongly convex modulus x (resp., y) and differentiable on A (resp., on B).2 Let for z = (x, y) d(z) = dx(x) + dy(y) (note that d is differentiable and
+
+strongly convex on A×B with respect to the norm, defined on A×B according to, e.g. z = x x + y y). We define the prox-function V of A × B as follows: for z0 = (x0, y0) and z = (x, y) in A × B we set
+
+V (z0, z) d=ef d(z) - d(z0) - d(z0), z - z0 .
+
+(20)
+
+Next, for s = (sx, sy) we define the prox-tranform T (z0, s) of s:
+
+T (z0, s) d=ef arg min [ s, z - z0 - V (z0, z)].
+zA×B
+
+(21)
+
+Let us denote F (z) = (-AT y -a, Ax+b) the vector field of descend-ascend directions of (19) at z = (x, y)
+and let z be the minimizer of d over A×B. Given vectors zk, zk+  A×B and sk  E at the k-th iteration, we define the update zk+1, zk++1 and sk+1 according to
+
+zk+1 = T (z, sk), zk++1 = T (zk+1, kF (zk+1)), sk+1 = sk + kF (zk++1),
+
+where k > 0 is the current stepsize. Finally, the current approximate solution zk+1 is defined with
+
+k+1
+
+1 zk+1 = k + 1
+
+zi+.
+
+i=1
+
+The key element of the above construction is the choice of the distance-generaing function d in the
+
+definition of the prox-function. It should satisfy two requirements:
+
+­ let D be the variation of V over A × B and let  be the parameter of strong convexity of V with respect to · . The complexity of the algorithm is proportional to D/, so this ratio should be as small as possible;
+­ one should be able to compute efficiently the solution to the auxiliary problem (21) which is to be solved twice at each iteration of the algorithm.
+
+Note that the prox-transform preserve the additive structure of the distance-generating function. Thus,
+
+in order to compute the prox-transform on the feasible domain P × X of (18) we need to compute its "P
+
+and X components" ­ the corresponding prox-transforms on P and cX. There are several evident choices
+
+of
+
+the
+
+prox-functions
+
+dP
+
+and
+
+dX
+
+of
+
+the
+
+domains 
+
+P
+
+and
+
+X
+
+of
+
+(18) which satisfy the first requirement
+
+above and allow to attain the optimal value O( m ln d ln L) of the ratio D/ for the prox-function V of
+
+(18). However, for such distance-generating functions there is no known way to compute efficiently the
+
+X-component of the prox-transform T in (21) for the set X . This is why in order to admit an efficient
+
+solution the problem (18) is to be modified one more time.
+
+2 Recall that a (sub-)differentiable on F function f is called strongly convex on F with respect to the norm · of modulus  if f (x) - f (y), x - y   x - y 2 for all x, y  F .
+
+11
+
+4.2 Modified problem
+
+We act as follows: first we eliminate the linear equality constraint which, taken along with X 0, says that X = QT ZQ with Z 0 and certain Q; assuming that the d rows of G are linearly independent, we can choose Q as an appropriate (L - d) × L matrix satisfying QQT = I (the orthogonal basis of the kernel of G). Note that from the constraints on X it follows that trace [X]  1, whence
+trace [QT ZQ] = trace [ZQQT ] = trace [Z]  1.
+
+Thus, although there are additional constraints on Z as well, Z belongs to the standard spectahedron Z = {Z  SL-d, Z 0, trace [Z]  1}.
+
+Now can rewrite our problem equivalently as follows:
+
+Let, further,
+
+min max trace [U T (I - P )U (QT ZQ)].
+P P ZZ, |QT ZQ|11
+
+W = {W  SL, W 2  1}, and Y = {Y  SL, |Y |1  1}.
+
+(22)
+
+We claim that the problem (22) can be reduced to the saddle point problem min max trace [U T (I - P )U Y ] +  trace [W (QT ZQ - Y )] .
+(P,W )P×W (Z,Y )Z×Y F (P,W ; Z,Y )
+provided that  is not too small.
+
+(23)
+
+Now, "can be reduced to" means exactly the following:
+Proposition 1 Suppose that  > L|U |22, where |U |2 is the maximal Euclidean norm of columns of U . Let (P , W ; Z, Y ) be a feasible solution -solution to (23), that is
+
+(P , W ; Z, Y )  (P, W; Z, Y), and F (P , W ) - F (Z, Y ) 
+
+where
+
+F (P, W ) = max F (P, W ; Z, Y ), F (Z, Y ) = min F (P, W ; Z, Y ).
+
+(Z,Y )Z×Y
+
+(P,W )P×W
+
+Then setting
+
+Z=
+
+Z, if |QT ZQ|1  1, |QT ZQ|-1 1Z otherwise,
+
+the pair (P , Z) is a feasible -solution to (22). Specifically, we have (P , Z)  P × Z with |QT ZQ|1  1,
+
+and
+
+G(P ) - G(Z)  ,
+
+where
+G(P ) = max trace [U T (I - P )U QT ZQ]; G(Z)
+ZZ, |QT ZQ|11
+= min trace [U T (I - P )U QT ZQ].
+P P
+The proof of the proposition is given in the appendix A.3.
+
+Note that feasible domains of (23) admit evident distance-generating functions. We provide the detailed computation of the corresponding prox-transforms in the appendix A.4.
+
+12 5 Numerical Experiments
+In this section we compare the numerical performance of the presented approach, which we refer to as SNGCA(SDP) with other statistical methods of dimension reduction on the simulated data.
+
+5.1 Structural adaptation algorithm
+
+We start with some implementation details of the estimation procedure. We use the choice of the test functions h (x) = f (x,  ) for the SNGCA algorithm as follows:
+
+f (x, )
+
+=
+
+tanh(T x)e-
+
+x
+
+2 2
+
+/2
+
+,
+
+where  , l = 1, ..., L are unit vectors in Rd.
+
+We implement here a multi-stage variant of the SNGCA (cf [10]). At the first stage of the SNGCA(SDP) algorithm we assume that the directions  are drawn randomly from the unit sphere of Rd. At each of the following stages we use the current estimation of the target subspace to "improve" the choice of directions  as follows: we draw a fixed fraction of 's from the estimated subspace and draw randomly over the unit square the remaining 's. The simulation results below are present for the estimation procedure with three stages. The size of the set of test function is set to L = 10 d, and the target accuracy of solving the problem (11) is set to 1e - 4.
+
+We can summarize the SNGCA(SDP) algorithm as follows:
+
+Algorithm 1: SNGCA (SDP)
+% Initialization: The data (Xi)Ni=1 are re-centered. Let  = (1, . . . d) be the standard deviations of the components of Xi . We denote Yi = diag(-1)Xi the standardized data.
+Set the current estimator 0 = Id.
+
+% Main iteration loop:
+
+for i=1 to I do
+Sample a fraction of (i) 's from the normal distribution N (0, i-1) (zero mean, with covariance matrix i-1), sample the remaining (i) 's from N (0, Id), then normalize to the unit length;
+
+% Compute estimations of  and 
+
+for =1 to L do
+
+(i)
+
+=
+
+1 N
+
+N j=1
+
+h(i)
+
+(Yj
+
+);
+
+(i)
+
+=
+
+1 N
+
+N j=1
+
+Yj
+
+hl(i)
+
+(Yj
+
+);
+
+end
+
+Solve the corresponding problem (11) and update the estimation i; end
+
+5.2 Experiment description
+
+13
+
+Each simulated data set XN = [X1, ..., XN ] of size N = 1000 represents N i.i.d. realizations of a random vectors X of dimension d. Each simulation is repeated 100 times and we report the average over 100 simulations Frobenius norm of the error of estimation of the projection on the target space. In the examples below only m = 2 components of X are non-Gaussian with unit variance, other d-2 components of X are independent standard normal r.v.. The densities of the non-Gaussian components are chosen as follows:
+
+(A) Gaussian mixture: 2-dimensional independent Gaussian mixtures with density of each component given by 0.5 -3,1(x) + 0.5 3,1(x).
+(B) Dependent super-Gaussian: 2-dimensional isotropic distribution with density proportional to exp(- x ). (C) Dependent sub-Gaussian: 2-dimensional isotropic uniform with constant positive density for x 2 
+1 and 0 otherwise. (D) Dependent super- and sub-Gaussian: a component of X, say X1, follows the Laplace distribution
+L(1) and the other is a dependent uniform U(c, c + 1), where c = 0 for |X1|  ln 2 and c = -1 otherwise. (E) Dependent sub-Gaussian: 2-dimensional isotropic Cauchy distribution with density proportional to (2 - x2)-1 where  = 1.
+
+We provide the 2-d plots of the densities of the non-Gaussian components on Figure 1.
+
+(A) (B) (C)
+(D) (E) Fig. 1 (A) independent Gaussian mixtures, (B) isotropic super-Gaussian, (C) isotropic uniform and (D) dependent 1d Laplacian with additive 1d uniform, (E) isotropic sub-Gaussian
+We start with comparing the presented algorithm with Projection Pursuit (PP) method [16] and the NGCA for d = 10. The results are presented on Figure 2 (the corresponding results for PP and NGCA has been already reported in [10] and [6]).
+
+14
+Fig. 2 Comparison of PP, NGCA and SNGCA(SDP)
+Since the minimization procedure of PP tends to be trapped in a local minimum, in each of the 100 simulations, the PP algorithm is restarted 10 times with random starting points. The best result is reported for each PP-simulation. We observe that SNGCA(SDP) outperforms NGCA and PP in all tests. In the next simulation we study the dependence of the accuracy of the SNGCA(SDP) on the noise level and compare it to the corresponding data for PP and NGCA. We present on Figure 3 the results of experiments when the non-Gaussian coordinates have unit variance, but the standard deviation of the components of the 8-dimensional Gaussian distribution follows the geometrical progression 10-r, 10-r+2r/7, . . . , 10r where r = 1, . . . , 8.
+
+15
+Fig. 3 estimation error with respect to the standard deviation of Gaussian components following a geometrical progression on [10-r, 10r] where r is the parameter on the abscissa
+The conditioning of the covariance matrix heavily influences the estimation error of PP(tanh) and NGCA, but not that of SNGCA(SDP). The latter method appears to be insensitive to the differences in the noise variance along different direction in all test cases. Next we compare the behavior of SNGCA(SDP), PP and NGCA as the dimension of the Gaussian component increases. On Figure 4 we plot the mean error of estimation against the problem dimension d.
+
+16
+Fig. 4 mean-square estimation error vs problem dimension d
+For PP and NGCA methods we observe that the estimation becomes meaningless (the estimation error explodes) already for d = 30 - 40 for the models (A), (C) and for d = 20 - 30 of the model (D). In the case of the models (B) and (E) we observe the progressive increase of the error for methods PP and NGCA. The proposed method SNGCA(SDP) behaves robustly with respect to the increasing dimension of the Gaussian component for all test models.
+5.3 Application to Geometric Analysis of Metastability Some biologically active molecules exhibit different large geometric structures at the scale much larger than the diameter of the atoms. If there are more than one such structures with the life span much larger that the time scale of the local atomic vibrations, the structure is called metastable conformation [27]. In other words, metastable conformations of biomolecules can be seen as connected subsets of state-space. When compared to the fluctuations within each conformation, the transitions between different conformations of a molecule are rare statistical events. Such multi-scale dynamic behavior of biomolecules stem from a decomposition of the free energy landscape into particulary deep wells each containing many local minima [23, 12]. Such wells represent different almost invariant geometrical large scale structures [1]. The macroscopic dynamics is assumed to be a Markov jump process, hopping between the metastable sets of the state space while the microscopic dynamics within these sets mixes on much shorter time scales [14]. Since the shape of the energy landscape and the invariant density of the Markov process are unknown, the "essential degrees of freedom", in which the rare conformational changes occur, are of importance. We will now illustrate that SNGCA(SDP) is able to detect a multimodal component of the data density as a special case of non-Gaussian subspace in high-dimensional data obtained from molecular dynamics simulation of oligopeptides.
+
+17 Clustering of 8-alanine The first example is a times series, generated by an equilibrium molecular dynamics simulation of 8-alanine. We only consider the backbone dihedral angles in order to determine different conformations. The 14-dimensional time series consists of the cyclic data set of all backbone torsion angles. The simulation using CHARMM was done at T = 300K with implicit water by means of the solvent model ACE2 [26]. A symplectic Verlet integrator with integration step of 1f s was used; the total trajectory length was 4µs and every  = 50f s a set of coordinates was recorded. The dimension reduction reported in the next figure was obtained using SNGCA(SDP) with for a given dimension m = 5 of the target space containing the multimodal component.
+Fig. 5 low dimensional multimodal component of 8-alanine
+A concentration of the clustered data in the target space of SNGCA may be clearly observed. In comparison, the complement of the target space is almost completely filled with Gaussian noise.
+
+18
+Fig. 6 Gaussian noise in the complement of the SNGCA target space.
+Clustering of a 3-peptide molecule In the next example we investigate Phenylalanyl-Glycyl-Glycine Tripeptide, which is assumed to realize all of the most important folding mechanisms of polypeptides [24]. The simulation is done using GROMACS at T = 300K with implicit water. An integration step of a symplectic Verlet integrator is set to 2f s, and every  = 50f s a set of 31 diedre angles was recorded. As in the previous experience, the dimension of the target space is set to m = 5. Figure 7 shows that the clustered data can be primarily found in the target space of SNGCA(SDP).
+
+19
+Fig. 7 low dimensional multimodal component of 3-peptide 6 Conclusions We have studied a new procedure of non-Gaussian component analysis. The suggested method, same as the techniques proposed in [6, 10], has two stages: on the first stage certain linear functionals of unknown distribution are computed, then this information is used to recover the non-Gaussian subspace. The novelty of the proposed approach resides in the new method of non-Gaussian subspace identification, based upon semidefinite relaxation. The new procedure allows to overcome the main drawbacks of the previous implementations of the NGCA and seems to improve significantly the accuracy of estimation. On the other hand, the proposed algorithm is computationally demanding. While the first-order optimization algorithm we propose allows to treat efficiently the problems which are far beyond the reach of classical SDP-optimization techniques, the numerical difficulty seems to be the main practical limitation of the proposed approach.
+
+20
+
+References
+
+1. A. Amadei & A. B. Linssen & H. J. Berendsen (1993) Essential dynamics of proteins. Proteins, 17(4):412-425.
+
+2. A. d'Aspremont, L. El Ghaoui, M.I. Jordan, and G. R. G. Lanckriet (2007) A direct formulation for sparse
+
+PCA using semidefinite programming. SIAM Review, 49(3):434-448.
+
+3. A. d'Aspremont, F. Bach and L. El Ghaoui (2008) Optimal solutions for sparse principal component analysis.
+
+Journal of Machine Learning Research, 9:1269-1294.
+
+4. M. Belkin, P. Niyogi (2009) Laplacian Eigenmaps for dimensionality reduction and data representation Neural
+
+Computation, 15(6):1373-1396.
+
+5. A. Ben Tal & A. Nemirovski (2001) Lectures on Modern Convex Optimization. Analysis, Algorithms and
+
+Engineering Applications, Volume 1 of MPS/ SIAM Series on Optimization, SIAM, Philadelphia.
+
+6. G. Blanchard, M. Kawanabe, M. Sugiyama, V. Spokoiny, K.-R. Mu¨ller (2006) In Search of Non-Gaussian
+
+Components of a High-Dimensional Distribution. J. of Machine Learning Research, p. 247-282. 7. M.Kawanabe, M.Sugiyama, G.Blanchard and K.-R.M´'uller" (2007) A new algorithm of non-Gaussian com-
+
+ponent analysis with radial kernel functions, Annals of the Institute of Statistical Mathematics, vol. 59(1),
+
+57-75. 8. E. CandA~ ¨s (2006) Compressive sampling. Int. Congress of Mathematics, Madrid, Spain, 3:1433-1452.
+
+9. P. Diaconis & D. Freedman (1984) Asymptotics of graphical projection pursuit Annals of Statistics, 12:793-
+
+815.
+
+10. E. Diederichs & A. Juditsky & V. Spokoiny & C. Schu¨tte (2009) Sparse NonGaussian Component Analysis.
+
+IEEE Transactions on Information Theory, 15(7):5249-5262.
+
+11. I. Guyon & A. Elisseeff (2003) An Introduction to Variable and Feature Selection. Journal of Machine Learning
+
+Research, 3:1157-1182.
+
+12. H. Frauenfelder & B.H. McMahon (2000) Energy Landscape and fluctations in proteins. Ann. Phys.
+
+(Leipzig),9:655-667.
+
+13. T. J. Hastie & R. Tibshirani & J. Friedman (2001) The Elements of Statistical Learning. New York, Springer
+
+Series in Statistcs.
+
+14.
+
+I.
+
+Horenko
+
+&
+
+Ch.
+
+SchA~
+
+1 4
+
+tte
+
+(2008)
+
+Likelihood-Based
+
+Estimation
+
+of
+
+Multidimensional
+
+Langevin
+
+Models
+
+and
+
+its Application to Biomolecular Dynamics. Mult. Mod. Sim., 7(2):731-773.
+
+15. R. A. Horn and C. R. Johnson (1985) Matrix Analysis. Cambridge University Press.
+
+16. A. Hyv¨arinen. (1999) Survey on independent component analysis. Neural Computing Surveys, 2:94-128.
+
+17. M. Mizuta (2004) Dimension Reduction Methods. In J.E. Gentle & W. Ha¨rdle, and Y. Mori (eds.): Handbook
+
+of Computational Statistics pp. 566-89.
+
+18. A. Nemirovski & D. Yudin (1983) Problem Complexity and Method Efficiency in Optimization. New York, J.
+
+Wiley and Sons
+
+19. A. Nemirovski (2004) Prox-method with rate of convergence O(1/t) for variational inequalities with Lips-
+
+chitz continuous monotone operators and smooth convex-concave saddle point problems. SIAM Journal on
+
+Optimization, 15:229-251
+
+20. Z. Lu & R. Monteiro &A. Nemirovski (2007) Large-Scale Semidefinite Programming via Saddle Point Mirror-
+
+Prox Algorithm. Mathematical Programming, 109:2-3, 211-237.
+
+21. Yu. E. Nesterov (2005) Smooth minimization of non-smooth functions. Mathematical Programming: Series A
+
+and B, 103(1):127-152.
+
+22. Yu. E. Nesterov (2007) Dual extrapolation and its applications for solving variational inequalities and related
+
+problems. Mathematical Programming: Series A and B, 109(2):319-344.
+
+23. J. Pillardy & L. Piela (1995) Molecular dynamics on deformed energy hypersurfaces. J.Phys.Chem., 99:11805-
+
+11812.
+
+24. D. Reha & H. Valdes & J.Vondrasek & P. Hobza & A. Abu-Riziq & B. Crews & M.S. de Vries (2005) Structure
+
+an IR Spectrum of Phenylalanyl-Glycyl-Glycine Tripeptide in the Gas-Phase. Cem. Eur. J., 11:6083-6817.
+
+25. S. Roweis & L. Saul (2000) Nonlinear dimensionality reduction by locally linear embedding. Science, 290:2323-
+
+2326.
+
+26. M. Schaefer & M. Karplus (1996) A Comprehensive Analytical Treatment of Continuum Electrostatics. J.
+
+Chem. Phys., 100:1578-1599.
+
+27. C. Schu¨tte & W. Huisinga (2003) Biomolecular Conformations can be identified as metastable sets of melcular
+
+dynamics. Computational Chemistry, Handbook of Numerical Analysis, 699-744.
+
+21
+28. V. Spokoiny (2009) A penalized exponential risk bound in parametric estimation. http://arxiv.org/abs/0903.1721.
+29. Tenenbaum & V. de Silva & J.C. Langford (2000) A global geometric framework for nonlinear dimensionality reduction. Science, 290:2319-2323.
+30. A. van der Vaart & J.A. Wellner (1996) Weak Convergence and Empirical Proccesses. Springer Series in Statistics - New York
+31. L. Wasserman (2006) All of Nonparametric Statistics. New York, Springer Texts in Statistcss
+
+22
+
+A Appendix
+
+Let X = XT  RL×L be positive semidefinite with |X|1  1, and let Y = X1/2 be the symmetric positive semidefinite square root of X. If we denote yi, i = 1, .., L the columns of Y , then |X|1  1 implies that
+
+|yiT yj |  1.
+1i,jL
+
+We make here one trivial though useful observation: for any matrix A  Rd×L, when denoting B = AT A, we have
+
+LL
+
+AY
+
+2 2
+
+=
+
+trace (AT AX)
+
+=
+
+trace [BX]
+
+=
+
+Bj i Xij
+
+
+
+max |Bij |
+ij
+
+=
+
+|A|22.
+
+j=1 i=1
+
+(24)
+
+(Recall that for a matrix A  Rd×L with columns ai, i = 1, ..., L, |A|2 stands for the maximal column norm:
+|A|2 = max1iL |ai|2). We can rewrite the problem (11) using Y = X1/2, so that the objective
+
+f (X, P ) = trace [U T (I - P )U X]
+
+of (11) becomes
+
+g(Y, P ) =
+
+(I - P )1/2U Y
+
+2 2
+
+.
+
+Let now (X, P ) be a saddle point of (11). Namely, we have for any feasible P and X:
+
+f (X, P )  [f  f (X, P )]  f (X, P ),
+
+We denote Y = X1/2. In what follows we suppose that vectors  and  ,
+and |G - G|2  N .
+
+= 1, ..., L satisfy (8). In other words,it holds |U -U |2  N
+
+A.1 Proof of Theorem 1.
+
+Lemma 1 Let P be an optimal solution to (11). Then
+
+Proof. We write:
+
+max
+c
+
+|(I - P )1/2U c|2 | |c|1  1, Gc = 0
+
+ m-1in()( + N ) + 2N .
+
+(25)
+
+max
+c
+
+|(I - P )1/2U c|2 | |c|1  1, Gc = 0
+
+ max (I - P )1/2U Y 2 |Y 2|1  1, GY = 0
+Y
+
+ max (I - P )1/2U Y 2 |Y 2|1  1, GY = 0
+Y
+
++ max (I - P )1/2(U - U )Y 2 |Y 2|1  1, GY = 0
+Y
+
+ max (I - P )1/2U Y 2 |Y 2|1  1, GY 2 
+Y
+
+(by (24)) +|(I - P )1/2(U - U )|2
+
+(due to 0 I - P I) = (I - P )1/2U Y 2 + N  (I - )1/2U Y 2 + N
+
+(again by (24))  (I - )1/2U Y 2 + 2N .
+
+On the other hand, as GY 2  N , we get
+
+GY 2  GY 2 + (G - G)Y 2  + |G - G|2  + N ,
+
+and by (3),
+
+(I - )U Y 2  -m1in()( + N ).
+
+This implies (25).
+
+We now come back to the proof of the theorem. Let j and j , j = 1, . . . , d be respectively the eigenvalues and the
+
+23
+
+eigenvectors of P . Assume that 1  2  . . .  d. Then P =
+
+d j=1
+
+j j
+
+jT
+
+and  =
+
+m j=1
+
+j
+
+jT
+
+.
+
+Let
+
+
+
+=
+
+Uc
+
+for c such that |c|1  1 and Gc = 0. We have
+
+m
+
+T (I - P ) = (1 - j )(jT )2 +
+
+(1 - j )(jT )2
+
+j=1
+
+j>m
+
+ (1 - j )(jT )2  (1 - m+1)(jT )2
+j>m
+
+= (1 - m+1)T (I - ) = (1 - m+1)|(I - )|22.
+
+Since,
+
+for
+
+obvious
+
+reasons,
+
+m+1
+
+
+
+m m+1
+
+,
+
+it
+
+applies
+
+(i)
+
+due
+
+to
+
+(25).
+
+Let us show (ii). We have due to (12) and (25):
+
+trace (I - P ) = trace (I - P )1/2(I - P )1/2
+
+mm
+ µktrace (I - P )1/2U ckcTk U T (I - P )1/2 = µk|(I - P )1/2U ck|22
+
+k=1
+
+k=1
+
+m
+
+
+
+µk
+
+max
+c
+
+|(I - P )1/2U c|22 | |c|1  1, Gc = 0
+
+k=1
+
+= µ(-m1in()( + N ) + 2N )2,
+
+(26)
+
+which is (13).
+
+Note that trace [P ]  jm j (cf, e.g., Corollary 4.3.18 of [15]), thus by (26),
+
+m+1  m -
+
+j  trace [(I - P )]  µ(-m1in()( + N ) + 2N )2.
+
+jm
+
+On the other hand,
+
+m
+trace [(I - P )] = (1 - j )jT j +
+
+(1 - j )jT j
+
+j=1
+
+j>m
+
+ (1 - j )jT j  (1 - m+1)jT j
+j>m
+
+= (1 - m+1)trace [(I - )],
+
+and we conclude that
+
+trace [(I
+
+- )] 
+
+trace [(1 - P )] 1 - m+1
+
+
+
+1
+
+µ(-m1in()( + - µ(-m1in()(
+
+N ) + + N )
+
+2N )2 + 2N )2
+
+.
+
+Now, using the relation trace  = trace  = m, we come to
+
+ - 
+
+2 2
+
+=
+
+trace
+
+[ 2
+
+-
+
+2  
+
++
+
+(  )2 ]
+
+=
+
+2m
+
+-
+
+2trace
+
+[   ]
+
+=
+
+2trace
+
+[(I
+
+-
+
+ )  ],
+
+and we arrive at (14).
+
+A.2 Proof of Theorem 2.
+
+Let now P , X and t = trace P be a triplet of optimal solution to (15).
+
+Lemma 2 Let P be an optimal solution to (15). (i) In the premises of the theorem  is a feasible solution of (15) and trace P  trace  = m.
+(ii) We have
+
+max
+c
+
+|(I - P )1/2U c|2 | |c|1  1, Gc = 0
+
+  + N .
+
+(27)
+
+24
+
+Proof. We act as in the proof of Lemma 1: to verify (i) we observe that
+
+max trace [U T (I - )U X] X 0, |X|1  1, trace [GXGT ]  2
+X
+
+= max
+Y
+
+(I - )U Y
+
+2 2
+
+|Y 2|1  1,
+
+GY 2 
+
+ max ( (I - )U Y 2 + N )2
+Y
+
+
+
+-m1in ( )(
+
++ N ) + N
+
+2
+.
+
+|Y 2|1  1,
+
+GY 2 
+
+Thus, if   -m1in()( + N ) + N ,  is a feasible solution of (15) and, as a result, trace P  trace . To show (ii) it suffices to note that
+
+max
+c
+
+|(I - P )1/2U c|2 | |c|1  1, Gc = 0
+
+ max (I - P )1/2U Y 2 |Y 2|1  1, GY = 0
+Y
+
+ max (I - P )1/2U Y 2 |Y 2|1  1, GY = 0 + |(I - P )1/2(U - U )|2
+Y
+
+ max (I - P )1/2U Y 2 |Y 2|1  1, GY 2  + N   + N
+Y
+
+because of the feasibility of P . Now using the bound m  m we complete the proof following exactly the lines of the proof of Theorem 1.
+
+A.3 Proof of Proposition 1
+
+Observe that
+
+F (Z, Y ) = min
+
+trace [BT (I - P )BQT ZQ] +  trace [W (QT ZQ - Y )]
+
+(P,W )P×W
+
+= min trace [BT (I - P )BQT ZQ] -  QT ZQ - Y 2
+P P
+ min trace [BT (I - P )BQT ZQ] = G(Z);
+P P
+
+and
+
+(28)
+
+F (P , W ) = max
+
+trace [BT (I - P )BQT ZQ] +  trace [W (QT ZQ - Y )]
+
+(Z,Y )Z×Y
+
+ max
+
+trace [BT (I - P )BQT ZQ] +  trace [W (QT ZQ - Y )]
+
+ZZ, |QT ZQ|11, Y =QT ZQ
+
+= G(P ) :
+
+Assume first that |QT ZQ|1  1. In this case Z = Z and
+
+ F (P , W ) - F (Z, Y ) = G(P ) - G(Z) = G(P ) - G(Z)
+
+(the second A^¸ is given by (28)), as claimed. Now assume that s = QT ZQ|1 > 1. We have already established the first equality of the following chain:
+
+F (Z, Y ) = min
+P P
+
+trace (BT (I - P )BQT ZQ) -  QT ZQ - Y
+
+2
+
+ min
+P P
+
+trace
+
+[BT
+
+(I
+
+-
+
+P )BQT
+
+Z Q]
+
+-
+
+ |QT L
+
+ZQ
+
+-
+
+Y
+
+|1
+
+ min
+
+trace [BT (I
+
+-
+
+P )BQT ZQ]
+
+-
+
+ (s
+
+-
+
+1)
+
+P P
+
+L
+
+= min
+
+strace [BT (I
+
+- P )BQT ZQ] -
+
+ (s - 1)
+
+P P
+
+L
+
+
+
+
+
+
+
+min
+P P
+
+ 
+trace
+
+
+[BT
+
+(I
+
+-
+
+P )BQT
+
+Z Q]
+
++
+
+(s
+
+-
+
+1)|BT
+
+(I
+
+-
+
+P )B||QT
+
+Z Q|1
+
+ - (s
+L
+
+-
+
+  1)
+
+
+
+
+
+
+(s-1)|BT B|=(s-1)|B|22
+
+
+
+ min trace [BT (I - P )BQT ZQ] = G(Z),
+P P
+
+where the concluding  is readily given by the definition of .3 Further, we have already seen that
+
+F (P , W )  G(P ).
+
+Consequently, as claimed.
+
+ F (P , W ) - F (Z, Y )  G(P ) - G(Z),
+
+25
+
+A.4 Computing the prox-transform
+
+Recall that because of the additivity of the distance-generating function d the computation of the prox-transform on the set P × W × Z × Y can be decomposed into independent computations on the four domains of (23).
+
+Prox-transform on P. The proxy-function of P is the matrix entropy:
+
+d(P0, P ) = P trace
+
+P m
+
+ln
+
+P m
+
+- ln
+
+P0 m
+
+for P, P0  P, P > 0.
+
+To compute the corresponding component of T we need to find, given S  Sd,
+
+T (P0, S)
+
+=
+
+arg max
+P P
+
+= arg max
+P P
+
+PP trace [S(P - P0)] - P trace m ln m
+
+trace S + P ln P0 mm
+
+P - P trace
+
+- ln P0 m
+PP ln
+mm
+
+.
+
+(29)
+
+By the symmetry considerations we conclude that the optimal solution of this problem is diagonal in the basis
+
+of
+
+eigenvectors
+
+of
+
+S
+
++
+
+P m
+
+ln(
+
+P0 m
+
+).
+
+Thus
+
+the
+
+solution
+
+of
+
+(29) can be obtained as follows: compute the eigenvalue
+
+decomposition
+
+S + P ln( P0 ) =   T mm
+and let  be the diagonal of . Then solve the "vector" problem
+
+p
+
+= arg
+
+max
+
+T p -
+
+0p1, pm
+
+P m
+
+d
+pi ln(pi/m).
+i=1
+
+(30)
+
+and compose
+
+T (P, S) =  diag(y) T .
+
+Now, the solution of (30) can be obtained by simple bisection: indeed, using Lagrange duality we conclude that the components of y satisfies
+
+pi = exp
+
+i -  
+
+ 1, i = 1, ..., d,
+
+and the Lagrange multiplier  is to be set to obtain pi = m, what can be done by bisection in . When the solution is obtained, the optimal value of (29) can be easily computed.
+
+Prox-transform on W.
+
+The distance-generating function of W is W trace [W 2]/2 =
+
+W
+
+2 2
+
+/2
+
+so
+
+that
+
+we
+
+have
+
+to
+
+solve for S  SL
+
+T (W0, S) = arg max
+W 21
+
+trace [S(W
+
+-
+
+W0)]
+
+-
+
+W 2
+
+W - W0
+
+2 2
+
+2
+
+.
+
+(31)
+
+The optimal solution to (31) can be easily computed
+
+T (W0, S) =
+
+W0 + S/W
+
+if W0 + S/W 2  1,
+
+(W0 + S/W )/ W0 + S/W 2 if W0 + S/W 2 > 1.
+
+3 We denote |A| = maxij |Aij |.
+
+26
+
+Prox-transform on Z. The prox-function of Z is the matrix entropy and we have to solve for S  SL-d
+
+T (Z, S)
+
+=
+
+arg
+
+max
+ZZ
+
+trace [S(Z
+
+-
+
+Z0)]
+
+-
+
+Z trace [Z(ln(Z)
+
+-
+
+ln(Z0))]
+
+=
+
+arg
+
+max
+ZZ
+
+trace [(S
+
++
+
+Z
+
+ln(Z0 ))Z ]
+
+-
+
+Z trace [Z
+
+ln Z].
+
+Once again, in the basis of eigenvectors of S + Z ln(Z0) the problem reduces to
+
+d
+z = arg max T z - Z zi ln(zi),
+z0, z1 i=1
+
+where  is the diagonal of  with S + Z ln Z0 =   T . In this case
+
+zi =
+
+exp(
+
+i 
+
+)
+
+, i = 1, ..., L - d.
+
+L j=1
+
+exp(
+
+j 
+
+)
+
+Prox-transform on Y. The distance generating function for the domain Y is defined as follows:
+
+
+L
+
+
+n
+
+d(Y ) = min
+
+(uij ln[uij ] + vij ln[vij ] ) : (uij + vij ) = 1,
+
+ i,j=1
+
+i=1
+
+Yij = uij - vij , uij  0, vij  0, 1  i, j  L } .
+
+In other words, the element Y  Y is decomposed according to Y = u - v, where (u, v) is an element of the 2L2-dimensional simplex  = x  R2L2 , x  0, i xi = 1 . To find the Y -component of the prox-transform amounts to find for S  SL
+
+TY (Y0, S) = TY (u0, v0, S)
+
+=
+
+arg
+
+max
+u,v
+
+trace
+
+[S(u
+
+-
+
+v)]
+
+-
+
+Y
+
+ij
+
+uij
+
+ln(
+
+uij ui0j
+
+)
+
++
+
+vij
+
+ln(
+
+vij vi0j
+
+)
+
+.
+
+One can easily obtain an explicit solution to (32): let
+
+aij = u0ij exp
+
+Sij Y
+
+,
+
+bij = vi0j exp
+
+- Sij Y
+
+.
+
+Then TY (Y0, S) = u - v, where
+
+uij =
+
+aij , ij (aij + bij )
+
+vij =
+
+bij . ij (aij + bij )
+
+(32)
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Localising temperature risk" by Wolfgang Karl Härdle, Brenda López Cabrera, Ostap Okhrin and Weining Wang, January 2011.
+002 "A Confidence Corridor for Sparse Longitudinal Data Curves" by Shuzhuan Zheng, Lijian Yang and Wolfgang Karl Härdle, January 2011.
+003 "Mean Volatility Regressions" by Lu Lin, Feng Li, Lixing Zhu and Wolfgang Karl Härdle, January 2011.
+004 "A Confidence Corridor for Expectile Functions" by Esra Akdeniz Duran, Mengmeng Guo and Wolfgang Karl Härdle, January 2011.
+005 "Local Quantile Regression" by Wolfgang Karl Härdle, Vladimir Spokoiny and Weining Wang, January 2011.
+006 "Sticky Information and Determinacy" by Alexander Meyer-Gohde, January 2011.
+007 "Mean-Variance Cointegration and the Expectations Hypothesis" by Till Strohsal and Enzo Weber, February 2011.
+008 "Monetary Policy, Trend Inflation and Inflation Persistence" by Fang Yao, February 2011.
+009 "Exclusion in the All-Pay Auction: An Experimental Investigation" by Dietmar Fehr and Julia Schmid, February 2011.
+010 "Unwillingness to Pay for Privacy: A Field Experiment" by Alastair R. Beresford, Dorothea Kübler and Sören Preibusch, February 2011.
+011 "Human Capital Formation on Skill-Specific Labor Markets" by Runli Xie, February 2011.
+012 "A strategic mediator who is biased into the same direction as the expert can improve information transmission" by Lydia Mechtenberg and Johannes Münster, March 2011.
+013 "Spatial Risk Premium on Weather Derivatives and Hedging Weather Exposure in Electricity" by Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+014 "Difference based Ridge and Liu type Estimators in Semiparametric Regression Models" by Esra Akdeniz Duran, Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+015 "Short-Term Herding of Institutional Traders: New Evidence from the German Stock Market" by Stephanie Kremer and Dieter Nautz, March 2011.
+016 "Oracally Efficient Two-Step Estimation of Generalized Additive Model" by Rong Liu, Lijian Yang and Wolfgang Karl Härdle, March 2011.
+017 "The Law of Attraction: Bilateral Search and Horizontal Heterogeneity" by Dirk Hofmann and Salmai Qari, March 2011.
+018 "Can crop yield risk be globally diversified?" by Xiaoliang Liu, Wei Xu and Martin Odening, March 2011.
+019 "What Drives the Relationship Between Inflation and Price Dispersion? Market Power vs. Price Rigidity" by Sascha Becker, March 2011.
+020 "How Computational Statistics Became the Backbone of Modern Data Science" by James E. Gentle, Wolfgang Härdle and Yuichi Mori, May 2011.
+021 "Customer Reactions in Out-of-Stock Situations ­ Do promotion-induced phantom positions alleviate the similarity substitution hypothesis?" by Jana Luisa Diels and Nicole Wiebach, May 2011.
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Extreme value models in a conditional duration intensity framework" by Rodrigo Herrera and Bernhard Schipp, May 2011.
+023 "Forecasting Corporate Distress in the Asian and Pacific Region" by Russ Moro, Wolfgang Härdle, Saeideh Aliakbari and Linda Hoffmann, May 2011.
+024 "Identifying the Effect of Temporal Work Flexibility on Parental Time with Children" by Juliane Scheffel, May 2011.
+025 "How do Unusual Working Schedules Affect Social Life?" by Juliane Scheffel, May 2011.
+026 "Compensation of Unusual Working Schedules" by Juliane Scheffel, May 2011.
+027 "Estimation of the characteristics of a Lévy process observed at arbitrary frequency" by Johanna Kappus and Markus Reiß, May 2011.
+028 "Asymptotic equivalence and sufficiency for volatility estimation under microstructure noise" by Markus Reiß, May 2011.
+029 "Pointwise adaptive estimation for quantile regression" by Markus Reiß, Yves Rozenholc and Charles A. Cuenod, May 2011.
+030 "Developing web-based tools for the teaching of statistics: Our Wikis and the German Wikipedia" by Sigbert Klinke, May 2011.
+031 "What Explains the German Labor Market Miracle in the Great Recession?" by Michael C. Burda and Jennifer Hunt, June 2011.
+032 "The information content of central bank interest rate projections: Evidence from New Zealand" by Gunda-Alexandra Detmers and Dieter Nautz, June 2011.
+033 "Asymptotics of Asynchronicity" by Markus Bibinger, June 2011. 034 "An estimator for the quadratic covariation of asynchronously observed
+Itô processes with noise: Asymptotic distribution theory" by Markus Bibinger, June 2011. 035 "The economics of TARGET2 balances" by Ulrich Bindseil and Philipp Johann König, June 2011. 036 "An Indicator for National Systems of Innovation - Methodology and Application to 17 Industrialized Countries" by Heike Belitz, Marius Clemens, Christian von Hirschhausen, Jens Schmidt-Ehmcke, Axel Werwatz and Petra Zloczysti, June 2011. 037 "Neurobiology of value integration: When value impacts valuation" by Soyoung Q. Park, Thorsten Kahnt, Jörg Rieskamp and Hauke R. Heekeren, June 2011. 038 "The Neural Basis of Following Advice" by Guido Biele, Jörg Rieskamp, Lea K. Krugel and Hauke R. Heekeren, June 2011. 039 "The Persistence of "Bad" Precedents and the Need for Communication: A Coordination Experiment" by Dietmar Fehr, June 2011. 040 "News-driven Business Cycles in SVARs" by Patrick Bunk, July 2011. 041 "The Basel III framework for liquidity standards and monetary policy implementation" by Ulrich Bindseil and Jeroen Lamoot, July 2011. 042 "Pollution permits, Strategic Trading and Dynamic Technology Adoption" by Santiago Moreno-Bromberg and Luca Taschini, July 2011. 043 "CRRA Utility Maximization under Risk Constraints" by Santiago MorenoBromberg, Traian A. Pirvu and Anthony Réveillac, July 2011.
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+044 "Predicting Bid-Ask Spreads Using Long Memory Autoregressive Conditional Poisson Models" by Axel Groß-Klußmann and Nikolaus Hautsch, July 2011.
+045 "Bayesian Networks and Sex-related Homicides" by Stephan Stahlschmidt, Helmut Tausendteufel and Wolfgang K. Härdle, July 2011.
+046 "The Regulation of Interdependent Markets", by Raffaele Fiocco and Carlo Scarpa, July 2011.
+047 "Bargaining and Collusion in a Regulatory Model", by Raffaele Fiocco and Mario Gilli, July 2011.
+048 "Large Vector Auto Regressions", by Song Song and Peter J. Bickel, August 2011.
+049 "Monetary Policy, Determinacy, and the Natural Rate Hypothesis", by Alexander Meyer-Gohde, August 2011.
+050 "The impact of context and promotion on consumer responses and preferences in out-of-stock situations", by Nicole Wiebach and Jana L. Diels, August 2011.
+051 "A Network Model of Financial System Resilience", by Kartik Anand, Prasanna Gai, Sujit Kapadia, Simon Brennan and Matthew Willison, August 2011.
+052 "Rollover risk, network structure and systemic financial crises", by Kartik Anand, Prasanna Gai and Matteo Marsili, August 2011.
+053 "When to Cross the Spread: Curve Following with Singular Control" by Felix Naujokat and Ulrich Horst, August 2011.
+054 "TVICA - Time Varying Independent Component Analysis and Its Application to Financial Data" by Ray-Bing Chen, Ying Chen and Wolfgang K. Härdle, August 2011.
+055 "Pricing Chinese rain: a multi-site multi-period equilibrium pricing model for rainfall derivatives" by Wolfgang K. Härdle and Maria Osipenko, August 2011.
+056 "Limit Order Flow, Market Impact and Optimal Order Sizes: Evidence from NASDAQ TotalView-ITCH Data" by Nikolaus Hautsch and Ruihong Huang, August 2011.
+057 "Optimal Display of Iceberg Orders" by Gökhan Cebirolu and Ulrich Horst, August 2011.
+058 "Optimal liquidation in dark pools" by Peter Kratz and Torsten Schöneborn, September 2011.
+059 "The Merit of High-Frequency Data in Portfolio Allocation" by Nikolaus Hautsch, Lada M. Kyj and Peter Malec, September 2011.
+060 "On the Continuation of the Great Moderation: New evidence from G7 Countries" by Wenjuan Chen, September 2011.
+061 "Forward-backward systems for expected utility maximization" by Ulrich Horst, Ying Hu, Peter Imkeller, Anthony Réveillac and Jianing Zhang.
+062 "On heterogeneous latent class models with applications to the analysis of rating scores" by Aurélie Bertrand and Christian M. Hafner, October 2011.
+063 "Multivariate Volatility Modeling of Electricity Futures" by Luc Bauwens, Christian Hafner and Diane Pierret, October 2011.
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+064 "Semiparametric Estimation with Generated Covariates" by Enno Mammen, Christoph Rothe and Melanie Schienle, October 2011.
+065 "Linking corporate reputation and shareholder value using the publication of reputation rankings" by Sven Tischer and Lutz Hildebrandt, October 2011.
+066 "Monitoring, Information Technology and the Labor Share" by Dorothee Schneider, October 2011.
+067 "Minimal Supersolutions of BSDEs with Lower Semicontinuous Generators" by Gregor Heyne, Michael Kupper and Christoph Mainberger, October 2011.
+068 "Bargaining, Openness, and the Labor Share" by Dorothee Schneider, October 2011.
+069 "The Labor Share: A Review of Theory and Evidence" by Dorothee Schneider, October 2011.
+070 "The Power of Sunspots: An Experimental Analysis" by Dietmar Fehr, Frank Heinemann and Aniol Llorente-Saguer, October 2011.
+071 "Econometric analysis of volatile art markets" by Fabian Y. R. P. Bocart and Christian M. Hafner, October 2011.
+072 "Financial Network Systemic Risk Contributions" by Nikolaus Hautsch, Julia Schaumburg and Melanie Schienle, October 2011.
+073 "Calibration of self-decomposable Lévy models" by Mathias Trabs, November 2011.
+074 "Time-Varying Occupational Contents: An Additional Link between Occupational Task Profiles and Individual Wages" by Alexandra Fedorets, November 2011.
+075 "Changes in Occupational Demand Structure and their Impact on Individual Wages" by Alexandra Fedorets, November 2011.
+076 "Nonparametric Nonstationary Regression with Many Covariates" by Melanie Schienle, November 2011.
+077 "Increasing Weather Risk: Fact or Fiction?" by Weining Wang, Ihtiyor Bobojonov, Wolfgang Karl Härdle and Martin Odening, November 2011.
+078 "Spatially Adaptive Density Estimation by Localised Haar Projections" by Florian Gach, Richard Nickl and Vladimir Spokoiny, November 2011.
+079 "Martingale approach in pricing and hedging European options under regime-switching" by Grigori N. Milstein and Vladimir Spokoiny, November 2011.
+080 "Sparse Non Gaussian Component Analysis by Semidefinite Programming" by Elmar Diederichs, Anatoli Juditsky, Arkadi Nemirovski and Vladimir Spokoiny, November 2011.
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

@@ -1,0 +1,1826 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2016-058
+Multivariate Factorisable Sparse Asymmetric
+Least Squares Regression
+Shih-Kang Chao * Wolfgang K. Härdle *²
+Chen Huang *²
+* Purdue University, United States of America *² Humboldt-Universit¨at zu Berlin, Germany This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Multivariate Factorisable Sparse Asymmetric Least Squares Regression
+Shih-Kang Chao, Wolfgang K. Härdle, Chen Huang§
+December 23, 2016
+Abstract
+More and more data are observed in form of curves. Numerous applications in finance, neuroeconomics, demographics and also weather and climate analysis make it necessary to extract common patterns and prompt joint modelling of individual curve variation. Focus of such joint variation analysis has been on fluctuations around a mean curve, a statistical task that can be solved via functional PCA. In a variety of questions concerning the above applications one is more interested in the tail asking therefore for tail event curves (TEC) studies. With increasing dimension of curves and complexity of the covariates though one faces numerical problems and has to look into sparsity related issues.
+Here the idea of FActorisable Sparse Tail Event Curves (FASTEC) via multivariate asymmetric least squares regression (expectile regression) in a high-dimensional framework is proposed. Expectile regression captures the tail moments globally and the smooth loss function improves the convergence rate in the iterative estimation algorithm compared with quantile regression. The necessary penalization is done via the nuclear norm. Finite sample oracle properties of the estimator associated with asymmetric squared error loss and nuclear norm regularizer are studied formally in this paper.
+As an empirical illustration, the FASTEC technique is applied on fMRI data to see if individual's risk perception can be recovered by brain activities. Results show that factor loadings over different tail levels can be employed to predict individual's risk attitudes.
+JEL classification: C38, C55, C61, C91, D87 Keywords: high-dimensional M -estimator, nuclear norm regularizer, factorization, expectile regression, fMRI, risk perception, multivariate functional data
+Financial support from the Deutsche Forschungsgemeinschaft via CRC 649 "Economic Risk" and IRTG 1792 "High Dimensional Non Stationary Time Series", Humboldt-Universität zu Berlin, is gratefully acknowledged. The authors would like to thank Prof. Martin A. Lindquist for the discussion and suggestions on this paper.
+Department of Statistics, Purdue University, 250 N University St., West Lafayette IN 47907-2066, U.S.A. Partially supported by Office of Naval Research.
+C.A.S.E. - Center for Applied Statistics and Economics, Humboldt-Universität zu Berlin, Spandauer Str. 1, 10178 Berlin, Germany. Sim Kee Boon Institute for Financial Economics, Singapore Management University, 50 Stamford Road, Singapore 178899, Singapore.
+§Corresponding author. C.A.S.E. - Center for Applied Statistics and Economics, HumboldtUniversität zu Berlin, Spandauer Str. 1, 10178 Berlin, Germany. Email: chen.huang@hu-berlin.de.
+1
+
+1 Introduction
+Data are observed more and more in form of curves, thus prompting a joint modelling to extract common patterns and also individual curves variations. Such data curve modelling occurs e.g., in neuroeconomics, weather and climate analysis, demographics among many other disciplines. A well known tool in these situations is Functional data analysis (FDA) that studies the variation of random curve objects in a high dimensional content. Leading references are Ramsay and Silverman (2002, 2005). Treating these random objects as curves FDA provides insight into main factors, typically extracted as principal components via a Karhunen-Loève decomposition. A commonly used approach is to fit the individual observation Y·j  Rn (j indicates individuals) via a basis or series approximation and then to enter a spectral analysis e.g., based on the Fourier coefficients of the series expansion. This leads via inspection of the eigenvalues to a lower dimensional factor model. This approach has been successfully employed in many situations, see, e.g., Yao et al. (2003); Hall et al. (2006).
+Focus of such joint variation analysis has been on fluctuations around a mean curve, a statistical task that can be solved via functional principal component analysis. However, in a variety of questions concerning the above applications one is more interested in the tail variations asking therefore for tail event curves (TEC) studies. TEC studies may be performed through smooth approximation of conditional tail probabilities. More generally though one needs to look at functions based on conditional tail events; it helps to discover "extreme curves" which are aberrant from the majorities. Modeling this way the TECs require to deviate from Hilbert L2 geometry and to introduce asymmetric norms or loss functions, Koenker and Bassett (1978); Newey and Powell (1987); Breckling and Chambers (1988), and more recent work on principal component analysis with asymmetric norm by Tran et al. (2016). Also in climate weather analysis and electricity load forecasting, distributional forecasts characterized by tail measures are shown to be powerful, Cabrera and Schulz (2016).
+In scatterplot smoothing and multivariate settings, quantile regressions have been studied under different approaches. A survey is given by Serfling (2002). Computational challenges arise in high-dimensional multi-task quantile regression due to the non-smooth absolute loss. Asymmetric least squares (ALS) regression (Efron, 1991), known as expectile regression as well, can capture the complete conditional distribution as quantile regression does. While associated with a smooth differentiable loss, it is more desirable if we have to pay attention to the computational convenience and efficiency in a high-dimensional framework. Expectile as a generalization of mean is more and more appealing in financial econometrics since it is more sensitive to the magnitude of extreme losses, Taylor (2008); Kuan et al. (2009); Xu et al. (2015). It plays a crucial role in risk
+2
+
+management because of its conventional interpretation: it specifies the sufficient amount of money required to maintain a position given a gain-loss ratio (Bernardo and Ledoit, 2000). For industry investors this notion of loss is certainly more attractive than the pure probability of a loss as given via the definition of quantile. Moreover, among other popular risk measures such as Value at Risk (VaR) and expected shortfall (ES), expectile is the only one enjoys elicitable law-invariant properties (Ziegel, 2016), which are desired in forecasts and risk diversification.
+On the other hand, with increasing dimension of curves and complexity of the covariates though one faces numerical problems and has to look into sparsity related issues. A natural way to reduce the burden of this estimation task is to introduce a penalty term. Yuan et al. (2007) proposed a penalization approach with nuclear norm, the sum of the singular values of the coefficient matrix, as the penalty. Numerically the estimator can be readily obtained since it involves a convex optimization. Moreover, it leads via thresholdings of the eigenvalues to a low dimensional factor model. Compared with previous research such as the reduced rank approach by Izenman (1975), the number of factors does not need to be predetermined. The dimension reduction and coefficient estimation can be done simultaneously, thus leading to a handy tool in data analysis of many curves.
+Following these lines of thoughts we propose FActorisable Sparse Tail Event Curves (FASTEC) via multivariate asymmetric least squares regression. We employ FISTA technique developed by Beck and Teboulle (2009) to solve the optimization. Expectile regression captures the tail moments globally and the smooth loss function improves the convergence rate in the iterative procedure compared with the quantile regression case (Chao et al., 2015). The finite sample oracle properties of the estimator are established formally.
+As an empirical illustration, FASTEC is applied on functional Magnetic Resonance Imaging (fMRI) data recorded during investment decisions experiment. To be more specific, multivariate factorisable sparse asymmetric least squares regression is employed to jointly model all response curves with multivariate functional data. We expect that individual's risk perception is predictable with one's brain reactions, particularly after taking tail risks into consideration.
+The rest of the paper is arranged as follows. Section 2 introduces the model setting, estimation method and finite sample oracle properties of the estimator. Section 3 illustrates the empirical application with fMRI data. Detailed proofs are provided in appendices. The codes to implement the algorithms are publicly accessible via www.quantlet.de.
+3
+
+2 Model and Estimation
+
+2.1 Model Setting
+
+We start with defining some notations. For a matrix S = (slj) = [S·1...S·m]  Rp×m, where S·j  Rp be the column vectors. Let S F, S  and S be the matrix Frobenius,
+nuclear and spectral norm. Denote min(S) and max(S) the smallest and largest singular values. For a vector v  Rp, v 2 is the Euclidean norm. Define A, B d=ef tr(A B).
+
+Let {(Xi, Yi1, ..., Yim)}1in be i.i.d. samples, with Yij  R and Xi  Rp. We note that Yij and Yik may be dependent, and m and p can diverge with n. For   (0, 1), the conditional expectile ej( |Xi) of Yij given Xi is defined by
+
+ej( |X) d=ef arg min E[ (Yij - )|X], 
+
+(2.1)
+
+with  (u) d=ef | - 1{u < 0}||u|2. In particular, we assume a factor structure:
+
+r
+ej( |Xi) = j,k( )fk (Xi),
+k=1
+
+(2.2)
+
+where fk (Xi) is the kth factor, r is the number of factors (much less than p) and j,k( ) are the factor loadings. Furthermore, factors are constructed by linear combinations of
+
+covariates Xi:
+
+fk (Xi) = Xi k( ).
+
+(2.3)
+
+Substituting (2.3) into (2.2) yields
+
+ej( |Xi) = Xi j( ),
+
+(2.4)
+
+where j( ) = (
+
+r k=1
+
+j,k
+
+(
+
+)k,1(
+
+),
+
+.
+
+.
+
+.
+
+,
+
+r k=1
+
+j,k
+
+(
+
+)k,p(
+
+))
+
+as the unknown coefficient
+
+vector. Define  d=ef [1 ... m], the factor model (2.2) implies that  is of rank r, and
+
+the model (2.4) corresponds to a multivariate linear regression model. For standard
+
+regression with square loss, Reinsel and Velu (1998) propose to estimate  with reduced-
+
+rank regression under the knowledge of r. However, r is usually unknown in practice.
+
+Yuan et al. (2007) propose to perform the multivariate regression with nuclear norm
+
+penalty, which does not require the knowledge of r. The latter inspire the use of nuclear
+
+norm penalty in the next section. It is important to note that both methods can only
+
+apply to small number of p and m, and do not scale up to large dimensions.
+
+Suppose an estimator  is available, we can estimate the kth factor fk (Xi) = Xi k( ) = kXi U·k and the factor loadings for the jth curve j( ) = Vj·, where U and V are
+
+4
+
+unitary matrices obtained from singular value decomposition:  = UDV .
+
+2.2 Algorithm
+
+To estimate our model under factor model (2.2), we combine asymmetric loss with nuclear
+
+norm penalty. To be more specific, it is proposed to estimate  defined in Section 2.1 by
+
+solving:
+
+ () d=ef arg min F (), Rp×m
+
+nm
+
+F () d=ef (mn)-1
+
+ (Yij - Xi ·j) +   ,
+
+i=1 j=1
+
+(2.5) (2.6)
+
+where  is a tuning parameter, ·j is the jth column of . The second term nuclear norm
+
+  is defined by
+
+min(p,m) l=1
+
+l()
+
+given
+
+the
+
+singular
+
+values
+
+of
+
+
+
+(square
+
+roots
+
+of
+
+non-zero
+
+eigenvalues of both   and  ): 1()  2()  . . .  min(p,m)(). We note that
+
+(2.6) is a convex optimization problem that can be solved efficiently. The number of
+
+factors r in (2.2) does not need to be specified. To simplify the notation, we denote 
+
+for  () hereinafter.
+
+To solve the optimization problem (2.6), we apply the fast iterative shrinkage-thresholding algorithm (FISTA) of Beck and Teboulle (2009). FISTA is a popular algorithm for optimization problems of the form:
+
+min{g() + h()}, 
+where g is a smooth convex function with Lipschitz continuous gradient g,
+
+(2.7)
+
+g(1) - g(2) F  Lg 1 - 2 F, 1, 2  Rp×m,
+
+(2.8)
+
+where Lg is the Lipschitz constant of g and h is a continuous convex (possibly nonsmooth) function (Ji and Ye, 2009). In view of (2.6), this corresponds to
+
+nm
+
+g() d=ef (mn)-1
+
+ (Yij - Xi ·j),
+
+i=1 j=1
+
+h() d=ef   .
+
+(2.9) (2.10)
+
+The
+
+Lipschitz
+
+constant of
+
+g
+
+is Lg
+
+= 2(mn)-1 max(, 1 -  )
+
+X
+
+2 F
+
+will be calculated
+
+in
+
+5
+
+(A.4) in Appendix A.1. The FISTA algorithm is described in Algorithm 1.
+
+Algorithm 1: Fast Iterative Shrinkage Thresholding Algorithm
+
+Input: {Yi}in=1, {Xi}ni=1, 
+
+Output:  = T
+
+1 Initialization: 0 = 0, 1 = 0, step size 1 = 1;
+
+2 for t = 1, 2, . . . , T do
+
+3 t = SVTt - L-1gg(t) ;
+
+4
+
+t+1 = 1+
+
+;1+4t2
+2
+
+5
+
+t+1
+
+=
+
+t
+
++
+
+(t-1
+t+1
+
+t
+
+-
+
+t-1);
+
+6 end
+
+The subroutine SVT in Algorithm 1 is the singular value thresholding given by SVT S d=ef US DS - (/Lg)Ip×m +VS , where SVD implies S = USDSVS , Ip×m is a rectangular identity matrix with main diagonal elements equal to 1, and (S)+ = (max{0, sij}).
+Theorem 2.1 (Bounds for loss difference and convergence rate in Algorithm 1). Let {t}tT=0 be the sequence obtained by the iteration of Algorithm 1. Then
+
+|F (t) - F ()| 
+
+4(mn)-1 max(, 1 -  ) X (t + 1)2
+
+2 F
+
+0 - 
+
+2
+F.
+
+(2.11)
+
+If for > 0, |F (t) - F ()|  , then
+
+t  2 max(, 1 - ) X F 0 -  F - 1. mn
+
+(2.12)
+
+The bound (2.11) comes from an explicit calculation of the Lipschitz constant of the gradient of g. The proof of Theorem 2.1 can be found in Appendix A.1.
+ Theorem 2.1 shows the convergence rate in our model is O(1/ ), which is better than O(1/ ) by quantile regression and O(1/ 2) by general subgradient method, see Theorem 3.2 and Remark 3.1 in Chao et al. (2015). In view of (2.15), when  is approaching 0 or 1, the number of iteration that is required to achieve an -solution would increase.
+Furthermore, utilizing the strong convexity of g, we can obtain a bound for t -  F2 . For this purpose, additional assumption on the design X is required.
+
+(A1) Suppose E X = 0, E XX =  with min() > 0 and max() < . for some sequence 0 < an < 1, constants c1, c2 > 0,
+
+XX P min n
+
+ c1min(), max
+
+XX n
+
+ c2max()  1 - an.
+
+(2.13)
+
+6
+
+Assumption (A1) holds for Gaussian design X with c1 = 1/9, c2 = 9 and an = 4 exp(-n/2). See ?.
+
+Theorem 2.2. Given (A1), the sequence t obtained Algorithm 1 satisfies
+
+t - 
+
+2 F
+
+
+
+36 n(t + 1)2
+
+max(, 1 -  ) min(, 1 -  )
+
+X
+
+2 F
+
+min()
+
+0 - 
+
+2 F
+
+,
+
+with probability greater than 1 - an. If for
+
+> 0,
+
+t - 
+
+2 F
+
+
+
+, then
+
+(2.14)
+
+t  6 max(, 1 -  ) X F 0 -  F - 1. min(, 1 -  ) nmin()
+
+(2.15)
+
+The proof of Theorem 2.2 is in Section A.2.
+
+2.3 Oracle Inequalities
+
+In this section, we derive bounds for the sequence generated by Algorithm 1 t and the
+
+true matrix . These results heavily rely on the strong convexity of  . The nuclear norm is decomposable with respect to two appropriately chosen subspaces in the sense
+
+that
+
+R( + ) = R() + R(),   M,   M,
+
+(2.16)
+
+where
+
+M(U, V ) = {  Rp×m| row()  U, col()  V }, M(U, V ) = {  Rp×m| row()  U , col()  V },
+
+(2.17)
+
+where U and V are two subspaces U  Rp and V  Rm, represent the left and right singular vectors of the target matrix  respectively, row() and col() denote the row and column spaces of .
+
+We make the following assumptions.
+
+(A2) There exists c > 0 such that for uij d=ef Yij - Xi ·j, P(|uij| > s)  exp(1 - s2/c2),
+
+s  0) with sub-gaussian norm uij 2 d=ef sup p-1/2(E |uij|p)1/p, and let Ku d=ef p1
+
+max
+1jm
+
+uij
+
+2 .
+
+(A3) Conditional on Xi, uij are independent from Xi and independent over j.
+
+(A2) regulates the tail of Yij. (A3) is required for obtaining bounds on tail probabilities 7
+
+that are important for our main theorem. However, this assumption can be restrictive in practice.
+
+Theorem 2.3. Under (A1)-(A3),  = 2cm-1 max(, 1 -  )Ku
+
+
+
+p+m n
+
+,
+
+the
+
+sequence
+
+t obtained by Algorithm 1 satisfies
+
+t - 
+
+2 F
+
+c
+
+Rt/n + 1
+
+p
+
++ n
+
+m
+
+2
+
+dim(M)
+
++
+
+p+m n  M 
+
++ c Rt n
+
+0 - 
+
+2F,
+
+(2.18)
+
+with probability greater than 1 - 3 · 8-(p+m)- an, where c > 0 is an absolute constant,
+
+Rt d=ef
+
+,  =1
+
+
+
+X
+
+2 F
+
+(t+1)2 min()
+
+def 
+
+max(,1- ) min(,1- )
+
+,
+
+
+
+d=ef
+
+K 
+min ()
+
+u
+
+and
+
+M
+
+d=ef
+
+arg
+
+min
+ZM
+
+Z-
+
+F.
+
+The optimal bound is obtained by minimizing the right hand side of (2.18) with respect to all pairs (M, M), which will also balance dim(M) and M . When holding all other quantities fixed, as long as p + m increases slower than n, the the right hand side of
+(2.18) goes to 0 as n tends to infinity. The quantity Rt characterizes how computational cost enters the oracle bound. We can increase the number of iteration in Algorithm 1 to
+shrink Rt, but this also increases the computational cost. Similar to Theorem 2.1 and B.1, when  is approaching to the boundary of (0, 1), the upper bounds will increase.
+Furthermore, heavier tail for Yij makes higher Ku, and leads to weaker error bounds.
+
+Remark 2.1. As explained in Section 2.1, we estimate j,t( ) by Vj·,t in the SVD t = UtDtVt . By Theorem 3.10 of Chao et al. (2015), we have j,t( ):
+
+1 - |j
+
+( )j,t( )|
+
+
+
+min
+
+2(2  + t -  F) t -  F j2-1() - j2(), j2() - j2+1()
+
+,
+
+(2.19)
+
+where j( ) is the true loadings. Theorem 2.3 can be used with (2.19) to get an explicit bound.
+
+3 Empirical Analysis: Predicting Risk Attitude with fMRI Data
+In this section, we apply FASTEC on fMRI data to predict the risk attitude of humans on investment decisions. How human's brain responds to reward and risk is an ongoing research topic in neuropsychology, financial economics and neuroeconomics (Heekeren et al., 2008; Camerer, 2007; Schultz, 2015). Previous research mainly focuses on identifying the region of interest (ROI) using significantly positive Blood Oxygenation Level Dependent (BOLD) signal (see Schultz (2015) and the references therein). However, only
+8
+
+a few research uses fMRI BOLD on predicting the risk attitude of a subject or even future actions. Helfinstein et al. (2014) train support vector machines with fMRI BOLD recorded in a Ballon Analog Risk Task (BART) on several combinations of brain regions, and this classifier can predict subjects' next choice with over 70% accuracy. Majer et al. (2015) and van Bömmel et al. (2014) retrieve factor loadings from a dynamic model and apply these loadings on predicting subjects' risk attitude.
+In our empirical analysis, we focus on predicting the subjects' risk attitude using the fMRI responses, but we differ from previous study in that we separately analyze the positive and negative fMRI BOLD signal observed in the cortical regions. The positive BOLD signal is known to be closely associated with increased neuronal activities, but the interpretation of large negative BOLD response (NBR) is still controversial. Mullinger et al. (2014) argue that the best explanation for NBR at the cortical layer might be a decrease in cerebral blood flow (CBF) with a lesser reduction in the neuronal activity, which is measured by the cerebral metabolic rate of oxygen consumption (CMRO2). This explanation is proven to be an important complement or even a more plausible explanation than the more classical blood/vascular stealing hypothesis (see the references cited by Mullinger et al. (2014)). However, Mullinger et al. (2014) also argue that there may exist deeper neuronal reasons for NBR than simply inversion of the neurovascular coupling mechanism of positive BOLD response. Following the interpretation of NBR of Mullinger et al. (2014), we suspect that NBR also contains information for predicting the risk attitude. Using our expectile based approach, we are able to use the positive and negative BOLD response information in a very specific way.
+3.1 Data
+Our data come from a rapid event-related design experiment on investment decision, and this data set is firstly analyzed in Majer et al. (2015). The experiment is done as follows: 19 subjects were requested to make choices in 256 investment decision tasks and each task lasts 7 seconds. The fMRI is taken every two seconds, and there are 1400 images for each subject. We have also acquired the answer for each task from each subject. Majer et al. (2015) identify three brain regions Anterior insula (left and right aINS) and dorsomedial prefrontal cortex (DMPFC) via spectral clustering method. We will only focus on the BOLD response of the voxels in these three regions.
+We integrate the information of each region (left and right aINS and DMPFC) spatially by taking quantile of the BOLD response over all voxels. At each fMRI scan i of sth subject, we take quantile with levels   {0.1, 0.5, 0.9} of BOLD response over all voxels in the regions b = 1 (aINS_L), b = 2 (aINS_R) and b = 3 (DMPFC) to construct a
+9
+
+single time series i(s, b, ), where i = 1, ..., N = 1400. Figure 3.1 gives an illustration of the BOLD time series of each cluster. For each cluster, the series of 19 subjects at  are averaged (the solid lines) and the band shows the dispersion of the 19 time series in . We observe that the series for  = 0.9 is largely positive, which summarize the information of positive BOLD response, while the series for  = 0.1 is mainly negative, which corresponds to the negative BOLD response. The series for  = 0.5 is stationary and varying around the origin.
+3.2 Method
+3.2.1 Factor loadings at each region b and quantile level 
+There are many ways to define Yij using BOLD series, and this can have big impact to predictive performance. For each  and a single region b, we consider two approaches to obtain the variable Yij:
+(C1) "Whole time series": set Yibj, = i(j, b, ), where i = 1, ..., n with n = N , j = 1, ..., 19 (subject). Thus, we have m = 19 curves in each region b and at each quantile .
+(C2) "Task-wise" perspective: we divide the whole time series in each region b and at each quantile level  into subseries based on the the start and the end of each task. Let Iq  {1, ..., N } be the set which contains the index of the images taken during the qth task. In our data, Iq usually contains 3-4 components. We interpolate the points {i(s, b, )}iIq for each fixed s, b, and . Denote the value on the interpolated curve at ith point in n equally distant grid on the interval (min(Iq), max(Iq)) by i(s, b, q, ), where i = 1, ..., n = 50. Let Yibj, = i(s, b, q, ) with j = 256(s - 1) + q, where s = 1, ..., 19 (index for subject) and q = 1, ..., 256 (index for tasks) for each , b. Thus, there are m = 19  256 = 4864 curves in each b and .
+The variable Xi needs to be flexible enough to capture the shape of the fMRI sequence. For this purpose, we use cubic B-spline basis {Bk}kp=1 with regularly spaced knots on [0, 1], and set Xi = B1(i/n), B2(i/n), ..., Bp(i/n) , where i = 1, ..., n and n is subject to which approach is taken. B-splines have nice computational properties for estimating the hemodynamic response, see Degras and Lindquist (2014) for more detail. We select p = n0.8 of basis functions in each approach above, where · takes the smallest integer that is greater than the argument. The power 0.8 is greater than the optimal rate 0.4, because the nuclear norm penalty potentially reduces the overfitting. As the result, there are 329 basis functions in the approach (C1) and 23 in (C2).
+10
+
+We compute the matrix b, with expectile level  = 0.1, 0.5, 0.9 using Yij and Xi by Algorithm 1, where Yij is chosen under either (C1) or (C2). We select b, by five fold cross-validation. To be more specific, we divide the whole sample into 5 groups along
+i = 1, . . . , N , e.g., under (C1) each group with 280 observations would be held out as
+the validation group in turns. About more detailed results in the determination of tuning
+parameters, we refer to Appendices D.2. Applying Algorithm 1 with the selected , we obtain b,. Using SVD b, = Ub,Db,(Vb,) , where (Vb,) is regarded as factor loadings. We note that the size of matrix Vb, is 19 × 19 if we define Yibj, by following (C1) and 4864×4864 by following (C2). Note that the sign of the factor loadings cannot
+be determined exactly.
+
+3.2.2 Predicting risk attitude
+
+To measure the predictive performance, we need to estimate the the subjects' "oracle" risk attitude s, where s = 1, ..., 19 denotes the subject. We follow the approach of Majer et al. (2015) and estimate s by the answer given by the subjects to each task with logistic regression. In essence, higher s means the subject s is less risk-averse. More on the computation of s is provided in Appendices D.1.
+In order to use the loadings Vb, to predict s, we apply standard linear regression models. In particular, in the case (C1), we construct a model for s using the first two factor loadings
+
+s = 0, + 11, (V1,)s1 + 12, (V2,)s1 + 13, (V3,)s1 + 21, (V1,)s2 + 22, (V2,)s2 + 23, (V3,)s2 + s,
+
+s = 1, ..., 19,
+
+(3.1)
+
+where {0, , 11, , 12, , 13, , 21, , 22, , 23, }  R7 are the intercept and the coefficients associated with the regions left and right Anterior insula, and dorsomedial prefrontal cortex. In the case (C2), define the averaged loadings of all tasks for each s
+
+µsb,,
+
+d=ef
+
+1 256
+
+256
+
+(Vb,)256(s-1)+q,1 .
+
+q=1
+
+We construct another model for s using µsb,, :
+
+s = ¯0, + ¯11, µs1,, + ¯12, µs2,, + ¯13, µs3,, + ¯21, µs1,, + ¯22, µs2,, + ¯23, µs3,, + s,
+
+s = 1, ..., 19,
+
+(3.2)
+
+where {¯0, , ¯11, , ¯12, , ¯13, , ¯21, , ¯22, , ¯23, }  R7. We take the absolute value of the loadings Vb, because we are only interested in the magnitude of the loadings.
+
+11
+
+3.2.3 In-sample and out-of-sample performance
+To compare model (3.1) and (3.2), we show their in-sample and out-of-sample performance. For in-sample performance, R2 of both regression (3.1) and (3.2) is computed. In addition, in order to determine whether (3.1) and (3.2) correctly predict the order of risk-aversion of the subjects (rather than the exact value of s), we calculate Spearman's and Kendall's rank correlation between the fitted s (in-sample) and s.
+To measure the out-of-sample performance, we calculate {s}1s=9 1 by leave-one-out algorithm. The steps are as below:
+(1) Fix s, where s = 1, ..., 19. Use the values of the remaining 18 subjects to find the coefficients {0, , 11, , 12, , 13, , 21, , 22, , 23, } in model (3.1) and {¯0, , ¯11, , ¯12, , ¯13, , ¯21, , ¯22, , ¯23, } in model (3.2) by standard linear regression.
+(2) Compute s by the trained models (3.1) and (3.2).
+(3) Repeat steps (1) and (2) for each s = 1, ..., 19.
+(4) Calculate the Spearman's correlation and Kendall's rank correlation between {s}1s=9 1 and {s}s1=9 1.
+3.3 Results
+In Table 3.1, we present the in-sample fitting and out-of-sample performance for models (3.1) and (3.2) with the constrained model that uses only the 1st factor (21, = 22, = 23, = 0 in (3.1) and ¯21, = ¯22, = ¯23, = 0 in (3.2)) and the whole model, under various (, ) combinations.
+For the in-sample fitting results, cases with  = 0.1 and  = 0.9 perform much better than  = 0.5. This shows that both negative or positive BOLD can lead to good model fitting, which suggests that negative BOLD may also explain the variation of risk attitude well. In particular, the level  that are closer to the maximum of the curves of  = 0.9 and to the minimum of the of the curves of  = 0.9, which is consistent with our prior belief from Figure 3.1. Moreover, task-wise curves seem to perform better than the whole series.
+For the out-of-sample performance, the constrained model (3.2) with the negative BOLD ( = 0.1,  = 0.1) nearly always outperforms all other cases. In contrast, positive BOLD ( = 0.9) under the same model performs poorly. This provides a new evidence that negative BOLD may be more relevant than the positive BOLD for predicting the risk
+12
+
+attitude. Moreover, the uncontrained model improves the prediction performance in most cases, particularly for the prediction by unconstrained (3.2) under  = 0.9 and higher  levels.
+13
+
+aINS_L
+
+BOLD response
+-500 0 500
+
+1000
+
+1020
+
+1040
+
+1060
+seconds
+
+aINS_R
+
+1080
+
+1100
+
+1120
+
+-200 0 200 400 600
+
+BOLD response
+
+-600
+
+1000
+
+1020
+
+1040
+
+1060
+seconds
+
+DMPFC
+
+1080
+
+1100
+
+1120
+
+-200 0 200 400
+
+BOLD response
+
+-600
+
+1000
+
+1020
+
+1040
+
+1060
+seconds
+
+1080
+
+1100
+
+1120
+
+Figure 3.1: In each region, the  quantiles of the BOLD response over all the voxels
+
+between 1000-1120 seconds of the experiment is shown. In each subfigure (region), lowest
+
+(resp., middle, highest) solid lines represent the median of  = 0.1 (resp.,  = 0.5, 0.9)
+
+quantiles of all 19 subjects, and the upper and lower boundaries of the bands present the
+
+maximum and the minimum of the  quantiles of the 19 subjects. Vertical lines indicate
+
+the occurrence of stimuli.
+
+14
+
+
+
+R2 =0.1 Spearman's rank corr
+Kendall's rank corr R2 =0.5 Spearman's rank corr Kendall's rank corr R2 =0.9 Spearman's rank corr Kendall's rank corr
+
+=0.1
+
+Spearman's rank corr Kendall's rank corr
+
+=0.5
+
+Spearman's rank corr Kendall's rank corr
+
+=0.9
+
+Spearman's rank corr Kendall's rank corr
+
+Constrained model
+
+Unconstrained model
+
+Whole series (3.1)
+
+Task-wise (3.2)
+
+Whole series (3.1)
+
+Task-wise (3.2)
+
+0.1 0.5 0.9 0.1 0.5 0.9 0.1 0.5 0.9 0.1 0.5 0.9
+
+In-sample fitting
+
+0.084 0.158 0.101 0.412 0.412 0.413 0.312 0.263 0.226 0.455 0.454 0.454
+
+0.149 0.377 0.328 0.595 0.595 0.604 0.532 0.526 0.396 0.618 0.618 0.618
+
+0.076 0.263 0.228 0.462 0.462 0.474 0.333 0.357 0.275 0.474 0.474 0.474
+
+0.070 0.043 0.030 0.134 0.136 0.135 0.307 0.260 0.352 0.445 0.440 0.441
+
+0.177 0.140 0.226 0.335 0.316 0.326 0.547 0.528 0.596 0.533 0.544 0.544
+
+0.135 0.088 0.135 0.205 0.193 0.205 0.427 0.333 0.415 0.368 0.380 0.380
+
+0.199 0.238 0.148 0.206 0.205 0.205 0.393 0.367 0.229 0.487 0.496 0.500
+
+0.435 0.540 0.181 0.412 0.412 0.412 0.588 0.628 0.582 0.596 0.637 0.637
+
+0.333 0.391 0.135 0.298 0.298 0.298 0.439 0.439 0.439 0.462 0.497 0.497
+
+Out-of-sample predicting
+
+-0.453 -0.181 -0.321 0.454 0.451 0.440 -0.079 -0.133 0.072 0.298 0.298 0.298
+
+-0.322 -0.111 -0.240 0.357 0.345 0.345 -0.076 -0.088 0.041 0.216 0.216 0.216
+
+-0.444 -0.700 -0.658 -0.119 -0.119 -0.119 -0.035 -0.196 0.247 0.205 0.204 0.212
+
+-0.275 -0.509 -0.450 -0.064 -0.064 -0.064 -0.006 -0.146 0.135 0.123 0.111 0.123
+
+-0.207 0.204 -0.493 0.023 0.023 0.023 0.161 0.072 -0.447 0.293 0.307 0.307
+
+-0.170 0.135 -0.345 0.006 0.006 0.006 0.076 0.041 -0.298 0.205 0.216 0.216
+
+15
+
+Table 3.1: The goodness of fit R2, Spearman's and Kendall's rank correlation from the in-sample fitting and out-of-sample prediction by (3.1) or (3.2) with/without constrains, under different  ,  levels.
+
+References
+Beck, A. and Teboulle, M. (2009). A fast iterative shrinkage-thresholding algorithm for linear inverse problems, SIAM Journal on Imaging Sciences 2(1): 183­202.
+Bernardo, A. E. and Ledoit, O. (2000). Gain, loss, and asset pricing, Journal of Political Economy 108(1): 144­172.
+Breckling, J. and Chambers, R. (1988). M -quantiles, Biometrika 74(4): 761­772.
+Cabrera, B. L. and Schulz, F. (2016). Forecasting generalized quantiles of electricity demand: A functional data approach, Journal of the American Statistical Association (DOI: 10.1080/01621459.2016.1219259).
+Camerer, C. F. (2007). Neuroeconomics: Using neuroscience to make economic predictions, The Economic Journal 117(519): C26­C42.
+Chao, S.-K., Härdle, W. K. and Yuan, M. (2015). Factorisable sparse tail event curves, SFB 649 Discussion Paper 2015-034, Sonderforschungsbereich 649, Humboldt Universität zu Berlin, Germany. Available at http://sfb649.wiwi.hu-berlin.de/papers/ pdf/SFB649DP2015-034.pdf.
+Chao, S.-K., Proksch, K., Dette, H. and Härdle, W. K. (2016). Confidence corridors for multivariate generalized quantile regression, Journal of Business & Economic Statistics (DOI: 10.1080/07350015.2015.1054493).
+Degras, D. and Lindquist, M. A. (2014). A hierarchical model for simultaneous detection and estimation in multi-subject fMRI studies, NeuroImage 98: 61­72.
+Efron, B. (1991). Regression percentiles using asymmetric squared error loss, Statistica Sinica 1(1): 93­125.
+Fadili, J. M. and Peyré, G. (2011). Total variation projection with first order schemes, Image Processing, IEEE Transactions on 20(3): 657­669.
+Hall, P., Müller, H.-G. and Wang, J.-L. (2006). Properties of principal component methods for functional and longitudinal data analysis, The Annals of Statistics 34(3): 1493­ 1517.
+Heekeren, H. R., Marrett, S. and Ungerleider, L. G. (2008). The neural systems that mediate human perceptual decision making, Nature Reviews Neuroscience 9(6): 467­ 479.
+16
+
+Helfinstein, S. M., Schonberg, T., Congdon, E., Karlsgodt, K. H., Mumford, J. A., Sabb, F. W., Cannon, T. D., London, E. D., Bilder, R. M. and Poldrack, R. A. (2014). Predicting risky choices from brain activity patterns, Proceedings of the National Academy of Sciences 111(7): 2470­2475.
+Izenman, A. J. (1975). Reduced-rank regression for the multivariate linear model, Journal of Multivariate Analysis 5(2): 248­264.
+Ji, S. and Ye, J. (2009). An accelerated gradient method for trace norm minimization, Proceedings of the 26th International Conference on Machine Learning .
+Koenker, R. and Bassett, G. W. (1978). Regression quantiles, Econometrica 46(1): 33­50.
+Kuan, C.-M., Yen, J.-H. and Hsu, Y.-C. (2009). Assessing value at risk with care, the conditional autoregressive expectile models, Journal of Econometrics 150(2): 261­270.
+Majer, P., Mohr, P. N. C., Heekeren, H. and Härdle, W. K. (2015). Portfolio decisions and brain reactions via the CEAD method, Psychometrika 81(3): 881­903.
+Mullinger, K., Mayhew, S., Bagshaw, A., Bowtell, R. and Francis, S. (2014). Evidence that the negative BOLD response is neuronal in origin: A simultaneous EEG­BOLD­ CBF study in humans, NeuroImage 94: 263 ­ 274.
+Negahban, S. N., Ravikumar, P., Wainwright, M. J. and Yu, B. (2012). A unified framework for high-dimensional analysis of M -estimators with decomposable regularizers, Statistical Science 27(4): 538­557.
+Negahban, S. N. and Wainwright, M. J. (2011). Estimation of (near) low-rank matrices with noise and high-dimensional scaling, The Annals of Statistics 39(2): 1069­1097.
+Newey, W. K. and Powell, J. L. (1987). Asymmetric least squares estimation and testing, Econometrica 55(4): 819­847.
+Ramsay, J. O. and Silverman, B. W. (2002). Applied Functional Data Analysis: methods and case studies, Vol. 77, Springer, New York.
+Ramsay, J. O. and Silverman, B. W. (2005). Functional Data Analysis, Series in Statistics, 2nd edn, Springer, New York.
+Reinsel, G. C. and Velu, R. P. (1998). Multivariate Reduced-Rank Regression, Springer, New York.
+Schultz, W. (2015). Neuronal reward and decision signals: From theories to data, Physiological Reviews 95(3): 853­951.
+17
+
+Serfling, R. (2002). Quantile functions for multivariate analysis: approaches and applications, Statistica Neerlandica 56(2): 214­232.
+Taylor, J. W. (2008). Estimating value at risk and expected shortfall using expectiles, Journal of Financial Econometrics 6(2): 231­252.
+Tran, N. M., Burdejova, P., Osipenko, M. and Härdle, W. K. (2016). Principal component analysis in an asymmetric norm, SFB 649 Discussion Paper 2016-040, Sonderforschungsbereich 649, Humboldt Universität zu Berlin, Germany. Available at http://sfb649.wiwi.hu-berlin.de/papers/pdf/SFB649DP2016-040.pdf.
+van Bömmel, A., Song, S., Majer, P., Mohr, P. N. C., Heekeren, H. R. and Härdle, W. K. (2014). Risk patterns and correlated brain activities. multidimensional statistical analysis of fmri data in economic decision making study, Psychometrika 79(3): 489­514.
+Vershynin, R. (2012). Introduction to the non-asymptotic analysis of random matrices, in Y. Eldar and G. Kutyniok (eds), Compressed Sensing, Theory and Applications, Cambridge University Press, chapter 5, pp. 210­268.
+Xu, X., Mihoci, A. and Härdle, W. K. (2015). lCARE - localizing conditional autoregressive expectiles, SFB 649 Discussion Paper 2015-052, Sonderforschungsbereich 649, Humboldt Universität zu Berlin, Germany. Available at http://sfb649.wiwi. hu-berlin.de/papers/pdf/SFB649DP2015-052.pdf.
+Yao, F., Müller, H.-G., Clifford, A. J., Dueker, S. R., Follett, J., Lin, Y., Buchholz, B. A. and Vogel, J. S. (2003). Shrinkage estimation for functional principal component scores with application to the population kinetics of plasma folate, Biometrics 59(3): 676­685.
+Yuan, M., Ekici, A., Lu, Z. and Monteiro, R. (2007). Dimension reduction and coefficient estimation in multivariate linear regression, Journal of the Royal Statistical Society: Series B 69(3): 329­346.
+Ziegel, J. F. (2016). Coherence and elicitability, Mathematical Finance 26(4): 901­918.
+18
+
+APPENDIX APPENDIX A: Proofs for Section 2.2
+
+A.1 Proof for Theorem 2.1
+
+Theorem 4.4 in Beck and Teboulle (2009) gives the upper bound of the loss difference in the t-th step of the iteration by
+
+|F (t) - F ()| 
+
+2Lg 0 -  (t + 1)2
+
+2
+F,
+
+(A.1)
+
+where Lg is the Lipschitz constant of g() defined in (2.8).
+
+We note that Hence, the gradient is
+
+ 2 u  (u) = 2(1 -  )u
+
+for u  0; for u < 0.
+
+(A.2)
+
+g() = -(mn)-1X W  (Y - X) ,
+
+(A.3)
+
+where W() = (wij)  Rn×m, wij d=ef 2  + 1(Yij  Xi ·j)(1 - 2 ) , "" represents the Hadamard product.
+
+To simplify the notations, define U() = (Yij - Xi ·j)  Rn×m. For all 1, 2  Rp×m, let U1 = U(1), U2 = U(2), W1 = W(1) and W2 = W(2).
+
+g(1) - g(2) F = (mn)-1 X (W1  U1) - X (W2  U2) F
+
+ (mn)-1 X F W1  U1 - W2  U2 F (by submultiplicity)
+
+= (mn)-1 X F  (mn)-1 X F
+
+nm
+i=1 j=1 nm
+
+ (u1,ij ) -  (u2,ij ) 2 1/2 2 max(, 1 -  ) 2(u1,ij - u2,ij)2 1/2
+
+i=1 j=1
+
+= 2(mn)-1 max(, 1 -  ) X F Y - X1 - (Y - X2) F
+
+ 2(mn)-1 max(, 1 -  )
+
+X
+
+2 F
+
+1 - 2
+
+F
+
+(by submultiplicity),
+
+(A.4)
+
+where the fourth line makes use of the fact that  (u) is Lipschitz continuous with Lipschitz constant 2 max(, 1 -  ), see Chao et al. (2016).
+
+19
+
+Plug
+
+Lg
+
+= 2(mn)-1 max(, 1 -  )
+
+X
+
+2 F
+
+into
+
+(A.1)
+
+yields
+
+|F (t) - F ()| 
+
+4(mn)-1 max(, 1 -  ) X (t + 1)2
+
+2 F
+
+0 - 
+
+2
+F.
+
+(A.5)
+
+Moreover, setting the right hand side of (A.5) to be ( > 0) and solving for t gives
+
+t  2 max(, 1 - ) X F 0 -  F - 1. mn
+
+(A.6)
+
+A.2 Proof for Theorem 2.2
+
+Following the proof of Theorem 1 in Fadili and Peyré (2011), define
+
+I(t) d=ef g(t) - g() - g(t), t -  , J(t) d=ef h(t) - h() + g(t), t -  ,
+
+the sum of them gives
+
+I(t) + J(t) = F (t) - F ().
+
+(A.7) (A.8)
+(A.9)
+
+According to Lemma C.2, we have
+
+I(t)  
+
+t - 
+
+2 F
+
+=
+
+1 9
+
+m-1
+
+min(
+
+,
+
+1
+
+-
+
+
+
+)min
+
+()
+
+t - 
+
+2 F
+
+where the second line holds with probability greater than 1 - an under (A1).
+
+Since  is the optimizer of (2.5), therefore,
+
+(A.10)
+
+0  g() + h(),
+
+(A.11)
+
+which implies As a result, we have i.e., J(t)  0.
+
+- g()  h(). h(t) - h()  -g(t), t -  ,
+
+(A.12) (A.13)
+
+20
+
+Plugging (A.10) and (A.13) into (A.9) yields,
+
+t - 
+
+2 F
+
+
+
+min(, 1
+
+9m -  )min()
+
+F (t) - F ()
+
+
+
+36
+
+max(, 1 -  )
+
+X
+
+2 F
+
+n(t + 1)2 min(, 1 -  ) min()
+
+0 - 
+
+2 F
+
+,
+
+(A.14)
+
+with probability greater than 1 - an. The second line comes from the result of Theorem 2.1.
+
+APPENDIX B: Proofs for Theorem 2.3
+
+By triangle inequality, we have
+
+t - 
+
+2 F
+
+=
+
+t -  +  - 
+
+2 F
+
+2
+
+t - 
+
+2 F
+
++
+
+2
+
+-
+
+2 F
+
+.
+
+(B.1)
+
+Combining the results of Lemma B.2 and Theorem 2.2, it follows that
+
+t - 
+
+2 F
+
+183c2
+
+p
+
++ n
+
+m
+
+max(, min(,
+
+1 1
+
+- -
+
+ )2  )2
+
+ min()2
+
+Ku2
+
+dim(M)
+
+p + m max(, 1 -  ) 
+
++ 144c
+
+n min(, 1 -  ) min() Ku M 
+
++
+
+72
+
+max(, 1 -  )
+
+X
+
+2 F
+
+n(t + 1)2 min(, 1 -  ) min()
+
+0 - 
+
+2F,
+
+holds with probability greater than 1 - 3 × 8-(p+m) - an. Furthermore, given
+
+(B.2)
+
+0 - 
+
+2 F
+
+=
+
+0 -  +  - 
+
+2 F
+
+
+
+2
+
+0 - 
+
+2 F
+
++
+
+2
+
+-
+
+2F,
+
+(B.3)
+
+and applying Lemma B.2 again we complete the proof of Theorem 2.3.
+
+Now we show auxiliary results used in the proof of Theorem 2.3. The next theorem is an application of Theorem 1 of Negahban et al. (2012).
+
+Theorem B.1 (Error bounds for the estimator). Under (A1), any optimal solution  in the problem (2.5) with   2 g() satisfies the bound
+
+-
+
+2 F
+
+
+
+9m22
+
+36m
+
+c1 min(, 1 -  )min() 2 dim(M) + min(, 1 -  )min() M ,
+
+(B.4)
+
+with probability greater than 1 - an, where M
+
+= arg min ZM
+
+Z-
+
+F.
+
+21
+
+Proof for Theorem B.1. The proof is an application of Theorem 1 of Negahban et al.
+(2012). We will verify its conditions (G1) and (G2). For condition (G1), we note that the nuclear norm ·  is decomposable with respect to (M, M) defined in (2.17). For
+condition (G2), note that on the event
+
+1 d=ef
+
+XX min( n )
+
+
+
+c1min
+
+
+
+, max
+
+XX n
+
+ c2max() ,
+
+(B.5)
+
+the loss function g is restrictive strongly convex with coefficients  and  = 0 (we replace L in Negahban et al. (2012) by ) shown in Lemma C.2. We note that the nuclear norm and the spectral norm of a matrix are dual, and their subspace compatibility constant (M)  dim(M).
+
+Lemma B.1. Under (A1)-(A3),
+
+P
+
+g()  cm-1 max(, 1 -  )Ku
+
+
+
+p+m n
+
+ 1 - 3 × 8-(p+m) - an, (B.6)
+
+where c > 0 is an absolute constant.
+
+Proof for Lemma B.1. Throughout the proof, we restrict on the event 1 in (B.5). Recall the expression from (A.3) that
+g() = -(mn)-1X W  (Y - X) .
+and the matrix U() = (uij) = (Yij - Xi ·j)  Rn×m. Following the proof of Lemma 3 in Negahban and Wainwright (2011), we have
+
+P n-1 X (W  U)  4s = P sup n-1| X (W  U)|  4s
+S p-1 , S m-1
+
+ 8p+m sup P
+S p-1 , S m-1
+ 8p+m sup P
+S p-1 , S m-1
+
+n-1| X, (W  U) |  s
+n
+n-1 , Xi , (W  U)i  s ,
+i=1
+(B.7)
+
+where Sm-1 d=ef {  Rm :  2 = 1} is the Euclidean sphere in m-dimensions. s  0, there exists C > 0 such that P |uij| > s  exp 1 - s2/C2 . Since |wij|  max(, 1 -  ),
+
+22
+
+we have
+
+P |wijuij| > s  P max(, 1 -  )|uij| > s
+
+s = P |uij| > max(, 1 -  )
+
+ exp 1 -
+
+s2
+
+max(, 1 -  )2C2
+
+.
+
+(B.8)
+
+It means for each j  {1, . . . m}, wijuij are sub-gaussian. Moreover, the maximal subgaussian norm is bounded by
+
+max
+1jm
+
+wij uij
+
+2
+
+= max 1jm
+
+sup p-1/2
+p1
+
+E |wij uij |p 1/p
+
+ max(, 1 -  ) max 1jm
+
+sup p-1/2
+p1
+
+E |uij|p
+
+1/p
+
+= max(, 1 -  )Ku.
+
+(B.9)
+
+Then by Hoeffding's inequality (Proposition 5.10 of Vershynin, 2012), we can conclude that , (W  U)i is also sub-guassian,
+
+m
+
+P , (W  U)i  s = P
+
+jwijuij  s
+
+j=1
+
+ exp = exp
+
+1 - C s2 max(, 1 -  )2Ku2
+
+
+
+2 2
+
+1 - C s2
+
+,
+
+max(, 1 -  )2Ku2
+
+(B.10)
+
+where C > 0 is an absolute constant. Furthermore, its sub-gaussian norm is bounded by
+
+, (W  U)i
+
+1/p
+
+= sup p-1/2
+2 p1
+
+E
+
+, (W  U)i p
+
+= sup p-1/2
+p1
+
+m 1/p
+E j wij uij p
+j=1
+
+m
+
+ max(, 1 -  )sup p-1/2 E
+
+j uij p
+
+p1 j=1
+
+1/p
+
+ max(, 1 -  )M Ku,
+
+(B.11)
+
+where M > 0 is an absolute constant. The last line comes from Khintchine inequality (Corollary 5.12 of Vershynin, 2012) and recall that  2 = 1. Applying Hoeffding's
+
+23
+
+inequality again we can obtain
+
+P
+
+n
+n-1 , Xi
+i=1
+
+, (W  U)i  s
+
+ exp
+
+C s2n 1 - max(, 1 -  )2M 2Ku2n-1
+
+n i=1
+
+, Xi
+
+2
+
+C s2n
+
+ exp
+
+1 - max(, 1 -  )2M 2Ku2n-1
+
+X
+
+2 2
+
+,
+
+ exp 1 -
+
+C s2n
+
+,
+
+c2 max(, 1 -  )2M 2Ku2 
+
+(B.12)
+
+where C is an absolute constant. Combining (B.7) and (B.12) gives
+
+P
+
+n-1 X (W  U)
+
+ 4s
+
+ exp
+
+C s2n 1 - 9 max(, 1 -  )2M 2Ku2 
+
++ (p + m) log 8 .
+
+(B.13)
+
+Set
+
+s
+
+=
+
+1 4
+
+c
+
+max(
+
+,
+
+1
+
+-
+
+
+
+)Ku
+
+
+
+from the fact P (1)  1 - an,
+
+p+m n
+
+,
+
+where
+
+c
+
+d=ef
+
+4·
+
+2
+
+log
+
+8
+
+9M 2 C
+
+,
+
+then
+
+we
+
+can
+
+conclude
+
+P n-1 X (W  U)  c max(, 1 -  )Ku 
+
+ 1 - exp 1 - (p + m) log 8 × (1 - an)
+
+ 1 - 3 × 8-(p+m) × (1 - an)
+
+ 1 - 3 × 8-(p+m) - an
+
+(as p + m > 1).
+
+p+m n
+
+(B.14)
+
+This finishes the proof.
+
+Lemma B.2. Under (A1)-(A3), selecting  = 2cm-1 max(, 1 -  )Ku
+
+
+
+p+m n
+
+,
+
+for
+
+n  2 min(m, p), any optimal solution  in the problem (2.5) satisfies the bound
+
+-
+
+2 F
+
+c
+
+p
+
++ n
+
+m
+
+max(, min(,
+
+1 1
+
+- -
+
+ )2  )2
+
+ min()2
+
+Ku2
+
+dim(M)
+
+p + m max(, 1 -  )  + c n min(, 1 -  ) min() Ku M ,
+
+(B.15)
+
+with probability greater than 1 - 3 × 8-(p+m) - an, where c, c > 0 are absolute constants.
+
+Proof of Lemma B.2. Recall that 1 is defined as (B.5), and let the event that
+
+(B.6) holds as 2. On event 1  2, (B.15) can be achieved by simply plugging  =
+
+2cm-1 max(, 1 -  )Ku
+
+
+
+p+m n
+
+into
+
+(B.4).
+
+We
+
+note
+
+that
+
+P(2  1) = P(2|1) P(1)  1 - 3 × 8-(p+m) × (1 - an)
+
+ 1 - 3 × 8-(p+m) - an
+
+(as p + m > 1).
+
+(B.16)
+
+24
+
+APPENDIX C: Auxiliary Results
+Lemma C.1. For any u,   R and   (0, 1),  (u + ) -  (u) -  (u)  min(, 1 -  )2.
+
+(C.1)
+
+Proof of Lemma C.1. When u = 0, we have  (u) =  (u) = 0, therefore  () = | - 1{ < 0}|2  min(, 1 -  )2.
+
+If u > 0, u +  < 0 ( < 0), we have
+  (u + ) -  (u) -  (u) - min(, 1 -  )2 = (1 - 2 )( + u)2  0 for   1 -  ;
+(1 - 2 )(u + 2)u > 0 for  > 1 - .
+
+If u > 0, u +  > 0 ( > 0), we have
+
+
+
+ (u
+
++
+
+)
+
+-
+
+ (u)
+
+-
+
+ (u)
+
+-
+
+min(,
+
+1
+
+-
+
+ )2
+
+=
+
+(2 (2
+
+- -
+
+1)(u 1)(u
+
++ +
+
+2)u )2u
+
+ >
+
+0 0
+
+for   1 -  ; for  > 1 - .
+
+In the other two cases,
+
+
+
+ 2  min(, 1 -  )2
+
+for u > 0, u +   0;
+
+ (u + ) -  (u) -  (u) = (1 -  )2  min(, 1 -  )2 for u < 0, u +   0.
+
+Therefore, we can conclude that
+
+ (u + ) -  (u) -  (u)  min(, 1 -  )2.
+
+Lemma C.2. g() defined in (2.9) is -strongly convex and differentiable with  =
+
+m-1
+
+min(
+
+,
+
+1
+
+-
+
+
+
+)min
+
+(
+
+X
+
+X n
+
+).
+
+Proof of Lemma C.2. Denote uij d=ef Yij - Xi (·j + ·j) and uij d=ef Yij - Xi ·j, for
+
+25
+
+i = 1, . . . , n, j = 1, . . . , m, we have
+
+g(), 
+
+= tr g() 
+
+mp
+
+n
+
+= -(mn)-1
+
+lj  (uij)Xil
+
+j=1 l=1
+
+i=1
+
+nm
+= -(mn)-1
+
+p
+lj (uij)Xil
+
+i=1 j=1 l=1
+
+nm
+
+= -(mn)-1
+
+ (uij)Xi ·j .
+
+i=1 j=1
+
+(C.2)
+
+Therefore,
+
+g( + ) - g() -
+
+g(), 
+
+nm
+
+= (mn)-1
+
+(uij) - (uij) +  (uij)Xi ·j
+
+i=1 j=1
+
+nm
+
+ (mn)-1 min(, 1 -  )
+
+(Xi ·j)2 (by Lemma C.1)
+
+i=1 j=1
+
+= (mn)-1 min(, 1 -  )
+
+X
+
+2 F
+
+= (mn)-1 min(, 1 -  ) tr( X X)
+
+ m-1 min(, 1 -  )min
+
+XX n
+
+
+
+2 F
+
+.
+
+(C.3)
+
+APPENDIX D: Additional Details for Section 3
+
+D.1 Risk Attitude Parameter
+
+The risk attitude parameter  is estimated by logistic model via maximum likelihood estimation (MLE)
+
+P{risky
+
+choice|x}
+
+=
+
+1
+
++
+
+1 exp[-{x¯ -
+
+S(x)
+
+-
+
+5}]
+
+P{sure
+
+choice|x}
+
+=
+
+1
+
+-
+
+1
+
++
+
+1 exp[-{x¯ -
+
+S(x)
+
+-
+
+5}]
+
+(D.1)
+
+where x is the return stream displayed to the individual, its mean and standard deviation are x¯ and S(x).
+
+The estimated risk attitude parameters for 19 subjects in order are plotted in Figure 3.2, also see Majer et al. (2015). Negative parameters imply risk-seeking behaviours; while
+
+26
+
+positive parameters indicate averse risk patterns. We can see most of the individuals are risk-averse and the two extremes #1 and #19 are the most risk-averse and most risk-seeking persons respectively.
+
+s
+0.0 0.2 0.4 0.6 0.8 1.0 1.2
+
+1 9 24 16 6 23 3 14 4 11 13 21 8 18 2 17 5 7
+Subject s
+Figure 3.2: Estimated risk attitude for 19 subjects.
+
+19
+
+D.2 Tuning Parameters by Cross-Validation
+Choosing  = 0.1, b = 1 (aINS_L cluster) in (C1) case as an example, Figure 3.3 illustrates the cross-validation error function in terms of  under different  levels. The optimal tuning parameters determined by 5-fold cross-validation under all cases are reported in Table 3.2.
+=0.1, aINS_L cluster, C1 case
+
+70000
+
+50000
+
+CV()
+
+30000
+
+10000
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+Figure 3.3: The cross-validation error function in terms of tuning parameter , with  =0.1, 0.5, and 0.9, respectively.
+27
+
+
+aINSL =0.1 aINSR
+DMPFC
+aINSL =0.5 aINSR
+DMPFC
+aINSL =0.9 aINSR
+DMPFC
+
+Whole series (C1) 0.1 0.5 0.9 0.0442 0.0552 0.0383 0.0303 0.0421 0.0293 0.0348 0.0504 0.0198 0.0181 0.0403 0.0153 0.0137 0.0393 0.0157 0.0195 0.0391 0.0143 0.0253 0.0408 0.0275 0.0243 0.0442 0.0200 0.0193 0.0474 0.0206
+
+Task-wise (C2) 0.1 0.5 0.9 0.0008 0.0006 0.0008 0.0004 0.0008 0.0004 0.0004 0.0007 0.0006 0.0004 0.0006 0.0003 0.0006 0.0004 0.0005 0.0006 0.0002 0.0007 0.0006 0.0004 0.0004 0.0008 0.0002 0.0006 0.0005 0.0008 0.0008
+
+Table 3.2: Tuning parameters by 5-fold cross validation.
+
+28
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001
+002 003
+004 005 006
+007 008 009 010
+011 012
+013 014
+015 016 017
+018 019 020
+
+"Downside risk and stock returns: An empirical analysis of the long-run and short-run dynamics from the G-7 Countries" by Cathy Yi-Hsuan Chen, Thomas C. Chiang and Wolfgang Karl Härdle, January 2016. "Uncertainty and Employment Dynamics in the Euro Area and the US" by Aleksei Netsunajev and Katharina Glass, January 2016. "College Admissions with Entrance Exams: Centralized versus Decentralized" by Isa E. Hafalir, Rustamdjan Hakimov, Dorothea Kübler and Morimitsu Kurino, January 2016. "Leveraged ETF options implied volatility paradox: a statistical study" by Wolfgang Karl Härdle, Sergey Nasekin and Zhiwu Hong, February 2016. "The German Labor Market Miracle, 2003 -2015: An Assessment" by Michael C. Burda, February 2016. "What Derives the Bond Portfolio Value-at-Risk: Information Roles of Macroeconomic and Financial Stress Factors" by Anthony H. Tu and Cathy Yi-Hsuan Chen, February 2016. "Budget-neutral fiscal rules targeting inflation differentials" by Maren Brede, February 2016. "Measuring the benefit from reducing income inequality in terms of GDP" by Simon Voigts, February 2016. "Solving DSGE Portfolio Choice Models with Asymmetric Countries" by Grzegorz R. Dlugoszek, February 2016. "No Role for the Hartz Reforms? Demand and Supply Factors in the German Labor Market, 1993-2014" by Michael C. Burda and Stefanie Seele, February 2016. "Cognitive Load Increases Risk Aversion" by Holger Gerhardt, Guido P. Biele, Hauke R. Heekeren, and Harald Uhlig, March 2016. "Neighborhood Effects in Wind Farm Performance: An Econometric Approach" by Matthias Ritter, Simone Pieralli and Martin Odening, March 2016. "The importance of time-varying parameters in new Keynesian models with zero lower bound" by Julien Albertini and Hong Lan, March 2016. "Aggregate Employment, Job Polarization and Inequalities: A Transatlantic Perspective" by Julien Albertini and Jean Olivier Hairault, March 2016. "The Anchoring of Inflation Expectations in the Short and in the Long Run" by Dieter Nautz, Aleksei Netsunajev and Till Strohsal, March 2016. "Irrational Exuberance and Herding in Financial Markets" by Christopher Boortz, March 2016. "Calculating Joint Confidence Bands for Impulse Response Functions using Highest Density Regions" by Helmut Lütkepohl, Anna StaszewskaBystrova and Peter Winker, March 2016. "Factorisable Sparse Tail Event Curves with Expectiles" by Wolfgang K. Härdle, Chen Huang and Shih-Kang Chao, March 2016. "International dynamics of inflation expectations" by Aleksei Netsunajev and Lars Winkelmann, May 2016. "Academic Ranking Scales in Economics: Prediction and Imdputation" by Alona Zharova, Andrija Mihoci and Wolfgang Karl Härdle, May 2016.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+021 022
+023 024
+025
+026 027
+028 029 030
+031
+032 033
+034 035
+036
+037 038
+039
+
+"CRIX or evaluating blockchain based currencies" by Simon Trimborn and Wolfgang Karl Härdle, May 2016. "Towards a national indicator for urban green space provision and environmental inequalities in Germany: Method and findings" by Henry Wüstemann, Dennis Kalisch, June 2016. "A Mortality Model for Multi-populations: A Semi-Parametric Approach" by Lei Fang, Wolfgang K. Härdle and Juhyun Park, June 2016. "Simultaneous Inference for the Partially Linear Model with a Multivariate Unknown Function when the Covariates are Measured with Errors" by Kun Ho Kim, Shih-Kang Chao and Wolfgang K. Härdle, August 2016. "Forecasting Limit Order Book Liquidity Supply-Demand Curves with Functional AutoRegressive Dynamics" by Ying Chen, Wee Song Chua and Wolfgang K. Härdle, August 2016. "VAT multipliers and pass-through dynamics" by Simon Voigts, August 2016. "Can a Bonus Overcome Moral Hazard? An Experiment on Voluntary Payments, Competition, and Reputation in Markets for Expert Services" by Vera Angelova and Tobias Regner, August 2016. "Relative Performance of Liability Rules: Experimental Evidence" by Vera Angelova, Giuseppe Attanasi, Yolande Hiriart, August 2016. "What renders financial advisors less treacherous? On commissions and reciprocity" by Vera Angelova, August 2016. "Do voluntary payments to advisors improve the quality of financial advice? An experimental sender-receiver game" by Vera Angelova and Tobias Regner, August 2016. "A first econometric analysis of the CRIX family" by Shi Chen, Cathy YiHsuan Chen, Wolfgang Karl Härdle, TM Lee and Bobby Ong, August 2016. "Specification Testing in Nonparametric Instrumental Quantile Regression" by Christoph Breunig, August 2016. "Functional Principal Component Analysis for Derivatives of Multivariate Curves" by Maria Grith, Wolfgang K. Härdle, Alois Kneip and Heiko Wagner, August 2016. "Blooming Landscapes in the West? - German reunification and the price of land." by Raphael Schoettler and Nikolaus Wolf, September 2016. "Time-Adaptive Probabilistic Forecasts of Electricity Spot Prices with Application to Risk Management." by Brenda López Cabrera , Franziska Schulz, September 2016. "Protecting Unsophisticated Applicants in School Choice through Information Disclosure" by Christian Basteck and Marco Mantovani, September 2016. "Cognitive Ability and Games of School Choice" by Christian Basteck and Marco Mantovani, Oktober 2016. "The Cross-Section of Crypto-Currencies as Financial Assets: An Overview" by Hermann Elendner, Simon Trimborn, Bobby Ong and Teik Ming Lee, Oktober 2016. "Disinflation and the Phillips Curve: Israel 1986-2015" by Rafi Melnick and Till Strohsal, Oktober 2016.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+040 041 042 043 044 045 046 047 048 049 050 051
+052 053
+054 055
+056
+057 058
+
+"Principal Component Analysis in an Asymmetric Norm" by Ngoc M. Tran, Petra Burdejová, Maria Osipenko and Wolfgang K. Härdle, October 2016. "Forward Guidance under Disagreement - Evidence from the Fed's Dot Projections" by Gunda-Alexandra Detmers, October 2016. "The Impact of a Negative Labor Demand Shock on Fertility - Evidence from the Fall of the Berlin Wall" by Hannah Liepmann, October 2016. "Implications of Shadow Bank Regulation for Monetary Policy at the Zero Lower Bound" by Falk Mazelis, October 2016. "Dynamic Contracting with Long-Term Consequences: Optimal CEO Compensation and Turnover" by Suvi Vasama, October 2016. "Information Acquisition and Liquidity Dry-Ups" by Philipp Koenig and David Pothier, October 2016. "Credit Rating Score Analysis" by Wolfgang Karl Härdle, Phoon Kok Fai and David Lee Kuo Chuen, November 2016. "Time Varying Quantile Lasso" by Lenka Zbonakova, Wolfgang Karl Härdle, Phoon Kok Fai and Weining Wang, November 2016. "Unraveling of Cooperation in Dynamic Collaboration" by Suvi Vasama, November 2016. "Q3-D3-LSA" by Lukas Borke and Wolfgang K. Härdle, November 2016. "Network Quantile Autoregression" by Xuening Zhu, Weining Wang, Hangsheng Wang and Wolfgang Karl Härdle, November 2016. "Dynamic Topic Modelling for Cryptocurrency Community Forums" by Marco Linton, Ernie Gin Swee Teo, Elisabeth Bommes, Cathy Yi-Hsuan Chen and Wolfgang Karl Härdle, November 2016. "Beta-boosted ensemble for big credit scoring data" by Maciej Zieba and Wolfgang Karl Härdle, November 2016. "Central Bank Reputation, Cheap Talk and Transparency as Substitutes for Commitment: Experimental Evidence" by John Duffy and Frank Heinemann, December 2016. "Labor Market Frictions and Monetary Policy Design" by Anna Almosova, December 2016. "Effect of Particulate Air Pollution on Coronary Heart Disease in China: Evidence from Threshold GAM and Bayesian Hierarchical Model" by Xiaoyu Chen, December 2016. "The Effect of House Price on Stock Market Participation in China: Evidence from the CHFS Micro-Datal" by Xiaoyu Chen and Xiaohao Ji, December 2016. "Factorisable Multi-Task Quantile Regression" by Shih-Kang Chao, Wolfgang K. Härdle and Ming Yuan, December 2016. "Multivariate Factorisable Sparse Asymmetric Least Squares Regression" by Shih-Kang Chao, Wolfgang K. Härdle and Chen Huang, December 2016.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+

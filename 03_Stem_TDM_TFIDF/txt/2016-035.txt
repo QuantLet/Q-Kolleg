@@ -1,0 +1,1015 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2016-035
+Time-Adaptive Probabilistic Forecasts of Electricity Spot
+Prices with Application to Risk Management.
+Brenda López Cabrera* Franziska Schulz*
+* Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Time-Adaptive Probabilistic Forecasts of Electricity Spot Prices with Application to Risk
+Management. 
+
+Brenda López Cabrera , Franziska Schulz
+September 18, 2016
+Abstract
+The increasing exposure to renewable energy has amplied the need for risk management in electricity markets. Electricity price risk poses a major challenge to market participants. We propose an approach to model and forecast electricity prices taking into account information on renewable energy production. While most literature focuses on point forecasting, our methodology forecasts the whole distribution of electricity prices and incorporates spike risk, which is of great value for risk management. It is based on functional principal component analysis and time-adaptive nonparametric density estimation techniques. The methodology is applied to electricity market data from Germany. We nd that renewable infeed eects both, the location and the shape of spot price densities. A comparison with benchmark methods and an application to risk management are provided. JEL classication: C1, Q41, Q47 Keywords: electricity prices; residual load; probabilistic forecasting; value at risk; expected shortfall; functional data analysis
+The nancial support from the Deutsche Forschungsgemeinschaft via SFB 649  Ökonomisches Risiko, Humboldt-Universität zu Berlin is gratefully acknowledged.
+Ladislaus von Bortkiewicz Chair of Statistics, Humboldt-Universität zu Berlin, Spandauer Straÿe 1, 10178 Berlin, Germany. Email: lopezcab@wiwi.hu-berlin.de, sulzfran@hu-berlin.de
+1
+
+1. Introduction
+In recent years electricity markets have changed signicantly. In Germany, the energy transition triggered by the regulators caused a rapid growth of renewable energy and has exposed the electricity market to new risk factors. The share of consumed electricity coming from renewable sources rose from 6.2% in 2000 to 32.6% in 2015 (BMWi 2016). This change in the structure of energy markets also aects the behavior of electricity spot prices: recently they have exhibited frequent downward spikes and negative prices have occurred regularly.
+Low or even negative prices appear when low demand concurs with high infeed from renewable sources. Recent studies have shown that the level as well as the volatility of electricity prices are to a large extent determined by residual load, dened as the dierence between total demand and renewable infeed (Nicolosi and Fürsch 2009; Hu 2009). The large volatility of renewables thus carries over to electricity prices. In order to cope with this increasing uncertainty, probabilistic forecasts and risk measures of electricity prices are crucial for market participants.
+Several methods has been applied to electricity price forecasting over the last years. They range from machine learning techniques and statistical methods to structural models. An extensive review on recent methods is provided by Weron (2014). He points out that probabilistic forecasting is still rare in the electricity price forecasting literature. A recent overview on probabilistic forecasting in energy markets is given by Hong et al. (2016). Most papers that deal with probabilistic forecasts of electricity prices focus on prediction intervals (see e.g. Misiorek et al. (2006), Wan et al. (2014), Nowotarski and Weron (2015)). Literature on density forecasts is even more scarce. Exceptions are Serinaldi (2011), who use a generalized additive model for location, scale and shape in order to model and forecast the distribution of electricity prices. Panagiotelis and Smith (2008) use a combination of multivariate time series models and Markov chain Monte Carlo methods to compute predictive densities of spot prices. Jónsson et al. (2014) produce probabilistic forecasts using quantile regression combined with an exponential distribution to explain the distribution tails. In a recent work, Bello et al. (2015) conduct probabilistic forecasts in the medium-term using a fundamental market equilibrium model.
+We propose to model the distribution of electricity spot prices conditional on residual load. This approach enables us to capture the eect of the interaction between demand and renewable infeed on electricity prices and to incorporate spikes that occur due to extremes in residual load.
+Literature on modeling residual load is rare, one exception is Wagner (2014), who uses a stochastic model for wind and solar power to derive residual load. We propose to model daily residual load curves directly using Functional Principal Component Analysis (FPCA), a common tool in Functional Data Analysis (FDA) that reduces the dimensionality of the problem by decomposing curves into a low number of risk drivers. See Ramsay and Silverman (2005) for an introduction to FDA and Shang (2014) for a survey on FPCA. In our context, daily residual load curves are regarded as realizations of a functional time series. Dynamics over time of the curves are analyzed and forecasted using multivariate time series techniques. Similar methodologies have been applied to load forecasting by Shang (2013) and
+2
+
+López Cabrera and Schulz (2016). Others, like Antoch et al. (2008) or Goia et al. (2010) use functional linear models to predict electricity load curves. Nonparametric functional regression techniques are applied to load and price forecasting by Vilar et al. (2012).
+Next, we use these daily curves to model the conditional density of daily spot price indices. This way, we can not only take into account information on the amount of residual load, but also on the distribution of residual load over the day. We suggest to model the relationship between residual load and prices using a exible nonparametric approach with functional covariates. This technique is based on functional conditional kernel density estimation. The approach has the advantage that predictive densities can have any form, in particular they can be asymmetric, multimodal or fat-tailed. In order to accommodate potential time-varying behavior, we include an exponential decay factor. From the conditional density interval and point forecasts and risk measures like Value at Risk (VaR) or Expected Shortfall can be derived.
+We apply the proposed methodology to prices of the Physical Electricity Index (Phelix) day base and Phelix day peak. Both indices are traded at the German electricity exchange EEX and serve as common underlyings for electricity derivatives. Phelix day base is the average of all 24 hourly spot prices, while Phelix day peak is the average of the spot prices during peak hours from 9am to 8pm.
+The proposed methodology is evaluated based on 300 day-ahead out-of-sample forecasts. We compare the performance with regard to point, interval and density forecasting to several benchmark models, including a similar day approach and an autoregressive moving average model. The proposed model turns out to alomst always outperform the benchmark models.
+Our article is structured as follows. Section 2 gives a brief introduction of the German electricity market and data. In Section 3 we describe the functional data approach to model and forecast residual load curves. Section 4 presents the functional conditional density estimator and introduces the time-adaptive approach. Section 5 discusses the modeling and estimation of residual load data and the density forecasting of electricity prices. In section 6 the forecasting performance is evaluated and compared to benchmark methods using several performance measures. An application to energy risk management is given in Section 7. Section 8 concludes the article. All computations in this article were carried out in R.
+2. German electricity market and data
+The German electricity market, which was liberalized in 1998, is Europe's largest, with annual power consumption of around 500 TWh and an annual production of around 600 TWh. In 2015, roughly one third of total production came from renewable sources (BMWi 2016). This poses new risk factors to market participants, as they have to cope with uncertain renewable infeed. Electricity is traded on the European Electricity Exchange (EEX), which contains a spot market (EPEX Spot) and a derivative market. EPEX Spot operates a day-ahead market, where market participants buy electricity for all 24 hours of the next day in a daily auction that takes place at 12pm. The EPEX Spot established two price indices, the Phelix base and
+3
+
+Phelix peak, which serve as reference prices for the European market. Market-based reference prices form an essential basis for market participants' decision making. Furthermore, the indices serve as underlying assets for Phelix futures, provided by the EEX. Hourly prices are set according to a merit order. This means that power plants are ordered according to their marginal costs and the price of electricity for a specic hour corresponds to the marginal costs of the last power plant that is needed to cover demand in that hour. The resulting merit order curve directly links electricity demand and prices. Conventionally, nuclear and lignite power plants serve base electricity demand, whereas the more expensive gas and oil power plants are only operated during hours of peak demand. Since renewable power plants have a feed-in guarantee and low marginal costs, they lower the entrance price and push conventional power plants down the merit order curve. Hence, increasing infeed from renewable energy results in lower electricity spot prices. This is also referred to as merit order eect. An overview on literature addressing the merit order eect is e.g. provided by Würzburg et al. (2013).
+While the merit order eect has been subject of many researchers, the eect of renewable infeed on the volatility of electricity prices has been studied much less. A notable exception is Ketterer (2014), who applies a GARCH model to electricity prices in Germany in order to investigate the eect of renewable infeed on the mean and volatility of prices. She nds that while the electricity price is falling due to increased renewable infeed, the volatility of prices is increasing. A similar nding is reported by Woo et al. (2011), who investigate the Texas electricity market and point out that increasing share of renewable energy requires a higher degree of price risk management.
+For a sustainable price risk management information of uncertainty and dispersion of future prices is crucial. In our analysis, we model and forecast the distribution of Phelix day base and Phelix day peak prices, taking into account information about electricity demand and renewable infeed. Distributional forecasts provide valuable information about uncertainty of prices and can be directly used to derive interval forecasts and risk measures.
+
+Mean Median SD Min Max
+
+Total demand
+56024.59 55871.00 10276.44 29550.00 79120.00
+
+Solar
+3974.07 241.88 5889.91
+0.00 25811.75
+
+Wind
+5966.80 4293.75 5353.44
+28.75 30582.50
+
+RL
+46083.73 45793.25 10591.75 8958.00 78069.50
+
+Phelix Base
+34.66 34.36 9.90 -4.13 62.89
+
+Phelix Peak
+38.72 38.18 13.13 -18.99 80.50
+
+Table 1: Summary statistics. Total demand, solar, wind and residual load (RL) in MW. Phelix base and Phelix peak in EUR/MWh.
+
+For the empirical work of this article, we use daily data on Phelix day base and Phelix day peak prices as well as hourly data on electricity consumption, wind infeed and solar infeed. The price data is obtained from Bloomberg. Electricity consumption data is obtained from the European Network of Transmission System Operators for Electricity (ENTSO-E). Data on wind and solar infeed is obtained from
+
+4
+
+the four German transmission system operators (50Hertz, Amprion, TennetTSO, TransnetBW). The analysis is based on data from 2013-01-01 to 2015-10-31. Summary statistics are given in Table 1. The time series of Phelix day base and Phelix day peak prices are displayed in Figure 1. It can be seen that the Phelix day peak has a larger volatility and more pronounced spikes than the Phelix day base. This is also visible from the summary statistics and not surprising, since the Phelix day peak corresponds to hours with high and variable demand. Both price series exhibit positive skewness and an excess kurtosis of about 1, implying a heavy-tailed unconditional distribution that is skewed to the right.
+
+Price 60
+
+-10
+
+2013
+
+2014
+
+2015
+
+Figure 1: Phelix day base (black) and Phelix day peak (red) index from 2013-01-01 to 2015-10-31. The red dottet line marks the end of the in-sample period.
+
+······ · · ···r·. ·····--· ·······
+
+06:00 0:00
+
+18:00
+
+24:00
+
+Figure 2: Residual Load in GW from 2013-01-01 to 2015-10-31
+
+As pointed out above, prices of electricity do not only depend on total consumption, but rather on the amount of electricity that has to be produced from conventional energy sources. We refer to this as residual load which we dene as:
+
+Rt = Lt - Wt - St,
+5
+
+(1)
+
+where Lt is total demand, Wt is wind infeed and St is solar infeed at time t.
+That is, residual load corresponds to total consumption minus electricity infeed from renewable sources. Since biomass and hydro power are still negligible in the German electricity market, we do not consider them in this study.
+Figure 2 displays the residual load data. Typical load proles on a day with high and low renewable infeed respectively are shown in Figure 3. It is clearly visible that residual load contains annual, weekly and intraday seasonal cycles. They closely follow the seasonalities of consumption which is lower during winter than during summer and lower during weekends than during the week.
+Typically, the intraday load prole shows a peak around noon, followed by valley in the afternoon and another peak in the evening. The valley during the afternoon becomes more pronounced the more solar infeed is present.
+
+2013-06-13
+
+2013-12-13
+
+Load in GW 30 40 50 60 70
+Load in GW 30 40 50 60 70
+
+06:00
+
+12:00
+
+18:00
+
+Time of Day
+
+24:00
+
+06:00
+
+12:00
+
+18:00
+
+Time of Day
+
+24:00
+
+Figure 3: Total consumption (thick black line), solar infeed (orange), wind infeed (green) and residual load (gray) on a day with high renewable infeed (left) and low renewable infeed (right).
+
+Since the seasonal patterns of load curves are quite predictable, we model them
+R~deterministically. We express the observed residual load t as
+
+R~t = t + Rt, t = 1, . . . , T,
+
+(2)
+
+ Rwhere t is a deterministic seasonal component and t is a stochastic component.
+We estimate the deterministic seasonal component separately for every quarter-hour of a day. It is specied as
+
+s,k = as + bs · k + c1,s sin
+
+2k 365
+
++ c2,s cos
+
+2k 365
+
+7
++ di,s · Di,k,
+
+i=1
+
+(3)
+
+where s = 1, . . . , S denotes time within the day in hours and k = 1, . . . , n the
+
+day, such that S = 24 and S · n = T . The parameters as,bs,c1,s,c2,s and di,s are
+
+Destimated by ordinary least square regression.
+
+i,k is a set of dummy variables
+
+consisting of six dummies for the weekdays and one dummy for public holidays.
+
+They capture weekly seasonal behavior, while the sine and cosine functions capture
+
+6
+
+yearly seasonalities. This approach is very close to the so called similar-day approach which is a commonly used approach in industry to model and forecast electricity load.
+
+3. Methodology
+
+3.1 Modeling and forecasting residual load
+We divide the univariate time series of residual load into segments and treat them as
+a time series of curves, where each curve represents one day. Since daily load curves
+show a similar pattern, this is a natural approach. Each of the daily segments of
+residual load contains 24 hourly observations. RWe denote these segments as s,k, where s = 1, . . . , 24 denotes the time within the day and k denotes the day. They are regarded as realizations Rk(s) of a functional time series {Rk, k  Z} dened on a S Scompact set , where corresponds to one day. For an overview on functional time series we refer to Horváth and Kokoszka (2012). Under stationarity Rk(s) have a common mean function E{R(s)} = µ(s) and a common covariance function C(s, t) = Cov{R(s), R(t)} with s, t  S . Note that functional observations are intrinsically
+innite dimensional. We model the time series of intra-daily residual load curves
+using functional principal component analysis (FPCA). FPCA is a tool to reduce
+the dimensionality of the problem that exploits the common structure of the residual
+load curves. It decomposes the functional process into the sum of the common mean
+function µ(s) and a linear combination of orthogonal principal component functions. The principal component functions are the eigenfunctions i, i = 1, 2, . . ., of the Kernel operator K :   K  dened by (K )(s) = S C(s, t)(t)dt. The Karhuhen-
+Lo`{e}ve expansion provides a representation of the intra-daily residual load curves
+as:
+
+
+Rk(s) = µ(s) + iki(s),
+i=1
+
+(4)
+
+where i, i = 1, 2, . . . are the principal component scores dened as R(s), i , where ·, · denotes the inner product. That is, the principal component scores
+are the projection of the residual load curves in the direction of the correspond-
+ing principal components. They satisfy E(i) = 0 and Var(i) = i, where i is
+the non-increasing and non-negative sequence of eigenvalues corresponding to the
+eigenfunctions i of the operator K. By taking only the rst m principal component
+functions, the truncated Karhuhen-Lo`{e}ve expansion approximates the functions
+Rk(t):
+
+m
+Rk(s)  µ(s) + iki(s).
+i=1
+
+(5)
+
+In practice, the mean, the principal components and the principal component scores have to be estimated from a sample of the functional process. We estimate the mean of the functions by
+
+7
+
+1n
+
+µ(s) = n
+
+Rk(s),
+
+k=1
+
+nwhere is the sample size. The kernel operator is estimated by
+
+(6)
+
+where
+
+(K)(s) = C(s, t)(t)dt,
+S
+
+(7)
+
+1 C(s, t) =
+n
+
+n
+{Rk(s) - µ(s)}{Rk(t) - µ(t)}.
+
+k=1
+
+(8)
+
+From (7) we estimate eigenfunctions and eigenvalues and denote them by i
+
+andik, i = 1, . . . , m. Hörmann and Kokoszka (2010) show that these estimates
+
+nare
+
+-consistent for a large group of stationary functional time series, including in
+
+particular linear functional processes. To choose the number of principal component
+mfunctions in Equation (5) there exist various rules. Here, the number is chosen
+
+such that at least an a priori xed amount of variation in the data is explained by
+
+the principal component functions.
+
+It is noted that only the principal component scores are varying over time,
+
+whereas the mean and principal component functions are time invariant. Hence,
+
+the dynamics over time of the residual load curves are fully captured by the dynam-
+ics of the principal component scores. The estimated principal component scores ik m nform a -variate time-series of length . Hence, the dimension of the problem has mbeen reduced from innite to . We model the dynamics of the principal component pscores using a vector autoregressive (VAR) process of order . It is given by
+
+p
+k = ik-i + k
+i=1
+
+(9)
+
+ where k is the vector of estimated principal component scores, i is a coecient  pmatrix and k is a white noise process (Lütkepohl 2005). The lag order of the pVAR process is determined by an Akaike information criterion. The VAR( ) model is then used to produce forecasts of the principal component scores i,n+h, where h denotes the forecast horizon. Plugging these forecasts into (5) yields forecasts of
+the whole residual load curve:
+
+m
+Rn+h(s) = µ(s) + i,n+hi(s),
+i=1
+where Rn+h(t) is the h-step ahead forecast of the residual load curve.
+8
+
+(10)
+
+3.2
+
+Functional kernel density estimation of electricity prices conditional on residual load
+
+As described above, electricity demand and prices are inherently connected through the merit order curve. We model the relation between demand and prices using methods for functional data. This has the advantage that we can take the information of the whole residual load curve into account to model the distribution of the daily prices. We chose a functional conditional kernel density (fCKD) estimator to estimate the density of electricity prices conditional on the residual load curves. The estimator requires neither assumption on the resulting density of prices nor on the functional form of the relationship between prices and residual load. This exibility is desirable in this context, since prices are generally asymmetric and heavy-tailed. Furthermore, the functional form of the relationship between prices and residual load is unknown and not straightforward to derive.
+The fCKD estimator (Ferraty and Vieu 2006) is given by :
+
+1
+f (y|R) = g
+
+n k=1
+
+K
+
+[h-1d{R(s), Rk(s)}]
+
+n k=1
+
+K
+
+[h-1
+
+d{R(s),
+
+K0{g-1(y Rk(s)}]
+
+-
+
+Yk)}
+
+,
+
+(11)
+
+where K and K0 are kernels, h and g are positive bandwidth parameters and d(·, ·) is a semi-metric that measures the proximity of curves. It is a functional
+extension of the well known Nadaraya-Watson estimator (Nadaraya 1964; Watson
+d1964), where the main change comes from the introduction of the semi-metric . We
+choose a semi-metric that is based on principal component analysis. It is dened as
+
+dqP CA(Rk, R) =
+
+q m=1
+
+2
+{Rk(s) - R(s)}vm(s)ds ,
+
+(12)
+
+where v1, . . . , vq are the rst q eigenvectors of the covariance matrix of the curves R qk, with being a tuning parameter that has to be xed a priori. The idea of
+the PCA-based semi-metric is to compute proximities between curves in a reduced
+qdimensional space, where determines the resolution at which curves are compared.
+For more details and dierent choices of the semi-metric we refer to Ferraty and Vieu (2006).
+h gThe two bandwidth parameters and are chosen based on cross-validation. The
+cross-validation is done as follows. We compute day-ahead density forecasts for the cross-validation sample and choose the bandwidth such that the forecasting accuracy in the cross-validation sample is maximized. As a measure of forecasting accuracy we choose the logarithmic score which evaluates location as well as concentration of the density forecasts and is a local proper scoring rule (Gneiting and Katzfuss 2014).
+Looking at scatterplots of electricity prices and average daily residual load for dierent time periods (see Section 4) indicates that the relationship between prices and residual demand is varying over time. This happens due to factors that impact the market environment and that we do not capture in our model. A way to address
+
+9
+
+this time-varying behavior is to give more weight to recent observations and to weight observations less that are more far away in time. We implement a time-adaptive algorithm that is based on an exponential decay factor. For this, we adjust the timeadaptive conditional kernel density approach proposed by Jeon and Taylor (2012) to the functional estimator. The time-adaptive functional kernel density estimator (TA-fCKDE) is given by:
+
+1
+f (y|R) = g
+
+n k=1
+
+n-k K [h-1d{R(s), Rk(s)}]
+
+n k=1
+
+n-k
+
+K
+
+[h-1d{R(s),
+
+K0{g-1(y Ri(s)}]
+
+-
+
+Yk)}
+
+,
+
+(13)
+
+where   (0, 1] is an exponential time decay factor. The smaller , the faster the factor decays and the more weight is given to recent values. We determine
+
+together with the bandwidth parameters in the cross-validation.
+
+The fCKD estimator and TA-fCKD estimator yield estimates of the electricity
+
+spot price density conditional on a given residual load curve. If we use the fCKD
+
+estimator for forecasting, the future residual load curve is of course unknown. The
+
+purpose of the FPCA described in the previous section is to produce high quality
+
+forecasts of the residual load curve that can be used to obtain a forecast of the
+
+electricity price density.
+
+4. Modeling and forecasting dynamics of residual load and spot price densities
+Since the relationship between prices and residual load curves is too complex to display visually, in order to illustrate the relationship between both we show a scatterplot of prices and average daily residual load in Figure 4. A clear positive relationship is visible, with slightly increasing variance for higher residual load. The right panel of the plot indicates that the relationship is not invariant over time.
+
+Phelix Base 20 40 60
+
+Phelix Base 20 40 60
+
+0
+
+0
+
+20 30 40 50 60 Average daily residual load in GW
+
+70
+
+20 30 40 50 60 Average daily residual load in GW
+
+70
+
+Figure 4: Phelix day base prices vs. average daily residual load for the whole insample period (left) and for the rst four month (black dots) and the last four month (blue triangles) of the in-sample period (right).
+In the rst step we model residual load curves for the in-sample period from 201301-01 to 2014-12-31 as described in Section 3.1. We choose the number of principal
+
+10
+
+components such that at least 95% of the variation in the data is explained. It
+turns out that three principal components are sucient. The rst three principal
+components together with their principal component scores are displayed in Figure
+5. The rst principal component explains already 80% of the variance. Variations
+in the rst principal components correspond mainly to shifts in the level of the load
+curve. Principal components two and three explain 10% and 6% respectively and
+are responsible for variations in the curvature of the load curve.
+The dynamics of the principal component scores are modeled using model (9).
+pWe determined the lag order of the VAR model based on the Akaike information criterion (AIC) and considered lags up to order 14. We nd that a VAR(1) model has the lowest AIC. Estimation results of the coecient matrix 1 are reported in
+table 2. They show that although the principal components are instantaneously
+uncorrelated by construction, they do exhibit dependencies over time.
+
+1,t-1
+
+1,t-2
+
+1,t-3
+
+1,t 0.62 -0.53 (0.00) (0.00)
+
+2,t 0.11
+
+0.01
+
+(0.00) (0.87)
+
+3,t -0.01 (0.51)
+
+0.14 (0.00)
+
+0.86 (0.00) 0.51 (0.00) 0.25 (0.00)
+
+1Table 2: Estimates of the coecients of the VAR( ) model. P-values in parentheses.
+
+-1.5 -1.0 -0.5 0.0 0.5 1.0 1.5
+
+^3 ^3
+
+^2 -1.5 -1.0 -0.5 0.0 0.5 1.0 1.5
+
+^1 -1.5 -1.0 -0.5 0.0 0.5 1.0 1.5
+
+0:00 06:00 12:00 18:00 24:00
+
+0:00 06:00 12:00 18:00 24:00
+
+0:00 06:00 12:00 18:00 24:00
+
+30
+
+^2 -60 30
+
+^1 -150 80
+
+-60
+
+2013
+
+2014
+
+2013
+
+2014
+
+2013
+
+2014
+
+Figure 5: First three principal component scores and the corresponding principal component scores for the in-sample period (2013-01-01 to 2014-12-31). Explained variance: 80%, 10% and 6%
+Day-ahead forecasts of the residual load curves are computed according to (10).
+We achieve a mean squared percentage error of 1.75% based on 300 day-ahead out-
+of-sample forecasts.
+11
+
+In the second step, forecasted residual load curves are used to produce forecasts of the conditional electricity price density as described in Section 3.2.
+Figure 6 shows exemplary forecasted densities of the Phelix day base price together with the corresponding residual load for a day with high residual load, low residual load and medium residual load. It can be seen that the location as well as the shape of the price density varies with residual load. Especially on the day with low residual load, it is highly asymmetric and bimodal. Interestingly, the realized price almost coincides with the lower mode.
+
+2015-01-21
+
+2015-08-23
+
+2015-09-01
+
+Load in GW 10 20 30 40 50 60 70 80
+
+Load in GW 10 20 30 40 50 60 70 80
+
+Load in GW 10 20 30 40 50 60 70 80
+
+06:00
+
+12:00
+
+18:00
+
+Time of Day
+
+24:00
+
+06:00
+
+12:00
+
+18:00
+
+Time of Day
+
+24:00
+
+06:00
+
+12:00
+
+18:00
+
+Time of Day
+
+24:00
+
+f^ 0.00 0.02 0.04 0.06 0.08 0.10
+
+f^ 0.00 0.02 0.04 0.06 0.08
+
+f^ 0.00 0.02 0.04 0.06 0.08 0.10
+
+0 10 20 30 40 50 60 Phelix base
+
+0 10 20 30 40 50 60 Phelix base
+
+0 10 20 30 40 50 60 Phelix base
+
+Figure 6: Residual load (upper panel) and forecasted spot price density (lower panel) together with 0.05 and 0.95 Quantile (gray shades), median (black solid line) and observed price (red dashed line).
+
+5. Forecast evaluation
+We compare the forecast performance of the functional conditional kernel density estimator (fCKDE) and the time-adaptive functional conditional kernel density estimator (TA-fCKDE) to the results of several benchmark models. The rst two years of data are used for in-sample tting. For the remaining data, we compute
+H = 300 day-ahead out-of-sample forecasts using a rolling window approach. For
+the cross-validation of the bandwidth parameters and the exponential decay factor
+ we keep the last third of the in-sample period as a cross-validation sample.
+The forecasts are computed under two scenarios for the residual load: (1) we assume that we have a perfect forecast, that is we use measured residual load as input for our price forecast, (2) we use forecasted residual load from our model proposed in Section 3.1 as input for our price forecasts. In this way we can on the one hand compare the performance of the price forecasting models fairly on the basis of a perfect forecast. On the other hand, we obtain an idea of how much of the uncertainty in price forecasting comes from the uncertainty in load forecasting.
+
+12
+
+5.1 Benchmark Models
+We estimate the following benchmark models and compare their performance for day-ahead forecasting to the performance of the fCKDE and the TA-fCKDE.
+I Naive similar day approach II ARMAX III Kernel density estimator (KDE) IV Conditional kernel density estimator (CKDE)
+The rst benchmark model (I) is a simple or naive model that is based on the idea that a good prediction of today's electricity price, is the price on the same weekday one week ago. It is often called similar day approach and popular due to its simplicity. The model is given by
+
+yk = yk-7 + k,
+
+(14)
+
+where k is a white noise process.
+As a further benchmark model (II) we choose the autoregressive moving average model (ARMA). ARMA models and variations of it are very often used in literature, see e.g. Cuaresma et al. (2004), Weron and Misiorek (2008), Kristiansen (2012) and serve as common benchmark models. We include weekday dummy variables in order to account for weekly seasonalities. The ARMA(p,q) model with exogenous variables (ARMAX) is given by:
+
+pq
+yk = c + iyk-i + jk-j + xk + k,
+i=1 j=1
+
+(15)
+
+where c is a constant, ,  and  are parameters that have to be estimated, xk are exogenous variables and k is a white noise process. The lag orders p and q are
+chosen according to the Akaike information criterion. Models I and II can be used to produce point forecasts of electricity spot prices.
+They do not yield information about the future price distribution. Model III is a simple unconditional kernel density estimator (KDE) given by:
+
+1 f (y) =
+ng
+
+n
+
+K0{g-1(y - Yk)},
+
+k=1
+
+(16)
+
+K gwhere 0 is a kernel function and is a bandwidth parameter. It has the
+advantage that only information about past electricity prices is needed. Therefore, it does not rely on forecasted values of residual load.
+Furthermore, we chose the Nadaraya-Watson conditional kernel density estimator (CKDE) as a benchmark (IV), where the conditional variable is the average daily residual load. It is given by:
+
+13
+
+1
+f (y|R¯) = g
+
+n k=1
+
+K{h-1(R¯ - R¯k)}
+
+n k=1
+
+K{h-1(R¯
+
+K0{g-1(y - R¯k)}
+
+-
+
+Yk)}
+
+,
+
+(17)
+
+where R¯k denotes average daily residual load on day k, K and K0 are kernels, h gand are positive bandwidth parameters. This estimator takes into account the in-
+formation about the amount of electricity that has to be produced from conventional
+power plants, but it does not consider its distribution over the day.
+
+5.2 Point Forecasting
+The main focus of our analysis is density forecasting. However, we also look at the performance of point forecasts for two reasons. First, point forecasts provide useful information about the location of the predicted density and are of great importance for users. Second, most established methods for electricity price forecasting only yield point forecasts. This way, we are able to compare our results to other well established methods, as the similar day approach and the ARMA model. We compute mean and median of the predicted densities and evaluate them using the root mean squared error (RMSE) and the mean absolute percentage error (MAPE), respectively. Thus, we take the respective loss function of the mean and the median into account when evaluating the forecast (Gneiting 2011). The forecasts of the similar day approach and the ARMA model are evaluated based on the RMSE only, as they do not provide forecasts of the median. RMSE and MAPE are dened as
+
+RMSE =
+
+1 H
+
+H
+(yn+h - yn+h)2,
+
+h=1
+
+1 MAPE =
+
+H | yn+h - yn+h |,
+
+H h=1
+
+yn+h
+
+(18) (19)
+
+H ywhere denotes the total number of forecasts, n+h is the observed price at day n + h and yn+h denotes the day-ahead point forecast of day n + h.
+The results are shown in Table 3. The TA-fCKDE performs best in forecasting the mean as well as the median. Surprisingly, the similar day approach performs relatively good as well, given its simplicity. Both the similar day approach and the ARMAX model outperform the unconditional kernel density estimator (KDE) in point forecasting, though they do not provide information about the density. Naturally, forecasts under scenario (1) are better than forecasts under scenario (2). The ranking of the models does however not change.
+
+5.3 Density Forecasting We evaluate the density forecasts using probability integral transforms (PIT) of the predicted densities (Diebold et al. 1998) as well as logarithmic scores (LS) (Gneiting and Katzfuss 2014). The PIT is dened as:
+14
+
+Scenario (1)
+
+MAE
+
+RMSE
+
+Base Peak Base Peak
+
+Scenario (2)
+
+MAE
+
+RMSE
+
+Base Peak Base Peak
+
+SD ARMA KDE CKDE fCKDE TAfCKDE
+
+15.15 7.03 6.64 5.94
+
+18.02 8.06 7.70 7.21
+
+9.16 7.23 8.84 4.64 4.77 3.61
+
+10.64 9.73
+11.50 5.83 5.89 4.70
+
+15.15 7.03 6.64 5.78
+
+18.02 6.77 6.72 6.48
+
+9.16 7.23 8.84 5.91 6.06 4.88
+
+10.64 9.73
+11.50 7.37 7.52 6.19
+
+Table 3: Mean absolute error (MAE) and root mean squared error (RMSE) based
+on H = 300 day-ahead forecasts.
+
+yn+h
+
+PITh =
+
+fn+h(u)du,
+
+-
+
+(20)
+
+where h = 1, . . . , H denotes the day-ahead forecasts and fn+h(·) is the predicted density of the price at day n + h. That is, the PIT is the cumulative density yfunction of the predicted density evaluated at n+h. Note, that if the predicted density equals the true data generating process, then PITh  U (0, 1). In Figures
+7 and 8 we plot histograms of the PIT. High bars indicate that the corresponding
+part of the distribution is underestimated and vice versa. Under scenario (1) the
+KDE overestimates the right tail, while the CKDE overestimates both tails. The
+PIT from the fCKDE and the TA-fCKDE look more uniform. Under scenario (2)
+the TA-fCKDE underestimates the tail-risk for peak load, but seems to capture the
+distribution of base load quite well.
+
+KDE
+
+CKDE
+
+fCKDE
+
+TA-fCKDE
+
+0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50
+
+0 10 10 10 1
+
+KDE
+
+CKDE
+
+fCKDE
+
+TA-fCKDE
+
+0 10 10 10 1
+Figure 7: Probability integral transform for peak load (upper panel) and base load
+(lower panel) based on H = 300 day-ahead forecasts under scenario (1).
+Though, as pointed out by (Hamill 2001), uniformity of the PIT does not guarantee unbiasedness of the forecasts. Hence, it is a necessary condition for a good
+15
+
+KDE
+
+CKDE
+
+fCKDE
+
+TA-fCKDE
+
+0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50
+
+0 10 10 10 1
+
+KDE
+
+CKDE
+
+fCKDE
+
+TA-fCKDE
+
+0 10 10 10 1
+Figure 8: Probability integral transform for peak load (upper panel) and base load
+(lower panel) based on H = 300 day-ahead forecasts under scenario (2).
+forecast, but not a sucient one. Therefore, we additionally compute the LS, which is a local proper scoring rule. It is dened as
+
+LSh(fn+h, yn+h) = - log{fn+h(yn+h)},
+
+(21)
+
+where fn+h(·) is the predicted density of the price at day n + h and yn+h is the
+observed price. The LS evaluates the quality of a probabilistic forecasts based on the paradigm of maximizing sharpness subject to calibration. In other words, it takes into account both, the concentration of the predicted distribution (sharpness) and its location relative to the observed values (calibration). The average LS over the out-of-sample period are reported in table 4. Again, the TA-fCKDE outperforms the other methods.
+
+Scenario (1) Scenario (2) Base Peak Base Peak
+
+KDE CKDE fCKDE TA-fCKDE
+
+3.59 2.95 2.94 2.70
+
+3.88 3.16 3.16 2.94
+
+3.59 3.25 3.23 3.07
+
+3.88 3.47 3.45 3.34
+
+Table 4: Mean logarithmic score (LS) based on H = 300 day-ahead forecasts.
+
+5.4 Quantile and Interval Forecasting Special interest often lies in certain quantiles of the distribution and the intervals spanned by them. In section 6 we show how they can be used for risk management.
+We evaluate the accuracy of conditional quantile forecasts using the pinball loss function given by:
+16
+
+L(q,n+h, yn+h) = | - I(yn+hq,n+h) ||yn+h - q,n+h|,
+
+(22)
+
+q where ,n+h denotes the day-ahead quantile forecast with level of asymmetry on day n+h and yn+h is the observed price on that day. The pinball loss function can be
+interpreted as a weighted absolute error, where the weight reects the asymmetry of the quantiles. It is a popular tool to evaluate quantile forecasts that has for example been suggested by Hong et al. (2016) and Steinwart et al. (2011).
+Table 6 shows the average loss function over all H = 300 day-ahead forecasts.
+The smaller the value, the better. For reasons of compactness, we only show the results under scenario (1), as the results for scenario (2) do not dier in their conclusion. We nd that the TA-fCKDE performs best for most of the considered
+quantile levels for both, base and peak load prices. Only for the 0.01 quantile it is
+outperformed by both the fCKDE and the CKDE.
+
+ = 0.01 0.05 0.25 0.5 0.75 0.95 0.99
+
+KDE CKDE fCKDE TA-fCKDE
+
+0.35 0.10 0.10 0.13
+
+1.09 0.44 0.42 0.40
+
+2.77 1.33 1.33 1.12
+
+3.32 1.80 1.75 1.37
+
+2.71 1.60 1.56 1.09
+
+0.96 0.65 0.63 0.39
+
+0.26 0.17 0.17 0.11
+
+Table 5: Mean pinball loss based on H = 300 day-ahead quantile forecasts (base).
+
+ = 0.01 0.05 0.25 0.5 0.75 0.95 0.99
+
+KDE CKDE fCKDE TA-fCKDE
+
+0.42 0.12 0.12 0.21
+
+1.28 0.52 0.48 0.54
+
+3.55 1.57 1.62 1.40
+
+4.35 2.16 2.16 1.73
+
+3.63 2.04 1.98 1.41
+
+1.30 0.84 0.81 0.50
+
+0.36 0.22 0.22 0.14
+
+Table 6: Mean pinball loss based on H = 300 day-ahead quantile forecasts (peak).
+
+6. Application to Risk Management
+Deregulated electricity markets provide opportunities for market participants to trade electricity and its derivatives. While this can be benecial, the specic characteristics of electricity spot prices also pose major challenges at market participants. In order to cope with these challenges, eective risk management is advantageous. A rst step in risk management is the measurement of risk. This quantication of uncertainty provides relevant information for the decision-making of market participants and forms the basis for trading strategies that meet their risk attitude. From a rm's perspective, as pointed out by Chan and Gray (2006), over-capitalization due to overestimation of risk implies idle capital which compromises the rms's profitability. On the other hand, under-capitalization may cause nancial distress in
+17
+
+case the rm is unable to meet the obligations of its trading contracts. Therefore, risk measurement is a central part in establishing optimal trading limits. Our probabilistic forecasts yield a complete picture of future electricity prices and can directly be used to measure uncertainty. Given the spike risk of electricity prices associated with tail events, knowledge about the tail dynamics rather than the variations around the mean is crucial for a sustainable risk management. We compute two different risk measures, Value at Risk (VaR) and Expected Shortfall (ES), based on the forecasts generated by the fCKDE and the TA-fCKDE using numerical integration techniques.
+VaR is dened as:
+
+VaR( ) = Fy-1( ),
+
+(23)
+
+where   (0, 1) corresponds to the probability that the spot price will fall below the amount given by the VaR. That is, VaR( ) is exactly the  · 100% quantile of
+the price distribution. VaR is a measure of price risk and a standard tool in nance (Due and Pan 1997; Holton 2003). However, it is not a coherent risk measure (see e.g. Artzner et al. (1999)). For a discussion of VaR in energy markets see e.g. Eydeland and Wolyniec (2003). A popular tool to compute VaR are GARCH models, which were shown to perform well for energy markets, if they have fattailed and possibly skewed distributions (Aloui 2008; Füss et al. 2010; Giot and Laurent 2003). Bunn et al. (2016) compute VaR levels for electricity spot prices using quantile regression with fundamental factors and volatility as explanatory factor in order to capture the specic behavior of electricity prices. Here, we use a dierent methodology that takes into account the eect of the interaction between demand and renewable infeed on electricity prices and incorporates the risk of extremes in spot prices. We show a plot of the 1% VaR for our out-of-sample forecasting period based on the fCKDE and the TA-fCKDE in Figure 9. While in the beginning of the period they provide comparable results, for the second part of 2015 the TA-fCKDE estimates a lower tail risk than the fCKDE. Furthermore, it can be seen that price spikes are captured quite well.
+Next, we compute the Expected Shortfall, that is, the expected value of a random variable below a given threshold. It is a more accurate risk measure compared to the VaR, since it takes diversication and risk aggregation eects properly into account and thus is a coherent risk measure (Acerbi and Tasche 2002; Delbaen 2002). ES is dened as
+
+1 ES( ) =
+
+
+VaR()d,   (0, 1).
+
+0
+
+(24)
+
+The right panel of Figure 9 shows estimates of the 1% Expected Shortfall. By construction, ES is lower than VaR. Though, it shows a similar pattern to the VaR. While the TA-fCKDE again estimates a lower tail risk, the dierence is less distinctive.
+VaR ignores losses below the VaR level, whereas ES has the advantage that it captures this tails risk. Though, as pointed out by Yamai and Yoshiba (2005), ES
+
+18
+
+is less reliable to estimate for fat-tailed distributions, which we face in electricity markets. For a comprehensive risk monitoring, it is recommended to take into account both, VaR and ES.
+The high forecasting performance of the TA-fCKDE model is reected in the accuracy of both risk measures. It considers the risk of market price uctuations, the eects of the interaction between demand and renewable infeed, spike risk and the time-varying behavior of the risk factors in the electricity spot market. Our methodology can as well be used to compute other risk measure, as e.g. Risk adjusted Return on Capital (RAROC), which was used by Prokopczuk et al. (2007) to quantify risks related to wholesale electricity contracts.
+
+Phelix base 20 40 60
+
+Phelix base 20 40 60
+
+0
+
+0
+
+2015
+
+2015
+
+Figure 9: Observed load (black dots) together with estimated 1% VaR (left panel) and 1% expected shortfall (right panel) for TA-fCKDE (blue solid line) and fCKDE (red dashed line).
+
+7. Conclusion
+Since electricity markets have been liberalized in many countries, price forecasting is becoming an important task. Residual load - the dierence between consumption and renewable infeed - plays a key role in the electricity price formation. For the purpose of modeling and forecasting electricity spot prices, a new prediction methodology that considers the uncertainty of future residual load and its stochastic relationship with prices is proposed. The methodology yields forecasts of the whole density of electricity prices, which is of great value for trading and risk management. It is able to capture spike risk associated with tail events, which is especially relevant in electricity markets. We nd that the location as well as the shape of the price distribution depends on residual load. Predicted price distributions are generally asymmetric and fat-tailed. We evaluate density forecasts as well as point and interval forecasts derived from the methodology against several benchmark methods and nd that the proposed methodology performs best in almost all cases. Moreover, we demonstrate how to apply the methodology to risk management and derive risk measures from the predicted densities. A possible further application would be futures pricing, as e.g. done by Bierbrauer et al. (2007).
+19
+
+References
+Acerbi, C. and Tasche, D. (2002), On the coherence of expected shortfall, tournl of fnking 8 pinne, 26, 14871503.
+Aloui, C. (2008), Value-at-risk analysis for energy commodities: long-range depen-
+dencies and fat-tails in return innovations, tournl of inergy wrkets, 1, 3163.
+Antoch, J., Prchal, L., De Rosa, M. R., and Sarda, P. (2008), Functional linear regression with functional response: application to prediction of electricity con-
+sumption, in puntionl nd ypertionl ttistis, Springer, pp. 2329.
+Artzner, P., Delbaen, F., Eber, J.-M., and Heath, D. (1999), Coherent measures of
+risk, wthemtil (nne, 9, 203228.
+Bello, A., Reneses, J., Muñoz, A., and Delgadillo, A. (2015), Probabilistic forecasting of hourly electricity prices in the medium-term using spatial interpolation
+techniques, snterntionl tournl of poresting.
+Bierbrauer, M., Menn, C., Rachev, S. T., and Trück, S. (2007), Spot and derivative
+pricing in the EEX power market, tournl of fnking 8 pinne, 31, 34623485.
+BMWi (2016), Zeitreihen zur Entwicklung der erneuerbaren Energien in Deutschland, .
+Bunn, D., Andresen, A., Chen, D., and Westgaard, S. (2016), Analysis and Fore-
+casting of Electricity Price Risks with Quantile Factor Models, he inergy tourE nl, 37(1).
+Chan, K. F. and Gray, P. (2006), Using extreme value theory to measure value-
+at-risk for daily electricity spot prices, snterntionl tournl of poresting, 22,
+283300.
+Cuaresma, J. C., Hlouskova, J., Kossmeier, S., and Obersteiner, M. (2004), Fore-
+casting electricity spot-prices using linear univariate time-series models, epplied inergy, 77, 87106.
+Delbaen, F. (2002), Coherent risk measures on general probability spaces, in edE vnes in (nne nd stohstis, Springer, pp. 137.
+Diebold, F. X., Gunther, T. A., and Tay, A. S. (1998), Evaluating Density Fore-
+casts with Applications to Financial Risk Management, snterntionl ionomi eview, 863883.
+Due, D. and Pan, J. (1997), An overview of value at risk, he tournl of derivE tives, 4, 749.
+Eydeland, A. and Wolyniec, K. (2003), inergy nd power risk mngementX xew developments in modelingD priingD nd hedging, vol. 206, John Wiley & Sons.
+20
+
+Ferraty, F. and Vieu, P. (2006), xonprmetri funtionl dt nlysisX theory nd prtie, Springer.
+Füss, R., Adams, Z., and Kaiser, D. G. (2010), The predictive power of value-at-
+risk models in commodity futures markets, tournl of esset wngement, 11,
+261285.
+Giot, P. and Laurent, S. (2003), Market risk in commodity markets: a VaR ap-
+proach, inergy ionomis, 25, 435457.
+Gneiting, T. (2011), Quantiles as optimal point forecasts, snterntionl tournl of poresting, 27, 197207.
+Gneiting, T. and Katzfuss, M. (2014), Probabilistic forecasting, ennul eview of ttistis nd sts epplition, 1, 125151.
+Goia, A., May, C., and Fusai, G. (2010), Functional clustering and linear regression
+for peak load forecasting, snterntionl tournl of poresting, 26, 700711.
+Hamill, T. M. (2001), Interpretation of rank histograms for verifying ensemble
+forecasts, wonthly ether eview, 129, 550560.
+Holton, G. A. (2003), lueEtEriskX theory nd prtie, vol. 2, Academic Press New
+York.
+Hong, T., Pinson, P., Fan, S., Zareipour, H., Troccoli, A., and Hyndman, R. J. (2016), Probabilistic energy forecasting: Global energy forecasting competition
+2014 and beyond, snterntionl tournl of poresting, 32, 896913.
+Hörmann, S. and Kokoszka, P. (2010), Weakly dependent functional data, he ennls of ttistis, 38, 18451884.
+Horváth, L. and Kokoszka, P. (2012), snferene for puntionl ht with eppliE tions, Springer.
+Hu, S. (2009), Unit-price procurement auctions: structural results and comparisons, Ph.D. thesis, University of Michigan.
+Jeon, J. and Taylor, J. W. (2012), Using conditional kernel density estimation for
+wind power density forecasting, tournl of the emerin ttistil essoition,
+107, 6679.
+Jónsson, T., Pinson, P., Madsen, H., and Nielsen, H. A. (2014), Predictive densities
+for day-ahead electricity prices using time-adaptive quantile regression, inergies,
+7, 55235547.
+Ketterer, J. C. (2014), The impact of wind power generation on the electricity price
+in Germany, inergy ionomis, 44, 270280.
+Kristiansen, T. (2012), Forecasting Nord Pool day-ahead prices with an autoregres-
+sive model, inergy oliy, 49, 328332.
+21
+
+López Cabrera, B. and Schulz, F. (2016), Forecasting generalized quantiles of elec-
+tricity demand: A functional data approach, tournl of the emerin ttistil essoition, DOI:10.1080/01621459.2016.1219259.
+Lütkepohl, H. (2005), xew introdution to multiple time series nlysis, Springer.
+Misiorek, A., Trueck, S., and Weron, R. (2006), Point and interval forecasting
+of spot electricity prices: Linear vs. non-linear time series models, tudies in xonliner hynmis 8 ionometris, 10.
+Nadaraya, E. A. (1964), On estimating regression, heory of roility 8 sts epplitions, 9, 141142.
+Nicolosi, M. and Fürsch, M. (2009), The impact of an increasing share of RES-
+E on the conventional power market-the example of Germany, eitshrift für inergiewirtshft, 33, 246254.
+Nowotarski, J. and Weron, R. (2015), Computing electricity spot price prediction
+intervals using quantile regression and forecast averaging, gomputtionl ttisE tis, 30, 791803.
+Panagiotelis, A. and Smith, M. (2008), Bayesian density forecasting of intraday
+electricity prices using multivariate skew t distributions, snterntionl tournl of poresting, 24, 710727.
+Prokopczuk, M., T. Rachev, S., Schindlmayr, G., and Trück, S. (2007), Quantifying
+Risk in the Electricity Business: A RAROC-based Approach, inergy ionomis,
+29(5), 10331049.
+Ramsay, J. O. and Silverman, B. W. (2005), puntionl dt nlysis, Springer.
+Serinaldi, F. (2011), Distributional modeling and short-term forecasting of electric-
+ity prices by generalized additive models for location, scale and shape, inergy ionomis, 33, 12161226.
+Shang, H. L. (2013), Functional time series approach for forecasting very short-term
+electricity demand, tournl of epplied ttistis, 40, 152168.
+ (2014), A survey of functional principal component analysis, ete edvnes in ttistil enlysis, 98, 121142.
+Steinwart, I., Christmann, A., et al. (2011), Estimating conditional quantiles with
+the help of the pinball loss, fernoulli, 17, 211225.
+Vilar, J. M., Cao, R., and Aneiros, G. (2012), Forecasting next-day electricity de-
+mand and price using nonparametric functional methods, snterntionl tournl of iletril ower 8 inergy ystems, 39, 4855.
+Wagner, A. (2014), Residual Demand Modeling and Application to Electricity Pric-
+ing, he inergy journl, 35, 4573.
+22
+
+Wan, C., Xu, Z., Wang, Y., Dong, Z. Y., and Wong, K. P. (2014), A hybrid
+approach for probabilistic forecasting of electricity price, siii rnstions on mrt qrid, 5, 463470. Watson, G. S. (1964), Smooth regression analysis, nkhy©X he sndin tournl of ttistisD eries e, 359372.
+Weron, R. (2014), Electricity price forecasting: A review of the state-of-the-art with
+a look into the future, snterntionl tournl of poresting, 30, 10301081.
+Weron, R. and Misiorek, A. (2008), Forecasting spot electricity prices: A compari-
+son of parametric and semiparametric time series models, snterntionl tournl of poresting, 24, 744763.
+Woo, C.-K., Horowitz, I., Moore, J., and Pacheco, A. (2011), The impact of wind generation on the electricity spot-market price level and variance: The Texas
+experience, inergy oliy, 39, 39393944.
+Würzburg, K., Labandeira, X., and Linares, P. (2013), Renewable generation and electricity prices: Taking stock and new evidence for Germany and Austria,
+inergy ionomis, 40, S159S171.
+Yamai, Y. and Yoshiba, T. (2005), Value-at-risk versus expected shortfall: A prac-
+tical perspective, tournl of fnking 8 pinne, 29, 9971015.
+23
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001
+002 003
+004 005 006
+007 008 009 010
+011 012
+013 014
+015 016 017
+018 019 020
+
+"Downside risk and stock returns: An empirical analysis of the long-run and short-run dynamics from the G-7 Countries" by Cathy Yi-Hsuan Chen, Thomas C. Chiang and Wolfgang Karl Härdle, January 2016. "Uncertainty and Employment Dynamics in the Euro Area and the US" by Aleksei Netsunajev and Katharina Glass, January 2016. "College Admissions with Entrance Exams: Centralized versus Decentralized" by Isa E. Hafalir, Rustamdjan Hakimov, Dorothea Kübler and Morimitsu Kurino, January 2016. "Leveraged ETF options implied volatility paradox: a statistical study" by Wolfgang Karl Härdle, Sergey Nasekin and Zhiwu Hong, February 2016. "The German Labor Market Miracle, 2003 -2015: An Assessment" by Michael C. Burda, February 2016. "What Derives the Bond Portfolio Value-at-Risk: Information Roles of Macroeconomic and Financial Stress Factors" by Anthony H. Tu and Cathy Yi-Hsuan Chen, February 2016. "Budget-neutral fiscal rules targeting inflation differentials" by Maren Brede, February 2016. "Measuring the benefit from reducing income inequality in terms of GDP" by Simon Voigts, February 2016. "Solving DSGE Portfolio Choice Models with Asymmetric Countries" by Grzegorz R. Dlugoszek, February 2016. "No Role for the Hartz Reforms? Demand and Supply Factors in the German Labor Market, 1993-2014" by Michael C. Burda and Stefanie Seele, February 2016. "Cognitive Load Increases Risk Aversion" by Holger Gerhardt, Guido P. Biele, Hauke R. Heekeren, and Harald Uhlig, March 2016. "Neighborhood Effects in Wind Farm Performance: An Econometric Approach" by Matthias Ritter, Simone Pieralli and Martin Odening, March 2016. "The importance of time-varying parameters in new Keynesian models with zero lower bound" by Julien Albertini and Hong Lan, March 2016. "Aggregate Employment, Job Polarization and Inequalities: A Transatlantic Perspective" by Julien Albertini and Jean Olivier Hairault, March 2016. "The Anchoring of Inflation Expectations in the Short and in the Long Run" by Dieter Nautz, Aleksei Netsunajev and Till Strohsal, March 2016. "Irrational Exuberance and Herding in Financial Markets" by Christopher Boortz, March 2016. "Calculating Joint Confidence Bands for Impulse Response Functions using Highest Density Regions" by Helmut Lütkepohl, Anna StaszewskaBystrova and Peter Winker, March 2016. "Factorisable Sparse Tail Event Curves with Expectiles" by Wolfgang K. Härdle, Chen Huang and Shih-Kang Chao, March 2016. "International dynamics of inflation expectations" by Aleksei Netsunajev and Lars Winkelmann, May 2016. "Academic Ranking Scales in Economics: Prediction and Imdputation" by Alona Zharova, Andrija Mihoci and Wolfgang Karl Härdle, May 2016.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+021 022
+023 024
+025
+026 027
+028 029 030
+031
+032 033
+034 035
+
+"CRIX or evaluating blockchain based currencies" by Simon Trimborn and Wolfgang Karl Härdle, May 2016. "Towards a national indicator for urban green space provision and environmental inequalities in Germany: Method and findings" by Henry Wüstemann, Dennis Kalisch, June 2016. "A Mortality Model for Multi-populations: A Semi-Parametric Approach" by Lei Fang, Wolfgang K. Härdle and Juhyun Park, June 2016. "Simultaneous Inference for the Partially Linear Model with a Multivariate Unknown Function when the Covariates are Measured with Errors" by Kun Ho Kim, Shih-Kang Chao and Wolfgang K. Härdle, August 2016. "Forecasting Limit Order Book Liquidity Supply-Demand Curves with Functional AutoRegressive Dynamics" by Ying Chen, Wee Song Chua and Wolfgang K. Härdle, August 2016. "VAT multipliers and pass-through dynamics" by Simon Voigts, August 2016. "Can a Bonus Overcome Moral Hazard? An Experiment on Voluntary Payments, Competition, and Reputation in Markets for Expert Services" by Vera Angelova and Tobias Regner, August 2016. "Relative Performance of Liability Rules: Experimental Evidence" by Vera Angelova, Giuseppe Attanasi, Yolande Hiriart, August 2016. "What renders financial advisors less treacherous? On commissions and reciprocity" by Vera Angelova, August 2016. "Do voluntary payments to advisors improve the quality of financial advice? An experimental sender-receiver game" by Vera Angelova and Tobias Regner, August 2016. "A first econometric analysis of the CRIX family" by Shi Chen, Cathy YiHsuan Chen, Wolfgang Karl Härdle, TM Lee and Bobby Ong, August 2016. "Specification Testing in Nonparametric Instrumental Quantile Regression" by Christoph Breunig, August 2016. "Functional Principal Component Analysis for Derivatives of Multivariate Curves" by Maria Grith, Wolfgang K. Härdle, Alois Kneip and Heiko Wagner, August 2016. "Blooming Landscapes in the West? - German reunification and the price of land." by Raphael Schoettler and Nikolaus Wolf, September 2016. "Time-Adaptive Probabilistic Forecasts of Electricity Spot Prices with Application to Risk Management." by Brenda López Cabrera , Franziska Schulz, September 2016.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+

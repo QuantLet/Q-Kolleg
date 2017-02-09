@@ -1,0 +1,823 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2010-032
+Learning Machines Supporting Bankruptcy
+Prediction
+Wolfgang Karl Härdle* Rouslan Moro** Linda Hoffmann*
+* Humboldt-Universität zu Berlin, Germany ** Brunel University, UK
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Learning Machines Supporting Bankruptcy Prediction 
+Wolfgang Karl Härdle, Rouslan Moroand Linda Hoffmann §
+June 7, 2010
+Abstract In many economic applications it is desirable to make future predictions about the financial status of a company. The focus of predictions is mainly if a company will default or not. A support vector machine (SVM) is one learning method which uses historical data to establish a classification rule called a score or an SVM. Companies with scores above zero belong to one group and the rest to another group.
+Estimation of the probability of default (PD) values can be calculated from the scores provided by an SVM. The transformation used in this paper is a combination of weighting ranks and of smoothing the results using the PAV algorithm. The conversion is then monotone.
+This discussion paper is based on the Creditreform database from 1997 to 2002. The indicator variables were converted to financial ratios; it transpired out that eight of the 25 were useful for the training of the SVM. The results showed that those ratios belong to activity, profitability, liquidity and leverage.
+Finally, we conclude that SVMs are capable of extracting the necessary information from financial balance sheets and then to predict the future solvency or insolvent of a company. Banks in particular will benefit from these results by allowing them to be more aware of their risk when lending money.
+The financial support from the Deutsche Forschungsgemeinschaft via SFB 649 'Ökonomisches Risiko", Humboldt-Universität zu Berlin is gratefully acknowledged.
+Humboldt-Universität zu Berlin, C.A.S.E. - Center for Applied Statistics and Economics, Spandauer Str. 1, 10178 Berlin, Germany, and National Central University, Department of Finance, No. 300, Jhongda. Rd., Jhongli City, Taoyuan County 32001, Taiwan (R.O.C.). Email: haerdle@wiwi.hu-berlin.de
+D octor at the Department of Economics and Finance, School of Social Sciences, Brunel University. Email: Russ.Moro@brunel.ac.uk
+§Humboldt-Universität zu Berlin, C.A.S.E. - Center for Applied Statistics and Economics, Spandauer Str. 1, 10178 Berlin, Germany. Email: linda.hoffmann@cms.hu-berlin.de
+
+1 Introduction
+JEL classification: C14; G33; C45
+Keywords: Support Vector Machine, Bankruptcy, Default Probabilities Prediction, Profitability
+1 Introduction
+This work presents one of the more recent and efficient learning systems ­ support vector machines (SVMs). SVMs are mainly used to classify various specialized categories such as object recognition (Schölkopf 1997)), optical character recognition (Vapnik (1995)), electric load prediction (Eunite (2001)), management fraud detection (Rätsch and Müller (2004)),and early medical diagnostics. It is also used to predict the solvency or insolvency of companies or banks, which is the focus of this work. In other words, SVMs are capable of extracting useful information from financial data and then label companies by giving them score values. Furthermore, probability of default (PD) values for companies can be calculated from those score values. The method is explained later.
+In the past, discriminant analysis (DA) and logit models were used for classification, especially in the financial world. The logit model is in a way a generalized DA model because it does not assume multivariate normality and equal covariance matrices. Over time, researchers, bankers and others found out that those two models were inefficient because they cannot classify satisfactorily if the data is non-linear separable. Consequently, the rate of prediction of new companies was low and demand for more accurate default estimations was developed, thus w ork with artificial neural nets (ANN), decision trees and SVMs started. The literature (S. Chen (accepted in 2009)) has shown that SVMs produce better classification results than parametric methods. Additionally, SVMs have single solutions characterized by the global minimum of the optimized function and they do not rely heavily on heuristics. SVM are attractive estimators and aree therefore worth studying.
+2 Bankruptcy analysis
+Lending money is an act based on trust in the debtors ability to repay a loan. From where does the lender get this trust? Banks and other institutions rely heavily on statistical tools that try to predict the financial situation of borrowers. Since those tools are only estimates of reality, lenders risk losing what they have invested. Therefore, improving predictions of bankruptcies allow for better lending decisions. The task for statisticians is to bolster existing methods and to develop new ones.
+2
+
+2 Bankruptcy analysis
+
+The problem of default and credit risks is not new and the idea of using financial ratios to analyze companies is more than a century old. Ramser & Foster (1931), Fitzpatrick (1932) and Winakor & Smith (1935) were one of the first scientists to apply financial ratios for bankruptcy predictions. The systematic application of statistics to bankruptcy analysis began with the work of Beaver (1966) and Altman (1968). They introduced the univariate and multivariate discriminant analysis (DA). In 1968, Altman presented a formula for predicting bankruptcy known as the linear Z-score model. This formula was widely popular for calculating defaults and even today it is used due to its simplicity. A drawback of the Z-score model is the assumption of equal normal distributions for both failing and successful companies with the same covariance matrix. In reality, the distributions may not be normal, therefore, financial institutions required a more sophisticated method.
+The centre of research shifted towards the logit and probit models. In 1977, Martin introduced 'Early warning of bank failure' and a few years later Ohlson (1980) published 'Financial ratios and the probabilistic prediction of bankruptcy.' Wiginton (1980), Zavgren (1983) and Zmijewski (1984) continued working on logit and probit models. During that time, other statisticians proposed different methods such as the gambler's ruin model (Wilcox 1971), option pricing theory (Merton 1974), recursive partitioning (Frydman, Altman & Kao 1985), neural networks (Tam & Kiang 1992) and rough sets (Dimitras, Slowinski, Susmaga & Zopounidis 1999). Glennon and Nigro (2005) suggested a hazard or survival analysis.
+From a geometrical point of view, SVMs classify solvent and insolvent companies into two groups by putting a margin of separation between them. For the best classification, the margin needs to be maximized and the error of misclassification minimized. The easiest way to classify occurs when the data is linearly separable. However, this is not always the case. Sometimes two groups cannot be separated linearly in the dimension they exist but can be in a higher dimensional space. The kernel technique (Hastie, Tibshirani, and Friedman (2001)) allows us to map the data into a higher dimensional feature space. For that reason a SVM is a more powerful tool than classical a DA, logit or probit. (The two later are only linear classifiers.)
+The purpose of an SVM is to classify new data x after training a classification function f . This f needs to be a good approximation of y when x is observed minimizing the expected risk
+
+R (f ) = |f (x) - y| dP (x, y).
+
+(1)
+
+y are the labels of x and |f (x) - y| is known as the loss function. f is an element of the set of measurable functions F. To avoid overfitting F is restricted to a smaller amount of functions. This approach is called emprirical risk minimization principle (ERM). In practice the distribution P (x, y) is unknown. Therefore, R (f ) cannot be calculated but may be approximated.
+
+3
+
+2 Bankruptcy analysis
+
+Risk R
+
+R^ R^ (f)
+
+R (f)
+
+^f
+
+f opt
+
+fn
+
+Function class
+
+Figure 1: The minimum values fopt and f^n of the expected (R) and empirical (R^) risk functions generally do not coincide.
+
+Because of the unknown distribution P (x, y), the empirical risk needs to be introduced:
+
+R^
+
+(f )
+
+=
+
+1 n
+
+n i=1
+
+|f (xi)
+
+-
+
+yi|
+
+.
+
+(2)
+
+Our loss function is the average value of misclassifications over the training set. Many loss functions exist such as the least square LLS(y,t) =def (1 - yt)2 , hinge Lhinge (y, t) =def max {0, 1 - yt}
+and logistic Llogic(y,t) =def log {1 + exp(-yt)}2 . These are used according to the problem posed or user preference.
+
+The minimization of the expected and empirical risk:
+
+fopt
+
+=
+
+arg min R (f ) ,
+f F
+
+f^n
+
+=
+
+arg min R^ (f ) ,
+f F
+
+(3) (4)
+
+do not necessary coincide (Figure 1). Depending on the size of F , fopt and f^n will become arbitrarily close as n increases.
+
+From this we conclude that minimizing the expected risk directly is not possible due to the unknown distribution P (x, y). According to statistical learning theory (Vapnik 1995), it is possible to estimate the Vapnik-Chervonenkis (VC) bound by putting an upper bound on R(f ). With probability 1 - :
+
+R(f )  R^(f ) +
+
+h
+
+log
+
+2n h
+
++1 n
+
+- log(/4) ,
+
+(5)
+
+4
+
+2 Bankruptcy analysis
+
+Figure 2: Eight possible ways of shattering 3 points on the plane with a linear indicator function.
+
+where
+
+h  min r2 w + 1, n + 1 (Vapnik 95).
+
+(6)
+
+r is the radius of the smallest sphere containing data and
+
+2 w
+
+is the width of the margin.
+
+h is the VC dimension.
+
+Next we review the VC dimension and its relation to the SVM. If for some f  F, the objects xi  Rd, i = 1, ..., h can be shattered in all 2h possible ways and no set
+xj  Rd, j = 1, ..., q exists with q > n, then h is called the VC dimension of F in a d-dimensional space. For instance, x1, x2 and x3  R2 can be shattered linearly in 8 = 23 ways. If we add a fourth point x4, we cannot shatter them into 24 = 16 different ways. Hence, the VC-dimension h is 3 in R2 as shown in Figure 2.
+
+The expression for the VC bound (5) is a regularized functional where the VC dimension h is a parameter controlling the complexity of the classifier function. We could find a function that makes no training error but its performance on new data would be low. Therefore, it is important to control the complexity. This means we have a trade-off between the number of classification errors on the training set and the complexity of the classifier function.
+
+The second goal is to maximize the margin separating the two groups as illustrated in Figure 3. The separating function generated by a linear SVM is
+
+xw + b = 0,
+
+(7)
+
+where w is of dimension d × 1 called the weight or the slope. b is a scalar representing
+
+5
+
+2 Bankruptcy analysis
+
+x2 xTw+b=0
+
+margin
+
+xTw+b=-1
+x
+x
+xx
+-b x |w|
+xx
+xx
+
+oo o
+
+o
+
+o o
+
+ow o oo
+x d+
+d -- xTw+b=1
+
+0 x1
+
+Figure 3: The separating hyperplane xw + b = 0 and the margin in a linearly separable (left) and non-separable (right) case. Crosses denote solvent companies, zeros are the insolvent ones. The hyperplanes bounding the margin zone equidistant from the separating hyperplane are represented as xw + b = 1 and xw + b = -1. The misclassification penalty in the non-separable case is proportional to the distance / w .
+
+the location parameter. xi is a d × 1 vector of the characteristics of company i, e.g. financial ratios described in 4. There are d different characteristics.
+Figure 3 visualizes the geometrical idea behind the SVM. In both pictures, a margin is created by straight parallel lines which separate the two groups. Recall that the distance between the groups needs to be maximized in order to improve classification. If the two groups are perfect linearly separable, meaning that no observations are in the margin or the opposite group as shown on the left picture, then all observations will satisfy
+xi w + b  1 for yi = 1, xi w + b  -1 for yi = -1,
+
+However, if there are observations in the marginal zone or in the opposite group shown on the right panel of Figure 3, the misclassification needs to be penalized with . Hence, the inequalities are adjusted for all observations and we get:
+
+xiw + b  1 - i for yi = 1, xiw + b  -1 + i for yi = -1,
+i  0,
+
+(8) (9) (10)
+
+One of the main advantages of the SVM method is that only the data points on the margin, in the margin and in the opposite group, are used for classification. These observations are then called support vectors giving the technique its name. The logit and DA methods use all observations for classification causing a higher cost of iteration.
+From the above inequalities (8) and (9), the primal minimization problem of the SVM
+
+6
+
+2 Bankruptcy analysis
+
+is written as: subject to
+
+min
+w
+
+1 2
+
+w
+
+n
+2 + C i,
+i=1
+
+(11)
+
+yi(xiw + b)  1 - i i  0.
+
+(12) (13)
+
+C is the complexity or capacity. Smaller C's lead to larger margins and avoid overfitting, but the misclassification rate is potentially higher. Sometimes each group has a different C. These C's are only necessary if the sizes of both groups are sufficiently different when training the SVM. Furthermore, the second term of (11) serves as the misclassification penalty.
+
+The primal problem above cannot be solved directly. The introduction of Lagrangian multipliers to (11) - (13) leads to following equations:
+
+min
+w,b,i
+
+max
+i,µi
+
+LP
+
+=
+
+1 2
+
+nn
+w 2 + C i - i{yi
+i=1 i=1
+
+xi w + b
+
+n
+- 1 + i} - ii,
+i=1
+
+where i  0 and i  0 are the Lagrange multipliers. They are non-zero for support vectors.
+
+Equation (14) needs to be rewritten as a dual problem using the Karush-Kuhn-Tucker conditions (Gale, Kuhn & Tucker 1951). The dual problem is
+
+max
+i
+
+=
+
+n i=1
+
+i
+
+-
+
+1 2
+
+n i=1
+
+n j=1
+
+ij yiyj xixj ,
+
+s.t.0  i  C,
+n
+
+iyi = 0.
+
+i=1
+
+(14) (15) (16)
+
+Note that this optimization problem is convex; therefore, a unique solution can be found.
+
+This dual optimization problem can be solved by hand or with a statistical computer program. Its solutions are the n Lagrangian multipliers i. They determine the degree of influence of each training observation. The harder an observation is to classify the higher i will be. This explains why the i's are zero for the observations lying in the correct area. Once i's are calculated the weight w of the d-variables is given:
+n
+w = iyixi.
+i=1
+Notice the Lagrangian multipliers are directly related to the weights. In logistic regression this comparison of  and w is not possible.
+
+7
+
+2 Bankruptcy analysis
+
+Data Space
+x2
+
+o
+o o
+oo o
+oo
+
+x x
+x x
+x x
+o o
+
+x xx
+
+xx x o
+
+xx x oo
+
+xx xx
+
+o oo
+
+o oo
+
+x1
+
+x22
+
+Feature Space
+xx
+
+o o
+o
+
+x
+
+x
+
+x x
+
+x
+
+x x
+
+xx
+
+o
+
+o o
+
+o
+
+o o
+
+o
+
+xx
+
+x x
+
+o o
+
+o oo o
+
+o
+
+o
+
+21/2 x1x2
+
+x12
+
+Figure 4: Mapping from a two-dimensional data space into a three-dimensional space of features R2 to R3
+
+If the data used is non-linear separable we transform it into a higher dimensional space, called the feature space. The minimization (11) depends only on the scalar product xxi, not on the original x and xi. Therefore, xxi can be replaced by a function k(x, xi) so that there is a mapping from a lower dimensional space into higher dimensional space
+in which the data is linearly separable. The kernel function k(xi, yj) must satisfy the Mercer conditions (Mercer (1909)):
+
+1. k(xi, yj) = k(yj, xi) = (symmetric)
+2. (x1, . . . , xn), (y1, . . . , yn), kij = k(xi, yj), aka  0 (semi-positive definite)
+Hence, the data can be mapped into infinitely dimensional spaces as in the case with the Gaussian kernels.
+
+Figure 4 visualizes a simple example of the above theory. Let k be the quadratic kernel
+
+function:
+
+k(x, xi) =
+
+xxi
+
+2
+,
+
+which maps from R2 into R3. The explicit map is:
+
+(x, xi) =
+
+x2,
+
+ 2xxi,
+
+x2i
+
+2
+
+Fortunately, we do not need to determine the transformation  explicitly because k(x, xi) = (x, xi)(x, xi).
+
+Non-linear data can be classified into a higher dimensional feature space without changing the SVM solution. Higher dimensionality of the data and degree of the polynomial
+
+8
+
+2 Bankruptcy analysis
+
+of k results in a larger number of features. The advantage of the 'kernel trick' becomes obvious: We train the SVM in a higher dimensional feature space, where the data is linear separable, but the feature space does not need to be determined explicitly.
+
+Some examples of kernel functions are: · k(xi, xj) = (xi · xj + c)d (Polynomial) · k(xi, xj) = exp - xi - xj 2 / 22 (RBF)
+
+· K(xi, xj) = tanh(kxixj - ) ­ the hyperbolic tangent kernel · K(xi, xj ) = e-(xi-xj)r-2-1(xi-xj)/2 (stationary Gaussian kernel)
+
+The last kernel has an anisotropic radial basis. Later, we will apply this kernel taking  equal to the variance matrix of the training set and r as a constant standing for the radius of the smallest sphere containing data. The higher r the lower the complexity.
+
+Once, the support vector machine is trained and we have found the values for w we are able to classify a new company described by variables of x using the classification rule:
+
+g(x) = sign xw + b ,
+
+(17)
+
+where w =
+
+n i=1
+
+iyixi
+
+and
+
+b
+
+=
+
+1 2
+
+(x+1
+
++
+
+x-1)
+
+w.
+
+x+1 and x-1 are any two support
+
+vectors belonging to different classes. They must both lay on the margin boundary. To
+
+reduce numerical errors when training the SVM it is desirable to use averages over all x+
+
+and x- instead of two arbitrarily chosen support vectors. The value of the classification
+
+function, or in our study, the score of a company is computed as:
+
+f (x) = xw + b.
+
+(18)
+
+We note that each value of f (x) uniquely corresponds to a default probability (PD).
+
+There are different ways of calculating the PD values for each company. Here, one solution is presented with two steps. First, we calculate for all i = 1, 2, . . . , n observations of the training set:
+
+P~D(z) =
+
+n i=1
+
+w(z - zi)I(yi =
+
+n i=1
+
+w(z
+
+-
+
+zi)
+
+1) ,
+
+where w(z - zi) = exp (z - zi)2 /2h2 . zi = Rankf (xi) is the rank of the ith company.
+
+Higher scores f (xi) lead to higher ranks. The smoothness of P~D(z) is influenced by the
+
+bandwidth h. Smaller h's give higher smoothness. Using the company rank zi instead of
+
+the score f (xi) we obtain a k - N N smoother with Gaussian weights
+
+w(z-zi)
+
+n j=1
+
+w(z-zj
+
+which
+
+decay gradually as |z - zi| grows. After the first step, the PD values are not necessarily
+
+monotone as the thin black line shows in Figure 5. Therefore, a second step is necessary.
+
+9
+
+2 Bankruptcy analysis 1
+
+Default
+
+-1 12345678
+
+Company Rank
+
+Figure 5: Monotonisation of PD's with the pool adjacent violator algorithm. The thin line denotes PD's estimated with the k - N N method with uniform weights and k = 3 before monotonisation and the bold red line after monotonisation. Here y = 1 for insolvencies, y = -1 for solvent companies
+
+In step 2, we monotonise P~D(zi) by using the Pool Adjacent Violator (PAV) algorithm (Barlow, Bartholomew, Bremmer, and Brunk (1972)). Figure 5 illustrates how the previous black line (before monotonisation) changes to the thick red line (PD after monotonisation). The PD values become monotone. The companies are ordered according to their rank on the horizontal axis. The value y = 1 indicates insolvency and y = -1 indicates solvency. Between the ranking 1 and 2 monotonicity is violated. After applying the the PAV algorithm, the PD value is corrected.
+With the PAV we obtain monotonised probabilities of default, PD(xi), for the observations of the training set as seen in Figure 6. A PD for any observation x of the testing set is computed by interpolating PDs for two adjacent observations in terms of the score from the training set. If the score for x lies beyond the range of the scores of the training set, then PD(x) is set equal to the score of the first neighbouring observation of the training set.
+Finally, we measure the quality of the rating method for which the accuracy ratio (AR) is applied. AR values close to one indicate good performances of the method. If the two groups are the same size then we calculate the AR:
+
+1
+AR  2 y(x)dx - 1.
+0
+From the AR, we can draw a receiver operating characteristics (ROC) curve as shown in Figure 7. The blue line demonstrates the perfect separation. Due to the intermesh
+
+10
+
+PD and cumulative PD 0 0.5 1
+
+2 Bankruptcy analysis
+PD and Cumulative PD
+PD CPD
+0 50 100 150 200 Company rank
+Figure 6: The circles represent the smoothing and monotonisation of default (y = 1) and non-default (y = 0) companies.
+11
+
+F1 (Percentage of insolvency) 0.0 0.2 0.4 0.6 0.8 1.0
+
+3 Importance of risk classification and Basel II
+ROC curve
+0.0 0.2 0.4 0.6 0.8 1.0 FO (Percentage of solvency)
+Figure 7: Receiver Operating Characteristics Curve. An SVM is applied with the radial basis 21/2 and capacity C = 1.
+of insolvent and solvent companies perfect separation does not exist. Usually the curve looks like the red line. In the case of a naive model, the ROC curve is simply the bisector.
+3 Importance of risk classification and Basel II
+When we look back at the history of financial markets, we observe many ups and downs. The wish to create a stable financial system will always exist. In 1974, one of the largest post World War II bankruptcies happened, the liquidation of I. D. Herstatt KGaA, a private bank in Cologne. Consequently, a committee was formed with the intent of setting up regulations for banks. One way to prevent bankruptcies is to correctly assert the financial situation of the contractor. In 1988, the Basel Committee on Banking Supervision (BCBS) presented the Basel I Accord. It suggested a minimal capital requirement for banks to prevent future bank crashes. This treaty did not prevent the world market from a crisis in 2002. Economists realized
+12
+
+4 Description of data
+that credit rating systems, which developed in the 1950, did not accurately price risks. Others said that the solution to market crashes are efficient regulations. The BCBS established Basel II, which addressed credit and operational risk, and also integrated supervisory review and market discipline. It gives banks the option to use their own rating systems, but they must base the validity of their systems on statistical models. This law came into effect at the end of 2006.
+The committee in Basel also decided to require banks to use rating systems with new particular properties such as statistical empirical justification for the calculation of PD values. All the additional requirements will be in effect by 2012. Thus the German Bundesbank, for example, is working hard adjusting their rating software. Unfortunately, up until five years ago, only a small percentage of firms and banks were rated so that developing any classification system brings many challenges. Even today, many companies are not listed on the database. Often, the premium for credits is not based on models but on the sole decision of a loan officer. According to Basel II, a company is declared insolvent if it overdraws its debts 90 days after maturity.
+Lending arbitrarily is not safe, and it is better to calculate the default probability (PD) of the borrower. The PD value can be directly calculated from the score found with the SVM method as explained in the previous section. Then, one can decide to which rating class the borrower belongs as shown in Table 1 or in Table 2 Those two tables are just general examples but do not correspond to each industry because different tables for different countries and industries exist. Banks and insurances can use tables such as 1 and 2 to establish the risk premium for each class. Whereas Table 3 displays the capital requirements according to Basel I and Basel II.
+4 Description of data
+The dataset used in this work comes from the credit reform database provided by the Research Data Center (RDC) of the Humboldt Universität zu Berlin. It contains financial information from 20000 solvent and 1000 insolvent German companies. The time period ranges from 1996 to 2002 and in the case of the insolvent companies the information was gathered 2 years before the insolvency took place. The last annual report of a company before it went bankrupt receives the indicator y = 1 and for the rest (solvent) y = -1.
+We are given 28 variables, i.e. cash, inventories, equity, EBIT, number of employees and branch code. From the original data, we create common financial indicators which are denoted as x1 . . . x25. These ratios can be grouped into four categories such as profitability, leverage, liquidity and activity. The indicators are presented in Table 4. For the x9 formula, INGA and LB mean intangible assets and lands & buildings, respectively.
+13
+
+4 Description of data
+
+Rating Class (S&P) AAA AA+ AA AAA+ A ABBB+ BBB BBBBB+ BB BBB+ B BCCC+ CCCD
+
+One year PD (%) 0.01 0.01 0.02 0.03 0.05 0.08 0.13 0.22 0.36 0.58 0.94 1.55 2.50 4.08 6.75 10.88 17.75 29.35 100.00
+
+Table 1: Rating classes and PDs. Source: Henking (2006)
+
+Rating Class (S&P) AAA AA A A BBB BB B CCCD
+
+Five year PD (%) 0.08 0.32 0.91 0.08 3.45 12.28 32.57 69.75 100.00
+
+Table 2: Rating classes and PDs. Henking (2006)
+
+14
+
+4 Description of data
+
+Rating Class (S&P)
+AAA AA A+ A ABBB BB B+ B BCCC CC C D
+
+One-year PD (%)
+0.01 0.02 ­ 0.04
+0.05 0.08 0.11 0.15 ­ 0.40 0.65 ­ 1.95 3.20 7.00 13.00 > 13
+
+Capital Requirements (%) (Basel I)
+8.00 8.00 8.00 8.00 8.00 8.00 8.00 8.00 8.00 8.00 8.00 8.00 8.00 8.00
+
+Capital Requirements (%) (Basel II)
+0.63 0.93 ­ 1.40
+1.60 2.12 2.55 3.05 ­ 5.17 6.50 ­ 9.97 11.90 16.70 22.89 > 22.89
+
+Table 3: Rating grades and capital requirements. Source: (Damodaran, 2002) and (Füser, 2002). The figures in the last column were estimated by the authors for a loan to an SME with a turnover of 5 million Euros with a maturity of 2.5 years using the data from column 2 and the recommendations of the Basel Committee on Banking Supervision (BCBS, 2003).
+
+15
+
+4 Description of data
+
+Ratio No. x1 x2 x3 x4 x5 x6 x7 x8 x9
+x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25
+
+Definition NI/TA NI/Sales OI/TA OI/Sales EBIT/TA (EBIT+AD)/TA EBIT/Sales Equity/TA (Equity-ITGA)/ (TA-ITGA-Cash-LB) CL/TA (CL-Cash)/TA TL/TA Debt/TA EBIT/Interest exp. Cash/TA Cash/CL QA/CL CA/CL WC/TA CL/TL TA/Sales INV/Sales AR/Sales AP/Sales Log(TA)
+
+Ratio Return on assets Net profit margin Operating Inc./Total ass. Operating profit margin EBIT/Total assets EBITDA EBIT/Sales Own funds ratio (simple) Own funds ratio (adj.)
+Current liab./Total ass. Net indebtedness Total liab./Total ass. Debt ratio Interest coverage ratio Cash/Total assets Cash ratio Quick ratio Current ratio Working Capital Current liab./Total liab. Asset turnover Inventory turnover Account receiv. turnover Account payable turnover Log(Total assets)
+
+Category Profit. Profit. Profit. Profit. Profit. Profit. Profit. Leverage Leverage
+Leverage Leverage Leverage Leverage Leverage Liquidity Liquidity Liquidity Liquidity Liquidity Liquidity Activity Activity Activity Activity Activity
+
+Table 4: Defintions of financial ratios.
+
+16
+
+5 Calculations
+Ratio q0.05 Med. q0.95 IQR q0.05 Med. q0.05 IQR x1 -0.19 0.00 0.09 0.04 -0.09 0.02 0.19 0.06 x2 -0.015 0.00 0.06 0.03 -0.07 0.01 0.10 0.03 x3 -0.22 0.00 0.10 0.06 -0.011 0.03 0.27 0.09 x4 -0.16 0.00 0.07 0.04 -0.08 0.02 0.13 0.04 x5 -0.19 0.02 0.13 0.07 -0.09 0.05 0.27 0.09 x6 -0.13 0.07 0.21 0.08 -0.04 0.11 0.35 0.12 x7 -0.14 0.01 0.10 0.04 -0.07 0.02 0.14 0.05 x8 0.00 0.05 0.40 0.13 0.00 0.14 0.60 0.23 x9 -0.01 0.05 0.56 0.17 0.00 0.16 0.95 0.32 x10 0.18 0.52 0.91 0.36 0.09 0.42 0.88 0.39 x11 -0.12 0.49 0.89 0.36 -0.05 0.36 0.83 0.41 x12 0.29 0.76 0.98 0.35 0.16 0.65 0.96 0.40 x13 0.00 0.21 0.61 0.29 0.00 0.15 0.59 0.31 x14 -7.90 1.05 7.20 2.47 -6.78 2.16 73.95 5.69 x15 0.00 0.02 0.16 0.05 0.00 0.03 0.32 0.10 x16 0.00 0.03 0.43 0.11 0.00 0.08 1.40 0.29 x17 0.18 0.68 1.90 0.54 0.25 0.94 4.55 1.00 x18 0.56 1.26 3.73 0.84 0.64 1.58 7.15 1.56 x19 -0.32 0.15 0.63 0.36 -0.22 0.25 0.73 0.41 x20 0.34 0.84 1.00 0.37 0.22 0.85 1.00 0.4 x21 0.43 1.63 4.15 1.41 0.50 2.08 6.19 1.76 x22 0.02 0.16 0.89 0.26 0.01 0.11 0.56 0.16 x23 0.02 0.12 0.33 0.11 0.00 0.09 0.25 0.09 x24 0.03 0.14 0.36 0.10 0.01 0.07 0.24 0.08 x25 13.01 14.87 17.16 1.69 12.82 17.95 1.657 2.37
+Table 5: Descriptive statistics for financial ratios.
+5 Calculations
+In order to reduce the effect of the outliers on the results, all observations that exceeded the upper limit of Q75+1.5IQ (Inter-quartile range) or the lower limit of Q25-1.5IQ were replaced with these values. Table 5 gives an overview of the summary statistics. In the next table (6), the insolvent and solvent companies for each year are displayed. Insolvent company data for the year of 1996 are missing, we will therefore exclude them from further calculations. We are left with 1000 insolvent and 18610 solvent companies.
+Not all variables are good predictors for the classification method. The most common techniques to find the right variables are Mallows' CP, backward stepwise and forward stepwise selection. The latter is preferred when dealing with many variables because the cost of computation is reduced. This method starts with a univariate model and
+17
+
+6 Computational results
+
+Year 1996 1997 1998 1999 2000 2001 2002
+
+Solvent 1390 1468 1615 2124 3086 4380 5937
+
+Insolv. 0
+146 1274
+179 175 187 186
+
+Solv. Ratio 100.00% 90.95% 92.71% 92.23% 94.63% 95.91% 96.96%
+
+Insolv. Ratio 0.00% 9.05% 7.29% 7.77% 5.37% 4.09% 3.04%
+
+Table 6: The distribution of the data over the years for solvent and insolvent companies.
+
+continues adding variables until all variables are included. At each step the variable is kept whose addition to the model resulted in the highest median accuracy ratio (AR). As a result, ratios x24, x3, x15, x12, x25, x22, x5, and x2 generate the model with the highest AR (60.51%).
+6 Computational results
+After choosing the best predictors, we start calculating score values for each company. As mentioned earlier, the results depend on the predefined C, the capacity, and r. To demonstrate how performance changes, we will use the accounts payable turnover (x24), which is the best univariate model, and calculate Type I and Type II errors. Type I errors are those when companies were predicted to stay solvent but turned insolvent. Type II errors are the mistakes we make by assuming companies will default but they do not. Keep in mind that different kernels will also influence performance. We use one of the most common ones, the radial Gaussian kernel.
+In Figures 8­11 the triangles represent solvent and circles represent insolvent companies from a chosen training set. The solid shapes represent the support vectors. We randomly chose 50 solvent and 50 insolvent companies. The colored background corresponds to different score values f . The bluer the area, the higher the score and probability of default. Most successful companies are in the red area and have positive profitability and reasonable activity.
+Figure 8 presents the classification results for an SVM using r = 100 and the fixed capacity C = 1. With the given priors, the SVM has trouble classifying between solvent and insolvent companies. The radial base r, which determines the minimum radius of a group, is too large. Default companies do not seem to exist. Notice that the SVM is doing a poor job of distinguishing between the groups even though most observations are used as support vectors.
+
+18
+
+6 Computational results
+
+C 0.001 0.100 10.000 100.000 1000.000 10.0 10.0 10.0 10.0 10.0
+
+r 0.600 0.600 0.600 0.600 0.600 0.002 0.060 6.000 60.000 2000.000
+
+Type I error 40.57 38.42 34.43 25.22 25.76 37.20 31.86 36.97 37.27 41.09
+
+Type II error 23.43 24.45 27.86 34.44 34.26 32.79 29.25 27.86 25.87 24.85
+
+Table 7: Misclassification errors (30 randomly selected samples; one predictor x24).
+
+In Figure 9, the minimal radius is reduced to 2 while C remains the same. Clearly, the SVM starts recognizing the difference between solvent and insolvent companies resulting in sharper clusters for successful and failing companies. Decreasing r even further, i.e. to 0.5 as in Figure 10, emphasizes the groups in even more detail. If the radial base is too small, then the complexity will be too high for a given data set.
+If we increase the capacity C, we decrease the distance between the groups. Figure 11 demonstrates this effect on the classification results. The beige area outside the clusters is associated with score values of around zero. With higher C's, the SVM localizes only one cluster of successful companies. It is crucial to use statistical methods, i.e. the leave-one-out method, to find the optimal priors C and r for classifying companies.
+After a SVM classification function f is trained, we can calculate the scores for new companies, determine their PD values and decide if they belong to the solvent or insolvent group. Further, a SVM learns the cluster of both groups given that the constants C and r are chosen appropriately. If the capacity is too high the knowledge of cluster centre vanishes. If r is too high, the groups might intermesh. The choice of the kernel k also affects the solution. Often, the most appropriate kernel is one of the Gaussian kernel.
+Earlier we introduced one way of converting scores into PDs including a smoothing technique. However, we can also calibrate the PDs by hand. Consider an example with r = 2 and C = 1. We choose three rating classes: safe, neutral and risky and give each class a corresponding score value of f < -0.0115, -0.0115 < f < 0.0115 and f > 0.0115, respectively. Next we count how many companies belong to each group then calculate the ratio of failing companies giving us the estimated probability of default for each rating class.
+With a sufficient number of observations in the training set, the rating classes could be divided up into finer ones. We have seen an example in Table 1. The rating company S
+
+19
+
+6 Computational results
+
+SVM classification plot 0.2
+
+1.0 0.5
+
+0.1 0.0
+
+x3
+
+-0.5
+0.0 -1.0
+
+-0.1
+-0.2 0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 x24
+
+-1.5 -2.0 -2.5
+
+Figure 8: Ratings of companies in two dimensions. The case of a low complexity of classifier functions, the radial basis is 100, the capacity is fixed at C = 1. STF2svm01
+
+20
+
+6 Computational results
+
+SVM classification plot 0.2 0.1 0.0
+
+1.5 1.0 0.5 0.0
+
+x3
+
+-0.1
+
+-0.5
+
+-0.2
+
+-1.0
+
+0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 x24
+
+Figure 9: Ratings of companies in two dimensions. The case of an average complexity of classifier functions, the radial basis is 2, the capacity is fixed at C = 1. STF2svm01
+
+21
+
+6 Computational results
+
+SVM classification plot 0.2 0.1 0.0
+
+1.0 0.5 0.0
+
+x3
+
+-0.1
+
+-0.5
+
+-0.2
+
+-1.0
+
+0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 x24
+
+Figure 10: Ratings of companies in two dimensions. The case of an excessively high
+
+complexity of classifier functions, the radial basis is 0.5, the capacity is fixed
+
+at C = 1.
+
+STF2svm01
+
+22
+
+6 Computational results
+
+SVM classification plot 0.2 0.1 0.0
+
+5 0 -5
+
+x3
+
+-0.1
+
+-10
+
+-0.2
+0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 x24
+
+-15
+
+Figure 11: Ratings of companies in two dimensions, the case of a high capacity (C =
+
+200). The radial basis is fixed at 2.
+
+STF2svm01
+
+23
+
+References
+& P uses over a dozen rating classes such as AAA, AA ,. . . Different rating agencies use a variety of numbers and names for their classifications.
+{Conclusions
+SVMs are capable of predicting whether a company will be solvent or insolvent based only on its financial and economic information. Of course, the SVM needs to be provided with a training data set. Once we have learned the SVM, it divulges the financial situation of a company, which may not be obvious at first glance. SVMs are easy to implement with their low number of calculational steps and priors. They often give the best classification results compared to logit or other methods. Thus, SVMs have become more and more popular over the last decade.
+We have learned that the scores found with SVM models can be used to calculate the individual PDs for each company. Consequently, credits and other financial instruments can be adjusted accordingly. Banks and companies will profit from those results because it helps them to decide with what kind of risk they can carry. This leads hopefully to a more stable financial market by increasing our ability to predict defaults and accurately evaluate risk.
+References
+Altman, E. (1968). Financial ratios, discriminant analysis and the prediction of corporate bankruptcy, The Journal of Finance pp. 589­609.
+Beaver, W. (1966). Financial ratios as predictors of failures. empirical research in accounting: Selected studies, Journal of Accounting Research pp. 71­111. supplement to vol. 5.
+Dimitras, A., Slowinski, R., Susmaga, R. & Zopounidis, C. (1999). Business failure prediction using rough sets, European Journal of Operational Research (114): 263­280.
+Eunite (2001). Electricity load forecast competition of the EUropean Network on Intelligent TEchnologies for Smart Adaptive Systems, http://neuron.tuke.sk/competition/ .
+Fitzpatrick, P. (1932). A comparison of the ratios of successful industrial enterprises with those of failed companies.
+Frydman, H., Altman, E. & Kao, D.-L. (1985). Introducing recursive partitioning for financial classification: The case of financial distress, The Journal of Finance 40(1): 269­291.
+Gale, D., Kuhn, H. W. & Tucker, A. W. (1951). Linear Programming and the Theory of Games, in Activity Analysis of Production and Allocation, T. C. Koopmans (ed.), John Wiley & Sons, New York, NY.
+Henking, A. (2006). Kreditrisikomessung, first edn, Springer.
+24
+
+References
+Merton, R. (1974). On the pricing of corporate debt: The risk structure of interest rates, The Journal of Finance 29(2): 449­470.
+Ohlson, J. (1980). Financial ratios and the probabilistic prediction of bankruptcy, Journal of Accounting Research pp. 109­131.
+Ramser, J. & Foster, L. (1931). A demonstration of ratio analysis. bulletin no. 40. S. Chen, W. H. a. R. M. (accepted in 2009). Modelling default risk with support vector
+machines, Journal of Quantitative Finance . Schölkopf, B. (1997). Support vector learning, Oldenbourg. Tam, K. & Kiang, M. (1992). Managerial application of neural networks: the case of bank
+failure prediction, Management Science 38(7): 926­947. Vapnik, V. (1995). The Nature of Statistical Learning Theory, Springer, New York. Wiginton, J. (1980). A note on the comparison of logit and discriminant models of consumer
+credit behaviour, Journal of Financial and Quantitative Analysis 15(3): 757­770. Wilcox, A. (1971). A simple theory of financial ratios as predictors of failure, Journal of
+Accounting Research pp. 389­395. Winakor, A. & Smith, R. (1935). Changes in the financial structure of unsuccessful industrial
+corporations. bulletin no. 51. Zavgren, C. (1983). The prediction of corporate failure: The state of the art, Journal of
+Accounting Literature (2): 1­38. Zmijewski, M. (1984). Methodological issues related to the estimation of financial distress
+prediction models, Journal of Accounting Research 20(0): 59­82.
+25
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Volatility Investing with Variance Swaps" by Wolfgang Karl Härdle and Elena Silyakova, January 2010.
+002 "Partial Linear Quantile Regression and Bootstrap Confidence Bands" by Wolfgang Karl Härdle, Ya'acov Ritov and Song Song, January 2010.
+003 "Uniform confidence bands for pricing kernels" by Wolfgang Karl Härdle, Yarema Okhrin and Weining Wang, January 2010.
+004 "Bayesian Inference in a Stochastic Volatility Nelson-Siegel Model" by Nikolaus Hautsch and Fuyu Yang, January 2010.
+005 "The Impact of Macroeconomic News on Quote Adjustments, Noise, and Informational Volatility" by Nikolaus Hautsch, Dieter Hess and David Veredas, January 2010.
+006 "Bayesian Estimation and Model Selection in the Generalised Stochastic Unit Root Model" by Fuyu Yang and Roberto Leon-Gonzalez, January 2010.
+007 "Two-sided Certification: The market for Rating Agencies" by Erik R. Fasten and Dirk Hofmann, January 2010.
+008 "Characterising Equilibrium Selection in Global Games with Strategic Complementarities" by Christian Basteck, Tijmen R. Daniels and Frank Heinemann, January 2010.
+009 "Predicting extreme VaR: Nonparametric quantile regression with refinements from extreme value theory" by Julia Schaumburg, February 2010.
+010 "On Securitization, Market Completion and Equilibrium Risk Transfer" by Ulrich Horst, Traian A. Pirvu and Gonçalo Dos Reis, February 2010.
+011 "Illiquidity and Derivative Valuation" by Ulrich Horst and Felix Naujokat, February 2010.
+012 "Dynamic Systems of Social Interactions" by Ulrich Horst, February 2010.
+013 "The dynamics of hourly electricity prices" by Wolfgang Karl Härdle and Stefan Trück, February 2010.
+014 "Crisis? What Crisis? Currency vs. Banking in the Financial Crisis of 1931" by Albrecht Ritschl and Samad Sarferaz, February 2010.
+015 "Estimation of the characteristics of a Lévy process observed at arbitrary frequency" by Johanna Kappusl and Markus Reiß, February 2010.
+016 "Honey, I'll Be Working Late Tonight. The Effect of Individual Work Routines on Leisure Time Synchronization of Couples" by Juliane Scheffel, February 2010.
+017 "The Impact of ICT Investments on the Relative Demand for HighMedium-, and Low-Skilled Workers: Industry versus Country Analysis" by Dorothee Schneider, February 2010.
+018 "Time varying Hierarchical Archimedean Copulae" by Wolfgang Karl Härdle, Ostap Okhrin and Yarema Okhrin, February 2010.
+019 "Monetary Transmission Right from the Start: The (Dis)Connection Between the Money Market and the ECB's Main Refinancing Rates" by Puriya Abbassi and Dieter Nautz, March 2010.
+020 "Aggregate Hazard Function in Price-Setting: A Bayesian Analysis Using Macro Data" by Fang Yao, March 2010.
+021 "Nonparametric Estimation of Risk-Neutral Densities" by Maria Grith, Wolfgang Karl Härdle and Melanie Schienle, March 2010.
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Fitting high-dimensional Copulae to Data" by Ostap Okhrin, April 2010. 023 "The (In)stability of Money Demand in the Euro Area: Lessons from a
+Cross-Country Analysis" by Dieter Nautz and Ulrike Rondorf, April 2010. 024 "The optimal industry structure in a vertically related market" by
+Raffaele Fiocco, April 2010. 025 "Herding of Institutional Traders" by Stephanie Kremer, April 2010. 026 "Non-Gaussian Component Analysis: New Ideas, New Proofs, New
+Applications" by Vladimir Panov, May 2010. 027 "Liquidity and Capital Requirements and the Probability of Bank Failure"
+by Philipp Johann König, May 2010. 028 "Social Relationships and Trust" by Christine Binzel and Dietmar Fehr,
+May 2010. 029 "Adaptive Interest Rate Modelling" by Mengmeng Guo and Wolfgang Karl
+Härdle, May 2010. 030 "Can the New Keynesian Phillips Curve Explain Inflation Gap
+Persistence?" by Fang Yao, June 2010. 031 "Modeling Asset Prices" by James E. Gentle and Wolfgang Karl Härdle,
+June 2010. 032 "Learning Machines Supporting Bankruptcy Prediction" by Wolfgang Karl
+Härdle, Rouslan Moro and Linda Hoffmann, June 2010.
+
+

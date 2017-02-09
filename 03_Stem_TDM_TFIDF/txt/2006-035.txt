@@ -1,0 +1,940 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2006-035
+Spectral calibration of exponential LÈvy Models [2]
+Denis Belomestny* Markus Reiﬂ**
+* Weierstrass Institute for Applied Analysis and Stochastics, Berlin, Germany
+** Institute of Applied Mathematics, Ruprecht-Karls-Universit‰t Heidelberg, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+SPECTRAL CALIBRATION OF EXPONENTIAL LEVY MODELS
+DENIS BELOMESTNY AND MARKUS REISS
+1. Introduction
+The calibration of financial models has become rather important topic in recent years mainly because of the need to price increasingly complex options in a consistent way. The choice of the underlying model is crucial for the good performance of any calibration procedure. Recent empirical evidences suggest that more complex models taking into account such phenomenons as jumps in the stock prices, smiles in implied volatilities and so on should be considered. Among most popular such models are Levy ones which are on the one hand able to produce complex behavior of the stock time series including jumps, heavy tails and on other hand remain tractable with respect to option pricing. The work on calibration methods for financial models based on L¥evy processes has mainly focused on certain parametrisations of the underlying L¥evy process with the notable exception of Cont and Tankov (2004). Since the characteristic triplet of a L¥evy process is a priori an infinite-dimensional object, the parametric approach is always exposed to the problem of misspecification, in particular when there is no inherent economic foundation of the parameters and they are only used to generate different shapes of possible jump distributions. In this work we propose and test a non-parametric calibration algorithm which is based on the inversion of the explicit pricing formula via Fourier transforms and a regularisation in the spectral domain.Using the Fast Fourier Transformation, the procedure is fast, easy to implement and yields good results in simulations in view of the severe ill-posedness of the underlying inverse problem.
+Date: April 28, 2006 This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 Economic Risk.
+Key words and phrases. European option, jump diffusion, minimax rates, severely ill-posed, nonlinear inverse problem, spectral cut-off Mathematics Subject Classification (2000): 60G51; 62G20; 91B28 JEL Subject Classification: G13; C14.
+1
+
+2 DENIS BELOMESTNY AND MARKUS REISS
+
+2. Description of the method
+Let the prices Y1, . . . , YN of N call options at strikes K1 < . . . < KN be observable
+
+2.1. Data transformation. We transform the observations (Kj, Yj) to (xj, Oj) by
+Oj := Yj/S - (1 - Kje-rT /S)+, xj := log(Kj/S) - rT,
+where T is the time to maturity, r is a short rate and S is the spot price.
+
+2.2. Estimation of O. Find function O~ among all functions O with two continuous derivatives that minimizes the penalized residual sum of squares
+
+N +1
+
+xN +1
+
+(1) RSS(O, ) = (Oi - O(xi))2 + 
+
+[O (u)]2 du,
+
+i=0 x0
+
+where x0 x1and xN+1 xN are two artificial points and ON+1 = O0 = 0. The first term in (1) measures closeness to the data, while the second term penalizes curvature in the function, and  establishes a tradeoff between the two. The two special cases are  = 0 when O~
+interpolates the data and  =  when the simple least squares line is
+fitted. It can be shown that that (1) has an explicit, finite dimensional,
+unique minimizer which is a natural cubic spline with knots at the
+unique values of xi, i = 1, . . . , N . The general cross validation can be used to choose  (see, for example, Green and Silverman (1994)). Note,
+that due to the non-smooth behavior of O(x) at 0 (see Belomestny and
+Reiﬂ (2004)) it is more reasonable to fit smoothing splines separately
+for x > 0 and x  0 and combine them thereafter.
+
+2.3. Estimation of FO. Since the solution of (1) is a natural cubic spline, we can write
+N
+O~(x) = jj(x)
+j=1
+where j(x), j = 1, . . . , N are set of basis function for representing the family of natural cubic splines. Now we estimate FO(v + i) by
+N
+F O~(v + i) = jF [e-xj(x)](v).
+j=1
+
+SPECTRAL CALIBRATION OF EXPONENTIAL LEVY MODELS
+
+3
+
+Although F [e-xj(x)] can be computed in the closed form we prefer using FFT and compute FO~(v + i) on the grid.
+
+2.4. Estimation of . Calculate
+
+(2)
+
+~(v)
+
+:=
+
+1 T
+
+log
+
+1 + v(v + i)FO~(v + i)
+
+,
+
+v  R,
+
+where log(∑) is taken in such a way that ~(v) is continuous with ~(-i) = 0.
+
+2.5. Estimation of ,  and . With an estimate ~ of  at hand, we obtain estimators for the parametric part (2, , ) by an averaging
+procedure taking into account the polynomial structure of . Upon
+fixing the spectral cut-off value U , we set
+
+U
+(3) ^2 := Re(~(u))wU (u) du,
+-U U
+(4) ^ := Im(~(u))wU (u) du,
+-U U
+(5) ^ := Re(~(u))wU (u) du,
+-U
+
+where the weight functions wU , wU and wU are given explicitly by
+
+wU (u)
+
+=
+
+r+3 1-2-2/(r+1)
+
+U
+
+-(r+3) |u|r (1
+
+-
+
+2
+
+∑
+
+1 ),{|u|>2-1/(r+1)U }
+
+u  [-U, U ],
+
+wU (u)
+
+:=
+
+r+2 2U r+2
+
+|u|r
+
+sgn(u),
+
+u  [-U, U ],
+
+w(u)
+
+:=
+
+r+1 2(22/(r+3) -1)
+
+U
+
+-(r+1) |u|r (1
+
+-
+
+2
+
+∑
+
+1 ),{|u|<2-1/(r+3)U }
+
+u  [-U, U ],
+
+and r > 0 is a parameter reflecting our priori knowledge about the smoothness of .
+
+2.6. Estimation of . Define
+
+(6)
+
+^(u) := F -1
+
+~(∑)
+
++
+
+^2 2
+
+x2
+
+-
+
+i^x
+
++
+
+^
+
+K(x)
+
+(u),
+
+u  R,
+
+where K(x) is a compactly supported kernel. In all simulations we take
+
+K(x) = 1 - (x/U)2 +, x  R
+
+for some U which may differ from U . The use of an additional cut-off parameter U can improve the quality of ^ significantly.
+
+4 DENIS BELOMESTNY AND MARKUS REISS
+
+2.7. Correction of . Due to the estimation error and as a result of
+the cut-off procedure in (6) the estimate ^ can take negative values and needs correcting. Our aim is therefore to find ^+ such that
+
+subject to
+
+^+ - ^
+
+2 L2(R)
+
+
+
+min,
+
+inf ^+(x)  0
+xR
+
+^+(x) dx = ^(x) dx.
+RR
+It can be easily shown that the solution of the above problem is given by
+^+(x; ) := max{0, ^(x) - }, x  R
+where  is chosen to satisfy the equation
+
+^+(u; ) du = ^(u) du.
+RR
+
+2.8. Choice of parameters. In our simulations the following heuristic criteria for choosing the spectral cut-off parameter U  is employed
+
+(7)
+
+U  = argminU
+
+d dU
+
+^U
+
+.
+
+So, U  corresponds to the flattest region of the curve U  ^U or in other words the region where ^U stabilizes. Other possible approaches to choose U include stagewise aggregation discussed in Belomesnty and
+Reiﬂ (2005) and risk hull minimization developed by Cavalier and Golubev (2005). As to U, it can be found as a point where ^U stabilizes
+
+(8)
+
+U = argminU
+
+d dU
+
+^U
+
+.
+L2
+
+In the case of real data examples when the Levy model serves as an
+approximation only the following criteria can be useful. One defines U  as a solution of the following minimization problem
+
+N
+
+(9)
+
+inf
+U
+
+|C(Ki; TU ) - Yi|2 +  |^U (x)|2 dx ,
+i=1 R
+
+>0
+
+where C(K; TU ) is the price at strike K computed using the Levy model with the triplet TU = (^U , ^U , ^U ).
+
+SPECTRAL CALIBRATION OF EXPONENTIAL LEVY MODELS
+
+5
+
+3. Simulated and Real Data Examples
+
+In this section we present simulated as well as real data examples
+demonstrating the performance of the calibration algorithm proposed.
+In our simulations different data designs, sample sizes and noise lev-
+els are used in order to investigate the behavior of the procedure in
+circumstances mimicking real ones. The data design {xi} is chosen to be normally distributed with zero mean and variance 1/3 and hence is
+similar to the one observed on the market where much more contracts
+are settled at the money than in- or out of money. Upon simulating
+the design, {O(xi)} are computed from the underlying model and then contaminated by the noise with zero mean and variances of the order {[ O(xi)]2}. In section 3.1 the Merton jump diffusion model is considered where jumps are normally distributed with mean  and variance 2
+
+(x) =  exp  2
+
+-
+
+(x
+
+- )2 22
+
+,
+
+x  R.
+
+The parameter  in the L¥evy triple (2, , ) is uniquely determined by the martingale condition
+
+ = -(2/2 + (exp(2/2 + ) - 1)).
+
+Our choice of parameters
+
+ = 0.1,  = 5,  = -0.1,  = 0.2
+
+implies  = 0.371. Note, that under such a choice the mean jump size is negative and the model reflects the important feature observed on the market. More interesting example of Kou model is considered in section 3.2 where L¥evy density  is given by
+
+(x) =  p+e-+x1[0,)(x) + (1 - p)-e-x1(-,0)(x) , x  R.
+and +, -  0, p  [0, 1] are parameters. Again the parameter  is given explicitly by
+ = -(2/2 + (p/(+ - 1) - (1 - p)/(- + 1)))
+and under the choice
+ = 0.1,  = 5, - = 4, + = 8, p = 1/3
+one has  = 0.424. The Kou model allows us to model different tails behavior for positive and negative jumps and hence makes the modelling more realistic. Finally, in section 3.3 two real data examples are presented. Both data
+
+6 DENIS BELOMESTNY AND MARKUS REISS
+sets consist of DAX options (put and call) for different maturities and strikes. L¥evy models are calibrated separately for each maturity.
+
+SPECTRAL CALIBRATION OF EXPONENTIAL LEVY MODELS
+3.1. Merton Model. Sample Size: N = 100 Noise Level:  = 0.05
+
+7
+
+(x)
+0 2 4 6 8 10
+
+0.08
+
+0.06
+
+O 0.04
+
+0.02
+
+0.00
+
+-1.5 -1.0 -0.5 0.0
+
+0.5
+
+log-moneyness
+
+1.0
+
+-2 -1
+
+0
+
+1
+
+2
+
+x
+
+Figure 1. Left: Sample (Oj). Right: True  (dashed) and estimated ^ (solid) L¥evy densities.
+^ ^ ^ 0.10402 0.38998 4.90736
+Table 1. Parameters estimates for the sample shown in Fig. 1 obtained using U and U given by (7) and (8).
+
+E(^ - )2 1/2 0.000350
+
+E(^ - )2 1/2 0.003237
+
+E(^ - )2 1/2 0.038097
+
+E
+
+^ - 
+
+2 1/2 L2
+
+0.487033
+
+Table 2. MSE estimated using 500 Monte Carlo simulations under optimal (oracle) choices of U and U.
+
+8 DENIS BELOMESTNY AND MARKUS REISS
+Sample Size: N = 100 Noise Level:  = 0.1
+
+(x)
+0 2 4 6 8 10
+
+0.08
+
+0.06
+
+Oj 0.04
+
+0.02
+
+0.00
+
+-1.5 -1.0 -0.5 0.0
+
+0.5
+
+log-moneyness
+
+1.0
+
+-2 -1
+
+0
+
+1
+
+2
+
+x
+
+Figure 2. Left: Sample (Oj). Right: True  (dashed) and estimated ^ (solid) L¥evy densities.
+^ ^ ^ 0.10208 0.35187 5.06226
+Table 3. Parameters estimates for the sample shown in Fig. 2 obtained using U and U given by (7) and (8).
+
+E(^ - )2 1/2 0.000721
+
+E(^ - )2 1/2 0.008502
+
+E(^ - )2 1/2 0.047850
+
+E
+
+^ - 
+
+2 1/2 L2
+
+0.632208
+
+Table 4. MSE estimated using 500 Monte Carlo simulations under optimal (oracle) choices of U and U.
+
+SPECTRAL CALIBRATION OF EXPONENTIAL LEVY MODELS
+Sample Size: N = 50 Noise Level:  = 0.05
+
+9
+
+(x)
+0 2 4 6 8 10
+
+0.08
+
+0.06
+
+Oj
+
+0.04
+
+0.02
+
+0.00
+
+-1.5
+
+-1.0
+
+-0.5 0.0
+
+0.5
+
+log-moneyness
+
+1.0
+
+-2 -1
+
+0
+
+1
+
+2
+
+x
+
+Figure 3. Left: Sample (Oj). Right: True  (dashed) and estimated ^ (solid) L¥evy densities.
+^ ^ ^ 0.11637 0.38541 4.73875
+Table 5. Parameters estimates for the sample shown in Fig. 3 obtained using U and U given by (7) and (8).
+
+E(^ - )2 1/2 0.000882
+
+E(^ - )2 1/2 0.013349
+
+E(^ - )2 1/2 0.043730
+
+E
+
+^ - 
+
+2 1/2 L2
+
+0.662298
+
+Table 6. MSE estimated using 500 Monte Carlo simulations under optimal (oracle) choices of U and U.
+
+10 DENIS BELOMESTNY AND MARKUS REISS
+Sample Size: N = 50 Noise Level:  = 0.1
+
+(x)
+0 2 4 6 8 10
+
+0.08
+
+0.06
+
+Oj
+
+0.04
+
+0.02
+
+0.00
+
+-1.5
+
+-1.0
+
+-0.5 0.0
+
+0.5
+
+log-moneyness
+
+1.0
+
+-2 -1
+
+0
+
+1
+
+2
+
+x
+
+Figure 4. Left: Sample (Oj). Right: True  (dashed) and estimated ^ (solid) L¥evy densities.
+^ ^ ^ 0.12870 0.36274 4.96426
+Table 7. Parameters estimates for the sample shown in Fig. 4 obtained using U and U given by (7) and (8).
+
+E(^ - )2 1/2 0.001852
+
+E(^ - )2 1/2 0.030394
+
+E(^ - )2 1/2 0.060641
+
+E
+
+^ - 
+
+2 1/2 L2
+
+0.859707
+
+Table 8. MSE estimated using 500 Monte Carlo simulations under optimal (oracle) choices of U and U.
+
+SPECTRAL CALIBRATION OF EXPONENTIAL LEVY MODELS
+3.2. Kou Model. Sample Size: N = 100 Noise Level:  = 0.05
+
+11
+
+0.10
+
+10 12
+
+0.08
+
+8
+
+0.06
+
+(x)
+
+Oj
+
+6
+
+0.04
+
+4
+
+0.02
+
+2
+
+0
+
+0.00
+
+-2 -1
+
+0
+
+1
+
+log-moneyness
+
+-2 -1
+
+0
+
+1
+
+2
+
+x
+
+Figure 5. Left: Sample (Oj). Right: True  (dashed) and estimated ^ (solid) L¥evy densities.
+^ ^ ^ 0.10071 0.43404 5.04483
+Table 9. Parameters estimates for the sample shown in Fig. 5 obtained using U and U given by (7) and (8).
+
+E(^ - )2 1/2 0.001006
+
+E(^ - )2 1/2 0.005631
+
+E(^ - )2 1/2 0.044007
+
+E
+
+^ - 
+
+2 1/2 L2
+
+0.662266
+
+Table 10. MSE estimated using 500 Monte Carlo simulations under optimal (oracle) choices of U and U.
+
+12 DENIS BELOMESTNY AND MARKUS REISS
+Sample Size: N = 100 Noise Level:  = 0.1
+
+0.10
+
+10 12
+
+0.08
+
+8
+
+0.06
+
+(x)
+
+Oj
+
+6
+
+0.04
+
+4
+
+0.02
+
+2
+
+0
+
+0.00
+
+-2 -1
+
+0
+
+1
+
+log-moneyness
+
+-2 -1
+
+0
+
+1
+
+2
+
+x
+
+Figure 6. Left: Sample (Oj). Right: True  (dashed) and estimated ^ (solid) L¥evy densities.
+^ ^ ^ 0.09696 0.38269 5.19702
+Table 11. Parameters estimates for the sample shown in Fig. 6 obtained using U and U given by (7) and (8).
+
+E(^ - )2 1/2 0.001786
+
+E(^ - )2 1/2 0.012310
+
+E(^ - )2 1/2 0.054588
+
+E
+
+^ - 
+
+2 1/2 L2
+
+0.944580
+
+Table 12. MSE estimated using 500 Monte Carlo simulations under optimal (oracle) choices of U and U.
+
+SPECTRAL CALIBRATION OF EXPONENTIAL LEVY MODELS
+Sample Size: N = 50 Noise Level:  = 0.05
+
+13
+
+0.10
+
+10 12
+
+0.08
+
+8
+
+0.06
+
+(x)
+
+Oj
+
+6
+
+0.04
+
+4
+
+0.02
+
+2
+
+0
+
+0.00
+
+-2 -1
+
+0
+
+1
+
+log-moneyness
+
+-2 -1
+
+0
+
+1
+
+2
+
+x
+
+Figure 7. Left: Sample (Oj). Right: True  (dashed) and estimated ^ (solid) L¥evy densities.
+^ ^ ^ 0.10889 0.41842 4.99187
+Table 13. Parameters estimates for the sample shown in Fig. 7 obtained using U and U given by (7) and (8).
+
+E(^ - )2 1/2 0.002444
+
+E(^ - )2 1/2 0.018898
+
+E(^ - )2 1/2 0.064104
+
+E
+
+^ - 
+
+2 1/2 L2
+
+0.998157
+
+Table 14. MSE estimated using 500 Monte Carlo simulations under optimal (oracle) choices of U and U.
+
+14 DENIS BELOMESTNY AND MARKUS REISS
+Sample Size: N = 50 Noise Level:  = 0.1
+
+0.10
+
+10 12
+
+0.08
+
+8
+
+0.06
+
+(x)
+
+Oj
+
+6
+
+0.04
+
+4
+
+0.02
+
+2
+
+0
+
+0.00
+
+-2 -1
+
+0
+
+1
+
+log-moneyness
+
+-2 -1
+
+0
+
+1
+
+2
+
+x
+
+Figure 8. Left: Sample (Oj). Right: True  (dashed) and estimated ^ (solid) L¥evy densities.
+^ ^ ^ 0.13086 0.42390 4.98324
+Table 15. Parameters estimates for the sample shown in Fig. 8 obtained using U and U given by (7) and (8).
+
+E(^ - )2 1/2 0.004917
+
+E(^ - )2 1/2 0.037315
+
+E(^ - )2 1/2 0.108304
+
+E
+
+^ - 
+
+2 1/2 L2
+
+1.40540
+
+Table 16. MSE estimated using 500 Monte Carlo simulations under optimal (oracle) choices of U and U
+
+SPECTRAL CALIBRATION OF EXPONENTIAL LEVY MODELS
+3.3. Real Data Examples. DAX options, 22 March 1999
+
+15
+
+T=28 T=91 T=182
+
+Oj 0.00 0.02 0.04 0.06 0.08
+(x)
+0.0 0.1 0.2 0.3 0.4 0.5
+
+-0.3
+
+-0.2 -0.1 0.0 0.1 xj - log-moneyness
+
+0.2
+
+-1.0
+
+-0.5
+
+0.0 x
+
+0.5
+
+Figure 9. Left: Observed (triangles) and fitted (solid line) put (xj < 0) and call (xj  0) prices for different maturities. Right: Estimated L¥evy densities.
+T N ^ ^ ^
+28 37 0.0673 0.0379 0.2105 91 56 0.0699 0.0360 0.2118 182 38 0.0819 0.0417 0.0019
+Table 17. Parameters of L¥evy triple estimated from DAX data shown in Fig. 9 with U chosen via the criteria (9) with  = 1e - 8
+
+All options data used here are publicly available in MDBase at http://www.quantlet.org/mdbase
+
+16 DENIS BELOMESTNY AND MARKUS REISS
+DAX options, 21 Juni 1999
+T=28 T=91 T=182
+
+Oj 0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07
+(x)
+0.0 0.1 0.2 0.3 0.4 0.5 0.6
+
+-0.6
+
+-0.4 -0.2
+
+0.0
+
+xj - log-moneyness
+
+0.2
+
+-1.5
+
+-1.0
+
+-0.5 x
+
+0.0
+
+Figure 10. Left: Observed (triangles) and fitted (solid line) put (xj < 0) and call (xj  0) prices for different maturities. Right: Estimated L¥evy densities.
+T N ^ ^ ^
+28 28 0.0353 0.0416 0.2317 91 38 0.0381 0.0347 0.1876 182 42 0.0446 0.0214 0.0887
+Table 18. Parameters of L¥evy triple estimated from DAX data shown in Fig. 10 with U chosen via the criteria (9) with  = 1e - 8
+
+SPECTRAL CALIBRATION OF EXPONENTIAL LEVY MODELS
+
+17
+
+4. Conclusions
+∑ The performance of the procedure depends strongly on the noise level and the number of observations the first being dominating.
+∑ The smoother is the L¥evy density the better is the performance of the procedure the difference being more pronounced for smaller noise levels.
+∑ The main features of L¥evy measures (different tails behavior, negative mean jump size) are preserved during the reconstruction.
+∑ In the real data examples the algorithm produces stable estimates for ,  decreasing with maturity, jump distributions with negative mean jump sizes, and by rather small complexity of L¥evy measures fits the data in a reasonable way.
+
+References
+[1] Belomestny, D., and M. Reiss (2005) "Optimal calibration of exponential Levy models", Preprint 1017, Weierstraﬂ Institute (WIAS) Berlin.
+[2] Cavalier, L. and Y. Golubev (2005) "Risk hull method and regularization by projections of ill-posed inverse problems," Ann. Stat., to appear.
+[3] Cont, R., and P. Tankov (2004) Nonparametric calibration of jump-diffusion option pricing models, Journal of Computational Finance, 7(3), 149.
+[4] Green, P. and Silverman, B. (1994). Nonparametric Regression and Generalized linear Models: A Roughness Penalty Approach, Chapman and Hall, London.
+
+SFB 649 Discussion Paper Series 2006
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Calibration Risk for Exotic Options" by Kai Detlefsen and Wolfgang K. H‰rdle, January 2006.
+002 "Calibration Design of Implied Volatility Surfaces" by Kai Detlefsen and Wolfgang K. H‰rdle, January 2006.
+003 "On the Appropriateness of Inappropriate VaR Models" by Wolfgang H‰rdle, Zdenk Hl·vka and Gerhard Stahl, January 2006.
+004 "Regional Labor Markets, Network Externalities and Migration: The Case of German Reunification" by Harald Uhlig, January/February 2006.
+005 "British Interest Rate Convergence between the US and Europe: A Recursive Cointegration Analysis" by Enzo Weber, January 2006.
+006 "A Combined Approach for Segment-Specific Analysis of Market Basket Data" by Yasemin Boztu and Thomas Reutterer, January 2006.
+007 "Robust utility maximization in a stochastic factor model" by Daniel Hern·ndez≠Hern·ndez and Alexander Schied, January 2006.
+008 "Economic Growth of Agglomerations and Geographic Concentration of Industries - Evidence for Germany" by Kurt Geppert, Martin Gornig and Axel Werwatz, January 2006.
+009 "Institutions, Bargaining Power and Labor Shares" by Benjamin Bental and Dominique Demougin, January 2006.
+010 "Common Functional Principal Components" by Michal Benko, Wolfgang H‰rdle and Alois Kneip, Jauary 2006.
+011 "VAR Modeling for Dynamic Semiparametric Factors of Volatility Strings" by Ralf Br¸ggemann, Wolfgang H‰rdle, Julius Mungo and Carsten Trenkler, February 2006.
+012 "Bootstrapping Systems Cointegration Tests with a Prior Adjustment for Deterministic Terms" by Carsten Trenkler, February 2006.
+013 "Penalties and Optimality in Financial Contracts: Taking Stock" by Michel A. Robe, Eva-Maria Steiger and Pierre-Armand Michel, February 2006.
+014 "Core Labour Standards and FDI: Friends or Foes? The Case of Child Labour" by Sebastian Braun, February 2006.
+015 "Graphical Data Representation in Bankruptcy Analysis" by Wolfgang H‰rdle, Rouslan Moro and Dorothea Sch‰fer, February 2006.
+016 "Fiscal Policy Effects in the European Union" by Andreas Thams, February 2006.
+017 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, March 2006.
+018 "The Bologna Process: How student mobility affects multi-cultural skills and educational quality" by Lydia Mechtenberg and Roland Strausz, March 2006.
+019 "Cheap Talk in the Classroom" by Lydia Mechtenberg, March 2006. 020 "Time Dependent Relative Risk Aversion" by Enzo Giacomini, Michael
+Handel and Wolfgang H‰rdle, March 2006. 021 "Finite Sample Properties of Impulse Response Intervals in SVECMs with
+Long-Run Identifying Restrictions" by Ralf Br¸ggemann, March 2006. 022 "Barrier Option Hedging under Constraints: A Viscosity Approach" by
+Imen Bentahar and Bruno Bouchard, March 2006.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "How Far Are We From The Slippery Slope? The Laffer Curve Revisited" by Mathias Trabandt and Harald Uhlig, April 2006.
+024 "e-Learning Statistics ≠ A Selective Review" by Wolfgang H‰rdle, Sigbert Klinke and Uwe Ziegenhagen, April 2006.
+025 "Macroeconomic Regime Switches and Speculative Attacks" by Bartosz Makowiak, April 2006.
+026 "External Shocks, U.S. Monetary Policy and Macroeconomic Fluctuations in Emerging Markets" by Bartosz Makowiak, April 2006.
+027 "Institutional Competition, Political Process and Holdup" by Bruno Deffains and Dominique Demougin, April 2006.
+028 "Technological Choice under Organizational Diseconomies of Scale" by Dominique Demougin and Anja Schˆttner, April 2006.
+029 "Tail Conditional Expectation for vector-valued Risks" by Imen Bentahar, April 2006.
+030 "Approximate Solutions to Dynamic Models ≠ Linear Methods" by Harald Uhlig, April 2006.
+031 "Exploratory Graphics of a Financial Dataset" by Antony Unwin, Martin Theus and Wolfgang H‰rdle, April 2006.
+032 "When did the 2001 recession really start?" by Jˆrg Polzehl, Vladimir Spokoiny and Ctlin Stric, April 2006.
+033 "Varying coefficient GARCH versus local constant volatility modeling. Comparison of the predictive power" by Jˆrg Polzehl and Vladimir Spokoiny, April 2006.
+034 "Spectral calibration of exponential LÈvy Models [1]" by Denis Belomestny and Markus Reiﬂ, April 2006.
+035 "Spectral calibration of exponential LÈvy Models [2]" by Denis Belomestny and Markus Reiﬂ, April 2006.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

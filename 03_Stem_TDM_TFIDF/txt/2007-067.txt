@@ -1,0 +1,1902 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2007-067
+A stochastic volatility Libor model and its robust calibration
+Denis Belomestny* Stanley Matthew** John Schoenmakers*
+* Weierstrass Institute Berlin, Germany ** Johann Wolfgang Goethe-Universität Frankfurt/Main, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+A stochastic volatility Libor model and its robust calibration
+Denis Belomestny1, , Stanley Mathew2, and John Schoenmakers1
+December 10, 2007
+Keywords: Libor modelling, stochastic volatility, CIR processes, calibration
+AMS 2000 Subject Classification: 60G51, 62G20, 60H05, 60H10, 90A09, 91B28 JEL Classification Code: G12
+Abstract In this paper we propose a Libor model with a high-dimensional specially structured system of driving CIR volatility processes. A stable calibration procedure which takes into account a given local correlation structure is presented. The calibration algorithm is FFT based, so fast and easy to implement.
+1 Introduction
+Since Brace, Gatarek, Musiela (1997), Jamshidian (1997), and Miltersen, Sandmann and Sondermann (1997), almost independently, initiated the development of the Libor market interest rate model, research has grown immensely towards improved models that fit market quotes of standard interest rate products such as cap and swaption prices for different strikes and maturities. As a matter of fact, while caps can be priced using a Black type formula and swaptions via closed form approximations with high accuracy, an important drawback of the market model is the impossibility of matching cap and swaption volatility smiles and skews observed in the markets. As a remedy, various alternatives to the standard Libor market model have been proposed. They can be roughly categorized into three streams: local volatility models, stochastic volatility models, and jump-diffusion models. Especially jump-diffusion and stochastic
+1Weierstrass Institute for Applied Analysis and Stochastics, Mohrenstr. 39, 10117 Berlin, Germany. {belomest,schoenma}@wias-berlin.de.
+2Johann Wolfgang Goethe-Universit¨at, Senckenberganlage 31, 60325 Frankfurt am Main, Germany. mathew@math.uni-frankfurt.de.
+partial support by the Deutsche Forschungsgemeinschaft through the SFB 649 `Economic Risk' is gratefully acknowledged.
+1
+
+volatility models are popular due to their economically meaningful behavior, and the greater flexibility they offer compared to local volatility models for instance. For local volatility Libor models we refer to Brigo and Mercurio (2006). Jump-diffusion models for assets go back to Merton (1976) and Eberlein (1998). Jamshidian (2001) developed a general semimartingale framework for the Libor process which covers the possibility of incorporating jumps as well as stochastic volatility. Specific jump-diffusion Libor models are proposed, among others, by Glasserman and Kou (2003) and Belomestny and Schoenmakers (2006). Levy Libor models are studied by Eberlein and O¨ zkan (2005). Incorporation of stochastic volatility has been proposed by Andersen and Brotherton-Ratcliffe (2001), Piterbarg (2004), Wu and Zhang (2006), Zhu (2007).
+In the present article we focus on a flexible particularly structured Heston type stochastic volatility Libor model that, due to its very construction, can be calibrated to the cap/strike matrix in a robust way. In this model we incorporate a core idea from Belomestny and Schoenmakers (2006), who propose a jumpdiffusion Libor model as a perturbation of a given input Libor market model. As a main issue, Belomestny and Schoenmakers (2006) furnish the jump-diffusion extension in such a way that the (local) covariance structure of the extended model coincides with the (local) covariance structure of the market model. The approach of perturbing a given market model while preserving its covariance structure, has turned out to be fruitfull and is carried over into the design of the stochastic volatility Libor model presented in this paper. In fact, this idea is supported by the following arguments (see also Belomestny and Schoenmakers (2006)).
+1. Cap prices do not depend on the (local) correlation structure of forward Libors in a Libor market model but, typically, do depend only weakly on this in a more general model. Since this correlation structure contains important information about, for example, prices of ATM swaptions, we do not want to destroy this (input) correlation structure while calibrating the extended model to the cap(let)-strike matrix.
+2. The lack of smile behavior of a Libor market model is considered a consequence of Gaussianity of the driving random sources (Wiener processes). Therefore we want to perturb this Gaussian randomness to a non-Gaussian one by incorporating a CIR volatility process, while maintaining the (local) correlation structure of the Libor market model we started with.
+3. Preserving the correlation structure allows for robust calibration, since it significantly reduces the number of parameters to be calibrated while holding a realistic correlation structure.
+Specifically, the perturbation part of the presented model will involve CIR volatility processes, and so the construction will finally resemble a Heston type Libor model (Heston (1993)). The CIR model, as developed by its founders Cox, Ingersoll, Ross (1985), was originally derived in a framework based on equilibrium assumptions.
+2
+
+The idea of utilizing a Heston type process has already been formulated in Wu and Zhang (2006), and Zhu (2007). However, the present article differs from these works in the following respects.
+1. As opposed to a one-dimensional stochastic volatility process as in Wu & Zhang, or a (possibly) vector valued one which inhibits only one source of randomness as in Zhu (2007), we will study multi-dimensional CIR vector volatility processes with each component being driven by its own Brownian motion. This leads to a more realistic local correlation structure and renders the model more flexible for calibration.
+2. We suggest a multi-dimensional partial-Gaussian and partial-Heston type model, where each forward Libor is driven by a linear combination of CIR processes.
+3. While in both papers the issue of robust calibration has not been addressed, we give full consideration to this problem using novel ideas mentioned above.
+Furthermore, approximative analytic pricing formulas for caplets and swaptions are derived for this new Libor model which allow for fast calibration to these products. Ultimately, complex structured Over The Counter products may be priced by Monte Carlo using guidelines for simulating Heston type models as given in Kahl and J¨ackel (2006).
+
+2 Dynamics of the Libor Model
+
+Consider a fixed sequence of tenor dates 0 =: T0 < T1 < . . . < Tn, called a tenor structure, together with a sequence of so called day-count fractions i := Ti+1 -Ti, i = 1, . . . , n-1. With respect to this tenor structure we consider zero bond processes Bi, i = 1, . . . , n, where each Bi lives on the interval [0, Ti] and ends up with its face value Bi(Ti) = 1. With respect to this bond system we deduce a system of forward rates, called Libor rates, which are defined by
+
+1 Li(t) := i
+
+Bi(t) - 1 , Bi+1(t)
+
+0  t  Ti, 1  i  n - 1.
+
+Note that Li is the annualized effective forward rate to be contracted at the
+date t, for a loan over a forward period [Ti, Ti+1]. Based on this rate one has to
+pay at Ti+1 an interest amount of $iLi(Ti) on a $1 notional. For a pre-specified volatility process i  Rm, adapted to the filtration gen-
+erated by some standard Brownian motion W  Rm, the dynamics of the cor-
+responding Libor model have the form,
+
+dLi Li
+
+=
+
+(...)dt +
+
+i
+
+dW
+
+(1)
+
+i = 1, ..., n-1. The drift term, adumbrated by the dots, is known under different numeraire measures, such as the risk-neutral, spot, terminal and all measures
+
+3
+
+induced by individual bonds taken as numeraire. If the processes t  i(t) in (1) are deterministic, one speaks of a Libor market model.
+In this work we study extensions of a Libor market model, which is given via a deterministic volatility structure , with respect to an extended Brownian filtration. In particular, we consider extensions with the following structure,
+
+dLi = (...)dt + Li
+
+1 - ri2i dW + rii dU,
+
+1  i < n,
+
+(2)
+
+ dUk = vkdWk
+
+1  k  d,
+
+ dvk = k(k - vk)dt + k vk kdWk +
+
+1 - 2kdW k ,
+
+(3)
+
+where W and W are mutually independent d-dimensional standard Brownian
+
+motions, both independent of W . In (2), i  Rd are chosen to be deterministic vector functions. They will be specified later. The ri are constants that may
+
+be considered "allotment" or "proportion" factors, quantifying how much of the
+
+original input market model should be in play. For ri = 0 for all i, it is easily seen from (2) that the classical market model is retrieved. As such, for small values
+
+of the ri, the extended model may be regarded as a perturbation of the former.
+
+Finally, from a modeling point of view system (2) is obviously overparameterized
+
+in the k =:
+
+following sense. By setting k-1k, we retrieve exactly
+
+ik the
+
+=: kik and same model.
+
+vk =: From
+
+k-2vk, k =: k-2k, now on we therefore
+
+normalize by setting k  1 without loss of generality.
+
+It is helpful to think of the Libor model as a vector-valued stochastic process of dimension n - 1 driven by m + 2d standard Brownian motions with dynamics of the form
+
+dLi Li
+
+=
+
+(...)dt +
+
+i
+
+dW ,
+
+i = 1, ..., n - 1,
+
+where
+
+
+
+
+
+
+
+
+
+
+
+
+
+i
+
+=
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+1 - ri2i1 
+
+1 - ri2i2 
+
+·
+
+ 
+
+·
+
+ 
+
+1 - ri2im
+
+  
+
+rii1 v1 
+
+
+
+·
+
+ ·  riid vd
+
+ dW1 
+
+ dW2 
+
+ 
+
+·
+
+ 
+
+ 
+
+·
+
+ 
+
+dW
+
+=
+
+ 
+
+dWm
+
+ 
+
+.
+
+ 
+
+dW1
+
+ 
+
+ 
+
+·
+
+ 
+
+ 
+
+·
+
+ 
+
+dWd
+
+In (4) the square-root processes vk are given by (3) (with k  1).
+
+(4)
+
+In our approach we will work throughout under the terminal measure Pn. Following Jamshidian (1997, 2001), the Libor dynamics in this measure are given
+
+4
+
+by
+
+dLi = - n-1 Lj Li j=i+1 1 + Lj
+
+m+d
+j k ik
+k=1
+
+dt + i dW(n).
+
+(5)
+
+Often it turns out technically more convenient to work with the log-Libor dynamics. A straightforward application of It^o's lemma to (5) yields,
+
+d ln
+
+Li
+
+=
+
+-
+
+1 2
+
+|i
+
+|2dt
+
+-
+
+n-1 j=i+1
+
+1
+
+Lj + Lj
+
+m+d
+j k ik
+k=1
+
+dt + i dW(n),
+
+1  i < n. (6)
+
+3 Reduction of parameters by covariance assumption
+
+Within the particular framework constructed above, one could interpret the second diffusion part in (2), namely rii dU , as an extension or perturbation of a given Libor market model. Let us integrate the diffusion part of (6) from zero to t and define the resulting zero-mean random variable by
+
+t
+i(t) := i dW(n).
+0
+
+(7)
+
+Recall that i  Rm is the (given) deterministic volatility structure of the input market model obtained by some calibration procedure to ATM caps and
+ATM swaptions. We assume further that the matrix (i,j(t))1i<n,1jm has full rank m for all t. The deterministic vector functions i  Rd will allow additional degrees of freedom for the upcoming fitting to the volatility curve.
+We will now see that under the covariance assumption we will have to restrict
+ourselves to specified values for the i.
+
+For the covariance function of i(t) in the terminal measure we obtain
+
+En(i(t)j(t)) = = = =:
+
+1 - ri2 1 - ri2 1 - ri2 1 - ri2
+
+t tt
+1 - rj2 i j ds + rirj En i dU · j dU
+0 00
+
+t dt
+
+1 - rj2 i j ds + rirj En ikjk d Uk
+
+0
+
+k=1
+
+0
+
+t dt
+
+1 - rj2 i j ds + rirj
+
+ikjk Envk ds
+
+0 k=1 0
+
+tt
+1 - rj2 i jds + rirj i (t)j ds
+00
+
+(8)
+
+5
+
+where (t) denotes a diagonal matrix in Rd×d whose elements are the expected values k = Envk  R.
+
+The square-root diffusions in (2) have a limiting stationary distribution. The transition law of the general CIR process
+
+t
+v(t) = v(u) + ( - v(s))ds +  v(s)dW (s) ,
+u
+is known. In particular, we have the representation
+
+2 v(t) =
+
+1 - e-(t-u) 4
+
+2 ,c,
+
+t > u,
+
+where 2,c is a noncentral chi-square random variable with  degrees of freedom and noncentrality c, where
+
+4 4e-(t-u)
+
+ := 2 ,
+
+c := 2
+
+1 - e-(t-u)
+
+v(u).
+
+For the expectation we have E[v(t) | Fu] = (v(u) - )e-(t-u) + , t  u,
+
+(9)
+
+e.g. see Glasserman (2003) for details. It is natural to take the limit expectation as the starting value of the process. Thus, we set
+
+vk(0) = k = 1, for k = 1, . . . , d, to obtain Evk(t)  1, hence  = I is constant.
+
+Let us now introduce the covariance restriction mentioned in the introduction, which will be in fact a modified version of the covariance restriction in Belomestny and Schoenmakers (2006). In the latter article one requires (in a jump-diffusion context)
+
+t
+En(i(t)j(t)) = i jds.
+0
+
+(10)
+
+In view of (8) and as a next simplification, we set ri  r, to yield from (10),
+
+tt
+i jds = i jds,
+00
+
+(11)
+
+which is obviously satisfied by taking   , and then, in particular, we have d = m. However, in order to obtain closed-form expressions for characteristic functions later on, we would like (t) to be piecewise constant in time. For a better tractability we even assume (t) to be time independent. In either case
+
+6
+
+this means that (11) has to be relaxed. As a first relaxation of (11) we require
+
+only
+
+Tk Tk
+
+i jdt =
+
+i jdt, k  min(i, j),
+
+00
+
+(12)
+
+which can be satisfied by taking (t) suitably piecewise constant. Unfortunately,
+
+for time independent , (12) can still not be matched in general. As a pragmatic
+
+solution for this case, we therefore relax (12) further to
+
+1
+
+min(i,j) 1
+
+Tk
+
+i j = min(i, j) k=1 Tk 0 i j dt,
+
+or as an alternative,
+
+1 Tmin(i,j)
+
+i j = Tmin(i,j) 0
+
+i jdt.
+
+(13) (14)
+
+It can be shown that in both cases the matrix (i j) is positive definite and so defines a covariance structure.
+Of course there are further variations possible. Note that even when m < n-1, exact fitting of (13) or (14), respectively, may require d = n-1. Depending on the readers preferences however, one may choose any d, d < n - 1, and then
+fit (13) or (14) after dimension reduction via principal component analysis of
+the respective symmetric right-hand-sides.
+
+4 Dynamics under various measures
+4.1 Dynamics under forward measures
+
+So far the Libor dynamics have been considered under the terminal measure.
+In order to price caplets later on, however, we will need to represent the above
+process under various forward measures. In what follows we denote the time
+independent solution for  of either (13), (14), or any other sensible choice of the reader for the covariance constraint, by   R(n-1)×d. Thus, spelling out (5) with ri  r yields
+
+dLi = Li
+
+n-1
+-
+
+j Lj
+
+j=i+1 1 + j Lj
+
+d
+(1 - r2)i j + r2 ikjkvk
+k=1
+
++
+
+1 - r2i dW (n) + r
+
+d
+
+ vk
+
+
+
+ik
+
+dWk(n)
+
+k=1
+
+dt
+
+(15)
+
+with corresponding volatility processes
+
+ dvk = k(1 - vk)dt + k vk
+
+kdWk(n) +
+
+1
+
+-
+
+2k dW
+
+(n) k
+
+,
+
+(16)
+
+7
+
+under the measure Pn. By rearranging terms we may write,
+
+dLi = Li
+
+ 1 - r2i dW (n) -
+
+
+
+1
+
+-
+
+r2
+
+n-1 j=i+1
+
+1
+
+j Lj + j Lj
+
+j dt
+
+
+
++
+
+r
+
+d k=1
+
+ ik vk
+
+dWk(n)
+
+-
+
+r
+
+n-1 j=i+1
+
+1
+
+j Lj + j Lj
+
+ jk vkdt
+
+=:
+
+1 - r2i dW (i+1) + r
+
+d
+
+ik
+
+ vk
+
+dWk(i+1).
+
+k=1
+
+(17)
+
+Since Li is a martingale under Pi+1, we have that both W (i+1) and W (i+1) in (17) are standard Brownian motions under Pi+1. In terms of these new Brownian motions the volatility dynamics becomes
+
+dvk
+
+=
+
+k (1
+
+-
+
+vk )dt
+
++
+
+rk k
+
+n-1 j=i+1
+
+1
+
+j Lj + j Lj
+
+ j k vk dt
+
++
+
+k
+
+ k vk
+
+dWk(i+1)
+
++
+
+1
+
+-
+
+k2
+
+k
+
+ vk
+
+dW
+
+(kn,i+1).
+
+(18)
+
+As shown in the Appendix, the process W (n,i+1) in (18) is standard Brownian motion under both measures Pi+1 and Pn.
+By freezing the Libors at their initial values in (18), we obtain an approximative CIR dynamics
+
+dvk  k(i+1) k(i+1) - vk
+
+ dt + k vk
+
+kdWk(i+1) +
+
+1
+
+-
+
+2k dW
+
+(i+1) k
+
+(19)
+
+with reversion speed parameter
+
+k(i+1)
+
+:=
+
+k
+
+-
+
+rk k
+
+n-1 j=i+1
+
+1
+
+j +
+
+Lj (0) j Lj (0)
+
+jk
+
+,
+
+(20)
+
+and mean reversion level
+
+k(i+1)
+
+:=
+
+k k(i+1)
+
+.
+
+(21)
+
+The approximative dynamics (19) for the volatility process will be used for calibration in Section 5.
+
+4.2 Dynamics under swap measures
+An interest rate swap is a contract to exchange a series of floating interest payments in return for a series of fixed rate payments. Consider a series of
+
+8
+
+payment dates between Tp+1 and Tq, q > p. The fixed leg of the swap pays jK at each time Tj+1, j = p, . . . , q - 1 where j = Tj+1 - Tj. In return, the floating leg pays jLj(Tj) at time Tj+1, where Lj(Tj) is the rate fixed at time Tj for payment at Tj+1. Thus, the time t value of the interest rate swap is
+
+q-1
+jBj+1(t)(Lj(t) - K).
+j=p
+
+The swap rate Sp,q(t) is the value of the fixed rate K, such that the present value of the contract is zero, hence after some rearranging
+
+Sp,q(t) =
+
+q-1 j=p
+
+j
+
+Bj+1
+
+(t)Lj
+
+(t)
+
+q-1 j=p
+
+j
+
+Bj+1
+
+(t)
+
+=
+
+Bp(t) - Bq(t)
+
+q-1 j=p
+
+j
+
+Bj+1(t)
+
+.
+
+(22)
+
+So Sp,q is a martingale under the probability measure Pp,q, induced by the
+
+annuity numeraire Bp,q =
+
+q-1 j=p
+
+j
+
+Bj+1(t).
+
+Therefore
+
+we
+
+may
+
+write
+
+dSp,q(t) = p,q(t)Sp,q(t)dW(p,q)(t),
+
+(23)
+
+where dW(p,q)(t) is standard Brownian motion under Pp,q. From (22) we see that the swap rate can be expressed as a weighted sum of the constituent forwards
+
+rates,
+
+q-1
+
+Sp,q(t) = wj(t)Lj(t)
+
+j=p
+
+with
+
+wj (t)
+
+=
+
+j Bj+1(t) . Bp,q
+
+An application of Ito's Lemma yields
+
+dSp,q (t)
+
+=
+
+q-1 j=p
+
+ Sp,q (t)  Lj (t)
+
+dLj
+
+(t)
+
++
+
+q-1 j=p
+
+q-1 i=p
+
+
+
+2Sp,q Lj (t) Li (t)
+
+dLj
+
+(t)dLi(t)
+
+=
+
+q-1 j=p
+
+ Sp,q (t)  Lj (t)
+
+Lj (t)j
+
+dW(n) + (. . .)dt .
+
+(24)
+
+Equating (23) and (24), gives
+
+q-1
+
+
+
+dSp,q(t) = Sp,q(t)  j (t)j  dW(p,q)(t)
+
+j=p
+
+with W(p,q) = (W (p,q), W (p,q)) and
+
+j (t)
+
+:=
+
+ Sp,q (t)  Lj (t)
+
+Lj(t) . Sp,q (t)
+
+9
+
+The change of measure from W(n) to W(p,q) can be found in Schoenmakers (2005). In particular,
+
+dW (p,q) = dW (n) -
+
+1
+
+-
+
+r2
+
+q-1 i=p
+
+wi
+
+n-1 j=i+1
+
+1
+
+j Lj + j Lj
+
+j dt
+
+and
+
+dW (p,q)
+
+=
+
+dWk(n)
+
+-
+
+r
+
+q-1
+wi
+i=p
+
+n-1 j=i+1
+
+1
+
+j Lj + j Lj
+
+ jk vkdt.
+
+In terms of these new Brownian motions the volatility processes read,
+
+dvk
+
+=
+
+k (1
+
+-
+
+vk )dt
+
++
+
+rk k
+
+q-1
+
+n-1
+
+wi(t)
+
+i=p j=i+1
+
+1
+
+j Lj + j Lj
+
+ j k vk dt
+
++
+
+k
+
+k
+
+ vk
+
+dWk(p,q)
+
++
+
+1
+
+-
+
+2k k
+
+ vk
+
+dW
+
+(kp,q,n).
+
+(25)
+
+As shown in the Appendix, the process W (p,q,n) in (25) is standard Brownian
+
+motion
+
+under
+
+both
+
+measures
+
+Pp,q
+
+and
+
+Pn.
+
+Assuming
+
+now
+
+that
+
+Sp,q (t) Lj (t)
+
+and
+
+Lj (t) Sp,q (t)
+
+are approximately constant in time, we freeze the weights at their initial time
+
+t = 0. Then the swap rate dynamic is approximately given by
+
+q-1
+
+
+
+dSp,q(t)  Sp,q(t)  j (0)j  dW(p,q)(t).
+
+j=p
+
+(26)
+
+Similarly, freezing the Libors in the drift term of (25) leads to an approximated volatility process vk given by
+
+dvk  k(p,q)
+
+k(p,q) - vk
+
+ dt + k vk
+
+kdWk(p,q) +
+
+1
+
+-
+
+2k
+
+dW
+
+(p,q,n) k
+
+(27)
+
+with reversion speed parameter
+
+(kp,q)
+
+:=
+
+k
+
+-
+
+rk k
+
+q-1
+
+n-1
+
+wi(0)
+
+i=p j=i+1
+
+1
+
+j +
+
+Lj (0) j Lj (0)
+
+jk
+
+,
+
+and mean reversion level
+
+k(p,q)
+
+:=
+
+k k(p,q)
+
+.
+
+(28) (29)
+
+5 Calibration to Caplet prices
+
+A caplet for the period [Tj, Tj+1] with strike K is an option that pays (Lj(Tj) - K)+j at time Tj+1, where 1  j < n. It is well-known that under the forward measure Pj+1 the j-th caplet price at time zero is given by
+Cj (K) = j Bj+1(0)Ej+1(Lj (Tj ) - K)+.
+
+10
+
+Thus, under Pj+1 the j-th caplet price is determined by the dynamics of Lj only. The FFT-method of Carr and Madan (1999) can be straightforwardly adapted to the caplet pricing problem as done in Belomestny and Schoenmakers (2006). We here recap the main results.
+In terms of the log-moneyness variable
+
+K v := ln
+Lj (0)
+
+(30)
+
+the j-th caplet price can be expressed as
+
++
+Cj (v) := Cj (evLj (0)) = j Bj+1(0)Lj (0)Ej+1 eXj(Tj) - ev ,
+
+where Xj(t) = ln Lj(t) - ln Lj(0). One then defines the auxiliary function
+
+Oj (v) := j-1Bj-+11(0)L-j 1(0)Cj (v) - (1 - ev)+
+
+(31)
+
+and can show the following proposition.
+
+Proposition 1 For the Fourier transform of the function Oj defined above and
+
+j+1(·; t) denoting the characteristic function of the process Xj(t) under Pj+1
+
+we have
+
+F {Oj} (z) =
+
+
+Oj (v)eivzdv
+-
+
+=
+
+1
+
+-
+
+j+1 z(z
+
+(z -
+
+- i)
+
+i;
+
+Tj
+
+)
+
+.
+
+(32)
+
+The proof can be found in Belomestny/Reiß (2006). Next, combining (30), (31), and (32) yields
+
+Cj(K) = Bj+1(0) (Lj(0) - K)+
+
+(33)
+
++ Bj+1(0)Lj(0)
+
+
+
+1
+
+-
+
+j+1(z
+
+-
+
+i;
+
+Tj )
+
+e-iz
+
+ln
+
+K Lj (0)
+
+dz.
+
+2 - z(z - i)
+
+We now outline a calibration procedure for the Libor structure (2), under the following additional assumptions.
+(i) The input market Libor volatility structure   R(n-1)×m is assumed to be of full rank, that is m = n - 1. (Strictly speaking it would be enough to require the right-hand-sides of (13) or (14) to be of full rank.)
+(ii) The terminal log-Libor increment d ln Ln-1 is influenced by a single stochastic volatility shock dUn-1, the one but last, hence d ln Ln-2, by only dUn-1 and dUn-2, and so forth. Put differently, we assume   R(n-1)×d to be a squared upper triangular matrix of rank n - 1, hence d = n - 1.
+(iii) The ri are taken to be constant, that is ri  r, and the matrix  is determined as the time independent upper triangular solution  of the covariance condition (13) or (14), depending on the readers preference.
+11
+
+(iv) Recall that vk(0)  k  1, 1  k < n.
+
+For the Libor dynamics structured in the above way we thus have
+
+d
+
+ln
+
+Li(t)
+
+=
+
+-
+
+1 2
+
+n-1
+
+(1 - r2) |i|2 + r2
+
+
+
+2 ik
+
+vk
+
+dt
+
+k=i
+
++ 1 - r2i dW (i+1)
+
++
+
+r
+
+n-1
+
+
+
+ik
+
+ vk
+
+dWk(i+1)
+
+,
+
+k=i
+
+1  i < n,
+
+(34)
+
+where for i = n - 1 the dynamics of vn-1 is given by (16), and for i < n - 1 the dynamics of vk, i  k < n, is approximately given by (19).
+
+We will calibrate the structure to prices of caplets according to the following roadmap.
+
+1. First step i = n - 1. Calibrate r and the parameter set (n-1 , n-1 = 1 , n-1 , n-1 ) to the Tn-1 column of the cap-strike matrix via (33) using the explicitly known characteristic function n of ln[Ln-1(Tn-1)/Ln-1(0)] (see Appendix (8.0.1)).
+2. For i = n - 2 down to 1 carry out the next iteration step:
+3. The k-th step i = n-k. Transform the yet known parameter set (j, j , j) i < j < n , via (20) and (21) into the corresponding set ((ji+1), j(i+1), (ji+1), j(i+1)), i < j < n. By the upper triangular structure of the square matrix  we obviously have (ii+1) = i, hence by (21) i(i+1) = 1. Then calibrate the at this stage unknown parameter set (i, i, i ) to the Ti column of the cap-strike matrix via (33) using the explicitly known characteristic function i+1 of ln[Li(Ti)/Li(0)] under the approximation (17)-(19) (see Appendix (8.0.1)).
+
+The above calibration algorithm includes at each step, as usual, the minimization of some objective function. As such function we take the weighted sum of squares of the corresponding differences between observed market prices and prices induced by the model. The weights are taken to be proportional to BlackScholes vegas. As an initial values for the local optimization routine at time step i + 1 the values of estimated parameters at time step i are used.
+
+6 Calibration to swaption prices
+A European swaption over a period [Tp, Tq] gives the right to enter at Tp into an interest rate swap with strike rate K. The swaption value at time t  Tp is
+
+12
+
+given by
+
+Swpnp,q(t) = Bp,q(t)EpF,tq(Sp,q(Tp) - K)+.
+
+Since the approximative model (26)-(27) for Sp,q has an affine structure with constant coefficients one can write down the characteristic function of Sp,q analytically under Pp,q and follow the lines of the previous section to calibrate the model.
+
+Remark 2 Due to the covariance restrictions (13)-(14), one can expect that the model prices of ATM swaptions are not far from market prices because our model employs a covariance structure of LMM calibrated to the market prices of ATM swaptions.
+
+7 Calibration to real data
+
+In this section we calibrate the model (17)-(19) to market data available on 14.08.2007. The caplet-strike volatility matrix is partially shown in Table 1. The corresponding implied volatility surface is shown in Figure 1.
+Pronounced smiles are clearly observable. Due to the structure of the given data we are going to calibrate the jump diffusion model based on semi-annual tenors, i.e. j  0.5, with n = 41, and where the initial calibration date 14.08.2007 is identified with T0 = 0.
+In a pre-calibration a standard market model is calibrated to ATM caps and ATM swaptions using Schoenmakers (2005). However, we emphasize that the method by which this input market model is obtained is not essential nor a discussion point for this paper. For the pre-calibration we have used a volatility structure of the form
+
+i(t) = cig(Ti - t)ei, 0  t  Ti, 1  i < n,
+
+where g is a simple parametric function and ei are unit vectors. The precalibration routine returns ei  Rn-1 such that (ei,k) is upper triangular and
+
+ei ej = ij
+
+=
+
+exp
+
+-
+
+|j m
+
+- -
+
+i| 1
+
+(-
+
+ln
+
+
+
+-
+
+i2
+
++
+
+j2
+
++
+
+ij
+
+- mi - mj - 3i - (m - 2)(m - 3)
+
+3j
+
++
+
+3m
+
++
+
+2
+
+i, j = 1, . . . , m := n - 1, 0    - ln ,
+
+, (35)
+
+with n = 41,  = 0.23,  = 1.42. The function g is given by g(s) = g + (1 - g + as)e-bs.
+
+with a = 0.32, b = 0.07, and g = 0.58. The loading factors ci can be readily computed from
+
+Ti
+
+(TAiT M )2Ti = c2i
+
+g2(s) ds, i = 1, . . . , n - 1,
+
+0
+
+13
+
+T/K 2 2.25 2.5 3 3.5 4 0 24.80 22.60 21.00 18.50 14.90 10.60 0.5 24.80 22.60 21.00 18.50 14.90 10.60 1.0 22.71 20.81 19.45 17.25 14.90 12.47 1.5 20.62 19.02 17.89 16.01 14.90 14.34 2 21.31 19.59 18.51 16.67 15.40 14.63 2.5 21.99 20.17 19.13 17.34 15.91 14.92 3.0 21.72 20.27 19.21 17.40 15.99 14.98 3.5 21.45 20.37 19.29 17.46 16.08 15.05 4.0 20.85 20.26 19.17 17.44 16.01 15.06 4.5 20.23 20.15 19.04 17.43 15.95 15.06 5.0 20.46 19.92 18.87 17.15 15.71 14.78 5.5 20.69 19.69 18.69 16.87 15.48 14.49 6.0 20.92 19.46 18.51 16.59 15.25 14.22 6.5 21.16 19.22 18.33 16.31 15.01 13.93 7.0 20.81 19.09 18.15 16.21 14.92 13.88 7.5 20.46 18.95 17.97 16.11 14.82 13.82 8.0 20.11 18.82 17.78 16.01 14.72 13.76 8.5 19.75 18.68 17.60 15.91 14.62 13.70 9.0 19.40 18.54 17.41 15.81 14.52 13.64
+Table 1: Caplet volatilities TK(in %) for different strikes and different tenor dates (in years).
+using the initial Libor curve, which is obtained by a standard stripping procedure from the yield curve at 14.08.2007. Table 2 shows the calibrated values of ci. Finally, the calibration procedure presented in Section 5 delivers the following parameter values: r = 0.18 and , ,  varying across several chosen maturities as shown in Table 3. The quality of the calibration can be seen in Figure 2, where calibrated volatility curves are shown for several caplet periods (corresponding to Table 7) together with the market caplet volas. The overall relative rootmean-square fit we have reached shows to be 0.5%-5%, when the caplet maturity ranges from 0.5 to 20.
+14
+
+Caplet Volas
+
+Tenors
+
+Strikes
+
+Figure 1: Caplet implied volatility surface TK .
+8 Appendix
+8.0.1 The Conditional Characteristic Function
+We need to determine the conditional characteristic function of ln Lj(T ) given Lj(0) for all j = 1, ..., n - 1. under the relevant measure Pj+1 when the Heston CIR-process has for each component k = 1, ..., n - 1 the general form
+
+dvk
+
+=
+
+k(j+1)(k(j+1)
+
+-
+
+vk )dt
+
++
+
+k
+
+k
+
+ vk
+
+dWk(j+1)
+
++
+
+k
+
+(1
+
+-
+
+2k
+
+ ) vk
+
+dW
+
+(kj+1),
+
+(36)
+
+15
+
+1 0.096
+11 0.084
+21 0.060
+31 0.051
+
+2 0.090
+12 0.081
+22 0.059
+32 0.050
+
+3 0.101
+13 0.078
+23 0.058
+33 0.050
+
+4 0.111
+14 0.076
+24 0.057
+34 0.049
+
+5 0.106
+15 0.073
+25 0.056
+35 0.049
+
+6 0.101
+16 0.071
+26 0.055
+36 0.048
+
+7 0.099
+17 0.068
+27 0.054
+37 0.049
+
+8 0.097
+18 0.066
+28 0.0534
+38 0.048
+
+9 0.092
+19 0.064
+29 0.0526
+39 0.047
+
+10 0.087
+20 0.062
+30 0.0518
+40 0.047
+
+Table 2: The values of loadings factors ci calibrated to ATM caplets volatilities.
+
+Tenor 20 19 18 17
+ -0.7832 -0.7832 -0.7832 -0.7832  7.4920 7.4920 6.2427 5.0198  2.3376 2.3376 3.9385 4.5590
+
+Table 3: Parameters estimates for chosen tenors.
+
+In this case and a forward Libor dynamic given by (34) , with general v  Rn-1 , the solution is of the form
+
+j+1(z ; T, l, v) = Ej+1 eiz ln Lj(T ) Lj (0) = l, vk(0) = vk, k = 1, ..., n - 1
+
+n-1
+= j+1,0 (z ; T ) exp(iz ln l) j+1,k (z; T )
+k=j
+
+(37)
+
+where
+
+j+1,0(z ; T ) = exp
+
+-
+
+1 2
+
+(1
+
+-
+
+r2
+
+)j2(T
+
+)
+
+z2 + iz
+
+T
+, j2(T ) = |j|2 dt
+0
+
+and each j+1,k (z ; T ) = j+1,k (z ; T, l, vk) satisfies the parabolic equation
+
+ j +1,k T
+
+=
+
+(kj+1)(k(j+1)
+
+-
+
+vk
+
+)
+
+
+
+j+1,k vk
+
+-
+
+1 2
+
+r2
+
+ j2k
+
+vk
+
+
+
+j+1,k l
+
++
+
+1 2
+
+k2
+
+vk
+
+2
+
+j+1,k vk2
+
++
+
+1 2
+
+r2
+
+ j2k
+
+vk
+
+
+
+2
+
+j+1,k l2
+
++
+
+k
+
+k
+
+rjk
+
+vk
+
+ 2 j +1,k  vk  l
+
+with the terminal condition
+
+j+1,k(z ; 0, l, vk) = 1, as can be easily verified by the Feynman-Kac formula.
+
+16
+
+0.10 0.12 0.14 0.16 0.18 0.10 0.12 0.14 0.16 0.18
+
+Caplet Volatilities
+
+[ 20 , 20.5 ]
+
+[ 19 , 19.5 ]
+
+Caplet Volatilities
+
+[ 18 , 18.5 ]
+
+[ 17 , 17.5 ]
+
+0.02 0.04 0.06 0.08 0.10 Strikes
+
+0.02 0.04 0.06 0.08 0.10 Strikes
+
+Figure 2: Caplet volas from the calibrated model (solid lines) and market caplets volas TK (dashed lines) for different caplet periods.
+
+Since j are constant, the above equation can be solved explicitly. The ansatz j+1,k(z; T, l, vk) = exp (Aj,k(z; T ) + vkBj,k(z; T ))
+
+will yield
+
+Aj,k(z; T )
+
+=
+
+k(j+1)k(j+1) k2
+
+(aj,k + dj,k)T - 2 ln
+
+1 - gj,kedj,kT 1 - gj,k
+
+Bj,k(z; T )
+
+=
+
+(aj,k + dj,k)(1 - edj,k k2(1 - gj,kedj,kT )
+
+T
+
+)
+
+,
+
+where
+
+aj,k = (kj+1) - irkkjkz
+
+dj,k =
+
+a2j,k
+
++
+
+r2
+
+2 jk
+
+k2
+
+(z2
+
++
+
+iz)
+
+gj,k
+
+=
+
+aj,k aj,k
+
++ -
+
+dj,k . dj,k
+
+17
+
+Note that the first lower index j + 1 at the characteristic function refers to the measure, whereas the first index j at the introduced coefficients refers to relevant forward Libor. The second index refers to the component. It is again the choice of  that enables the product in (37) to be startet at j. This crucial feature will show to be beneficial in the calibration part. When j = n - 1, for example, only the last ln-Libor will contribute a non-trivial factor to the characteristic function. For all others we have
+n,k  1 , k = 1, ..., n - 2 .
+
+8.0.2 CIR Consider a CIR model of the form
+
+dv(t) = ( - v(t))dt +  v(t)dW (t), , ,  > 0.
+
+Given v(u), v(t) with t > u is distributed with density
+d2(x, )
+where 2d(x, ) is the density of a noncentral chi-square random variable with d degrees of freedom and noncentrality parameter  and
+4  = 2(1 - e-(t-u))
+4e-(t-u)  = 2(1 - e-(t-u)) v(u)
+4 d = 2 .
+The conditional mean of v(t) is given by
+E(v(t)|v(u)) = -1( + d) = (v(u) - )e-(t-u) + 
+
+and the conditional second moment is
+
+E(v2(t)|v(u))
+
+=
+
+(2(d + 2) + ( 2
+
++ d)2)
+
+=
+
+2 1+
+
+[E(v(t)|v(u))]2 - 2 e-2(t-u)v2(u).
+
+dd
+
+18
+
+8.0.3 Measure Invariance
+
+Why
+
+is
+
+dW
+
+(n,i+1) k
+
+invariant
+
+under
+
+the
+
+various
+
+measures?
+
+See Jamshidian for the compensator, which is given by
+
+with That is, we have
+
+µi+1
+
+W
+
+(n) k
+
+=
+
+W
+
+(n) k
+
+,
+
+ln
+
+M
+
+.
+
+M = jn=-i1+1(1 + Lj ).
+
+
+
+n-1
+
+W
+
+(n) k
+
+,
+
+ln
+
+M
+
+=
+
+dW (kn)d ln M
+
+=
+
+dW
+
+(n) k
+
+d
+
+
+
+ln (1 + Lj)
+
+j=i+1
+
+n-1
+= dW k(n)d ln(1 + Lj)
+j=i+1
+
+=
+
+n-1 j=i+1
+
+1
+
+Lj + Lj
+
+dW
+
+(n) k
+
+d
+
+ln
+
+Lj
+
+A closer look at (15) reveils that all terms are negligible, since of higher order
+
+than dt, or zero due to independence of W and W or W , respectively. We thus
+
+have
+
+W
+
+(n) k
+
+,
+
+ln
+
+M
+
+=0
+
+or
+
+in
+
+other
+
+words,
+
+as
+
+indicated
+
+by
+
+dW
+
+(n,i+1) k
+
+:
+
+dW
+
+(n) k
+
+=
+
+dW
+
+(i+1) k
+
+.
+
+Analoguosly we obtain by exchanging W k with Wk that Wk(n), ln M = dWk(n)d ln M
+
+=
+
+n-1 j=i+1
+
+1
+
+Lj + Lj
+
+dWk(n)d ln
+
+Lj
+
+=
+
+n-1 j=i+1
+
+rLj 1 + Lj
+
+jk
+
+vtk dt
+
+19
+
+References
+[1] Andersen, L. and R. Brotherton-Ratcliffe (2001). Extended Libor Market Models with Stochastic Volatility. Working paper, Gen Re Securities.
+[2] Andersen, L. and Piterbarg, V. (2007). Moment Explosions in Stochastic Volatility Models. Finance Stoch. 11, no. 1, 29­50.
+[3] Belomestny, D. and M. Reiß (2006). Optimal calibration of exponential L´evy models. Finance Stoch. 10, no. 449-474, 29­50.
+[4] Belomestny, D. and J.G.M. Schoenmakers (2006). A Jump-Diffusion Libor Model and its Robust Calibration, Preprint No. 1113, WIAS Berlin.
+[5] Brigo, D. and F. Mercurio (2001) Interest rate models--theory and practice. Springer Finance. Springer-Verlag, Berlin.
+[6] Brace, A., Gatarek, D. and M. Musiela (1997). The Market Model of Interest Rate Dynamics. Mathematical Finance, 7 (2), 127­155.
+[7] Carr, P. and D. Madan (1999). Option Valuation Using the Fast Fourier Transform, Journal of Computational Finance, 2, 6174.
+[8] Cox, J.C., Ingersoll, J.E. and S.A. Ross (1985). A Theory of the Term Structure of Interest Rates, Econometrica 53, 385-407.
+[9] Eberlein, E., Keller U. and K. Prause (1998). New insights into smile, mispricing, and value at risk: the hyperbolic model. Journal of Business, 71(3), 371405.
+[10] Eberlein, E. and F. O¨ zkan (2005). The L´evy Libor model, Finance Stoch. 7, no. 1, 1­27.
+[11] Glasserman, P. Monte Carlo methods in financial engineering. Applications of Mathematics (New York), 53. Stochastic Modelling and Applied Probability. Springer-Verlag, New York, 2004.
+[12] Glasserman, P. and S.G. Kou (2003). The term structure of simple forward rates with jump risk. Mathematical Finance 13, no. 3, 383­410.
+[13] Heston, S. (1993). A closed-form solution for options with stochastic volatility with applications to bond and currency options. The Review of Financial Studies, Vol. 6, No. 2, 327-343.
+[14] Jamshidan, F.(1997). LIBOR and swap market models and measures. Finance and Stochastics, 1, 293­330.
+[15] Jamshidian, F.(2001). LIBOR Market Model with Semimartingales, in Option Pricing, Interest Rates and Risk Management, Cambridge Univ.
+20
+
+[16] Kahl Ch. and P. J¨ackel (2006). Fast strong approximation Monte Carlo schemes for stochastic volatility models. Quantitative Finance, 6(6), 513­ 536.
+[17] Kurbanmuradov, O., Sabelfeld, K. and J. Schoenmakers(2002) Lognormal approximations to Libor market models. Journal of Computational Finance, 6(1), 69­100.
+[18] Merton, R.C. (1976). Option pricing when underlying stock returns are discontinuous. J. Financial Economics, 3(1), 125­144.
+[19] Miltersen, K., K. Sandmann, and D. Sondermann (1997). Closed-form solutions for term structure derivatives with lognormal interest rates. Journal of Finance, 409-430.
+[20] Piterbarg,V. (2004). A stochastic volatility forward Libor model with a term structure of volatility smiles. Working paper. SSRN.
+[21] Schoenmakers, J.: Robust Libor Modelling and Pricing of Derivative Products. BocaRaton London NewYork Singapore: Chapman & Hall ­ CRC Press 2005
+[22] Wu, L. and F. Zhang (2006). Libor Market Model with Stochastic Volatility. Journal of Industrial and Management Optimization, 2, 199­207.
+[23] Zhu, J. (2007). An extended Libor Market Model with nested stochastic volatility dynamics. Working paper. SSRN.
+21
+
+SFB 649 Discussion Paper Series 2007
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Trade Liberalisation, Process and Product Innovation, and Relative Skill Demand" by Sebastian Braun, January 2007.
+002 "Robust Risk Management. Accounting for Nonstationarity and Heavy Tails" by Ying Chen and Vladimir Spokoiny, January 2007.
+003 "Explaining Asset Prices with External Habits and Wage Rigidities in a DSGE Model." by Harald Uhlig, January 2007.
+004 "Volatility and Causality in Asia Pacific Financial Markets" by Enzo Weber, January 2007.
+005 "Quantile Sieve Estimates For Time Series" by Jürgen Franke, JeanPierre Stockis and Joseph Tadjuidje, February 2007.
+006 "Real Origins of the Great Depression: Monopolistic Competition, Union Power, and the American Business Cycle in the 1920s" by Monique Ebell and Albrecht Ritschl, February 2007.
+007 "Rules, Discretion or Reputation? Monetary Policies and the Efficiency of Financial Markets in Germany, 14th to 16th Centuries" by Oliver Volckart, February 2007.
+008 "Sectoral Transformation, Turbulence, and Labour Market Dynamics in Germany" by Ronald Bachmann and Michael C. Burda, February 2007.
+009 "Union Wage Compression in a Right-to-Manage Model" by Thorsten Vogel, February 2007.
+010 "On -additive robust representation of convex risk measures for unbounded financial positions in the presence of uncertainty about the market model" by Volker Krätschmer, March 2007.
+011 "Media Coverage and Macroeconomic Information Processing" by Alexandra Niessen, March 2007.
+012 "Are Correlations Constant Over Time? Application of the CC-TRIGt-test to Return Series from Different Asset Classes." by Matthias Fischer, March 2007.
+013 "Uncertain Paternity, Mating Market Failure, and the Institution of Marriage" by Dirk Bethmann and Michael Kvasnicka, March 2007.
+014 "What Happened to the Transatlantic Capital Market Relations?" by Enzo Weber, March 2007.
+015 "Who Leads Financial Markets?" by Enzo Weber, April 2007. 016 "Fiscal Policy Rules in Practice" by Andreas Thams, April 2007. 017 "Empirical Pricing Kernels and Investor Preferences" by Kai Detlefsen,
+Wolfgang Härdle and Rouslan Moro, April 2007. 018 "Simultaneous Causality in International Trade" by Enzo Weber, April
+2007. 019 "Regional and Outward Economic Integration in South-East Asia" by
+Enzo Weber, April 2007. 020 "Computational Statistics and Data Visualization" by Antony Unwin,
+Chun-houh Chen and Wolfgang Härdle, April 2007. 021 "Ideology Without Ideologists" by Lydia Mechtenberg, April 2007. 022 "A Generalized ARFIMA Process with Markov-Switching Fractional
+Differencing Parameter" by Wen-Jen Tsay and Wolfgang Härdle, April 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "Time Series Modelling with Semiparametric Factor Dynamics" by Szymon Borak, Wolfgang Härdle, Enno Mammen and Byeong U. Park, April 2007.
+024 "From Animal Baits to Investors' Preference: Estimating and Demixing of the Weight Function in Semiparametric Models for Biased Samples" by Ya'acov Ritov and Wolfgang Härdle, May 2007.
+025 "Statistics of Risk Aversion" by Enzo Giacomini and Wolfgang Härdle, May 2007.
+026 "Robust Optimal Control for a Consumption-Investment Problem" by Alexander Schied, May 2007.
+027 "Long Memory Persistence in the Factor of Implied Volatility Dynamics" by Wolfgang Härdle and Julius Mungo, May 2007.
+028 "Macroeconomic Policy in a Heterogeneous Monetary Union" by Oliver Grimm and Stefan Ried, May 2007.
+029 "Comparison of Panel Cointegration Tests" by Deniz Dilan Karaman Örsal, May 2007.
+030 "Robust Maximization of Consumption with Logarithmic Utility" by Daniel Hernández-Hernández and Alexander Schied, May 2007.
+031 "Using Wiki to Build an E-learning System in Statistics in Arabic Language" by Taleb Ahmad, Wolfgang Härdle and Sigbert Klinke, May 2007.
+032 "Visualization of Competitive Market Structure by Means of Choice Data" by Werner Kunz, May 2007.
+033 "Does International Outsourcing Depress Union Wages? by Sebastian Braun and Juliane Scheffel, May 2007.
+034 "A Note on the Effect of Outsourcing on Union Wages" by Sebastian Braun and Juliane Scheffel, May 2007.
+035 "Estimating Probabilities of Default With Support Vector Machines" by Wolfgang Härdle, Rouslan Moro and Dorothea Schäfer, June 2007.
+036 "Yxilon ­ A Client/Server Based Statistical Environment" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, June 2007.
+037 "Calibrating CAT Bonds for Mexican Earthquakes" by Wolfgang Härdle and Brenda López Cabrera, June 2007.
+038 "Economic Integration and the Foreign Exchange" by Enzo Weber, June 2007.
+039 "Tracking Down the Business Cycle: A Dynamic Factor Model For Germany 1820-1913" by Samad Sarferaz and Martin Uebele, June 2007.
+040 "Optimal Policy Under Model Uncertainty: A Structural-Bayesian Estimation Approach" by Alexander Kriwoluzky and Christian Stoltenberg, July 2007.
+041 "QuantNet ­ A Database-Driven Online Repository of Scientific Information" by Anton Andriyashin and Wolfgang Härdle, July 2007.
+042 "Exchange Rate Uncertainty and Trade Growth - A Comparison of Linear and Nonlinear (Forecasting) Models" by Helmut Herwartz and Henning Weber, July 2007.
+043 "How do Rating Agencies Score in Predicting Firm Performance" by Gunter Löffler and Peter N. Posch, August 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+044 "Ein Vergleich des binären Logit-Modells mit künstlichen neuronalen Netzen zur Insolvenzprognose anhand relativer Bilanzkennzahlen" by Ronald Franken, August 2007.
+045 "Promotion Tournaments and Individual Performance Pay" by Anja Schöttner and Veikko Thiele, August 2007.
+046 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, August 2007.
+047 "Risiken infolge von Technologie-Outsourcing?" by Michael Stephan, August 2007.
+048 "Sensitivities for Bermudan Options by Regression Methods" by Denis Belomestny, Grigori Milstein and John Schoenmakers, August 2007.
+049 "Occupational Choice and the Spirit of Capitalism" by Matthias Doepke and Fabrizio Zilibotti, August 2007.
+050 "On the Utility of E-Learning in Statistics" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, August 2007.
+051 "Mergers & Acquisitions and Innovation Performance in the Telecommunications Equipment Industry" by Tseveen Gantumur and Andreas Stephan, August 2007.
+052 "Capturing Common Components in High-Frequency Financial Time Series: A Multivariate Stochastic Multiplicative Error Model" by Nikolaus Hautsch, September 2007.
+053 "World War II, Missing Men, and Out-of-wedlock Childbearing" by Michael Kvasnicka and Dirk Bethmann, September 2007.
+054 "The Drivers and Implications of Business Divestiture ­ An Application and Extension of Prior Findings" by Carolin Decker, September 2007.
+055 "Why Managers Hold Shares of Their Firms: An Empirical Analysis" by Ulf von Lilienfeld-Toal and Stefan Ruenzi, September 2007.
+056 "Auswirkungen der IFRS-Umstellung auf die Risikoprämie von Unternehmensanleihen - Eine empirische Studie für Deutschland, Österreich und die Schweiz" by Kerstin Kiefer and Philipp Schorn, September 2007.
+057 "Conditional Complexity of Compression for Authorship Attribution" by Mikhail B. Malyutov, Chammi I. Wickramasinghe and Sufeng Li, September 2007.
+058 "Total Work, Gender and Social Norms" by Michael Burda, Daniel S. Hamermesh and Philippe Weil, September 2007.
+059 "Long-Term Orientation in Family and Non-Family Firms: a Bayesian Analysis" by Jörn Hendrich Block and Andreas Thams, October 2007
+060 "Kombinierte Liquiditäts- und Solvenzkennzahlen und ein darauf basierendes Insolvenzprognosemodell für deutsche GmbHs" by Volodymyr Perederiy, October 2007
+061 "Embedding R in the Mediawiki" by Sigbert Klinke and Olga ZlatkinTroitschanskaia, October 2007
+062 "Das Hybride Wahlmodell und seine Anwendung im Marketing" by Till Dannewald, Henning Kreis and Nadja Silberhorn, November 2007
+063 "Determinants of the Acquisition of Smaller Firms by Larger Incumbents in High-Tech Industries: Are they related to Innovation and Technology Sourcing? " by Marcus Wagner, November 2007
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+064 "Correlation vs. Causality in Stock Market Comovement" by Enzo Weber, October 2007
+065 "Integrating latent variables in discrete choice models ­ How higherorder values and attitudes determine consumer choice" by Dirk Temme, Marcel Paulssen and Till Dannewald, December 2007
+066 "Modelling Financial High Frequency Data Using Point Processes" by Luc Bauwens and Nikolaus Hautsch, November 2007
+067 "A stochastic volatility Libor model and its robustcalibration" by Denis Belomestny, Stanley Matthew and John Schoenmakers, December 2007
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

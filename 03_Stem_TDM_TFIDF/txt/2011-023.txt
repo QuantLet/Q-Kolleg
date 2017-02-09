@@ -1,0 +1,1990 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2011-023
+Forecasting Corporate Distress in the Asian and
+Pacific Region
+Russ Moro* Wolfgang Härdle** Saeideh Aliakbari* Linda Hoffmann**
+* Brunel University, United Kingdom ** Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Forecasting Corporate Distress in the Asian and Pacific Region
+Russ Moro, Wolfgang H¨ardle, Saeideh Aliakbari§, Linda Hoffmann¶
+The authors are grateful for the financial support, data access and excellent research facilities provided by the Risk Management Institute (RMI) of the National University of Singapore (NUS) for the study of corporate distress in Asia and the Pacific region. We personally thank Prof. Duan Jin-Chuan and Dr. Oliver Chen for their inspiration and valuable suggestions. We also would like to express our thanks to the staff of RMI NUS for their patience and readiness to help in conducting our research. The work of R. A. Moro in development of the statistical algorithms was partially supported by the German Academic Exchange Service (DAAD). W. K. Ha¨rdle and L. Hoffmann were also assisted by the Deutsche Forschungsgemeinschaft through the SFB 649 `Economic Risk'.
+Brunel University, Department of Economics and Finance, School of Social Sciences, Uxbridge, Middx UB8 3PH, United Kingdom and DIW Econ, Mohrenstraße 58, 10117 Berlin, Germany; e-mail: Russ.Moro@brunel.ac.uk; phone: +44 1895 266058.
+Center for Applied Statistics and Economics, Humboldt-Universit¨at zu Berlin, Spandauer Straße 1, 10178 Berlin, Germany and National Central University, Department of Finance, No. 300, Jhongda Rd., Jhongli City, Taoyuan County 32001, Taiwan (R.O.C.); e-mail: stat@wiwi.hu-berlin.de.
+§Brunel University, Department of Economics and Finance, School of Social Sciences, Uxbridge, Middx UB8 3PH, United Kingdom; e-mail: Saeideh.Aliakbari@brunel.ac.uk.
+¶Center for Applied Statistics and Economics, Humboldt-Universita¨t zu Berlin, Spandauer Straße 1, 10178 Berlin, Germany; e-mail: Linda.Hoffmann@cms.hu-berlin.de.
+
+This study analyses credit default risk for firms in the Asian and Pacific region by applying two methodologies: a Support Vector Machine (SVM) and a logistic regression (Logit). Among different financial ratios suggested as predictors of default, leverage ratios and the company size display a higher discriminating power compared to others. An analysis of the dependencies between PD and financial ratios is provided along with a comparison with Europe (Germany). With respect to forecasting accuracy the SVM has a lower model risk than the Logit on average and displays a more robust performance. This result holds true across different years.
+Keywords: Credit risk, Bankruptcy, Asian companies, SVM
+JEL Classification: C14, G33, C45
+
+1 Introduction
+Although credit risk has always been a major concern for investors, in recent years high profile insolvencies have attracted widespread attention, first, after the dot-com bubble and then in connection with the subprime mortgage crisis. In the Asian and Pacific region, particularly the crisis of 1998, caused a wave of insolvencies. The announcement of the Basel III Capital Accord in 2010 after the adoption of Basel II in 2004 and Basel I in 1992 indicates both the concern of banks and regulators about providing protection against credit risk and, at the same time, inadequacy of the existing protection measures and methods for measuring risk.
+As early as in the beginning of the XXth century Winakor & Smith (1935) proposed the use of financial ratios for seperating firms into solid stable and potentially bankrupt ones. Ramser & Foster (1931) and Fitzpatrick (1932) also applied financial ratios for bankruptcy prediction. The systematic application of statistics to bankruptcy analysis began with the works of Beaver (1966) and Altman (1968). They introduced the univariate and multivariate discriminant analysis (DA), respectively. In 1968 Altman presented a formula for predicting bankruptcy known as the linear Z-score model (Altman, Haldeman & Narayanan, 1977). This formula remains popular for forecasting default rates even today due to its simplicity. The drawback of the Z-score model is the assumption of equal normal distributions for both failing and successful firms with the same covariance matrix.
+Later the focus of research shifted towards the logit and probit models (Ohlson (1980), Martin (1977), Wiginton (1980), Zavgren (1983) and Zmijewski (1984)). Other statistical methods which were introduced at the same time, such as the gambler's ruin model (Wilcox, 1971) and option pricing theory (Merton, 1974), were based on time series data. Later hazard or survival models (Glennon & Nigro, 2005) and Forward Intensity Approach (J. C. Duan & Wang, 2010) used both time series and cross-sectional data. Another type of models such as recursive partitioning (Frydman, Altman & Kao, 1985), neural networks (Tam & Kiang, 1992), rough sets (Dimitras, Slowinski, Susmaga & Zopounidis, 1999) and Support Vector Machines (SVM) (Martens, Baesens, van Gestel & Vanthienen, 2006) were mostly applied to cross-sectional data.
+One of the major shortcomings of many methodologies is the fact that they ignore non-monotonic dependence between some financial ratios and the PD such as the logistic regression or are badly suited for credit risk modelling such as neural networks due to their multiple local equilibria. For further information please refer to Falkenstein, Boral & Carty (2000), Manning (2004), Fernandes (2005) and Ha¨rdle, Moro & Scha¨fer (2010). For instance, the probability of default (PD) is non-
+3
+
+monotonically dependent from the net income (NI) growth. Negative or very slowly growing NI may create problems with paying company debt obligations. On the other hand, high NI is likely to be non-sustainable in the long run causing high volatility. Both situations can lead to a higher PD, what is in accordance with the existing literature (Merton (1974), Bharath & Shumway (2008)). The identification of the shape of the dependence, however, still remains a problem.
+The non-monotonic and non-linear dependence between some financial ratios and the PD has been addressed by introducing non-linear models such as recursive partitioning, also known as classification and regression trees (Frydman, Altman & Kao (1985), Frydman, Altman & Kao (1985)), neural networks (Tam & Kiang (1992)), Proximal Support Vector Machines (PSVM) ((Friedman, 2002)) and Support Vector Machines (SVM) ((Martens, Baesens, van Gestel & Vanthienen, 2006), (Ha¨rdle, Moro & Scha¨fer, 2010)).
+When classifying distressed vs. solvent companies, the SVM allows adjustment of its complexity. The compexity can be then optimised with respect to some accuracy measure, for example the Accuracy Ratio (AR), for the data and predicting variables at hand. Figure 1 illustrates the classical trade-off between the good in-sample preformance and the generalisation ability. In this example by changing complexity of the classification method between it possible For more details on the SVM please see Appendix A.
+In this study we use the Logit and SVM approaches, both in their cross-sectional and dynamic setting, to analyse credit risk of firms in the Asian and Pacific region and to establish the most important predictors of default selected from financial ratios.
+2 Data Description
+The data used in this study were collected and prepared by the Risk Management Institute (RMI) of the National University of Singapore (NUS). The data contain quarterly and annual company reports, default indicators and stock prices for 25, 000 listed firms from the Asian and Pacific region as well as the macroeconomic and selected financial data for the countries in which the firms operate. The time coverage spans from 1980 to 2010. The database also indicates the relevant industry of operation for each firm. In our analysis we exclude companies in the financial sector, asset backed securities, funds and governement owned enterprises since the nature of these businesses is different from non-governmental manufacturing firms and service providers.
+At the first stage the financial data are converted into financial ratios. These ratios are
+4
+
+X2 e.g. Leverage
+
+solvent
+
+1 32
+
+companies
+
+o
+
+oo o o
+
+o o
+o
+
+oo oo
+
+o
+
+oo o
+
+oo
+
+o
+
+o oo
+
+o o oo
+
+x
+
+ox
+
+o xx
+
+o oxx
+
+xx
+
+o o o
+
+x x4
+
+xx
+x x
+
+xx
+
+x x
+
+x Ao x
+
+x x
+
+ox
+
+oo o
+
+x
+
+x
+
+x
+
+x
+distressed
+
+x xxx
+
+x companies
+
+X1 e.g. Profitability
+
+Figure 1: A classification example. The boundary between the classes of solvent and insolvent companies can be either linear (1 or 2) or non-linear (3 and 4). A model capable of producing non-linear boundaries can have low (linear cases 1 and 2), moderate (case 3) and high (case 4 where overfitting is evident) complexities. By optimising the complexity with respect to some accuracy criterion, the optimal boundary can be established (e.g. case 3).
+
+5
+
+grouped into seven categories: profitability, leverage, liquidity, activity, cost structure, dynamics and size, characterising company performance from different sides. A summary statistics of the indicators is presented in tables 2 ­ 4.
+Financial reports in the database are released quarterly, semi annually and annually, however, the beginning of a financial year and, hence, reporting dates for companies are different and spread throughout the year. To reflect this situation we index each financial report by a unique time ID number according to the year and month of the report in order to have the fianacial information on regular monthly basis for all firms. Since the reporting date almost invariably falls on the last day of a month, this encoding gives us the precise time of a default event.
+After assigning the report time ID number to each observation, distressed firms are defined based on the default information in the database. Each monthly report of a firm receives the default indicator y = 1 if the firm files a credit event report within a period with a one year long period starting after one year after the date of the financial report (distressed observations). For the rest of the observations (solvent observations) the default indicatior is y = -1. In this study we call this horizon specification design 1. This horizon is considered to analyse the effects of the default on the long term debt which has maturity of over one year.
+Additionally, to see the effects of the short term debt on PD, we analyse distress for a different horizon, when the default indicator y = 1 is assigned to those observations recording a credit event report filing within the two year period from the date of the financial report (distressed observations) and for the rest (solvent observations) the default indicatior is y = -1. This horizon specification is called design 2.
+A broad range of credit events is applied to identify distressed firms and assign the default indicatior (y = 1), including filings under Chapter 11, Chapter 15, Chapter 7, restructuring, liquidation, being sued by creditors and failing in coupon and principle payments. Overall, the bankruptcy events coded from 100 to 120 and 300 to 333 in the database are included to define distressed observations.
+In the dataset with the horizon under the design 2 specification, there are 311,682 observations from which 7,449 (2.39%) observations are indicated as distressed and 304,233 (97.61%) as solvent. The distribution of solvent and distressed observations among countries varies substantially. For instance, for Australia and Hong Kong, there are respectively only 6 (4.03%) and 19 (0.34%) of distressed observations out of 149 and 5,524 observations whereas for China there are 4,182 (7.22%) distressed observations out of 57,921 observations (see table 1).
+6
+
+Country
+Australia China
+Hong Kong India
+Indonesia Japan
+Malaysia Philippines Singapore South Korea
+Taiwan Thailand
+
+Horizon: Design 1
+
+Distressed Solvent
+
+firms
+
+firms
+
+3 (2.01 % )
+
+146
+
+1088 (2.42 % ) 43784
+
+10 (0.18 % ) 5514
+
+48 (0.17 % ) 28840
+
+26 (0.42 % ) 6131
+
+124 (0.17 % ) 71489
+
+385 (1.17 % ) 32512
+
+113 (1.90 % ) 5839
+
+34 (0.48 % ) 7009
+
+99 (0.20 % ) 49828
+
+260 (1.08 % ) 23906
+
+202 (1.19 % ) 16702
+
+Horizon: Design 2
+
+Distressed Solvent
+
+firms
+
+firms
+
+6 (4.03 % )
+
+143
+
+4182 (7.22 % ) 53739
+
+19 (0.34 % ) 5505
+
+148 (0.51 % ) 28775
+
+70 (1.12 % ) 6186
+
+258 (0.36 % ) 71380
+
+1100 (3.12 % ) 34173
+
+267 (4.16 % ) 6154
+
+77 (1.08 % ) 7050
+
+232 (0.46 % ) 50153
+
+604 (2.47 % ) 23809
+
+486 (2.77 % ) 17028
+
+Table 1: Distribution of distressed and solvent firms across countries.
+
+2.1 Variable Description
+The components of the financial ratios which are estimated from data are explained below and the summary statistics for them for distressed and solvent firms are provided in tables 2 and 3.
+Profitability Ratios
+1. NI/TA : return on assets; net income / total assets. 2. NI/S : net profit margin; net income / sales. 3. OI/TA: operating return on assets; operating income / total assets. 4. OI/S : operating profit margin; operating income / sales. 5. EBIT/TA: gross return on assets; earnings before interest and taxes / total assets. 6. EBIT/S : gross profit margin; earnings before interest and taxes / sales.
+
+Leverage Ratios
+1. OK/TA : own capital ratio; own capital / total assets. 2. CL/TA : current debt ratio; current liabilities / total assets. 3. TD/TA : bank debt ratio; the ratio of total bank debt / total assets.
+
+Liquidity Ratios
+1. STD/D : fraction of debt which is short term debt (liquidity). 2. CASH/TA : cash and cash equivalents / total assets. 3. CASH/CL : cash ratio; the ratio of cash and cash equivalents / current liabilities.
+
+7
+
+4. QA/CL : quick ratio; quick assets (current assets inventories) / current liabilities. 5. CA/CL : current ratio; the ratio of current assets / current liabilities. 6. WC/TA : working capital (current assets minus current liabilities) / total assets. 7. CL/TL : current liabilities / total liabilities.
+Activity Ratios 1. TA/S : asset turnover; total assets / sales. 2. INV/S : inventory turnover; inventories / sales. 3. AR/S : account receivable turnover; account receivables / sales. 4. AP/CS : account payable turnover; account payables / cost of sales.
+Cost Structure Ratios 1. INT/D : average cost of debt; the ratio of interest payments to debt. 2. EBIT/INT paid : interest coverage ratio; the ratio of earnings before interest and
+taxes to interest paid.
+Dynamic Ratios 1. Sales-Growth : one year growth in sales. 2. NI-Growth : one year growth in income.
+Size 1. log(TA) : company size; logarithm of total assets. 2. log(S) : logarithm of total sales.
+2.2 Summary Statistics
+In this section summary statistics of the financial ratios for distressed and solvent companies are provided. They are reported for Design 1 (table 2) and Design 2 (table 3) horizon designs, pooled across countries. The first five columns in each table summarize the estimates for distressed companies and the next five columns report the estimates for solvent companies. q0.05 and q0.95 are 5% and 95% quantiles. N is the number of observations for which the ratio can be computed based on the available data and IQR represents the interquartile range for each ratio.
+8
+
+1986-2010
+
+Distressed Firms
+
+Solvent Firms
+
+Variable
+
+N q0.05 Med IQR q0.95 N q0.05 Med IQR q0.95
+
+NI/TA NI/S OI/TA OI/S EBIT/TA EBIT/S
+
+1529 2062 1704 1723 1523 1542
+
+-0.10 -2.90 -0.06 -1.17 -0.06 -1.41
+
+-0.00 -0.00 0.00 0.02 0.00 0.02
+
+0.01 0.05 0.01 0.09 0.01 0.10
+
+Profitability
+0.04 231456 0.30 281329 0.03 232939 0.30 249187 0.04 231084 0.31 247091
+
+-0.05 -0.57 -0.03 -0.37 -0.03 -0.37
+
+0.01 0.03 0.01 0.05 0.01 0.05
+
+0.02 0.09 0.02 0.11 0.02 0.11
+
+0.05 0.27 0.05 0.29 0.05 0.29
+
+OK/TA CL/TA TD/TA
+
+1716 -0.68 0.36 0.49 1716 0.15 0.48 0.65 1506 0.12 0.44 0.58
+
+Leverage
+0.67 234206 1.51 233974 0.87 228469
+
+0.16 0.54 0.07 0.32 0.00 0.20
+
+0.70 0.45 0.36
+
+0.88 0.68 0.58
+
+STD/D CASH/TA CASH/CL QA/CL CA/CL WC/TA CL/TL
+
+1497 1685 1685 1680 1713 1713 1716
+
+0.12 0.00 0.00 0.11 0.18 -0.96 0.28
+
+0.80 0.04 0.08 0.68 1.00 -0.00 0.81
+
+0.97 0.10 0.24 1.08 1.47 0.17 0.95
+
+Liquidity
+1.00 204949 0.27 233234 0.84 232945 2.15 231103 2.79 233920 0.42 233948 1.00 233921
+
+0.08 0.00 0.01 0.30 0.50 -0.22 0.32
+
+0.69 0.09 0.27 1.11 1.52 0.17 0.78
+
+0.97 0.17 0.65 1.91 2.46 0.34 0.92
+
+1.00 0.38 2.70 5.58 6.60 0.58 1.00
+
+TA/S INV/S AR/S AP/CS
+
+1697 1657 1653 1085
+
+Activity
+
+2.29 8.67 16.61 90.13 232584
+
+0.05 0.80 1.62
+
+8.57 229603
+
+0.17 0.93 1.66
+
+4.82 230847
+
+0.09 0.65 1.14
+
+4.52 174888
+
+1.74 4.69 7.59 22.83 0.01 0.47 0.84 2.26 0.08 0.72 1.07 2.05 0.04 0.41 0.68 1.33
+
+INT/D EBIT/INT
+
+Cost Structure
+712 0.01 0.03 0.08 0.70 130408 0.00 0.02 0.06 0.56 803 -20.08 0.45 2.68 20.53 172564 -28.08 4.25 19.86 326.33
+
+Dynamics
+
+Sales-Growth 1617 -72.55 -2.81 27.42 119.62 226216 -48.84 5.21 23.89
+
+NI-Growth
+
+1744 -5.59 0.46 1.26 13.34 229415 -4.69 0.18 0.93
+
+97.17 5.14
+
+log(TA) log(S)
+
+1721 2249
+
+Size
+
+4.73 7.57 9.12 12.21 234284
+
+1.80 4.94 6.45
+
+9.83 284275
+
+4.95 9.31 11.02 2.32 7.09 9.24
+
+13.51 11.85
+
+Table 2: Summary statistics for distressed firms (the left five columns) and solvent firms (the right five columns) across countries. Horizon: Design 1. N indicates the number of observations which contain the variable. q0.05 and q0.95 are respectively 5% and 95% quantiles. IQR is the interquartile range.
+
+9
+
+1986-2010
+
+Distressed Firms
+
+Solvent Firms
+
+Variable
+
+N q0.05 Med IQR q0.95 N q0.05 Med IQR q0.95
+
+NI/TA NI/S OI/TA OI/S EBIT/TA EBIT/S
+
+4989 6657 5342 5397 4967 5022
+
+-0.15 -4.18 -0.09 -1.81 -0.09 -2.12
+
+-0.00 -0.03 0.00 0.01 0.00 0.00
+
+0.00 0.04 0.01 0.08 0.01 0.09
+
+Profitability
+0.03 240454 0.26 292615 0.03 241847 0.29 257567 0.03 240011 0.30 255490
+
+-0.06 -0.69 -0.04 -0.44 -0.04 -0.43
+
+0.01 0.03 0.01 0.05 0.01 0.05
+
+0.02 0.09 0.02 0.11 0.02 0.11
+
+0.05 0.28 0.05 0.29 0.05 0.29
+
+OK/TA CL/TA TD/TA
+
+5381 -1.25 0.34 0.48 5381 0.18 0.54 0.72 4913 0.15 0.44 0.58
+
+Leverage
+0.63 243232 2.02 242997 1.06 237398
+
+0.12 0.53 0.08 0.32 0.00 0.21
+
+0.70 0.47 0.37
+
+0.88 0.73 0.60
+
+STD/D CASH/TA CASH/CL QA/CL CA/CL WC/TA CL/TL
+
+4890 5296 5296 5289 5375 5375 5381
+
+0.17 0.00 0.00 0.10 0.15 -1.67 0.33
+
+0.89 0.05 0.08 0.64 0.90 -0.04 0.88
+
+1.00 0.11 0.24 1.00 1.37 0.16 0.97
+
+Liquidity
+1.00 213146 0.30 242186 0.71 241890 1.91 239845 2.40 242893 0.37 242925 1.00 242941
+
+0.08 0.00 0.01 0.27 0.44 -0.29 0.32
+
+0.71 0.08 0.26 1.09 1.49 0.16 0.79
+
+0.97 0.17 0.63 1.87 2.41 0.33 0.93
+
+1.00 0.38 2.63 5.47 6.51 0.58 1.00
+
+TA/S INV/S AR/S AP/CS
+
+5294 5193 5185 3427
+
+Activity
+
+2.53 9.79 17.62 107.11 240836
+
+0.09 0.90 1.78
+
+9.48 237729
+
+0.19 1.00 1.82
+
+6.54 238940
+
+0.08 0.65 1.20
+
+4.97 178398
+
+1.75 4.77 7.89 25.78 0.01 0.48 0.87 2.54 0.08 0.72 1.09 2.18 0.04 0.42 0.69 1.38
+
+INT/D EBIT/INT
+
+1802 0.01 0.04 2095 -22.50 -0.38
+
+Cost Structure
+0.12 3.02 131670 0.00 0.02 0.06 0.57 1.68 12.90 174050 -28.00 4.18 19.60 322.00
+
+Dynamics
+
+Sales-Growth 5389 -78.25 -7.82 20.61 117.90 235485 -51.28 5.12 24.24 100.80
+
+NI-Growth
+
+5792 -6.71 0.48 1.43 19.97 239939 -4.77 0.19 0.94
+
+5.31
+
+log(TA) log(S)
+
+5393 7029
+
+Size
+
+4.70 7.31 8.32 11.49 243336
+
+1.39 4.70 5.94
+
+9.39 295454
+
+4.89 9.16 10.97 2.18 6.93 9.17
+
+13.46 11.80
+
+Table 3: Summary statistics for distressed firms (the left five columns) and solvent firms (the right five columns) across countries. Horizon: Design 2. N indicates the number of observations which contain the variable. q0.05 and q0.95 are respectively 5% and 95% quantiles. IQR is the interquartile range.
+
+10
+
+Country
+Australia China
+Hong Kong India
+Indonesia Japan
+Malaysia Philippines Singapore South Korea
+Taiwan Thailand
+
+Horizon: Design 1
+
+Distressed Solvent
+
+firms
+
+firms
+
+0 (0.00 % )
+
+48
+
+634 (1.83 % ) 34048
+
+3 (0.19 % ) 1588
+
+0 (0.00 % )
+
+156
+
+26 (0.45 % ) 5758
+
+104 (0.16 % ) 64735
+
+274 (1.14 % ) 23693
+
+39 (2.04 % ) 1870
+
+29 (0.53 % ) 5431
+
+77 (0.16 % ) 48115
+
+77 (0.35 % ) 22025
+
+161 (1.07 % ) 14856
+
+Horizon: Design 2
+
+Distressed Solvent
+
+firms
+
+firms
+
+0 (0.00 % )
+
+48
+
+2639 (6.10 % ) 40627
+
+7 (0.44 % ) 1584
+
+0 (0.00 % )
+
+156
+
+70 (1.19 % ) 5811
+
+227 (0.35 % ) 64637
+
+813 (3.21 % ) 24512
+
+102 (4.84 % ) 2007
+
+70 (1.27 % ) 5454
+
+177 (0.37 % ) 48385
+
+226 (1.02 % ) 21947
+
+352 (2.27 % ) 15124
+
+Table 4: Distribution of distressed and solvent firms across countries after removing 6 variables with most missing values. These variables are : INT/D, EBIT/INT, AP/CS, STD/D, Sales-Growth and NI-Growth.
+
+As we can see from table 3, the lowest number of available observatios belong to 6 variables: INT/D, EBIT/INT, AP/CS, STD/D, Sales-Growth and NI-Growth. Table 4 presents the distribution of distressed and solvent firms after removing these 6 variables with most missing values. After removing them and cleaning missing values the total number of distressed observations in the data set increases from 1,182 to 4,688.
+
+3 Univariate Analysis of the Predictors of Default
+
+The analysis of financial ratios and their individual power as predictors of default can be concisely done by estimating univariate dependence of PD from each variable. Since the range of each predictor can change significantly, we represent all predictors with their percentiles. Univariately estimated PDs are reported in figures 2 ­ 8. They were obtained as k nearest neighbor estimates (k-NN) with Gaussian weights:
+
+n
+
+I (yi
+
+=
+
+1)e-
+
+(q-qi )2 22
+
+P D(q) = i=1
+
+en
+
+-
+
+(q-qi )2 22
+
+,
+
+i=1
+
+(3.1)
+
+where 0  q  1 is a percentile of a company for which PD is estimated, qi is the percentile of company i of the data set and the smoothing parameter  is set to 0.08. I(yi = 1) is the distress indicator which equals 1 if yi = 1 when company i is defined as distressed and 0 otherwise.
+
+11
+
+Univariate PD (Profitability Ratios)
+10 NI/TA OI/TA
+8 EBIT/TA
+6
+
+Univariate PD (Profitability Ratios)
+10 NI/TA OI/TA
+8 EBIT/TA
+6
+
+PD %
+
+PD %
+
+44
+
+22
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+Univariate PD (Profitability Ratios)
+10 NI/S OI/S
+8 EBIT/S
+6
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+Univariate PD (Profitability Ratios)
+10 NI/S OI/S
+8 EBIT/S
+6
+
+PD %
+
+PD %
+
+44
+
+22
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+Figure 2: Univariate probabilities of default for Profitability Ratios pooled over countries and years. Horizon: Design 1 (left panel), Horizon: Design 2 (right panel).
+
+The variables differ substantially in their predictive power. For instance, variables EBIT/TA, CL/TA and log(S) indicate strong predictive power and also traditionally appear in the literature as strong indicators. In contrast some variables such as STD/D, AR/S and Sales-Growth show less discriminating power.
+Another important observation from the plots is that some predictors, many of which with high discriminating power, such as CL/TA, OK/TA, CA/CL, EBIT/INTpaid, log(TA), INT/D and CL/TL have a non-monotonic dependence with PD.
+We analyse the relationship between each predictor of default with PD and their predictive power on data pooled over countries. The results are presented for the two horizon designs, Design 1 and Design 2.
+
+12
+
+Univariate PD (Leverage Ratios)
+10 OK/TA CL/TA
+8 TD/TA
+6
+
+Univariate PD (Leverage Ratios)
+10 OK/TA CL/TA
+8 TD/TA
+6
+
+PD % PD %
+
+44
+
+22
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+Figure 3: Univariate probabilities of default for Leverage Ratios pooled over countries and years. Horizon: Design 1 (left panel), Horizon: Design 2 (right panel).
+
+Univariate PD (Liquidity Ratios)
+10 STD/D CASH/TA
+8 CASH/CL
+6
+
+Univariate PD (Liquidity Ratios)
+10 STD/D CASH/TA
+8 CASH/CL
+6
+
+PD %
+
+PD %
+
+44
+
+22
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+Univariate PD (Liquidity Ratios)
+10 QA/CL CA/CL
+8 WC/TA CL/TL
+6
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+Univariate PD (Liquidity Ratios)
+10 QA/CL CA/CL
+8 WC/TA CL/TL
+6
+
+PD %
+
+PD %
+
+44
+
+22
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+Figure 4: Univariate probabilities of default for Liquidity Ratios pooled over countries and years. Horizon: Design 1 (left panel), Horizon: Design 2 (right panel).
+
+13
+
+Univariate PD (Activity Ratios)
+10 TA/S INV/S
+8 AR/S AP/CS
+6
+
+Univariate PD (Activity Ratios)
+10 TA/S INV/S
+8 AR/S AP/CS
+6
+
+PD % PD %
+
+44
+
+22
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+Figure 5: Univariate probabilities of default for Activity Ratios pooled over countries and years. Horizon: Design 1 (left panel), Horizon: Design 2 (right panel).
+
+Univariate PD (Cost Structure Ratios)
+10 INT/D
+EBIT/INTpaid 8
+
+Univariate PD (Cost Structure Ratios)
+10 INT/D
+EBIT/INTpaid 8
+
+66
+
+PD % PD %
+
+44
+
+22
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+Figure 6: Univariate probabilities of default for Cost Structure Ratios pooled over countries and years. Horizon: Design 1 (left panel), Horizon: Design 2 (right panel).
+
+14
+
+Univariate PD (Dynamic Ratios)
+10 SALES-GROWTH
+NI-GROWTH 8
+
+Univariate PD (Dynamic Ratios)
+10 SALES-GROWTH
+NI-GROWTH 8
+
+66
+
+PD % PD %
+
+44
+
+22
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+Figure 7: Univariate probabilities of default for Dynamic Ratios pooled over countries and years. Horizon: Design 1 (left panel), Horizon: Design 2 (right panel).
+
+Univariate PD (Size Ratios)
+10 LOG-TA
+LOG-S 8
+
+Univariate PD (Size Ratios)
+10 LOG-TA
+LOG-S 8
+
+66
+
+PD % PD %
+
+44
+
+22
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+0 0 0.2 0.4 0.6 0.8 1
+Percentile
+
+Figure 8: Univariate probabilities of default for Company Size pooled over countries and years. Horizon: Design 1 (left panel), Horizon: Design 2 (right panel).
+
+15
+
+4 Comparison of the PD between Asian and German Companies
+In this section we compare the results of the PD univariate analysis for Asian firms (horizon: Design 1) pooled across all countries with the analysis of the same or very close financial ratios for German firms. The dataset for German companies was kindly provided for our analysis by the Deutsche Bundesbank and covers the years 1987 ­ 2005 containing around 500,000 balance sheets and income statements from which 8,000 belong to bankrupt firms. Some of the financial ratios that are used by the Deutsche Bundesbank for company rating are the same as constructed for Asian companies, while others are specific for Germany. We report the comparison of the common financial ratios in figures 9 ­ 15.
+The graphs for Germany report the cumulative default rate with the horizon of default of three years and above, whereas the horizon of default for RMI data lies between one and two years. The possibilty of registering default within a much broader range of horizons explains the higher PD for German data. For more information see (Ha¨rdle, Moro & Sch¨afer, 2010).
+German companies in contrast to Asian ones are primarily private (non-traded) and are of a smaller size. Moreover, the sample of firms in the Bundesbank database is expected to be biased. These are the firms who voluntarily applied for rating in order to receive refinancing from commercial banks and are mostly self-selected solvent companies.
+Despite many similarities, the dependence of PD from the individual financial ratios can display certain differences between German and Asian companies which can be attributed to a more homogeneous sample for Germany, disparity in company registration forms and sizes and the self-selected nature of the German sample. These differences are mostly proclaimed if the dependence for the companies from one of the regions has a U shape.
+5 Variable Selection and Rating Model Comparison
+The criterion for comparing different models is a robust accuracy measure, the median Accuracy Ratio (AR) estimated on bootstrapped subsamples. AR is the ratio of two areas (i) between the cumulative default curves for the model being evaluated and the model with the zero predictive power and (ii) between the cumulative default curves for the ideal model and the model with the zero predictive power (figure 16). AR is used
+16
+
+Univariate PD (Profitability)
+
+Univariate PD (Profitability, DE)
+
+4
+
+EBIT/S
+
+EBIT/S (K01)
+
+OI/S
+
+10
+
+OI/S (K02)
+
+EBIT/TA
+
+EBIT/TA (K23)
+
+38
+
+PD % PD %
+
+6 2
+4
+1 2
+
+00 0 0.2 0.4 0.6 0.8 1 0 0.2 0.4 0.6 0.8 1
+
+Percentile
+
+Percentile
+
+Figure 9: Univariate probabilities of default for Profitability Ratios pooled over countries and years for Asia (horizon: Design 1, left panel) and Germany (right panel).
+
+PD % PD %
+
+Univariate PD (Leverage)
+
+Univariate PD (Leverage, DE)
+
+4
+
+OK/TA
+
+OK/TA (K08)
+
+12
+
+3 10
+
+8
+2 6
+
+4 1
+2
+
+00 0 0.2 0.4 0.6 0.8 1 0 0.2 0.4 0.6 0.8 1
+
+Percentile
+
+Percentile
+
+Figure 10: Univariate probabilities of default for Leverage Ratios pooled over countries and years for Asia (horizon: Design 1, left panel) and Germany (right panel).
+
+17
+
+Univariate PD (Liquidity)
+
+Univariate PD (Liquidity, DE)
+
+4
+
+CASH/TA
+
+LiquidAssets/TA (K14)
+
+12
+
+3 10
+
+PD % PD %
+
+8
+2 6
+
+4 1
+2
+
+00 0 0.2 0.4 0.6 0.8 1 0 0.2 0.4 0.6 0.8 1
+
+Percentile
+
+Percentile
+
+Figure 11: Univariate probabilities of default for Liquidity Ratios pooled over countries and years for Asia (horizon: Design 1, left panel) and Germany (right panel).
+
+PD % PD %
+
+Univariate PD (Activity)
+
+Univariate PD (Activity, DE)
+
+4
+
+INV/S
+
+INV/S (K31)
+
+AR/S
+
+12
+
+AR/S (K06)
+
+3 10
+
+8
+2 6
+
+4 1
+2
+
+00 0 0.2 0.4 0.6 0.8 1 0 0.2 0.4 0.6 0.8 1
+
+Percentile
+
+Percentile
+
+Figure 12: Univariate probabilities of default for Activity Ratios pooled over countries and years for Asia (horizon: Design 1, left panel) and Germany (right panel).
+
+18
+
+Univariate PD (Cost Structure)
+
+Univariate PD (Cost Structure, DE)
+
+4
+
+EBIT/INTpaid
+
+EBIT/INTpaid (K29)
+
+12
+
+3 10
+
+8
+2 6
+
+4 1
+2
+
+PD % PD %
+
+00 0 0.2 0.4 0.6 0.8 1 0 0.2 0.4 0.6 0.8 1
+
+Percentile
+
+Percentile
+
+Figure 13: Univariate probabilities of default for Cost Structure Ratios pooled over countries and years for Asia (horizon: Design 1, left panel) and Germany (right panel).
+
+Univariate PD (Dynamics)
+
+Univariate PD (Dynamics, DE)
+
+4
+
+NI-GROWTH
+
+NIG (K21)
+
+12
+
+3 10
+
+8
+2 6
+
+PD % PD %
+
+4 1
+2
+
+00 0 0.2 0.4 0.6 0.8 1 0 0.2 0.4 0.6 0.8 1
+
+Percentile
+
+Percentile
+
+Figure 14: Univariate probabilities of default for Dynamic Ratios pooled over countries and years in Asia (horizon: Design 1, left panel) and Germany (right panel).
+
+19
+
+Univariate PD (Size)
+
+Univariate PD (Size, DE)
+
+4
+
+log-TA
+
+log(TA) (K33)
+
+12
+
+3 10
+
+8
+2 6
+
+PD % PD %
+
+4 1
+2
+
+00 0 0.2 0.4 0.6 0.8 1 0 0.2 0.4 0.6 0.8 1
+
+Percentile
+
+Percentile
+
+Figure 15: Univariate probabilities of default for Company Size pooled over countries and years in Asia (horizon: Design 1, left panel) and Germany (right panel).
+
+since it is not sensitive to a monotonic transformation of a score in contrast to other accuracy measures such as hit rate or  and  errors.
+The bootstrap procedure (Efron & Tibshirani, 1993) for model comparison starts with the selection of two non-overlapping random subsamples of 1000 observations (500 nondefaulting and 500 defaulting firms) from the original data set. One of those subsamples is used as a training set and the other one as a testing set. A classification model (SVM or Logit) is trained on the former and its AR is estimated on the latter. The procedure is repeated 100 times creating a set of 100 estimates of AR from which the median is computed and used for the comparison of models. The model with the highest median AR is preferred.
+All data were first cleaned from outliers by capping them: if x < qinf (x) then x = qinf (x) and if x > qsup(x) then x = qsup(x). Here qinf (x) = M edian(x) - 1.5IQR(x) and qsup(x) = Median(x) + 1.5IQR(x). Secondly, all data were standardised as xnew = (x - median(x))/(x). This was done to avoid an excessive influence of the variables with a higher dispersion. These transformations are routinely applied to the data prior to analysis.
+Variable selection was performed using the forward selection procedure which starts with univariate models. At step one the first variable is selected that produces the most accurate univariate model as judged by its median AR estimated by bootsrapping. At step two, in addition to this variable, the second variable from the remaining is chosen which has the highest meadian AR among all alternatives. At step three a trivariate model is selected, etc. The variables selected by Logit and SVM for pooled data are presented in table 5. After a certain step four the accuracy of both the Logit and SVM
+
+20
+
+Cumulative default rate 1
+
+Cumulative default rate 1
+
+Model being evaluated
+Model with zero predictive power
+
+Model with zero predictive power
+
+0
+
+A
+0
+number of all companies
+Number of companies, ordered by their score
+
+0
+
+B
+Perfect
+model
+
+0 number of
+successful companies
+
+number of bankrupt companies
+
+Number of companies, ordered by their score
+
+Figure 16: Accuracy Ratio (AR) is the ratio of two areas A and B.
+
+models does not experience any significant improvements, what is evident from very high p-values.
+The SVM was always applied with R = r d/2 and C = (c/n)(2/d), where r and c were chosen based on the values reported as performing well for company rating (Lacerda & Moro (2008), H¨ardle, Moro & Scha¨fer (2010)) . These two parameters of the SVM used in our study were r = 2.5 and c = 1 for a low complexity SVM with high generalisation ability, which is expected to perform well on a broad range of data sets. The performance of the SVM can be potentially further increased by optimising r and c for the studied data. The transformations for computing R and C figuring in the SVM formulation (see Appendix A) were applied to keep the SVM invariant of the data dimension d and the number of observations in the training set n.
+As the table 5 indicates both models considered ­ Logit and SVM ­ have selected the first three variables identically: TD/TA, log(S), CL/TA. The forth variable selected by the SVM is TA/S, while log(TA) was selected by Logit. These variables form the basis for our model comparison.
+
+6 Forecasting Accuracy
+Figure 17 represents the time series of Accuracy Ratios (AR) for pooled data and a separate country with the highest number of distressed observations, China. The training set data are collected from the year indicated in the plots along the horizontal axis. The testing set data are collected for the year T + 2, where T is the training set year. The
+
+21
+
+Logit
+
+SVM (R = 2.5, C = 1)
+
+Step Variable Med. AR pmax p Variable Med. AR pmax p
+
+1 TD/TA
+
+57.5 0 ­ TD/TA
+
+57.5 0 ­
+
+2 log(S)
+
+69.0 0 0 log(S)
+
+69.7 0 0
+
+3 CL/TA
+
+71.1 0 0 CL/TA
+
+71.7 3 5
+
+4 log(TA) 73.2 ­ 0 TA/S
+
+73.5 ­ 3
+
+5 WC/TA 73.3 ­ 19 RV
+
+73.4 ­ 75
+
+Table 5: Variables selected at each step by the forward selection procedure for Logit and SVM for the pooled data. For computing the median AR for each combination of variables and the distributions of AR required for the tests, 100 bootstrapped subsamples were used. The confidence level pmax is reported for the test with H0: the model is not significantly different from the four-variable model which was selected; p corresponds to the H0: a model is not significantly different compared to a previous reduced model which has one variable less. Median AR, pmax and p are reported in percentage points.
+
+used default horizon specification is Design 2. This arrangement guarantees that there are no overlapping observations in the data sets and forecasting is made out-of-sample. The parameters of the SVM are r = 2.5 and c = 1. The variables are the same ones selected by varibale selection procedure. For SVM these variables are: TD/TA, log(S), CL/TA and TA/S and for Logit: TD/TA, log(S), CL/TA and log(TA).
+As it is evident from figure 17, SVM usually outperforms Logit in forecasting corporate distress. The difference in AR can be as high as 7.5%, as it is the case for China in 2005. On the other hand there are much fewer years when the SVM underperformed compared to the Logit. The maximum difference in this case is only 2.4%. For the pooled data in seven years out of eight the SVM has a higher performance than the Logit, although the differences in this case are more moderate than for China.
+The similar conclusion about a higher predictive power of the SVM can be reached from analysing figure 18. It reports the distribution of the differences in AR between the SVM and Logit estimated on 100 bootstrapped subsamples of the data pooled across countries and years. Although the average improvement is moderate, around 0.5%, the SVM can achieve a much higher relative improvement for extreme scenarios. This is evident from a longer right tail of the probability density function. In other words, the SVM has a lower model misspecification risk compared with Logit, both on average and in the extreme cases.
+To illustrate the performance of the SVM and Logit we will consider a two dimensional case (figures 19 and 20). The lines correspond to the isoquants with the PD equal to the average PD for the data. However small the differences may be, they are sufficient to
+
+22
+
+AR % AR %
+
+AR of 2 Year PD Estimate (Pooled Data)
+80 SVM
+75 Logit
+70
+65
+60
+55
+50
+45
+40 2000 2001 2002 2003 2004 2005 2006 2007
+Year
+
+AR of 2 Year PD Estimate (China)
+80 SVM
+75 Logit
+
+70
+
+65
+
+60
+
+55
+
+50
+
+45
+
+40 2002
+
+2003
+
+2004 2005 Year
+
+2006
+
+2007
+
+Figure 17: AR of 2 year probabilities of default estimated with SVM and Logit for pooled data (left panel) and China (right panel). Horizon: Design 2.
+
+Difference in AR between SVM and Logit
+
+Probability density 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7
+
+-1 0 1 2 Difference, %
+Figure 18: The distribution of differences in AR for the SVM vs. Logit estimated on 100 bootstrapped subsamples for a four-variable model on pooled data. Horizon: Design 2. A Gaussian kernel estimator was used with the bandwidth 0.191.
+23
+
+explain the higher AR achieved by the SVM. The background PDs coded with colours ranging from green to red are estimated for the SVM.
+The PD range for the depicted area is from 0.11% to 8.87% for the pooled data and from 0.06% to 16.7% for China allowing for more than a 100 time difference between the highest and the lowest PD.
+7 Conclusion
+The focus of our study is the analysis of the ability of two models, SVM and Logit, to predict distress in the Asian and Pacific region in various settings.
+Both models selected only four financial ratios as predictors of default, whereas three financial ratios are the same: TD/TA, log(S) and CL/TA. They are leverage ratios and a company size. Surprisingly, no profitability ratios were selected.
+A strong U-shaped dependence of PD from the leverage and activity ratios implies the existence of the optimal capital structure (TD/TA=15%, the figure being in accordance with the existing literature) and inventory stock (Inv/S=38%).
+A comparison with the German data leads to a mixed conclusion. On one hand the dependence of PD from the profitability, leverage and liquidity ratios has a very similar shape. In all three cases for both countries it is falling. On the other hand, the dependencies for activity, cost structure and dynamic ratios and company size are dissimilar.
+Comparison of forecasting accuracy reveals that the SVM has a lower model risk than the Logit. Firstly, on average SVM is more accurate than Logit. Secondly, in the extreme cases when discrepancies between the two models are the largest, the predictive power of the Logit can fall significantly below the SVM, while the probability that the SVM will significantly underperform relative to the Logit is much smaller.
+Overall, an SVM with a high generalisation ability appears to be a promising method for distress forecasting in the Asian and Pacific region providing a reduction of model risk and a more robust performance compared to the Logit.
+Appendix A: Support Vector Machine (SVM)
+The Support Vector Machine applied in this paper is a statistical method for binary classification that is a practical implementation of the Tikhonov regularisation principle (Tikhonov (1963), Tikhonov & Arsenin (1977)). It is based on linear classifiers that
+24
+
+8.87
+
+12.1
+
+Probability of Default (Pooled Data) 1.86 3.62 5.37 7.12
+
+10.3
+
+Probability of Default (Pooled Data)
+Logit SVM
+
+8.42
+
+Log(S)
+
+6.57
+
+4.71
+
+0.11
+
+2.85
+
+0.00000 0.121
+
+0.241
+
+0.362
+
+TD/TA
+
+0.482
+
+0.603
+
+Figure 19: PD for log(S) vs. TD/TA for pooled data are represented with a background colour. 1/50th of all data is represented (1/50th of 228504 solvent and 4678 insolvent observations). Black dots denote solvent and white dots distressed companies. The separating curves are computed and ploltted for the SVM and Logit for the average PD=2.01%.
+
+16.7
+
+7.66
+
+Probability of Default (China)
+Logit SVM
+
+6.56
+
+Probability of Default (China) 3.39 6.71 10.0 13.4
+
+5.45
+
+Log(S)
+
+4.35
+
+3.24
+
+0.06
+
+2.14
+
+0.00272 0.152
+
+0.301
+
+0.450
+
+TD/TA
+
+0.599
+
+0.748
+
+Figure 20: PD for log(S) vs. TD/TA for pooled data are represented with a background colour. 1/10th of all data is represented (1/10th of 40,627 solvent and 2,639 insolvent observations). Black dots denote solvent and white dots distressed companies. The separating curves are computed and plotted for the SVM and Logit for the average PD=6.10%.
+
+25
+
+x2 xTw+b=0
+
+margin
+
+xTw+b=-1
+x
+x
+xx
+-b x |w|
+xx
+xx
+
+oo o
+
+o
+
+o o
+
+ow o oo
+x d+
+d -- xTw+b=1
+
+0 x1
+
+Figure 21: The separating hyperplane xw + b = 0 and the margin in a linearly separa-
+ble (left) and non-separable (right) case. Crosses denote solvent companies, zeros are the insolvent ones. The hyperplanes bounding the margin zone equidistant from the separating hyperplane are represented as xw + b = 1 and xw + b = -1. The misclassification penalty in the non-separable case is proportional to the distance / w .
+
+simultaneously maximise the margin or the distance between the classes and minimise empirical risk related to misclassifications on a given data set (Vapnik (1995)).
+Figure 21 illustrates the maximum margin classification for linearly separable and non-separable data in a two-dimensional case. The separating function generated by a linear SVM is
+
+xw + b = 0.
+
+(7.1)
+
+Such a classification rule makes an SVM similar to Logit. xi is a d × 1 vector of the characteristics of firm i, e.g. financial ratios described in Appendix B, whereas d is the number of characteristics or variables used. w is a d × 1 vector of weights which determine the slope of the separating function. The scalar b is a location parameter or a threshold.
+The margin is the empirically estimated distance between the opposite classes of observations. In Figure 21 it is shown as the distance between the margin boundaries ­ the parallel lines located symmetrically on both sides of the separating function. In a perfectly separable case such as in Figure 21, left panel, no observations may lie in the
+
+26
+
+margin zone and all observations must satisfy the constraints:
+
+xiw + b  1 for yi = 1, xi w + b  -1 for yi = -1.
+
+(7.2) (7.3)
+
+The constraints ensure that the observations of the opposite classes lie on the opposite sides from the margin gap.
+Misclassifications may occur if data are linearly non-separable as in Figure 21, right panel. Here the bold zero on the left-hand side of the separating line shows a solvent company that is classified as insolvent. SVM adjusts the weights w and the location parameter b in such a way that the margin is maximised and the sum of misclassification errors i is minimised. i  0 is also called a slack variable and is introduced to (7.2) and (7.3) to ensure that these constraints are satisfied. For any observation xi the modified constraints must hold:
+
+xi w + b  1 - i for yi = 1, xi w + b  -1 + i for yi = -1.
+
+(7.4) (7.5)
+
+For the representation (7.2) ­ (7.5) when 1 appears on the right hand side the margin equals 2/ w . Here w is the Euclidean norm or the length of vector w.
+Only the observations lying on the margin boundaries or on the wrong side of the margin determine the SVM solution. These observations are marked with bold crosses and zeros. They are called support vectors, hence the name of the method. This contrasts to Logit where all observations are used to derive the solution.
+The primal minimisation problem to be solved is convex and has a unique solution:
+
+min w
+
+1 2
+
+w
+
++
+
+n
+
+Ci
+
+i w
+
+i=1
+
+s.t. yi(xi w + b)  1 - i,
+
+i  0.
+
+(7.6)
+(7.7) (7.8)
+
+Here (7.4) and (7.5) are rewritten as one constraint. It is easier to see that the
+
+problem
+
+is
+
+convex
+
+if
+
+we
+
+rewrite
+
+the
+
+optimised
+
+functional
+
+in
+
+(7.6)
+
+as
+
+1 2
+
+w 2+
+
+n i=1
+
+Cii.
+
+The first term is the inverse margin, which equals 2/ w . By minimising this term we
+
+maximise the margin. The second term is a sum of weighted errors that are measured
+
+as a distance to a misclassified observation i from the boundary of its class i/ w . The
+
+parameters Ci's which are called capacity represent the penalty weights of in-sample
+
+27
+
+false classifications for each company observation i. The SVM will give priority to the correct classification of the companies with higher Ci's. Capacity is related to the width of the margin zone. Smaller Ci's are associated with bigger margins. In our case Ci are set equal for the same class. In order to make SVMs comparable for a different number of observations and various ratios between solvent and insolvent companies we compute Ci's as c/2n+ for insolvent and c/2n- for solvent companies. Here n+, and n- are the numbers of insolvent and solvent companies in the training set, c is the coefficient that is used to control the capacity of the SVM. In contrast to Ci it is invariant of the number of observations in the training data set and provides a convenient basis for comparing SVMs. This formulation implies that in a sample with mostly solvent companies, misclassifications of insolvent companies are given a higher weight. If the number of solvent and insolvent companies is the same, then Ci = c/n.
+The primal problem (7.6) ­ (7.8) rewritten in a Lagrangian formulation is
+
+1
+
+min max LP
+wk,b,i i,µi
+
+=
+
+2
+
+w
+
+nn
+
+n
+
+2 + Ci i - i{yi(xi w + b) - 1 + i} - iµi.
+
+i=1 i=1
+
+i=1
+
+The Karush-Kuhn-Tucker Conditions or first order optimality conditions are:
+
+LP wk
+
+=0
+
+
+
+LP b
+
+=0
+
+
+
+LP i
+
+=0
+
+
+
+i{yi(xiw + b) - 1 + i} = 0,
+
+µii = 0,
+
+yi(xi w + b) - 1 + i  0,
+
+i  0,
+
+µi  0,
+
+i  0,
+
+n
+wk = iyixik,
+i=1 n
+iyi = 0,
+i=1
+Ci - i - µi = 0,
+
+k = 1, . . . , d,
+
+(7.9) (7.10) (7.11)
+
+where xik is the k-th characteristic of company i. The dual problem is equivalent to the primal one since the minimised function is convex (Gale, Kuhn & Tucker (1951)). By substituting equations (7.9) ­ (7.11) into the primal Lagrangian we derive the dual
+
+28
+
+problem:
+
+n nn
+
+max i
+
+i=1
+
+i -
+
+i=1
+
+j=1
+
+ij yiyjxi xj ,
+
+s.t. 0  i  Ci,
+n
+
+iyi = 0.
+
+i=1
+
+(7.12)
+
+The n Lagrange multipliers i are the free parameters to be estimated. They represent the weights with which each observation influences the solution (see (7.14) and (7.18)). Those observations have higher weights which are harder to classify, i.e. which lie closer to the margin zone. On the contrary, the coefficients in the logistic regression are the weights assigned to each variable and can not be directly compared to Lagrange multipliers. Problem (7.12) can be equivalently expressed in a matrix notation:
+
+max  - H,  s.t. 0    C,
+y = 0.
+
+(7.13)
+
+Here  is a vector of Lagrange multipliers,  is a vector of 1's, y is a vector of company classes, +1 for solvent or -1 for insolvent ones and C here is a vector of the coefficients Ci; all vectors are of the size n × 1. The n components of the vector  are obtained as the solution of the constrained maximisation problem (7.13). The i, j'th element of the matrix H is
+d
+hij = yiyjxi xj = yiyj xikxjk.
+k=1
+The reader who desires to construct an SVM independently may find the problem formulation in the matrix notation (7.13) more convenient. The SVM problem is a classical quadratic optimisation problem (Fletcher (1987)) that can be solved with numerous software packages such as Matlab (routines minq or minqdef) or using algorithms specifically developed for the SVM such as the Sequential Minimal Optimisation (SMO) (Platt (1998)).
+Equation (7.9) of the KKT optimality conditions determines the weights wk, k = 1, . . . , d for the k-th characteristic of a company. By substituting (7.9) into (7.1) we
+
+29
+
+derive the classification rule:
+
+nn
+
+f (x) = xw + b = x iyixi + b = iyixix + b
+
+ i=1
+
+i=1
+
+ f (x) < 0  x is solvent,
+
+ f (x)  0  x is insolvent.
+
+(7.14)
+
+To derive the coefficient b we will use the fact that the separating hyperplane f (x) = 0 (see Figure 21) lies equidistant from the hyperplanes bounding the classes:
+
+x+w + b = 1 for y+ = 1, x-w + b = -1 for y- = -1,
+
+(7.15) (7.16)
+
+where x+ is any support vector that lies on or `supports' the hyperplane for y = 1 and x- is any support vector that lies on the hyperplane for y = -1. Both x+ and x- have dimensions d × 1. By summing (7.15) and (7.16) we derive:
+
+b
+
+=
+
+-
+
+1 2
+
+x+ + x-
+
+w
+
+=
+
+-
+
+1 2
+
+n
+
+iyi
+
+x+ + x-
+
+xi.
+
+i=1
+
+(7.17)
+
+To reduce numerical errors when training the SVM it is desirable to use averages over all x+ and x- instead of two arbitrary chosen support vectors.
+Note that the classification rule (7.14) depends only on the scalar product xxi, not on the original x and xi. This makes possible a `kernel trick', i.e. an implicit mapping of low dimensional data into a highly dimensional Hilbert feature space and performing a linear classification there, e.g. with an SVM. A kernel transformation corresponds to (i) performing a variable transformation and (ii) taking a scalar product of transformed variables.
+In practice xxi in the SVM formulation (7.12) is replaced with a kernel function K(x, xi) which represents a scalar product in a feature space (Weyl (1928)). Then the elements of the matrix H in (7.13) are hij = yiyjK(xi, xj). A kernel function must satisfy the Mercer conditions (Mercer (1909)), i.e. be symmetric and semipositive definite as a scalar product. It can map data into infinitely dimensional spaces as in the case with Gaussian kernels. The number of Lagrange multipliers i ­ parameters to be estimated ­ is n and can be large for large data sets. However, by selecting a small Ci's and, hence, a narrow interval [0, Ci] in which  may vary we can avoid overfitting and extremely high complexities of the SVM classifier.
+
+30
+
+Figure 22 shows a simple mapping example. The quadratic kernel function
+
+K(x, xi) = (xxi)2
+
+maps two dimensional data into a three-dimensional space of features. The three features correspond to the three components of a quadratic form in two dimensions: x~1 = x12, x~2 = 2x1x2 and x~3 = x22. The transformation from a two dimensional data space into a three dimensional feature space is (x1, x2) = (x21, 2x1x2, x22). However, we do not need to know the transformation  explicitly and can equivalently apply the kernel K(x1, x2) = (x1, x2)(x1, x2) to represent quadratic dependencies between input variables. The data separable in the data space of x1 and x2 only with a quadratic function will be separable in the feature space of x~1, x~2 and x~3 with a linear function. Thus, a non-linear SVM in the data space is equivalent to a linear SVM in the feature space. The number of features is growing fast with the dimension of the data d and the degree of the polynomial kernel making a direct data transformation not feasible and the advantages of the data transformation via a kernel obvious.
+By substituting the scalar product in (7.14) with a kernel function a non-linear score function f is derived:
+
+n
+f (x) = iyiK(x, xi) + b,
+i=1
+
+(7.18)
+
+where, by analogy with (7.17):
+
+b = - 12 n iyi {K(x+, xi) + K(x-, xi)} . i=1
+
+The non-parametric score function (7.18) does not have a compact closed form representation.
+In our study we applied an SVM with an anisotropic Gaussian or radial basis kernel
+
+K(x, xi) = exp -(x - xi)r-2-1(x - xi)/2 ,
+
+(7.19)
+
+where r is a coefficient and  is a scaling matrix, which in our case is a variancecovariance matrix of the training characteristics x. The k1, k2-th element of the matrix
+
+31
+
+Data Space
+x2
+
+o
+
+x x
+
+x xx
+
+x ox
+o x
+
+xx x o xx x oo
+
+oo
+o oo
+
+o
+
+x o
+
+x xx
+o
+
+x o
+
+o o
+o o
+
+x1
+
+x22
+
+Feature Space
+xx
+
+oo o
+
+x
+
+x
+
+x x
+
+x
+
+x x xx
+
+o
+
+o o
+
+o
+
+o o
+
+o
+
+xx x x
+
+o o
+
+o o oo
+
+o
+
+o
+
+21/2 x1x2
+
+x12
+
+Figure 22: Mapping from a two-dimensional data space into a three-dimensional space of features R2  R3.
+
+is:
+
+k1,k2
+
+=
+
+1 n
+
+n
+
+i=1
+
+xi,k1
+
+-
+
+1 n
+
+n
+
+xj,k1
+
+j=1
+
+xi,k2
+
+-
+
+1 n
+
+n
+
+xj,k2
+
+j=1
+
+.
+
+Here k1,k2 is the covariance between two financial ratios xk1 and xk1, e.g. a profitability and a leverage financial ratio.  is used to bring all variables to the same scale and exclude the excessive influence of the variables with high variance. The ability to use differently scaled data explains the term `anisotropic' in the kernel name. Before computing  and training an SVM the outliers should be processed, e.g. capped. The coefficient r is related to the complexity of classifying functions: the higher the r is, the lower is the complexity. If kernel functions allow for sufficiently rich feature spaces, the performance of SVMs with different kernels is comparable in terms of out-of-sample forecasting accuracy (Vapnik (1995)). Note that only the capacity Ci and the complexity coefficient r are to be set a priori. The Lagrange multiplies are the free parameters that are computed when training the SVM.
+The SVM has a substantial advantage in comparison to the logistic regression with transformed variables, namely, it does not require to specify the transformation but estimates it from a broad range of possible ones defined implicitly by the kernel function type and the SVM capacity coefficient. This advantage of the SVM is fully revealed when data are new or the relevance of well known transformations must be tested.
+
+32
+
+Appendix B: Conversion of Scores into PDs
+
+The conversion of rating scores into PDs provides us with a link to the existing rating classes reported by rating agencies such as Moody's and S&P. In the Logistic model a sigmoid function is applied to estimate PD assuming the logistic distribution of the latent variable. However, such an assumption is often not compatible with reality. In general the company score, as it is computed by the SVM or Logit, defines the distance between companies in terms of PD: the lower the difference in scores, the closer are companies. If a company has a higher score, it lies farther from successful companies and, therefore, its PD should be higher. This means that the dependence between scores and PDs is assumed to be monotonic. No further assumptions about the form of this dependence will be made in contrast to the already mentioned Logit model with a prespecified functional transformation from the score to PD.
+The conversion procedure consists of the estimation of PDs for the observations of the training set with a subsequent monotonisation (step one and two) and the computation of a PD for a new company (step three).
+Step one is the estimation of PDs for the companies of the training set. This is done using standard smoothing techniques in order to preliminary evaluate PDs for all i = 1, 2, . . . , n observations of the training set:
+
+P D(z) =
+
+n i=1
+
+w(z
+n i=1
+
+- zi)I(yi = w(z - zi)
+
+1)
+
+,
+
+(7.20)
+
+where w(z - zi) = exp {(z - zi)2/2h2}. The rank of the i-th company zi = Rank{f (xi)}
+
+can be 1, 2, 3, . . . up to n depending on its score f (xi); the higher the score is, the higher
+
+is the rank. h is a bandwidth, in our case h = 0.09n. The smaller is the bandwidth,
+
+the smoother is P D(z). When h  0 no smoothing is performed and all P D(zi),
+
+i = 1, 2, . . . , n, will be either 1 or 0; when h  , all P D(zi) will have the same value
+
+equal to the average probability of default for the training set.
+
+Using the company rank z instead of the score f (x) we obtain a k-NN smoother with
+
+Gaussian weights
+
+w(z-zi)
+
+n j=1
+
+w(z-zj
+
+)
+
+which
+
+decay
+
+gradually
+
+as
+
+|z
+
+- zi|
+
+grows.
+
+This
+
+differs
+
+from
+
+the
+
+most
+
+commonly
+
+used
+
+k-NN
+
+smoother
+
+that
+
+relies
+
+on
+
+the
+
+uniform
+
+weights
+
+1 k
+
+I
+
+(|z
+
+-
+
+zi|
+
+<
+
+k 2
+
++
+
+1).
+
+The preliminary PDs evaluated at step one are not necessarily a monotonic function
+
+of the score. This is due to the fact that companies with close scores may have for
+
+different reasons a non-concordant binary survival indicator y. The monotonisation of
+
+P D(zi), i = 1, 2, . . . , n is achieved at step two using the Pool Adjacent Violator (PAV)
+
+33
+
+1
+
+Default
+
+0 12345678
+
+Company Rank
+
+Figure 23: Monotonisation of PDs with the pool adjacent violator algorithm. The thin line denotes PDs estimated with the k-NN method with uniform weights and k = 3 before monotonisation and the bold line after monotonisation. Here y = 1 for insolvencies, y = 0 for solvent companies.
+
+algorithm (Barlow, Bartholomew, Bremmer & Brunk, 1972). Figure 23 illustrates the
+
+workings of the algorithm. The companies are ordered according to their rank and have
+
+here the indicator y = 1 for insolvent and y = 0 for solvent companies. The thin line
+
+denotes the PDs estimated using the k-NN method with uniform weights and k = 3. At
+
+the interval between the observations with rank 1 and 2 monotonicity is violated and is
+
+corrected with the PAV algorithm. The bold line shows PDs after monotonisation.
+
+The PAV algorithm solves the following optimisation problem: given data {zi, yi}ni=1
+
+with z1  z2  . . .  zn find the monotonic increasing function m(zi), i.e. m(z1) 
+
+m(z2)  . . .  m(zn) that minimises
+
+n i=1
+
+{yi
+
+-
+
+m(zi)}2.
+
+The
+
+solution
+
+to this
+
+problem
+
+is pooling (averaging) the adjacent observations that are violating monotonicity. The
+
+PAV acronym comes from this property. Mammen (1991) has shown that one can
+
+equivalently start with the PAV step and then smooth with a Nadaraya-Watson kernel
+
+estimator (Nadaraya (1964)).
+
+As a result we obtain monotonised probabilities of default P D(xi) for the observations of the training set. A PD for any observation x of the testing set is computed by
+
+interpolating PDs for two adjacent, in terms of the score, observations from the training
+
+set. If the score for x lies beyond the range of the scores of the training set, then P D(x)
+
+is set equal to the score of the first neighbouring observation of the training set.
+
+References
+Altman, E., 1968: Financial ratios, discriminant analysis and the prediction of corporate bankruptcy. The Journal of Finance, 23(4), 589­609.
+
+34
+
+Altman, E., R. Haldeman, and P. Narayanan, 1977: Zeta analysis: a new model to identify bankruptcy risk of corporations. Journal of Banking and Finance, 1, 29­54.
+
+Barlow, R. E., J. M. Bartholomew, J. M. Bremmer, and H. D. Brunk, 1972: Statistical Inference Under Order Restrictions. John Wiley & Sons, New York, NY.
+
+Beaver, W., 1966: Financial ratios as predictors of failures. empirical research in accounting: Selected studies. Journal of Accounting Research 71­111. supplement to vol. 5.
+
+Bharath, S. T. and T. Shumway, 2008: Forecasting default with the merton distance to default model. Review of Financial Studies, 21(3), 1339­1369.
+
+Dimitras, A., R. Slowinski, R. Susmaga, and C. Zopounidis, 1999: Business failure prediction using rough sets. European Journal of Operational Research, 114, 263­280.
+
+Efron, B. and R. J. Tibshirani, 1993: An Introduction to the Bootstrap. Chapman & Hall/CRC, New York, NY.
+
+Falkenstein, E., A. Boral, and L. Carty, 2000: Riskcalc for private companies: Moody's default model.
+
+Fernandes, J. E., 2005:
+
+Corporate credit risk modeling: Quan-
+
+titative rating system and probability of default estimation.
+
+http://pwp.netcabo.pt/jed fernandes/JEF CorporateCreditRisk.pdf.
+
+Fitzpatrick, P., 1932: A comparison of the ratios of successful industrial enterprises with those of failed companies.
+
+Fletcher, R., 1987: Practical Methods of Optimization. John Wiley and Sons, Inc., 2nd edition.
+
+Friedman, C., 2002: Creditmodel technical white paper. discussion paper, Standard & Poor's.
+
+Frydman, H., E. Altman, and D.-L. Kao, 1985: Introducing recursive partitioning for financial classification: The case of financial distress. The Journal of Finance, 40(1), 269­291.
+
+Gale, D., H. W. Kuhn, and A. W. Tucker, 1951: Linear Programming and the Theory of Games, in Activity Analysis of Production and Allocation, T. C. Koopmans (ed.). John Wiley & Sons, New York, NY, 317­329.
+
+35
+
+Glennon, D. and P. Nigro, 2005: Measuring the default risk of small business loans: A survival analysis approach. Journal of Money, Credit and Banking, 37, 923­947.
+H¨ardle, W. K., R. A. Moro, and D. Scha¨fer, 2010: Estimating probabilities of default with support vector machines. Preprint Submitted to Elsevier.
+J. C. Duan, J. S. and T. Wang, 2010: Multiperiod corporate default prediction ­ a forward intensity approach. working paper, Risk Management Institute, National University of Singapore.
+Lacerda, A. I. and R. A. Moro, 2008: Analysis of the predictors of default for portuguese firms. Working paper 22, Banco de Portugal.
+Mammen, E., 1991: Estimating a smooth monotone regression function. Annals of Statistics, 19, 724­740.
+Manning, M. J., 2004: Exploring the relationship between credit spreads and default probabilities. Working Paper No. 225, Bank of England.
+Martens, D., B. Baesens, T. van Gestel, and J. Vanthienen, 2006: Comprehensible credit scoring models using rule extraction from support vector machines. working paper 878283, Social Science Research Network.
+Martin, D., 1977: Early warning of bank failure: A logit regression approach. Journal of Banking and Finance, 1, 249­276.
+Mercer, J., 1909: Functions of positive and negative type and their connection with the theory of integral equations. Philosophical Transactions of the Royal Society of London, 209, 415­446.
+Merton, R. C., 1974: On the pricing of corporate debt: The risk structure of interest rates. The Journal of Finance, 29(2), 449­470.
+Nadaraya, E. A., 1964: On estimating regression. Theory of Probability and its Applications, 10, 186­190.
+Ohlson, J. A., 1980: Financial ratios and the probabilistic prediction of bankruptcy. Journal of Accounting Research, 18(1), 109­131.
+Platt, J., 1998: Sequential minimal optimization: A fast algorithm for training support vector machines. technical report msr-tr-98-14, Microsoft Research.
+36
+
+Ramser, J. and L. Foster, 1931: A demonstration of ratio analysis. bulletin no. 40. Bureau of Business Research, University of Illinois, Urbana, Ill.
+Tam, K. and M. Kiang, 1992: Managerial application of neural networks: the case of bank failure prediction. Management Science, 38(7), 926­947.
+Tikhonov, A. N., 1963: On solving ill-posed problem and method regularization. Doklady Akademii Nauk USSR, 153, 501­504.
+Tikhonov, A. N. and V. Y. Arsenin, 1977: Solution of Ill-posed Problems. W. H. Winston, Washington, DC.
+Vapnik, V., 1995: The Nature of Statistical Learning Theory. Springer, New York, NY. Weyl, H., 1928: Gruppentheorie und Quantenmechanik. Hirzel, Leipzig. Wiginton, J., 1980: A note on the comparison of logit and discriminant models of
+consumer credit behaviour. Journal of Financial and Quantitative Analysis, 15(3), 757­770. Wilcox, J. W., 1971: A simple theory of financial ratios as predictors of failure. Journal of Accounting Research, 9(2), 389­395. Winakor, A. and R. Smith, 1935: Changes in the financial structure of unsuccessful industrial corporations. bulletin no. 51. Bureau of Business Research, University of Illinois, Urbana, Ill. Zavgren, C., 1983: The prediction of corporate failure: The state of the art. Journal of Accounting Literature, 2, 1­38. Zmijewski, M., 1984: Methodological issues related to the estimation of financial distress prediction models. Journal of Accounting Research, 20(0), 59­82.
+37
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Localising temperature risk" by Wolfgang Karl Härdle, Brenda López Cabrera, Ostap Okhrin and Weining Wang, January 2011.
+002 "A Confidence Corridor for Sparse Longitudinal Data Curves" by Shuzhuan Zheng, Lijian Yang and Wolfgang Karl Härdle, January 2011.
+003 "Mean Volatility Regressions" by Lu Lin, Feng Li, Lixing Zhu and Wolfgang Karl Härdle, January 2011.
+004 "A Confidence Corridor for Expectile Functions" by Esra Akdeniz Duran, Mengmeng Guo and Wolfgang Karl Härdle, January 2011.
+005 "Local Quantile Regression" by Wolfgang Karl Härdle, Vladimir Spokoiny and Weining Wang, January 2011.
+006 "Sticky Information and Determinacy" by Alexander Meyer-Gohde, January 2011.
+007 "Mean-Variance Cointegration and the Expectations Hypothesis" by Till Strohsal and Enzo Weber, February 2011.
+008 "Monetary Policy, Trend Inflation and Inflation Persistence" by Fang Yao, February 2011.
+009 "Exclusion in the All-Pay Auction: An Experimental Investigation" by Dietmar Fehr and Julia Schmid, February 2011.
+010 "Unwillingness to Pay for Privacy: A Field Experiment" by Alastair R. Beresford, Dorothea Kübler and Sören Preibusch, February 2011.
+011 "Human Capital Formation on Skill-Specific Labor Markets" by Runli Xie, February 2011.
+012 "A strategic mediator who is biased into the same direction as the expert can improve information transmission" by Lydia Mechtenberg and Johannes Münster, March 2011.
+013 "Spatial Risk Premium on Weather Derivatives and Hedging Weather Exposure in Electricity" by Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+014 "Difference based Ridge and Liu type Estimators in Semiparametric Regression Models" by Esra Akdeniz Duran, Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+015 "Short-Term Herding of Institutional Traders: New Evidence from the German Stock Market" by Stephanie Kremer and Dieter Nautz, March 2011.
+016 "Oracally Efficient Two-Step Estimation of Generalized Additive Model" by Rong Liu, Lijian Yang and Wolfgang Karl Härdle, March 2011.
+017 "The Law of Attraction: Bilateral Search and Horizontal Heterogeneity" by Dirk Hofmann and Salmai Qari, March 2011.
+018 "Can crop yield risk be globally diversified?" by Xiaoliang Liu, Wei Xu and Martin Odening, March 2011.
+019 "What Drives the Relationship Between Inflation and Price Dispersion? Market Power vs. Price Rigidity" by Sascha Becker, March 2011.
+020 "How Computational Statistics Became the Backbone of Modern Data Science" by James E. Gentle, Wolfgang Härdle and Yuichi Mori, May 2011.
+021 "Customer Reactions in Out-of-Stock Situations ­ Do promotion-induced phantom positions alleviate the similarity substitution hypothesis?" by Jana Luisa Diels and Nicole Wiebach, May 2011.
+SFB 649, Ziegelstraße 13a, D-10117 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Extreme value models in a conditional duration intensity framework" by Rodrigo Herrera and Bernhard Schipp, May 2011.
+023 "Forecasting Corporate Distress in the Asian and Pacific Region" by Russ Moro, Wolfgang Härdle, Saeideh Aliakbari and Linda Hoffmann, May 2011.
+SFB 649, Ziegelstraße 13a, D-10117 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

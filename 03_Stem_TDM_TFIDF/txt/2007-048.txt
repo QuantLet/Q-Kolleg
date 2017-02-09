@@ -1,0 +1,1842 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2007-048
+Sensitivities for Bermudan Options by Regression Methods
+Denis Belomestny* Grigori Milstein** John Schoenmakers*
+* Weierstrass-Institute Berlin, Germany ** Ural State University, Ekaterinburg, Russia
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Sensitivities for Bermudan options by regression methods
+Belomestny, Denis 
+Weierstrass-Institute Mohrenstr. 39, 10117 Berlin, Germany
+belomest@wias-berlin.de
+Milstein, Grigori N.
+Ural State University Lenin Str. 51, 620083 Ekaterinburg, Russia
+Grigori.Milstein@usu.ru
+Schoenmakers, John
+Weierstrass-Institute Mohrenstr. 39, 10117 Berlin, Germany
+schoenma@wias-berlin.de
+Abstract
+In this article we propose several pathwise and finite difference based methods for calculating sensitivities of Bermudan options using regression methods and Monte Carlo simulation. These methods rely on conditional probabilistic representations which allow, in combination with a regression approach, for efficient simultaneous computation of sensitivities at many initial positions. Assuming that the price of a Bermudan option can be evaluated sufficiently accurate, we develop a method for constructing deltas based on least squares. We finally propose a testing procedure for assessing the performance of the developed methods.
+Keywords: American and Bermudan options, Optimal stopping times, Monte Carlo simulation, Deltas, Conditional probabilistic representations, Regression methods
+AMS 2000 Subject Classification: 60H30, 65C05, 91B28
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 Economic Risk.
+This work was finished while the author was a visitor of the Weierstrass-Institute fu¨r Angewandte Analysis und Stochastik (WIAS), Berlin, due to the financial supports from this institute and DFG (grant No. 436 RUS 17/137/05) which are gratefully acknowledged.
+1
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+2
+
+1 Introduction
+Valuation of high-dimensional American/Bermudan options is one of the most difficult numerical problems in financial engineering. Besides its practical relevance, investigations in this field are of great theoretical importance because pricing of such options is an archetype for high-dimensional optimal stopping problems. Recently several approaches have been proposed for pricing of American options using Monte Carlo simulation technique and regression methods (see [1]-[12], [15], [20], [22], [25], [30], [31], [34] and references therein). The problem of efficient evaluation of price sensitivities however is considerably more involved. Even for European options this problem remains to be of great interest both in theory and practice. The simplest methods of evaluating price sensitivities for European options are based on finite difference approximations using Monte Carlo simulation. A shortcoming of these methods is a rather poor accuracy. In [27], finite difference based methods are essentially improved regarding accuracy and efficiency. Many articles are devoted to pathwise methods of estimating Greeks (see [15] and references therein, see [26] as well). In comparison with finite difference based methods, these methods are more accurate but less universal and they require rather large computational expenses. In contrast to European options there are only a few articles devoted to Greeks for American/Bermudan derivatives ( [29], [13], [19], and references therein).
+In this paper we propose a number of pathwise and finite difference based methods for computing sensitivities of Bermudan options via regression methods and Monte Carlo simulation. We basically assume that we have a pricing method for a Bermudan option which is accurate enough, and then construct a convenient least squares based method for computing its sensitivities (deltas). Our main goal is the development of methods which allow for evaluating sensitivities at any point in time using a single set of Monte Carlo simulated trajectories. The presented approach is related to [28] where conditional probabilistic representations are introduced for sensitivities of diffusion processes. There the sensitivities are estimated via a regression approach and used for variance reduced Monte Carlo simulation of diffusions. In [2] a regression based martingale estimator for dual upper bounds of Bermudan products is developed. The martingale estimator in [2], which essentially relies on a Clarc-Ocone type formula, implicitly allows for estimating sensitivities. So, the methods relying on conditional probabilistic representations in connection with regression play as such a decisive role in the problem of efficient estimating sensitivities.
+Computing prices and sensitivities of Bermudan options involves a number of estimation errors of different nature which are hard to treat on a theoretical base. As an alternative we propose some kind of testing procedure for the application of the developed methods. Extensive numerical investigations of the here introduced approaches will be considered in a separate work.
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+3
+
+In Section 2 we introduce our modelling framework and recall some known facts on pricing of American/Bermudan derivatives in a form suitable for our purposes. Section 3 is devoted to Monte Carlo estimation of Bermudan sensitivities using unconditional probabilistic representations and in Section 4 we study the estimation of sensitivities via regression methods using conditional probabilistic representations. In Section 5 an efficient least squares method for constructing deltas is proposed in the case where at all (time-space) positions a sufficiently accurate price of the Bermudan option under consideration is available. A method for testing the proposed procedures in an application is outlined in Section 6. In Section 7 it is proposed to implement this test procedure for regularisation of calibration routines.
+
+2 Preliminaries
+
+2.1 Modelling framework.
+
+We consider a price system consisting of a saving account B (riskless asset) and price processes Xi, i = 1, . . . , d, of risky assets, which satisfies the stochastic differential equations
+
+(SDEs)
+
+dX i Xi = r(t, X)dt +
+
+d
+
+ij(t, X)dW j, dB = r(t, X)dt, B
+
+j=1
+
+(2.1)
+
+in the (risk-neutral) measure P. In (2.1) W = (W 1, ..., W d) is a d-dimensional standard
+
+Wiener process on a probability space (, F , (Ft)t[t0,T ], P ), where the P -augmentation of the filtration generated by W is denoted by (Ft). It is assumed that the interest rate r(t, X) and the matrix (t, x) = {ij(t, x)}, t  [t0, T ], x  Rd+ := {x : x1 > 0, . . . , xd > 0} are such that for all x  R+d and s  [t0, T ] there exists a unique solution (Xt, Bt) = (Xts,x, Bts,x,b)  R+d × R+ of (2.1) for s  t  T with (Xss,x, Bss,x,b) = (x, b) (note that Bts,x,b = bBts,x,1 for any b > 0), which is smooth in x, and that all Xt/Bt are
+(true) martingales on [t0, T ] under the risk-neutral measure P. For example, it is sufficient
+to assume that the functions
+
+ai(t, x) := xir(t, x), cij(t, x) := xiij(t, x)
+
+(2.2)
+
+are continuous in t, and have bounded derivatives with respect to x up to some order. In addition, we assume that the volatility matrix (t, x) has full rank for every (t, x), t  [t0, T ], x  R+d . Under these assumptions the price system (X, B) constitutes a complete market [21]. In this article we consider exact solutions of (2.1) although, of course, in reality we have only approximations usually. For instance, one may integrate (2.1) numerically and so construct an accurate enough solution of (2.1) using, for example, a standard Euler scheme with sufficiently small time step t.
+Let us now consider a Bermudan contract with exercise dates t0 = T0 < T1 < ... < TI = T and corresponding pay-off functions fi(x), 0  i  I. The holder of this contract
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+4
+
+has the right to call (once) a cash-flow fi(XTi) at an exercise date Ti of his choice. Henceforth we will write, where convenient, subindex i instead of subindex Ti. For
+
+instance Bi := BTi, Xi := XTi, and so on. The process Xi is a Markov chain with respect to the discrete filtration (Fi)0iI := (FTi)0iI . For notational convenience we sometimes use the cash-flow discounted from time t to s :
+
+Zts,x
+
+:=
+
+ft(Xts,x) Bts,x,1
+
+,
+
+s  t.
+
+(2.3)
+
+It is well known (e.g. [11]) that the fair price of a Bermudan contract with remaining exercise dates {Ti, Ti+1, .., TI}, at a time Ti-1 < s  Ti, is given by
+
+us(x) := sup EZs,x = EZss,x,x , Ti-1 < s  Ti,
+ Ti,I
+
+(2.4)
+
+where Ti,I the set of stopping times  taking values in {Ti, Ti+1, ..., TI}, and  s,x is the
+
+minimal optimal stopping index. The value function us(x) is determined by induction as
+
+follows:
+
+uI(x) = fI(x),
+
+ui(x) = max
+
+fi(x), E
+
+ui+1(Xii+,x1) Bii+,x1,1
+
+,
+
+us(x) = E
+
+ui+1(Xis+,x1) Bis+,x1,1
+
+, Ti < s  Ti+1, i = I - 1, ..., 0.
+
+(2.5)
+
+We see that, in principle, the problem of evaluating u0(x0), i.e. the price of the Bermudan option at the initial position (t0, x0), is easily solved using the backward recursive procedure (2.5), also called backward dynamic program. However, if X is high dimensional and I is large, this procedure is practically not feasible.
+For the solution (Xt, Bt) = (Xtt0,x, Btt0,x,1) of (2.1) on the interval [t0, T ], the discrete discounted value process Yi := ui(Xi)/Bi, called the Snell envelope, is a supermartingale due to (2.5), and in particular Yi is the smallest supermartingale which dominates the discounted cash-flow process fi(Xi)/Bi, e.g. [32].
+
+2.2 Continuation values and optimal stopping times.
+
+For the considered Bermudan option, we introduce the continuation value
+
+Ci(x) = E
+
+ui+1(Xii+,x1) Bii+,x1,1
+
+, i = 0, ..., I - 1; CI(x) = fI(x),
+
+the continuation region C, and the exercise (stopping) region E :
+
+C = {(ti, x) : fi(x) < Ci(x), i = 0, ..., I} , E = {(ti, x) : fi(x)  Ci(x), i = 0, ..., I} .
+
+(2.6) (2.7)
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+5
+
+Clearly, (tI, x)  E for any x. Due to (2.5) ui(x) = max {fi(x), Ci(x)} , i = 0, ..., I.
+
+(2.8)
+
+It is not difficult to see that Ci(x) has also the probabilistic representation
+
+Ci(x) = E
+
+f (Xi,x) Bi,x,1
+
+,  =  ti+1,Xi+1 , Xi+1 = Xii+,x1,
+
+(2.9)
+
+where the optimal stopping time  i,x =  ti,x is defined recurrently by the dynamic programming principle in the following way. We set
+
+ I,x =  T,x = T,  i,x = Ti{Ci(x)fi(x)} +  i+1,Xii+,x1 {Ci(x)>fi(x)}
+= Ti{ui(x)=fi(x)} +  i+1,Xii+,x1 {ui(x)>fi(x)}, i = I - 1, ..., 0.
+
+(2.10)
+
+Thus, for any position (Ti, x), the optimal stopping time  i,x is either equal to Ti :  i,x =
+Ti, or  i,x > Ti. It is also clear that (Ti, x) is a stopping point (i.e.,  i,x = Ti) iff (Ti, x) 
+E (i.e., (Ti, x) belongs to the exercise region). The instant  i,x is either the first time that the trajectory (Tj, Xji,x) enters the region E during i  j  I - 1, or  i,x = TI. So, ( i,x, Xi,ix,x )  E (see (2.7)).
+
+2.3 General schemes for the regression method.
+Let us consider a sample (mX,m V ), m = 1, ... , M, from a generic random pair (X, V ). We are interested in the estimation of the regression function
+
+c(x) = E(V |X = x).
+
+(2.11)
+
+There are different regression methods for estimating c(x) in fact. We here recall a
+
+general scheme for the linear regression method (see, e.g., [18]). Let {r(x)}rK=1 be a set
+
+of basis functions each mapping Rd+ into R. An estimate c(x) of c(x) is obtained as a
+
+function of the form
+
+K k=1
+
+k k (x)
+
+which
+
+minimizes
+
+the
+
+empirical
+
+risk
+
+
+
+=
+
+arg min
+RK
+
+1 M
+
+M
+(mV
+m=1
+
+K
+- kk(mX))2.
+k=1
+
+(2.12)
+
+So
+K
+
+c(x) = kk(x).
+
+(2.13)
+
+k=1
+
+Thus, the usual base material for the linear regression procedure is a sample (mX,m V ), m =
+
+1, ..., M, from a generic random pair (X, V ), where X is a d-dimensional random vector,
+
+V is a one-dimensional random variable, and a set of basis functions {r}.
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+6
+
+2.4 Recursively estimating continuation values and optimal stopping times
+
+Suppose we have a sample (t, mXt, mBt) of M independent trajectories all starting from the position (t0, X0, 1). There are different regression methods (and even different generic members and samples) for estimating ui by backward recursion. For example, one may estimate the continuation value function Ci(x) backwardly by regression via (2.12)-(2.13) by considering the (d + 1)-dimensional sample
+
+(mXi,m
+
+Vi)
+
+:=
+
+(mXi,
+
+mBi mBi+1
+
+u
+
+(2.14)
+
+from
+
+(Xi, Vi)
+
+:=
+
+(Xi,
+
+Bi Bi+1
+
+ui+1(Xi+1))
+
+where
+
+ui+1(Xi+1)
+
+is
+
+an
+
+estimate
+
+of
+
+ui+1(Xi+1)
+
+obtained by (2.8) using an approximation of Ci+1(x) in (2.6). This procedure is due to
+
+[34], see also [15].
+
+In the method of [25] one considers backwardly the sample
+
+(mXi,
+
+mBi mB
+
+f (mXti+1,
+
+mXi+1 ))
+
+=
+
+(mXi,
+
+mBi mB
+
+f (mXti,
+
+mXi )),
+
+ =  ti+1, ,mXi+1
+
+m = 1, ..., M,
+
+(2.15)
+
+from (Xi,
+
+Bi B
+
+f (Xti+1,Xi+1 ))
+
+=
+
+(Xi,
+
+Bi B
+
+f (Xti,Xi )),
+
+where
+
+
+
+=  ti+1,Xi+1 , and then con-
+
+structs an approximation of Ci(x) due (2.9) by regression via (2.12)-(2.13).
+
+We here briefly recap the regression method from [25] which is analyzed rigorously in
+
+[10]. Let r, r = 1, ..., K, be a system of real valued base functions on the state space R+d . Set  I,x = TI, and CI(mXI) = -1, m = 1, . . . , M. For i < I we recursively construct
+
+ i, mXi , Ci(mXi) from  i+1, ,mXi+1 Ci+1(mXi+1), m = 1, . . . , M, as follows. Via standard
+
+least squares minimization we compute a system of regression coefficients (cir)1rK,
+
+M
+(cir)1rK := argmin
+(cr)1rK m=1
+
+K
+
+crr(mXi) -
+
+Z i,m Xi
+m bi+1,mXi+1
+
+r=1
+
+2
+,
+
+(2.16)
+
+and set We then define
+
+K
+Ci(mXi) := cirr(mXi), m = 1, . . . , M.
+r=1
+
+(2.17)
+
+ i, mXi = Ti if Ci(mXi)  fi(mXi), else  i, mXi =  i+1, .mXi+1
+
+As a result all the positions (t, mXt), Ti-1 < t  Ti, are equipped with stopping times  ti, mXi. This gives us the following estimate for u0(X0) :
+
+u0(X0)
+
+=
+
+B0 M
+
+M m=1
+
+1 Bm
+
+fm (mXmt0,
+
+X0 ),
+
+(2.18)
+
+where either m = t0 (i.e., (t0, X0) belongs to the exercise region and u0(X0) = f0(X0)) or m > t0 (i.e., m =  t1, mX1 ).
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+7
+
+Moreover, via (2.17) we get an approximate sequence of continuation value functions
+
+K
+Ci(x) := cirr(x), 0  i < I, CI = -1,
+r=1
+and obtain a lower biased approximation
+
+(2.19)
+
+us(x) = EZbss,x,x , Ti-1 < s  Ti,
+
+(2.20)
+
+for the true price of a Bermudan option with exercise possibilities {Ti, Ti+1, .., TI}, via
+
+the stopping rule
+
+ s,x = inf{Tj  Ti : Cj (XTs,jx)  fj (XTs,jx)}.
+
+(2.21)
+
+It should be noted that for a lower biased estimate of (2.20) by Monte Carlo simulation,
+
+one should use a new set of trajectories all starting from (s, x).
+
+Another estimate for ui(x) = uTi(x) can be obtained by (see (2.8) and (2.19))
+
+ui(x) = max fi(x), Ci(x) , i = 0, ..., I.
+
+(2.22)
+
+This estimate is less expensive but apparently less accurate than (2.20). Having ui(x), we can estimate us(x) for Ti-1 < s < Ti by pricing the European claim at the maturity time Ti specified by the payoff function ui(x).
+
+3 Monte Carlo estimation of Bermudan sensitivities at a fixed position
+
+In this section we concentrate on the evaluation of deltas
+
+sk (x)
+
+:=
+
+us(x) xk
+
+,
+
+k
+
+=
+
+1, ..., d,
+
+t0
+
+
+
+s
+
+T,
+
+at the starting position (t0, X0). Let us introduce the notation
+
+s(x) = (s1(x), ..., sd(x)) =
+
+us(x) x1
+
+,
+
+...,
+
+us(x) xd
+
+.
+
+In order to simplify the presentation we now assume r(t, x) : r in (2.1) to be constant.
+
+3.1 Pathwise approach
+
+We note that  s,x in (2.4) depends on s, x and on an elementary random event  :  s,x =  s,x(). Due to finiteness of Ti,I , we have  s,x+x() =  s,x() almost surely for all x small enough if (s, x) does not belong to the boundary of the exercise region. Therefore we obtain from (2.4):
+
+sk(x) = BsE
+
+1 B s,x
+
+d i=1
+
+
+
+f
+
+s,x (Xss,x,x xi
+
+)
+
+
+
+k
+
+(Xss,x,x
+
+)i
+
+,
+
+(3.1)
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+8
+
+where
+
+ k Xti
+
+:= k(Xts,x)i
+
+=
+
+
+
+(Xts,x)i xk
+
+,
+
+s  t  T,
+
+k,
+
+i = 1, ..., d,
+
+satisfies the system of variational equations associated with (2.1) and (2.2):
+
+dkX =
+
+d
+
+k
+
+X
+
+i
+
+a(t, X xi
+
+)
+
+dt
+
++
+
+d
+
+k
+
+X
+
+i
+
+c(t, X xi
+
+)
+
+dW (t) ,
+
+i=1 i=1
+
+kXi(s) = 0 , if i = k, and kXk(s) = 1 .
+
+(3.2)
+
+We note that if the position (s, x) belongs to the exercise region (hence  s,x = s = Tk for some k = 0, ..., I), then formula (3.1) evidently gives
+
+sk (x)
+
+=
+
+fs(x) xk
+
+.
+
+Let  t0,x > t0. Based on the independent trajectories (t, mXt), m = 1, ..., M, all starting from the point (t0, X0), we obtain from (3.1) with (s, x) = (t0, X0) the following Monte Carlo estimates for the deltas:
+
+tk0 (X0) =
+
+B0 M 1 M m=1 Bm
+
+d i=1
+
+
+
+fm
+
+(mXmt0,X0 xi
+
+)
+
+k
+
+(mXmt0,X0
+
+)i
+
+,
+
+m
+
+=  t1, mX1 .
+
+(3.3)
+
+For a corresponding estimator in the case where the interest rate r = r(t, x) is nonconstant we get somewhat more complicated expressions (see e.g. [26]).
+
+3.2 Finite difference based approach
+
+Formula (3.1) requires computation of kXti, i.e., to evaluate deltas by the pathwise approach one has to integrate not only the d-dimensional system for X from (2.1) but also d additional systems, each of dimension d. This can cause severe computational difficulties in practice. However, in [16] an adjoint simulation approach is presented to speed up this procedure. As an alternative, we may compute (approximately) the derivatives in (3.1) by finite differences as studied in [27] for the European case. This method is based on the finite difference formula (we put X0 = x)
+
+ut(x) xk
+
+=
+
+ut(x1, . .
+
+.
+
+,
+
+xk
+
++
+
+xk, . .
+
+.
+
+,
+
+xd) - ut(x1, 2xk
+
+.
+
+. . , xk
+
+-
+
+xk ,
+
+...,
+
+xd)
+
++
+
+O
+
+xk 2 . (3.4)
+
+In typical situations, we need to use approximations ut(x1, . . . , xk ± xk, . . . , xd) for
+
+ut(x1, . . . , xk ± xk, . . . , xd), for example (see (2.18)):
+
+ut0 (x1, . . . , xk
+
+± xk, . . . , xd)
+
+=
+
+B0 M
+
+M m=1
+
+1 Bm
+
+fm (mXmt0,x1,...,xk±xk,...,xd ).
+
+(3.5)
+
+In (3.5), mXt, t0  t  m, is an approximate solution of (2.1) obtained by a numerical integration scheme. M triples of approximate trajectories are simulated, each triple
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+9
+
+consists of a trajectory starting from x and a pair of trajectories starting from x ± xkek := (x1, . . . , xk ± xk, . . . , xd) at the moment t0. The triples are independent, but
+the three trajectories of the same triple are dependent: they correspond to the same
+realization of the Wiener process. We therefore take the same stopping time m =  t1, mX1, mX1 = mXTt01,x for each trajectory of the m-th triple. For a particular triple this is correct when xk is small enough. In the finite difference approach one takes one fixed xk for all trajectories however, so for some trajectories this may fail to be correct. But, with decreasing xk the number of such trajectories decreases as well. As an estimator for tk0(X0) we thus obtain
+
+tk0 (X0)
+
+=
+
+1 2xi
+
+B0 M
+
+M m=1
+
+1 Bm
+
+fm (mXmt0,x+xkek ) - fm (mXmt0,x-xkek ) .
+
+(3.6)
+
+For European options it is proved in [27] that the delta-estimator (3.6) has the same convergence rate as the estimator for the option value. Using the fact that Bermudan option values are continuous in x at the exercise boundary, and good properties of the estimator (3.6) in the European case, a similar result can be shown for (3.6) as well.
+
+3.3 The case of accurately known uTi(x)
+
+Proceeding with the problem of evaluating deltas, we may naturally presuppose that
+
+uTi(x) is a sufficiently accurate estimate of uTi(x) for all x and i. In this case one can use results obtained for European options (see, e.g., [27] and references therein) for evaluation
+
+of tk(x) at a position (t, x), where Ti-1  t < Ti. (Note that if t = Ti-1, one needs to take the max-operator into account, (2.5)). In particular, the theory developed for
+
+European options enables us to apply weak methods of numerical integration for SDEs
+
+and variance reduction techniques. In this context we recall an approach in [27] which is
+
+based on a Clark-Ocone type formula. Let  = (1, ..., d) be a d-dimensional random
+
+vector with i.i.d. components distributed by P (k = ±1) = 1/2, and h be a positive
+
+number. With (2.2) and the matrix c(t, x) := {cij(t, x)} we denote by X the one-step
+
+approximation
+
+X := x + ha(t, x) + h1/2c(t, x).
+
+Then,
+
+c
+
+(t, x)t(x) =
+
+1 h
+
+E[ut+h(X
+
+)]
+
++
+
+O(h).
+
+This formula can be used for effective estimation of t(x), Ti-1  t < t + h  Ti via Monte Carlo simulation, provided uTi(x) is close to uTi(x) (see [27]).
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+10
+
+4 Regression methods for Bermudan sensitivities at arbitrary positions
+The pathwise Monte Carlo estimator (3.3) and finite difference Monte Carlo estimator (3.6) can be used for estimating sensitivities at a given starting position of the process X, say (t0, Xt0) = (t0, x0), using a sample set of trajectories starting at (t0, x0). For estimating sensitivities at another position, let us say (s, x) with t0 < s  T1, one can of course simulate a new set of trajectories and use (3.3) or (3.6) again. As a more efficient alternative, we propose to infer the sensitivities from the old trajectories via the well-known method of linear regression.
+
+4.1 Pathwise methods with linear regression
+
+We here propose to use the old trajectories (together with the corresponding stopping
+
+times) starting at (t0, x0), for evaluation of the price and deltas for the new position (s, x), t0 < s  t1. The key tools are the following expressions (see (2.4) and (3.1)),
+
+= BsE
+
+us(x) = BsE
+
+f (Xs,x) B
+
+with  =  s,x
+
+1 B
+
+f
+
+(Xs,X
+
+)
+
+with
+
+X
+
+:=
+
+Xst0,x0
+
+and
+
+
+
+=
+
+ t0,x0
+
+|
+
+Xst0,x0
+
+=
+
+x
+
+(4.1)
+
+and
+
+= BsE
+
+sk(x) = BsE
+
+1 B
+
+d i=1
+
+
+
+f (Xs,x xi
+
+)
+
+
+
+k (Xs,x )i
+
+with  =  s,x
+
+(4.2)
+
+1 B
+
+d i=1
+
+
+
+f
+
+(Xs,X xi
+
+)
+
+ k (Xs,X
+
+)i
+
+|
+
+Xst0,x0
+
+=x
+
+with X := Xst0,x0 and  =  t0,x0 .
+
+Thus, we have two different probabilistic representations both for us(x) and sk(x): the first one is in the form of an unconditional expectation and the second one is in the form
+of a conditional one. The first forms can be naturally computed by direct Monte Carlo
+and the second one by a regression method. Using regression based on one and the same set of trajectories (t,m Xtt0,x0) and stopping times m =m  t0,x0, m = 1, ..., M, for many positions (s, x) is of course much more efficient than simulating new from each desired
+position (s, x) (though generally less accurate of course)
+A proof of (4.1) and (4.2) relies on the following assertion: if  is F-measurable,
+f (x, ) is independent of F, and Ef (x, ) = (x), then E(f (, )|F) = () (see, e.g., [23]). From this assertion, for any measurable g it holds (with  = Xst0,x0, F = (Xst0,x0 ), f (x, ) = g(Xs,x())):
+
+E g(Xs,X ) | Xst0,x0 = x = Eg(Xs,x) with X := Xst0,x0 and   s,
+
+hence (4.1) and (4.2).
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+11
+
+For evaluating us(x) by regression, the pairs (X, V ) and (mX,m V ) (see Subsection 2.3) have the form
+
+(X, V ) 
+
+Xst0,x0 ,
+
+Bs B
+
+f
+
+(Xs,X )
+
+,
+
+(mX,m V ) 
+
+mXst0,x0 ,
+
+Bs Bm
+
+fm
+
+(mXms,mX )
+
+,
+
+(4.3)
+
+and for evaluating sk(x) they have the form
+
+(X, V ) 
+
+Xst0,x0 ,
+
+Bs B
+
+d i=1
+
+f
+
+(Xs,X xi
+
+)
+
+k
+
+(Xs,X
+
+)i
+
+,
+
+(mX,m V ) 
+
+mXst0,x0 ,
+
+Bs Bm
+
+d i=1
+
+
+
+fm
+
+
+
+(mXms,mX xi
+
+)
+
+k
+m
+
+(m
+
+Xms,m
+
+X
+
+)i
+
+.
+
+(4.4)
+
+Having the sample (4.3), one can obtain the estimate us(x) by linear regression as
+
+L
+us(x) = ll(x).
+l=1
+In principle one can differentiate this expression to obtain an estimate for sk(x). However, in general this is not a suitable method. It is better to apply linear regression directly to
+the sample (4.4) to get
+L1
+sk(x) = lkl(x).
+l=1
+Of course, the choice of basis functions {l} and {l} is a problem in it's own right.
+
+4.2 Finite difference based methods via linear regression
+
+We have
+
+sk (x)
+
+1 2xk
+
+[us(x
+
++
+
+xk
+
+)
+
+-
+
+us(x
+
+-
+
+xk
+
+)].
+
+(4.5)
+
+Similar to (4.1) and (4.2), the right part of (4.5) has the following probabilistic represen-
+
+tations:
+
+1 2xk
+
+[us(x
+
++
+
+xk
+
+)
+
+-
+
+us
+
+(x
+
+-
+
+xk
+
+)]
+
+(4.6)
+
+1 = 2xk E
+
+Bs B
+
+f (Xs,x+xkek ) - f (Xs,x-xkek )
+
+with  =  s,x
+
+1 = 2xk E
+
+Bs B
+
+f (Xs,X+xkek ) - f (Xs,X-xkek )
+
+with  =  t0,x0 |X = Xst0,x0 = x
+
+.
+
+The corresponding generic member (X, V ) and the sample (mX,m V ) have the form
+
+(X, V )  (mX,m V ) 
+
+Xst0,x0 ,
+
+Bs 2xk B
+
+f (Xs,X+xkek ) - f (Xs,X-xkek )
+
+,
+
+mXst0,x0 ,
+
+Bs 2xk Bm 
+
+fm (mXms,mX+xkek ) - fm (mXms,mX-xkek )
+
+(4.7) .
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+12
+
+For any m we have to consider three trajectories defined on the interval s  t  m. One of them is (t,m Xtt0,x0) = (t, Xts,mX ) which is constructed previously. Two others (t, Xts,mX±xkek ) start from points X ±xkek at time s, and they have to be constructed. We recall that these three trajectories are dependent: two last trajectories have the same
+realization of the Wiener process as the first (basic) trajectory. Besides, let us note that xk is the same for all m.
+
+4.3 Greeks by local polynomial regression
+
+In the case that we only need us(x) and sk(x) at a particular point x at time s it is advantageous to use local regression (see e.g. [14]). In the local regression approach the
+
+regression function
+
+c(x) = E(V |X = x)
+
+(4.8)
+
+and its derivatives c (x), ..., c(p)(x) at a point x = x0 are to be estimated from a sample (mX,m V ), m = 1, ..., M, from (X, V ). For notational simplicity we here suppose that X and V are one-dimensional. Assume that the (p + 1)-th derivative of c(x) at x0 exists. Then the unknown regression function c(x) can be locally approximated by a polynomial of order p due to the weighted least squares regression problem (see [18])
+
+M
+
+p
+
+2
+
+Kh(mX - x0) · mV - j(mX - x0)j  min ,
+
+m=1
+
+j=0 0,...,p
+
+(4.9)
+
+where h is a bandwidth, and Kh is a kernel function. If j, j = 0, ..., p, is the solution to problem (4.9) then,
+
+c(x0) = 0, ..., c(j)(x0) = j!j, j = 0, ..., p.
+
+(4.10)
+
+The local polynomial regression approach allows for different alternatives. For example, to get an estimate for sk(x) one can use a local regression method directly to the sample (4.4) or one can use a polynomial regression method of order p  1 to the sample (4.3) and obtain both estimates us(x) and sk(x). Apparently the second alternative for estimating sk(x) is less accurate but not so expensive since sample (4.3) is simpler. If we apply a polynomial regression method of order p  1 to sample (4.4), we
+can obtain estimates both for deltas and gammas. The latter is very noteworthy, since
+known methods for estimating gammas are very expensive. Moreover we note that local
+regression methods do not involve the rather difficult problem of choice of basis functions.
+Admittedly, it involves the problem of bandwidth selection however. But this difficulty
+can in principle be solved during numerical calculations. Over all, the local regression method in the situation where we need us(x) and sk(x) only at one position (s, x) looks promising.
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+13
+
+5 Direct least squares methods for deltas
+
+Due to (2.5), ut(x) is continuous in t for Ti < t < Ti+1, i = 0, ..., I - 1, uTi+1-0(x) =
+
+uTi+1 (x) , and if
+
+fi(x) > uTi+0(x) = E
+
+ui+1(Xii+,x1) Bii+,x1,1
+
+,
+
+then
+
+uTi+0(x) < uTi (x) = fi(x).
+
+Together with (2.1) we have on (Ti, Ti+1]
+
+du = rudt +
+
+d
+
+u xj
+
+d
+
+cjkdW k(t)
+
+j=1 k=1
+
+(5.1)
+
+or
+
+ut(Xt) = uTi+0(x) +
+
+t
+r(s, Xs)us(Xs)ds +
+Ti
+
+td Ti j=1
+
+us(Xs) xj
+
+d
+
+cjk(s, Xs)dW k(s),
+
+k=1
+
+(5.2)
+
+where Xs = XsTi,x. Let h be a small positive number and Ti  t < t + h  Ti+1. We assume that Xt is
+supposed to be known exactly (see Section 2). In the context below, this means that the time step t used in a numerical integration scheme for computing Xt (e.g. the Euler scheme) is much smaller than h: t h. From (5.2) we get the following approximate equality
+
+ut+h(Xt+h) ut(Xt) + r(t, Xt)ut(Xt)h + [c (t, Xt)t(Xt)] tW (h),
+
+(5.3)
+
+where tW (h) = W (t + h) - W (t). Of course, if t = Ti, one should set uTi+0 instead of uTi in (5.3).
+Suppose ut(x) and ut+h(x) are known (e.g., they are evaluated by one of the procedures in [5]), mXs, m = 1, ..., M, are trajectories starting from (t0, x0), and mW (s) are the corresponding realizations of the Wiener process. We then look for t(x) = (t1(x), ..., td(x)) in the form
+
+Lk
+tk(x)  lklk(x), k = 1, ..., d,
+l=1
+
+(5.4)
+
+where Lk and lk may depend on t. Substituting in (5.3) mXt, mXt+h, ut, ut+h instead of Xt, Xt+h, ut, ut+h, then mW (t + h) -m W (t) instead of tW (h), and t(mXt) in the form (5.4), we obtain M relations, whence lk can be found by the method of least squares, i.e.
+
+lk
+
+=
+
+arg min
+lk
+
+1 M
+
+M m=1
+
+d
+mu - (mr)(mu)h - (mZi)(mW i)
+i=1
+
+2
+,
+
+(5.5)
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+14
+
+where
+
+mu = ut+h(mXt+h) - ut(mXt), mr = r(t,m Xt), mu = ut(mXt), mW i =m W i(t + h) -m W i(t),
+
+d Lk
+mZi = (mcki) lk(mlk), with mcki = cki(t,m Xt), mlk = lk(mXt).
+
+k=1
+
+l=1
+
+Using the technique from, e.g. [18] (see also [17]), it is not difficult to prove that
+
+tk(x) =
+
+Lk l=1
+
+lk lk (x)
+
+converge
+
+to
+
+the
+
+true
+
+deltas
+
+when
+
+the
+
+estimation
+
+error
+
+of
+
+u
+
+goes
+
+to
+
+zero, h  0, M  , and Lk  . In our case the error analysis is much simpler than
+
+in [17]. In contrast to [17], we consider only a one-step error, we consider both ut(x) and
+
+ut+h(x) to be accurately known, and finally the expression inside the square brackets in
+
+(5.5) is linear with respect to lk.
+
+As an alternative least squares problem we may look for
+
+Zt(x) := c (t, Xt)t(Xt)
+
+in the form
+
+L
+Ztk(x)  lkl(x), k = 1, ..., d,
+l=1
+
+(5.6)
+
+where L and l do not depend on k. The solution li satisfies the minimization problem
+
+li
+
+=
+
+arg min
+li
+
+1 M
+
+M m=1
+
+dL
+
+mu - (mr)(mu)h -
+
+li(ml)(mW i)
+
+i=1 l=1
+
+2
+.
+
+(5.7)
+
+Both minimization problem (5.5) and (5.7) lead to a linear algebraic system of order
+
+d × Lk. We now show that the linear system corresponding to problem (5.7) can, in a good approximation, be split into d linear systems each of order L. The error due to this splitting tends to zero if M  .
+
+We have
+
+1M M
+
+mu - (mr)(mu)h -
+
+d
+
+(mZi)(mW i)
+
+2
+1 =
+M
+
+M
+(mu - h(mr)(mu))2
+
+m=1
+
+i=1
+
+m=1
+
+(5.8)
+
+-2 M M
+
+d
+
+(mu
+
+-
+
+h(m r)(m u))(m Z i )(m W
+
+i)
+
++
+
+1 M
+
+M
+
+d
+(mZi)(mZj)(mW i)(mW j),
+
+m=1 i=1
+
+m=1 i,j=1
+
+where
+
+LL
+mZi = li(ml) = lil(mXt).
+
+l=1 l=1
+
+Due to the central limit theorem, we have approximately
+
+1M M
+
+d
+(mZi)(mZj)(mW i)(mW j)
+
+m=1 i,j=1
+
+d
+h E(Zi)2,
+i=1
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+15
+
+where the error tends to zero if M  . By the same reasoning, we have
+
+1M M
+
+d
+(m Z i )2 h
+
+m=1 i=1
+
+d
+h E(Zi)2,
+i=1
+
+hence
+
+the
+
+last
+
+summand
+
+in
+
+(5.8)
+
+can
+
+be
+
+replaced
+
+by
+
+1 M
+
+M m=1
+
+di=1(mZi)2h. Now it is
+
+not difficult to see that problem (5.7) is close to the following minimization problem
+
+li
+
+=
+
+arg min
+li
+
+1 M
+
+M m=1
+
+d i=1
+
+mu
+
+-
+
+(mr)(mu)h h
+
+(mW
+
+i)
+
+-
+
+L
+
+li(ml)
+
+2
+
+.
+
+l=1
+
+(5.9)
+
+In turn, (5.9) is equivalent to d separate problems
+
+li
+
+=
+
+arg min
+li
+
+1 M
+
+M m=1
+
+mu
+
+-
+
+(m h
+
+r)(mu)h
+
+(mW
+
+i)
+
+-
+
+L
+
+li(ml)
+
+2
+
+,
+
+i = 1, ..., d.
+
+l=1
+
+(5.10)
+
+Each of the i-th problem (5.10), i = 1, ..., d, gives a linear algebraic system of order L with respect to li, l = 1, ..., L.
+In the approach based on (5.4) we get all the deltas at once, but the approach based on (5.6) allows for more efficient computation.
+Concerning the selection of a suitable h, it is difficult (or even impossible) to give some recommendations on a theoretical basis. In practice, however, this issue can be settled during computations. In any case it is clear that h cannot be chosen too small because of the terms (mu)(mW i)/h in (5.10). Heuristically, these terms have the error   / h if the error of u is of  . Hence, if e.g., h  ,  > 0, then   1-/2, i.e.,  should be less than 2.
+
+6 Testing
+
+All procedures of evaluating prices and in particular sensitivities of Bermudan options contain a lot of errors of different nature and it is almost impossible to take them satisfactorily into account. We therefore propose a test procedure which allows for estimating the quality of either procedure. Equalities (5.1)-(5.2) or the equivalent equality
+
+du
+
+=
+
+1 Bt (u(Xt) -
+
+d j=1
+
+u xj
+
+(Xt)Xtj
+
+)dB
+
++
+
+d j=1
+
+u xj
+
+(Xt)dX
+
+j
+
+=
+
+1 Bt
+
+(u(Xt)
+
+-
+
+[t(Xt)]
+
+Xt)dB + [t(Xt)]
+
+dX
+
+(6.1)
+
+give good opportunities for such testing.
+
+Let X be the solution of (2.1) starting from x0 at t0 and Ht(x) be a d-dimensional vector-function. Consider the hedging strategy  := (Ht0, Ht(Xt)) with
+
+Ht0
+
+=
+
+1 Bt (Vt
+
+- Ht
+
+(Xt)Xt),
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+16
+
+where Vt is determined by the equation
+
+dV
+
+=
+
+1 (V
+Bt
+
+- Ht (Xt)Xt)dB + Ht (Xt)dX,
+
+Vt0
+
+= ut0 (x0).
+
+Clearly, the corresponding portfolio has the form
+
+Vt()
+
+=
+
+Ht0Bt
+
++
+
+Ht
+
+(Xt)Xt
+
+=
+
+1 B (Vt
+
+-
+
+Ht
+
+(Xt)Xt)Bt
+
++
+
+Ht
+
+(Xt)Xt
+
+and the strategy  is self-financing. It is not difficult to prove that Vt = ut if and only if Ht(x) = t(x).
+Let ut(Xt) and t(Xt) be constructed due to some procedure. Consider the equation
+
+1
+
+dV
+
+=
+
+(V Bt
+
+- [t(Xt)]
+
+Xt)dB + [t(Xt)]
+
+dX,
+
+Vt0
+
+= ut0 (x0),
+
+(6.2)
+
+and the portfolio
+
+Vt
+
+=
+
+1 Bt
+
+(Vt
+
+-
+
+[t(Xt)]
+
+Xt)Bt + [t(Xt)]
+
+Xt.
+
+(6.3)
+
+Let T be the first time from {T0, ..., TI} for which u coincides with f, i.e., uTi(XTi) > fi(XTi) for i = 0, ...,  - 1 and uT (XT ) = f(XT ). Now let us compare Vt and ut(Xt) on the interval [T0, T]. Tightness of these quantities is a necessary condition for the considered procedure to be 'good'. As a criterion of tightness one may take, for instance,
+
+the difference at T : VT - uT (XT ) = VT - f(XT ), or some integral criterion on the time interval [T0, T]. Of course, we assume that u is a satisfactorily accurate estimate of u. The above mentioned testing is rather efficient because we need ut(x) and t(x) only
+
+on an individual trajectory.
+
+If we are equipped at any position (t, x) with ut(x) and t(x) constructed by one of the
+
+regression methods (Section 4) or by using the direct method of least squares (Section 5)
+
+basing on a sample set of trajectories, we may introduce some new criterions of tightness.
+
+In such cases we apply again equation (6.2) to any trajectory of the considered set or to
+
+a new independent set of trajectories. The latter is necessary if deltas are constructed
+
+via direct least squares. After computing Vl T(l) for every trajectory lXt, l = 1, ..., L, it is natural to introduce, for example, the following criterions
+
+Cr2 := [E(VT - f (XT ))2]1/2
+
+1 L
+
+L
+(lVT(l) - f(l)(lXT(l) ))2
+
+l=1
+
+Cr+ := E(VT - f (XT ))+
+
+1 L
+
+L
+(lVT(l) - f(l)(lXT(l) ))+ ,
+
+l=1
+
+Cr- := E(f (XT ) - VT )+
+
+1 L
+
+L
+(f(l)(lXT(l) ) -l VT(l) )+ .
+
+l=1
+
+1/2
+,
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+17
+
+7 Calibration
+
+Given market prices {C1, . . . , Cn} at t = 0 for a set of liquid benchmark options (typically call options with different strikes Ki and maturities Ti) one looks for a risk-neutral model Q which prices these options correctly:
+
+Ci = EQ Bi-1(XTi - Ki)+ , i = 1, . . . , n.
+
+The idea is the following: one calibrates a risk-neutral model to a set of observed market
+
+prices of liquid options and then uses this model to price exotic, illiquid or `Over The
+
+Counter' (OTC) options and to compute hedge ratios. If we parameterize our class of
+
+models by    (e.g. (2.1) with (t, X) = (t, X; )), then a practical solution to the
+
+calibration problem is to minimize the in-sample weighted quadratic pricing error:
+
+n
+O() = wi|C(Ti, Ki) - Ci|2,
+i=1
+
+(7.1)
+
+where C(Ti, Ki) are the model prices and wi are nonnegative weights. Given that the number of calibration constraints (option prices) is finite, there may be many models
+
+reproducing the option prices with equal precision, which means that the error object
+
+function (7.1) may have many local minima. Typically, the error landscape may have flat
+
+regions in which the error has a low sensitivity to variations in model parameters. Since
+
+a good hedging performance is a desired feature of the model to be calibrated (which is
+
+not taken into account in (7.1)), it is natural to consider instead of O another objective
+
+function
+
+n
+OH () = wi|C(Ti, Ki) - Ci|2 + Cr2(),  > 0
+
+i=1
+
+and define
+
+ = arg inf OH (),
+
+
+where the "lack of hedge" Cr2() can be cheaply computed using regression as described
+
+in the previous section.
+
+References
+[1] L. Andersen, M. Broadie (2001). A primal-dual simulation algorithm for pricing multidimensional American options. Working paper, Columbia Business School, New York.
+[2] D. Belomestny, C. Bender, J. Schoenmakers (2006). True upper bounds via nonnested Monte Carlo, to appear in Mathematical Finance.
+[3] D. Belomestny, G.N. Milstein (2006). Monte Carlo evaluation of American options using consumption processes. International Journal of Theoretical and Applied Finance, 9, No. 4, 1-27.
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+18
+
+[4] D. Belomestny, G.N. Milstein (2005). Adaptive simulation algorithms for pricing American and Bermudan options by local analysis of financial market. WIASPreprint No. 1022, Berlin.
+[5] D. Belomestny, G.N. Milstein, V. Spokoiny (2006). Regression methods in pricing American and Bermudan options using consumption processes. WIAS-Preprint No. 1145, Berlin.
+[6] C. Bender, J. Schoenmakers (2006). An iterative method for multiple stopping: convergence and stability. Advances in Appl. Prob., Volume 38, Number 3, 729749.
+[7] P. Boyle, M. Broadie, P. Glasserman (1997). Monte Carlo methods for security pricing. Journal of Economic Dynamics and Control, 21, 1267-1321.
+[8] M. Broadie, P. Glasserman (1997). Pricing American-style securities using simulation. J. of Economic Dynamics and Control, 21, 1323-1352.
+[9] J. Carriere (1996). Valuation of early-exercise price of options using simulations and nonparametric regression. Insurance: Mathematics and Economics, 19, 19-30.
+[10] E. Cl´ement, D. Lamberton, P. Protter (2002). An analysis of a least squares regression algorithm for American option pricing. Finance and Stochastics, 6, 449-471.
+[11] D. Duffie, Dynamic Asset Pricing Theory. Princeton University Press 2001
+[12] D. Egloff (2005). Monte Carlo algorithms for optimal stopping and statistical learning. Ann. Appl. Probab. 15, no. 2, 1396-1432.
+[13] R. Elie, J.-D. Fermanian, N. Touzi (2007). Kernel estimation of Greek weights by parameter randomization. To appear in Ann. Appl. Probab.
+[14] J. Fan, I. Gijbels (1996). Local Polynomial Modelling and Its Applications. Chapman & Hall.
+[15] P. Glasserman (2004). Monte Carlo Methods in Financial Engineering. Springer.
+[16] M. Giles, P. Glasserman (2006). Smoking adjoints: fast Monte Carlo Greeks. Risk, January, 88-92.
+[17] E. Gobet, J.-P. Lemor, X. Warin (2005). A regression-based Monte Carlo method to solve backward stochastic differential equations. Ann. Appl. Probab. 15, no. 3, 2172-2202.
+[18] L. Gy¨orfi, M. Kohler, A. Krzyzak, H. Walk (2002). A Distribution-Free Theory of Nonparametric Regression. Springer.
+
+belomestny, d., milstein, g. and schoenmakers, j.
+
+19
+
+[19] J. Kampen, A. Kolodko, J. Schoenmakers (2007). Monte Carlo Greeks for financial products via approximative Greenian kernels. WIAS-Preprint No. 1208, Berlin.
+[20] M. Haugh, L. Kogan (2004). Pricing American options: a duality approach. Operations Research, 52, No. 2, 258­270.
+[21] Karatzas I., Shreve S.E. Methods of Mathematical Finance. Springer, 1998.
+[22] A. Kolodko, J. Schoenmakers (2006). Iterative construction of the optimal Bermudan stopping time. Finance and Stochastics, 10, No. 1, 27-49.
+[23] N.V. Krylov (1977). Contollable processes of diffusion type. Nauka, Moscow.
+[24] D. Lamberton, B. Lapeyre (1996). Introduction to Stochastic Calculus Applied to Finance. Chapman & Hall.
+[25] F.A. Longstaff, E.S. Schwartz (2001). Valuing American options by simulation: a simple least-squares approach. Review of Financial Studies, 14, 113-147.
+[26] G.N. Milstein, J.G.M. Schoenmakers (2002). Monte Carlo construction of hedging strategies against multi-asset European claims. Stochastics and Stochastics Reports, 73(1-2), 125-157.
+[27] G.N. Milstein, M.V. Tretyakov (2005). Numerical analysis of Monte Carlo evaluation of Greeks by finite differences. J. of Computational Finance, 8, No. 3, 1-33.
+[28] G.N. Milstein, M.V. Tretyakov (2006). Practical variance reduction via regression for simulating diffusions. Rep. No. MA-06-019, Univ. of Leicester.
+[29] V.V. Piterbarg (2004). Risk sensitivities of Bermuda swaptions. International Journal of Theoretical and Applied Finance, 7, No. 4, 465-509.
+[30] L.C.G. Rogers (2001). Monte Carlo valuation of American options. Mathematical Finance, 12, 271-286.
+[31] J. Schoenmakers (2005). Robust Libor Modelling and Pricing of Derivative Products. Chapman & Hall/CRC.
+[32] A. N. Shiryayev (1978). Optimal Stopping Rules. Berlin Heidelberg New York: Springer-Verlag.
+[33] A.N. Shiryayev (1999). Essentials of Stochastic Finance: Facts, Models, Theory. World Scientific.
+[34] J. Tsitsiklis, B. Van Roy (1999). Regression methods for pricing complex American style options. IEEE Trans. Neural. Net., 12, 694-703.
+
+SFB 649 Discussion Paper Series 2007
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Trade Liberalisation, Process and Product Innovation, and Relative Skill Demand" by Sebastian Braun, January 2007.
+002 "Robust Risk Management. Accounting for Nonstationarity and Heavy Tails" by Ying Chen and Vladimir Spokoiny, January 2007.
+003 "Explaining Asset Prices with External Habits and Wage Rigidities in a DSGE Model." by Harald Uhlig, January 2007.
+004 "Volatility and Causality in Asia Pacific Financial Markets" by Enzo Weber, January 2007.
+005 "Quantile Sieve Estimates For Time Series" by Jürgen Franke, JeanPierre Stockis and Joseph Tadjuidje, February 2007.
+006 "Real Origins of the Great Depression: Monopolistic Competition, Union Power, and the American Business Cycle in the 1920s" by Monique Ebell and Albrecht Ritschl, February 2007.
+007 "Rules, Discretion or Reputation? Monetary Policies and the Efficiency of Financial Markets in Germany, 14th to 16th Centuries" by Oliver Volckart, February 2007.
+008 "Sectoral Transformation, Turbulence, and Labour Market Dynamics in Germany" by Ronald Bachmann and Michael C. Burda, February 2007.
+009 "Union Wage Compression in a Right-to-Manage Model" by Thorsten Vogel, February 2007.
+010 "On -additive robust representation of convex risk measures for unbounded financial positions in the presence of uncertainty about the market model" by Volker Krätschmer, March 2007.
+011 "Media Coverage and Macroeconomic Information Processing" by Alexandra Niessen, March 2007.
+012 "Are Correlations Constant Over Time? Application of the CC-TRIGt-test to Return Series from Different Asset Classes." by Matthias Fischer, March 2007.
+013 "Uncertain Paternity, Mating Market Failure, and the Institution of Marriage" by Dirk Bethmann and Michael Kvasnicka, March 2007.
+014 "What Happened to the Transatlantic Capital Market Relations?" by Enzo Weber, March 2007.
+015 "Who Leads Financial Markets?" by Enzo Weber, April 2007. 016 "Fiscal Policy Rules in Practice" by Andreas Thams, April 2007. 017 "Empirical Pricing Kernels and Investor Preferences" by Kai Detlefsen,
+Wolfgang Härdle and Rouslan Moro, April 2007. 018 "Simultaneous Causality in International Trade" by Enzo Weber, April
+2007. 019 "Regional and Outward Economic Integration in South-East Asia" by
+Enzo Weber, April 2007. 020 "Computational Statistics and Data Visualization" by Antony Unwin,
+Chun-houh Chen and Wolfgang Härdle, April 2007. 021 "Ideology Without Ideologists" by Lydia Mechtenberg, April 2007. 022 "A Generalized ARFIMA Process with Markov-Switching Fractional
+Differencing Parameter" by Wen-Jen Tsay and Wolfgang Härdle, April 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "Time Series Modelling with Semiparametric Factor Dynamics" by Szymon Borak, Wolfgang Härdle, Enno Mammen and Byeong U. Park, April 2007.
+024 "From Animal Baits to Investors' Preference: Estimating and Demixing of the Weight Function in Semiparametric Models for Biased Samples" by Ya'acov Ritov and Wolfgang Härdle, May 2007.
+025 "Statistics of Risk Aversion" by Enzo Giacomini and Wolfgang Härdle, May 2007.
+026 "Robust Optimal Control for a Consumption-Investment Problem" by Alexander Schied, May 2007.
+027 "Long Memory Persistence in the Factor of Implied Volatility Dynamics" by Wolfgang Härdle and Julius Mungo, May 2007.
+028 "Macroeconomic Policy in a Heterogeneous Monetary Union" by Oliver Grimm and Stefan Ried, May 2007.
+029 "Comparison of Panel Cointegration Tests" by Deniz Dilan Karaman Örsal, May 2007.
+030 "Robust Maximization of Consumption with Logarithmic Utility" by Daniel Hernández-Hernández and Alexander Schied, May 2007.
+031 "Using Wiki to Build an E-learning System in Statistics in Arabic Language" by Taleb Ahmad, Wolfgang Härdle and Sigbert Klinke, May 2007.
+032 "Visualization of Competitive Market Structure by Means of Choice Data" by Werner Kunz, May 2007.
+033 "Does International Outsourcing Depress Union Wages? by Sebastian Braun and Juliane Scheffel, May 2007.
+034 "A Note on the Effect of Outsourcing on Union Wages" by Sebastian Braun and Juliane Scheffel, May 2007.
+035 "Estimating Probabilities of Default With Support Vector Machines" by Wolfgang Härdle, Rouslan Moro and Dorothea Schäfer, June 2007.
+036 "Yxilon ­ A Client/Server Based Statistical Environment" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, June 2007.
+037 "Calibrating CAT Bonds for Mexican Earthquakes" by Wolfgang Härdle and Brenda López Cabrera, June 2007.
+038 "Economic Integration and the Foreign Exchange" by Enzo Weber, June 2007.
+039 "Tracking Down the Business Cycle: A Dynamic Factor Model For Germany 1820-1913" by Samad Sarferaz and Martin Uebele, June 2007.
+040 "Optimal Policy Under Model Uncertainty: A Structural-Bayesian Estimation Approach" by Alexander Kriwoluzky and Christian Stoltenberg, July 2007.
+041 "QuantNet ­ A Database-Driven Online Repository of Scientific Information" by Anton Andriyashin and Wolfgang Härdle, July 2007.
+042 "Exchange Rate Uncertainty and Trade Growth - A Comparison of Linear and Nonlinear (Forecasting) Models" by Helmut Herwartz and Henning Weber, July 2007.
+043 "How do Rating Agencies Score in Predicting Firm Performance" by Gunter Löffler and Peter N. Posch, August 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+044 "Ein Vergleich des binären Logit-Modells mit künstlichen neuronalen Netzen zur Insolvenzprognose anhand relativer Bilanzkennzahlen" by Ronald Franken, August 2007.
+045 "Promotion Tournaments and Individual Performance Pay" by Anja Schöttner and Veikko Thiele, August 2007.
+046 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, August 2007.
+047 "Risiken infolge von Technologie-Outsourcing?" by Michael Stephan, August 2007.
+048 "Sensitivities for Bermudan Options by Regression Methods" by Denis Belomestny, Grigori Milstein and John Schoenmakers, August 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

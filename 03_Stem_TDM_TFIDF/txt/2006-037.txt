@@ -1,0 +1,2919 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2006-037
+A jump-diffusion Libor model and its robust calibration
+Denis Belomestny* John Schoenmakers*
+* Weierstrass Institute for Applied Analysis and Stochastics, Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+A jump-diffusion Libor model and its robust calibration
+Denis Belomestny and John Schoenmakers
+April 26, 2006
+Abstract
+In this paper we propose a jump-diffusion Libor model with jumps in a high-dimensional space (Rm) and test a stable non-parametric calibration algorithm which takes into account a given local covariance structure. The algorithm returns smooth and simply structured L´evy densities, and penalizes the deviation from the Libor market model. In practice, the procedure is FFT based, thus fast, easy to implement, and yields good results, particularly in view of the severe ill-posedness of the underlying inverse problem.
+1 Introduction
+The calibration of financial models has become an important topic in financial engineering because of the need to price increasingly complex options consistent with prices of standard instruments liquidly traded in the market. The choice of an underlying model is crucial with respect to its statistical relevance on the one hand, and the possibility of calibrating it with ease on the other. In order to cover stylized facts in financial data such as implied volatility smiles, more complex models, i.e. models beyond Black-Scholes, are called for.
+During the last decade L´evy-based models have drawn much attention, as these models are capable to describe complex but realistic behavior of financial time series. In particular, these models may cover jumps, heavy tails, and are principally able to match implied volatility surfaces observed in stock and interest rate markets. For modelling stock prices, pure jump L´evy processes were already proposed in Eberlein, Keller and Prause (1998). In Cont & Tankov (2003) regularized approaches for calibrating jump-diffusion stock price models were considered.
+In the interest rate world the Libor market model developed by Brace, Gatarek, Musiela (1997), Jamshidian (1997), and Miltersen, Sandmann, Sondermann (1997), has become one of the most popular and advanced tools for
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 Economic Risk.
+1
+
+modelling interest rates and interest rate derivatives. This in spite of a main drawback; the Libor market model cannot explain implied volatility surfaces typically observed in the cap markets. In order to handel this issue different extensions of the Libor market model using processes with jumps have been proposed. Glasserman and Kou (2003) developed a jump diffusion Libor model and gave some useful explicit specifications. The most general framework for Libor models driven by jump measures is provided in Jamshidian (2001).
+The central theme in this paper is a well structured jump-diffusion Libor model which allows for robust and efficient calibration. Our starting point will be a given Libor market model with known deterministic volatility structure. For instance, this market model might be obtained from a calibration procedure involving at the money (ATM) caps, ATM swaptions, and/or a historically identified forward rate correlation structure. Meanwhile, calibration procedures for Libor market models are well studied in the literature (e.g. Schoenmakers (2005), or Brigo & Mercurio (2001)). Yet, our main goal is the development of a specific jump-diffusion Libor model which can be calibrated to the cap-strike matrix in a robust way and which is, in a sense, as near as possible to the given market model. In particular, this model will be furnished in such a way that the (local) covariance structure of the jump-diffusion model coincides with the (local) covariance structure of the market model. We have three main reasons for doing so: (1) The price of a cap in a Libor market model does not depend on the (local) correlation structure of the forward Libors. However, this correlation structure may contain important information such as, for instance, prices of ATM swaptions. We therefore do not want to destroy this correlation structure as given by the input market model when calibrating the extended model to the cap(let)-strike volatility matrix. (2) The lack of smile behavior of the input market model, which is regarded as a rough intermediate approximation of a smile explaining jump-diffusion model, is considered to be a consequence of Gaussianity of the driving random forces (Wiener processes). So, loosely speaking, we want to perturb these forces to non-Gaussian ones by using jumps, while maintaining the (local) covariance structure of the given market model, hence the correlation structure implicitly. (3) Last but not least, by preserving the covariance structure we obtain a very robust calibration procedure.
+The literature on calibration methods for asset models based on L´evy processes has mainly focused on certain parametrization of the underlying L´evy process. Since the characteristic triplet of a L´evy process is a priori an infinitedimensional object, the parametric approach is always exposed to the problem of misspecification, in particular when there is no inherent economic foundation of the parameters and they are only used to generate different shapes of possible jump distributions. Therefore, we employ a nonparametric approach of Belomestny & Reiss (2004) which utilizes explicit inversion of a Fourier based pricing formula and a regularization in the spectral domain.
+The outline of the paper is as follows. We recall in Section 2 the general arbitrage-free Libor framework developed in Jamshidian (2001). It will serve as the baseplate of this article. The covariance preserving jump-diffusion extension of the Libor market model is constructed in Section 3. In Section 4 we recap
+2
+
+Fourier-based representations for Caplet prices in the spirit of Car & Madan (1999), see also Glasserman & Merener (2003), Eberlein & O¨ zkan (2005). The algorithm for calibrating to a full cap-strike matrix is developed in Section 5, and a real life calibration is carried out in Section 6. Technical details and derivations are given in the Appendix-section.
+
+2 General framework for Libor models with jumps
+
+Consider a fixed sequence of tenor dates 0 =: T0 < T1 < T2 < . . . Tn, called a tenor structure, together with a sequence of so called day-count fractions
+i := Ti+1 -Ti, i = 1, . . . , n-1. With respect to this tenor structure we consider zero bond processes Bi, i = 1, . . . , n, where each Bi lives on the interval [0, Ti] and ends up with its face value Bi(Ti) = 1. With respect to this bond system we deduce a system of forward rates, called Libor rates, which are defined by
+
+Li(t)
+
+:=
+
+1 i
+
+Bi(t) Bi+1(t)
+
+-
+
+1
+
+,
+
+0  Ti, 1  i  n - 1.
+
+Note that Li is the annualized effective forward rate to be contracted for at the date t, for a loan over a forward period [Ti, Ti+1]. Based on this rate one has to pay at Ti+1 an interest amount of $iLi(Ti) on a $1 notional.
+
+2.1 Arbitrage free dynamics
+
+On a filtered measurable space (, F, Ft) we consider a Libor model under the terminal measure Pn within the following framework (Jamshidian (2001)),
+
+dLi Li-
+
+=
+
+-
+
+n-1 j=i+1
+
+j Lj-
+1 + j Lj- 
+
+ij dt
+
++
+
+idW
+
+(n)
+
+-
+
+n-1
+(n)(dt, du)i(t, u) 
+E j=i+1
+
+1
+
++
+
+jLj-j(t, u) 1 + j Lj-
+
+ - 1
+
++ i(t, u)(µ - (n))(dt, du),
+E
+
+i = 1, ..., n - 1,
+
+(1)
+
+with   µ(dt, du, ), being a random point measures on R+ ×E, where E is an abstract Lusin space, and (n)(dt, du, ) is the (Pn, F )-compensator on R+ × E of µ. In (1), W (n) is a d-dimensional standard Brownian motion under Pn, and the filtration (Ft)t0 is assumed to contain the natural filtrations generated by W (n) and µ, respectively. Further, (, t)  i(t, ·, ) are predictable processes of functions on E and i are d-dimensional predictable column vector processes. The random measure µ is assumed to be of the form
+
+µ=
+
+1Tn()=t(t,t())(dt, du),
+
+n1
+
+(2)
+
+3
+
+where  is in general an optional process and Tn, n = 1, 2, .. is a sequence of
+stopping times with disjoint graphs, i.e. Tn() = Tm() for n = m.
+The framework (1) may be casted into a somewhat different form. Let us
+m
+consider a partition E := Ek, where E1, ..., Em are Lusin spaces with
+k=1
+Ek  El =  for k = l, and define µk := µ|Ek , ik := i|Ek , k(n) := (n)|Ek , for k = 1, ..., m. Then (1) becomes
+
+m
+-
+k=1
+
+dLi Li-
+
+=
+
+-
+
+n-1 j=i+1
+
+1
+
+j Lj-
++ j Lj- 
+
+ij dt
+
++
+
+idW
+
+(n)
+
+n-1
+k(n)(dt, duk)ik(t, uk) 
+Ek j=i+1
+
+1
+
++
+
+j Lj-jk(t, uk) 1 + j Lj-
+
+ - 1
+
+m
++ ik(t, uk)(µk - k(n))(dt, duk),
+k=1 Ek
+
+i = 1, ..., n - 1.
+
+(3)
+
+In particular, it easily follows that k(n) is the Pn-compensator of µk with respect to F . Note that in general EFt(k) k(n)(, dt, du) is the compensator of µk with respect to the restricted filtration Ft(k) := Ft  {µ([0, s] × C) : s  t, C  B(Ek)}, t  0 (thus not k(n)). As shown in Appendix 7.1, the representation (3) is in fact equivalent to (1), but somewhat more natural as it suggest the use
+of a system of m point processes with phase space R+ × R as in the papers of Glasserman & Kou (2001) and Glasserman & Merener (2003).
+Henceforth we consider in (1) only random point measures with finite activ-
+ity, i.e., µ is of the form (2) and for each t > 0, µ([0, t] × E) < . In order to
+guarantee that the Libor processes Li are nonnegative we further require that i > -1 in (1), and then set i := ln(i + 1). Let (sl, ul), l = 1, ..., Nt, denote the jumps of µ up to time t for an   . Using the fact that at a jump time sl, Li(sl, ) = Li(sl-, )i(sl, ul, ) = Li(sl-, )(ei(sl,ul,) - 1), and hence Li(sl, ) = Li(sl-, )ei(sl,ul,), we obtain by the Ito-substitution rule for jump processes (with  suppressed),
+
+d ln Li
+
+=
+
+1 Li-
+
+dLi
+
+-
+
+1 2
+
+|i|2dt
+
++d
+
+Nt l=1
+
+(i(sl, ul) - i(sl, ul))
+
+=
+
+-
+
+1 2
+
+|i|2dt
+
+-
+
+n-1 j=i+1
+
+1
+
+j Lj- + j Lj-
+
+ij dt
+
++
+
+idW
+
+(n)
+
+-
+
+E
+
+(n)(dt, du)(ei(s,u)
+
+-
+
+n-1
+1)
+j=i+1
+
+1
+
++
+
+j Lj-ej (s,u) 1 + j Lj-
+
++d
+
+Nt l=1
+
+i(sl, ul).
+
+(4)
+
+4
+
+The logarithmic analogue of (3) directly follows from (4),
+
+d
+
+ln
+
+Li
+
+=
+
+-
+
+1 2
+
+|i|2
+
+dt
+
+-
+
+n-1 j=i+1
+
+1
+
+j Lj- + j Lj-
+
+ij dt
+
++
+
+idW (n)
+
+m
+-
+k=1
+
+Ek
+
+k(n)(dt,
+
+duk )(eik (s,uk )
+
+-
+
+n-1
+1)
+j=i+1
+
+1
+
++
+
+j Lj-ejk(s,uk) 1 + j Lj-
+
+m Nt(k)
++ d ik(sl(k), ul(k)),
+k=1 l=1
+
+(5)
+
+with ik := ln(ik + 1) and (sl(k), ul(k)), l = 1, ..., Nt(k), denoting the jumps of µk up to time t. The logarithmic representation (4) (or equivalently (5)) will be the basic framework for our purposes.
+
+3 Jump diffusion extension of a Libor market model
+We first specialize to a jump-diffusion Libor model which is driven by a Poisson random measure with marks in some multi-dimensional space.
+3.1 Poisson driven multi-dimensional jumps
+Consider the Lusin product space E := E1 × · · · × Em, with Ek Lusin for k = 1, ..., m (e.g. Ek = R). Suppose that on a common probability space, equipped with some probability measure Pn, we are given random measures µk on R+ × Ek. We then consider the product Lusin space E := E1 × . . . × Em (e.g. E = Rm), and on R+ × E the random measure µ(dt, du, ) such that for any t  0, µ({t}, ·, ) := µ1({t}, ·, )  . . .  µm({t}, ·, ). We assume that the random measures µk are such that almost surely for each t  0 either µk({t}, Ek, ) = 1 for all k, or µk({t}, Ek, ) = 0 for all k. Thus, all random measures µk throw a point in Ek at the same time. Then each µk({t}, ·, ) can be seen as the image of µ({t}, ·, ) under the projection of E onto Ek. In addition, we assume that given µk({t}, Ek, ) = 1 for all k, the Dirac measures µk =: (t,uk) are mutually independent for k = 1, ..., m, independent of t, and uk is distributed on Ek with probability pk(duk). The (simultaneous) jump-times, i.e. times t at which µk({t}, Ek, ) = 1 for all k, are assumed to be Poisson distributed with locally finite intensity measure (t)dt. We then consider (4) (or (1)) for the thus constructed jump measure µ with respect to the filtration (Ft)t0 which is generated by µ and W (n), where the Pn standard Brownian motion W (n) is independent of µ. Under these assumptions it follows that the (Pn, F )-compensator of µ is deterministic and is given by
+(n)(dt, du1, ..., dum) := (t)p1(du1) · · · pm(dum)dt =: (t)p(du)dt.
+
+5
+
+3.2 Extending the Libor market model
+
+Within the particular framework constructed above we now introduce a jump-
+diffusion Libor model which in a sense can be seen as an extension or perturbation of a (given) Libor market model. Let i(t)  Rd be the (given) deterministic volatility structure of the market model, resulting for instance from some stan-
+dard calibration procedure to ATM caps and ATM swaptions or historical data.
+To exclude local redundancies we assume that the matrix (i,l(t))1i<n,1ld has full rank d for all t. Let E := Rm for some integer m and consider deterministic vector functions i(t)  Rm, i = 1, ..., n - 1. We then take a sequence of constants ri with -1 < ri < 1, and set
+
+i := 1 - ri2i, i(t, u) := ri ui(t)
+
+(6)
+
+in (4) to yield,
+
+d ln Li
+
+=
+
+-
+
+1 2
+
+(1
+
+-
+
+ri2)|i|2dt
+
+-
+
+n-1 j=i+1
+
+1
+
+j Lj- + j Lj-
+
+(1 - ri2)(1 - rj2)ijdt
+
+Nt
++ 1 - ri2idW (n) + rid ul i(sl)
+l=1
+
+(7)
+
+-(t)dt
+
+Rm
+
+exp(ri ui) - 1
+
+p(du) n-1 1
+j=i+1
+
++
+
+j Lj- exp(rj 1 + j Lj-
+
+uj) .
+
+Note that in (7) the market model is retrieved by taking ri  0, and so, for small ri, (7) may be seen as a jump diffusion perturbation of the Libor market model.
+
+3.3 The jump drift of ln Li under Pn
+Let us consider the third term in (7), i.e. the "log jump drift" of ln Li under the terminal measure Pn. The computation of this term is of particular importance, for example, in a Monte Carlo simulation of the model. For a fixed time t > 0 we consider the expression
+
+n-1
+
+() := p(du) exp(riui(t) - 1
+
+1 + jLj-(t) exp(rjuj(t)) . (8)
+
+Rm j=i+1
+
+Using the abbreviation xj := jLj-(t) exp(rjuj(t)), the product in (8) my be expanded as
+
+n-1
+
+(1 + xj) = 1 +
+
+xj +
+
+xj1 xj2
+
+j=i+1
+
+i<j<n
+
+i<j1 <j2 <n
+
++ xj1 xj2 xj3 + ... + xi+1 · · · xn-1.
+i<j1 <j2 <j3 <n
+
+6
+
+Let us take a generic term of degree 1  d < n - i (with t suppressed),
+
+xj1 · · · xjd = j1 Lj1- · · · jd Ljd- exp(rj1 uj1 ) · · · exp(rjd ujd ), for i < j1 < j2 < · · · < jd < n, and observe that
+
+p(du)eriui exp(rj1 uj1 ) · · · exp(rjd ujd )
+Rm
+= p(du) exp u(rii + rj1 j1 + · · · + rjd jd )
+Rm m
+= pl(dul) exp [ul(riil + rj1 j1l + · · · + rjd jdl)]
+l=1 R m
+= pl (-iriil - irj1 j1l · · · -irjd jdl),
+l=1
+
+with pl being the characteristic function of pl. Note that the existence of pl (z) in some ball {z  C : |z| < A} has to be assumed. By analogue computations
+and collecting terms we thus obtain
+
+m
+
+() = -1 + pl (-iriil)+
+
+l=1
+
+n-1-i
+
+j1 Lj1- · · · jd Ljd-×
+
+d=1 i<j1<j2<···<jd<n
+
+mm
+
+× pl (-iriil - irj1 j1l · · · -irjd jdl) - pl (-irj1 j1l · · · - irjd jdl)
+
+l=1 l=1
+
+n-1-i
+
+=: ip,r, +
+
+j1 Lj1- · · · jd Ljd-pi;,jr1,,...,jd .
+
+d=1 i<j1<j2<···<jd<n
+
+Once the model inputs ri, jump loadings t  i(t) for 1  i < n, and jump component measures pl with characteristic functions pl for 1  l  m, are calibrated or simply given, the real valued functions t  pi ,r,(t), t  ip;,jr1,,...,jd (t), 1  i < n, i < j1 < j2 < · · · < jd < n, can be computed in closed form and, in principle, even be stored outside the Monte Carlo simulator. Thus considering
+these functions as given, the simulation of ln Li in the terminal measure may be
+
+7
+
+carried out straightforwardly via the formula
+
+d ln Li
+
+=
+
+-
+
+1 2
+
+(1
+
+-
+
+ri2)|i|2dt
+
+-
+
+n-1 j=i+1
+
+1
+
+j Lj- + j Lj-
+
+(1 - ri2)(1 - rj2)ijdt
+
+Nt
++ 1 - ri2idW (n) + rid uli(sl)
+l=1
+
+(9)
+
+n-1
+
+- (1 + j Lj-)-1 (t)dt pi ,r,(t)+
+
+j=i+1
+
+
+
+n-1-i
+
++ j1 Lj1- · · · jd Ljd-pi;,jr1,,...,jd (t) .
+
+d=1 i<j1<j2<···<jd<n
+
+We underline that the structure of the dynamics (9), hence the feasibility of standard Monte Carlo simulation of every forward Libor in the terminal measure, is a consequence of our model design in Sections 3.1 and 3.2. In particular it is due to the special product structure of the principally high dimensional jump measure p and the linear structure of the log-Libor factor loadings (6).
+
+Remark 1 Based on (9) we may consider different Libor model approxima-
+tions. For example we may freeze Lj- at zero (see Glasserman & Merener (2003)), hence replace Lj- with Lj(0) in (9). As an alternative, if the ri are small enough and the magnitudes of jLj are small enough as well, one could drop in (9) the terms of order (jLj)2 and higher. Of course, any such attempt needs careful investigation which is considered beyond the scope of this article.
+For related approximations in the context of the standard Libor market model,
+see for instance Kurbanmuradov, Sabelfeld and Schoenmakers (2002).
+
+3.4 Dynamics of Li under Pi+1
+We now consider for i = 1, ..., n - 1 the dynamics of Li under Pi+1. From (7) we see that the logarithm of the last Libor rate Ln-1 has the following simple dynamics in the Pn measure,
+
+d
+
+ln
+
+Ln-1
+
+=
+
+-
+
+1 2
+
+(1
+
+-
+
+rn2 -1 )|n-1 |2 dt
+
++
+
+1 - rn2-1n-1dW (n)+
+
+Nt
+
+rn-1d ul n-1(sl) - (t)dt
+
+exp(rn-1 un-1) - 1 p(du)
+
+l=1 Rm
+
+(10)
+
+and thus belongs to the class of additive models, i.e., the process Xn-1(t) := ln Ln-1(t) - ln Ln-1(0) has independent increments. By using Lemma 2 below for instance, we can derive straightforwardly the characteristic function of
+
+8
+
+Xn-1(t),
+
+n(z; t) :=EPn exp[izXn-1(t)] = exp [n(z; t)] with
+
+n(z;
+
+t)
+
+:=
+
+-
+
+z2 2
+
+(1
+
+-
+
+rn2 -1 )
+
+t
+|n-1(s)|2ds - iz
+0
+
+t 0
+
+(11)
+
+1 2
+
+(1
+
+-
+
+rn2 -1 )|n-1
+
+(s)|2ds+
+
+(s)ds
+
+exp(rn-1 un-1(s)) - 1 p(du)
+
+Rm
+
+t
++ (s)ds
+
+(eiz rn-1un-1(s) - 1)p(du).
+
+0 Rm
+
+(12)
+
+For 1  i < n - 1 the dynamics of Li under Pi+1 is more complicated. By the
+
+fact that Li is a martingale under Pi+1 we observe from the general framework
+
+(1) that
+
+dLi Li-
+
+=: idW (i+1) +
+
+i(t, u)
+E
+
+µ - (i+1)
+
+(dt, du),
+
+(13)
+
+where
+
+dW (i+1)
+
+=
+
+n-1
+-
+j=i+1
+
+1
+
+j +
+
+Lj- j Lj-
+
+j
+
+dt
+
++
+
+dW (n)
+
+is a standard Brownian motion under Pi+1, and
+
+n-1
+(i+1)(dt, du) = (n)(dt, du)
+j=i+1
+
+1
+
++
+
+jLj-j(t, u) 1 + j Lj-
+
+(14)
+
+is the compensator process of µ under the measure Pi+1. For the more specialized setup introduced in this section, which is based on (6), (14) reads
+
+(i+1)(dt, du) = (t)p(du)dt n-1 1 + jLj- exp(rj uj) ,
+
+j=i+1
+
+1 + j Lj-
+
+(15)
+
+and (13) reads
+
+dLi Li-
+
+=
+
+1 - ri2idW (i+1) +
+
+eri ui(t) - 1
+
+Rm
+
+µ - (i+1) (dt, du), (16)
+
+i = 1, ..., n - 1. The logarithmic version of (16) is seen from (7) to be
+
+d
+
+ln
+
+Li
+
+=
+
+-
+
+1 2
+
+(1
+
+-
+
+ri2)|i|2dt
+
++
+
+1 - ri2idW (i+1)
+
+Nt
+
++rid ul i(sl) -
+
+exp(ri ui) - 1 (i+1)(dt, du).
+
+l=1 Rm
+
+(17)
+
+In particular, for i < n - 1 the compensator (15) is non-deterministic in the
+present setup and, as a consequence, ln Li is generally not additive under Pi+1 for i < n - 1. However, by freezing in (15) the Libor terms, i.e. replacing Li- by Li-(0), we may get a deterministic approximative compensator and so an additive approximation of ln Li under Pi+1.
+
+9
+
+3.5 Preserving the local covariance structure
+
+We recall the following standard lemma which is proved in Appendix 7.2.
+
+Lemma 2 If J(t) =
+
+Nt l=1
+
+(sl
+
+,
+
+ul
+
+)
+
+is
+
+a
+
+compound
+
+Poisson
+
+process
+
+in
+
+Rq
+
+with
+
+jump intensity (t)dt, independent jumps in a measurable space E with prob-
+
+ability measure p(du), and  : R+ × E  Rq is deterministic, then (i) the
+
+characteristic function of J(t) is given by
+
+EeizJ(t) = exp
+
+t
+(s)ds (eiz(s,u) - 1)p(du) ,
+0E
+
+z  Rq.
+
+and (ii) for the expectation and covariance structure of J(t) we have
+
+EJl(t) = Cov(Jl(t), Jl (t)) =
+
+t
+(s)ds
+0 t
+(s)ds
+0
+
+l(s, u)p(du),
+E
+l(s, u)l (s, u)p(du),
+E
+
+Let us now write the integrated random term in (7) as
+
+1  l, l  q.
+
+i(t) := =:
+
+t Nt
+1 - ri2 idW (n) + ri ul i(sl)
+0 l=1
+1 - ri2 iD(t) + riiJ (t).
+
+(18)
+
+By Lemma 2 the characteristic function of the jump process J is then given by
+
+ 
+
+ 
+
+t n-1
+EeizJ (t) = exp  (s)ds p  zj j(s) - 1 ,
+
+0 j=1
+
+with p(y) := p(du) exp iuy , y  Rm being the characteristic function of p. For the covariance matrix Lemma 2 yields
+t
+Cov(iJ (t), jJ (t)) = (s)ds i(s)uuj(s)p(du)
+0 Rm t
+=: (s)dsi(s)j(s)
+0
+with kl := ukulp(du) being the cross moments of jump components uk and ul. Since the Brownian motion and the jumps are assumed to be independent, we have for the local covariance of the random term in (7),
+
+Cov(di(t), dj(t))/dt = (1 - ri2)(1 - rj2)i(t)j(t) + rirj(t)i(t)j(t). (19)
+
+10
+
+Our main idea is to consider jump diffusion extensions of a (given) pure Libor market model which preserve the (given) local covariance structure of the market model. To this aim we consider in (7) the case where r : ri for all i. Then (19) yields
+Cov(di, dj)/dt = (1 - r2)ij + r2ij.
+We then assume j = Aj for some m × d matrix A which gives
+Cov(di, dj)/dt = i(I - r2I + r2AA)j.
+Now the requirement that the local covariances (19) coincide with the local covariances of the market model leads to the condition
+AA = Id,
+and in particular m  d. Since  is (time independent) positive definite there is a unique positive symmetric m × m matrix C such that  = C2. Then for any column-orthogonal m × d matrix Q we have a solution
+A = -1/2C-1Q.
+
+Note that in general Q and  may depend on t. Without loss of generality (i.e. without affecting the input Libor market model) we may assume that the (n - 1) × d matrix (j,r) is an upper triangular matrix in the sense
+n-j,l = 0 for 1  l < d - j + 1, j = 1, ..., d.
+We assume (for technical reasons in fact) that the (n - 1) × m matrix (j,r) is also an upper triangular matrix,
+
+d
+n-j,l = Al,rn-j,r = 0,
+r=1
+
+for 1  l < m - j + 1,
+
+j = 1, ..., m.
+
+(20)
+
+In particular this entails that the jumps of Ln-1 are driven by a single jump measure. We will achieve (20) by the additional requirement m = d (dimension
+of the jump space equal to the number of Brownian motions) and by taking the orthogonal matrix Q such that C-1Q, hence A, is a lower triangular (square)
+matrix with positive diagonal elements. Thus, A is uniquely determined by
+
+AA = -1-1, A is lower triangular with positive diagonal. (21)
+
+As a further specialization we take  to be time independent. Note that ui = (Du)D-1i for any regular diagonal matrix D. So, multiplication of all jump random variables with an arbitrary factor and respective components of i with this factors inverse yields the same model. We thus need to standardize the
+jump components in a suitable way. Without any restriction we may fix the
+jump variances k defined as
+
+k :=
+
+uk2 pk(duk) - 2k where
+
+k := ukpk(duk)
+
+11
+
+is the mean of the kth jump component, as we like. As a convenient choice we
+
+take that
+
+them ||A||F
+
+all :=
+
+equal, i.e.
+m k,l=1
+
+we set |Akl|2 =
+
+k : , k = m = ||Im||F
+
+1, . . . , m. , which is
+
+We will choose equivalent to
+
+
+
+such
+
+||C -1 ||2F
+
+=
+
+m k=1
+
+1 k
+
+= m,
+
+(22)
+
+where k, k = 1, ..., m, denote the eigenvalues of . Then by the result of Appendix 7.3 it follows that (22) is equivalent to
+
+m
+
+
+
++
+
+m-1 m
+
+p2
+
+ =
+
+p=1 m
+
+.
+
+ + 2p
+
+p=1
+
+It is easy to show that this quadratic equation in  has one positive and one
+
+negative solution, and that for large m the positive solution +  1/. We
+
+therefore set
+
+
+
+:=
+
+1 
+
+
+
+k ,
+
+k = 1, . . . , m.
+
+For all k, l = 1, ..., m, ck cl = ek C2el = kl = kkl + kl. We so have in particular n-1,l(s)  0 for 1  l < m, and
+
+n-1,m(s) = Am,mn-1,m(s) = -1/2(emC2em)-1n-1,m(s)
+
+= n-1,m(s) = n-1,m(s) .
+
+( + m2 )
+
+1 + 2m
+
+(23)
+
+Hence the dynamics of ln Ln-1 is driven by a single jump variable um under a jump distribution with density pm with mean m and variance -1.
+
+4 Pricing caplets
+
+A caplet for the period [Tj, Tj+1] with strike K is an option which pays (Lj(Tj)- K)+j at time Tj+1, where 1  j < n. It is well-known that under the Tj+1 - forward measure the caplet price has the following simple representation. Writing Ej+1 for the expectation under this measure, we have
+Cj (K) = Bj+1(0)Ej+1[(Lj (Tj ) - K)+j ]
+
+for price of the j-th caplet at time zero. Thus the j-th caplet price is determined
+
+by the dynamics of Lj under Pj+1 only. We now recall the FFT pricing method of Carr & Madan, which basically goes as follows. It turns out natural to
+
+transform for a fixed j the strike variable into a log-forward moneyness variable
+
+defined by
+
+v := ln K . Lj (0)
+
+12
+
+In terms of log-forward moneyness the j-th caplet price is then given by
+
+Cj (v) := j Bj+1(0)Lj (0)Ej+1[(eXj(Tj) - ev)+],
+
+where Xj(t) := ln Lj(t) - ln Lj(0). We further introduce an auxiliary function Oj (v) := j-1Bj-+11(0)L-j 1(0)Cj (v) - (1 - ev)+ = Ej+1(eXj(Tj) - ev)+ - (1 - ev)+ = 1v0Ej+1(eXj (Tj) - ev)+ + 1v0Ej+1(ev - eXj (Tj))+,
+
+where the third expression is basically due to the put-call parity and follows from the identity (a - b)+ = a - b + (b - a)+ and the fact Ej+1eXj(Tj) = 1.
+In Appendix we derive further characteristic properties of the function Oj. In particular, it holds (for a proof see Appendix 7.4)
+
+F{Oj}(z) =
+
+ -
+
+Oj (v)eivzdv
+
+=
+
+1
+
+-
+
+j+1(z - z(z - i)
+
+i; Tj) .
+
+(24)
+
+Most importantly, if the characteristic function of Xj(Tj) is explicitly given, for example by (11), and (12) in the case j = n - 1, we obtain an analytical
+caplet pricing formula via Fourier inversion,
+
+Cj(K) = jBj+1(0)(Lj (0) - K)+ +
+
+j Bj+1(0)Lj (0)
+
+
+
+1
+
+-
+
+j+1(z
+
+-
+
+i;
+
+Tj )
+
+e-iz
+
+ln
+
+K Lj (0)
+
+dz.
+
+(25)
+
+2 - z(z - i)
+
+For a fixed j, j < n - 1, let now ln Lj be given by (17). As noted at the end of Section 3, we may then obtain an additive approximation Xj(Tj) of Xj(Tj) via (17) by replacing (j+1) with the approximative compensator
+
+(j+1)(dt, du) := (t)dt p(du) n-1 1 + lLl(0) exp(rl ul) .
+
+l=j+1
+
+1 + lLl(0)
+
+(26)
+
+Hence, approximative caplet prices Cj(K) are obtained from (25), using an ap-
+proximation j+1 of the characteristic function j+1, which in turn is obtained by replacing in (11)-(12), n - 1, n, and (n)(dt, du) = (dt)p(du), respectively with j, j + 1, and (j+1)(dt, du) from (26).
+
+5 Calibration
+
+Let us first consider the calibration to a panel of caplets corresponding to matu-
+rity Tn-1 and different strikes K-N < · · · < K-1 < K0 := Ln-1(0) < K1 < · · · < KN . So, suppose that caplet prices Cn-1,j corresponding to Kj, -N  j  N , are available. We first transform the observations Cn-1,j and strikes Kj to
+
+On-1,j := n--11,Bn-1(0)Ln--1 1(0)Cn-1,j - (1 - evj )+,
+
+vj
+
+:=
+
+ln
+
+Kj Lj (0)
+
+,
+
+-N  j  N.
+
+(27) (28)
+
+13
+
+Our calibration procedure relies essentially upon the next formula which follows from (11), (12), (24), and taking the assumptions of Section 3.5 into account.
+
+n(z; Tn-1) = Ln(n(z; Tn-1)) = Ln 1 - z(z + i)F{On-1}(z + i)
+
+=
+
+-
+
+n2 -1 z 2 2
+
+- in-1z
+
+- n-1
+
++ n-1F{µn-1}(z),
+
+(29)
+
+with abbreviations
+
+Tn-1
+
+n2-1 := (1 - rn2-1)
+
+|n-1(s)|2ds,
+
+0
+
+n-1 := Tn-1 exp(rn-1 un-1,m(s)) - 1 pm(u) du
+R
+
++
+
+1 2
+
+Tn-1
+(1 - rn2-1)|n-1(s)|2ds
+0
+
+n-1 := Tn-1,
+
+Tn-1
+
+µn-1(·) := Tn--11
+
+rn--11n--11,m(s) pm(rn--11n--11,m(s) ·) ds,
+
+0
+
+(30)
+(31) (32)
+
+with Ln(w) := ln |w| + iArg w, - < Arg w   denoting the main branch of
+the logarithm, and pm being the density of pm which we now assume to exist. In principle, the constants n2-1, n-1, n-1, and the mixed density µn-1
+can be recovered via (29) from complete knowledge of function On-1, hence a complete system of model consistent caplet prices Cn-1(K), 0 < K < . Indeed, since F{µn-1}(z) tends to zero as |z|   due to the Riemann-Lebesgue lemma, we have
+
+n2 -1
+
+=
+
+-2
+
+lim
+z+
+
+z-2n(z;
+
+Tn-1)
+
+n-1
+
+=
+
+-
+
+lim
+z+
+
+z-1
+
+Im
+
+n(z;
+
+Tn-1),
+
+and next,
+
+n-1
+
+=
+
+lim
+z+
+
+-n(z; Tn-1) -
+
+n2 -1 z 2 2
+
+- in-1z
+
+,
+
+and then the function F{µn-1}(z) can be found from (29). In practice this approach breaks down due to incomplete knowledge of On-1 and lack of numerical stability however.
+In Belomestny and Reiss (2004) a more stable procedure is developed which estimates all spot characteristics n2-1, n-1, n-1, and µn-1(·), for a given set of noisy observations (27) due to a discrete set of strikes (28). This procedure consists basically of four steps: (i) first, a continuous piece-wise linear approxi-
+mation On-1 of On-1 is built from the data; (ii) from On-1 an approximation
+n of n is obtained; (iii) next the coefficients of the quadratic polynomial on
+the right-hand side in (29) are estimated from n, under the presence of the
+
+14
+
+nonparametric nuisance part F{µn-1} (which vanishes at infinity) using appropriate weighting schemes; (iv) finally an estimator for µn-1 is obtained via FFT inversion of the remainder. The steps (i)­(iv) are spelled out in detail below.
+(i) In view of Appendix 7.5, we construct a continuous piece-wise linear function v  On-1(v) on a grid vj, -N - 1  j  N + 1, with v-N-1  v-N < · · · < v-1 < v0 := 0 < v1 < · · · < vN  vN+1, , such that On-1(v) fits the data at vj, j = 0, On-1(v-N-1) := On-1(vN+1) := 0, and On -1(0-) - On -1(0+) = 1. The boundary strikes v-N-1, vN+1 are included to reflect the fact that limv± On-1(v) = 0.
+(ii) By straightforward FFT we compute F{On-1}(z + i) and so obtain
+
+n(z) := Ln 1 - z(z + i)F{On-1}(z + i) , z  R.
+
+(33)
+
+(iii) With an estimate n of n at hand, we obtain estimators for the parametric part (n2-1, n-1, n-1) by an averaging procedure using the polynomial structure in (29) and the decay property of F{µn-1}. For suitable weight
+functions w, w, and w constructed in Section 5.1, which have bounded
+support U := [-U, U ] with U > 0, and satisfy
+
+wdu = 0, u2w(u)du = -2,
+
+uw(u)du = 1,
+
+u2w(u)du = 0, w(u)du = -1,
+
+(34)
+
+we compute the estimates
+
+n2-1 := Re(n(u))w(u)du,
+
+(35)
+
+n-1 := Im(n(u))w(u)du,
+
+n-1 := Re(n(u))w (u)du,
+
+for the parameters n2-1, n-1, and n-1, respectively. (iv) The estimate for µn-1 is obtained via the inverse Fourier transform,
+
+µn-1 := n--11F-1
+
+n(·)
+
++
+
+n2 -1 2
+
+(·)2
+
+-
+
+in-1(·)
+
++
+
+n-1
+
+1U
+
+,
+
+(36)
+
+where u  R and 1U is the indicator function of the set U .
+The computational complexity of this estimation procedure is very low. The only time consuming steps are the three integrations in step (iii) and the inverse Fourier transform (inverse FFT) in step (iv).
+
+15
+
+5.1 Determination of the weights w, w, and w
+Let us assume that for some natural number p and C > 0,
+
+max
+0qp
+
+µn(q-) 1
+
+L2(R)  C
+
+(37)
+
+and consider for some U > 0 the following weight functions,
+
+wU,p(u) :=
+
+p+3 1 - 2-2/(p+1)
+
+U p+3 |u|p(1|u/U |1 - 2 · 1 ),2-1/(p+1)|u/U |1
+
+wU,p(u)
+
+:=
+
+p+2 2U p+2
+
+|u|psign(u)1|u/U
+
+|1,
+
+wU,p(u) := 2
+
+p+1 22/(p+3) - 1
+
+U p+1 |u|p(2 · 12-1/(p+3)|u/U |1 - 1|u/U |1),
+
+(38)
+
+which satisfy the conditions (34) by straightforwardly checking. Following Belomestny and Reiss (2005), we can estimate
+
+|n2-1 - n2-1| 
+
+Re(n(u) - n(u))wU,p(u)du +
+
+= (1) + (2).
+
+Re(F{µn-1}(u))wU,p(u)du (39)
+
+The second term can be estimated using the identity (iu)pF{µn-1}(u) = F{µ(np-)1}(u), two times Parseval's isometry, and (38),
+
+(2) 
+
+F{µn-1}(u)wU,p(u)du =
+
+(iu)pF{µn-1}(u)
+
+wU,p(u) (iu)p
+
+du
+
+=
+
+F{µ(np-) 1 }(u)
+
+wU,p(u) (iu)p
+
+du
+
+=
+
+1 2
+
+µ(np-) 1(s)F-1
+
+wU,p(·) (s)ds (i·)p
+
+
+
+C 2
+
+wU,p(·) (·)p
+
+= 
+
+C(p + 3) 1 - 2-2/(p+1)
+
+U p+5/2
+
+
+
+C1
+
+(p
+
++ 1)(p + U p+5/2
+
+3)
+
+,
+
+L2 (R)
+
+for some C1 > 0, which explains the construction of wU,p: for fixed p and U large, (2) falls with O(U -(p+5/2)). The first term (1) is due to the noise and lack of data. It can be estimated by
+
+(1)
+
+
+
+||n - n||L(U)||wU,p||L1(U) = ||n - n||L(U) (p + 1)
+
+2(p + 3) 1 - 2-2/(p+1)
+
+U2
+
+
+
+C2||n
+
+-
+
+n ||L (U )
+
+p+3 U2
+
+,
+
+for some C2 > 0. So we have,
+
+|n2 -1
+
+-
+
+n2 -1 |
+
+
+
+C2||n
+
+-
+
+n
+
+||L
+
+(U
+
+)
+
+p+ U2
+
+3
+
++
+
+C1 (p
+
++ 1)(p + U p+5/2
+
+3) .
+
+(40)
+
+16
+
+In a similar way we obtain for n-1, and n-1,
+
+|n-1 - n-1|
+
+
+
+C3||n
+
+-
+
+n ||L (U )
+
+p+2 U (p + 1)
+
++
+
+C4
+
+(p + 2) U p+3/2
+
+,
+
+(41)
+
+|n-1 - n-1|
+
+
+
+C5||n
+
+-
+
+n ||L (U ) (p
+
++
+
+3)
+
++
+
+C6
+
+(p
+
++ 1)(p + U p+1/2
+
+3)
+
+,
+
+(42)
+
+for some C3, C4, C5, C6 > 0. Note that even when µn(q-) 1 L2(R) is finite for very large q it is not wise in view of (42) to take p too large. In practice one needs to
+accomplish that ||n - n||L(U) is small for a large enough U and then p = 1 or 2 turns out to be a proper choice.
+
+Correction of µn-1
+Due to numerical as well as statistical errors the estimated µn-1 may not be a probability density and thus needs to be corrected. Besides that we also want the variance of Xn-1 to be equal to the Black variance Tn-1(nB-1)2, where
+
+nB-1 :=
+
+1 Tn-1
+
+Tn-1
+|n-1|2(s)ds.
+0
+
+In order to accomplish all these requirements we construct a new estimate µ+n-1 as a solution of the following optimization problem,
+
+µn+-1 - µn-1
+
+2 L2 (R)
+
+
+
+min,
+
+inf
+xR
+
+µ+n-1(x)
+
+
+
+0
+
+(43)
+
+subjected to
+
+µ+n-1(v)dv = 1,
+
+v2µ+n-1(v)dv =
+
+Tn-1
+
+nB-1 2 - n2-1 . n-1
+
+(44)
+
+The solution has a rather simple form and is given by
+
+µ+n-1(x; , ) := max{0, µn-1(x) -  - x2}, x  R,
+
+where  and  need to be determined such that (44) is satisfied. Note that by representing µ+ as a mixture of given densities, (43)-(44) boils down to a finite
+dimensional quadratic optimization problem.
+
+5.2 Procedure for calibration against terminal caplets
+For U > 0 we denote the estimates (35) obtained using the weight functions (38) by n-1(U ), n-1(U ), n-1(U ), and the corrected L´evy density is denoted by µ+n-1(·; U ). From (30) and (31) we can directly infer estimates rn-1(U ) and (U ), respectively. We further have to identify a jump density pm from µn+-1(·; U ) via (32), while taking into account (23). Since the function  is usually not constant this might be not easy in general. We therefore go the following
+
+17
+
+pragmatic way. Let us define in the spirit of (23) nB-1 := nB-1/ 1 + m2 . We then consider as candidate jump density
+
+pm(u; U ) := rn-1(U )nB-1µn+-1 rn-1(U )nB-1u; U
+
+=
+
+rn-1(U )nB-1 1 + (U )2m
+
+µ+n-1
+
+rn-1(U )nB-1 u; U . 1 + (U )m2
+
+(45)
+
+Due to the very construction
+
+-F{µ+n-1(·, U )}(0) =
+
+v2µn+-1(v; U )dv =
+
+rn2-1(U ) nB-1 (U )
+
+2
+,
+
+(46)
+
+and so by (45) it holds u2pm(u; U ) du = -1(U ) + 2m. By next requiring that the first moment of the r.h.s. in (45) is equal to m, we simply obtain
+
+m(U ) :=
+
+µ+ , (U )µ+
+
+(47)
+
+with µ+ and µ+ denoting the expectation and the variance, respectively, of a random variable with density µn+-1(·; U ). Substituting (47) in (45) then yields
+
+
+
+pm(u; U ) =
+
+rn-1(U )nB-1 1 + µ2 + /µ+
+
+µn+-1
+
+
+
+rn-1(U )nB-1 u; U  . 1 + 2µ+ /µ+
+
+(48)
+
+Finally we consider in view of (32)
+
+µn+-1(·; U )
+
+:=
+
+1
+
+Tn-1
+
+1 + 2µ+ /µ+ ×
+
+Tn-1 0
+
+rn-1(U )n-1,m(s) 
+
+×
+
+pm
+
+ 1 + µ2 + /µ+ rn-1(U )n-1,m(s)
+
+·;
+
+U
+
+ds.
+
+(49)
+
+Note that the second moments of µ+n-1 and µ+n-1 coincide and are given by the r.h.s. of (46) (the first moments coincide approximately).
+
+Choice of U We find U  as a solution of the following minimization problem
+
+N
+
+U  = arginfU
+
+|Cn-1(Ki; U ) - Cn-1,i|2,
+
+i=-N
+
+(50)
+
+where Cn-1(·; U ) are prices computed from the model due to n-1(U ), n-1(U ), n-1(U ), and µn+-1(·; U ).
+
+18
+
+5.3 Calibration to other caplets
+
+With U  is determined via (50) and pm := pm(U ), we introduce the shifted densities
+pj(u) := pm(u - j + m),
+
+hence
+
+j = u pj(u)du,
+R
+
+j = 1, . . . , m.
+
+(51)
+
+Because we want to preserve the input local covariance structure we set rj = rm(U ), j = 1, . . . , m - 1. Let U be the upper triangular m × m matrix with positive diagonal elements such that  = U U . This decomposition exists because  is invertible. From (21) we then have A = -1/2U -. Let us define
+r(kr) , k  r, r  m, k = 1, ..., m. Since U is an upper triangular we have (k) = U (k)(U (k)) and A(k) = -1/2(U (k))- with A(k) and U (k) defined analogously to (k). Thus, for knowing A(k) it is sufficient to know (k).
+
+Now let us suppose that m = n - 1. We determine j, j = 1, . . . , n - 1,
+recursively in the following way. For j = n - 1, n-1 is determined from (47), then n-1,n-1 from (23), and n(n--11,n) -1 =  + n2 -1. Suppose l,k is determined for l = j, ..., n - 1, k = l, ..., n - 1, where j > 1. For j = m = n - 1 we are in the
+
+situation of Section 5.2. We then consider the matrix
+
+(j-1)(j-1) :=
+
+ + 2j-1 j-1a
+
+j-1a (j)
+
+,
+
+(52)
+
+with a := [j, · · ·, n-1], and where the (n - j) × (n - j) matrix (rjr) is assumed to be already determined. Note that  = -1(U ) is the common jump variance.
+In fact the only unknown parameter to be determined in (52) is j-1. Further, it easily follows that,
+
+U (j-1)(j-1) =
+
+ + 2j-1 1 - a((j))-1a 1/2
+
+j-1a(U (j))- U (j)
+
+and so
+
+F (j-1)(j-1) :=
+
+U (j-1)
+
+-
+(j-1) =
+
+ + 2j-1 1 - a((j))-1a -1/2 -  + j2-1 1 - a((j))-1a -1/2 j-1a
+
+U (j) -
+
+Next, set according to (20)
+
+k
+
+j-1,k(j-1) = -1/2
+
+Fk(,jr-1) (j -1 )j -1,r ,
+
+r=j-1
+
+j-1,k(j-1) = 0, 1  k < j - 1.
+
+k = j - 1, ..., n - 1,
+
+19
+
+By a simple trial and error search we then determine j-1 such that the least squares fit error of the Tj-1 caplet panel is as small as possible. For each guess of j-1 the model caplet prices may be computed by Monte Carlo simulation of the model, or as an alternative by approximating caplet prices as proposed
+at the end of Section 4.
+
+6 Calibration to real data
+In this section we calibrate the model (7) to market data given on 11.01.2004. The caplet-strike volatility matrix is partially shown in Table 1. The corre-
+
+K/T
+0.50 0.75 1.75 2.50 3.50 4.50 5.50 6.50 7.50 8.50 9.50 11.50 14.50 19.50
+
+0.150
+0.2604 0.2678 0.2832 0.2850 0.2804 0.2720 0.2625 0.2531 0.2447 0.2375 0.2315 0.2212 0.2149 0.2111
+
+0.200
+0.1735 0.2036 0.2587 0.2651 0.2581 0.2474 0.2381 0.2314 0.2270 0.2241 0.2224 0.2206 0.2201 0.2200
+
+0.225
+0.1819 0.2052 0.2475 0.2513 0.2432 0.2319 0.2219 0.2144 0.2092 0.2058 0.2036 0.2011 0.2003 0.2001
+
+0.250
+0.1969 0.2136 0.2365 0.2334 0.2233 0.2142 0.2079 0.2039 0.2016 0.2002 0.1995 0.1988 0.1987 0.1987
+
+0.300
+0.2453 0.2401 0.2227 0.2125 0.2016 0.1934 0.1872 0.1824 0.1788 0.1761 0.1740 0.1707 0.1689 0.1678
+
+0.400
+0.2708 0.2598 0.2246 0.2051 0.1856 0.1720 0.1625 0.1557 0.1510 0.1477 0.1454 0.1424 0.1410 0.1404
+
+0.500
+0.3197 0.3052 0.2539 0.2234 0.1924 0.1711 0.1566 0.1470 0.1407 0.1367 0.1342 0.1312 0.1302 0.1300
+
+0.600
+0.3407 0.3258 0.2733 0.2412 0.2071 0.1821 0.1640 0.1510 0.1418 0.1355 0.1311 0.1253 0.1228 0.1219
+
+Table 1: Caplet volatilities TK for different strikes and different tenor dates (in years).
+
+sponding implied volatility surface is shown in Figure 1. Pronounced smiles are clearly observable. Due to the structure of the given
+data we are going to calibrate the jump diffusion model based on semi-annual tenors, i.e. j  0.5, with n = 41, and where the initial calibration date 01.11.04 is identified with T0 = 0.
+In a pre-calibration a standard market model is calibrated to ATM caps and ATM swaptions using Schoenmakers (2005). However, we emphasize that the method by which this input market model is obtained is not essential nor a discussion point for this paper. For the pre-calibration we have used a volatility
+
+20
+
+Caplets Implied Volatilities
+
+0.35
+
+0.30
+
+0.25
+
+0.20
+
+0.15
+
+0.02 0.04 Stri0ke.0s6
+
+0.08
+
+0.10
+
+Tenors
+
+5 10 15
+
+Figure 1: Smoothed caplet implied volatility surface TK.
+
+structure of the form
+
+i(t) = cig(Ti - t)ei, 0  t  min(Ti, Tj), 1  i, j < n,
+
+where g is a simple parametric function and ei are unit vectors. The calibration routine returned ei  R40 with
+eiej = ij = exp[-0.005|i - j|] 1  i, j < 41, such that the matrix (ei,k) is upper triangular, and
+g(s) = 0.8 + 0.2e-2.0s.
+
+The ci can be readily computed from
+
+Ti
+
+(TAiT M )2Ti = ci2
+
+g2(s) ds, i = 1, . . . , n - 1,
+
+0
+
+using the initial Libor curve, which is obtained by a standard stripping procedure from the yield curve at 11.01.04, and is given in Table 2.
+
+The further steps are as follows
+
+21
+
+Ti Li(0) Ti Li(0) Ti Li(0) Ti Li(0) 0.5 0.0238176 5.5 0.0451931 10.5 0.0509249 15.5 0.0539696
+1 0.0264201 6 0.0465074 11 0.0512114 16 0.0540521 1.5 0.0292798 6.5 0.0475881 11.5 0.0515804 16.5 0.0540931
+2 0.0320656 7 0.0484201 12 0.0520317 17 0.0540933 2.5 0.0345508 7.5 0.0490942 12.5 0.0524639 17.5 0.054053
+3 0.0366693 8 0.0496402 13 0.0528456 18 0.0539728 3.5 0.0385821 8.5 0.0500331 13.5 0.0531757 18.5 0.0538533
+4 0.040381 9 0.0502848 14 0.0534529 19 0.053695 4.5 0.0420863 9.5 0.0504889 14.5 0.0536757 19.5 0.0534984
+5 0.0437079 10 0.0506932 15 0.0538451 20 0.053268
+Table 2: Initial Libor curve.
+r  m 0.7 0.1 -0.005
+
+Table 3:
+
+Parameters
+
+calibrated
+
+using
+
+terminal
+
+caplet
+
+volas
+
+K
+Tn-1
+
+.
+
+1. The model for Ln-1 is calibrated as described in Section 5.2 and the calibrated parameters are shown in Table 3. The calibrated density pm(x) is plotted in Figure 2. Note that the variance of the distribution corresponding to pm is equal to 1/ = 10.0 in order to ensure (22).
+2. Remaining parameters j, j = 1, . . . , 39, are calibrated sequentially as described in Section 5.3 with approximation formula (26) being used for pricing caplets. It turned out experimentally that j can be taken on the line j = 40 - 0.0751  (40 - j), j = 40, . . . , 1.
+The quality of the calibration can be seen in Figure 3, where calibrated volatility curves are shown for several caplet maturities together with original caplet volas and ATM caplet volas. The overall root-mean-square fit we have reached shows to be 0.5%-5%, when the number of caplet panels ranges from 2 to 20. Fitting all the 40 caplet panels with an acceptable accuracy (e.g. 5%), would require a more flexible structure for pj, j < m, however.
+
+22
+
+0.004
+
+0.003
+
+pm(x)
+0.002
+
+0.001
+
+0.000
+
+-20 -10
+
+0
+
+x
+
+10 20
+
+Figure
+
+2:
+
+Density
+
+pm(x)
+
+calibrated
+
+using
+
+terminal
+
+caplet
+
+volas
+
+K
+Tn-1
+
+7 Appendix
+
+7.1 Equivalence of (1) and (3)
+Suppose on (, F , Ft, Pn) we are given  and W (n) as in (3), and for k = 1, ..., m we are given a random measure µk on R+ × Ek, with Ek Lusin, of the form (2)
+
+µk =
+
+1Tn(k)()=t(t,t(k)())(dt, du),
+
+n1
+
+where the stopping times (Tn(k))k=1,...,m,n1 satisfy Tn(k)() = Tm(l)() for n = m
+
+or k = l. Further let for i = 1, ..., n - 1, k = 1, ..., m, the Ek-valued function
+
+processes ik be predictable. By treating Ek and El for k = l as completely
+
+different spaces, i.e.Ek El =  (which may be achieved by giving them different
+
+colors if need be), we may construct straightforwardly the Lusin space E :=
+
+m
+Ek and define a random measure µ :=
+
+m k=1
+
+µk
+
+on
+
+R+
+
+× E.
+
+Let
+
+now
+
+k(n)
+
+k=1
+
+be the (Pn, F )-compensator of µk (which is concentrated on Ek), then it easily
+
+follows that (n) :=
+
+m k=1
+
+k(n)
+
+is
+
+the
+
+(Pn,
+
+F )-compensator
+
+of
+
+µ,
+
+and
+
+by
+
+defining
+
+i(t, u, ) := ik(t, u, ) if u  Ek, (3) may be written as (1).
+
+23
+
+Caplet Mat.= 4.5 yr.
+
+Caplet Mat.= 4 yr.
+
+Caplet Mat.= 3.5 yr.
+
+Caplet Volas 0.10 0.15 0.20 0.25 0.30 0.35 0.40
+
+Caplet Volas 0.10 0.15 0.20 0.25 0.30 0.35 0.40
+
+Caplet Volas 0.10 0.15 0.20 0.25 0.30 0.35 0.40
+
+0.02
+
+0.04
+
+0.06
+
+0.08
+
+0.10
+
+Strike
+
+Caplet Mat.= 3 yr.
+
+0.02
+
+0.04
+
+0.06
+
+0.08
+
+0.10
+
+Strike
+
+Caplet Mat.= 2.5 yr.
+
+0.02
+
+0.04
+
+0.06
+
+0.08
+
+0.10
+
+Strike
+
+Caplet Mat.= 2 yr.
+
+Caplet Volas 0.10 0.15 0.20 0.25 0.30 0.35 0.40
+
+Caplet Volas 0.10 0.15 0.20 0.25 0.30 0.35 0.40
+
+Caplet Volas 0.10 0.15 0.20 0.25 0.30 0.35 0.40
+
+0.02
+
+0.04
+
+0.06
+
+0.08
+
+0.10
+
+Strike
+
+0.02
+
+0.04
+
+0.06
+
+0.08
+
+0.10
+
+Strike
+
+0.02
+
+0.04
+
+0.06
+
+0.08
+
+0.10
+
+Strike
+
+Figure 3: Caplet volas from the calibrated model (solid lines), original caplets volas TK (points) and ATM caplet volas TAT M (dashed lines) for different caplet maturities T .
+
+7.2 Proof of Lemma 2
+
+Proof of (i):
+
+È Nt
+
+EeizJ(t) = E E eiz
+
+|NNt
+l=1
+
+(sl
+
+,ul )
+
+t
+
+=E
+
+eiz  (sl ,ul ) |Nt
+
+l=1
+
+=E
+
+=
+k=0
+
+t 0
+
+(s)ds
+
+t 0
+
+(
+
+)d
+
+eiz(s,u)p(du)
+E
+
+Nt
+
+Êt
+0
+
+(
+
+)d
+
+k
+
+e-
+
+t 0
+
+(
+
+)d
+
+k!
+
+t (s)ds
+
+0
+
+t 0
+
+(
+
+)d
+
+eiz(s,u)p(du)
+E
+
+t
+= exp (s)ds (eiz(s,u) - 1)p(du).
+
+0E
+
+k
+
+Proof of (ii): By differentiating the characteristic function with respect to zl and zl we obtain
+
+ zl
+
+E eiz J (t)
+
+=
+
+i
+
+t
+(s)ds
+0
+
+eiz(s,u)l(s, u)p(du)·
+E
+
+t
+· exp (s)ds (eiz(s,u) - 1)p(du),
+
+0E
+
+24
+
+2 EeizJ(t) = - zlzl
+
+t
+(s)ds
+0
+
+eiz(s,u)l (s, u)p(du)·
+E
+
+tt
+· (s)ds eiz(s,u)l(s, u)p(du) exp (s)ds (eiz(s,u) - 1)p(du)
+
+0E
+
+0E
+
+t
+- (s)ds eiz(s,u)l(s, u)l (s, u)p(du)
+0E
+
+t
+· exp (s)ds (eiz(s,u) - 1)p(du).
+
+0E
+
+Hence and
+
+t
+EJl(t) = (s)ds l(s, u)p(du),
+0E
+
+tt
+
+EJl(t)Jl (t) = (s)ds l (s, u)p(du) · (s)ds l(s, u)p(du)
+
+0E
+
+0E
+
+t
+
++ (s)ds l(s, u)l (s, u)p(du),
+
+0E
+
+and then note that Cov(Jl(t), Jl (t)) = EJl(t)Jl (t) - EJl(t)EJl (t).
+
+7.3 Summed reciprocal eigenvalues of 
+
+Consider the determinant
+
+Dm :=
+
+1 + 12 21
+31
+
+12 2 + 22 32
+
+13 23 3 + 23
+
+1m-1
+
+1m 2m
+
+m-11 m-12
+
+m1
+
+m2
+
+1 + 12 21
+31
+
+12 2 + 22 32
+
+13 23 3 + 32
+
+=
+
+m-1 + m2 -1 mm-1
+1m-1
+
+m-1m m + m2
+1m 2m
+
+m-11
+
+-
+
+m 1
+
+1
+
+m-12 0
+
+mDm-1
+
+-
+
+m 1
+
+1
+
+(-1)m-1
+
+12 2 + 22 32
+
+m-1 + 2m-1 0
+
+m-1m m
+
+13 23 3 + 23
+
+1m-1
+
+1m 2m
+
+m-12 m-13
+
+m-1 + 2m-1 m-1m
+
+.
+
+25
+
+Since
+
+12 2 + 22 32
+
+13 23 3 + 23
+
+1m-1
+
+1m 2m 3m
+
+m-12
+
+m-1 + m2 -1 m-1m
+
+2 0
+
+0 3
+
+= ... = 1m(-1)m-2
+
+0
+
+00
+
+0
+0 m-1
+
+= 1m(-1)m-22 · · · m-1,
+
+we obtain
+
+Dm
+
+=
+
+mDm-1
+
+-
+
+m 1
+
+1(-1)m-11m(-1)m-22
+
+·
+
+·
+
+·
+
+m-1
+
+= mDm-1 + 2m12 · · · m-1 = ...
+
+=
+
+1
+
++
+
+m p=1
+
+p2 p
+
+m
+p.
+q=1
+
+Hence,
+
+Dm() = | - Im| =
+
+1
+
++
+
+m p=1
+
+p2 p -
+
+
+
+m
+(q - )
+q=1
+
+m mm
+
+= (q - ) + 2p (q - ) =: · · · + K + ||,
+
+q=1
+
+p=1 q=1, q=p
+
+where the coefficient of  is given by
+
+mm
+
+mm
+
+m
+
+K := -
+
+q -
+
+2p
+
+q .
+
+p=1q=1, q=p
+
+p=1r=1, q=1, r=p q=p,q=r
+
+26
+
+We finally obtain
+
+mm
+
+mm
+
+m
+
+q +
+
+p2 q
+
+m1 p=1 i
+
+=
+
+-
+
+K ||
+
+=
+
+p=1q=1, q=p
+
+p=1r=1, r=p
+
+mm
+
+q + p2
+
+q=1, q=p,q=r m
+q
+
+q=1
+
+p=1 q=1, q=p
+
+mm
+
+1 p
+
++
+
+m 2p
+p r
+
+p=1
+
+p=1r=1,
+
+=
+
+r=p m
+
+.
+
+1+
+
+p2 p
+
+p=1
+
+7.4 Derivation of (24)
+
+On the one hand we have,
+
+
+Oj (v)eivzdv =
+0
+=
+=
+=
+
+
+
+eivzEj+1(eXj(Tj) - ev)+dv
+
+0
+
+
+
+eivz Pj+1(Xj (Tj )  dx)(ex - ev)dv
+
+0v
+
+x
+
+Pj+1(Xj (Tj )  dx) eivz(ex - ev)dv
+
+00
+
+
+Pj+1(Xj (Tj )  dx) e(iz+1)x
+0
+
+1 iz
+
+-
+
+iz
+
+1 +1
+
+(53)
+
++
+
+iz
+
+1 +
+
+1
+
+-
+
+eixz iz
+
+and on the other hand,
+
+0
+Oj (v)eivzdv =
+-
+=
+=
+=
+
+0
+eivzEj+1(ev - eXTj )+dv
+-
+
+0v
+
+eivz dv
+
+Pj+1(Xj (Tj )  dx)(ev - ex)
+
+-
+
+-
+
+00
+
+Pj+1(Xj (Tj )  dx) (ev - ex)eivzdz
+
+-
+
+x
+
+0
+Pj+1(Xj (Tj )  dx)
+-
+
+e(iz+1)x
+
+1 iz
+
+-
+
+iz
+
+1 +
+
+1
+
+(54)
+
++
+
+iz
+
+1 +
+
+1
+
+-
+
+ex iz
+
+Note that the characteristic function j+1(z; Tj) of Xj(Tj) exist in the strip {z = x + iy  C : - < x < , -1  y  0} since Ej+1Lj(Tj) = Lj(0) exists. Hence, by combining (53), (54), and using the martingale property of Xj(Tj) again, we obtain (24).
+
+27
+
+7.5 Characteristic properties of Oj
+
+By denoting the density of Lj(Tj) with Lj(Tj) we may write
+
+Cj (K) = Bj+1(0)Ej+1[(Lj (Tj ) - K)+j ]
+
+
+
+= Bj+1(0)j
+
+(y - K)Lj(Tj)(y)dy,
+
+K
+
+and then by differentiating two times with respect to K we obtain
+
+Cj(K) = Bj+1(0)j Lj(Tj)(K).
+
+The density of Xj := ln Lj(Tj) - ln Lj(0) is obviously given by Xj (v) := Lj(Tj)(Lj (0)ev)Lj (0)ev, so
+
+Xj (v) = Bj-+11(0)j-1Cj(Lj (0)ev)Lj (0)ev = Bj-+11(0)j-1Lj-1(0) Cj(v) - Cj (v) e-v = Oj(v) - Oj (v) e-v, v = 0,
+
+where Oj - Oj extends continuously at v = 0. In particular, Oj satisfies
+
+Oj(v) - Oj (v) > 0 and O(0-) - O(0+) = 1.
+
+(55)
+
+On the grid vj, -N - 1  j  N + 1 we consider a continuous piecewise linear approximation On-1 of On-1,
+
+On-1(v) :=
+
+N +1 j=-N
+
+vj
+
+1 - vj-1
+
+(On-1,j-1
+
+vj
+
+-
+
+vj-1On-1,j
+
++
+
+v(On-1,j
+
+-
+
+On-1,j-1))1[vj-1,vj )(v)
+
+with vj and On-1,j-1 given by (27) and (28), extended with On-1,-N-1 = ON+1,n-1 = 0 (note that v0 := 0). Then it follows that (with suppressed subscript n - 1)
+
+d dv
+
+distr
+
+O(v)
+
+=
+
+N +1 j=-N
+
+Oj vj
+
+- -
+
+Oj-1 vj-1
+
+1[vj-1
+
+,vj
+
+)
+
+(v)
+
+(56)
+
+in (Schwartz) distribution sense. Differentiating in distribution again yields
+
+d2 dv2
+
+distr
+
+O(v)
+
+=
+
+v-N
+
+O-N - v-N
+
+-1
+
+v-N
+
+-1
+
++
+
+ON vN+1 - vN
+
+vN +1
+
+N
++
+j=-N
+
+Oj+1 - Oj vj+1 - vj
+
+-
+
+Oj vj
+
+- Oj-1 - vj-1
+
+vj .
+
+(57)
+
+28
+
+Because O satisfies
+
+O(v) - O(v)
+
+=
+
+d2 dv2
+
+distr
+
+O
+
+-
+
+d
+
+distr
+O,
+
+dv
+
+v = 0,
+
+we consider for v = 0,
+
+d2 dv2
+
+distr
+
+O
+
+-
+
+d dv
+
+distr
+
+O
+
+e-v
+
+=
+
+- O1
+
+- v1
+
+O0 1[0,v1)(v)e-v
+
++
+
+ON vN+1 -
+
+vN
+
+ evN+1 -vN+1
+
+v-N
+
+O-N - v-N
+
+-1
+
+v-N
+
+-1
+
+e-v-N
+
+-1
+
+-
+
+v-N
+
+O-N - v-N
+
+-1
+
+1[v-N
+
+-1
+
+,v-N
+
+)
+
+(v)e-v
+
+(58)
+
+N
++
+j=-N j=0
+
+Oj+1 vj+1
+
+- Oj - vj
+
+-
+
+Oj vj
+
+- Oj-1 - vj-1
+
+vj e-vj
+
+-
+
+Oj+1 vj+1
+
+- -
+
+Oj vj
+
+1[vj ,vj+1)(v)e-v
+
+,
+
+which follows from (56) and (57) and some rearranging of terms. Since the
+generalized function (58) should be an approximation of the density Xn-1 , integrals over each interval [vj-1, vj), j = -N, ..N + 1, should be non-negative. This leads to
+
+0
+
+Oj+1 vj+1
+
+- Oj - vj
+
+-
+
+Oj vj
+
+- Oj-1 - vj-1
+
+e-vj
+
+-
+
+Oj+1 vj+1
+
+- -
+
+Oj vj
+
+1[vj ,vj+1)(v)e-vdv
+
+=
+
+Oj+1 vj+1
+
+- -
+
+Oj vj
+
+e-vj+1
+
+-
+
+Oj vj
+
+- -
+
+Oj-1 vj-1
+
+e-vj
+
+,
+
+j = -N, ..., -N,
+
+j = 0.
+
+(59)
+
+Note that (59) holds if the input data are consistent with a function O which
+
+is convex on both v < 0 and v > 0, and if the grid vj is fine enough. Fur-
+
+ther, the total mass of (58) should be one. This leads straightforwardly to the
+
+requirement,
+
+O0 - O-1 -v-1
+
+-
+
+O1 - O0 v1
+
+=
+
+1,
+
+which is a discretisation of the boundary condition (55) in fact.
+
+References
+[1] Belomestny, D. and Reiß, M. (2005). Optimal calibration of exponential L´evy models," Preprint 1017, Weierstraß Institute (WIAS) Berlin.
+[2] Brigo, D. and Mercurio, F. (2001) Interest rate models--theory and practice. Springer Finance. Springer-Verlag, Berlin.
+[3] Brace, A., Gatarek, D. and Musiela, M. (1997). The Market Model of Interest Rate Dynamics. Mathematical Finance, 7 (2), 127-155.
+[4] Carr, P. and Madan, D. (1999). Option Valuation Using the Fast Fourier Transform, Journal of Computational Finance, 2, 6174.
+
+29
+
+[5] Cont, R., and Tankov P. (2004). Nonparametric calibration of jump-diffusion option pricing models, Journal of Computational Finance, 7(3), 149.
+[6] Eberlein, E., Keller U. and Prause K. (1998). New insights into smile, mispricing, and value at risk: the hyperbolic model. Journal of Business, 71(3), 371405.
+[7] Eberlein, E. and O¨ zkan, F. (2005). The L´evy LIBOR model, Finance Stoch. 7, no. 1, 1­27.
+[8] Glasserman, P. Monte Carlo methods in financial engineering. Applications of Mathematics (New York), 53. Stochastic Modelling and Applied Probability. Springer-Verlag, New York, 2004.
+[9] Glasserman, P. and Kou, S. G. (2003). The term structure of simple forward rates with jump risk. Math. Finance 13, no. 3, 383­410.
+[10] Glasserman, P. and Merener, N. (2003). Cap and swaption approximations in Libor market models with jumps. Journal of Computational Finance, 7, no. 1.
+[11] Jamshidan, F.(1997). LIBOR and swap market models and measures. Finance and Stochastics, 1, 293-330.
+[12] Jamshidian, F.(2001). LIBOR Market Model with Semimartingales, in Option Pricing, Interest Rates and Risk Management, Cambridge Univ.
+[13] Kurbanmuradov, O., Sabelfeld, K. and Schoenmakers, J.(2002) Lognormal approximations to Libor market models. Journal of Computational Finance, 6(1), 69­100.
+[14] Schoenmakers, J.: Robust Libor Modelling and Pricing of Derivative Products. BocaRaton London NewYork Singapore: Chapman & Hall ­ CRC Press 2005
+30
+
+SFB 649 Discussion Paper Series 2006
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Calibration Risk for Exotic Options" by Kai Detlefsen and Wolfgang K. Härdle, January 2006.
+002 "Calibration Design of Implied Volatility Surfaces" by Kai Detlefsen and Wolfgang K. Härdle, January 2006.
+003 "On the Appropriateness of Inappropriate VaR Models" by Wolfgang Härdle, Zdenk Hlávka and Gerhard Stahl, January 2006.
+004 "Regional Labor Markets, Network Externalities and Migration: The Case of German Reunification" by Harald Uhlig, January/February 2006.
+005 "British Interest Rate Convergence between the US and Europe: A Recursive Cointegration Analysis" by Enzo Weber, January 2006.
+006 "A Combined Approach for Segment-Specific Analysis of Market Basket Data" by Yasemin Boztu and Thomas Reutterer, January 2006.
+007 "Robust utility maximization in a stochastic factor model" by Daniel Hernández­Hernández and Alexander Schied, January 2006.
+008 "Economic Growth of Agglomerations and Geographic Concentration of Industries - Evidence for Germany" by Kurt Geppert, Martin Gornig and Axel Werwatz, January 2006.
+009 "Institutions, Bargaining Power and Labor Shares" by Benjamin Bental and Dominique Demougin, January 2006.
+010 "Common Functional Principal Components" by Michal Benko, Wolfgang Härdle and Alois Kneip, Jauary 2006.
+011 "VAR Modeling for Dynamic Semiparametric Factors of Volatility Strings" by Ralf Brüggemann, Wolfgang Härdle, Julius Mungo and Carsten Trenkler, February 2006.
+012 "Bootstrapping Systems Cointegration Tests with a Prior Adjustment for Deterministic Terms" by Carsten Trenkler, February 2006.
+013 "Penalties and Optimality in Financial Contracts: Taking Stock" by Michel A. Robe, Eva-Maria Steiger and Pierre-Armand Michel, February 2006.
+014 "Core Labour Standards and FDI: Friends or Foes? The Case of Child Labour" by Sebastian Braun, February 2006.
+015 "Graphical Data Representation in Bankruptcy Analysis" by Wolfgang Härdle, Rouslan Moro and Dorothea Schäfer, February 2006.
+016 "Fiscal Policy Effects in the European Union" by Andreas Thams, February 2006.
+017 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, March 2006.
+018 "The Bologna Process: How student mobility affects multi-cultural skills and educational quality" by Lydia Mechtenberg and Roland Strausz, March 2006.
+019 "Cheap Talk in the Classroom" by Lydia Mechtenberg, March 2006. 020 "Time Dependent Relative Risk Aversion" by Enzo Giacomini, Michael
+Handel and Wolfgang Härdle, March 2006. 021 "Finite Sample Properties of Impulse Response Intervals in SVECMs with
+Long-Run Identifying Restrictions" by Ralf Brüggemann, March 2006. 022 "Barrier Option Hedging under Constraints: A Viscosity Approach" by
+Imen Bentahar and Bruno Bouchard, March 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "How Far Are We From The Slippery Slope? The Laffer Curve Revisited" by Mathias Trabandt and Harald Uhlig, April 2006.
+024 "e-Learning Statistics ­ A Selective Review" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, April 2006.
+025 "Macroeconomic Regime Switches and Speculative Attacks" by Bartosz Makowiak, April 2006.
+026 "External Shocks, U.S. Monetary Policy and Macroeconomic Fluctuations in Emerging Markets" by Bartosz Makowiak, April 2006.
+027 "Institutional Competition, Political Process and Holdup" by Bruno Deffains and Dominique Demougin, April 2006.
+028 "Technological Choice under Organizational Diseconomies of Scale" by Dominique Demougin and Anja Schöttner, April 2006.
+029 "Tail Conditional Expectation for vector-valued Risks" by Imen Bentahar, April 2006.
+030 "Approximate Solutions to Dynamic Models ­ Linear Methods" by Harald Uhlig, April 2006.
+031 "Exploratory Graphics of a Financial Dataset" by Antony Unwin, Martin Theus and Wolfgang Härdle, April 2006.
+032 "When did the 2001 recession really start?" by Jörg Polzehl, Vladimir Spokoiny and Ctlin Stric, April 2006.
+033 "Varying coefficient GARCH versus local constant volatility modeling. Comparison of the predictive power" by Jörg Polzehl and Vladimir Spokoiny, April 2006.
+034 "Spectral calibration of exponential Lévy Models [1]" by Denis Belomestny and Markus Reiß, April 2006.
+035 "Spectral calibration of exponential Lévy Models [2]" by Denis Belomestny and Markus Reiß, April 2006.
+036 "Spatial aggregation of local likelihood estimates with applications to classification" by Denis Belomestny and Vladimir Spokoiny, April 2006.
+037 "A jump-diffusion Libor model and its robust calibration" by Denis Belomestny and John Schoenmakers, April 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

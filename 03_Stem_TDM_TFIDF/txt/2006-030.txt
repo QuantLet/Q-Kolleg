@@ -1,0 +1,425 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2006-030
+Approximate Solutions to Dynamic Models ≠ Linear Methods
+Harald Uhlig*
+* Humboldt-Universit‰t zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+Approximate Solutions to Dynamic Models - Linear Methods
+by Harald Uhlig, Humboldt Universit‰t zu Berlin, uhlig@wiwi.hu-berlin.de, February 2006. This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649, "Economic Risk". Keywords: numerical methods, linear solution method, loglinearization, dynamic stochastic general equilibrium methods, recursive law of motion. JEL codes: C60, C61, C63, E32
+Abstract:
+Linear Methods are often used to compute approximate solutions to dynamic models, as these models often cannot be solved analytically. Linear methods are very popular, as they can easily be implemented. Also, they provide a useful starting point for understanding more elaborate numerical methods. It shall be described here first for the example of a simple real business cycle model, including how to easily generate the log-linearized equations needed before solving the linear system. For a general framework, formulas are provided for calculating the recursive law of motion. The algorithm described here is implemented with the "toolkit" programs available per http://www.wiwi.hu-berlin.de/wpol/html/toolkit.htm .
+0. Introduction
+Linear Methods are often used to compute approximate solutions to dynamic models, as these models often cannot be solved analytically. While a plethora of advanced numerical methods exist, the most popular "bread-and-butter'' method for solving them is linearization. It shall be described here first for the example of a simple real business cycle model, including how to easily generate the log-linearized equations needed before solving the linear system. The classic reference for solving linear difference models under rational expectations is Blanchard and Kahn (1980), while Kydland and Prescott (1982) is the origin of the modern approach of calculating numerically approximate solutions to dynamic stochastic models in order to obtain quantitative results. Much of the material here is taken from Uhlig (1999), which builds on the method of undetermined coefficients in King, Plosser and Rebelo (2002).
+1. A basic example
+
+As a basic example, consider a version of the real business cycle model of Hansen (1985). A social planner or representative agent chooses ct, kt, yt, lt and nt to maximize the utility function
+
+U
+
+=
+
+E
+
+ 
+
+ t=0
+
+ tu(ct ,lt )
+
+for some twice differentiable utility function u(.), satisfying the usual conditions, subject to the constraints
+
+ct + kt = yt + (1 -  )kt-1
+yt =  t f (kt-1, nt )
+1 = nt + lt
+as well as a given initial capital stock k-1,where ct denotes consumption, kt denotes capital, yt denotes output, lt denotes leisure, nt denotes labor, f(k,n) denotes a twice differentiable production function, typically assumed to obey constant returns to scale,  is the discount factor and t is total factor productivity, with
+( )zt = log( t ) - log  *
+evolving according to
+zt =  zt-1 + t
+where
+Et [t+1] = 0
+for some values  and , with -1 <  < 1. A solution is a stochastic sequence (ct, kt, yt, lt, nt),t0 where all variables dated t are independent of all s for s>t and satisfies all constraints, and which maximizes the utility function given above within the set of all such sequences.
+The necessary first-order conditions for this problem are given by
+uc (ct ,lt ) = t
+ul (ct ,lt ) = ( )fn kt-1, nt
+[ ]t =  Et  Rt+1 t+1
+Rt = fk (kt-1, nt ) + 1 - 
+2. Linearization
+The first step towards solving the model by linear approximation is to linearize all the constraints and necessary equations (possibly after substituting out some variables, if so desired). Linearization amounts to finding a first-order approximation to all equations. Formally, linearization amounts to replacing a set of equations
+
+0 = g ( xt )
+in a vector xt of variables with its linearized counterpart around some point of approximation x*,
+0 = g ( x* ) + g '( x* ) x%t
+where
+x%t = xt - x*
+is the deviation of xt from the approximation point x* and where G'(x*) is the matrix of first derivatives of G(.). As point of approximation x*, the nonstochastic steady state is often chosen, i.e. one solves the equations
+0 = g ( x* )
+under the assumption that all exogenous stochastic variables are constant (here: t= and all s=0). Then, the remaining linearized system consists of
+( )0 = g ' x* x%t
+Since many economic variables are constrained to be positive, it is often more attractive to log-linearize the equations, rather than to linearize them. The difference between linearization and log-linearization is that entries in xt denote the original variable (e.g. consumption ct) in the case of linearization and the log of these variables (e.g. log(ct)) in the case of loglinearization. There is no need to choose either linearization or log-linearization for all entries in xt. One may choose to linearize some and log-linearize others or take other transformations. Indeed, for variables such as trade balances, it is better to use linearization rather than log-linearization, if they can take negative values. Also, e.g. tax rates are often more appropriately linearized rather than log-linearized to provide a more useful interpretation.
+This makes no difference as far as the linearized solution is concerned. More generally, differentiable and differentiable invertible transformations (i.e. homeomorphisms) of the variables (e.g. taking ratios of variables, etc.) make no difference to the properties of the linearized solution. The differences only always lies in the recalculation of the original variables, where one may want to take into account the nonlinearities originally inherent in the model. To see more generally, that any homeomorphism (i.e. differentiable and differentiably invertible transformation)
+yt = h(xt )
+of the variables makes no difference to remaining calculations, note that the equations can be restated as
+( )0 = g h-1 ( yt )
+The linearized version is now
+
+( )( ) ( )( ) ( )0 = g h-1 y* + g ' x* f -1 ' y* y%t
+which coincides with the previous linearization if y*=F(x*), noting that
+( )y^ = f ' x* x^t
+as well as
+I = f '( x* )( f -1)'( y* )
+
+While linearization can be performed numerically or with the usual rules of calculus, one can
+
+often "read" the log-linearized version of an equation from its original form, exploiting
+
+xt = exp( yt )  x* + x* y%t
+
+y = log(x ) x^ y%where now t
+
+t . Write t Instead of t for the loglinear
+
+deviation.
+
+For log-linearization, the following useful "rules" can easily be derived. Let at, bt, ct be three variables, with ct=h(at) for some monotone and differentiable function h(.), and let B be some constant. Then,
+( ) ( )at + Bbt  a* + Bb* + a*a^t + Bb*b^t
+
+( ) ( )( )Batbt  Ba*b* + Ba*b* a^t + b^t
+
+c^t
+
+
+
+h '(a*)a* h(a*)
+
+a^t
+
+Either with these rules or directly, the equations in the example log-linearize to
+
+c*c^t + k*k^t = y* y^t + (1 -  )k*k^t-1
+
+y^t
+
+= zt +
+
+fkk* f
+
+k^t -1
+
++
+
+fnn* f
+
+n^t
+
+( )0 = n*n^t + 1 - n* l^t
+
+^t
+
+=
+
+uccc* uc
+
+c^t
+
++
+
+ucll uc
+
+*
+
+l^t
+
+ucl l * ul
+
+c^t
+
++
+
+ull l * ul
+
+l^t
+
+=
+
+fnk k fn
+
+*
+
+k^t -1
+
++
+
+fnnn* fn
+
+n^t
+
+^t = Et ^t+1 + R^t+1 
+
+R*R^t
+
+=
+
+fkk k fk
+
+*
+
+k^t -1
+
++
+
+fknn* fk
+
+n^t
+
+3. Solving for the recursive law of motion
+With some further algebra, one can turn this system into a second-order one-dimensional difference equation,
+[ ]0 = Et Fxt+1 + Lzt+1 + Gxt + Mzt + Hxt-1
+plus the evolution of the exogenous state,
+zt = Nzt-1 + Ot
+
+where xt=kt is the capital stock, and F, L, G, M, H, N and O are real numbers (here, with N= and O=1). Alternatively, use the system of equations above directly (or with some variables substituted out) and stack all variables into a vector xt to reformulate it in this form, where now F, L, G, M and H are matrices of coefficients. Indeed, if there is more than one predetermined variable like kt-1 in the system of equations, one will need to use such a matrix restatement of the equations anyways. More generally, zt may also be a vector, and N and O matrices.
+
+Anderson et al (1996) as well as Binder and Pesaran (1997) contain detailed and general results for solving linearized systems. In most cases, the system has a solution in the form of a recursive law of motion,
+xt = Pxt-1 + Qzt
+for some coefficient matrices P and Q. Most models require the solution to be stable, i.e. all eigenvalues of P to be less than unity in absolute value. Often, one also allows for roots equal to unity in absolute value, as this arises easily e.g. in models of international trade or with multiple agents: one may then want to think of the linear approximation as a local solution. In many models, this uniquely determines the matrix P and usually also Q.
+
+The solutions can be found by substituting the recursive law of motion in for xt+1 and again for all xt into the second-order difference equation above, exploiting
+[ ]Nzt = Et zt+1
+so that only xt-1 and zt and some coefficient matrices remain.
+
+Examine first the equation by matching coefficients on xt-1. One obtains the equation
+0 = FP2 + GP + H
+for P. In case of a one-dimensional difference equation (as can be obtained for the example above and xt=kt), this is a quadratic equation in the feedback coefficient P, which has two solutions. The system is said to be saddle-path stable, if only one of the two roots is smaller than unity in absolute value. Thus, if a stable solution is desired, this is the unique solution for P.
+
+Generally, the equation above is a matrix quadratic equation, which can be solved per
+
+computing generalized eigenvalues or by QZ-decomposition as follows. Let m be the
+
+dimensionality of xt. Define the matrices
+
+A
+
+=
+
+-G
+
+ 
+
+Im
+
+-H 0m
+
+  
+
+,
+
+B
+
+=
+
+F 0m
+
+0m 
+
+I
+
+m
+
+ 
+
+I 0where m is the m-by-m identity matrix and m the m-by-m matrices of only zeros.
+
+Recall that a generalized eigenvector s with eigenvalue  for the matrices A and B is defined
+
+as satisfying
+Bs = As
+
+The generalized eigenvector problem reduces to the standard eigenvector problem of B-1A, if
+
+B is invertible. If s is a generalized eigenvector with eigenvalue  for the matrices A and B
+
+above, it can be written as s'=[  x',x'] for some m-dimensional vector x. If there are m
+
+generalized eigenvalues 1,..., m together with generalized eigenvectors
+si = [i xi ', xi ']
+
+such that
+C = [x1,..., xm ]
+
+is of full rank, then
+P = CC -1
+
+is a solution to the matrix quadratic equation, where
+
+1 0 K 0 
+
+
+
+=
+
+ 
+
+0
+
+2
+
+K
+
+0
+
+ 
+
+M M O M 
+
+ 
+
+0
+
+0
+
+K
+
+m
+
+ 
+
+is the diagonal matrix of the eigenvalues for the generalized eigenvectors used as well as of P. The system is said to be saddle-path stable, if there are exactly m generalized eigenvalues smaller than unity in absolute value. In that case, the matrix P is unique, if one requires all eigenvalues of P to be stable. If there are fewer than m eigenvalues smaller than (or equal to) unity in absolute value, then there is no solution, such that the difference equation xt=Pxt-1 remains bounded for all x0. In that case, the set of bounded solution is characterized by e'x0 = 0 as well as e'Qzt = 0 for all t for all eigenvectors e of P corresponding to explosive eigenvalues. The second of these two constraints may impose restrictions on the exogenous shock process. If there are more than m eigenvalues smaller than (or equal to) unity in absolute value, then sunspot solutions may arise, i.e., there are additional solutions. In the one-dimensional case and if F is nonzero, the general solution is now given by the original equation, i.e. as
+
+xt = -F -1Gxt-1 - F -1Hxt-2 - F -1 (LN + M ) zt-1 +  t
+
+ E [ ] = 0where t is any stochastic process with t
+
+t +1
+
+and which is
+
+independent of all s for s>t, but not necessarily independent of t. Note that the recursive law of motion now includes an additional lag of the state variable, as well as the possibility for
+
+additional random influences ("sunpots") via t , which are not part of the original system
+
+of equations. Farmer (1999) provides a detailed treatment of sunspots in linearized solutions.
+
+Equivalently, consider the stacked variable st'=[ xt', xt-1'], and note that the second half of this vector is "predetermined", i.e. must be independent of all s for s>t-1. The linearized system can be rewritten as
+
+BEt
+
+[ st +1 ]
+
+=
+
+Ast
+
++
+
+-M 
+
+- 0
+
+LN
+
+ 
+
+zt
+
+If B is invertible, the solutions can now be characterized in terms of the eigenvalues and eigenvectors of B-1A. This is the approach taken in the classic reference of Blanchard and Kahn (1980).
+
+Alternatively, find the QZ-decomposition (or generalized Schur decomposition) of A and B, see Sims (2002), i.e., find unitary matrices U and V as well as upper triangular matrices K and L such that
+A = U ' LV
+
+B = U ' KV
+
+(and recall that a matrix is unitary, if the product with its complex conjugate transpose is the identity matrix). Such a Schur decomposition always exists, although it may not be unique. Partition U and V into m-by-m submatrices,
+
+U
+
+=
+
+U11 U 21
+
+U12 U 22
+
+ 
+
+,V
+
+=
+
+V11 V21
+
+V12  V22 
+
+U VIf 21 and 21 are invertible, then P = -V2-11V22
+
+solves the matrix quadratic equation. Suppose furthermore, that the QZ-decomposition has
+
+L / Kbeen chosen so that the ratios ii
+
+ii are in ascending order. Furthermore, suppose
+
+L / K < 1mm mm
+
+. Then P is stable.
+
+V vec(Q) = -vec( LN + M )To solve for Q, given a solution to P, compare the coefficients on zt to find
+where vec(.) denotes columnwise vectorization and where
+V = N ' F + Ik  (FP + G)
+with k the dimensionality of zt. If V is invertible, the solution is unique.
+
+Many links for codes for solving dynamic stochastic models are available per http://dge.repec.org/codes.html. The procedure outlined above has been used in particular in the toolkit programs of H. Uhlig, see http://www.wiwi.hu-berlin.de/wpol/html/toolkit.htm. For a discussion of the accuracy of linearized solution, see e.g. Taylor and Uhlig (1990) and Aruoba et al (2005).
+4. References
+Anderson, Evan W. , Ellen R. McGrattan, Lars Peter Hansen and Thomas J. Sargent, "Mechanics of forming and estimating dynamic linear economies", Chapter 04 in Handbook of Computational Economics, 1996, vol. 1, pages 171-252, Elsevier, Amsterdam
+Aruoba, Boraan, Jes˙s Fern·ndez-Villaverde and Juan F. Rubio-RamÌrez, "Comparing Solution Methods for Dynamic Equilibrium Economies", Journal of Economic Dynamics and Control, forthcoming (2006).
+Binder, Michael & Pesaran, M Hashem, 1997. "Multivariate Linear Rational Expectations Models: Characterization of the Nature of the Solutions and Their Fully Recursive Computation," Econometric Theory, Cambridge University Press, vol. 13(6), pages 877-88.
+Blanchard, Olivier Jean and Charles M. Kahn, "The Solution of Linear Difference Models under Rational Expectations," Econometrica, vol. 48, no. 5 (July 1980), 1305-1312.
+Farmer, Roger E.A., Macroeconomics of Self-fulfilling Prophecies, MIT Press, 1999, Cambridge, MA.
+King, Robert G & Plosser, Charles I & Rebelo, Sergio T, 2002. "Production, Growth and Business Cycles: Technical Appendix," Computational Economics, Springer, vol. 20(1-2), pages 87-116.
+Kydland, Finn E. and Edward C. Prescott, "Time to Build and Aggregate Fluctuations," Econometrica, vol. 50, no. 6 (Nov. 1982), 1345-1370.
+Sims, Christopher A, 2002. "Solving Linear Rational Expectations Models," Computational Economics, Springer, vol. 20(1-2), pages 1-20.
+Uhlig, Harald, "A toolkit for analysing nonlinear dynamic stochastic models easily," in Ramon Marimon and Andrew Scott, eds, Computational Methods for the Study of Dynamic Economies, Oxford University Press, Oxford (1999), 30-61.
+Taylor, John B. and Harald Uhlig, "Solving nonlinear stochastic growth models: a comparison of alternative solution methods," Journal of Business Economics and Statistics 8, 1-17 (1990).
+
+SFB 649 Discussion Paper Series 2006
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Calibration Risk for Exotic Options" by Kai Detlefsen and Wolfgang K. H‰rdle, January 2006.
+002 "Calibration Design of Implied Volatility Surfaces" by Kai Detlefsen and Wolfgang K. H‰rdle, January 2006.
+003 "On the Appropriateness of Inappropriate VaR Models" by Wolfgang H‰rdle, Zdenk Hl·vka and Gerhard Stahl, January 2006.
+004 "Regional Labor Markets, Network Externalities and Migration: The Case of German Reunification" by Harald Uhlig, January/February 2006.
+005 "British Interest Rate Convergence between the US and Europe: A Recursive Cointegration Analysis" by Enzo Weber, January 2006.
+006 "A Combined Approach for Segment-Specific Analysis of Market Basket Data" by Yasemin Boztu and Thomas Reutterer, January 2006.
+007 "Robust utility maximization in a stochastic factor model" by Daniel Hern·ndez≠Hern·ndez and Alexander Schied, January 2006.
+008 "Economic Growth of Agglomerations and Geographic Concentration of Industries - Evidence for Germany" by Kurt Geppert, Martin Gornig and Axel Werwatz, January 2006.
+009 "Institutions, Bargaining Power and Labor Shares" by Benjamin Bental and Dominique Demougin, January 2006.
+010 "Common Functional Principal Components" by Michal Benko, Wolfgang H‰rdle and Alois Kneip, Jauary 2006.
+011 "VAR Modeling for Dynamic Semiparametric Factors of Volatility Strings" by Ralf Br¸ggemann, Wolfgang H‰rdle, Julius Mungo and Carsten Trenkler, February 2006.
+012 "Bootstrapping Systems Cointegration Tests with a Prior Adjustment for Deterministic Terms" by Carsten Trenkler, February 2006.
+013 "Penalties and Optimality in Financial Contracts: Taking Stock" by Michel A. Robe, Eva-Maria Steiger and Pierre-Armand Michel, February 2006.
+014 "Core Labour Standards and FDI: Friends or Foes? The Case of Child Labour" by Sebastian Braun, February 2006.
+015 "Graphical Data Representation in Bankruptcy Analysis" by Wolfgang H‰rdle, Rouslan Moro and Dorothea Sch‰fer, February 2006.
+016 "Fiscal Policy Effects in the European Union" by Andreas Thams, February 2006.
+017 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, March 2006.
+018 "The Bologna Process: How student mobility affects multi-cultural skills and educational quality" by Lydia Mechtenberg and Roland Strausz, March 2006.
+019 "Cheap Talk in the Classroom" by Lydia Mechtenberg, March 2006. 020 "Time Dependent Relative Risk Aversion" by Enzo Giacomini, Michael
+Handel and Wolfgang H‰rdle, March 2006. 021 "Finite Sample Properties of Impulse Response Intervals in SVECMs with
+Long-Run Identifying Restrictions" by Ralf Br¸ggemann, March 2006. 022 "Barrier Option Hedging under Constraints: A Viscosity Approach" by
+Imen Bentahar and Bruno Bouchard, March 2006.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "How Far Are We From The Slippery Slope? The Laffer Curve Revisited" by Mathias Trabandt and Harald Uhlig, April 2006.
+024 "e-Learning Statistics ≠ A Selective Review" by Wolfgang H‰rdle, Sigbert Klinke and Uwe Ziegenhagen, April 2006.
+025 "Macroeconomic Regime Switches and Speculative Attacks" by Bartosz Makowiak, April 2006.
+026 "External Shocks, U.S. Monetary Policy and Macroeconomic Fluctuations in Emerging Markets" by Bartosz Makowiak, April 2006.
+027 "Institutional Competition, Political Process and Holdup" by Bruno Deffains and Dominique Demougin, April 2006.
+028 "Technological Choice under Organizational Diseconomies of Scale" by Dominique Demougin and Anja Schˆttner, April 2006.
+029 "Tail Conditional Expectation for vector-valued Risks" by Imen Bentahar, April 2006.
+030 "Approximate Solutions to Dynamic Models ≠ Linear Methods" by Harald Uhlig, April 2006.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

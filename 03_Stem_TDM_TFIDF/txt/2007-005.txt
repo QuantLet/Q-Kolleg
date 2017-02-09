@@ -1,0 +1,1540 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2007-005
+QUANTILE SIEVE ESTIMATES FOR TIME
+SERIES
+Jürgen Franke* Jean-Pierre Stockis*
+Joseph Tadjuidje*
+* University of Kaiserslautern, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+JU¨ RGEN FRANKE, JEAN-PIERRE STOCKIS, JOSEPH TADJUIDJE University of Kaiserslautern, Germany
+Abstract. We consider the problem of estimating the conditional quantile of a time series at time t given observations of the same and perhaps other time series available at time t - 1. We discuss sieve estimates which are a nonparametric versions of the Koenker-Bassett regression quantiles and do not require the specification of the innovation law. We prove consistency of those estimates and illustrate their good performance for light- and heavy-tailed distributions of the innovations with a small simulation study. As an economic application, we use the estimates for calculating the value at risk of some stock price series.
+Key words and phrases. conditional quantile, time series, sieve estimate, neural network, qualitative threshold model, uniform consistency, value at risk.
+JEL classification: C14, C45 Corresponding author: J. Franke, Dept. of Mathematics, University of Kaiserslautern, D-67653 Kaiserslautern, Germany Tel. +49-631-205-2741, Fax +49-631-205-3052, email franke@@mathematik.uni-kl.de Acknowledgement: The work was supported by the Deutsche Forschungsgemeinschaft (DFG) as part of the priority research program 1114 Mathematical Methods of Time Series and Digital Image Analysis as well as by the center of excellence Dependable Adaptive Systems and Mathematical Modelling funded by the state of Rhineland-Palatinate. J. Tadjuidje did part of this research as a guest of SFB 649 Economic Risk.
+1
+
+2 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+1. Introduction
+Reliable measures of market risk are crucial tools for an effective risk management which financial institutions have to employ for internal and regulatory purposes. There are now established procedures for modelling asset returns and for subsequent calculation of risk measures, but there is still room for improvement and more flexibility dealing with the shortcomings of standard methodology. An extensive discussion of these issues has been given recently by (Engle and Manganelli 2002).
+The standard measure of market risk is currently the value at risk (VaR). If Yt is the return of an asset a time t, the value at risk of level 1 -  at time t (V aRt) is determined by the conditonal -quantile qt of Yt given information up to time t - 1 represented by the -algebra It-1, i.e.
+pr(Yt  qt|It-1) = .
+Then, V aRt = -qt where we follow the convention that the value at risk is commonly reported as a positive number. It provides a bound on future losses at time t which is not exceeded with high probability 1- given currently available information.
+We concentrate on the VaR as a risk measure, but our exposition can be easily extended to the expected shortfall as another popular measure of risk, i.e. the conditional expectation of the loss given that it exceeds the value at risk
+(1) est = E - Yt It-1, -Yt  V aRt .
+The expected shortfall provides more information than V aRt about the size of extreme losses and, moreover, is a coherent risk measure as shown by (Artzner et al. 1997).
+A broad class of approaches to estimating VaR is volatility based, i.e. the distribution of the return time series {Yt, - < t < } is assumed to conform with some form of stochastic volatility model of the general form
+(2) Yt = µt + tt
+where µt, t denote the conditional mean and volatility of Yt given information on the past up to time t - 1, and the innovations t are i.i.d. with mean 0 and variance 1. If q denotes the -quantile of t, then for a time series following (2), we immediately have V aRt = µt + tq. Typical examples are based on the classical ARCHand GARCH-models for financial returns and their extensions, compare (Engle 1982), (Bollerslev 1986). For the GARCH(1,1) model, which currently is quite popular for market risk analysis, we have, e.g., µt = 0, t2 =  + Yt2-1 + t2-1. To calculate an estimate of V aRt given data Y1, . . . , Yt-1, we only need estimates of the model parameters , ,  and some initial value for the first volatility 1, where the influence of the latter will be neglible for large t under short memory asumptions like (A1) below.
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+3
+
+As pointed out by (Engle and Manganelli 2002), volatility based estimates of VaR assume that the extreme negative returns follow the same process as the remainder of typical returns. Additionally, it is assumed that the standardized returns t = (Yt - µt)/t are i.i.d., and, moreover, their distribution has to be specified, frequently as standard normal. To avoid relying on those assumptions which may well be not satisfied for real data, (Engle and Manganelli 2002) propose to estimate the VaR directly without taking a detour over estimating volatility and without having to make an ad-hoc choice of an innovation distribution. They consider a class of models where the conditional quantile qt is specified as a function of finitely many of its own past values as well as of past returns. The different functions which they consider are specified up to finitely many parameters and are quite similar to the manner how volatility is given as a function of the past in GARCH models and their modifications like, e.g., TGARCH (Rabemananjara and Zakoian 1993), (Glosten et al. 1993). (Engle and Manganelli 2002) call such models CAViaR, i.e. conditional autoregressive value at risk, and discuss how to estimate the parameters following the regression quantiles approach of (Koenker and Bassett 1978).
+
+Models like GARCH for volatility or CAViaR for value at risk have a particular parametric form to be chosen in advance. A more flexible alternative is given by nonparametric approaches. For volatility based models, these have been extensively studied in the last years. E.g., we may choose µt = m(Xt), t = (Xt) in the volatility based model (2), where Xt is a vector of finitely many Yt-1, . . . , Yt-p and perhaps some additional financial data known at time t - 1, we get a nonparametric AR(d)ARCH(d)-model including exogeneous variables. Local smoothing estimates of the trend and volatility functions m,  and their use for market risk management have been studied by (H¨ardle and Tsybakov 1997), (Hafner 1998) and (Franke et al. 2004) among many others. Nonparametric sieve estimates of m,  based on neural networks or on other approximating function classes are discussed in (Gouri´eroux and Montfort 1992), (Franke 1998), (Franke 2000) and, in a similar general context as in this paper, in (Franke and Diagne 2006). If the main interest in fitting such nonparametric models to financial data is estimating the value at risk, then they suffer from similar problems as the volatility-based parametric approaches. The innovation distribution has to be specified somewhat arbitrarily, and the crucial volatility estimate is mainly influenced by the bulk of the data, i.e. by small and medium returns which are not important for managing extreme risks. The latter is only partially true for estimates based on local smoothing, e.g. kernel or local polynomial estimates, but those suffer from the curse of dimensionality which in particular leads to highly unreliable estimates in regions with low data density, in particular in the regions of the few extreme data.
+
+In this paper, we try to combine both approaches, i.e. nonparametric estimation to get flexibility and the Koenker-Bassett method of accessing regression quantiles directly which does not require the specification of the innovation law and focusses on the extreme data which are important for quantifying risk. We study general sieve estimates as, in assessing the risk of an asset, we want to allow for incorporating not
+
+4 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+only past asset prices, but also other available information on the market. This leads to the problem of estimating functions on higher-dimensional spaces than local smoothers can easily handle.
+In the following, the information available at time t - 1 is represented by an observable random vector Xt  Rd which may consist of past observations Yt-1, . . . , Yt-p of the time series of interest but also on past observations of other time series. Our goal is to estimate the conditional -quantile function q(x) given by (3) pr(Yt  q(Xt) | Xt = x) = . q(x) solves the minimization problem (4) E{|Yt - q(Xt)| | Xt = x} = min E{|Yt - f (Xt)| | Xt = x}
+f L1(µ)
+Here, |u| denotes the skew absolute value given by (5) |u| = u+ + (1 - )u- = u(  - 1(-,0)(u) ) = u + u- where u+, u- denote the positive and negative part of u.
+In section 2 we introduce general nonparametric sieve estimates for q(x) and formulate a nonparametric consistency result. In the following two sections, we consider two special case: qualitative threshold quantile estimates similar to the trend and volatility estimates proposed by (Gouri´eroux and Montfort 1992) and neural network based quantile estimates. In section 5 we present some simulations and application to quantifying market risk. Some technical results and all the proofs are deferred to the last section 6.
+2. Consistency of sieve quantile estimates
+We need the following assumptions on the time series of interest.
+(A1) (Yt, Xt) is -mixing with geometrically decreasing mixing coefficients, i.e. the mixing coefficients s satisfy s  a1e-a2s, s  1, for some a1, a2 > 0. Furthermore, E|Yt| < .
+(A2) Let p(z|x) denote the conditional density of t = Yt - q(Xt) given Xt = x. There are functions (x), (x) and a constant 0 such that for all x a) p(z|x)  (x) > 0 for all |z|  (x), b) (x)(x)  0 > 0.
+(A1) is a standard short-memory condition. (A2) corresponds to the usual assumption for quantile asymptotics that the probability density of Yt is uniformly bounded away from 0 in a neighbourhood of the quantile - in our case conditional on x with a certain
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+5
+
+degree of uniformity w.r.t. x. The condition is not very strong. For example, consider the case
+
+(6) Yt = q(Xt) + s(Xt) t,
+where q(x) is the conditional -quantile of Yt given Xt = x, s(x) is the conditional -scale of Yt given Xt = x, i.e. the conditional -quantile of |Yt - q(Xt)| given Xt = x, and t, - < t < , are i.i.d. real random variables with -quantile 0, -scale 1 and density p. If we assume that p is bounded away from 0 in a neighbourhood of its -quantile 0, i.e. for some 0, 0 > 0
+p(u)  0 > 0 for |u|  0,
+then (A2) is satisfied with (x) = 0/s(x), (x) = 0s(x) and 0 = 00 as t = s(Xt)t and, therefore,
+
+p(z|x)
+
+=
+
+1 s(x) p
+
+z s(x)
+
+ 0 s(x)
+
+for |z|  0s(x).
+
+We remark that for the special case Xt = (Yt-1, . . . , Yt-p)T , (6) is a quantile AR(p) ARCH(p)-process as discussed in (Franke and Mwita 2003).
+
+Let Fn, n  1, denote an increasing sequence of subsets of L1(µ), and let F denote their union. We estimate the conditional quantile function q(x) by solving the sample version of (4) restricted to functions in Fn, i.e.
+
+(7)
+
+1n qn = argminfFn n
+
+Yt - f (Xt)  .
+
+t=1
+
+Estimating q by qn belongs to the broad class of nonparametric regression estimates
+based on Grenander's method of sieves (Grenander 1981). To get consistency of these estimates we have to assume that F is dense in L1(µ), the space of integrable functions on Rd w.r.t. µ. Mark that q  L1(µ) as we have assumed E|Yt| < .
+
+Examples for Fn are given by piecewise constant functions or by feedforward neural networks which we discuss in detail in sections 3 resp. 4.
+
+Typically, the functions in Fn are parametrized by some parameter vector with finite dimension increasing with n. For proving consistency of the estimate qn of (7), we could assume uniform boundedness of the functions in Fn which usually is achieved by bounding the parameter vector or, in the case of feedforward neural networks, like in Theorem 3.3 of (White 1990) or Theorem 3.2 of (Franke and Diagne 2006). This procedure has some computational drawbacks discussed in section 10.1 of (Gyo¨rfy et al. 2002) where, as an alternative to bounding the functions in Fn in advance, the original estimate qn is replaced by a truncated version instead, i.e. for some sequence n   we consider
+(8) q^n(x) = Tnqn(x),
+
+6 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+where the truncation operator TL is defined as TLu = u, if |u|  L, and TLu = L sgn(u), else.
+Let Fn = {Tnf ; f  Fn}
+denote the truncated functions of Fn. We assume that Fn satisfies the following assumption on bounded real-valued functions.
+
+(A3) G is a class of bounded, real-valued measurable functions on Rd such that for all  > 0, N  1, there exists kN () such that for all z1, . . . , zN  Rd there are functions gk : Rd  R, k = 1, . . . , kN (), with:
+
+for
+
+any
+
+g
+
+
+
+G
+
+there
+
+is
+
+a
+
+k
+
+
+
+kN ()
+
+such
+
+that
+
+1 N
+
+N j=1
+
+|g (zj )
+
+-
+
+gk(zj )|
+
+<
+
+.
+
+kN () is a bound on the -covering number of G w.r.t. the L1-norm of the discrete
+measure with point masses 1/N in z1, . . . , zN , assumed to hold uniformly in z1, . . . , zN , compare ch.9 of (Gyo¨rfy et al. 2002). Let KN () denote the size of the smallest -cover,
+i.e. the minimal value of kN () in (A2). Assumption (A2) is satisfied for many function classes G. By Lemma 9.2 and
+
+Theorem 9.4 of (Gyo¨rfy et al. 2002), we have, e.g., for all N and some bound B on the
+
+absolute value of functions in G
+
+4eB 6eB V(G+)
+
+(9)
+
+KN ()  3
+
+log 
+
+if the Vapnik-Chervonenkis dimension V(G+) of G+ = {(z, t); t  g(z) + B, g  G} is at least 2 and if  < B/2. Mark that (9) differs slightly from the version in (Gyo¨rfy et al. 2002) as we do not assume that G contains only nonnegative functions.
+
+For later reference, we remark that each -covering of G w.r.t. z1, . . . , z2N is automatically a 2-covering w.r.t. z1, . . . , zN as
+
+1 N
+
+N
+
+|g (zj )
+
+-
+
+gk (zj )|
+
+
+
+1 2
+2N
+
+2N
+
+|g(zj) - gk(zj)|,
+
+j=1 j=1
+
+which immediately implies
+
+(10) KN (2)  K2N () for all N  1,  > 0.
+
+Theorem 1. Let {(Yt, Xt)} be a stationary stochastic process satisfying (A1) and (A2). Let Fn be increasing classes of bounded functions in L1(µ), such that their union F is dense in L1(µ), and, for n  , the corresponding classes of truncated functions Fn satisfy (A3). Let
+n( ) = log K2n 32 . Let q^n = Tnqn, given by (7) and (8) be the truncated sieve estimate for the conditional -quantile q(z) given by (3).
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+7
+
+ a) If, for n  , nn( )/ n  0 for all > 0, then q^n is a consistent estimate
+of q in the mean sense, i.e. for n  
+
+E |q^n(z) - q(z)|µ(dz)  0.
+
+b) Let, additionally, {Yt} satisfy Crame´r's condition, i.e. E|Yt|j  cj-2j!EYt2,
+
+j = 3, 4, . . . for we have nn(
+
+some c n)/ n
+
+> 0. 0
+
+If, for some  >
+
+and
+
+n/(nn
+
+1 2
+
+-
+
+)
+
+0 and some sequence  0, then q^n is even
+
+n  0 strongly
+
+L1(µ)-consistent, i.e. for n  
+
+|q^n(z) - q(z)|µ(dz)  0 a.s.
+
+By this result, proving consistency of the truncated sieve estimate of the conditional quantile q(z) for specific function classes Fn reduces to finding bounds on the covering numbers. In the next two sections, we consider two specific examples.
+
+3. Qualitative threshold quantile estimates
+(Gouri´eroux and Montfort 1992) have introduced the class of qualitative threshold ARCH models for financial time series. For order d, they have the form
+HH
+Yt = aj1Aj (Yt-1, . . . , Yt-d) + bj1Aj (Yt-1, . . . , Yt-d)t
+j=1 j=1
+where A1, . . . , AH is a given partition of Rd, i.e. the sets are pairwise disjoint and their union is Rd, and the t are white noise with zero mean and unit variance. A straightforward extension would allow the conditional mean and volatility of Yt given the past to depend on a general random vector Xt observable at time t - 1 including past values Ys, s < t as well as other market data. The elements Aj of the partition may correspond to phases of increasing and decreasing prices, to phases of low and high volatility, etc.
+Based on this intuition, we consider approximating the conditional quantile function q(x) of (3) by a simple function from
+H
+(11) P(H) = {f (x) = cj1Aj (x); c1, . . . , cH  R}.
+j=1
+Applying this approach to VaR-calculation is based on the assumption that approximately the market can be in H different states characterized by the value of the risk variable Xt observable at time t - 1 and that the VaR of the asset of interest is approximately constant in each state. If H is chosen large enough and the A1, . . . , AH provide a suitable partition of Rd, then we get a reasonable approximation of q(x) even
+
+8 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+
+if it is not locally constant. This follows from the following consistency result which is a special case of Theorem 1 for the function classes
+
+Hn
+Fn = P(Hn) = {f (x) = cj1Anj (x); c1, . . . , cHn  R}.
+j=1
+We have to assume that Fn is increasing in n and that F is dense in L1(µ) which follows from Hn   and the following assumptions on the partitioning:
+
+(A4) For all n, An = {An1, . . . , AnHn} is a partition of Rd, such that a) for m > n and any i  Hm, Ami  Anj for some j  Hn, b) for all bounded subsets B of Rd, supjHn diam(Anj  B)  0 for n  .
+
+a) states that An+1 is a subpartition of An, and b) guarantees that the partitions become finer and finer with increasing n except for the extreme part of Rd. For given
+Hn, we get as a nonparametric quantile estimate of q(x):
+
+(12)
+
+Hn
+qn(x) = cnj1Anj (x)
+j=1
+
+where
+
+cn = argminb1,...,bHn
+
+1 n
+
+n
+
+Hn
+
+Yt -
+
+bj 1Anj (Xt) 
+
+t=1 j=1
+
+with cn = (cn1, . . . , cnHn)  RHn. As only one term in the sum does not vanish, truncating qn(x) is equivalent to just truncating the coefficients cnj, and we get
+
+(13)
+
+Hn
+q^n(x) = Tnqn(x) = c^nj1Anj (x)
+j=1
+
+with c^nj = Tncnj.
+
+Theorem 2. Let {(Yt, Xt)} be a stationary process satisfying (A1) and (A2). For
+
+Hn  , n  , let q^n be the truncated qualitative threshold quantile estimate for q
+
+given by (12) and a) If for n 
+
+(13). Assume that the
+
+,
+
+nHn
+
+ log(n)/ n
+
+sequence of  0, then
+
+partitions
+
+An
+
+satisfies
+
+(A4).
+
+E |q^n(x) - q(x)|µ(dx)  0 (n  )
+
+b) If, additionally, {Yt} satisfies Crame´r's condition and n2 /n1-  0 for some  > 0, then
+
+|q^n(z) - q(z))|µ(dz)  0 a.s. (n  ).
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+9
+
+4. Neural networks
+As a second example, we now consider estimates for q(z) based on fitting neural networks to the data. Given an input variable x = (x1, x2, ..., xd)T  Rd, a feedforward neural network with one hidden layer consisting of H  1 neurons defines a function f (x) = fH (x, ) of the following form
+H
+fH (x; ) = v0 + vh(xT wh + wh0)
+h=1
+where wh = (wh1, ..., whd)T . The so-called activation function  is fixed in advance, whereas the network weights v0, ..., vH, whi, h = 1, ..., H, i = 0, ..., d, which we combine to a M(H)-dimensional parameter vector  with M(H) = 1 + H + H(1 + d), may be chosen appropriately. We denote the class of such neural network output functions by
+(14) O = fH (x; );   RM(H), H  1 .
+In the following, we consider only sigmoid activation functions satisfying
+
+(A5)  is continuous and strictly increasing, 0 < lim (x) = ()  1 and x 0  lim (x) = (-)  -1. x-
+
+Assuming |(u)|  1 is no restriction but only a convenient standardization. A
+
+typical example of such a function is the hyperbolic tangent or symmetrized logistic
+
+function
+
+(15)
+
+(u)
+
+=
+
+tanh(u)
+
+=
+
+1+
+
+2 exp (-2u)
+
+- 1.
+
+We also consider neural networks of finite complexity characterized by subclasses of O of the form
+H
+(16) O(H, ) = fH (x; );   RM(H), |vh|  
+h=0
+for some given number H  1 of neurons and some bound  on the 1-norm of the output weights. We consider the increasing function classes
+
+Fn = O(Hn, n) for some increasing sequences Hn, n  .
+Their union F = O is dense in L2(µ) by Theorem 1 of (Hornik 1991), compare also Lemma 16.2 of (Gyo¨rfy et al. 2002), if  satisfies (A3). But O  L1(µ) too, as, by (A5), it consists of bounded functions, and for any f  L1(µ), g  O, L > 0 we have by the triangular and by Jensen's inequality
+
+|f (x) - g(x)|µ(dx)  |f (x) - TLf (x)|µ(dx) + |TLf (x) - g(x)|2µ(dx) 1/2,
+
+which implies denseness of O in L1(µ) too.
+
+10 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+
+Now, we consider the estimate qn(x) of q(x) based on feedforward neural networks, i.e.
+
+(17)
+
+qn(x) = fHn(x; ^n),
+
+^n
+
+=
+
+argminn
+
+1 n
+
+n
+
+Yt - fHn(Xt; ) 
+
+t=1
+
+with n = {  RM(Hn);
+
+Hn h=0
+
+|vh|
+
+
+
+n}.
+
+From
+
+Theorem
+
+1,
+
+we
+
+get
+
+immediately
+
+Theorem 3. Let {(Yt, Xt)} be a stationary process satisfying (A1) and (A2). For Hn  , n  , let qn be the neural network quantile estimate for q(x) given by (17). Assume that  satisfies (A5).
+ a) If for n  , nHn log(nHn)/ n  0, then
+E |qn(x) - q(x)|µ(dx)  0 (n  )
+b) If, additionally, {Yt} satisfies Crame´r's condition and 2n/n1-  0 for some  > 0, then
+|qn(z) - q(z))|µ(dz)  0 a.s. (n  ).
+
+5. Simulations and applications
+In this section, we first apply nonparametric quantile sieve estimates to some artificially generated data. As approximating function classes, we use feedforward neural networks as in section 4. For an easy graphical comparison of the function estimate with the true quantile function, we restrict ourselves to the case of a one-dimensional regressor. Finally, we use the quantile sieve approach for estimating the conditional VaR of some real stock price series. In each case, we have chosen the size of the network such that a further increase of the number of neurons did not change the visual impression significantly.
+For simulation, we consider a nonlinear AR-ARCH processes of order 1, i.e.
+Yt = m(Yt-1) + (Yt-1)t
+with i.i.d. innovations t having mean 0 and variance 1. In each case, we generate a sample of size 2500, use the first 2000 data as a training set from which we get the estimates of the network parameters. The last 500 observations are set aside as a validation set to check the out-of-sample performance of the estimate.
+In the first two examples, we consider pure autoregressive processes with a bump function as the autoregressive function
+m(x) = -0.7x + 1.50.5,0.4(x), (x) = 0.2,
+where µ,v denotes the density of the normal law with mean µ and variance v. We use a feedforward neural network with H=7 neurons to estimate the conditional 5%-quantile
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+11
+
+2.5 2
+1.5 1
+0.5 0
+-0.5 -1
+-1.5 -2 -2 -1.5 -1 -0.5 0 0.5 1 1.5 2 2.5 Figure 1a: Conditional 0.05-quantile-estimate for NLAR(1)-process with normal innovations - training set (N=2000)
+
+2 1.5
+1 0.5
+0 -0.5
+-1 -1.5
+-2 -2
+
+-1.5 -1 -0.5 0 0.5 1 1.5 Figure 1b: Conditional 0.05-quantile-estimate for NLAR(1)-process with normal innovations - validation set (N=500)
+
+2
+
+function q(x).
+For standard normal innvoations, Figure 1a shows the scatter plot Yt against Yt-1, t = 2, . . . , 2000, of the training set as well as the true quantile function q(x) (green curve)
+
+12 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+4 3 2 1 0 -1 -2 -3 -4 -5 -5 -4 -3 -2 -1 0 1 2 3 4
+Figure 2a: Conditional 0.05-quantile-estimate for NLAR(1)-process with t4 innovations - training set (N=2000)
+3
+2
+1
+0
+-1
+-2
+-3 -3 -2 -1 0 1 2 3 Figure 2b: Conditional 0.05-quantile-estimate for NLAR(1)-process with t4 innovations - vakdation set (N=500)
+and the neural-network based quantile estimate qn(x) (red curve). Mark that for pure autoregressive processes, the conditional quantile function is just a shifted version of the conditional mean m(x). Figure 1b shows the same picture for the data of the validation set. On the training set, we get an empirical level of 4.95%, i.e. a fraction of 0.0495 of the data Yt are below the estimated conditional quantile qn(Yt-1). For the validation set, the empirical level is 5.61%.
+For the second example, we consider the same autoregressive process but with heavy-tailed (t4-distributed) innovations t. Figures 2a and 2b show the corresponding
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+13
+
+4 3 2 1 0 -1 -2 -3 -4 -5 -6 -5 -4 -3 -2 -1 0 1 2 3 4
+Figure 3a: Conditional 0.05-quantile-estimate for NLAR(1)-ARCH(1)-process with normal innovations - training set (N=2000)
+
+3
+2
+1
+0
+-1
+-2
+-3
+-4
+-5 -5 -4 -3 -2 -1 0 1 2 3 Figure 3b: Conditional 0.05-quantile-estimate for NLAR(1)-ARCH(1)-process with normal innovations -validation set (N=500)
+results for the training and the validation set. The empirical levels are 5.00% and 6.81% resp.
+As the last example, we generate data from a genuine AR-ARCH-process, again with a bump function as autoregressive function m(x) and with a volatility function (x) as in the parametric ARCH(1)-model of (Engle 1982):
+m(x) = -0.2x + 1.50.5,0.4(x), 2(x) = 0.01 + 0.5x2 As innovations, we use again standard normal variables, such that the conditional law of Yt given Yt-1 = x is normal with mean m(x) and variance 2(x). Therefore, the true
+
+14 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+conditional quantile function is no longer just a shifted conditional mean. As the basis for the nonparametric quantile estimate we use a neural network with H = 9 neurons. Figures 3a and 3b show the scatter plots for training and validation set and the true and estimated quantile function. The empirical levels are 5.00% and 4.21% resp.
+
+Finally, we consider the problem of estimating the conditional 5%-VaR for the BASF-stock for the period 1990 to 1992 (N=745) which covers the first Gulf War as a phase of high volatility and the attempted coup d'etat in Moscow as an example of an isolated event, having a strong, but very local effect on the market.
+
+The figures show only data starting with February 13, 1990 (N=716), as only then, the exogeneous variables discussed below are available. As a benchmark, we first consider the VaR calculated from fitting a GARCH(1,1)-model with standard normal innovations to the data, where the model parameters are estimated by conditional maximum likelihood. Figure 4a shows the usual backtesting plot, i.e. the actual log returns Yt (dots), where for better visibility only the negative values are plotted, and the (negative) VaR (solid line), i.e. the conditional quantile of Yt given the last log return Yt-1 and the last volatility t-1.
+
+Figure 4b shows the corresponding backtesting plot with value at risk based on a
+neural network quantile estimate as described in section 4. As input, we have chosen
+the last log return Yt-1, the corresponding log return Dt-1 of the market index, i.e. the DAX, a 30-days moving average Mt-1 = {Dt-1 + ... + Dt-30}/30 as a local market trend indicator, and an exponentially weighted 30-days historical variance of Yt:
+
+1- Vt-1 = 1 -  30
+
+30
+
+ k-1 Yt-k - Y¯t-1 2
+
+k=1
+
+with  = 0.95 and Y¯t-1 = {Yt-1 + ... + Yt-30}/30. The neural network used in calculating the conditional quantile estimate qn(Yt-1, Dt-1, Mt-1, Vt-1) had H = 4 neurons and the symmetrized logistic function (15) as activation function.
+
+The neural network based VaR shows somewhat better than the GARCH-VaR. The empirical levels are 5.04% and 3.91% resp., i.e. the GARCH-fit leads to a rather conservative view of risk whereas the nonparametric approach leads to a rather good agreement with the nominal level 5%. Moreover, the network-based risk measure recovers much faster form the shock of an isolated extreme event in a phase of otherwise stable volatility like the Moscow coup (t=376) compared to the GARCH-procedure. The neural network based VaR has, therefore, some kind of robustness, but still reacts as fast to significant increases in volatility as the GARCH-VaR. On the other hand, an advantage of GARCH is the more stable visual appearance of the backtesting plot in Figure 4a; the nonparametric quantile estimate leads to considerably larger fluctuations of the corresponding VaR from day to day.
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+15
+
+-0.02
+
+-0.04
+
+-0.06
+
+-0.08
+
+-0.1
+
+-0.12 0
+
+100 200 300 400 500 600 Figure 4a: Negative BASF log returns (13.2.1990 to 30.12.1992), GARCH-based conditional 5%-VaR
+
+700
+
+0 -0.02 -0.04 -0.06 -0.08
+-0.1 -0.12
+0
+
+100 200 300 400 500 600 700 Figure 4b: Negative BASF-log returns (Feb 13, 1990, to Dec. 30, 1992) and nonparametric conditional 5%-VaR
+
+6. Technical results and proofs
+In this section we formulate some auxiliary results needed for the proof of the main Theorem 1. The first result is a variant of the Vapnik-Chervonenkis inequality (Vapnik and Chervonenkis 1971) which holds for dependent data from a stationary process. The proof can be found in (Franke and Diagne 2006).
+Theorem 4. Let {Zt, - < t < } be a Rd-valued stationary stochastic process satisfying an -mixing condition with exponentially decreasing mixing coefficients. Let
+
+16 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+G be a set of measurable functions g : Rd  [0, B] satisfying (A3). Then, for any > 0, n  1
+
+(18)
+
+pr
+
+sup
+gG
+
+1 n
+
+n
+
+g(Zt) - Eg(Z1)
+
+>
+
+t=1
+
+ K2n 32
+
+where c1, c2 > 0 are some constants not depending on n.
+
+
+c1e-c2 n /B
+
+Lemma 1. Let q denote the -quantile of the real random variable Y. Let F, p denote the distribution function and density of  = Y - q. Then, for any f  R
+
+f -q
+
+E|Y - f | - E|Y - q| =
+
+(F(z) - F(0))dz
+
+0
+
+Proof. Using |u| =  u+u-, F(0) =  and distinguishing the two cases d = f -q > 0 and d = f - q < 0, we get using integration by parts
+
+E|Y - f | - E|Y - q| = E| - d| - E||
+d0
+= 1(0,)(d) (d - z)p(z)dz + 1(-,0)(d) (z - d)p(z)dz
+0d d0
+= 1(0,)(d) (F(z) - F(0))dz + 1(-,0)(d) (F(0) - F(z))dz.
+0d
+
+A corresponding relation holds analogously for the conditional quantile q(x) of Y
+given X = x where  = Y - q(X), F(·|x), p(·|x) denote the conditional distribution function and density of  given X = x, expectation E is replaced by conditional expectation E{.|X = x}, and f (x) is an arbitrary function in L1(µ).
+
+Theorem 5. Let (Yt, Xt), - < t < , be a stationary time series with Yt  R, Xt 
+
+Rd satisfying assumption (A2). Let E|Yt| < , and let µ denote the stationary distri-
+
+bution of Xt.
+
+Let Fn  L1(µ), n  1, be increasing classes of functions f : Rd  R such that
+
+F =
+
+ n=1
+
+Fn
+
+is
+
+dense
+
+in
+
+L1(µ).
+
+Let
+
+qn
+
+
+
+Fn
+
+denote
+
+the
+
+regression
+
+quantile
+
+given
+
+by
+
+(7), and q^n = Tnqn the truncated version for some sequence n > 0, limn n = .
+
+Let Fn = {f^n = Tnf ; f  Fn}. Assume furthermore
+
+(19)
+
+lim inf
+
+|f (z) - m(z)|µ(dz) = 0.
+
+n f Fn,||f ||n
+
+a) If for all L > 0
+
+(20)
+
+lim E
+n
+
+sup
+f Fbn
+
+1 n
+
+n
+
+|TLYt - f (Xt)| - E|TLY1 - f (X1)|
+
+t=1
+
+= 0,
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+17
+
+with TLYt denoting the random variable Yt truncated at ±L, then
+
+(21)
+
+lim E
+n
+
+|m^ n(z) - m(z)|µ(dz) = 0.
+
+b) If there is a sequence n  0 such that for all L > 0
+
+(22)
+
+1 1n
+
+n
+
+n |Yt - TLnYt| - E|Y1 - TLnY1| t=1
+
+0
+
+a.s.
+
+(23)
+
+1 sup
+n f Fbn
+
+1 n
+
+n
+
+|TLnYt - f (Xt)| - E|TLnY1 - f (X1)|
+
+t=1
+
+0
+
+a.s.
+
+then
+
+lim
+n
+
+|m^ n(z) - m(z)|µ(dz) = 0 a.s.
+
+Proof. We use Lemma 1 and assumption (A2) to relate ||q^n - q||1 to E|Y - q^n(X)| - E|Y - q(X)| where, here, E is taken conditional on the data, i.e. q^n(x) is given. In
+the first part of the proof we bound this term from above by terms converging to 0.
+
+i) By definition of q as conditional quantile function we have
+
+0  E|Y - q^n(X)| - E|Y - q(X)|
+
+= E|Y - q^n(X)| - inf E|Y - f (X)| f Fn,||f ||n
+
++ inf E|Y - f (X)| - E|Y - q(X))| f Fn,||f ||n
+
+ sup {E|Y - q^n(X)| - E|Y - f (X)|} + inf E|q(X) - f (X)|
+
+f Fn,||f ||n
+
+f Fn,||f ||n
+
+ sup {E|Y - q^n(X)| - E|Y - f (X)|} + inf ||f - q||1
+
+f Fn,||f ||n
+
+f Fn,||f ||n
+
+where we have used the triangular inequality for |u| and |u|  |u|. For a yet arbitrary L  n, let YL, YtL denote TLY, TLYt. We decompose the first term on the right-hand
+side.
+
+(24) (25) (26) (27)
+
+sup {E|Y - q^n(X)| - E|Y - f (X)|}
+f Fn,||f ||n
+
+ sup E|Y - q^n(X)| - E|YL - q^n(X)|
+f Fn,||f ||n
+
++
+
+E|YL
+
+-
+
+q^n (X )|
+
+-
+
+1 n
+
+n
+
+|YtL - q^n(Xt)|
+
+t=1
+
++
+
+1 n
+
+n
+
+|YtL
+
+-
+
+q^n(Xt)|
+
+-
+
+1 n
+
+n
+
+|YtL - qn(Xt)|
+
+t=1 t=1
+
++
+
+1 n
+
+n
+
+|YtL
+
+-
+
+qn(Xt)|
+
+-
+
+1 n
+
+n
+
+|YtL - qn(Xt)|
+
+t=1 t=1
+
+18
+(28) (29) (30) (31)
+
+J. FRANKE, J. STOCKIS, J. TADJUIDJE
+
++
+
+1 n
+
+n
+
+|Yt
+
+-
+
+qn(Xt)|
+
+-
+
+1 n
+
+n
+|Yt - f (Xt)|
+
+t=1 t=1
+
++
+
+1 n
+
+n
+
+|Yt
+
+-
+
+f (Xt)|
+
+-
+
+1 n
+
+n
+|YtL - f (Xt)|
+
+t=1 t=1
+
++
+
+1 n
+
+n
+|YtL - f (Xt)| - E|YL - f (X)|
+
+t=1
+
++ E|YL - f (X)| - E|Y - f (X)| .
+
+By definition of qn, (28) is bounded from above by 0. As L  n and as YtL, q^n(Xt) 
+n, we immediately get |YtL - q^n(Xt)| - |YtL - qn(Xt)|  0, and (26) is bounded from above by 0, too. By definition of q^n and F^ n, (25) and (30) both are bounded by
+
+sup
+f F^ n
+
+1 n
+
+n
+
+|YtL - f (Xt)| - E|YL - f (X)| .
+
+t=1
+
+Again using the triangular inequality for |u| and |u|  |u|, (24), (31) are bounded by
+
+1 n
+
+n
+
+|Yt - YtL|.
+
+t=1
+
+Therefore, we have
+
+(32)
+
+0  E|Y - q^n(X)| - E|Y - q(X)|
+
+1n
+
+
+
+2 sup
+f F^ n
+
+n |YtL - f (Xt)| - E|YL - f (X)| t=1
+
+2n
+
++ inf f Fn,||f ||n
+
+f - q 1 + 2 E|Y - YL| + n |Yt - YtL|. t=1
+
+ii) By Lemma 5.1, applied to conditional quantiles and expectations, we have for any f  L1(µ), 0    1,
+
+E|Y - f (X)| - E|Y - q(X)| = E E{|Y - f (X)||X} - E{|Y - q(X)||X}
+
+f (X)-q(X)
+
+= E 1(0,)(f (X) - q(X))
+
+(F(z|X) - F(0|X)) dz
+
+0
+
+0
+
++1(-,0)(f (X) - q(X))
+
+(F(0|X) - F(z|X)) dz
+
+f (X)-q(X)
+
+f (X)-q(X)
+
+ E (X)1(0,)(f (X) - q(X))
+
+min((X), z) dz
+
+0
+
+0
+
++(X)1(-,0)(f (X) - q(X))
+
+min((X), -z) dz
+
+f (X)-q(X)
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+19
+
+as, by assumption (A2a)
+
+z
+F(z|X) - F(0|X) = p(z|X)dz 
+0
+
+(X )z
+
+for 0  z  (X)
+
+(X)(X) for (X)  z
+
+and, analogously, F(0|X) - F(z|X)  (X) min((X), -z) for z  0.
+
+Using (A2b) and distinguishing the cases f (X) - q(X) > (X), f (X) - q(X) < -(X) and |f (X) - q(X)|  (X), we get
+
+E|Y - f (X)| - E|Y - q(X)|   0 E(f (X) - q(X) - (X))+
+
++ 0 E(q(X) - f (X) - (X))+
+
+1 +2
+
+E
+
+(X)|f (X)
+
+- q(X)|2
+
+· 1[0,(X)]
+
+(|f (X)
+
+- q(X)|)
+
+  0 E(f (X) - q(X) - (X))+ + E(q(X) - f (X) - (X))+
+
+Replacing f by q^n and taking expectations with respect to q^n we get by a monotone convergence argument for  = n  0 (n  ), as (x) > 0,
+
+E |q^n(x) - q(x)|µ(dx)
+
+= lim E
+n
+
+(q^n(x) - q(x) - n(x))+ + (q(x) - q^n(x) - (x))- µ(dx)
+
+
+
+1 lim E n n0
+
+E|Y
+
+- q^n(X)| - E|Y
+
+- q(X)|
+
+- 0
+
+by i), by choosing n  0 slowly enough and by letting L  .
+
+We get part b) of the assertion by applying the same argument without expectations using assumptions (22) and (23).
+
+Proof of Theorem 1: The assertion follows from Theorem 5 if we show that (19) and (20) resp. (22)-(23) are satisfied.
+
+i) For arbitrary > 0 there are n1 and f  Fn1 such that f - q 1  by denseness of F  L1(µ). As f is bounded and n  , there is a n  n1 such that f  Fn1  Fn and f   n. (19) follows.
+ii) Let L > 0 be arbitrary and n large enough such that L  n. We use as abbreviation Zt = (Yt, Xt), t = 1, . . . , n, and we set for z = (y, x)
+g(z) = |TLy - f (x)|. Let G^ n denote the class of such functions g : Rd+1 - R which we get if f ranges over F^ n.
+Let  > 0, N > 0, z1, . . . , zN  Rd+1 be arbitrary. We write zj = (yj, xj), j = 1, . . . , N. By (A3), there are fk, k = 1, . . . , kN () such that for all f  F^ n
+
+20 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+
+1 N
+
+N
+
+|f (xj) - fk(xj)| < 
+
+j=1
+
+for some k.
+
+Let gk(z) = |TLy - fk(x)|, k = 1, . . . , kN (), and let g(z) = |TLy - f (x)|  G^ n, i.e. f  F^ n. We have
+
+1 N
+
+N
+
+|g(zj) - gk(zj)|
+
+=
+
+1N N
+
+|TLyj - f (xj)| - |TLyj - fk(xj)|
+
+j=1 j=1
+
+
+
+1 N
+
+N
+|f (xj) - fk(xj)| < .
+
+j=1
+
+i.e. for every -covering of F^ n we get a corresponding -covering of G^ n with the same size kN (). We conclude K~N ()  KN () for the minimal -covering numbers K~N (), KN () of G^ n resp. F^ n.
+
+As 0  g(z)  2n for g  G^ n, we have by Theorem 4 for arbitrary > 0
+
+(33)
+
+pr
+
+sup
+f F^n
+
+1 n
+
+n
+
+|TLYt - f (Xt)| - E|TLY1 - X1|
+
+t=1
+
+>
+
+= pr
+
+sup
+gG^ n
+
+1 n
+
+n
+
+g(Zt) - Eg(Z1)
+
+t=1
+
+>
+
+
+ K2n 32 c1e-c2 n /(2n)
+
+iii)As for any nonnegative variable V and > 0
+
+E V = pr(V > u) du  + pr(V > u) du
+0
+we get by (33), using that KN () is decreasing in ,
+
+1n
+
+E
+
+sup
+f F^ n
+
+n |TLYt - f (Xt)| - E|TLY1 - X1| t=1
+
+ + K2n 32
+
+
+c1e-c2 nu/(2n)
+
+=
+
++ K2n 32
+
+2n
+
+
+e-c2 n
+
+/(2n )
+
+-
+
+c2 n
+
+(n  )
+
+by our assumptions. For  0, (20) follows.
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+21
+
+iv) Under assumption (A1), Yt - TLYt is -mixing with geometrically mixing coefficients. Furthermore, it satisfies Cram´er's condition by our assumption on Yt. Therefore, by Theorem 1.6 of (Bosq 1996), we have
+
+1 n log n log log n
+
+n
+(|Yt
+t=1
+
+-
+
+TLYt|
+
+-
+
+E|Y1
+
+- TLY1|)
+
+
+
+0
+
+ and (22) is satisfied for any n = O( log n log log n/ n).
+
+a.s.,
+
+v) Again by (33) we have for any > 0
+
+
+pr
+n=1
+
+1 1n
+
+sup n f F^ n
+
+n |TLYt - f (Xt)| - E|TLY1 - f (X1)| t=1
+
+>
+
+
+
+
+K2n
+
+n 32
+
+n=1
+
+
+c1e-c2 n n/(2n)
+
+=
+
+ n=1
+
+c1
+
+exp{-n
+
+n1 2
+
+-
+
+n
+
+c2 n - n(n)n 2n
+
+<
+
+as,
+
+by
+
+our
+
+assumptions,
+
+n
+
+1 2
+
+-
+
+n
+
+/n
+
+-
+
+
+
+and
+
+n(
+
+ n)n/ n
+
+-
+
+0
+
+for
+
+n
+
+
+
+.
+
+(23)
+
+follows from the Borel-Cantelli-Lemma.
+
+To prove Theorem 2 we need an auxiliary result which is closely related to Lemma
+
+9.3 of (Gyo¨rfy et al. 2002) and proven in an analogous manner. Let G,  > 0, z1, . . . , zN 
+
+Rd and g1, . . . , gkN be as in assumption (A3). For given z = (z1, . . . , zN ), let KN (, G, z)
+
+denote the smallest value of kN such that for any g  G there is a k  kN with
+
+1 N
+
+N j=1
+
+|g (zj )
+
+-
+
+gk(zj )|
+
+<
+
+.
+
+Lemma 2. Let A1, . . . , AH be disjoint subsets of Rd, and let P(H) be the class of
+corresponding simple functions given by (11). For arbitrary r > 0, N  1, z1, . . . , zN  Rd let
+
+G = {f  P(H); 1 N
+
+N
+
+|f (zi)|  r}.
+
+i=1
+
+Then, KN (, G, z)  (1 + 4r/)H.
+
+Proof. For f  P(H), c  RH we write
+
+f
+
+1 N=N
+
+N
+
+|f (zj)|,
+
+j=1
+
+H
+c = |cj|.
+j=1
+
+Set dj = 1Aj N , and let D denote the diagonal matrix with entries d1, . . . , dH. As 1Aj (zi), j = 1, . . . , H, vanish except for at most one j, we have for f = cj 1Aj  G
+
+22 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+
+fN
+
+=
+
+1 N
+
+N
+
+H
+|
+
+cj
+
+1Aj (zi)|
+
+=
+
+1 N
+
+N
+
+H
+|cj|1Aj (zi)
+
+i=1 i=1
+
+i=1 j=1
+
+(34)
+
+H
+= |cj| 1Aj N = Dc
+j=1
+
+Let f1, . . . , fK  G be an arbitrary -packing of G, i.e. fk - fl N   for all 1  k < l  K. From Lemma 9.2 of (Gyo¨rfy et al. 2002), it suffices to show K  (1 + 4r/)H. As fk  G, we have, using (34), for 1  k < l  K
+
+H
+
+fk =
+
+aj(k)1Aj ,
+
+j=1
+
+Da(k) = fk N  r,
+
+Da(k) - Da(l) = fk - fl N  .
+
+Therefore, by the triangular inequality, the sets
+
+Bk = {u  RH ;
+
+u - Da(k)
+
+  }, k = 1, . . . , K 4
+
+are disjoint subsets of {u  RH;
+
+u
+
+
+
+r
+
++
+
+ 4
+
+},
+
+and
+
+we
+
+have
+
+for
+
+the
+
+volumes
+
+K
+
+cH
+
+(
+
+ 4
+
+)H
+
+
+
+cH (r
+
++
+
+ )H 4
+
+where cH denotes the volume of the l1-unit ball {u, u  1} in RH.
+
+Proof of Theorem 2: It only remains to check the rate conditions of Theorem 1. As A1, . . . , AHn are disjoint we have for all c1, . . . , cHn  R
+
+Hn Hn
+Tn ( cj1Aj ) = Tn cj1Aj  {f  P(Hn);
+j=1 j=1
+
+f   N }.
+
+Therefore, for any z1, . . . , z2n  Rd, z = (z1, . . . , z2n), we have
+
+F^ n
+
+=
+
+Tn P(Hn)
+
+
+
+{f
+
+
+
+P(Hn);
+
+1 2n
+
+2n
+
+|f (zj)|  n} = G.
+
+j=1
+
+From Lemma 2 we conclude K2n( 32 )  K2n( 32, G, z)  (1 + 128n )Hn,
+or n( )  Hn log(1 + 128n/ ). a) follows.
+
+For b), choose n  0 such that n-1 = O(n) with 0 <  < . Setting  =
+
+(
+
+-
+
+)/2,
+
+we
+
+have
+
+n
+
+(n
+
+n
+
+1 2
+
+-
+
+)
+
+-
+
+0
+
+and,
+
+using
+
+the
+
+same
+
+type
+
+of
+
+upper
+
+bound
+
+for
+
+n( n) as above, we also get nn( n)/ n - 0.
+
+QUANTILE SIEVE ESTIMATES FOR TIME SERIES
+
+23
+
+Proof of Theorem 3: By (A5), we have |qn(z)|  n, and qn and the truncated estimate q^n given by (8) coincide in this case. Therefore, we only have to check the assumptions of Theorem 1. By (16.19) in the proof of Theorem 16.1 of Gyo¨rfy et al. (Gyo¨rfy et al. 2002), Fn satisfies (A3) with
+K2n 32 = en( )  12 e n(Hn + 1) 32 (2d+5)Hn+1
+
+with n( )  {(2d + 5)Hn + 1} log(384 e n(Hn + 1)/ ). Neglecting constant factors and terms of smaller order, a) follows immediately from Theorem 1.
+For b), choose n  0 such that n-1 = O((nHn)) with 0 <  < . Setting  = ( - )/2, we have n/(nn1/2- )  0, and using the same upper bound on the log covering number n( n) as for showing a), the other rate condition of Theorem 1 b) follows too.
+
+References
+Artzner, P., Delbaen, F., Eber, F.-J., Heath, D., 1997. Thinking Coherently, Risk Magazine.
+Bollerslev, T.P., 1986. Generalized autoregressive conditional heteroscedasticity, Journal of Econometrics 31, 307-327.
+Bosq, D., 1996. Nonparametric Statistics for Stochastic Processes, Lecture Notes in Statistics 110 (Springer-Verlag, Heidelberg).
+Engle, R.F., 1982. Autoregressive conditional heteroscedasticity with estimates of the variance of U.K. inflation, Econometrica 50, 987-1008.
+Engle, R.F., Manganelli, S., 2002. CAViaR: Conditional autoregressive value at risk by regression quantiles, to appear in Journal of Business and Economic Statistics.
+Franke, J., 1998. Nonlinear and nonparametric methods for analyzing financial time series, in: P. Kall and H.-J. Luethi, eds., Operation Research Proceedings 98 (Springer-Verlag, Heidelberg).
+Franke, J., 2000. Portfolio management and market risk quantification using neural networks, in: W.S. Chan, W.K. Li and H. Tong, eds., Statistics and Finance: An Interface (Imperial College Press, London).
+Franke, J., Mwita, P., 2003. Nonparametric estimates for conditional quantiles of time series, Report in Wirtschaftsmathematik, University of Kaiserslautern.
+Franke, J., Diagne, M., 2006. Estimating market risk with neural networks, Statistics and Decisions 24, 233-253.
+Franke, J., Neumann, M.H., Stockis, J.P., 2004. Bootstrapping nonparametric estimates of the volatility function, Journal of Econometrics 118, 189-218.
+Glosten, L., Jagannathan, R., Runkle, D., 1993. Relationship between the expected value and the volatility of the nominal excess return on stocks, Journal of Finance 48, 1779-1801.
+
+24 J. FRANKE, J. STOCKIS, J. TADJUIDJE
+Gouri´eroux, C., Montfort, A., 1992. Qualitative Threshold ARCH Models, Journal of Econometrics 52, 159-200.
+Grenander, U., 1981. Abstract Inference, (Wiley, New York).
+Gyo¨rfy, L., Kohler, M., Krzyzak, A., Walk, H., 2002. A Distribution-Free Theory of Nonparametric Regression (Springer-Verlag, Heidelberg).
+Ha¨rdle, W., Tsybakov, A.B., 1997. Local polynomial estimation of the volatility function, Journal of Econometrics 81, 223-242.
+Hafner, C.M., 1998. Nonlinear Time Series Analysis with Applications to Foreign Exchange Volatility, (Physica-Verlag, Heidelberg).
+Hornik, K., 1991. Approximation Capabilities of Multilayer Feedforward Networks, Neural Networks 4, 251-257.
+Koenker, R., Bassett, G., 1978. Regression quantiles, Econometrica 46, 33-50.
+Pollard, D., 1984. Convergence of Stochastic Processes, (Springer-Verlag, Heidelberg).
+Rabemananjara, R., Zakoian, J.M., 1993. Threshold ARCH Models and asymmetries in volatility, Journal of Applied Econometrics 8, 31-49.
+Vapnik, V.N., Chervonenkis, A.Y., 1971. On the uniform convergence of relative frequencies of events to their probabilities, Theory of Probability and its Applications 16, 264-280.
+White, H., 1990. Connectionist nonparametric regression: Multilayer feedforward networks can learn arbitrary mappings, Neural Networks 3, 535-549.
+
+SFB 649 Discussion Paper Series 2007
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Trade Liberalisation, Process and Product Innovation, and Relative Skill Demand" by Sebastian Braun, January 2007.
+002 "Robust Risk Management. Accounting for Nonstationarity and Heavy Tails" by Ying Chen and Vladimir Spokoiny, January 2007.
+003 "Explaining Asset Prices with External Habits and Wage Rigidities in a DSGE Model." by Harald Uhlig, January 2007.
+004 "Volatility and Causality in Asia Pacific Financial Markets" by Enzo Weber, January 2007.
+005 "Quantile Sieve Estimates For Time Series" by Jürgen Franke, JeanPierre Stockis and Joseph Tadjuidje, February 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

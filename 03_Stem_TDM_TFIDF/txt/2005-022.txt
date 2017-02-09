@@ -1,0 +1,714 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2005-022
+DSFM fitting of Implied Volatility Surfaces
+Szymon Borak* Matthias R. Fengler*
+Wolfgang Härdle*
+* CASE ­ Center for Applied Statistics and Economics, Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+DSFM fitting of Implied Volatility Surfaces
+
+Szymon Borak, Matthias Fengler and Wolfgang Ha¨rdle CASE - Center for Applied Statistics and Economics
+Humboldt-Universita¨t zu Berlin Spandauer Straße 1, 10178 Berlin, Germany
+borak@wiwi.hu-berlin.de
+
+Abstract
+Implied volatility is one of the key issues in modern quantitative finance, since plain vanilla option prices contain vital information for pricing and hedging of exotic and illiquid options. European plain vanilla options are nowadays widely traded, which results in a great amount of highdimensional data especially on an intra day level. The data reveal a degenerated string structure. Dynamic Semiparametric Factor Models (DSFM) are tailored to handle complex, degenerated data and yield low dimensional representations of the implied volatility surface (IVS). We discuss estimation issues of the model and apply it to DAX option prices.
+JEL classification codes: C14
+1. Introduction
+The Black-Scholes formula (BS) for calculating the price of a European plain vanilla option is one of the most recognized results in modern quantitative finance. The price is given as a function of the price of the underlying, a strike price, the interest rate, time to maturity and an unobserved volatility. By plugging the observed option price into the BS formula it is straightforward to calculate the implied volatility (IV). The surface (on day t) given by the mapping from moneyness  (a measure of strikes) and from time to maturity  (,  )  t(,  ) is called implied volatility surface (IVS). The observed IVS, Figure 1, reveals a non-flat profile across moneyness (called "smile" or "smirk") and across time to maturity. Despite the deficiencies of the BS model it is popular among practitioners to quote option prices in terms of IV due to its intuitive simplicity. However there were many efforts to model a non constant IVS. One possible approach is to change the dynamics of the process of the underlying asset by increasing its degree of freedom. This leads to para-
+
+metric models with jumps like in [14], stochastic volatility like in [13] and [12] or models based on Le´vy processes like the generalized hyperbolic in [4] among many others. The models reproduce the smile phenomenon and their parameters are calibrated from the option prices by minimizing cost functional. One may also consider local volatility (LV) models like in [3] where the volatility is assumed to be a function of time and the price of the underlying. There exist an analytical formula which allows to calibrate this surface (LVS) straightforward from the IVS.
+A drawback even of the most sophisticated models is the failure to correctly describe the dynamics of the IVS. This can be inferred from frequent recalibration of the model and has been best understood in the context of LV-models [10]. Consequently, studying the IVS as an additional market factor has become a vital stand of research. The main focus is on a low dimensional approximation of the IVS based on principal components analysis (PCA). The PCA is applied both to the term structure of the IVS ([16] or [7]) and strike dimension (eg. [15]). The common PCA for several maturity groups is studied in [8] and the functional PCA was discussed in [1] and [2].
+Our approach is to represent the IVS as the sum of factors treated as two dimensional functions depending on moneyness and maturity. In [2] the factors are obtained using the functional PCA for the IVS fitted on a grid for each particular day. However this fit may be biased due to the degenerated data design. In [9] the IVS is obtained as a projection on parametric factors which has to be initially specified. In DSFM the factors are estimated from the data, which allows flexible modelling. Contrary to [2] the IVS is obtained as a fit to the factors smoothed in time, which reflects the dynamics of the whole system.
+The paper is organized as follows: in the next section we describe the DSFM and present the estimation procedure. In Section 3 we discuss the estimation issues and proposed improvements of the algorithm. Section 4 presents the empirical results on DAX options and discusses briefly possible applications.
+
+2. DSFM
+IVS Ticks 20000502
+
+Data Design
+
+Time to maturity 0.1 0.2 0.3 0.4 0.5 0.6 0.7
+
+0
+
+0.4 0.5 0.6 0.7 0.8 0.9 1 Moneyness
+
+1.1 1.2 1.3 1.4
+
+Figure 1. Left panel: implied volatilities observed on 2nd May, 2000. Right panel: data design on 2nd May, 2000.
+
+Institutional conventions of the option market entail a spe-
+
+cific degenerated IV data design. Each day one observes
+
+only a small number of maturities which form typi-
+
+cal `strings'. The usual data pattern is visible in the right
+
+panel of Figure 1. Options belonging to the same string
+
+have a common time to maturity but different money-
+
+ness. In the left panel of the Figure 1 IV smiles are pre-
+
+sented. One can easily see different curvatures for a each
+
+time to maturity. As time passes not only do the strings
+
+move through the space towards expiry but they also
+
+change their shape and level randomly.
+
+In order to capture this complex dynamic structure
+
+of the IVS a DSFM was proposed in [6]. It offers a
+
+low-dimensional representation of the IVS, which is ap-
+
+proximated by basis functions in a finite dimensional func-
+
+tion space. The basis functions are unknown and have to
+
+be estimated from the data. The IVS dynamics are ex-
+
+plained by loading coefficients, which form a multidimen-
+
+sional time series.
+
+Let Yi,j be the log-implied volatility observed on a particular day. The index i is the number of the day, while the
+
+total number of days is denoted by I (i = 1, ..., I). The in-
+
+dex j represents an intra-day trade on day i and the num-
+
+ber of trades on that day is Ji (j = 1, ...Ji). Let Xi,j be
+
+a two-dimensional variable containing moneyness i,j and
+
+maturity i,j. Among many moneyness settings we define
+
+it as
+
+i,j
+
+=
+
+,Ki,j
+Fti
+
+where
+
+Ki,j
+
+is a
+
+strike
+
+and
+
+Fti
+
+the under-
+
+lying futures price at time ti. The DSFM regresses Yi,j on
+
+Xi,j by:
+
+L
+Yi,j = m0(Xi,j ) + i,lml(Xi,j ),
+l=1
+
+(1)
+
+where m0 is an invariant basis function, ml (l = 1, ...L) are
+
+the `dynamic' basis functions and i,l are the factor weights depending on time i.
+
+2.1. Estimation
+The estimates i,l and ml are obtained by minimizing the following least squares criterion (i,0 = 1):
+
+I Ji
+
+L2
+
+Yi,j - i,lml(u) Kh(u - Xi,j ) du,
+
+i=1 j=1
+
+l=0
+
+(2)
+
+where Kh denotes a two-dimension kernel func-
+
+tion. The possible choice for two-dimensional
+
+kernels is a product of one dimensional kernels
+
+Kh(u) = kh1 (u1) × kh2 (u2), where h = (h1, h2) are bandwidths and kh(v) = k(h-1v)/h is a one dimen-
+
+sional kernel function.
+
+The minimization procedure searches through all functions
+
+ml : R2 - R (l = 0, ..., L) and time series i,l  R (i = 1, ..., I; l = 1, ..., L).
+
+To calculate the estimates an iterative procedure is applied.
+
+First we introduce the following notation for 1  i  I:
+
+pi(u)
+
+=
+
+1 Ji
+
+Ji
+Kh(u
+j=1
+
+-
+
+Xi,j ),
+
+1 Ji
+
+qi(u)
+
+=
+
+Ji
+
+Kh(u
+j=1
+
+-
+
+Xi,j )Yi,j .
+
+(3) (4)
+
+We denote by m(r) = (m(0r), ..., m(Lr)) the estimate of the basis functions and i(r) = (i(,rl), ..., i(,rL)) the factor loadings on the day i after r iterations. By replacing each func-
+tion ml in (2) by ml + g with arbitrary function g and tak-
+ing derivatives with respect to  one obtains:
+
+I Ji
+
+L
+
+Yi,j - i,lml(Xi,j ) i,l Kh(u - Xi,j ) = 0.
+
+i=1 j=1
+
+l=0
+
+(5)
+
+Rearranging terms in (5) and plugging in (3)-(4) yields:
+
+I IL
+Jii,l qi(u) = Ji i,l i,lpi(u)ml(u),
+i=1 i=1 l=0
+
+(6)
+
+for 0  l  L. In fact (6) is a set of L + 1 equations. Define the matrix B(r)(u) and vector Q(r)(u) by their elements:
+
+B(r)(u) l,l
+
+I
+= Jii(,rl-1)i(,rl-1)pi(u),
+i=1
+
+(7)
+
+I
+
+Q(r)(u) l =
+
+Jii(,rl-1)qi(u).
+
+i=1
+
+Thus (6) is equivalent to:
+
+(8)
+
+B(r)(u)m(r)(u) = Q(r)(u)
+
+(9)
+
+which yields the estimate of m(r)(u) in the r-th iteration. A similar idea has to be applied to update i(r). Replacing i,l by i,l +  in (2) and taking once more the derivative with respect to  yields:
+
+
+
+Ji 
+
+L
+
+
+
+Yi,j - i,lml(Xi,j ) ml (u)Kh(u - Xi,j )du = 0,
+
+j=1 
+
+l=0
+
+
+
+(10)
+
+which leads to:
+
+L
+qi(u)ml (u) du = i,l pi(u)ml (u)ml(u) du,
+l=0
+(11) for 1  l  L. The formula (11) is now a system of L equations. Define the matrix M (r)(i) and the vector S(r)(i) by their elements:
+M (r)(i) l,l = pi(u)ml (u)ml(u) du, (12)
+
+S(r)(i) l = qi(u)ml(u) du - pi(u)m0(u)ml(u) du.
+(13) An estimate of i(r) is thus given by solving:
+
+M (r)(i)i(r) = S(r)(i).
+
+(14)
+
+The algorithm stops when only minor changes occur:
+
+IL
+
+2
+
+i(,rl)m(lr)(u) - i(,rl-1)ml(r-1)(u) du 
+
+i=1 l=0
+
+(15)
+
+for some small . Obviously one needs to set initial values of i(0) in order to start the algorithm.
+
+2.2. Orthogonalization and normalization
+
+The estimates m = (m1, ..., mL) of the basis func-
+
+tions are not uniquely defined. They can be replaced by
+
+functions that span the same affine space. Define p(u) =
+
+1 I
+
+I i=1
+
+pi(u)
+
+and
+
+the
+
+L
+
+×
+
+L
+
+matrix
+
+
+
+by
+
+its
+
+elements
+
+l,l = ml(u)ml (u)p(u)du.
+
+The estimates m are replaced by new functions mnew = (mn1 ew, ..., mLnew) :
+m0new = m0 -  -1m mnew = -1/2m
+
+such that they are now orthogonal in the L2(p) space. The
+loading time series estimates i = (i,1, ..., i,L) need to be substituted by:
+
+inew = -1/2(i + -1)
+
+(16)
+
+where  is (L × 1) vector with l = m0(u)ml(u)p(u)du. The next step is to choose an orthogonal basis such that for each w = 1, ..., L the explanation achieved by the partial sum:
+
+w
+m0(u) + i,lml(u)
+l=1
+
+is maximal. One proceeds as in PCA. First define a ma-
+
+trix B with Bl,l =
+
+I i=1
+
+i,l
+
+i,l
+
+and Z
+
+= (z1, ..., zL)
+
+where z1,...,zL are the eigenvectors of B. Then replace m
+
+by mnew = Z m and i by inew = Z i.
+
+The orthonormal basis m1, ..., mL is chosen such that
+
+I i=1
+
+i2,1
+
+is
+
+maximal
+
+and
+
+given
+
+i,1, m0, m1
+
+the
+
+quan-
+
+tity
+
+I i=1
+
+i2,2
+
+is
+
+maximal
+
+and
+
+so
+
+forth.
+
+3. Estimation issues
+
+The estimation procedure encounter several computational challenges. The basis factor functions can be represented on the finite grid only, which obviously may not cover the whole desired estimation space. One also needs to choose some kernel function, the bandwidths and the initial loading time series i(0). Due to the degenerated design of the IV data proper decision of these points is a key issue in successful model estimation.
+
+3.1. Implementation
+As a numerical result of the estimation L time series (i,l) and L + 1 functions (ml) given on the finite grid are obtained. The choice of the grid needs to be arbitrary and depends on the density of the data points. The data (Xi,j and Yi,j) comes into the computation only in pi(u) and qi(u), which has to be calculated before the main iteration procedure. The calculation of pi(u) and qi(u), however, is the main computation effort in the estimation procedure. Therefore we believe that the DSFM can be used efficiently in a 'sliding window' type of analysis. Updating of pi(u) and qi(u) requires calculations only for one additional day, which is not a big computational issue.
+
+3.2. Bandwidths dependence
+In derivative market one can observe fairly many different types of option contracts. Each day one may trade options with several different time to maturities and many different strikes. However the number of possible strikes is much higher than the number of maturities, which results in the string structure. Moreover the contracts with smaller maturities are traded more intensively and there tend to exist more contracts for the smaller time to maturities for which the difference between two successive expiry days is one month (1M, 2M, 3M), but for the next maturity range it increases to three months (6M, 9M, 12M).
+Since the strings are moving in the maturity vs. moneyness plane towards expiry one needs to pool many days in order to fill the plane with observations. However due to an unequal distribution of data points one needs even more days to fill the range with bigger maturities than with smaller ones. Otherwise one faces gaps for some particular maturity range.
+These gaps may obstruct the estimation procedure. If in any point u the function p(u ) = 0 in (3) then obviously matrix B(r)(u ) in (7) contains only 0 and is singular. This means that one may not estimate successfully any value of the IVS in this point.
+This problem may be solved by increasing the bandwidths but it may lead also to a larger bias. One may also use a kernel function with infinite support like the Gaussian kernel but instead of analytical zeros numerical zeros creep in. Another possibility is to use the k-nearest neighbor estimator. In the range with many data, however, one takes into consideration only very few observations closest to the grid points. On the other hand in the range with few points the estimator is based on the observations far from the grid points. In order to cope with the degenerated data design local bandwidths can be applied. In (3) and (4) the fixed bandwidths are replaced by bandwidths dependent on time to maturity and moneyness:
+
+pi(u)
+
+=
+
+1 Ji
+
+Ji
+Kh(u)(u
+j=1
+
+-
+
+Xi,j ),
+
+1 Ji
+
+qi(u)
+
+=
+
+Ji
+
+Kh(u)(u
+j=1
+
+-
+
+Xi,j )Yi,j .
+
+(17) (18)
+
+Due to the described data design we propose to keep the bandwidths in the moneyness direction constant and linearly increasing in the maturity dimension. For the optimal choice of the bandwidths we refer to [11].
+
+3.3. Initial parameter dependence
+
+The problem of gaps in the data cannot only be handled
+with the size of the bandwidths. Of course it is obligatory
+that pi(u) needs to be non-zero for at least one i. However this is not a sufficient condition to ensure non singularity of the matrix B(r)(u ). The initial estimates of i(0) play also an important role.
+
+In [6] a piecewise constant initial time series was proposed.
+
+The subintervals I1, ..., IL are pairwise disjoint subsets of
+
+{1, ..., I} and
+
+L l=1
+
+Il
+
+is
+
+a
+
+strict
+
+subset
+
+of
+
+{1, ..., I}.
+
+The
+
+initial estimates are now defined by i(,0l) = 1 if i  Il and
+
+i(,0l) = 0 if i / Il. To complete the setting i(,00) = 1 for
+
+each i.
+
+However this kind of setting requires even more data to ob-
+
+tain the final estimates. For each subset Il there needs to exist at least one day i such that pi(u ) = 0, otherwise the row of zeros in (7) appears. The smaller is the length of Il intervals the bigger bandwidths need to be taken. This defi-
+
+ciency can be removed by taking a random initial time series.
+
+4. Results
+For our analysis we employ tick statistics on DAX index options from January 1999 to February 2003. By inverting the BS formula one easily obtains IV. We regard as outliers observations with IV bigger that 0.8 and smaller than 0.04. We also remove observations with maturity less than 10 day since their behavior in this range is irregular due to expiry effect.
+We apply the algorithm on an equidistant grid covering moneyness   [0.8, 1.2] and time to maturity measured in years   [0.05, 1.00]. In each direction our grid consists of 25 points. We set the number of dynamic basis functions to L = 3 like in [6]. In the moneyness direction we apply constant bandwidths h1 = 0.03 and in order to get smoother estimates of the basis functions in the maturity direction we use linearly increasing bandwidths. On the smallest maturity grid points we set bandwidths on 0.02 and increase them linearly to 0.2 for the greatest maturity points. As the starting values of (0) we take a piecewise constant series on disjoint time intervals. The initial weights selection is discussed below.
+Figure 2 presents the estimated factors loading 1,2 and 3 respectively. The magnitude and variance of the 1 are much higher than for the other two time series, which suggests that the first basis function has the biggest explanatory power of the IVS variation. This is actually not surprising since the basis functions were ordered with respect to the biggest variance of loading factors.
+
+creases the long term ones. The negative 2 causes the opposite effect. This function provides term structure changes of the IVS. The last function m3 reveals a strong slope in the moneyness direction changing from positive to negative near at-the-money. It reflects changes of the moneyness beta1 slope and smile curvature.
+
+Y 0 0.5 1 1.5
+
+beta2
+
+beta3
+
+1999
+
+2000
+
+2001
+
+2002
+
+2003
+
+X
+Figure 2. Time series of weights 1,2 and 3.
+
+mhat0
+
+mhat1
+
+0.60
+0.54
+0.48
+0.42
+0.37
+0.80 0.88 0.96 1.04 1.12
+
+1.00 0.81 0.62 0.43 0.24
+
+0.07
+-0.04
+-0.15
+-0.26
+-0.37
+0.80 0.88 0.96 1.04 1.12
+
+1.00 0.81 0.62 0.43 0.24
+
+-0.43
+-0.58
+-0.73
+-0.88
+-1.02
+0.80 0.88 0.96 1.04 1.12
+
+1.00 0.81 0.62 0.43 0.24
+
+0.61
+0.55
+0.50
+0.44
+0.39
+0.80 0.88 0.96 1.04 1.12
+
+1.00 0.81 0.62 0.43 0.24
+
+mhat2
+
+mhat3
+
+0.07
+-0.04
+-0.15
+-0.26
+-0.37
+0.80 0.88 0.96 1.04 1.12
+
+1.00 0.81 0.62 0.43 0.24
+
+-0.43
+-0.58
+-0.73
+-0.88
+-1.02
+0.80 0.88 0.96 1.04 1.12
+
+1.00 0.81 0.62 0.43 0.24
+
+Figure 3. Invariant basis function m0 and dynamic basis functions m1, m2 and m3.
+
+Figure 3 displays the estimated basis functions m0 - m3. We find similar interpretations of the factors as in [6] or [2]. The first dynamic factor m1 is relatively flat on almost the whole range and negative on all grid points. It reflects the up and down shifts of the entire log-IVS. For the small maturities a strong curvature can be seen. It corresponds to the empirical fact that near the expiry the `smile' effect becomes stronger. The second function is positive for the small matu-
+rities and negative for the bigger maturities. The positive 2 increases short term maturities IVs and simultaneously de-
+
+Figure 4. IVS estimates on February 25, 2003, fixed bandwidths h1 = 0.03, h2 = 0.02 (top), linearly increasing bandwidths (bottom).
+In our estimation we used the local bandwidths linearly increasing in maturity. Figure 4 presents the comparison of the two different IVS estimates on February 25, 2003 obtained with fixed bandwidths h1 = 0.03, h2 = 0.02 and with local bandwidths. While in the fixed bandwidths approach in bigger maturities the estimated IVS is rough, in the local bandwidths approach it becomes smoother.
+Another estimation issue is the choice of the initial times series (0). We have recalculated the estimates for different starting values. Denote by P C1, P C2, P C3 as the different settings of piecewise constant starting values as described in Section 3.3. Denote also by W N1, W N2, W N3 settings where the algorithm starts from a white noise and BM1, BM2, BM3 from a Brownian Motion. For each of the 9 settings we have obtained different estimates of weights. The correlation between different estimates of 1, 2 and 3 are respectively:
+
+ 1.0
+           
+
+-1.0 1.0
+
+-1.0 1.0 1.0
+
+-1.0 1.0 1.0 1.0
+
+-1.0 1.0 1.0 1.0 1.0
+
+1.0 -1.0 -1.0 -1.0 -1.0
+1.0
+
+-0.9 0.9 0.9 0.9 0.9
+-0.9 1.0
+
+0.9 -0.9 -0.9 -0.9 -0.9
+0.9 -1.0
+1.0
+
+-0.9 0.9 0.9 0.9 0.9 0.9 1.0
+-1.0 1.0
+
+
+           
+
+ 1.0
+           
+
+1.0 1.0
+
+1.0 1.0 1.0
+
+-1.0 -1.0 -1.0
+1.0
+
+-1.0 -1.0 -1.0
+1.0 1.0
+
+-1.0 -1.0 -1.0
+1.0 1.0 1.0
+
+0.3 0.3 0.3 -0.3 0.3 -0.3 1.0
+
+-0.3 -0.3 -0.3
+0.3 0.3 0.3 -1.0 1.0
+
+-0.3 -0.3 -0.3
+0.3 0.3 0.3 -1.0 1.0 1.0
+
+
+           
+
+ 1.0
+           
+
+-1.0 1.0
+
+-1.0 1.0 1.0
+
+-1.0 1.0 1.0 1.0
+
+-1.0 -1.0 -1.0 -1.0
+1.0
+
+1.0 1.0 1.0 1.0 -1.0 1.0
+
+-0.8 0.8 0.8 0.8
+-0.8 0.8 1.0
+
+0.8 -0.8 -0.8 -0.8
+0.8 -0.8 -1.0
+1.0
+
+-0.8 0.8 0.8 0.8
+-0.8 0.8 1.0
+-1.0 1.0
+
+
+           
+
+where the sequence of the settings is following: P C1, P C2, P C3, W N1, BM1, BM2, W N2, W N3, BM3. The algorithm converges to two different solutions depending on the starting values since the settings form clearly two clusters: (P C1, P C2, P C3, W N1, BM1, BM2) and (W N2, W N3, BM3). Inside the clusters the weights are almost perfectly correlated - top left and bottom right corners of the matrices contain 1 or -1. Of course if the correlation of the time series estimates is -1 the same factors are considered because they are identifiable only up to sign. Between the clusters the correlation is not so strong. In order to choose one solution other criteria like explained variance or smoothness of IVS need to be taken into account.
+The DSFM can easily be applied in hedging or risk management. Computing sensitivity with respect to factor loadings changes simplify the vega hedge since the whole dynamics of the IVS is reduced to L factors. After estimating stochas-
+tic model for , like in [5] where VAR(2) was detected, it can be used for scenario generation in Monte Carlo framework. Therefore it allows to compute the VaR for portfolios containing options.
+
+5. Conclusion
+We discuss estimation issues of the DSFM, which gives a flexible way of handling IV data and is a convenient modelling tool. We study the dependence on the starting  and the bandwidths settings. These are the key issues in efficient application of the model, which is left for future research.
+
+6. Acknowledgement
+We gratefully acknowledge financial support by the Deutsche Forschungsgemeinschaft and the Sonderforschungsbereich 649 "O¨ konomisches Risiko".
+References
+[1] M. Benko and W. Ha¨rdle. Common Functional Implied Volatility Analysis in P. C ´izek, W. Ha¨rdle and R. Weron (eds) Statistical Tools for Fianance and Insurance, chapter 5, pages 115­134. Springer Verlag, 2005.
+[2] R. Cont and J. da Fosenca. Dynamics of implied volatility surfaces. Quantitative Finance, 2:45­60, February 2002.
+[3] B. Dupire. Pricing with a smile. RISK, 1(7):18­20, 1994. [4] E. Eberlein and K. Prause. The generalized hyperbolic
+model: Financial derivatives and risk measures in H. German, D. Madan, S. Pliska, T. Vorst (eds) Mathematical Finance - Bachelier Congress 2000 pages 245­267. Springer Verlag, 2002. [5] M. Fengler. Semiparametric Modelling of Implied Volatility. PhD thesis, Humboldt-Universita¨t zu Berlin, 2004. [6] M. Fengler, W. Ha¨rdle, and E. Mammen. A Dynamic Semiparametric Factor Model for Implied Volatility String Dynamics. CASE Discussion Paper, Humboldt-Universita¨t zu Berlin, 2004. [7] M. Fengler, W. Ha¨rdle, and P. Schmidt. Common factors govering VDAX movements and the maximum loss. Journal of Financial Markets and Portfolio Managment, 1(16):16­ 19, 2002. [8] M. Fengler, W. Ha¨rdle, and C. Villa. The Dynamics of Implied Volatilities: A Common Principal Components Approach. Review of Derivatives Research, 6:179­202, 2003. [9] R. Hafner. Stochastic Implied Volatility. Springer-Verlag, Berlin Heidelberg, 2004. [10] P. Hagan, D. Kumar, D. Lesniewski and D. Woodward. Manging smile risk. Wilmott magazine, 1:84­108, 2002. [11] W. Ha¨rdle. Applied Nonparametric Regression. Cambridge University Press,1990. [12] S. Heston. A closed-form solution for options with stochastic volatility with applications to bond and currency options. Review of Financial Studies, 6:327­343, 1993. [13] J. Hull, A. White The pricing on option on assets with stochastic volatilities. Journal of Finance, 42:281­300, 1987. [14] R. Merton. Option pricing when underlying stock returns are discontinuous. Journal of Financial Economics, 3:125­144, 1976. [15] G. Skiadopoulos, S. Hodges, and L. Clewlow. The dynamics of the S&P 500 implied volatility surface. Review of Derivatives Research, 3:263­282, 1999. [16] Y. Zhu and M. Avellaneda. An E-ARCH model for the termstructure of implied volatility of FX options. Applied Mathematical Finance, 4:81­100, 1997.
+
+SFB 649 Discussion Paper Series
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Nonparametric Risk Management with Generalized Hyperbolic Distributions" by Ying Chen, Wolfgang Härdle and Seok-Oh Jeong, January 2005.
+002 "Selecting Comparables for the Valuation of the European Firms" by Ingolf Dittmann and Christian Weiner, February 2005.
+003 "Competitive Risk Sharing Contracts with One-sided Commitment" by Dirk Krueger and Harald Uhlig, February 2005.
+004 "Value-at-Risk Calculations with Time Varying Copulae" by Enzo Giacomini and Wolfgang Härdle, February 2005.
+005 "An Optimal Stopping Problem in a Diffusion-type Model with Delay" by Pavel V. Gapeev and Markus Reiß, February 2005.
+006 "Conditional and Dynamic Convex Risk Measures" by Kai Detlefsen and Giacomo Scandolo, February 2005.
+007 "Implied Trinomial Trees" by Pavel Cízek and Karel Komorád, February 2005.
+008 "Stable Distributions" by Szymon Borak, Wolfgang Härdle and Rafal Weron, February 2005.
+009 "Predicting Bankruptcy with Support Vector Machines" by Wolfgang Härdle, Rouslan A. Moro and Dorothea Schäfer, February 2005.
+010 "Working with the XQC" by Wolfgang Härdle and Heiko Lehmann, February 2005.
+011 "FFT Based Option Pricing" by Szymon Borak, Kai Detlefsen and Wolfgang Härdle, February 2005.
+012 "Common Functional Implied Volatility Analysis" by Michal Benko and Wolfgang Härdle, February 2005.
+013 "Nonparametric Productivity Analysis" by Wolfgang Härdle and Seok-Oh Jeong, March 2005.
+014 "Are Eastern European Countries Catching Up? Time Series Evidence for Czech Republic, Hungary, and Poland" by Ralf Brüggemann and Carsten Trenkler, March 2005.
+015 "Robust Estimation of Dimension Reduction Space" by Pavel Cízek and Wolfgang Härdle, March 2005.
+016 "Common Functional Component Modelling" by Alois Kneip and Michal Benko, March 2005.
+017 "A Two State Model for Noise-induced Resonance in Bistable Systems with Delay" by Markus Fischer and Peter Imkeller, March 2005.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+018 "Yxilon ­ a Modular Open-source Statistical Programming Language" by Sigbert Klinke, Uwe Ziegenhagen and Yuval Guri, March 2005.
+019 "Arbitrage-free Smoothing of the Implied Volatility Surface" by Matthias R. Fengler, March 2005.
+020 "A Dynamic Semiparametric Factor Model for Implied Volatility String Dynamics" by Matthias R. Fengler, Wolfgang Härdle and Enno Mammen, March 2005.
+021 "Dynamics of State Price Densities" by Wolfgang Härdle and Zdenk Hlávka, March 2005.
+022 "DSFM fitting of Implied Volatility Surfaces" by Szymon Borak, Matthias R. Fengler and Wolfgang Härdle, March 2005.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

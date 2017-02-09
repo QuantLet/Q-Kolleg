@@ -1,0 +1,2788 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2015-039
+Dynamics of Real Per Capita GDP
+Daniel Neuhoff*
+* Humboldt University Berlin, Germany This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+Dynamics of Real Per Capita GDP 
+Daniel Neuhoff 
+This Version: August 7, 2015 Abstract
+This study investigates the dynamics of quarterly real GDP per capita growth rates across four countries, the US, UK, Canada and France. I obtain estimates for ARIMA(p,q) processes for first differences of log quarterly real GDP per capita using Reversible Jump Markov Chain Monte Carlo, allowing me to account for model uncertainty when comparing the implied impulse responses across countries. The results are checked for robustness with respect to the detrending device.
+The estimated impulse response functions are different in shape. The persistence estimates for the US, France, Canada and Italy are clustered together, while the UK and Japan are clear outliers. Significant posterior uncertainty remains regarding the persistence estimates and the appropriate ARMA models. The results for the UK is sensitive to the time period. An analysis of the components of GDP for the US suggests that the dynamics are mainly driven by consumption. JEL classification: C51, C52, E32 Keywords: ARMA; Real GDP per capita; Growth Rates; Persistence; Reversible Jump Markov Chain Monte Carlo
+ I am grateful to Michael Burda and Alexander Meyer-Gohde for useful comments. Furthermore, I am indebted to Tobias Ko®nig for excellent research assistance. This research was supported by the DFG through the SFB 649 "Economic Risk." Any and all errors are entirely my own.
+Humboldt-Universita®t zu Berlin, Institut fu®r Wirtschaftstheorie II, Spandauer Straﬂe 1, 10178 Berlin, Germany; Tel.: +49-30-2093 5667; E-Mail:daniel.neuhoff@gmail.com
+
+1 Introduction
+The dynamic behavior of GDP has attracted longstanding interest among economists. This study aims to add to the existing literature by investigating the dynamics of quarterly real GDP per capita across six countries, the US, UK, Canada, Italy, Japan, and France. In contrast to earlier studies on the dynamics of growth rates, such as Campbell and Mankiw (1987) who obtain maximum likelihood point estimates for ARIMA(p,1,q) models of quarterly real GNP in the US, this investigation employs Reversible Jump Markov Chain Monte Carlo (henceforth RJMCMC).
+This Bayesian approach enables the sampling from posteriors across models where the associated parameter spaces vary in dimensionality from model to model. The posterior will then not only incorporate posterior uncertainty about parameter values, as is the case for fixed-dimension Bayesian methods like Random-Walk MCMC, but also reflects posterior uncertainty about the models themselves while at the same time providing a method to efficiently traverse the model space.
+I analyze the posterior distributions of the impulse responses as well as the measure of persistence based on cumulative impulse responses also utilized in Campbell and Mankiw (1989). The results are compared to maximum likelihood estimates with model choice according to three information criteria: Akaike Information Criterion (AIC), Corrected Akaike Information Criterion (AICC), and the Bayesian Information Criterion (BIC). The results from maximum likelihood estimates mostly coincide with the means and modes of the posterior impulse responses when the model is chosen using the BIC. In contrast, both AIC and AICC choose less parsimonious models exhibiting much higher persistence and often oscillatory behavior of the impulse responses, where the latter is rare for estimates using either RJMCMC or the BIC.
+The comparison of impulse responses across countries also reveals significant variation: for the UK, RJMCMC assigns an extensive amount of posterior mass to the pure random walk model. The impulse response function of a shock to the growth rate of GDP in the UK therefore exhibits very little persistence. In contrast, the posterior impulse responses for the growth rates of Canada and the US exhibit more persistence with the median responses dying out after 5 to 6 quarters. France and Italy show somewhat higher persistence, while Japan is consistently ranked as the economy with the most persistent response to a shock. It is shown, however, that the results for the UK do not carry over when the time series for UK GDP is split into subsamples.
+For the posterior distributions of the persistence measure, two sample Kolmogorov-Smirnov tests are carried out. In all cases, the null hypothesis of equality of any combination of posteriors is rejected at the 1% level.
+In order to gain some insight into which component of GDP drives the results, the method is
+i
+
+applied to the major aggregates of US GDP≠ private and government consumption, as well as fixed capital formation, exports, and imports. The results suggest, that the shape of the impulse response for the GDP series is mainly defined by private and government consumption.
+Since it is well known that the detrending method chosen has significant impact on empirical results, see e.g. Canova (1998), the results from the difference stationary perspective are compared with the results obtained using OLS- and Hodrick-Prescott-detrending. The results for the HP-filtered series seem to be dominated by filtering artifacts while the results for linear detrending are in line with the ones from the difference stationary perspective.
+In general, distinguishing a trend-stationary process with a large autoregressive root from a unit root process and a trend-stationary process seems infeasible with available data as emphasized by Christiano and Eichenbaum (1990), among others, who state that "[to] us the possibility of providing a compelling case that real GNP is either trend of difference stationary seems extremely small". Furthermore, in their seminal contribution Kwiatkowski, Phillips, Schmidt, and Shin (1992) find that for real GNP per capita they "cannot reject either the unit root hypothesis or the trend stationary hypothesis".
+The results suggest that economic models that put strong constraints on the dynamic response of GDP growth rates to reduced form shocks, may only be appropriate in certain instances. Furthermore, the dynamics may change significantly over time as suggested by the results for subsamples of UK GDP. For the US, the dynamics appear to be driven mainly by government consumption, private consumption, and to a lesser extent, investment.
+The rest of this paper is structured as follows: after a review of some of the relevant literature, I discuss the relationship between point estimates and posterior distributions, setting up a brief discussion on the estimation of ARMA models with RJMCMC and the frequentist approach employed here. After a discussion of the data and the sampler settings, a measure of persistence is introduced, in order to then present the results for GDP growth rates and the robustness check. Following the persistence results, I discuss the results from the GDP components and subsamples from the UK and end with a conclusion.
+2 Literature
+The study of the dynamic properties of output measures has inspired longstanding substantial interest among economists. The strand of literature bearing the closest resemblance to the investigation presented here was initiated by Campbell and Mankiw (1987) who analyze the persistence of US GNP from a difference stationary perspective after Nelson and Plosser (1982) had challenged the hitherto
+ii
+
+prevailing view among economists that aggregate time series were trend stationary. Other studies concerned with trends in and persistence of output and other economic variables include Clark (1989), Stock and Watson (1988), and Watson (1986). While the researchers disagree on the long-run effect of an innovation, there is cautious consensus that significant persistence is present in economic time series.
+Campbell and Mankiw (1989) provide an international perspective on persistence in a difference stationary world, confirming the finding of meaningful levels of persistence for the G7 economies. Among others, Cochrane (1988) challenges the view that GNP is clearly difference stationary. Using Bayesian techniques, DeJong and Whiteman (1991) find significant support for time trends in the posterior distributions for many of the series analyzed by Nelson and Plosser (1982). Perron (1993) finds that when allowing for a break in the trend, trend stationarity seems to be a good description of the behavior of the data. Perron's paper was, however, criticized for picking the break point in the trend a priori. Cheung (1994) carries out unit root tests allowing the structural break to be determined endogenously and rejects the null hypothesis of a unit root. He finds significant differences in the dynamic behavior of GDP across countries, which is consistent with the conclusions of Campbell and Mankiw (1989). Koop (1991) analyzes the time series properties of real per capita GDP for 121 countries using a Bayesian approach confirming the results from previous studies with respect to persistence. He finds mixed evidence regarding the trend and difference stationarity hypotheses.
+While trend stationary and difference stationary models offer extremely differing implications, especially concerning long term forecasts, the question of which model is closest to the true nature of GDP is unlikely to be settled in the near future, as also argued in Christiano and Eichenbaum (1990). Hence, both perspectives will be considered in this paper.
+Another strand of literature concerned with breaking up the dichotomy between trend and difference stationarity uses fractionally integrated time series models to analyze output series. Studies in this vein include Diebold and Rudebusch (1989) and Cheung and Lai (1992). Both studies find substantial persistence in output, albeit not always unit roots for the countries considered.
+While univariate time series analyses of output appear to be simple or even naive, the resulting findings can be used, for example, to analyze the welfare implications of stabilization policies as well as discriminate between economic models as in Steven N. Durlauf and Sims (1989). Other authors such as Jones (1995), Ragacs and Zagler (2002), Fatas (2000b), and Fatas (2000a) use univariate results to test models of economic growth. Furthermore, multivariate econometric models have univariate representations, as pointed out already by Quenouille (1957), and DSGE models in turn possess VAR representations - of finite or infinite order - as shown by Ravenna (2007).
+iii
+
+3 Point Estimates vs. Posterior Distributions
+In the following, results from a Bayesian approach to time series estimation are compared to their frequentist counterparts. Apart from their philosophical differences with respect to conditioning, the two approaches also give different output: the frequentist approach yields point estimates of parameters together with confidence intervals around these estimates which are then compared to some limiting distribution of the estimator for inference, while the Bayesian approach delivers posterior distributions of the parameters on which inference is based.
+Based on these distributions, point estimates for parameters and any function of the parameters can be derived by choosing a loss function. Loss functions are in essence penalties for "missing" the true parameter values. This is akin to minimizing the sum of squares of the deviations of the data from their model-implied value in a classical linear regression. Commonly used are the quadratic loss function yielding the mean of the posterior distribution as the estimator, and the absolute loss giving the median of the posterior as estimate. Throughout the following, complete posterior distributions will be compared with each other using the two-sample Kolmogorov-Smirnov-Test as well as the point estimates for the two commonly used loss functions together with credible sets.
+
+4 Bayesian Estimation of ARMA Models Using RJMCMC
+
+The estimation carried out here employs the Reversible Jump Markov Chain Monte Carlo (RJMCMC) methodology pioneered by Green (1995). RJMCMC generalizes the Metropolis-Hastings algorithm from Hastings (1970) to allow sampling from posterior distributions spanning different models and therefore parameter spaces of variable dimensionality. The method is applied here to obtain posterior distributions spanning the model and corresponding parameter spaces of stationary ARMA(p,q) models with p, q  [0; 10] of the form:
+
+P(L)yt = Q(L)t; t  N(0, 2e )
+
+(1)
+
+with
+
+P(L) = 1 - P1L - P2L2 - ...PpLp Q(L) = 1 + Q1L - Q2L2 - ...QqLq
+
+(2) (3)
+
+denoting the autoregressive and moving average polynomials respectively and L denoting the lag operator. It is assumed throughout that the coefficients of Q(L) satisfy the invertibility and those of P(L) the stationarity conditions. In order to impose these conditions, the model is reparametrized in
+
+iv
+
+terms of its (inverse) partial autocorrelations for the (moving average) autoregressive polynomials as in e.g. Meyer-Gohde and Neuhoff (2015), Barndorff-Nielsen and Schou (1973), Monahan (1984) and Jones (1987). These assumptions as well as the notation will be used throughout this study.
+The RJMCMC implementation employed here is identical to that in Meyer-Gohde and Neuhoff (2015) including the evaluation of the Likelihood by means of the Kalman filter, apart from the fact that two proposal distributions were used, one for within-model moves where the model indicators remain constant and one for model moves where at least one indicator changes. An in-depth explanation of and references to other literature about the RJMCMC algorithm applied here can be found in Meyer-Gohde and Neuhoff (2015).
+4.1 Model Selection and Averaging with RJMCMC
+In this study, the output of the RJMCMC algorithm consists of a posterior distribution across the space of ARMA(p,q) models and their corresponding parameters. Each draw from the posterior distribution consists of information on p and q as well as the (inverse) partial autocorrelations and consequently parameter values and the standard deviation of the disturbance corresponding to this draw. To analyze the output, two options present themselves to the researcher with respect to model choice:
+1. Pick the model with the highest posterior probability 2. Average across models Option 1 will feel more familiar to most researchers. It simply involves counting the number of draws for each combination of p and q and picking the one with the highest number of draws. It is akin to a likelihood ratio test or choosing a model based on information criteria like the Akaike Information Criterion. While one can then account for the parameter uncertainty conditional on the model there is no consistent way to include model uncertainty in the analysis of the results as one specific model is chosen. In a case where the estimates for measures of interest like the persistence measure discussed below are quite different depending on the model chosen, a phenomenon mentioned e.g. by Campbell and Mankiw (1989) for the persistence measure for France, it seems prudent to incorporate model uncertainty in the analysis. This can be easily accomplished using the full posterior provided by RJMCMC instead of just posteriors conditional on some choice of model. Model uncertainty is accounted for by calculating the measure of interest for all draws from the posterior spanning the different models and then analyzing the resulting distribution. This approach may very well lead to wider credible sets, but this widening would then be a desirable feature as narrower sets can lead the researcher to a false sense of confidence in the results. Indeed, in quite a few cases examined here, especially when using the
+v
+
+HP-Filter, considerable posterior model uncertainty remains. The results presented here account for this uncertainty.
+
+5 Frequentist Regressions
+
+The frequentist, or classical, maximum likelihood estimates are obtained using the Econometrics
+
+Toolbox of Matlab 2015a. For the frequentist estimates, the model space was constrained to include only models with autoregressive and moving average lag polynomials up to degree five.1
+
+In order to pick a model, three information criteria were employed: The Akaike Information
+
+Criterion (AIC), the Corrected Akaike Information Criterion (AICC) and the Bayesian or Schwartz
+
+Information Criterion (BIC). These are given by:
+
+AIC = 2k - 2 ln(L^),
+
+2k(k + 1)
+
+AICC = AIC +
+
+,
+
+BIC = -2 ln(L^) + k ln(n)
+
+n-k-1
+
+with k being the number of model parameters and n the number of observations. L^ denotes the
+
+maximized likelihood value of a model, i.e., for given ARMA orders p and q. The model chosen is
+
+then the one with the lowest value of the information criterion which is being applied.
+
+Interestingly, the models chosen by the BIC generally exhibit impulse responses very similar to
+
+the mean and mode impulse responses obtained from RJMCMC. The AIC and AICC, on the other
+
+hand, select identical models that tend to be of higher order and the implied impulse responses differ
+
+significantly from those estimated using the other approaches.
+
+6 Data
+Seasonally adjusted quarterly real GDP and population data used for the first experiment are taken from the OECD.Stat database. The time series for quarterly real GDP are the VOBARSA measures in this database for the period 1960:1 to 2007:4, thus excluding the Great Recession. Per capita numbers were calculated using population data from the same source.
+For estimation, demeaned first differences of the natural logarithm of GDP per capita, logarithmic deviations from OLS-detrended GDP and logarithmic deviations from an HP trend with the smoothing parameter  set to 1600 were employed. The natural logarithm of GDP per capita is thus taken to be either difference stationary with drift, trend stationary with a linear trend in logarithms, or fluctuating around a logarithmic HP trend. All log-growth rates and log deviations were multiplied by 100 in order to alleviate potential numerical issues.
+1Many authors restrict the model space even further, e.g. to p + q  6 as e.g. in Diebold and Rudebusch (1989). The truncation of the model space chosen here is the same as in Perron (1993).
+vi
+
+Since the focus of this study is the persistence of changes in GDP, the drift parameter µ for the difference stationary case is not of central interest. Thus, the first differenced series was demeaned and the remaining fluctuations taken to follow stationary and invertible a zero-mean ARMA process of undefined order. The same assumption was maintained in the estimation for the other detrending methods. The drift parameter can be inferred from the mean in the data together with the autoregressive coefficients for each model (or sample from the posterior) from
+µ = c(1 + P1 + P2 + . . . + Pp)
+.
+
+7 Sampler Settings
+
+For each of the series 4.000.000 samples from the posterior are obtained, discarding the first 1.000.000 as burn-in. The prior structure applied here assumes a priori independence for the parameters. The priors reported in Table 1 are the same for all variants considered.
+
+Object
+
+Prior
+
+p DU(0, 10)
+
+q DU(0, 10) (Inverse) Partial Autocorrelation U(-1, 1)
+
+ IG(1, 1)
+
+Table 1: Priors
+
+In Table 1, DU(a, b) denotes the discrete uniform distribution on the interval [a, b], U(c, d) is the continuous uniform distribution on the open interval (c, d), and IG(e, f ) denotes the inverse gamma distribution truncated at zero with parameters (e, f ). It should be noted that, even though the prior on the orders of the lag polynomials is uniform, the proper prior on the (inverse) partial autocorrelations induces an exponentially decaying prior. If one were to increase, for example, the order of the autoregressive lag polynomial by one and set the corresponding parameter equal to zero, the likelihood would not be changed. However, the new parameter has a prior probability < 1 at all values and the posterior probability will be lowered. In this sense, additional parameters are penalized and the prior behaves implicitly like an exponential prior over (p + q) which is shown in Figure 1. A discussion of this feature can be found in Meyer-Gohde and Neuhoff (2015).
+vii
+
+0.01
+0.008
+0.006
+0.004
+0.002
+0 0 1 2 3 4 5 6 7 q8 9 10
+
+10
+
+9
+
+8
+
+7
+
+6
+
+5
+
+4
+
+3
+
+2 1
+
+p
+
+0
+
+Figure 1: Implied posterior for model indicators
+
+At each iteration of the RJMCMC algorithm, a new state, consisting of the model indicators p and q as well as the corresponding parameters, has to be proposed from some proposal distributions. The proposal distribution parameters were tuned using short pilot runs for each of the experiments. The parameters were left constant across countries. The pilot tuning targeted acceptance rates around 20 - 30% for within-model moves, roughly in line with recommendations for fixed-dimensional random walk samplers (see, e.g. An and Schorfheide (2007)), and around 4-5 % for between-model moves. This goal was not achieved in all cases. The resulting parameter values and the proposal distributions employed are reported in Table 2.
+In Table 2, DL(a) denotes the discretized Laplace distribution, with location parameter, µ, and shape parameter, b, such that
+
+p(p|p)  exp(-b|p - p|) with p, p  [0, 1, . . . , 10] q(q|q)  exp(-b|q - q|) with q, q  [0, 1, . . . , 10]
+
+(4) (5)
+
+T N(µ, 2) is the normal distribution with mean µ and variance 2 truncated to the interval (-1, 1) for the partial autocorrelations and (0, 1000) for the standard deviation of the error term. Proposals are always centered around the current value of the parameter of interest as in Meyer-Gohde and Neuhoff (2015).
+The resulting acceptance rates are presented in Table 3. Here,  stands for the overall acceptance rate, w for the acceptance rate for within-model moves and b is the acceptance rate for betweenmodel moves. The acceptance rates seem satisfactory and roughly in line with the ones in Brooks and Ehlers (2004), with the acceptance rates decreasing as the model orders increase. Even though some of the acceptance rates are low, the high number of samples used for the analysis should be sufficient to alleviate this possible problem.
+
+viii
+
+Detrending
+
+Object
+
+Proposal
+
+First Differences Linear Trend
+
+p q (Inverse) Partial Autocorrelation Between (Inverse) Partial Autocorrelation Within  p q (Inverse) Partial Autocorrelation Between (Inverse) Partial Autocorrelation Within 
+
+DL(µ, 2.2) DL(µ, 2.2) T N(µ, 0.052) T N(µ, 0.12) T N(µ, 0.052)
+DL(µ, 2.2) DL(µ, 2.2) T N(µ, 0.052) T N(µ, 0.032) T N(µ, 0.052)
+
+HP Filter
+
+p DL(µ, 2.2) q DL(µ, 2.2) (Inverse) Partial Autocorrelation Between T N(µ, 0.0252) (Inverse) Partial Autocorrelation Within T N(µ, 0.072)  T N(µ, 0.042)
+
+Table 2: Proposals
+
+Filter
+
+FDIFF
+
+HP LINEAR
+
+ w b  w b  w b
+
+Canada 0.29 0.38 0.09 0.17 0.26 0.02 0.20 0.28 0.04
+
+France 0.14 0.19 0.05 0.23 0.33 0.04 0.12 0.18 0.02
+
+Italy 0.26 0.34 0.09 0.22 0.32 0.04 0.15 0.22 0.03
+
+Japan 0.12 0.16 0.04 0.25 0.37 0.04 0.06 0.08 0.01
+
+UK 0.49 0.61 0.12 0.20 0.30 0.03 0.36 0.49 0.07
+
+US 0.22 0.29 0.07 0.19 0.28 0.03 0.23 0.33 0.05
+
+Table 3: Acceptance rates
+
+ix
+
+8 Impulse Responses
+The following point estimates for impulse response functions at each horizon are readily available: ∑ The median of the impulse response at each horizon ∑ The mean of the impulse response at each horizon
+Note that these estimates are different from those obtained when picking one particular model. In order to, for example, calculate the median of the impulse response function at some horizon, the whole distribution of the response at this horizon across models and parameters is utilized. Bayesian credible set for the responses can easily be constructed. Here, the 90% credible sets will be reported.
+Together with means, medians, and credible sets, the impulse responses implied by the estimates using the information criteria will be presented and compared. All impulse responses presented are responses to a one standard deviation shock as estimated for each sample and the models from the frequentist regressions respectively.2
+
+9 A Measure of Persistence
+
+The measure of persistence on which this study will focus is the sum of coefficients of the infinite moving average representation of the stationary processes giving an estimate of the total persistence of the process as employed by Diebold and Rudebusch (1989) and Campbell and Mankiw (1987), among others. This measure has different interpretations, depending on the nature of the underlying model.
+Let C(L) denote the infinite order polynomial in the lag operator given by the infinite moving average representation of a stationary ARMA(p,q) model and let Cn(1) be the sum of the first n coefficients:
+
+P(L)yt = Q(L)t
+
+yt
+
+=
+
+Q(L) P(L) t
+
+=
+
+C(L)t
+
+=
+
+(1
+
++ C1L
+
++ C2L2
+
++
+
+. . .)t
+
+n
+
+Cn(1) = 1 + Ci
+i=1
+
+(6) (7) (8)
+
+Cn(1) thus gives the cumulated response to a shock up to horizon n. What information does this statistic convey? Consider first a model in which the yt are first-
+
+differenced log GDP per capita data points. In this setup, Ci gives the effect of a disturbance on the
+2This is necessary as the unconditional variance of an ARMA model is a function of not only the standard deviation of the disturbance, but also the AR and MA polynomials. If the model or its parameters values change, the corresponding standard deviation has to change as well to match the variation in the data.
+
+x
+
+growth rate occurring at time t on the growth rate at time t + i. The cumulative effect on the level of GDP at time t + i is then given by Ci(1). Ci(1) is thus the change in one's forecast for the level of GDP at time t + i after observing a unit shock in t. For a random walk holds, for example, Ci(1) = 1i, while if the series were trend stationary, Ci(1) would converge to zero with increasing i as the effect of the shock on the level of GDP vanishes with trend-reversion (see Campbell and Mankiw (1987) for further discussion).
+In a trend-stationary world, be it a Hodrick-Prescott or a linear trend, the measure will give the undiscounted sum of departures from the trend in future periods in log points. The higher Ci(1), the more pronounced the departure of GDP from its trend up to time t + i after a shock occurring in period t.
+
+10 Kolmogorov-Smirnov Test
+
+In order to compare the estimates from RJMCMC output across countries≠ apart from optical inspection of the impulse responses and posterior distributions for the statistics considered and corresponding intracranial trauma tests≠ a more formal means of comparison will be employed here. Since RJMCMC delivers a posterior distribution for the persistence measures, I can test whether any two sets of samples from the posteriors seem to be generated by the same distribution.
+The test employed here is the two-sample Kolmogorov-Smirnov test, which has equality of the distributions in the two samples as its null hypothesis. The corresponding test statistic for two distributions a and b is given by
+
+KS S a,b = sup |Fa(x) - Fb(x)|
+x
+
+where Fa(x) and Fb(x) denote the cumulative distribution functions associated with the distributions a and b. The critical values for this statistic are given by
+
+KS S  = c()
+
+na + nb nanb
+
+where na and nb are the sample sizes for posteriors a and b respectively and c() is a coefficient depending on the chosen significance level :
+
+ 0.05 0.01 c() 1.36 1.63
+
+xi
+
+11 Results
+In the following sections, the results of the estimation using GDP growth rates and the robustness checks using Hodrick-Prescott as well as OLS linear detrending will be presented.
+11.1 GDP Growth Rates
+This section presents the results obtained using first differences of the natural logarithm of GDP. It is thus primarily concerned with the dynamics of GDP growth rates.
+11.1.1 Model Choice
+One of the main advantages of RJMCMC is the possibility to plot and inspect the posterior distribution across models. Here, the role of the model indicator is played by the orders of the two lag polynomials, p for the AR polynomial and q for the MA polynomial. The pair (p, q) then identifies one model. Figure 2 shows the posteriors over the model indicators p and q for all six countries.
+Inspection of the plots shows clear differences in the posteriors over the models for the six countries. Notably, for the UK the pure random walk model is clearly preferred by RJMCMC. There are very few samples with low order AR and MA polynomials. This result will be revisited later.
+In contrast, the posterior for France has the most posterior mass assigned to the ARMA(3,1) model with quite substantial posterior uncertainty regarding the model and the possibility of multimodality with the second mode at the ARMA(1,2) model. The posterior for Japan has its mode at the ARMA(2,2) model with similarly pronounced posterior model uncertainty. These higher-order and mixed models allow for more intricate and possibly more persistent impulse responses as will become obvious in the next section.
+The posterior mode in the (p, q) space for the US is at the ARMA(2,0) model, a result in line with Meyer-Gohde and Neuhoff (2015) with the rest of the posterior mass clustered around this point. The posterior for Canada exhibits a similar picture but clearly favors a simple AR(1) model over the AR(2) specification preferred for the US. Both posteriors also show strong similarities with the one for Italy. The posterior for Italy is, however, more dispersed around the mode at the AR(1) model with almost negligible differences in posterior probabilities for the neighboring models ARMA(1,1) and AR(2), indicating higher model uncertainty compared to e.g. Canada for which the posterior distribution has a much more pronounced mode at the AR(1) model. It should be noted, that the AR(1) model imposes significant restrictions on the shape of the impulse response function as an AR(1) model will always exhibit exponential decay of the impulse response, oscillating or not.
+xii
+
+Figure 2: Posteriors for model indicators
+Thus, the posteriors over the model indicators already hint at differing dynamic behavior of the GDP growth rates across countries.
+11.1.2 Impulse Responses I now turn to an analysis of the estimated impulse responses to a positive one standard deviation shock to the growth rate for the six countries. The impulse responses are presented in Figure 3. The impulse responses and the persistence measures are calculated using every 30th draw from the posterior giving 1.000.000 draws to keep computation time manageable. This approach, called thinning, also reduces the autocorrelations in the samples from the posterior which is very much desirable as inference is
+xiii
+
+1
+0.8
+0.6
+0.4
+0.2
+0
+-0.2 0
+1
+0.8
+0.6
+0.4
+0.2
+0
+-0.2 0
+1.2 1
+0.8 0.6 0.4 0.2
+0 -0.2
+0
+
+US
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1.2 1
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+0
+
+-0.2 10 20 30 40 50 60 0
+
+Canada
+
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1.2 1
+0.8 0.6
+
+0.4
+
+0.2
+
+0
+
+-0.2
+
+-0.4
+
+-0.6 10 20 30 40 50 60 0
+
+Italy
+
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1.2 1
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+0
+
+-0.2 10 20 30 40 50 60 0
+
+UK Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+10 20 30 40 50 60 France Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+10 20 30 40 50 60 Japan Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+10 20 30 40 50 60
+
+Figure 3: Estimated impulse responses
+
+based on the assumption that the samples are independently distributed. The models on which the frequentist impulse responses are based are presented in Table 4.
+A few observations can be made from visual inspection of the plots. Models chosen by the AIC and AICC criteria coincide among the two criteria for all six countries and the models chosen by the BIC are significantly closer to the means and modes of the impulse responses from RJMCMC with BIC and RJMCMC choosing more parsimonious models3. AIC and AICC choose models character-
+3The extent to which this will happen depends, of course, on the priors used for RJMCMC.
+xiv
+
+Country Canada France
+Italy Japan UK
+US
+
+Criterion AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC
+
+P1 0.717 (0.150) 0.717 (0.150) -1.002 (0.065) -1.016 (0.108) -1.016 (0.108) 0.845 (0.091) 0.625 (0.212) 0.625 (0.212) 0.273 (0.057) -0.866 (0.031) -0.866 (0.031) 0.973 (0.032) -0.235 (0.095) -0.235 (0.095)
+-0.140 (0.067) -0.140 (0.067) 0.305 (0.063)
+
+P2 -0.273 (0.066) -0.273 (0.066) -0.417 (0.079) -0.085 (0.198) -0.085 (0.198)
+0.922 (0.117) 0.922 (0.117)
+-0.209 (0.036) -0.209 (0.036) -0.801 (0.026) -0.544 (0.047) -0.544 (0.047)
+0.343 (0.049) 0.343 (0.049)
+
+P3 0.747 (0.053) 0.747 (0.053) 0.191 (0.057) 1.000 (0.117) 1.000 (0.117)
+-0.469 (0.225) -0.469 (0.225)
+0.348 (0.036) 0.348 (0.036) 0.783 (0.025) -0.751 (0.092) -0.751 (0.092)
+-0.169 (0.060) -0.169 (0.060)
+
+P4 -0.592 (0.117) -0.592 (0.117)
+0.560 (0.099) 0.560 (0.099)
+-0.753 (0.149) -0.753 (0.149)
+0.783 (0.055) 0.783 (0.055)
+-0.726 (0.043) -0.726 (0.043)
+
+P5
+0.195 (0.083) 0.195 (0.083)
+0.639 (0.127) 0.639 (0.127)
+0.731 (0.034) 0.731 (0.034)
+
+Q1 -0.428 (0.161) -0.428 (0.161) 1.320 (0.054) 0.651 (0.116) 0.651 (0.116) -1.212 (0.085) -0.322 (0.230) -0.322 (0.230)
+1.007 (0.061) 1.007 (0.061) -0.823 (0.059) 0.157 (0.106) 0.157 (0.106)
+0.336 (0.064) 0.336 (0.064)
+
+Q2 0.241 (0.095) 0.241 (0.095) 0.832 (0.057) -0.192 (0.155) -0.192 (0.155) 0.415 (0.038) -0.992 (0.181) -0.992 (0.181)
+0.511 (0.095) 0.511 (0.095) 0.965 (0.031) 0.750 (0.073) 0.750 (0.073)
+-0.187 (0.068) -0.187 (0.068)
+
+Q3 -0.816 (0.097) -0.816 (0.097)
+-0.813 (0.122) -0.813 (0.122)
+0.158 (0.227) 0.158 (0.227)
+0.050 (0.093) 0.050 (0.093) -0.863 (0.059) 0.918 (0.101) 0.918 (0.101)
+0.175 (0.067) 0.175 (0.067)
+
+Q4 0.601 (0.136) 0.601 (0.136)
+0.722 (0.203) 0.722 (0.203)
+-0.602 (0.088) -0.602 (0.088)
+-0.041 (0.059) -0.041 (0.059)
+0.901 (0.052) 0.901 (0.052)
+
+Q5
+-0.482 (0.152) -0.482 (0.152)
+-0.858 (0.053) -0.858 (0.053)
+0.292 (0.060) 0.292 (0.060)
+
+e
+0.764 (0.063) 0.764 (0.063) 0.779 (0.056) 1.017 (0.097) 1.017 (0.097) 1.077 (0.059) 0.841 (0.058) 0.841 (0.058) 0.934 (0.057) 0.930 (0.084) 0.930 (0.084) 0.974 (0.090) 0.882 (0.071) 0.882 (0.071) 0.957 (0.054) 0.725 (0.042) 0.725 (0.042) 0.789 (0.047)
+
+Table 4: Frequentist regression results
+
+xv
+
+ized by higher order lag polynomials as well as complex conjugate roots in the AR-polynomials, as evident in the dampened oscillations in the impulse responses. The means and medians of the impulse responses are similar to one another. With the exception of Japan and to some degree, France, the credible sets for the impulse responses are relatively tight despite model uncertainty present in the posterior.
+Turning to the differences between countries, the response of US, Italian and Canadian growth rates to a shock show a similar pattern of persistence: the mean and median responses decay geometrically until reaching zero at a horizon of about 6 quarters. Notably, the credible sets for the US compared to the ones for Canada and Italy are somewhat different. The credible set for the former is wider, includes responses below zero, and the lower bound remains below zero up to 30 quarters. The credible sets for the impulse responses for the two latter countries do not encompass negative responses at any horizon and the upper bound reaches zero after 20 quarters and 17 quarters, for Canada and Italy respectively.
+The impulse response for the UK reflects the large posterior mass put on the pure random walk (ARIMA(0,1,0)) by RJMCMC. The credible sets allow for some very limited persistence due to the few samples with low-order ARMA model in the posterior, but collapse completely after about 6 quarters. Negative responses are included in the credible set at a horizon of 1 quarter.
+The impulse response functions for France exhibit particularly interesting dynamics. A shock to the growth rate of real GDP leads to a strongly negative response of the growth rate one quarter after the shock with a magnitude of about 40% of one standard deviation of the disturbance, thereafter turning positive again. The credible sets do not even allow for a zero or positive response after one quarter. In quarter two after the shock, the mean response, the median response, and the credible sets are all positive. In the third quarter following the shock the credible sets allow for a negative response once more. This shape is also present in the impulse responses based on frequentist estimates. However, the AIC and AICC pick models with strongly and very persistent oscillatory behavior. The credible sets for France include positive responses at horizons as long as 60 quarters at which point the oscillations from the two aforementioned information criteria are still present.
+Equally interesting is the impulse response for Japan, for which the means and medians exhibit a slightly oscillatory pattern. The response always remains positive. The credible sets for Japan are considerably wider than those for the other countries and the response is very persistent, with the mean response being 0.03 log points after 40 quarters and the credible set encompassing the area between zero and 0.116 log points. All information criteria pick models with strongly oscillatory behavior. Interestingly, these results fit squarely with narratives about the French and Japanese economy being
+xvi
+
+slow to adjust to shocks. To conclude, from the perspective of impulse response functions, the dynamic behavior of GDP
+growth rates seems to differ quite strongly between the countries studied with the greatest similarities among US, Canada, and Italy.
+11.1.3 Persistence
+I now turn to the discussion of estimates for the persistence measure Cn(1) at different horizons. Figures 4 and 5 present posterior distributions for Cn(1) for horizons of 10, 20 and 40 quarters. Tables 5 and 6 report point estimates for the persistence measure at different horizons from RJMCMC and frequentist methods respectively. The table for the RJMCMC results contains the posterior mean and [median] as well as the 90% credible sets in the second row.
+Inspection of the posteriors again reveals differences similar to those observed in the impulse response functions. The posterior at all horizons for the UK has a pole at C(1)n = 1 with very little variation, which is to be expected given the foregoing analysis since the clearly preferred model for the UK is a pure random walk. Not surprisingly, the dispersion of the posterior distributions mirrors the width of the credible sets in the impulse responses. For the US, Italy, France, and Canada the posterior distributions have means clustered around 1.5 at a horizon of 60 quarters, with a range of 1.46 for Canada to 1.58 for Italy. The shapes and variances of the posteriors also differ between these countries. Additionally, the medians and means of the posteriors appear stable across horizons for all countries except France and Japan.
+The behavior of the posterior mean and median responses is different for these two countries, for which the posterior distributions shift to the right as the horizon increases. This phenomenon is most pronounced for Japan. This higher persistence is already visible in the impulse response functions: the very persistent impulse response implies that the growth rate will be above its average for a longer period following a positive shock with the resulting effect on the level of GDP accumulating more strongly over time. The shape of the posterior distribution for Japan changes slightly across horizons with the lower bound increasing until a horizon of 40 quarters, after which only the upper bound increases further. As a result, both mean and median tend to grow and the credible sets widen as the horizon increases.
+For France, the behaviors of the mean and median are different. While the mean grows as the horizon increases from 40 to 60 quarters, the median remains roughly constant, due to an increase of the upper bound of the credible set while the lower bound is constant. The change in the shape of the posterior is clearly visible in Figure 4.
+xvii
+
+Horizon
+
+5
+
+10 20 40 60
+
+Canada
+
+1.42 [1.38] [1.16; 1.8]
+
+1.45 [1.39] [1.16; 1.94]
+
+1.46 [1.39] [1.16; 2]
+
+1.46 [1.39] [1.16; 2.01]
+
+1.46 [1.39] [1.16; 2.01]
+
+France Italy Japan UK
+
+0.921 [0.913] 1.07 [1.05] 1.25 [1.2] 1.43 [1.3] 1.54 [1.32]
+
+[0.726; 1.15] [0.744; 1.45] [0.746; 1.93] [0.746; 2.6] [0.746; 3.07]
+
+1.51 [1.49] 1.55 [1.5] 1.56 [1.51] 1.58 [1.51] 1.58 [1.51]
+
+[1.22; 1.89] [1.22; 2.03] [1.22; 2.1] [1.22; 2.14] [1.22; 2.14]
+
+1.78 [1.75] 2.33 [2.28] 3.12 [3.03] 4.11 [3.92] 4.72 [4.38]
+
+[1.42; 2.23] [1.77; 3.06] [2.2; 4.35] [2.39; 6.48] [2.4; 8.22]
+
+1.01 [1]
+
+1.01 [1]
+
+1 [1]
+
+1 [1]
+
+1 [1]
+
+[0.92; 1.12] [0.917; 1.13] [0.914; 1.13] [0.914; 1.13] [0.914; 1.13]
+
+US 1.56 [1.54] 1.56 [1.54] 1.52 [1.54] 1.5 [1.54] 1.5 [1.54] [1.22; 1.98] [0.962; 2.11] [0.557; 2.14] [0.368; 2.14] [0.31; 2.14]
+
+Table 5: Cn(1) for different horizons; RJMCMC estimates
+
+Horizon
+
+5
+
+10 20 40 60
+
+Canada France Italy Japan
+UK US
+
+1.68; 1.41 1.51; 1.42 1.51; 1.42 1.49; 1.41 1.49; 1.41
+
+0.925; 0.964 1.18; 1.16 1.52; 1.28 1.75; 1.31 1.83; 1.31
+
+1.32; 1.38 1.41; 1.38 1.65; 1.38 1.93; 1.38 2.09; 1.38
+
+1.54; 1.66 2.2; 2.29 2.94; 3.12 3.97; 4.36 4.53; 5.1
+
+1.23; 1
+
+1.18; 1
+
+1.2; 1
+
+1.21; 1 1.22; 1
+
+1.39; 1.44 1.24; 1.44 1.34; 1.44 1.31; 1.44 1.31; 1.44
+
+Table 6: Cn(1) for different horizons; frequentist estimates for AIC; BIC
+
+xviii
+
+C(1)20 US
+
+C(1)40 US
+
+C(1)60 US
+
+0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5
+
+C(1)20 Canada
+
+C(1)40 Canada
+
+C(1)60 Canada
+
+0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5
+
+C(1)20 France
+
+C(1)40 France
+
+C(1)60 France
+
+0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5
+
+C(1)20 UK
+
+C(1)40 UK
+
+C(1)60 UK
+
+0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5
+Figure 4: C(1): Mean: Dashed line; Median: Dotted line
+Turning to the frequentist estimates in Table 6, the differences in the behavior of the point estimates between countries are clearly visible again. The frequentist estimates appear mostly consistent with the estimates from RJMCMC even though the models chosen differ significantly, especially for the AIC and AICC.4 The clustering of the estimates at longer horizons is present in those based on the BIC, but not in those using the AIC. The frequentist estimates are contained in the credible sets with the exception of the AIC estimate for the UK.
+4As the estimates using AICC and AIC are identical, only the AIC estimates are presented here and below.
+xix
+
+C(1)20 Italy
+
+C(1)40 Italy
+
+C(1)60 Italy
+
+0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5
+
+C(1)20 Japan
+
+C(1)40 Japan
+
+C(1)60 Japan
+
+0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5 0.5 1 1.5 2 2.5 3 3.5
+Figure 5: C(1): Mean: Dashed line; Median: Dotted line
+It is instructive to compare these estimates to the results of Campbell and Mankiw (1989) (henceforth CM) who use quarterly real GNP for the G7 to estimate Cn(1). Their results can be found in Table 7 together with means and [medians] from RJMCMC. The pattern of an increase in Cn(1) as n increases is present for all countries in their results in contrast to the findings presented here. There is no clear pattern regarding the relative size of the estimates from CM and RJMCMC.
+Table 8 presents a ranking of the six countries based on the estimated Cn(1) with the first-ranking country being the most persistent. Clearly, the pattern of persistence across countries leads to a similar persistence ranking for all estimates and at 40 and 60 quarter horizons with the exception of the US being ranked consistently lower by CM and AIC. The ranking using the BIC and medians coincide almost perfectly. Also, the ranking appears stable for each method when changing the horizon.
+It should be noted, however, that for countries for which the estimates are close, the respective values lie well within the 90% credible sets of one another. For example, the mean Cn(1) for Italy at a horizon of 40 quarters is equal to 1.58 with a credible set in [1.22; 2.14]. The credible set thus contains the point estimates for Canada, France, and the US.
+11.2 Kolmogorov-Smirnov Test for C(1)
+In order to gain a more complete picture regarding the differences in the persistence estimates, this section compares the whole posterior distributions for Cn(1) at different horizons. Table 9 presents the
+xx
+
+Horizon:
+
+20
+
+40
+
+60
+
+Canada France Italy Japan
+UK US
+
+1.57 1.88 1.92 1.46 [1.39] 1.46 [1.39] 1.46 [1.39]
+1.39 1.86 2.06 1.25 [1.2] 1.43 [1.3] 1.54 [1.32]
+1.44 1.96 2.45 1.56 [1.51] 1.58 [1.51] 1.58 [1.51]
+2.31 3.18 3.71 3.12 [3.03] 4.11 [3.92] 4.72 [4.38]
+0.76 0.88 0.94 1 [1] 1 [1] 1 [1] 1.21 1.22 1.25 1.52 [1.54] 1.5 [1.54] 1.5 [1.54]
+
+Table 7: Cn(1): Results from CM in the first row, posterior mean and median in the second
+
+Horizon Estimate
+Canada France Italy Japan
+UK US
+
+20 Mean Median CM AIC BIC
+4 4 244 5 5 435 2 3 323 1 1 111 6 6 666 3 2 552
+
+40 Mean Median CM AIC BIC
+4 4 343 5 5 435 2 3 224 1 1 111 6 6 666 3 2 552
+
+60 Mean Median CM AIC BIC
+5 4 443 3 5 335 2 3 224 1 1 111 6 6 666 4 2 552
+
+Table 8: Ranking by persistence
+test statistic for a horizon of 40 quarters. Results for horizons 5, 10, 20, 30, 50, and 60 can be found in the appendix. All pairwise two-sample Kolmogorov-Smirnov test applied to the posteriors reject the null hypothesis at the 1% level. Interestingly, according to the test statistic at different horizons, the posteriors for the US and Italian economies are most similar. Furthermore, the US, Canada and Italy form a trio with fairly similar posterior distributions of Cn(1) at all horizons compared to the other countries.
+11.3 Conclusion
+To conclude, while differences exist in the persistence estimates, the posteriors contain significant uncertainty. The economies of both the UK and Japan, however, exhibit a behavior that differs strongly
+
+xxi
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.35207 (*) 0.2237 (*) 0.94847 (*) 0.92226 (*) 0.24055 (*)
+
+France 0.35207 (*) 0 0.39423 (*) 0.87453 (*) 0.58686 (*) 0.32605 (*)
+
+Italy 0.2237 (*) 0.39423 (*) 0 0.93387 (*) 0.94124 (*) 0.09863 (*)
+
+Japan 0.94847 (*) 0.87453 (*) 0.93387 (*) 0 0.99633 (*) 0.93799 (*)
+
+UK 0.92226 (*) 0.58686 (*) 0.94124 (*) 0.99633 (*) 0 0.84812 (*)
+
+US 0.24055 (*) 0.32605 (*) 0.09863 (*) 0.93799 (*) 0.84812 (*)
+
+0
+
+Table 9: K-S test for C(1)40
+from that seen in other countries under inspection. The results of CM are roughly in line with the results presented here, with Japan being highly persistent and the UK exhibiting the lowest degree of persistence in growth rates. The estimates using the BIC are closest to the estimates obtained with RJMCMC.
+11.4 Robustness
+Since it is well known that the detrending method chosen can have significant impact on empirical results, see e.g. Canova (1998), the results from the difference stationary perspective will now be compared with the results obtained using linearly detrended and Hodrick-Prescott filtered data.
+11.4.1 OLS Linear Detrending
+This section investigates whether the ranking of persistence obtained taking the first-difference stationary perspective will hold up under ordinary least squares (OLS) linear detrending. RJMCMC was applied to the logarithmic deviations of GDP from an OLS linear trend.
+Model Choice Comparing the posterior distributions for the model indicators for the six countries presented in Figure 6, significant differences in the posteriors are immediately obvious. Notably, for the UK, the preferred AR(1) model is again the most parsimonious among the countries with very limited posterior uncertainty. Furthermore, also in the linear trend world, the posteriors for Canada and the US seem quite similar, albeit with different modes at the AR(2) model for Canada and the AR(3) model for the US where the modes were at the AR(1) and AR(2) model respectively from the difference stationary perspective.
+The posterior for Italy now indicates the possibility of multi-modality. The model at the mode
+
+xxii
+
+Figure 6: Posteriors for model indicators
+here is an AR(3), albeit exhibiting significant posterior uncertainty and very little difference in the posterior probability compared to the AR(2) model. This observation is again in line with the results from the analysis of growth rates where the posterior probabilities for Italy were quite close for the group of models clustered around the mode.
+The posteriors for France and Japan show the greatest posterior uncertainty regarding the model with pronounced multi-modality for Japan. The preferred models for France and Japan are ARMA(4,1) and AR(4) respectively. The second mode for Japan is at the ARMA(3,2) model. France exhibits
+xxiii
+
+more dispersed clustering of high posterior probability models around the mode and multi-modality is diminished compared to the growth rate case.
+
+Impulse Responses The impulse response functions for the linear trend perspective are reported in Figure 7. The frequentist estimates are presented in Table 10. Not surprisingly, the impulse response functions show substantially more persistence and are different in shape compared to the ones obtained under first differencing.
+
+Country Canada France
+Italy Japan UK
+US
+
+Criterion AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC
+
+P1
+-0.272 (0.041) -0.272 (0.041) -0.284 (0.042) 0.092 (0.037) 0.092 (0.037) 1.882 (0.066) 0.314 (0.011) 0.314 (0.011) 0.314 (0.011) 0.682 (0.278) 0.391 (0.159) 1.127 (0.071) 0.344 (0.175) 0.344 (0.175) 0.949 (0.024) 1.081 (0.241) 1.081 (0.241) 1.785 (0.063)
+
+P2 0.513 (0.033) 0.513 (0.033) 0.517 (0.033) 1.195 (0.025) 1.195 (0.025) -0.887 (0.065) 1.387 (0.014) 1.387 (0.014) 1.387 (0.014) 1.500 (0.117) 1.500 (0.107) 0.067 (0.108) 0.774 (0.079) 0.774 (0.079)
+0.764 (0.133) 0.764 (0.133) -0.818 (0.059)
+
+P3 0.683 (0.046) 0.683 (0.046) 0.703 (0.047) 0.897 (0.043) 0.897 (0.043)
+0.231 (0.011) 0.231 (0.011) 0.231 (0.011) -0.762 (0.436) -0.214 (0.201) 0.099 (0.110) 0.475 (0.079) 0.475 (0.079)
+-0.491 (0.221) -0.491 (0.221)
+
+P4
+-0.763 (0.023) -0.763 (0.023)
+-0.937 (0.010) -0.937 (0.010) -0.937 (0.010) -0.752 (0.057) -0.735 (0.056) -0.302 (0.078) -0.679 (0.148) -0.679 (0.148)
+-0.895 (0.056) -0.895 (0.056)
+
+P5
+-0.426 (0.029) -0.426 (0.029)
+0.329 (0.234) 0.054 (0.101)
+0.522 (0.166) 0.522 (0.166)
+
+Q1 1.556 (0.079) 1.556 (0.079) 1.575 (0.073) 0.504 (0.064) 0.504 (0.064) -1.281 (0.057) 0.922 (0.071) 0.922 (0.071) 0.922 (0.071) 0.384 (0.272) 0.712 (0.136)
+0.627 (0.165) 0.627 (0.165)
+0.195 (0.264) 0.195 (0.264) -0.615 (0.099)
+
+Q2 1.229 (0.136) 1.229 (0.136) 1.167 (0.106) -0.504 (0.051) -0.504 (0.051) 0.430 (0.035) -0.403 (0.129) -0.403 (0.129) -0.403 (0.129) -1.001 (0.240) -0.766 (0.077)
+-0.088 (0.263) -0.088 (0.263)
+-0.820 (0.195) -0.820 (0.195)
+
+Q3 0.469 (0.136) 0.469 (0.136) 0.218 (0.062) -1.000 (0.058) -1.000 (0.058)
+-1.000 (0.104) -1.000 (0.104) -1.000 (0.104) -0.232 (0.219) -0.611 (0.101)
+-0.565 (0.209) -0.565 (0.209)
+-0.656 (0.118) -0.656 (0.118)
+
+Q4 0.292 (0.109) 0.292 (0.109)
+-0.330 (0.094) -0.330 (0.094) -0.330 (0.094) 0.148 (0.208)
+0.200 (0.078) 0.200 (0.078)
+0.473 (0.226) 0.473 (0.226)
+
+Q5 0.144 (0.059) 0.144 (0.059)
+-0.190 (0.110) -0.190 (0.110) -0.190 (0.110) -0.159 (0.087)
+
+e
+0.764 (0.055) 0.764 (0.055) 0.774 (0.056) 1.010 (0.081) 1.010 (0.081) 1.057 (0.059) 0.841 (0.059) 0.841 (0.059) 0.841 (0.059) 0.986 (0.091) 0.997 (0.087) 1.028 (0.095) 0.888 (0.067) 0.888 (0.067) 0.943 (0.051) 0.708 (0.043) 0.708 (0.043) 0.748 (0.041)
+
+Table 10: Frequentist regression results
+
+The estimates obtained using RJMCMC compared to those using the information criteria differ more strongly in terms of magnitude. This difference is especially pronounced in the case of Italy and France, where the estimates for Italy from all three information criteria are not covered by the credible sets. For France, the impulse response implied by the model selected by the AIC and AICC
+xxiv
+
+is also completely outside the credible set while the one chosen by the BIC lies within. The impulse responses for the models selected by the information criteria for the US basically trace out the lower bound of the credible set. For the UK, the model chosen by the BIC coincides with mean and median responses from RJMCMC. The frequentist impulse responses tend to show small oscillations. These oscillations feature in the RJMCMC estimates only for Canada. The choices of the three criteria coincide in the case of Italy.
+The impulse response functions for the UK do not show the familiar hump-shaped pattern, a consequence of the dominant model in the posterior being AR(1). The other countries, however, exhibit a hump-shaped response, albeit with substantially differing persistence. The mean response for the US remains slightly positive up to 60 quarters, but is already at a low level of 0.06 log points after 30 quarters and a response of zero is contained in the credible set starting in quarter 14 after the shock. In comparison, the impulse response for Canada converges to zero at a much slower rate and the credible sets do not contain a zero response even after 60 quarters. The impulse response for Italy, while hump-shaped, is even more persistent: it reaches the level of one shock standard deviation only after about 55 quarters.
+Interestingly, the kink in the impulse response function for France is still present here. After the initial reversion towards the trend, the response of GDP is hump-shaped as well. The credible sets for France are quite wide and contain a zero response after 50 quarters but the mean and median responses are still only slightly below the initial response at the time of the shock after 60 quarters.
+The response for Japan is even more persistent. Mean and median response as well as the bounds of the credible sets increase until reaching a maximum only after about 22 quarters. The credible sets, however, are quite wide again, including a zero response after 60 quarters. For this extreme case, the models chosen by AIC and AICC exhibit a response that is less pronounced in terms of magnitude but similar in shape while the response of the model chosen by the BIC peaks already after 10 quarters.
+The substantial persistence in the impulse responses found here and the higher orders of the lag polynomials of the models selected can be seen as an indication that it might be reasonable to adopt a difference stationary perspective to more parsimoniously capture the dynamics of the series. Apart from the impulse response for the US, a shock to GDP causes a significant departure from the trend even after 10 years, pointing towards substantial persistence in the response to a shock.
+Persistence Figures 8 and 9 show the posterior distributions for the persistence measure for the six countries under linear detrending. It should, however, be kept in mind that the interpretation of the measure is different with linear detrending as explained in the foregoing.
+The means and medians of the posterior distributions of the persistence measure move to the right
+xxv
+
+1.4 1.2
+1 0.8 0.6 0.4 0.2
+0 -0.2
+0 1.5
+1
+
+US
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1.2 1
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+0
+
+-0.2 10 20 30 40 50 60 0
+
+Canada
+
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+2 1.5
+
+1
+
+UK Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+10 20 30 40 50 60 France
+
+0.5 0.5
+0
+
+0 -0.5 0 10 20 30 40 50 60 0
+
+Italy 2
+
+4.5
+
+4
+1.5 3.5
+
+3 1
+2.5
+
+0.5 2
+
+0
+-0.5
+-1 0
+
+1.5
+
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1 0.5
+0
+
+-0.5 10 20 30 40 50 60 0
+
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC 10 20 30 40 50 60
+Japan
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC 10 20 30 40 50 60
+
+Figure 7: Estimated impulse responses
+
+as the horizon increases. The US and UK show the lowest change in Cn(1) with changing horizon, as well as the lowest persistence. The estimates for Canada and France are almost identical and converge as the horizon increases. The same is true for the pair US and UK. Japan again exhibits by far the largest persistence. The dispersion of the posterior distributions again reflects the width of the credible sets for the impulse responses.
+xxvi
+
+C(1)20 US
+
+C(1)40 US
+
+C(1)60 US
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)20 Canada
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)40 Canada
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)60 Canada
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)20 France
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)40 France
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)60 France
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)20 UK
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)40 UK
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)60 UK
+
+10 20 30 40 50 60 70 80 90 100 110
+
+10 20 30 40 50 60 70 80 90 100 110
+
+10 20 30 40 50 60 70 80 90 100 110
+
+Figure 8: C(1): Mean: Dashed line; Median: Dotted line
+
+Tables 11 and 12 present point estimates for the persistence measure from RJMCMC and the frequentist methods respectively. The RJMCMC estimates do differ more significantly across countries than before. For example, at a horizon of 40 quarters the point estimates for the US are no longer contained in the credible sets of Canada, France, Italy or Japan and vice versa. The clustering of estimates is still present especially at longer horizons, but the clustering is different. Canada and France, and US and UK, now form two pairs for which the estimates are virtually identical. Italy
+xxvii
+
+C(1)20 Italy
+
+C(1)40 Italy
+
+C(1)60 Italy
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)20 Japan
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)40 Japan
+
+10 20 30 40 50 60 70 80 90 100 110
+C(1)60 Japan
+
+10 20 30 40 50 60 70 80 90 100 110
+
+10 20 30 40 50 60 70 80 90 100 110
+
+10 20 30 40 50 60 70 80 90 100 110
+
+Figure 9: C(1): Mean: Dashed line; Median: Dotted line
+
+and Japan exhibit higher persistence without the estimates converging as the horizon increases. The frequentist estimates are no longer as close to the ones from RJMCMC as before, but the majority is still contained in the credible sets.
+Table 13 presents the persistence ranking for the linear detrending case. Interestingly, the persistence ranking remains mostly unchanged. Japan maintains a comfortable first place, followed by Italy which is not far from the third and fourth place, Canada and France respectively, both of which exhibit similar persistence. Only the ranking for the US is changed substantially, having been ranked around third place in the difference stationary case it is now in fifth and sixth place. This ranking for the US is more consistent with the one from the results of Campbell and Mankiw (1989). As mentioned above, the clustering from the difference stationary case carries over to some extent, especially at longer horizons. The rankings from the frequentist approach are very similar to those obtained with RJMCMC.
+Kolmogorov-Smirnov Test for Cn(1) Table 14 presents the test statistic for a horizon of 40 quarters. Additional results for different horizons can be found in the appendix. Again, the KolmogorovSmirnov test rejects the null hypothesis at the 1% level for all country pairs. However, in this case the US and the UK seem to have the most similar posterior, followed by the pair formed by Canada and France.
+
+xxviii
+
+Horizon
+
+5
+
+10 20 40 60
+
+Canada 7.62 [7.55] 14 [13.7] 24.7 [24.1] 39.8 [38.9] 50.1 [48.2] [6.58; 8.9] [11.5; 17.3] [19.2; 31.9] [27; 55.8] [29.5; 76.9]
+
+France Italy Japan UK
+
+5 [4.96] 9.76 [9.65] 19.8 [19.3] 37.9 [36] 50.8 [47.6] [4.29; 5.81] [7.86; 12.1] [14.5; 26.8] [25.4; 57.2] [30.1; 82.4] 8.06 [8.02] 15.3 [15.1] 28.9 [28.4] 52.6 [51.9] 72.7 [72] [6.97; 9.28] [12.8; 18.4] [23.5; 35.8] [40.5; 67.1] [51.5; 96] 8.62 [8.6] 19.5 [19.4] 45.5 [44.7] 97.9 [95] 139 [133] [7.23; 10.1] [15.3; 24.4] [34.5; 59.5] [69; 137] [86.1; 212] 5.34 [5.3] 8.64 [8.55] 12.9 [12.7] 17.1 [16.1] 18.9 [17.1] [4.77; 6.09] [7.15; 10.4] [9.39; 17.4] [10.2; 27.5] [10.3; 33.9]
+
+US 7.6 [7.56] 12.4 [12.2] 16.1 [15.6] 17.8 [16.3] 18.4 [16.4] [6.55; 8.75] [9.88; 15.4] [10.7; 23.1] [10.1; 30.4] [10.2; 33.3]
+
+Table 11: Cn(1) for different horizons; RJMCMC estimates
+
+Horizon
+
+5
+
+10 20 40 60
+
+Canada France Italy Japan
+UK US
+
+8.03; 7.27 14.6; 12.9 25.5; 22.4 40.4; 36.3 49.3; 45.3 4.4; 4.63 7.76; 9.15 13.6; 17.9 19.5; 28.4 15.7; 31.4 7.66; 7.66 13.9; 13.9 23.9; 23.9 32; 32 24.7; 24.7 7.45; 8.86 15.3; 19.6 32.8; 40.5 67.5; 69.4 90.6; 84.9 6.11; 5.29 10.4; 8.58 13.6; 13.1 13.5; 17.3 13.5; 18.8 7.3; 7.3 11.3; 11.9 11.7; 13.1 9.51; 11.5 9.79; 11.7
+
+Table 12: Cn(1) for different horizons; frequentist estimates for AIC; BIC
+
+xxix
+
+Horizon
+
+20
+
+40
+
+60
+
+Estimate Mean Median AIC BIC Mean Median AIC BIC Mean Median AIC BIC
+
+Canada France Italy Japan
+UK US
+
+3 4 2 1 6 5
+
+3
+
+23
+
+3
+
+4
+
+44
+
+4
+
+2
+
+32
+
+2
+
+1
+
+11
+
+1
+
+6
+
+45
+
+6
+
+5
+
+65
+
+5
+
+3
+
+22
+
+4
+
+4
+
+44
+
+3
+
+2
+
+33
+
+2
+
+1
+
+11
+
+1
+
+6
+
+55
+
+5
+
+5
+
+66
+
+6
+
+3 22 4 43 2 34 1 11 5 55 6 66
+
+Table 13: Ranking by persistence
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.14051 (*) 0.57909 (*) 0.96998 (*) 0.89649 (*) 0.86332 (*)
+
+France 0.14051 (*) 0 0.64029 (*) 0.96119 (*) 0.87076 (*) 0.83552 (*)
+
+Italy 0.57909 (*) 0.64029 (*) 0 0.91528 (*) 0.98728 (*) 0.9708 (*)
+
+Japan 0.96998 (*) 0.96119 (*) 0.91528 (*) 0 0.99974 (*) 0.99769 (*)
+
+UK 0.89649 (*) 0.87076 (*) 0.98728 (*) 0.99974 (*) 0 0.03921 (*)
+
+US 0.86332 (*) 0.83552 (*) 0.9708 (*) 0.99769 (*) 0.03921 (*)
+
+0
+
+Table 14: K-S test for C(1)40
+
+xxx
+
+Conclusion In conclusion, the differences in persistence and the ordering of persistence between countries appear to mostly carry over to the linear detrending perspective, albeit with some changes in the ranking and clustering. The substantial persistence in the impulse response functions indicates that difference stationary models may be better suited to parsimoniously capture the very persistent dynamics of most of the series.
+11.4.2 HP-Filtered Data
+I shall now turn to an analysis of the results obtained using deviations from an HP-trend. As will become clear in the following, the results using HP-detrended data seem to be dominated by filtering artifacts and do not seem particularly reliable in terms of capturing actual features of the data. Given this, the discussion of the results will be kept rather concise.
+Model Choice Figure 10 shows the familiar posterior distributions over model indicators for the six countries. The models chosen here are of much higher order than those in the previous two cases, leading also to significantly more dispersed posteriors. This dispersion is to be expected, seeing as the likelihood is a function of autocorrelations and higher-order ARMA models can exhibit quite similar autocorrelation patterns even if the number of parameters differs. Put differently, near-cancellation of roots is more pronounced in higher-order ARMA models, a well known phenomenon (see e.g. Campbell and Mankiw (1987)).
+The tendency of the algorithm to choose higher-order ARMA models seems to be due to the application of the HP-Filter which is known to introduce significant filtering artifacts at business cycle frequencies as documented by King and Rebelo (1993) and Cogley and Nason (1995). Indeed, the impulse response functions shown below exhibit oscillations and periodicity very similar to the results of Cogley and Nason (1995) who show that the HP-filter can introduce periodicity in artificial data even if the underlying data generating process is completely aperiodic.
+One can observe that the differences in the posterior distributions for the model indicators are not as striking as in the two foregoing cases. The posterior for Italy is now the least dispersed with a clear mode at the ARMA(3,2) model, followed by France with mode at the ARMA(3,3) model. The posteriors for the other countries show a clustering of the samples along the diagonal running from (p, q) = (0, 0) to (10, 10), again a sign of root cancellation.
+Impulse Responses Figure 11 presents the impulse responses. The frequentist estimates are shown in Table 15. Despite the substantial posterior uncertainty regarding the model choice, the credible sets for the impulse responses are surprisingly tight. Furthermore, the impulse response functions
+xxxi
+
+Figure 10: Posteriors for model indicators
+are quite similar across countries and exhibit clear cyclicality. The information criteria select models more in line with the results from RJMCMC. For all countries the responses are more or less identical to the mean and median response from RJMCMC while the response chosen by AIC and AICC for Japan are further away but still mostly contained in the credible set. Interestingly, the kink in the impulse response for France is still clearly visible, with the response dropping to about 20% of a shock standard deviation after 1 quarter.
+All of the above suggests that the results from HP-filtered data may indeed be an artifact of the
+xxxii
+
+Country Canada France
+Italy Japan UK
+US
+
+Criterion AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC
+
+P1
+0.423 (0.032) 0.423 (0.032) 0.423 (0.032) 0.141 (0.142) 0.141 (0.142) 1.215 (0.055) 0.003 (0.073) 0.003 (0.073) 0.224 (0.055) 1.195 (0.218) 1.195 (0.218) 1.371 (0.117) 0.409 (0.145) 0.409 (0.145) 1.702 (0.021) 0.270 (0.037) 0.270 (0.037) 1.770 (0.015)
+
+P2
+0.744 (0.037) 0.744 (0.037) 0.744 (0.037) 0.847 (0.054) 0.847 (0.054) -0.075 (0.052) 1.116 (0.051) 1.116 (0.051) 1.123 (0.035) -1.317 (0.193) -1.317 (0.193) -0.846 (0.233) 0.231 (0.138) 0.231 (0.138) -0.757 (0.013) 1.017 (0.054) 1.017 (0.054) -0.831 (0.008)
+
+P3 0.377 (0.025) 0.377 (0.025) 0.377 (0.025) 0.694 (0.077) 0.694 (0.077) -0.032 (0.111) 0.320 (0.056) 0.320 (0.056) 0.086 (0.063) 1.000 (0.194) 1.000 (0.194) 1.000 (0.178) 0.758 (0.042) 0.758 (0.042)
+0.232 (0.026) 0.232 (0.026)
+
+P4 -0.719 (0.019) -0.719 (0.019) -0.719 (0.019) -0.694 (0.093) -0.694 (0.093) -0.192 (0.075) -0.718 (0.065) -0.718 (0.065) -0.791 (0.038) -0.413 (0.153) -0.413 (0.153) -0.634 (0.064) -0.102 (0.127) -0.102 (0.127)
+-0.741 (0.018) -0.741 (0.018)
+
+P5
+-0.173 (0.084) -0.173 (0.084)
+0.145 (0.050)
+-0.546 (0.112) -0.546 (0.112)
+
+Q1
+0.435 (0.045) 0.435 (0.045) 0.435 (0.045) 0.108 (0.177) 0.108 (0.177) -1.000 (0.051) 0.934 (0.076) 0.934 (0.076) 0.745 (0.037) -0.414 (0.210) -0.414 (0.210) -0.730 (0.104) 0.295 (0.173) 0.295 (0.173) -1.000 (0.037) 0.698 (0.082) 0.698 (0.082) -1.000 (0.024)
+
+Q2 -0.487 (0.056) -0.487 (0.056) -0.487 (0.056) -0.633 (0.107) -0.633 (0.107)
+-0.417 (0.115) -0.417 (0.115) -0.706 (0.030) 1.150 (0.090) 1.150 (0.090) 0.501 (0.173) 0.121 (0.057) 0.121 (0.057)
+-0.486 (0.104) -0.486 (0.104)
+
+Q3 -0.948 (0.043) -0.948 (0.043) -0.948 (0.043) -0.833 (0.090) -0.833 (0.090)
+-1.000 (0.077) -1.000 (0.077) -0.986 (0.032) -0.163 (0.252) -0.163 (0.252) -0.771 (0.111) -0.823 (0.042) -0.823 (0.042)
+-0.989 (0.071) -0.989 (0.071)
+
+Q4
+0.358 (0.160) 0.358 (0.160)
+-0.298 (0.109) -0.298 (0.109)
+0.183 (0.089) 0.183 (0.089)
+-0.593 (0.149) -0.593 (0.149)
+-0.131 (0.088) -0.131 (0.088)
+
+Q5
+-0.159 (0.093) -0.159 (0.093) 0.287 (0.088) 0.287 (0.088)
+-0.092 (0.079) -0.092 (0.079)
+
+e
+0.657 (0.044) 0.657 (0.044) 0.657 (0.044) 0.845 (0.068) 0.845 (0.068) 0.877 (0.035) 0.712 (0.048) 0.712 (0.048) 0.716 (0.048) 0.808 (0.068) 0.808 (0.068) 0.824 (0.062) 0.759 (0.041) 0.759 (0.041) 0.810 (0.038) 0.622 (0.037) 0.622 (0.037) 0.661 (0.035)
+
+Table 15: Frequentist regression results
+
+xxxiii
+
+0.8 0.6 0.4 0.2
+0 -0.2 -0.4 -0.6
+0 0.8 0.6 0.4 0.2
+0 -0.2 -0.4 -0.6
+0 1
+0.5
+
+US
+Mean Mode Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1 0.5
+
+0
+
+-0.5 5 10 15 20 25 30 35 40 0
+
+Canada
+
+Mean Mode Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1 0.8 0.6
+
+0.4
+
+0.2
+
+0
+
+-0.2
+
+-0.4 5 10 15 20 25 30 35 40 0
+
+Italy
+
+Mean Mode Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1 0.5
+
+UK Mean Mode Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+5 10 15 20 25 30 35 40 France Mean Mode Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+5 10 15 20 25 30 35 40 Japan Mean Mode Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+00
+
+-0.5 0
+
+-0.5 5 10 15 20 25 30 35 40 0
+
+5 10 15 20 25 30 35 40
+
+Figure 11: Estimated impulse responses
+
+filter chosen. Nevertheless, some insights may be obtained from analyzing the persistence measure as well as the corresponding ranking.
+Persistence Figures 12 and 13 report the familiar posterior distributions for the persistence measure. Tables 16 and 17 report point estimates obtained from the posteriors and the frequentist estimates
+xxxiv
+
+C(1)20 US
+
+C(1)40 US
+
+C(1)60 US
+
+-2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6
+
+C(1)20 Canada
+
+C(1)40 Canada
+
+C(1)60 Canada
+
+-2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6
+
+C(1)20 France
+
+C(1)40 France
+
+C(1)60 France
+
+-2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6
+
+C(1)20 UK
+
+C(1)40 UK
+
+C(1)60 UK
+
+-2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6
+Figure 12: C(1): Mean: Dashed line; Median: Dotted line
+respectively. The behavior of the mean and median estimates reflects the oscillations present in the impulse
+responses with the signs of the point estimates tending to change from positive to negative and back as the horizon increases. Notably, the posteriors for France and Japan exhibit a second mode at higher levels of persistence while all other posterior distributions of the persistence measure presented here and in the foregoing are unimodal.
+xxxv
+
+C(1)20 Italy
+
+C(1)40 Italy
+
+C(1)60 Italy
+
+-2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6
+
+C(1)20 Japan
+
+C(1)40 Japan
+
+C(1)60 Japan
+
+-2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6 -2 -1 0 1 2 3 4 5 6
+Figure 13: C(1): Mean: Dashed line; Median: Dotted line
+Notably, while the means of the posteriors at a horizon of 20 quarters do not have the same sign, the medians are all negative. From the perspective of a zero-one loss function the cumulated response for all countries is thus first positive and then negative, only to turn positive or zero again. This difference in the means and medians is a result of multi-modality and skewness in the posterior distributions. The estimates, especially at longer horizons, are very much similar and all estimates are contained in the credible sets for all other countries starting at a horizon of 10 quarters. At a horizon of 60 quarters, the point estimates for Canada, Italy, the UK, and the US are virtually identical.
+The frequentist estimates for the persistence are mostly in line with expectations formed during inspection of the impulse responses and AIC and BIC tend to deliver similar estimates with the exception of Japan. While for Japan the impulse response functions already hint at significantly different persistence estimates from AIC and BIC, the difference in the impulse response functions chosen by the different criteria is not as pronounced for France. Nonetheless, the point estimates differ significantly for the latter country with the AIC estimate at a horizon of 60 quarters being 3.82 while the model chosen by the BIC implies an estimate of 0.0142. In general, the persistence estimates at a horizon of 60 quarters are zero for almost all countries and criteria while they are clearly positive for RJMCMC.
+Despite the considerations in the foregoing challenging the dependability of the results, Table 18
+xxxvi
+
+Horizon
+
+5
+
+10
+
+20
+
+40
+
+60
+
+Canada France Italy Japan
+UK US
+
+3.24 [3.21] 1.55 [1.46] -0.567 [-0.569] 0.212 [0.131]
+
+0.268 [0.15]
+
+[2.61; 3.99] [0.554; 2.85] [-1.6; 0.459] [-0.316; 0.977] [-0.00424; 0.944]
+
+1.63 [1.6] 1.06 [0.87] 0.157 [-0.185] 0.613 [0.289]
+
+0.476 [0.125]
+
+[1.1; 2.27] [0.3; 2.49] [-0.804; 2.54] [0.019; 2.55]
+
+[-0.157; 2.55]
+
+2.65 [2.62] 0.739 [0.661] -0.102 [-0.153] 0.208 [0.0852]
+
+0.25 [0.119]
+
+[2.05; 3.36] [-0.159; 1.88] [-0.856; 0.648] [-0.166; 0.847] [-0.0102; 0.83]
+
+2.93 [2.87] 1.8 [1.6] 0.316 [-0.0461] 0.642 [0.225]
+
+0.618 [0.188]
+
+[2.31; 3.78] [0.751; 3.63] [-0.873; 3.41] [-0.00059; 3.4] [0.00408; 3.4]
+
+2.68 [2.65] 1.25 [1.19] -0.522 [-0.518] 0.199 [0.139]
+
+0.246 [0.161]
+
+[2.17; 3.27] [0.467; 2.26] [-1.3; 0.243] [-0.232; 0.816] [0.00434; 0.788]
+
+3.43 [3.39] 1.34 [1.26] -0.796 [-0.79] 0.0211 [0.00077] 0.27 [0.171]
+
+[2.8; 4.18] [0.367; 2.61] [-1.85; 0.217] [-0.73; 0.83] [-0.0994; 0.961]
+
+Table 16: Cn(1) for different horizons; RJMCMC estimates
+
+Horizon
+
+5
+
+10
+
+20
+
+40
+
+60
+
+Canada France Italy Japan
+UK US
+
+2.96; 2.96 1.19; 1.19 -0.827; -0.827 0.0119; 0.0119
+
+0.026; 0.026
+
+1.59; 1.53 0.703; 0.653 -0.398; -0.316 0.0548; 0.034 -0.0009; -0.0001
+
+2.88; 2.84 0.728; 0.799 -0.0472; -0.0596 0.199; 0.231
+
+0.211; 0.25
+
+3.95; 2.67 3.85; 1.26
+
+3.81; -0.743
+
+3.82; 0.0648
+
+3.82; 0.0142
+
+2.84; 2.28 1.05; 0.898 -0.967; -0.281 -0.0512; 0.014 0.0583; 0.0002
+
+3.45; 2.62 1.06; 0.786 -0.827; -0.618 -0.141; -0.0441 0.0035; 0.0137
+
+Table 17: Cn(1) for different horizons; frequentist estimates for AIC; BIC
+
+xxxvii
+
+reports the same ranking as in the foregoing.5 Due to the multimodal nature of some of the posteriors, the rankings do not coincide across mean and median based estimates as they do in the previous sections. Furthermore, especially at longer horizons, the estimates are almost identical with each of the estimates captured in the credible sets of all the others. France appears somewhat more persistent as before and the US experiences an "improvement" in its persistence ranking as the horizon increases, moving from sixth to third (second) place in the ranking of the means (medians). The rankings do not coincide between the different methods as well as before.
+
+Horizon
+
+20
+
+40
+
+60
+
+Estimate Mean Median AIC BIC Mean Median AIC BIC Mean Median AIC BIC
+
+Canada 5
+
+5
+
+46
+
+3
+
+4
+
+45
+
+4
+
+4
+
+42
+
+France
+
+2
+
+3
+
+33
+
+2
+
+1
+
+33
+
+2
+
+5
+
+66
+
+Italy 3
+
+2
+
+21
+
+4
+
+5
+
+21
+
+5
+
+6
+
+21
+
+Japan
+
+1
+
+1
+
+15
+
+1
+
+2
+
+12
+
+1
+
+1
+
+13
+
+UK
+
+4
+
+4
+
+62
+
+5
+
+3
+
+54
+
+6
+
+3
+
+35
+
+US
+
+6
+
+6
+
+44
+
+6
+
+6
+
+66
+
+3
+
+2
+
+54
+
+Table 18: Ranking by persistence
+
+Kolmogorov Smirnov Test for Cn(1) Again, the Kolmogorov-Smirnov test rejects the null hypothesis of equality of the posterior distributions for all country pairs and horizons at the one percent level. Table 19 reports the test statistic for a horizon of 40 quarters. Additional tables for different horizons can be found in the appendix. In the HP-detrended case, the closest two distributions are now those for Canada and the US, with the pairs Italy and Canada and Canada and Japan following in terms of magnitude of the test statistic.
+Conclusion To conclude, the validity of the results using HP-filtered data is uncertain. The impulse responses show a cyclicality which may very well be introduced by the filter, making any estimate of persistence, at the very least, less reliable. The rankings between countries appear less consistent compared to the previous sections and the posterior distributions exhibit multi-modality making the choice between means and medians more onerous. Nonetheless, even when applying a filter that is designed to filter out low-frequency movement in the data, some persistence remains even at long
+5It is not clear how the negative estimates are to be treated in this context. What does a negative estimate tell us? Is a negative estimate more or less persistent than a positive estimate of the same magnitude? The ranking presented here just reflects the arrangement of the estimates on the real line.
+xxxviii
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.25295 (*) 0.08726 (*) 0.19597 (*) 0.02858 (*) 0.25459 (*)
+
+France 0.25295 (*) 0 0.33926 (*) 0.1054 (*) 0.23759 (*) 0.47643 (*)
+
+Italy 0.08726 (*) 0.33926 (*) 0 0.24071 (*) 0.10391 (*) 0.28712 (*)
+
+Japan 0.19597 (*) 0.1054 (*) 0.24071 (*) 0 0.17015 (*) 0.44848 (*)
+
+UK 0.02858 (*) 0.23759 (*) 0.10391 (*) 0.17015 (*) 0 0.28146 (*)
+
+US 0.25459 (*) 0.47643 (*) 0.28712 (*) 0.44848 (*) 0.28146 (*)
+
+0
+
+Table 19: K-S test for C(1)40
+
+horizons in the RJMCMC estimates and the behavior of the economies differs, albeit not as strongly as before.
+12 US GDP Components
+In this section, the dynamics of the major components of GDP≠ consumption, gross fixed capital formation, government consumption, imports, and exports≠ in the US are analyzed in isolation in order to gain insight into which of the components are the main drivers behind the above results.
+The data used in this section is again the VOBARSA measure, that is, seasonally adjusted volume estimates, taken from the OECD.stat website for the period 1960:1 to 2007:4. The data was transformed into per-capita terms and first differences of the logarithms were taken as in the foregoing. The sampler settings were adjusted for each series, again using short pilot runs. The chosen parameter values are presented in Table 20 and the resulting acceptance rates are contained in Table 21.
+12.1 Model Choice
+The posteriors for the model indicators presented in Figure 14 show quite intriguing differences. The posterior for imports is the least dispersed with a clear mode at the random walk. The mode model for the exports series is clearly AR(1) but there is some posterior uncertainty around that point. The mode for the government consumption series is at the ARMA(1,1) model with a medium level of posterior uncertainty. The other two posteriors for private consumption and gross fixed capital formation show substantially higher posterior model uncertainty. The quite pronounced mode for the capital formation series is interestingly at the MA(2) model but the posterior is very dispersed with samples even for high-order models like ARMA(6,4). The posterior distribution for private consumption is not quite
+
+xxxix
+
+Component
+
+Object
+
+Proposal
+
+Capital Formation
+
+p q (Inverse) Partial Autocorrelation Between (Inverse) Partial Autocorrelation Within 
+
+DL(µ, 2.2) DL(µ, 2.2) T N(µ, 0.052) T N(µ, 0.082) T N(µ, 0.052)
+
+Exports
+
+p q (Inverse) Partial Autocorrelation Between (Inverse) Partial Autocorrelation Within 
+
+DL(µ, 2.2) DL(µ, 2.2) T N(µ, 0.052) T N(µ, 0.122) T N(µ, 0.052)
+
+Government Consumption
+
+p q (Inverse) Partial Autocorrelation Between (Inverse) Partial Autocorrelation Within 
+
+DL(µ, 2.2) DL(µ, 2.2) T N(µ, 0.052) T N(µ, 0.062) T N(µ, 0.052)
+
+Imports
+
+p DL(µ, 2.2) q DL(µ, 2.2) (Inverse) Partial Autocorrelation Between T N(µ, 0.0552) (Inverse) Partial Autocorrelation Within T N(µ, 0.12)  T N(µ, 0.072)
+
+Private Consumption
+
+p q (Inverse) Partial Autocorrelation Between (Inverse) Partial Autocorrelation Within 
+
+DL(µ, 2.2) DL(µ, 2.2) T N(µ, 0.052) T N(µ, 0.062) T N(µ, 0.052)
+
+Table 20: Proposals
+
+xl
+
+ w b
+
+Exports
+
+0.28 0.37 0.09
+
+Government Consumption 0.27 0.36 0.08
+
+Gross Fixed Capital Formation 0.20 0.27 0.06
+
+Imports
+
+0.64 0.79 0.13
+
+Private Consumption
+
+0.26 0.35 0.08
+
+Table 21: Acceptance rates GDP components
+
+as dispersed and does not exhibit as clear a mode as the one for capital formation. The mode for this series lies at the ARMA(1,1) model but e.g. the AR(2) model is attached an only slightly lower posterior probability.
+12.2 Impulse Responses
+The impulse responses of the GDP components are presented in Figure 15. Table 22 contains the results from the frequentist regressions. Credible sets for the impulse responses are tight, with somewhat more uncertainty in the estimates for capital formation and government consumption. The clearly preferred model for the imports series is a pure random walk for all methods, which is reflected in the shape of the impulse response. The credible sets contain responses from some samples with AR and MA models of order one respectively. The posterior for the exports series exhibits the exponential decay from the AR(1) model at the mode and some oscillatory behavior. All three information criteria pick a model with oscillatory behavior for this series, while only the AIC and AICC estimates show high frequency oscillations for private consumption and government consumption and a low frequency cycle for capital formation. The persistence in the growth rate for the exports series is relatively limited based on the impulse response, but exports as well as imports have by far the greatest shock standard deviation at about 3.5 percentage points, followed by capital formation with about 1.5 percentage points.
+The impulse responses for the two consumption and the capital formation series show a somewhat more intricate behavior. Private consumption exhibits medium persistence. The oscillations from the model picked by the AIC and AICC are present in the RJMCMC estimates only to a very limited extent in the shape of the credible sets. Rather, the impulse responses from RJMCMC and BIC decay exponentially after the effect of the low-order MA terms vanishes. The impulse response for government consumption follows a similar pattern, although the impulse responses from AIC and
+xli
+
+Component Exports
+Government Consumption
+Gross Fixed Capital Formation
+Imports
+Private Consumption
+
+Criterion AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC
+
+P1 -0.043 (0.048) -0.043 (0.048) -0.973 (0.003) 0.920 (0.083) 0.920 (0.083) 0.920 (0.083) 1.808 (0.022) 1.808 (0.022)
+-0.479 (0.120) -0.479 (0.120) 0.191 (0.068)
+
+P2 0.909 (0.047) 0.909 (0.047)
+-0.358 (0.037) -0.358 (0.037) -0.358 (0.037) -0.846 (0.015) -0.846 (0.015)
+-0.453 (0.074) -0.453 (0.074) 0.196 (0.064)
+
+P3
+0.382 (0.042) 0.382 (0.042) 0.382 (0.042)
+0.432 (0.059) 0.432 (0.059)
+
+P4
+-0.862 (0.036) -0.862 (0.036) -0.862 (0.036)
+0.216 (0.081) 0.216 (0.081)
+
+P5
+0.699 (0.069) 0.699 (0.069) 0.699 (0.069)
+
+Q1 -0.211 (0.070) -0.211 (0.070) 0.751 (0.047) -0.769 (0.109) -0.769 (0.109) -0.769 (0.109) -1.518 (0.077) -1.518 (0.077) 0.371 (0.068)
+0.676 (0.102) 0.676 (0.102)
+
+Q2 -0.871 (0.085) -0.871 (0.085) -0.139 (0.080) 0.277 (0.051) 0.277 (0.051) 0.277 (0.051) 0.543 (0.128) 0.543 (0.128) 0.308 (0.060)
+0.825 (0.061) 0.825 (0.061)
+
+Q3
+0.319 (0.094) 0.319 (0.094) 0.191 (0.092) -0.211 (0.056) -0.211 (0.056) -0.211 (0.056) -0.242 (0.123) -0.242 (0.123)
+
+Q4
+-0.128 (0.075) -0.128 (0.075) 0.080 (0.081) 0.983 (0.043) 0.983 (0.043) 0.983 (0.043) 0.380 (0.125) 0.380 (0.125)
+
+Q5 -0.106 (0.087) -0.106 (0.087)
+-0.790 (0.111) -0.790 (0.111) -0.790 (0.111) -0.163 (0.088) -0.163 (0.088)
+
+e
+3.220 (0.792) 3.220 (0.792) 3.263 (0.830) 0.789 (0.064) 0.789 (0.064) 0.789 (0.064) 1.683 (0.227) 1.683 (0.227) 1.763 (0.216) 3.412 (0.668) 3.412 (0.668) 3.412 (0.668) 0.622 (0.034) 0.622 (0.034) 0.648 (0.033)
+
+Table 22: Frequentist regression results
+
+xlii
+
+Figure 14: Posteriors for model indicators
+AICC, which again show oscillatory behavior, are more persistent than the ones chosen by either RJMCMC or BIC.
+The impulse response for capital formation reflects the shape of the posterior over the model orders in the shape and width of the credible sets and the behavior of the mean and median responses. While the median response is zero after 5 quarters, the mean response stays negative until quarter 20 after the shock. The BIC chooses the rather simple MA(2) model, and the models chosen by the AIC and AICC show persistent oscillation. This oscillatory behavior is present to some degree in the mean
+xliii
+
+0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1
+0 -0.1
+0 1
+0.8
+0.6
+0.4
+0.2
+0
+-0.2 0
+4
+3
+2
+
+Private Consumption
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+2 1.5
+1
+
+0.5
+
+0
+
+-0.5 10 20 30 40 50 60 0
+
+Government Consumption
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+4 3.5
+3 2.5
+
+2
+
+1.5
+
+1
+
+0.5
+
+0
+
+-0.5 10 20 30 40 50 60 0
+Exports
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1
+
+0
+
+-1
+
+-2 0 10 20 30 40 50 60
+
+Gross Fixed Capital Formation Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+10 20 30 40 50 60 Imports Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+10 20 30 40 50 60
+
+Figure 15: Estimated impulse responses
+
+response from RJMCMC as well as the credible sets. Judging from the perspective of impulse responses alone, the shape of the impulse response for
+the two consumption series is closest to the one for the whole economy. This is not entirely surprising as these two components account for a significant proportion of GDP. They cannot, however, account
+
+xliv
+
+for the negative responses contained in the credible set for the full GDP series. This feature could, however, be explained by the negative response of capital formation.
+
+12.3 Persistence
+
+Turning to the analysis of the posteriors for the persistence measure for the series, the plot for capital formation immediately stands out. While all the posteriors for Cn(1) for the other series are unimodal, the distribution for capital formation is significantly bi-modal and very dispersed with substantial probability mass at Cn(1) = 0, possibly indicating some degree of trend reversion. The posterior for government consumption exhibits a peak at Cn(1) = 1, a consequence of the presence of some pure random walk models in the posterior. Notably, the estimate from the AIC is almost zero at a horizon of 60 quarters while the one from BIC equals 1.68, roughly in line with the median estimate from RJMCMC, equal to 1.58. Similarly different estimates are obtained for the exports series, with the AIC estimate at 0.036 and the BIC estimate at 0.95. For imports, all methods agree on the pure random walk model resulting in persistence estimates equal to one.
+Table 23 presents point estimates of Cn(1) from RJMCMC. The frequentist estimates can be found in Table 24. Government consumption appears quite persistent with a mean of 2.03 at a horizon of 60 quarters. The frequentist estimates are similar for this series. Private consumption is not quite as persistent with a mean of 1.7 at the same horizon with the frequentist estimates bracketing this value at 1.95 and 1.63 for AIC and BIC respectively. Again, the estimates using BIC are closest to those obtained with RJMCMC.
+
+Horizon
+
+5
+
+10
+
+20
+
+40 60
+
+Exports
+Government Consumption Gross Fixed Capital Formation
+Imports
+Private Consumption
+
+0.8 [0.78] 0.809 [0.787] 0.801 [0.786] 0.796 [0.785] 0.794 [0.785]
+
+[0.676; 0.993] [0.674; 1.03] [0.649; 1.04] [0.621; 1.04] [0.603; 1.04]
+
+1.49 [1.49] 1.73 [1.71]
+
+1.9 [1.83]
+
+2 [1.86]
+
+2.03 [1.86]
+
+[1.05; 1.85] [1.05; 2.37] [1.04; 2.92] [1.04; 3.33] [1.04; 3.45]
+
+1.66 [1.66] 1.46 [1.59]
+
+1.27 [1.58]
+
+1.27 [1.58] 1.26 [1.58]
+
+[1.25; 2.1] [0.582; 2.16] [-0.0151; 2.17] [0.0587; 2.17] [0.0574; 2.17]
+
+0.998 [1]
+
+0.997 [1]
+
+0.995 [1]
+
+0.993 [1]
+
+0.993 [1]
+
+[0.931; 1.06] [0.928; 1.06] [0.928; 1.06] [0.928; 1.06] [0.927; 1.06]
+
+1.62 [1.61] 1.69 [1.65]
+
+1.7 [1.65]
+
+1.7 [1.65]
+
+1.7 [1.65]
+
+[1.27; 2.03] [1.23; 2.31] [1.18; 2.42] [1.17; 2.44] [1.17; 2.44]
+
+Table 23: Cn(1) for different horizons; RJMCMC estimates
+
+xlv
+
+C(1)20 Private Consumption
+
+C(1)40 Private Consumption
+
+C(1)60 Private Consumption
+
+-0.5 0 0.5 1 1.5 2 2.5 3 3.5
+C(1)20 Gross Fixed Capital Formation
+
+-0.5 0 0.5 1 1.5 2 2.5 3 3.5
+C(1)40 Gross Fixed Capital Formation
+
+-0.5 0 0.5 1 1.5 2 2.5 3 3.5
+C(1)60 Gross Fixed Capital Formation
+
+-0.5 0 0.5 1 1.5 2 2.5 3 3.5
+C(1)20 Government Consumption
+
+-0.5 0 0.5 1 1.5 2 2.5 3 3.5
+C(1)40 Government Consumption
+
+-0.5 0 0.5 1 1.5 2 2.5 3 3.5
+C(1)60 Government Consumption
+
+-0.5 0 0.5 1 1.5 2 2.5 3 3.5 -0.5 0 0.5 1 1.5 2 2.5 3 3.5 -0.5 0 0.5 1 1.5 2 2.5 3 3.5
+
+C(1)20 Imports
+
+C(1)40 Imports
+
+C(1)60 Imports
+
+-0.5 0 0.5 1 1.5 2 2.5 3 3.5 -0.5 0 0.5 1 1.5 2 2.5 3 3.5 -0.5 0 0.5 1 1.5 2 2.5 3 3.5
+
+C(1)20 Exports
+
+C(1)40 Exports
+
+C(1)60 Exports
+
+-0.5 0 0.5 1 1.5 2 2.5 3 3.5 -0.5 0 0.5 1 1.5 2 2.5 3 3.5 -0.5 0 0.5 1 1.5 2 2.5 3 3.5
+Figure 16: C(1): Mean: Dashed line; Median: Dotted line
+xlvi
+
+Horizon
+
+5 10 20
+
+40
+
+60
+
+Exports Government Consumption
+Capital Formation Imports
+Private Consumption
+
+0.769; 0.97 1.63; 1.47 1.43; 1.68
+1; 1 1.79; 1.59
+
+0.525; 0.941 1.83; 1.75 0.741; 1.68
+1; 1 1.95; 1.63
+
+0.269; 0.944 1.75; 2.01
+-0.351; 1.68 1; 1
+1.94; 1.63
+
+0.0805; 0.948 1.77; 2.14
+0.0791; 1.68 1; 1
+1.94; 1.63
+
+0.0358; 0.951 1.77; 2.16
+-0.0123; 1.68 1; 1
+1.95; 1.63
+
+Table 24: Cn(1) for different horizons; frequentist estimates for AIC; BIC
+
+12.4 Conclusion
+In conclusion, the persistence and shape of the impulse response of the GDP series seems to be driven mainly by the two consumption series. Regarding the inclusion of negative responses in the credible sets for the aggregate series, it can be conjectured that this phenomenon may be explained by the response of capital formation since the shape and persistence of the line traced out by the lower 5% credible set bound is reminiscent of the shape of the response in the latter series. Furthermore, none of the other substantial series show meaningful negative responses, neither with respect to magnitude nor posterior mass.
+13 UK Subsamples
+The result for the UK GDP series appears quite curious. The clear preference for a pure random walk may indicate that the likelihood is dominated by rare and substantial shifts in the level of GDP which are not well captured by adding persistence through the growth rate. In order to gain some insight into the validity of this conjecture, the series for the UK was divided into two subsamples at two different points in time. The first break point chosen is the beginning of the year 1980, corresponding roughly to the assumption of office by Margaret Thatcher. The second break point chosen is the fourth quarter of 1989 corresponding to the end of Margaret Thatcher's time in office as well as the collapse of the Soviet Union.
+Sampler settings were the same as for all other estimations for first differences. The resulting acceptance rates are presented in Table 25.
+13.1 Model Choice
+Figure 17 presents the posterior distributions of the model indicators for the subsamples. While the posterior for the subsample stretching from 1960:1 to 1989:4 strongly resembles the one for the whole
+xlvii
+
+ w b 1960:1 - 1979:4 0.48 0.63 0.13 1980:1 - 2007:4 0.29 0.39 0.09 1960:1 - 1989:1 0.55 0.68 0.15 1990:1 - 2007:4 0.30 0.39 0.09
+Table 25: Acceptance rates UK subsamples
+series with clear preference for a pure random walk and only a few samples with low-order AR and MA models, the posterior for the subsample for the period 1960:1 to 1979:4 exhibits significantly more posterior uncertainty with the model at the mode being MA(1). The posterior probabilities, however, are virtually identical for the model trio AR(1), MA(1), and random walk.
+The posteriors for both subsamples after the break points are very similar, with the mode at the AR(1) model and some posterior mass in the neighboring regions. The posterior uncertainty, however, is greater for the subsample starting in 1980.
+The above lends credence to the interpretation that the random walk finding is at least to some extent driven by some large and persistent shift in the structure of the UK economy during the reign of Thatcher, consistent with conventional wisdom.
+13.2 Impulse Responses
+The impulse response functions are presented in Figure 18 and the estimation results from the frequentist regressions in Table 26. Again, the AICC and AIC tend to choose persistent models with oscillatory behavior and the models chosen by the BIC are close to the responses from RJMCMC, except for the subsample starting in 1990. For both subsamples starting in 1960, the impulse response is driven by random walk and low-order models. Both subsamples also show some extension of the credible sets into the negative after 1 quarter, in line with the impulse response of the models chosen by the frequentist criteria. The dominant model for both does not, however, exhibit meaningful persistence.
+The impulse response functions for both of the later subsamples show the familiar exponential decay of the response due to the preferred AR(1) model. For the subsample starting in 1980, the BIC chooses a model with a response virtually identical to the mean and mode responses from RJMCMC. While the credible sets are tight for both subsamples, the credible set for the subsample starting in 1990 includes some negative response after quarter three. This negative response is also present in the
+xlviii
+
+Figure 17: Posterior for model indicators xlix
+
+1.5
+1
+0.5
+0
+-0.5
+-1 0
+0.7 0.6 0.5 0.4 0.3 0.2 0.1
+0 -0.1
+0
+
+1960:1 - 1979:4
+
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+1.4 1.2
+1 0.8
+
+0.6
+
+0.4
+
+0.2
+
+0
+
+-0.2
+
+-0.4 10 20 30 40 50 60 0
+
+1980:1 - 2007:4
+
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+0.5 0.4 0.3
+
+0.2
+
+0.1
+
+0
+
+-0.1
+
+-0.2 10 20 30 40 50 60 0
+
+1960:1 - 1989:1
+
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+10 20 30 40 50 60
+1990:1 - 2007:4
+Mean Median Posterior IRF 5% Bound Posterior IRF 95% Bound AIC AICC BIC
+
+10 20 30 40 50 60
+
+Figure 18: Estimated impulse responses
+
+l
+
+reponses of the models chosen by all the frequentist criteria with the AICC and AIC again choosing a model with fairly persistent oscillatory behavior. Visually, the frequentist criteria seem to choose models with impulse responses at the borders of the credible sets from RJMCMC, roughly tracing out first the lower and then the upper bound.
+
+Period 1960:1 - 1979:4
+1980:1 - 2007:4
+1960:1 - 1989:1
+1990:1 - 2007:4
+
+Criterion AIC AICC BIC AIC AICC BIC AIC AICC BIC AIC AICC BIC
+
+P1 -0.078 (0.336) -0.229 (0.114)
+1.024 (0.193) 1.024 (0.193) 0.792 (0.048) -0.242 (0.139) -0.242 (0.139)
+0.343 (0.087) 0.343 (0.087) 1.364 (0.171)
+
+P2 -0.575 (0.139)
+-0.766 (0.124) -0.766 (0.124)
+-0.540 (0.068) -0.540 (0.068)
+1.163 (0.094) 1.163 (0.094) 0.145 (0.304)
+
+P3 -0.603 (0.286)
+1.000 (0.114) 1.000 (0.114)
+-0.759 (0.135) -0.759 (0.135)
+-0.153 (0.111) -0.153 (0.111) -0.986 (0.189)
+
+P4
+-0.519 (0.144) -0.519 (0.144)
+-0.525 (0.089) -0.525 (0.089) 0.388 (0.075)
+
+Q1 -0.164 (0.357)
+-0.681 (0.202) -0.681 (0.202) -0.506 (0.104) 0.100 (0.154) 0.100 (0.154)
+0.063 (0.150) 0.063 (0.150) -1.040 (0.192)
+
+Q2 0.673 (0.281)
+0.701 (0.126) 0.701 (0.126)
+0.712 (0.110) 0.712 (0.110)
+-1.314 (0.136) -1.314 (0.136) -0.461 (0.323)
+
+Q3 0.391 (0.442)
+-0.812 (0.185) -0.812 (0.185)
+0.883 (0.150) 0.883 (0.150)
+-0.697 (0.212) -0.697 (0.212) 0.642 (0.180)
+
+Q4 -0.184 (0.164)
+0.149 (0.167) 0.149 (0.167)
+-0.103 (0.086) -0.103 (0.086)
+0.600 (0.166) 0.600 (0.166)
+
+Q5
+0.202 (0.122) 0.202 (0.122)
+0.277 (0.090) 0.277 (0.090)
+0.542 (0.110) 0.542 (0.110)
+
+e
+1.138 (0.256) 1.238 (0.165) 1.270 (0.181) 0.469 (0.031) 0.469 (0.031) 0.535 (0.032) 1.044 (0.150) 1.044 (0.150) 1.141 (0.113) 0.324 (0.022) 0.324 (0.022) 0.338 (0.017)
+
+Table 26: Frequentist regression results
+
+Of note are also the magnitudes of the standard deviations. While the mean standard deviation for the first halves of the series is 1.259 for the series ending in 1979 and 1.147 respectively, the standard deviations for the second halves are significantly lower with 0.578 for the sample starting in 1980 and 0.423 for the one starting in 1990. This result is consistent with the standard deviation of the growth rates in the data: for the subsample ending in 1979 the standard deviation is 1.2778 and 1.1456 for the sample ending in 1989 while the standard deviations for the second subsamples are 0.6458 and 0.5176 respectively. This substantial shift in the variance of the growth rate is accompanied by the introduction of some persistence in the response of the growth rate to a shock, pointing towards something akin to a "great moderation", a phenomenon also seemingly present in US data. The question whether this diminished variance is due to successful economic policies reducing the variance of the shocks and/or smoothing their impact or simply luck has not been conclusively answered in the literature, neither for the UK nor the US, and it cannot be answered based on the results presented here.
+
+li
+
+C(1)20 1960:1 - 1979:4
+
+C(1)40 1960:1 - 1979:4
+
+C(1)60 1960:1 - 1979:4
+
+0 2 4 6 8 10 0 2 4 6 8 10 0 2 4 6 8 10
+
+C(1)20 1960:1 - 1989:4
+
+C(1)40 1960:1 - 1989:4
+
+C(1)60 1960:1 - 1989:4
+
+0 2 4 6 8 10 0 2 4 6 8 10 0 2 4 6 8 10
+
+C(1)20 1980:1 - 2007:4
+
+C(1)40 1980:1 - 2007:4
+
+C(1)60 1980:1 - 2007:4
+
+0 2 4 6 8 10 0 2 4 6 8 10 0 2 4 6 8 10
+
+C(1)20 1990:1 - 2007:4
+
+C(1)40 1990:1 - 2007:4
+
+C(1)60 1990:1 - 2007:4
+
+0 2 4 6 8 10 0 2 4 6 8 10 0 2 4 6 8 10
+Figure 19: C(1): Mean: Dashed line; Median: Dotted line
+13.3 Persistence
+The posterior distributions of the persistence measure presented in Figure 19 again reflect the behavior of the impulse responses. Point estimates from RJMCMC and frequentist estimation are also presented in the familiar form.
+The large amount of posterior probability assigned to the random walk model is once more clearly visible through a pole at Cn(1) = 1 for the subsamples starting in 1960. However, the dispersion is
+lii
+
+somewhat greater for the shorter subsample. The posteriors for the subsamples starting in 1980 and 1990 have the familiar form. The response of the growth rate to a disturbance is quite persistent compared to the estimates for the other countries apart from Japan which cluster around a value of 1.5 whereas the point estimates for the later subsamples are 2.58 and 2.56 for the sample starting in 1980 and 1990 respectively. The UK would therefore not consistently be ranked in 6th place in terms of persistence but instead be second only to Japan.
+
+Horizon
+
+5
+
+10 20
+
+40
+
+60
+
+1960:1 - 1979:4 0.778 [0.804] 0.76 [0.804] 0.751 [0.804] 0.749 [0.804] 0.748 [0.804]
+
+[0.348; 1]
+
+[0.208; 1]
+
+[0.139; 1]
+
+[0.117; 1]
+
+[0.114; 1]
+
+1980:1 - 2007:4 2.12 [2.08] 2.36 [2.21] 2.49 [2.23] 2.56 [2.23] 2.58 [2.23]
+
+[1.54; 2.86] [1.53; 3.69] [1.5; 4.4]
+
+[1.5; 4.7]
+
+[1.5; 4.74]
+
+1960:1 - 1989:4 0.975 [1]
+
+0.976 [1]
+
+0.975 [1]
+
+0.975 [1]
+
+0.975 [1]
+
+[0.822; 1.06] [0.818; 1.06] [0.816; 1.06] [0.815; 1.06] [0.815; 1.06]
+
+1990:1 - 2007:4 2.35 [2.28] 2.49 [2.34] 2.54 [2.34] 2.56 [2.34] 2.56 [2.34]
+
+[1.67; 3.27] [1.59; 3.91] [1.54; 4.22] [1.52; 4.29] [1.51; 4.3]
+
+Table 27: Cn(1) for different horizons; RJMCMC estimates
+
+Horizon 5 10 20 40 60
+
+1960:1 - 1979:4 0.678; 1 0.697; 1 0.721; 1 0.749; 1 0.76; 1 1980:1 - 2007:4 1.94; 1.94 2.24; 2.24 2.16; 2.36 2.14; 2.37 2.14; 2.37
+
+1960:1 - 1989:4 1.15; 1
+
+1.1; 1
+
+1.11; 1 1.12; 1 1.13; 1
+
+1990:1 - 2007:4 0.722; 1.11 0.56; 1.36 1.33; 1.6 1.09; 1.59 1.12; 1.59
+
+Table 28: Cn(1) for different horizons; frequentist estimates for AIC; BIC
+
+13.4 Conclusion
+The results presented above for the subsamples for UK GDP growth rates seem to support the conjecture that the random walk result for the whole series is driven by some large and persistent shifts in the level of GDP. When splitting the sample around the time of Margaret Thatcher, the random walk result only carries over for the first part of the series, while the following subsamples exhibit familiar patterns in terms of impulse responses as well as persistence with a drastically reduced variance of the
+liii
+
+disturbance. Whether this is a consequence of good policy or simple luck is unclear, but the dynamics of GDP do not seem to be constant over time, at least for the UK.
+14 Conclusion
+This paper has investigated the dynamic behavior of real per capita GDP for six countries. Using a novel Bayesian approach, RJMCMC, posterior distributions accounting for model uncertainty have been obtained and analyzed using impulse response functions and a measure of persistence based on the infinite moving average representation of ARMA processes. The results have been compared to estimates obtained using maximum likelihood estimation while choosing a model according to three information criteria.
+For all countries substantial persistence exists. Furthermore, strong differences in persistence across countries can be observed, with Japan being consistently ranked first in terms of persistence and exhibiting a degree of persistence far removed from the ones shown by the other economies analyzed. The results from frequentist estimates are mostly in line with the ones obtained using RJMCMC.
+The estimates suggest that an innovation in the growth rate of GDP of 1% should induce an increased forecast for the level of GDP by substantially more than 1% in the future, consistent with results from other studies, most prominently the non-parametric estimates in Campbell and Mankiw (1989), with the sole exception of the UK. For this economy, the increase in the forecast should only be 1%, again roughly in line with the estimate from Campbell and Mankiw (1989) who also found the least persistence for the UK. This particular result is, however, sensitive to the time period studied. For example, using data starting in 1990, the corresponding increase in one's forecast for the level of GDP should be about 2.5%.
+With regards to the ranking in terms of persistence across countries, the results presented here are mostly consistent with Campbell and Mankiw (1989). The behavior of the estimates as the horizon changes differs, however. While the estimates of Campbell and Mankiw (1989) increase with the horizon, RJMCMC estimates exhibit this pattern only for Japan and to some extent France. The magnitudes are also somewhat different, but the differences do not indicate a clear pattern.
+The persistence ranking from a difference stationary perspective mostly carries over to OLS linear detrending, which has been used as a robustness check, offering only minor changes in the persistence ranking. The impulse responses are, however, significantly more persistent. These results contain a lesson for economic modeling: a model with a time trend must exhibit much stronger persistence in its impulse responses for output than a model featuring difference stationarity in order to capture the
+liv
+
+dynamics in the data. Another robustness check was carried out using HP-detrending. Here, the results appear to be
+dominated by filtering artifacts, casting doubt on the dependability of the estimates. Furthermore, it is questionable whether an analysis of long-run persistence is sensible when using a filter designed to extract a whole range of low frequencies from dynamics of the time series.
+For the US, the dynamic behavior of the major components of GDP, private and government consumption, imports and exports, as well as fixed capital formation, were examined independently. The results for the aggregate series seem to be mainly driven by the two consumption series and to some extent by capital formation.
+To conclude, while the question of difference vs trend stationarity could not be answered here, the results in this study suggest that significant persistence feature in the real GDP series for all countries studied. Shocks to GDP cast a long shadow into the future. The relative magnitude of persistence is robust to the detrending method, with the exception of the HP filter for which the estimates appear to be contaminated by filtering artifacts to a substantial degree. Persistence may, however, change over time as suggested by the results for subsamples for UK GDP.
+lv
+
+References
+An, S., and F. Schorfheide (2007): "Bayesian Analysis of DSGE Models," Econometric Reviews, 26(2-4), 113≠172.
+Barndorff-Nielsen, O., and G. Schou (1973): "On the Parametrization of Autoregressive Models by Partial Autocorrelations," Journal of Multivariate Analysis, 3, 408≠419.
+Brooks, S. P., and R. Ehlers (2004): "Bayesian Analysis of Order Uncertainty in ARIMA Models," Discussion paper, Federal University of Paran, Brazil; University of Cambridge, UK.
+Campbell, J., and G. Mankiw (1989): "International Evidence on the Persistence of Economic Fluctuations," Journal of Monetary Economics, 23, 319≠333.
+Campbell, J. Y., and N. G. Mankiw (1987): "Are Output Fluctuations Transitory?," The Quarterly Journal of Economics, 102(4), 857≠80.
+Canova, F. (1998): "Detrending and business cycle facts," Journal of Monetary Economics, 41, 475≠ 512.
+Cheung, Y.-W. (1994): "Aggregate output dynamics in the twentieth century," Economics Letters, 45, 15≠22.
+Cheung, Y.-W., and K. S. Lai (1992): "International evidence on output persistence from postwar data," Economic Letters, 38, 435≠442.
+Christiano, L. J., and M. Eichenbaum (1990): "Unit roots in real GNP: Do we know, and do we care?," Carnegie-Rochester Conference Series on Public Policy, 32(0), 7 ≠ 61.
+Clark, P. K. (1989): "Trend Reversion in Real Output and Unemployment," Journal of Econometrics, 40, 15≠32.
+Cochrane, J. H. (1988): "How Big Is the Random Walk in GNP?," Journal of Political Economy, 96(5), 893≠920.
+Cogley, T., and J. M. Nason (1995): "Effects of the Hodrick-Prescott filter on trend and difference stationary time series - Implications for business cycle research," Journal of Economic Dynamics and Control, 19, 253≠278.
+DeJong, D. N., and C. H. Whiteman (1991): "Reconsiderung 'Trends and random walks in macroeconomic time series'," Journal of Monetary Economics, 28, 221≠254.
+Diebold, F. X., and G. D. Rudebusch (1989): "Long memory and persistence in aggregate output," Journal of Monetary Economics, 24(2), 189≠209.
+Fatas, A. (2000a): "Do Business Cycles Cast Long Shadows? Short-Run Persistence and Economic Growth," Journal of Economic Growth, 5, 147≠162.
+(2000b): "Endogenous growth and stochastic trends," Journal of Monetary Economics, 45, 107≠128.
+Green, P. J. (1995): "Reversible Jump Markov Chain Monte Carlo," Biometrika, 82, 711≠732.
+Hastings, W. (1970): "Monte Carlo Sampling Methods using Markov Chains and Their Applications," Biometrika, 57, 97≠109.
+Jones, C. I. (1995): "Time Series Tests of Endogenous Growth Models," The Quarterly Journal of Economics, 110(2), 495≠525.
+Jones, M. (1987): "Randomly Choosing Parameters from the Stationarity and Invertibility Region of Autoregressive-Moving Average Models," Journal of the Royal Statistical Society, Series C (Applied Statistics), 36, 134≠138.
+King, R. G., and S. T. Rebelo (1993): "Low frequency filtering and real business cycles," Journal of Economic Dynamics and Control, 17, 207≠231.
+Koop, G. (1991): "Intertemporal Properties of Real Output: A Bayesian Analysis," Journal of Business & Economic Statistics, 9(3), 253≠265.
+lvi
+
+Kwiatkowski, D., P. C. B. Phillips, P. Schmidt, and Y. Shin (1992): "Testing the null hypothesis of stationarity against the alternative of a unit root: How sure are we that economic time series have a unit root?," Journal of Econometrics, 54(1-3), 159≠178.
+Meyer-Gohde, A., and D. Neuhoff (2015): "Generalized Exogenous Processes in DSGE: A Bayesian Approach," Discussion paper, SFB 649 "Economic Risk".
+Monahan, J. (1984): "A note on enforcing stationarity in autoregressive-moving average models," Biometrika, 71, 403≠404.
+Nelson, C., and C. Plosser (1982): "Trends and Random Walk in Macroeconomic Time Series," Journal of Monetary Economics, 10, 139≠162.
+Perron, P. (1993): "The HUMP-Shaped Behavior of Macroeconomic Fluctuations," Empirical Economics, 18, 707≠727.
+Quenouille, M. (1957): The Analysis of Multiple Time-Series. Hafner Publishing Company. Ragacs, C., and M. Zagler (2002): "Persistence of Shocks to Output in Austria and Theories of
+Economic Growth," Empirica, 29, 305≠317. Ravenna, F. (2007): "Vector autoregressions and reduced form representations of DSGE models,"
+Journal of Monetary Economics, 54, 2048≠2064. Steven N. Durlauf, D. R., and C. A. Sims (1989): "Output Persistence, Economic Structure, and the
+Choice of Stabilization Policy," Brookings Papers on Economic Activity, 2, 66≠136. Stock, J. H., and M. W. Watson (1988): "Variable Trends in Economic Time Series," The Journal of
+Economic Perspectives, 2(3), pp. 147≠174. Watson, M. W. (1986): "Univariate Detrending Methods With Stochastic Trends," Journal of Mone-
+tary Economics, 18, 49≠75.
+lvii
+
+A Additional Kolmogorov-Smirnov Results for First Differences
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.90783 (*) 0.2252 (*) 0.6005 (*) 0.926 (*) 0.29677 (*)
+
+France 0.90783 (*)
+
+0
+
+0.94 (*) 0.98796 (*) 0.59668 (*) 0.93531 (*)
+
+Italy 0.2252 (*) 0.94 (*)
+
+0 0.44652 (*) 0.94552 (*) 0.09902 (*)
+
+Japan 0.6005 (*) 0.98796 (*) 0.44652 (*) 0 0.98278 (*) 0.35091 (*)
+
+UK 0.926 (*) 0.59668 (*) 0.94552 (*) 0.98278 (*) 0 0.93798 (*)
+
+US 0.29677 (*) 0.93531 (*) 0.09902 (*) 0.35091 (*) 0.93798 (*)
+
+0
+
+Table 29: K-S test for C(1)5
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.64346 (*) 0.22286 (*) 0.84638 (*) 0.92358 (*) 0.24922 (*)
+
+France 0.64346 (*) 0 0.73156 (*) 0.97455 (*) 0.43928 (*) 0.69557 (*)
+
+Italy 0.22286 (*) 0.73156 (*) 0 0.79564 (*) 0.94258 (*) 0.06852 (*)
+
+Japan 0.84638 (*) 0.97455 (*) 0.79564 (*) 0 0.99375 (*) 0.75236 (*)
+
+UK 0.92358 (*) 0.43928 (*) 0.94258 (*) 0.99375 (*) 0 0.87506 (*)
+
+US 0.24922 (*) 0.69557 (*) 0.06852 (*) 0.75236 (*) 0.87506 (*)
+
+0
+
+Table 30: K-S test for C(1)10
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.40579 (*) 0.22353 (*) 0.9368 (*) 0.92268 (*) 0.24155 (*)
+
+France 0.40579 (*) 0 0.47572 (*) 0.94691 (*) 0.56207 (*) 0.42913 (*)
+
+Italy 0.22353 (*) 0.47572 (*) 0 0.92163 (*) 0.94174 (*) 0.09432 (*)
+
+Japan 0.9368 (*) 0.94691 (*) 0.92163 (*) 0 0.99661 (*) 0.91413 (*)
+
+UK 0.92268 (*) 0.56207 (*) 0.94174 (*) 0.99661 (*) 0 0.85222 (*)
+
+US 0.24155 (*) 0.42913 (*) 0.09432 (*) 0.91413 (*) 0.85222 (*)
+
+0
+
+Table 31: K-S test for C(1)20
+
+lviii
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.36273 (*) 0.2237 (*) 0.94717 (*) 0.92238 (*) 0.24083 (*)
+
+France 0.36273 (*) 0 0.41119 (*) 0.90935 (*) 0.58186 (*) 0.34913 (*)
+
+Italy 0.2237 (*) 0.41119 (*) 0 0.93345 (*) 0.9414 (*) 0.09738 (*)
+
+Japan 0.94717 (*) 0.90935 (*) 0.93345 (*) 0 0.99653 (*) 0.93455 (*)
+
+UK 0.92238 (*) 0.58186 (*) 0.9414 (*) 0.99653 (*) 0 0.84894 (*)
+
+US 0.24083 (*) 0.34913 (*) 0.09738 (*) 0.93455 (*) 0.84894 (*)
+
+0
+
+Table 32: K-S test for C(1)30
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.34851 (*) 0.22366 (*) 0.94887 (*) 0.92218 (*) 0.24043 (*)
+
+France 0.34851 (*) 0 0.38823 (*) 0.84666 (*) 0.58882 (*) 0.3176 (*)
+
+Italy 0.22366 (*) 0.38823 (*)
+
+0
+
+0.9329 (*) 0.94116 (*) 0.09906 (*)
+
+Japan 0.94887 (*) 0.84666 (*) 0.9329 (*)
+
+0 0.99629 (*) 0.93882 (*)
+
+UK 0.92218 (*) 0.58882 (*) 0.94116 (*) 0.99629 (*) 0 0.84777 (*)
+
+US 0.24043 (*) 0.3176 (*) 0.09906 (*) 0.93882 (*) 0.84777 (*)
+
+0
+
+Table 33: K-S test for C(1)50
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.34698 (*) 0.22366 (*) 0.94891 (*) 0.92212 (*) 0.24039 (*)
+
+France 0.34698 (*) 0 0.38588 (*) 0.82598 (*) 0.58954 (*) 0.31435 (*)
+
+Italy 0.22366 (*) 0.38588 (*) 0 0.93246 (*) 0.94109 (*) 0.09942 (*)
+
+Japan 0.94891 (*) 0.82598 (*) 0.93246 (*) 0 0.99605 (*) 0.93945 (*)
+
+UK 0.92212 (*) 0.58954 (*) 0.94109 (*) 0.99605 (*) 0 0.84764 (*)
+
+US 0.24039 (*) 0.31435 (*) 0.09942 (*) 0.93945 (*) 0.84764 (*)
+
+0
+
+Table 34: K-S test for C(1)60
+B Additional Kolmogorov-Smirnov Results for OLS-detrended Data C Additional Kolmogorov-Smirnov Results for HP-detrended Data
+
+lix
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.98085 (*) 0.26592 (*) 0.46009 (*) 0.95862 (*) 0.02384 (*)
+
+France 0.98085 (*) 0 0.99191 (*) 0.99601 (*) 0.34982 (*) 0.97951 (*)
+
+Italy 0.26592 (*) 0.99191 (*) 0 0.28987 (*) 0.97918 (*) 0.26564 (*)
+
+Japan 0.46009 (*) 0.99601 (*) 0.28987 (*) 0 0.98778 (*) 0.48219 (*)
+
+UK 0.95862 (*) 0.34982 (*) 0.97918 (*) 0.98778 (*) 0 0.95492 (*)
+
+US 0.02384 (*) 0.97951 (*) 0.26564 (*) 0.48219 (*) 0.95492 (*)
+
+0
+
+Table 35: K-S test for C(1)5
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.85326 (*) 0.33398 (*) 0.77479 (*) 0.96433 (*) 0.36318 (*)
+
+France 0.85326 (*) 0 0.94166 (*) 0.98908 (*) 0.37822 (*) 0.62025 (*)
+
+Italy 0.33398 (*) 0.94166 (*)
+
+0
+
+0.6546 (*) 0.98744 (*) 0.63403 (*)
+
+Japan 0.77479 (*) 0.98908 (*) 0.6546 (*)
+
+0 0.99753 (*) 0.8968 (*)
+
+UK 0.96433 (*) 0.37822 (*) 0.98744 (*) 0.99753 (*) 0 0.85126 (*)
+
+US 0.36318 (*) 0.62025 (*) 0.63403 (*) 0.8968 (*) 0.85126 (*)
+
+0
+
+Table 36: K-S test for C(1)10
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.50011 (*) 0.46724 (*) 0.93963 (*) 0.95242 (*) 0.76679 (*)
+
+France 0.50011 (*)
+
+0
+
+0.7902 (*) 0.98207 (*) 0.73116 (*) 0.38668 (*)
+
+Italy 0.46724 (*) 0.7902 (*)
+
+0 0.87262 (*) 0.99439 (*) 0.91873 (*)
+
+Japan 0.93963 (*) 0.98207 (*) 0.87262 (*) 0 0.99981 (*) 0.99221 (*)
+
+UK 0.95242 (*) 0.73116 (*) 0.99439 (*) 0.99981 (*)
+
+0
+
+0.3832 (*)
+
+US 0.76679 (*) 0.38668 (*) 0.91873 (*) 0.99221 (*) 0.3832 (*)
+
+0
+
+Table 37: K-S test for C(1)20
+
+lx
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.27342 (*) 0.54445 (*) 0.96783 (*) 0.92406 (*) 0.84404 (*)
+
+France 0.27342 (*) 0 0.68925 (*) 0.97414 (*) 0.8345 (*) 0.7238 (*)
+
+Italy 0.54445 (*) 0.68925 (*) 0 0.91659 (*) 0.99201 (*) 0.96143 (*)
+
+Japan 0.96783 (*) 0.97414 (*) 0.91659 (*) 0 0.99983 (*) 0.9971 (*)
+
+UK 0.92406 (*) 0.8345 (*) 0.99201 (*) 0.99983 (*) 0 0.13508 (*)
+
+US 0.84404 (*) 0.7238 (*) 0.96143 (*) 0.9971 (*) 0.13508 (*)
+
+0
+
+Table 38: K-S test for C(1)30
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.06116 (*) 0.59258 (*) 0.95936 (*) 0.87519 (*) 0.86943 (*)
+
+France 0.06116 (*) 0 0.61963 (*) 0.94099 (*) 0.87797 (*) 0.8719 (*)
+
+Italy 0.59258 (*) 0.61963 (*) 0 0.89009 (*) 0.98216 (*) 0.97407 (*)
+
+Japan 0.95936 (*) 0.94099 (*) 0.89009 (*) 0 0.99938 (*) 0.99674 (*)
+
+UK 0.87519 (*) 0.87797 (*) 0.98216 (*) 0.99938 (*) 0 0.02389 (*)
+
+US 0.86943 (*) 0.8719 (*) 0.97407 (*) 0.99674 (*) 0.02389 (*)
+
+0
+
+Table 39: K-S test for C(1)50
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.03504 (*) 0.59639 (*) 0.93725 (*) 0.85954 (*) 0.87205 (*)
+
+France 0.03504 (*) 0 0.61165 (*) 0.91461 (*) 0.86784 (*) 0.87745 (*)
+
+Italy 0.59639 (*) 0.61165 (*) 0 0.84468 (*) 0.97737 (*) 0.97514 (*)
+
+Japan 0.93725 (*) 0.91461 (*) 0.84468 (*) 0 0.99751 (*) 0.99421 (*)
+
+UK 0.85954 (*) 0.86784 (*) 0.97737 (*) 0.99751 (*) 0 0.04726 (*)
+
+US 0.87205 (*) 0.87745 (*) 0.97514 (*) 0.99421 (*) 0.04726 (*)
+
+0
+
+Table 40: K-S test for C(1)60
+
+lxi
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.96313 (*) 0.55185 (*) 0.31978 (*) 0.55247 (*) 0.17481 (*)
+
+France 0.96313 (*) 0 0.83271 (*) 0.91359 (*) 0.87615 (*) 0.98294 (*)
+
+Italy 0.55185 (*) 0.83271 (*) 0 0.25863 (*) 0.06192 (*) 0.68343 (*)
+
+Japan 0.31978 (*) 0.91359 (*) 0.25863 (*) 0 0.24069 (*) 0.47301 (*)
+
+UK 0.55247 (*) 0.87615 (*) 0.06192 (*) 0.24069 (*) 0 0.68844 (*)
+
+US 0.17481 (*) 0.98294 (*) 0.68343 (*) 0.47301 (*) 0.68844 (*)
+
+0
+
+Table 41: K-S test for C(1)5
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.39382 (*) 0.50325 (*) 0.08816 (*) 0.19114 (*) 0.12875 (*)
+
+France 0.39382 (*) 0 0.22189 (*) 0.47737 (*) 0.25589 (*) 0.27229 (*)
+
+Italy 0.50325 (*) 0.22189 (*) 0 0.58397 (*) 0.39561 (*) 0.39193 (*)
+
+Japan 0.08816 (*) 0.47737 (*) 0.58397 (*) 0 0.27676 (*) 0.2166 (*)
+
+UK 0.19114 (*) 0.25589 (*) 0.39561 (*) 0.27676 (*) 0 0.07209 (*)
+
+US 0.12875 (*) 0.27229 (*) 0.39193 (*) 0.2166 (*) 0.07209 (*)
+
+0
+
+Table 42: K-S test for C(1)10
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.33491 (*) 0.40334 (*) 0.4021 (*) 0.07921 (*) 0.17017 (*)
+
+France 0.33491 (*) 0 0.12849 (*) 0.12412 (*) 0.32156 (*) 0.4936 (*)
+
+Italy 0.40334 (*) 0.12849 (*) 0 0.18634 (*) 0.39056 (*) 0.54647 (*)
+
+Japan 0.4021 (*) 0.12412 (*) 0.18634 (*) 0 0.41018 (*) 0.53602 (*)
+
+UK 0.07921 (*) 0.32156 (*) 0.39056 (*) 0.41018 (*) 0 0.24275 (*)
+
+US 0.17017 (*) 0.4936 (*) 0.54647 (*) 0.53602 (*) 0.24275 (*)
+
+0
+
+Table 43: K-S test for C(1)20
+
+lxii
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.29307 (*) 0.16128 (*) 0.19692 (*) 0.05716 (*) 0.27729 (*)
+
+France 0.29307 (*)
+
+0
+
+0.2301 (*) 0.09745 (*) 0.28851 (*) 0.52728 (*)
+
+Italy 0.16128 (*) 0.2301 (*)
+
+0 0.15904 (*) 0.12747 (*) 0.43728 (*)
+
+Japan 0.19692 (*) 0.09745 (*) 0.15904 (*) 0 0.19531 (*) 0.43287 (*)
+
+UK 0.05716 (*) 0.28851 (*) 0.12747 (*) 0.19531 (*) 0 0.32595 (*)
+
+US 0.27729 (*) 0.52728 (*) 0.43728 (*) 0.43287 (*) 0.32595 (*)
+
+0
+
+Table 44: K-S test for C(1)30
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.25295 (*) 0.08726 (*) 0.19597 (*) 0.02858 (*) 0.25459 (*)
+
+France 0.25295 (*) 0 0.33926 (*) 0.1054 (*) 0.23759 (*) 0.47643 (*)
+
+Italy 0.08726 (*) 0.33926 (*) 0 0.24071 (*) 0.10391 (*) 0.28712 (*)
+
+Japan 0.19597 (*) 0.1054 (*) 0.24071 (*) 0 0.17015 (*) 0.44848 (*)
+
+UK 0.02858 (*) 0.23759 (*) 0.10391 (*) 0.17015 (*) 0 0.28146 (*)
+
+US 0.25459 (*) 0.47643 (*) 0.28712 (*) 0.44848 (*) 0.28146 (*)
+
+0
+
+Table 45: K-S test for C(1)40
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.13596 (*) 0.17464 (*) 0.13558 (*) 0.03753 (*) 0.13773 (*)
+
+France 0.13596 (*) 0 0.14547 (*) 0.10886 (*) 0.14447 (*) 0.1346 (*)
+
+Italy 0.17464 (*) 0.14547 (*) 0 0.12736 (*) 0.17647 (*) 0.12889 (*)
+
+Japan 0.13558 (*) 0.10886 (*) 0.12736 (*) 0 0.15701 (*) 0.10085 (*)
+
+UK 0.03753 (*) 0.14447 (*) 0.17647 (*) 0.15701 (*) 0 0.15547 (*)
+
+US 0.13773 (*) 0.1346 (*) 0.12889 (*) 0.10085 (*) 0.15547 (*)
+
+0
+
+Table 46: K-S test for C(1)50
+
+lxiii
+
+Canada
+
+France
+
+Italy
+
+Japan
+
+UK
+
+US
+
+Canada
+
+0 0.13528 (*) 0.06751 (*) 0.10346 (*) 0.03713 (*) 0.06562 (*)
+
+France 0.13528 (*) 0 0.12716 (*) 0.1284 (*) 0.14378 (*) 0.13572 (*)
+
+Italy 0.06751 (*) 0.12716 (*) 0 0.14865 (*) 0.10131 (*) 0.10688 (*)
+
+Japan 0.10346 (*) 0.1284 (*) 0.14865 (*) 0 0.12635 (*) 0.103 (*)
+
+UK 0.03713 (*) 0.14378 (*) 0.10131 (*) 0.12635 (*) 0 0.08265 (*)
+
+US 0.06562 (*) 0.13572 (*) 0.10688 (*) 0.103 (*) 0.08265 (*)
+
+0
+
+Table 47: K-S test for C(1)60
+
+lxiv
+
+SFB 649 Discussion Paper Series 2015
+
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001 002
+003
+004 005
+006 007 008 009 010 011 012 013 014 015 016 017
+018 019 020 021
+
+"Pricing Kernel Modeling" by Denis Belomestny, Shujie Ma and Wolfgang Karl H‰rdle, January 2015. "Estimating the Value of Urban Green Space: A hedonic Pricing Analysis of the Housing Market in Cologne, Germany" by Jens Kolbe and Henry W¸stemann, January 2015. "Identifying Berlin's land value map using Adaptive Weights Smoothing" by Jens Kolbe, Rainer Schulz, Martin Wersing and Axel Werwatz, January 2015. "Efficiency of Wind Power Production and its Determinants" by Simone Pieralli, Matthias Ritter and Martin Odening, January 2015. "Distillation of News Flow into Analysis of Stock Reactions" by Junni L. Zhang, Wolfgang K. H‰rdle, Cathy Y. Chen and Elisabeth Bommes, January 2015. "Cognitive Bubbles" by Ciril Bosch-Rosay, Thomas Meissnerz and Antoni Bosch-DomËnech, February 2015. "Stochastic Population Analysis: A Functional Data Approach" by Lei Fang and Wolfgang K. H‰rdle, February 2015. "Nonparametric change-point analysis of volatility" by Markus Bibinger, Moritz Jirak and Mathias Vetter, February 2015. "From Galloping Inflation to Price Stability in Steps: Israel 1985≠2013" by Rafi Melnick and till Strohsal, February 2015. "Estimation of NAIRU with Inflation Expectation Data" by Wei Cui, Wolfgang K. H‰rdle and Weining Wang, February 2015. "Competitors In Merger Control: Shall They Be Merely Heard Or Also Listened To?" by Thomas Giebe and Miyu Lee, February 2015. "The Impact of Credit Default Swap Trading on Loan Syndication" by Daniel Streitz, March 2015. "Pitfalls and Perils of Financial Innovation: The Use of CDS by Corporate Bond Funds" by Tim Adam and Andre Guettler, March 2015. "Generalized Exogenous Processes in DSGE: A Bayesian Approach" by Alexander Meyer-Gohde and Daniel Neuhoff, March 2015. "Structural Vector Autoregressions with Heteroskedasticy" by Helmut L¸tkepohl and Aleksei Netsunajev, March 2015. "Testing Missing at Random using Instrumental Variables" by Christoph Breunig, March 2015. "Loss Potential and Disclosures Related to Credit Derivatives ≠ A CrossCountry Comparison of Corporate Bond Funds under U.S. and German Regulation" by Dominika Paula Galkiewicz, March 2015. "Manager Characteristics and Credit Derivative Use by U.S. Corporate Bond Funds" by Dominika Paula Galkiewicz, March 2015. "Measuring Connectedness of Euro Area Sovereign Risk" by Rebekka G‰tjen Melanie Schienle, April 2015. "Is There an Asymmetric Impact of Housing on Output?" by Tsung-Hsien Michael Lee and Wenjuan Chen, April 2015. "Characterizing the Financial Cycle: Evidence from a Frequency Domain Analysis" by Till Strohsal, Christian R. ProaÒo and J¸rgen Wolters, April 2015.
+
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2015
+
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+022 023
+024 025 026 027 028 029
+030 031 032 033
+034 035 036 037
+038 039
+
+"Risk Related Brain Regions Detected with 3D Image FPCA" by Ying Chen, Wolfgang K. H‰rdle, He Qiang and Piotr Majer, April 2015. "An Adaptive Approach to Forecasting Three Key Macroeconomic Variables for Transitional China" by Linlin Niu, Xiu Xu and Ying Chen, April 2015. "How Do Financial Cycles Interact? Evidence from the US and the UK" by Till Strohsal, Christian R. ProaÒo, J¸rgen Wolters, April 2015. "Employment Polarization and Immigrant Employment Opportunities" by Hanna Wielandt, April 2015. "Forecasting volatility of wind power production" by Zhiwei Shen and Matthias Ritter, May 2015. "The Information Content of Monetary Statistics for the Great Recession: Evidence from Germany" by Wenjuan Chen and Dieter Nautz, May 2015. "The Time-Varying Degree of Inflation Expectations Anchoring" by Till Strohsal, Rafi Melnick and Dieter Nautz, May 2015. "Change point and trend analyses of annual expectile curves of tropical storms" by P.Burdejova, W.K.H‰rdle, P.Kokoszka and Q.Xiong, May 2015. "Testing for Identification in SVAR-GARCH Models" by Helmut Luetkepohl and George Milunovich, June 2015. "Simultaneous likelihood-based bootstrap confidence sets for a large number of models" by Mayya Zhilova, June 2015. "Government Bond Liquidity and Sovereign-Bank Interlinkages" by Sˆren Radde, Cristina Checherita-Westphal and Wei Cui, July 2015. "Not Working at Work: Loafing, Unemployment and Labor Productivity" by Michael C. Burda, Katie Genadek and Daniel S. Hamermesh, July 2015. "Factorisable Sparse Tail Event Curves" by Shih-Kang Chao, Wolfgang K. H‰rdle and Ming Yuan, July 2015. "Price discovery in the markets for credit risk: A Markov switching approach" by Thomas Dimpfl and Franziska J. Peter, July 2015. "Crowdfunding, demand uncertainty, and moral hazard - a mechanism design approach" by Roland Strausz, July 2015. ""Buy-It-Now" or "Sell-It-Now" auctions : Effects of changing bargaining power in sequential trading mechanism" by Tim Grebe, Radosveta Ivanova-Stenzel and Sabine Krˆger, August 2015. "Conditional Systemic Risk with Penalized Copula" by Ostap Okhrin, Alexander Ristig, Jeffrey Sheen and Stefan Tr¸ck, August 2015. "Dynamics of Real Per Capita GDP" by Daniel Neuhoff, August 2015.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatﬂraeﬂ1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasrecahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+

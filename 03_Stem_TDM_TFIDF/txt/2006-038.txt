@@ -1,0 +1,1245 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2006-038
+Adaptive Simulation Algorithms for Pricing American and Bermudan Options by Local Analysis
+of Financial Market
+Denis Belomestny* Grigori N. Milstein**
+* Weierstrass Institute for Applied Analysis and Stochastics, Berlin, Germany
+** Ural State University, Ekaterinburg, Russia
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+ADAPTIVE SIMULATION ALGORITHMS FOR PRICING AMERICAN AND BERMUDAN OPTIONS BY LOCAL ANALYSIS OF FINANCIAL
+MARKET
+DENIS BELOMESTNY AND GRIGORI N. MILSTEIN
+Abstract. Here we develop an approach for efficient pricing discrete-time American and Bermudan options which employs the fact that such options are equivalent to the European ones with a consumption, combined with analysis of the market model over a small number of steps ahead. This approach allows constructing both upper and low bounds for the true price by Monte Carlo simulations. An adaptive choice of local low bounds and use of the kernel interpolation technique enhance efficiency of the whole procedure, which is supported by numerical experiments.
+1. Introduction
+The valuation of high-dimensional American and Bermudan options is one of the most difficult numerical problems in financial engineering. Several approaches have recently been proposed for pricing such options using Monte Carlo simulation technique (see, e.g. [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 15] and references therein). In some papers, procedures are proposed that are able to produce upper and low bounds for the true price and hence allow for evaluating the accuracy of price estimates.
+In [3] we develop the approach for pricing American options both for discrete-time and continuous-time models. The approach is based on the fact that any American option is equivalent to the European one with a consumption process involved. This approach allows us, in principle, to construct iteratively a sequence v1, V 1, v2, V 2, v3, ..., where v1, v2, v3, ... is an increasing (at any point) sequence of low bounds and V 1, V 2, ..., is a decreasing sequence of upper bounds. Unfortunately, the complexity of the procedure increases dramatically with any new iteration step. Even V 2 is too expensive for the real construction.
+Let us consider a discrete-time financial model and let
+(Bti, Xti) = (Bti, Xt1i, ..., Xtdi), i = 0, 1, ..., L,
+be the vector of prices at time ti, where Bti is the price of a scalar riskless asset (we assume that Bti is deterministic and Bt0 = 1) and Xti = (Xt1i, ..., Xtdi) is the price vector process of risky assets ( along with index ti we shall use below the index i and instead of
+Date: 27.07.2005. 1991 Mathematics Subject Classification. 60H30, 65C05, 91B28. Key words and phrases. American and Bermudan options, Lower and Upper bounds, Monte Carlo simulation, Variance reduction. THIS RESEARCH WAS SUPPORTED BY THE DEUTSCHE FORSCHUNGSGEMEINSCHAFT THROUGH THE SFB 649 ECONOMIC RISK.
+1
+
+(ti, Xti) we will write (ti, Xi)). Let fi(x) be the profit made by exercising an American option at time ti if Xti = Xi = x.
+In this paper we propose to use an increasing sequence of low bounds for constructing an upper bound and low bound at the initial position (t0, X0). It is supposed that the above sequence is not too expensive from the computational point of view. This is achieved by using local low bounds which take into account a small number of exercise dates ahead.
+Let (ti, mXi), i = 0, 1, ..., L; m = 1, ..., M, be M independent trajectories all starting from the point (t0, X0) and let v1  v2  ...  vl be a finite sequence of low bounds which can be calculated at any position (ti, x). Clearly, these low bounds are also ordered according to their numerical complexities and a natural number l indicates the maximal such complexity as well as the quality of the low bound vl. Any low bound gives a low bound for the corresponding continuation value (low continuation value) and an upper bound for the consumption process (upper consumption process). If the payoff at (ti, mXi) is less or equal to the low continuation value, then the position (ti, mXi) belongs to the continuation region and the consumption at (ti, mXi) is equal to zero. Otherwise the position (ti, mXi) can belong either to the exercise region or to the continuation region. In the latter cases we compute the upper consumption at (ti, mXi) as a difference between the payoff and the low continuation value.
+It is important to emphasize that the low bounds are applied adaptively. It means that if, for instance, using the low bound v1 (which is the cheapest one among v1, v2, ..., vl) at the position (ti, mXi), we have found that this position belongs to the continuation region (i.e., the corresponding upper consumption process is equal to zero), we do not calculate any further bounds. Similarly, if the upper consumption process is positive but comparatively small, we can stop applying further bounds at (ti, mXi) because a possible error will not be large. Finally, if the upper consumption process is not small enough after applying low bounds v1, ..., vj but changes not significantly after applying vj+1, we can stop applying further bounds as well. The low bounds are prescribed to every position (ti, mXi) and are, as a rule, local. Applying them means, in some sense, a local analysis of the considered financial market at any position. Such a local analysis for all positions (ti, mXi), i = 0, 1, ..., L; m = 1, ..., M , yields some global low bound and upper bound at the original position (t0, X0). If we detect that the difference between the global upper and low bounds is large, we can return to the deeper local analysis. It is clear that, in principle, this analysis can give exhaustive results in a finite number of steps (it suffices to take the following sequence of American options at (ti, mXi): v1 is the price of the American option on the time interval [ti, ti+1], v2 is the price on [ti, ti+2] and so on, in a way that vL-i is the price on [ti, tL]). Thus, we have no problems with convergence of the algorithms based on the approach considered. The paper is organized as follows. In Section 2 we recall the basic notions related to the pricing of American and Bermudan options and sketch the approach developed in [3]. The method of this paper is presented in Section 3. Two numerical examples are given in Section 4. The paper is concluded in Section 5.
+2
+
+2. The approach based on consumption processes
+To be self-contained, let us briefly recall the approach to pricing American options that has been developed in [3].
+
+2.1. The Snell envelope. We assume that the modelling is based on the filtered space
+(, F , (Fi)0iL, Q), where the probability measure Q is the risk-neutral pricing measure
+for the problem under consideration, and Xi is a Markov chain with respect to the filtration (Fi)0iL .
+The discounted process X~i := Xi/Bi is a martingale with respect to the Q and the
+price of the corresponding discrete American option at (ti, Xi) is given by
+
+(2.1)
+
+ui(Xi) = sup BiE
+ Ti,L
+
+f
+
+(X B
+
+)
+
+|Fi
+
+,
+
+where Ti,L is the set of stopping times  taking values in {i, i + 1, ..., L}. The value process ui (Snell envelope) can be determined by the dynamic programming principle:
+
+(2.2)
+
+uN (x) = fN (x),
+
+ui(x) = max
+
+fi(x), BiE
+
+ui+1(Xi+1 Bi+1
+
+)
+
+|Xi
+
+=
+
+x
+
+, i = L - 1, ..., 0.
+
+We see that theoretically the problem of evaluating u0(x), the price of the discrete-time American option, is easily solved using iteration procedure (2.2). However, if X is high dimensional and/or L is large, the above iteration procedure is not practical.
+
+2.2. The continuation value, the continuation and exercise regions. For the considered American option, let us introduce the continuation value
+
+(2.3)
+
+Ci(x) = BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+,
+
+the continuation region C and the exercise (stopping) region E :
+
+(2.4)
+
+C = {(ti, x) : fi(x) < Ci(x)} , E = {(ti, x) : fi(x)  Ci(x)} .
+
+Let Xji,x, j = i, i + 1, ..., L, be the Markov chain starting at time ti from the point x : Xii,x = x, and mXji,x, m = 1, ..., M, be independent trajectories of the Markov chain. The Monte Carlo estimator u^i(x) of ui(x) (in the case when E is known) has the form
+
+(2.5)
+
+u^i(x)
+
+=
+
+1 M
+
+M m=1
+
+Bi B
+
+f (mXi,x),
+
+where  is the first time at which Xji,x gets into E (of course,  in (2.5) depends on i, x, and m :  =m  i,x). Thus, for estimating ui(x), it is sufficient to examine sequentially the position (tj, mXji,x) for j = i, i+1, ..., L, whether it belongs to E or not. If (tj, mXji,x)  E, then we stop at the instant  = tj on the trajectory considered. If (tj, mXji,x)  C, we move one step more along the trajectory.
+3
+
+Let v be any low bound, i.e. ui(x)  vi(x), i = 0, 1, ..., L. Clearly, fi(x) is a low bound. If vi1, ..., vil are some low bounds then the function vi(x) = max1kl vik(x) is also a low bound. Henceforth we consider low bounds satisfying the inequality vi(x)  fi(x).
+Introduce the set
+
+Cv =
+
+(ti, x) : fi(x)  BiE
+
+vi+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+.
+
+Since Cv  C, any low bound provides us with a sufficient condition for moving along the trajectory: if (tj, mXji,x)  Cv, we do one step ahead.
+
+2.3. Equivalence of American options to European ones with consumption processes. For 0  i  L - 1 the equation (2.2) can be rewritten in the form
+
+(2.6)
+
+ui(x) = BiE
+
+ui+1(Xi+1 Bi+1
+
+)
+
+|Xi
+
+=
+
+x
+
++ fi(x) - BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+Introduce the functions
+
+(2.7)
+
+i(x) = fi(x) - BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
++
+, i = L - 1, ..., 0.
+
+Due to (2.6), we have
+
++
+.
+
+uL-1(XL-1) = BL-1E
+
+fL(XL) BL
+
+|FL-1
+
++ L-1(XL-1),
+
+uL-2(XL-2) = BL-2E
+
+uL-1(XL-1 BL-1
+
+)
+
+|FL-2
+
++ L-2(XL-2)
+
+= BL-2E
+
+fL(XL) BL
+
+|FL-2
+
++ BL-2E
+
+
+
+L-1(XL-1 BL-1
+
+)
+
+|FL-2
+
++ L-2(XL-2).
+
+Analogously, one gets
+
+(2.8)
+
+ui(Xi) = BiE
+
+fL(XL) BL
+
+|Fi
+
+L-(i+1)
+
++ Bi
+
+E
+
+k=1
+
+ L-k (XL-k BL-k
+
+)
+
+|Fi
+
++i(Xi), i = 0, ..., L - 1.
+
+Putting X0 = x and recalling that B0 = 1, we obtain
+
+(2.9)
+
+u0(x) = E
+
+fL(XL) BL
+
+L-1
++ 0(x) + E
+i=1
+
+i(Xi) Bi
+
+.
+
+Formula (2.9) gives us the price of the European option with the payoff function fi(x) in the case when the underlying price process is equipped with the consumption i defined in (2.7).
+4
+
+2.4. Upper and low bounds using consumption processes. The results about the
+equivalence of the discrete-time American option to the European one with the consump-
+tion process cannot be used directly because ui(x) and consequently i(x) are unknown. We take the advantage of this connection in the following way (see [3]).
+Let vi(x) be a low bound on the true option price ui(x). Introduce the function (upper consumption process)
+
+(2.10)
+
+i,v(x) = fi(x) - BiE
+
+vi+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
++
+, i = 0, ..., L - 1.
+
+Clearly, i,v(x)  i(x).
+Hence the price Vi(x) of the European option with payoff function fi(x) and upper consumption process i,v(x) is an upper bound: Vi(x)  ui(x).
+Conversely, if Vi(x) is an upper bound on the true option price ui(x) and
+
+(2.11)
+
+i,V (x) = fi(x) - BiE
+
+Vi+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
++
+, i = 0, ..., L - 1,
+
+then the price vi(x) of the European option with low consumption process i,V (x) is a low bound.
+Thus, starting from a low bound vi1(x), one can construct the sequence of low bounds vi1(x)  vi2(x)  vi3(x)  ...  ui(x), and the sequence of upper bounds Vi1(x)  Vi2(x)  ...  ui(x). All these bounds can be, in principle, evaluated by the Monte Carlo simulations. However, each further step of the procedure requires labor-consuming calculations
+and in practice it is possible to realize only a few steps of this procedure. In this connec-
+tion, much attention in [3] is given to variance reduction technique and some constructive
+methods for reducing statistical errors are proposed there.
+
+2.5. Bermudan options. As before, let us consider the discrete-time model
+
+(Bi, Xi) = (Bi, Xi1, ..., Xid), i = 0, 1, ..., L.
+
+Suppose that an investor can exercise only at an instant from the set of stopping times S = {s1, ..., sl} within {0, 1, ..., L}, where sl = L. The price ui(Xi) of the so called Bermudan option is given by
+
+ui(Xi) = sup BiE
+ TS[i,L]
+
+f
+
+(X B
+
+)
+
+|Fi
+
+,
+
+where TS[i,L] is the set of stopping times  taking values in {s1, ..., sl}  {i, i + 1, ..., L} with sl = L.
+The value process ui is determined as follows:
+
+uL(x) = fL(x),
+
+
+
+ 
+
+max
+
+
+
+ui(x) =
+
+  
+
+fi(x), BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+, i  S,
+
+Bi
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+, i / S.
+
+5
+
+Similarly to American options, any Bermudan option is equivalent to the European one
+
+with the payoff function fi(x) and the consumption process i defined as
+
+
+ i(x) =
+
+
+fi(x) - BiE
+
+ui+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+0, i / S.
+
++
+, i  S,
+
+Thus, all the results obtained in this section for discrete-time American options can be
+carried over to Bermudan options. For example, if vi(x) is a low bound on the true option price ui(x), the price Vi(x) of the European option with the payoff function fi(x) and with the consumption process
+
+
+ i,v(x) =
+
+
+fi(x) - BiE
+
+vi+1(Xi+1 Bi+1
+
+)
+
+|Xi
+
+=
+
+x
+
+0, i / S.
+
++
+, i  S,
+
+is an upper bound: Vi(x)  ui(x).
+
+3. The main procedure
+The difficulties mentioned in Subsection 2.4 can be avoided by using an increasing sequence of simple low bounds.
+
+3.1. Local low bounds. The trivial low bound is fi(x) and the simplest nontrivial one
+
+is given by
+
+vii+1(x) = max
+
+fi(x), BiE
+
+fi+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+.
+
+The function vii+1(x) is the price of the American option at the position (ti, x) on the time interval [ti, ti+1]. It takes into account the behavior of assets at one step ahead. Let vii+k(x) be the price of the American option at the position (ti, x) on the time interval [ti, ti+k]. The function vii+k(x) corresponds to an analysis of the market over k steps ahead. The calculation of vii+k(x) can be done iteratively. Indeed, the price of the American option on the interval [ti, ti+k+1] with k + 1 exercise periods can be calculated using the American
+
+options on the interval [ti+1, ti+k+1] with k exercise periods
+
+(3.1)
+
+vii+k+1(x) = max
+
+fi(x), BiE
+
+vii++1k+1(Xi+1) Bi+1
+
+|Xi
+
+=
+
+x
+
+.
+
+We see that vii+k+1(x) is, as a rule, much more expensive than vii+k(x). The direct formula (3.1) can be too laborious even for k  3. As an example of a simpler low bound, let us
+consider the maximum of the American option on the interval [ti, ti+k] and the European option on the interval [ti, ti+k+1]:
+
+v¯ii+k(x) = max
+
+vii+k(x), BiE
+
+fi+k+1(Xi+k+1) Bi+k+1
+
+|Xi
+
+=
+
+x
+
+.
+
+This low bound is not so expensive as vii+k+1(x). Clearly
+
+vii+k(x)  v¯ii+k(x)  vii+k+1(x).
+6
+
+Different combinations consisting of European, American, and Bermudan options can give
+other simple low bounds.
+The success of the main procedures (see below) exceedingly depends on a choice of low
+bounds. Therefore their efficient construction is of great importance. To this aim one can
+use the known methods and among them the method from [3].
+We emphasize again (see Introduction) that if after using some low bound it is established that the position belongs to C, then this position does not need any further analysis. Therefore, at the beginning the simplest nontrivial low bound vii+1(x) should be applied and then other low bounds should be used adaptively in the order of increasing
+complexity.
+
+3.2. The main procedure for constructing upper bounds for the initial position
+(global upper bounds). Aiming to estimate the price of the American option at a fixed
+position (t0, x0), we simulate the independent trajectories mXi, i = 1, ..., L, m = 1, ..., M, of the process Xi, starting at the instant t = t0 from x0 : X0 = x0. Let vi(x) be a low bound and (ti, mXi) be the position on the m-th trajectory at the time instant ti. We calculate the low continuation value
+
+(3.2)
+
+ci,v(mXi) = BiE
+
+vi+1(mXi+1) Bi+1
+
+|Fi
+
+at the position (ti, mXi). If
+
+(3.3)
+
+fi(mXi) < ci,v(mXi),
+
+then (ti, mXi)  C (see (2.4)) and we move one step ahead along the trajectory to the next position (ti+1, mXi+1). Otherwise if
+
+(3.4)
+
+fi(mXi)  ci,v(mXi),
+
+then we cannot say definitely whether the position (ti, mXi) belongs to C or to E. In spite of this fact we do one step ahead in this case as well. Let us recall that the true consumption at (ti, x) is equal to
+
+(3.5)
+
+i (x) = [fi (x) - Ci (x)]+
+
+(see (2.7) and (2.3)). Thus, it is natural to define the upper consumption i,v at any position (ti, mXi) by the formula
+
+(3.6)
+
+i,v(mXi) = [fi(mXi) - ci,v(mXi)]+.
+
+Obviously, ci,v  Ci and hence i,v  i. Therefore, the price Vi(x) of the European option with payoff function fi(x) and upper consumption process i,v is an upper bound on the price ui(x) of the original American option. In the case (3.3) i,v(mXi) = i(mXi) = 0 and we do not get any error. If (3.4) holds and besides ci,v(mXi) < Ci(mXi), we get an
+error. If i,v(mXi) is large, then it is in general impossible to estimate this error, but if i,v(mXi) is small, the error is small as well.
+7
+
+Having found i,v, we can construct an estimate V^0(x0) of the upper bound V0(x0) for u0(x0) by the formula
+
+(3.7)
+
+V^0(x0)
+
+=
+
+1 M
+
+M m=1
+
+fL(mXL) BL
+
++
+
+1 M
+
+L-1 M i=0 m=1
+
+i,v(mXi) . Bi
+
+Note that for the construction of an upper bound V0 one can use different local low bounds depending on a position. This opens various opportunities for adaptive proce-
+dures. For instance, if i,v(mXi) is large, then it is reasonable to use a more powerful local instrument at the position (ti, mXi).
+
+3.3. The main procedure for constructing low bounds for the initial position
+
+(global low bounds). Let us proceed to the estimation of a low bound v0(x0). We stress that both V0(x0) and v0(x0) are estimated for the initial position (t0, x0) only. Since we are interested in obtaining as large as possible low bound, it is reasonable to calculate
+
+different not too expensive low bounds at the position (t0, x0) and to take the largest one.
+
+Let
+
+us
+
+fix
+
+a
+
+local
+
+low
+
+bound
+
+v.
+
+We
+
+denote
+
+by
+
+t0
+
+
+
+
+
+(m) 1
+
+
+
+L
+
+the
+
+first
+
+time
+
+when
+
+either
+
+(3.4)
+
+is
+
+fulfilled
+
+or
+
+
+
+(m) 1
+
+=
+
+L.
+
+The
+
+second
+
+time
+
+
+
+(m) 2
+
+is
+
+defined
+
+in
+
+the
+
+following
+
+way.
+
+If
+
+
+
+(m) 1
+
+<
+
+L,
+
+then
+
+
+
+(m) 2
+
+is
+
+either
+
+the
+
+first
+
+time
+
+after
+
+
+
+(m) 1
+
+for
+
+which
+
+(3.4)
+
+is
+
+fulfilled
+
+or
+
+
+
+(m) 2
+
+=
+
+L.
+
+So,
+
+t0
+
+
+
+
+
+(m) 1
+
+<
+
+
+
+(m) 2
+
+
+
+L.
+
+In
+
+the
+
+same
+
+way
+
+we
+
+can
+
+define
+
+
+
+times
+
+(3.8)
+
+0
+
+
+
+
+
+(m) 1
+
+<
+
+
+
+(m) 2
+
+<
+
+...
+
+<
+
+
+
+(m) 
+
+=
+
+L.
+
+The number  depends on the m-th trajectory:  = (m) and can vary between 1 and
+
+L+1
+
+:
+
+1
+
+
+
+
+
+
+
+L + 1.
+
+We
+
+put
+
+by
+
+definition
+
+
+
+(m) +1
+
+=
+
+
+
+(m) 
+
+=
+
+L,
+
+
+
+(m) +2
+
+= ...
+
+=
+
+
+
+(m) L+1
+
+=
+
+L.
+
+Thus, we get times  1, ...,  L+1 which are connected with the considered process Xi. For
+
+any 1  k  L + 1 the time  k does not anticipate the future because at each point Xi
+
+at time ti the knowledge of Xj, j = 0, 1, ..., i, is sufficient to define it uniquely. So, the
+
+times  1, ...,  L+1 are stopping rules and the following low bound can be proposed
+
+v0(x0)
+
+=
+
+max
+1kL+1
+
+E
+
+fk (Xk ) B k
+
+which can be in turn estimated as
+
+v^0(x0)
+
+=
+
+max
+1kL+1
+
+1 M
+
+M m=1
+
+f
+
+(m) k
+
+(m
+
+X
+
+(m) k
+
+)
+
+.
+
+B
+
+(m) k
+
+Of course, v0(x0) depends on the choice of the local low bound v. Clearly, increasing the local low bound implies increasing the global low bound v0(x0).
+
+Remark 3.1. It is reasonable instead of the stopping criterion (3.4) to use the following criterion
+
+(3.9)
+
+i,v(mXi)  
+
+for some  > 0. On the one hand, i,v  i and hence the stopping criterion with  = 0 can lead to earlier stopping and possibly to a large error when i,v > 0 but i = 0. On the other hand, if 0 < i,v(mXi) <  we can make an error using criterion (3.9). Indeed,
+8
+
+in this case we continue and if i > 0 then (ti, mXi)  E and the true decision is to stop. Since the price of the option at (ti, mXi) upon the continuation is Ci(mXi) and
+fi(mXi) - Ci(mXi) = i  i,v < ,
+the error due to the wrong decision at (ti, mXi) is small as long as  is small. It is generally difficult to estimate the influence of many such wrong decisions on the global low bound. Fortunately, any  > 0 leads to a sequence of stopping times (3.8) and, consequently, to a global low bound v0(x0). What the global upper bound is concerned, we have 0  i,v - i <  when i,v <  and hence the error in estimating V0 is small due to (3.7). The choice of  can be based on some heuristics and the empirical analysis of overall errors in estimating true i's.
+3.4. Kernel interpolation. The computational complexity of the whole procedure can be substantially reduced by using methods from the interpolation theory. As discussed in the previous sections, the set of independent paths
+
+PM := {mXi, i = 1, ..., L, m = 1, ..., M }
+
+and the sequence of local low bounds {vi1, ..., vil} deliver the set of the upper consumption values {i,v(mXi), i = 0, ..., L, m = 1, ..., M }, where vi := max{vi1, ..., vil}. If M is large one may take a subset PM~ of PM containing first M~ M trajectories
+
+(3.10)
+
+PM~ := {mXi, i = 1, ..., L, m = 1, ..., M~ }
+
+and compute {i,v(mXi), i = 0, ..., L, m = 1, ..., M~ }. The remaining consumption values i,v(nXi) for n = M~ + 1, ..., M can be approximated by
+
+^i,v(nXi) := 
+
+ wn,mi,v(mXi),
+
+m:mXiBPk M~ (nXi)
+
+where
+
+Bk
+PM~
+
+(n
+
+Xi
+
+)
+
+is
+
+the
+
+set
+
+of
+
+k
+
+nearest
+
+neighbors
+
+of
+
+nXi
+
+lying
+
+in
+
+the
+
+PM~
+
+for
+
+fixed
+
+exercise
+
+date ti and
+
+wn,m :=
+
+K( nXi -m Xi /h)
+
+  K( m:mXiBPk M~ (nXi)
+
+nXi -m Xi
+
+/h)
+
+with K(·) being a positive kernel. A bandwidth h and the number of nearest neighbors
+k are chosen experimentally. Having found ^i,v(nXi), we get the global upper bound at (t0, x0) according to (3.7) by plugging estimated values ^i,v(mXi) with m = M~ + 1, ..., M in place of the corresponding i,v(mXi) . The simulations show that an essential reduction of computational time can be sometimes
+achieved at small loss of precision. The reason for the success of kernel methods is that
+the closeness of the points in the state space implies the closeness of the corresponding
+consumption values.
+9
+
+4. Simulations
+
+4.1. Bermudan max calls on d assets. This is a benchmark example studied in [5], [9] and [15] among others. Specifically, the model with d identical assets is considered where each underlying has dividend yield . The risk-neutral dynamic of assets is given by
+
+(4.1)
+
+dXtk Xtk
+
+=
+
+(r - )dt + dWtk,
+
+k = 1, ..., d,
+
+where Wtk, k = 1, ..., d, are independent one dimensional Brownian motions and r, ,  are constants. At any time t  {t0, ..., tL} the holder of the option may exercise it and receive
+the payoff
+
+f (Xt) = (max(Xt1, ..., Xtd) - K)+.
+
+In applying the method developed in this paper we take ti = iT /L, i = 0, ..., L, with T = 3, L = 9 and simulate M = 50000 trajectories
+
+PM = {mXi, i = 0, ..., L}Mm=1
+using Euler scheme with a time step h = 0.1. Setting M~ = 500, we define the set PM~ as in (3.10) and compute adaptively the low continuation values for every point in PM~ . To this end we simulate N = 100 points
+
+nXi(+ti1, mXi), 1  n  N,
+
+from each point (ti, mXi) with i < L and m  M~ . For any natural l such that 0  l  L - i - 1, values
+
+vi(+j)1
+
+X (ti, mXi)
+n i+1
+
+,
+
+0  j  l,
+
+based on local low bounds of increasing complexity, can be constructed as follows. First,
+
+vi(+0)1
+
+X (ti, mXi)
+n i+1
+
+=f
+
+X (ti, mXi)
+n i+1
+
+and vi(+j)1 for j = 1, 2 are values of the American option
+
+on the intervals [ti+1, ti+1+j] . If j > 2 then vi(+j)1 is defined as value of the Bermudan
+
+option with three exercise instances at time points {ti+1, ti+j, ti+j+1}. Now, we estimate
+
+the corresponding low continuation value by
+
+e-r(ti+1-ti) N
+
+c^i,l(mXi) =
+
+N
+
+max
+0jl
+
+n=1
+
+vi(+j)1(nXi(+ti1, mXi))
+
+.
+
+Clearly, c^i,l is the Monte-Carlo estimate of ci,v, where v = max0jl vi(+j)1. Let us fix a maximal complexity l. Sequentially increasing l from 0 to li = min{l, L - i - 1}, we compute c^i,l until l  l, where
+
+l := min{l : fi(mXi) < c^i,l(mXi)}
+
+or l := li if
+
+fi(mXi)  c^i,l(mXi), l = 1, . . . , li.
+
+Note, that in the case l < li the numerical costs are reduced as compared to the non-
+
+adaptive procedure while the quality of the estimate c^i,v, where v = max0jl vi(+j)1 is
+
+preserved. The estimated values c^i,v(mXi) allow us, in turn, to compute the estimates
+
+for the corresponding upper consumptions i,v(mXi) with m = 1, . . . , M~ . The upper consumptions values for m = M~ +1, . . . M are estimated using kernel interpolation with an
+
+10
+
+Table 4.1. Bounds (with 95% confidence intervals) for the 2-dimensional
+Bermudan max call with parameters K = 100, r = 0.05,  = 0.2, L = 9 and l varying as shown in the table.
+
+l x0 Lower Bound Upper Bound True Value
+
+v0(X0)
+
+V0(X0)
+
+90 7.892±0.1082 8.694±0.0023
+
+8.08
+
+1 100 12.872±0.1459 15.2568±0.0042 13.90
+
+110 19.275±0.1703 23.8148±0.0062 21.34
+
+90 8.070±0.1034 7.900±0.0018
+
+8.08
+
+3 100 13.281±0.1434 14.241±0.0038 13.90
+
+110 19.526±0.1852 21.807±0.0058 21.34
+
+90 8.099±0.1057 7.914±0.0018
+
+8.08
+
+6 100 13.196±0.1498 13.844±0.0038 13.90
+
+110 19.639±0.1729 21.411±0.0056 21.34
+
+exponential kernel (see Section 3.4). In Table 4.1 the corresponding results are presented in dependence on l and x0 with X0 = (X01, . . . , X0d)T , X01 = ... = X0d = x0. The true values are quoted from [8]. We see that while the quality of bounds increases significantly from l = 1 to l = 3, the crossover to l = 6 has a little impact on it. It means that either
+the true value is achieved (as for x0 = 90) or deeper analysis is needed (as for x0 = 100).
+
+4.2. Bermudan basket-put. In this example we consider again the model with d identi-
+cal assets driven by independent identical geometrical Brownian motions (see (4.1)) with  = 0. Defining the basket at any time t as X¯t = (Xt1 + ... + Xtd)/d, let us consider the Bermudan basket put option granting the holder the right to sell this basket for a fixed price K at time t  {t0, ..., tL} getting the profit given by f (X¯t) = (K - X¯t)+. We apply
+our method for constructing low and upper bounds on the true value of this option at
+the initial point (t0, X0). In order to construct local low bounds we need to compute the prices of the corresponding European style options vtt+(x) = e-rE(f (X¯t+)|Xt = x) for different  and t. It can be done in principle by Monte-Carlo method since the closed form expression for vtt+(x) is not known. However, in this case it is more rational to use the so-called moment-matching procedure from [6] and to approximate the distribution of the basket X¯t+ by a log-normal one with parameters r~ - ~2/2 and ~1/2, where r~ and ~
+are chosen in a such way that the first two moments of the above log-normal distribution
+coincide with the true ones. In our particular example r~ = r and
+
+(4.2)
+
+ ~2 = 1 log 
+
+
+
+
+d i,j=1
+
+XtiXtj exp(1{i=j}2)
+
+d i=1
+
+Xti
+
+2
+
+ 
+
+.
+
+In Table 4.2 the results of simulations for different maximal complexity l and initial values x0 = X01 = ... = X0d are presented. Here, overall M = 50000 paths are simulated and on the subset of M~ = 500 trajectories the local analysis is conducted. Other trajectories are handled with the kernel interpolation method as described in Section 3.4. Similar to
+11
+
+Table 4.2. Bounds (with 95% confidence intervals) for the 5-dimensional
+Bermudan basket put with parameters K = 100, r = 0.05,  = 0.2, L = 9 and different l.
+
+l x0 Lower Bound Upper Bound True Value
+
+v0(X0)
+
+V0(X0)
+
+100 2.391±0.0268 2.985±0.0255 2.480
+
+1 105 1.196±0.0210 1.470±0.0169 1.250
+
+110 0.594±0.0155 0.700±0.0105 0.595
+
+100 2.455±0.0286 2.767±0.0238 2.480
+
+2 105 1.210±0.0220 1.337±0.0149 1.250
+
+110 0.608±0.0163 0.653±0.0094 0.595
+
+100 2.462±0.0293 2.665±0.0228 2.480
+
+3 105 1.208±0.0224 1.295±0.0144 1.250
+
+110 0.604±0.0166 0.635±0.0090 0.595
+
+100 2.473±0.0200 2.639±0.0228 2.480
+
+6 105 1.237±0.0231 1.288±0.0142 1.250
+
+110 0.611±0.0169 0.632±0.0089 0.595
+
+100 2.479±0.0300 2.627±0.0226 2.480
+
+9 105 1.236±0.0232 1.293±0.0144 1.250
+
+110 0.598±0.0167 0.627±0.0087 0.595
+
+the previous example, significant improvements are observed for l = 2 and l = 3. The difference between the upper bound and low bound for l > 3 is less than 5%.
+
+5. Conclusions
+In this paper a new Monte-Carlo approach towards pricing discrete American and Bermudan options is presented. This approach relies essentially on the representation of an American option as the European one with the consumption process involved. The combination of the above representation with the analysis of the market over a small number of time steps ahead provides us with a low as well an upper bound on the true price at a given point. Additional ideas concerning adaptive computation of the continuation values and the use of interpolation techniques help reducing the computational complexity of the procedure. In summary, the approach proposed has following features:
+· It is Monte-Carlo based and is applicable to the problems of medium dimensionality.
+· The propagation of errors is transparent and the quality of final bounds can be easily assessed.
+· It is adaptive that is its numerical complexity can be tuned to the accuracy needed. · Different type of sensitivities can be efficiently calculated by combining the current
+approach with the method developed in [14].
+12
+
+6. Acknowledgements
+This work was finished while the second author was a visitor of the Weierstrass-Institut fu¨r Angewandte Analysis und Stochastik (WIAS), Berlin, due to the financial supports from this institute and DFG (grant No. 436 RUS 17/108/04) which are gratefully acknowledged.
+References
+[1] L. Andersen, M. Broadie (2004). A primal-dual simulation algorithm for pricing multidimensional American options. Management Science, 50, no. 9, 1222-1234.
+[2] V. Bally, G. Pag`es, J. Printems (2005). A quantization tree method for pricing and hedging multidimensional American options. Mathematical Finance, 15, No. 1, 119-168.
+[3] D. Belomestny, G.N. Milstein (2004). Monte Carlo evaluation of American options using consumption processes. WIAS-Preprint No. 930, Berlin.
+[4] P. Boyle, M. Broadie, P. Glasserman (1997). Monte Carlo methods for security pricing. Journal of Economic Dynamics and Control, 21, 1267-1321.
+[5] M. Broadie, P. Glasserman (1997). Pricing American-style securities using simulation. J. of Economic Dynamics and Control, 21, 1323-1352.
+[6] D.Brigo, F. Mercurio, F. Rapisarda, R. Scotti (2002). Approximated moment-matching dynamics for basket-options simulation. Working paper.
+[7] E. Cl´ement, D. Lamberton, P. Protter (2002). An analysis of a least squares regression algorithm for American option pricing. Finance and Stochastics, 6, 449-471.
+[8] P. Glasserman (2004). Monte Carlo Methods in Financial Engineering. Springer. [9] M. Haugh, L. Kogan (2004). Pricing American options: a duality approach. Opeations Research,
+52, No. 2, 258­270. [10] F. Jamshidian (2003). Minimax optimality of Bermudan and American claims and their Monte Carlo
+upper bound approximation. Working paper. [11] A. Kolodko, J. Schoenmakers (2004). Iterative construction of the optimal Bermudan stopping time.
+WIAS-Preprint No. 926, Berlin. [12] D. Lamberton, B. Lapeyre (1996). Intoduction to Stochastic Calculus Applied to Finance. Chapman
+& Hall. [13] F.A. Longstaff, E.S. Schwartz (2001). Valuing American options by simulation: a simple least-squares
+approach. Review of Financial Studies, 14, 113-147. [14] G.N. Milstein, M.V. Tretyakov (2005). Numerical Analysis of Monte Carlo evaluation of Greeks by
+finite differences. J. of Computational Finance, 8, No. 3. [15] L.C.G. Rogers (2001). Monte Carlo valuation of American options. Mathematical Finance, 12, 271-
+286. [16] A.N. Shiryaev (1999). Essentials of Stochastic Finance: Facts, Models, Theory. World Scientific.
+Weierstrass Institute for Applied Analysis and Stochastics, Mohrenstr. 39, D-10117 Berlin, Germany
+E-mail address: belomest@wias-berlin.de
+Department of Mathematics, Ural State University, Lenin Str. 51, 620083 Ekaterinburg, Russia.
+E-mail address: Grigori.Milstein@usu.ru
+13
+
+SFB 649 Discussion Paper Series 2006
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Calibration Risk for Exotic Options" by Kai Detlefsen and Wolfgang K. Härdle, January 2006.
+002 "Calibration Design of Implied Volatility Surfaces" by Kai Detlefsen and Wolfgang K. Härdle, January 2006.
+003 "On the Appropriateness of Inappropriate VaR Models" by Wolfgang Härdle, Zdenk Hlávka and Gerhard Stahl, January 2006.
+004 "Regional Labor Markets, Network Externalities and Migration: The Case of German Reunification" by Harald Uhlig, January/February 2006.
+005 "British Interest Rate Convergence between the US and Europe: A Recursive Cointegration Analysis" by Enzo Weber, January 2006.
+006 "A Combined Approach for Segment-Specific Analysis of Market Basket Data" by Yasemin Boztu and Thomas Reutterer, January 2006.
+007 "Robust utility maximization in a stochastic factor model" by Daniel Hernández­Hernández and Alexander Schied, January 2006.
+008 "Economic Growth of Agglomerations and Geographic Concentration of Industries - Evidence for Germany" by Kurt Geppert, Martin Gornig and Axel Werwatz, January 2006.
+009 "Institutions, Bargaining Power and Labor Shares" by Benjamin Bental and Dominique Demougin, January 2006.
+010 "Common Functional Principal Components" by Michal Benko, Wolfgang Härdle and Alois Kneip, Jauary 2006.
+011 "VAR Modeling for Dynamic Semiparametric Factors of Volatility Strings" by Ralf Brüggemann, Wolfgang Härdle, Julius Mungo and Carsten Trenkler, February 2006.
+012 "Bootstrapping Systems Cointegration Tests with a Prior Adjustment for Deterministic Terms" by Carsten Trenkler, February 2006.
+013 "Penalties and Optimality in Financial Contracts: Taking Stock" by Michel A. Robe, Eva-Maria Steiger and Pierre-Armand Michel, February 2006.
+014 "Core Labour Standards and FDI: Friends or Foes? The Case of Child Labour" by Sebastian Braun, February 2006.
+015 "Graphical Data Representation in Bankruptcy Analysis" by Wolfgang Härdle, Rouslan Moro and Dorothea Schäfer, February 2006.
+016 "Fiscal Policy Effects in the European Union" by Andreas Thams, February 2006.
+017 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, March 2006.
+018 "The Bologna Process: How student mobility affects multi-cultural skills and educational quality" by Lydia Mechtenberg and Roland Strausz, March 2006.
+019 "Cheap Talk in the Classroom" by Lydia Mechtenberg, March 2006. 020 "Time Dependent Relative Risk Aversion" by Enzo Giacomini, Michael
+Handel and Wolfgang Härdle, March 2006. 021 "Finite Sample Properties of Impulse Response Intervals in SVECMs with
+Long-Run Identifying Restrictions" by Ralf Brüggemann, March 2006. 022 "Barrier Option Hedging under Constraints: A Viscosity Approach" by
+Imen Bentahar and Bruno Bouchard, March 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "How Far Are We From The Slippery Slope? The Laffer Curve Revisited" by Mathias Trabandt and Harald Uhlig, April 2006.
+024 "e-Learning Statistics ­ A Selective Review" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, April 2006.
+025 "Macroeconomic Regime Switches and Speculative Attacks" by Bartosz Makowiak, April 2006.
+026 "External Shocks, U.S. Monetary Policy and Macroeconomic Fluctuations in Emerging Markets" by Bartosz Makowiak, April 2006.
+027 "Institutional Competition, Political Process and Holdup" by Bruno Deffains and Dominique Demougin, April 2006.
+028 "Technological Choice under Organizational Diseconomies of Scale" by Dominique Demougin and Anja Schöttner, April 2006.
+029 "Tail Conditional Expectation for vector-valued Risks" by Imen Bentahar, April 2006.
+030 "Approximate Solutions to Dynamic Models ­ Linear Methods" by Harald Uhlig, April 2006.
+031 "Exploratory Graphics of a Financial Dataset" by Antony Unwin, Martin Theus and Wolfgang Härdle, April 2006.
+032 "When did the 2001 recession really start?" by Jörg Polzehl, Vladimir Spokoiny and Ctlin Stric, April 2006.
+033 "Varying coefficient GARCH versus local constant volatility modeling. Comparison of the predictive power" by Jörg Polzehl and Vladimir Spokoiny, April 2006.
+034 "Spectral calibration of exponential Lévy Models [1]" by Denis Belomestny and Markus Reiß, April 2006.
+035 "Spectral calibration of exponential Lévy Models [2]" by Denis Belomestny and Markus Reiß, April 2006.
+036 "Spatial aggregation of local likelihood estimates with applications to classification" by Denis Belomestny and Vladimir Spokoiny, April 2006.
+037 "A jump-diffusion Libor model and its robust calibration" by Denis Belomestny and John Schoenmakers, April 2006.
+038 "Adaptive Simulation Algorithms for Pricing American and Bermudan Options by Local Analysis of Financial Market" by Denis Belomestny and Grigori N. Milstein, April 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+
