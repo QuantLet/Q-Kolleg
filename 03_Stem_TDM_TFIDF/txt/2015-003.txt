@@ -1,0 +1,654 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2015-003
+Identifying Berlin's land value map using Adaptive
+Weights Smoothing
+Jens Kolbe* Rainer Schulz* Martin Wersing* Axel Werwatz*
+* Technische Universität Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Identifying Berlin's land value map using Adaptive Weights Smoothing
+Jens Kolbe, Rainer Schulz, Martin Wersing, and Axel Werwatz December 18, 2014
+Kolbe and Werwatz: Technische Universita¨t Berlin, Institut fu¨r Volkswirtschaftslehre und Wirtschaftsrecht, Straße des 17. Juni 135, 10623 Berlin, Germany, and Collaborative Research Center 649 Economic Risk, Humboldt-Universita¨t zu Berlin. Emails: j.kolbe@tu-berlin.de and axel.werwatz@tu-berlin.de. Schulz and Wersing: University of Aberdeen Business School, Edward Wright Building, Dunbar Street, Aberdeen AB24 3QY, United Kingdom. Emails: r.schulz@abdn.ac.uk and martin.wersing@abdn.ac.uk.
+1
+
+Abstract We use Adaptive Weights Smoothing (AWS) of Polzehl and Spokoiny (2000, 2003, 2006) to estimate a map of land values for Berlin, Germany. Our data are prices of undeveloped land that was transacted between 1996-2009. Even though the observed land price is an indicator of the respective land value, it is influenced by transaction noise. The iterative AWS applies piecewise constant regression to reduce this noise and tests at each location for constancy at the margin. If not rejected, further observations are included in the local regression. The estimated land value map conforms overall well with expert-based land values. Our application suggests that the transparent AWS could prove a useful tool for researchers and real estate practitioners alike. Keywords: land value, adaptive weight smoothing, spatial modeling JEL Classification: C14, R14, R15
+2
+
+1 Introduction
+The scope of flexible, local regression modelling has been greatly expanded in the past decades, both by computational advances and increased data availability. Nonparametric kernel regression, in particular, has become a standard tool of applied statistics and is nowadays implemented in most statistical software packages. Kernel regression assumes only that the regression function is smooth. Smoothness, however, is an unattractive assumption in applications where the regression function is likely to possess jumps or sharp edges. Moreover, smoothness is at the heart of the well-known `curse of dimensionality': the implied continously changing regression function makes kernel regression very data-hungry, resulting in the low precision of kernel estimates in multivariate settings.
+Semiparametric regression models have been developed to overcome the problems associated with the `over-flexibility' of nonparametric regression. Additive regression models, for instance, impose an additively seperable structure on the regression relation in order to overcome the curse of dimensionality (Stone 1985). They maintain, however, that each component function is smooth. Additive models thus are also not suitable for situations with `edgy' regression functions.
+A well-known example of edgy regression is image denoising. From a statistical perspective, image data can be regarded as a noisy representation of the image of interest. The underlying image is regarded as the regression function to be recovered by a suitable estimation method. A challenge for regression modelling of image data are the specific structural features of images: they are typically composed of several regions (e.g. organs or tumors in medical images) with pronounced edges. Moreover, within each region of the image (i.e. the regression function) image values are rather homogenous. Smooth nonparametric regression is unsuitable in this setting as it can neither cope with the edges of the regression function nor does it exploit its local homogeneity. A suitable regression method for this situation was proposed by Polzehl and Spokoiny (2000, 2003). They developed Adaptive Weights Smoothing
+3
+
+(AWS) originally in the context of image denoising. In this paper, we demonstrate that AWS can also be applied to land value estimation, a problem of considerable interest in economics that shares the main structural features of the image denoising problem.
+AWS, which has been extended into the propagation-separation approach1, replaces the smoothness assumption of nonparametric kernel regression with the assumption that the unknown regression function is constant or can be at least approximated by a constant for a set of observations U (xi) around a location xi. AWS uses an iterative algorithm to determine this set. For each observation i, the algorithm starts with a small neighborhood U 0(xi) of locally close observations and uses these to estimate the local constant. In each step k, the algorithm enlarges the set of observations for each i and includes all those observations xj into U k(xi) for which the hypothesis of local constancy at i and j cannot be rejected. In this situation, propagation of the set of observations takes place. If, however, local constancy for observations i and j is rejected, separation takes place. xj does not become member of U k(xi). The algorithm stops in step k and the observations in U k(xi) are used for the final estimate of the constant at xi.
+AWS has several remarkable properties. First, AWS does not suffer from the `curse of dimensionality', because the dimension of xi plays no role for the iterative procedure. Second, unlike nonparametric kernel regression, AWS can handle `edges' in the regression function. Third, by successively increasing the bandwidth in the direction of xi, AWS allows more distant observations to be included in an estimate at any location as long as this is justified by approximate constancy of the estimate. The resulting areas of local constancy are completely determined by the data. Areas with identical values need not be of the same shape, say rectangular or radial (as in kernel regression), and also do not have to be adjacent.
+We show in this paper that AWS and its properties are well-suited not only
+1See Polzehl and Spokoiny (2006). For simplicity, we nonetheless refer to the approach as AWS throughout the paper
+4
+
+for image denoising but also for our economic application of land value estimation. Instead of a smudged image, we work with a set of land prices from a city (Berlin, Germany); instead of pixels, our design points xi are location coordinates; instead of finding areas with the same contrast, we find areas with approximately constant land values. There are strong reasons for using AWS in our application. First, piecewise constancy agrees with the block-wise layout of a city, formed by streets and transport infrastructure and shaped by planning and zoning regulations. It also fits with the prediction of the monocentric city model that land should have the same value at locations with equal travel distance to the central business district. Second, in most practical situations, fine graduation of land values will not be economically relevant, making the assumption of approximate local constancy reasonable. Third, a smooth map of land values could only be estimated imprecisely, as it requires many local observations, which might not be available.
+Land value estimation is an important problem in economics. Knowledge of a city's land values is of high interest to both real estate market participants and urban economists. Market participants need information on land values for purchasing decisions, development decisions, property taxation, and compulsory purchases. Urban economists have used (expert-based) land values to decompose house price dynamics (Bostic et al. 2007) and to assess the effect of local (dis)amenities on land values (Diamond 1980, Ahlfeldt and Maennig 2010).
+Indeed, in Germany, information on the real estate market is seen as so important that expert-based land values (Bodenrichtwerte, BRW) must be published at least every two years. BRW are assessed by independent surveyors, following detailed guidelines. They serve as the benchmark for our AWS-based land values in this paper. Despite being based on detailed guidelines, it is fair to say that BRW rely heavily on local surveyors' knowledge and expertise. AWS, on the other hand, is a transparent statistical approach for the problem of jointly determining areas and land values. We apply AWS to our data of undeveloped land transacted between 1996-2009. AWS splits each price into the land value (the expected price) and
+5
+
+transaction noise, which could have occurred during the business dealings. Our application of AWS to Berlin land prices reveals that overall the estimated land values are close to BRW. For specific parts of Berlin, however, land values estimated with AWS and BRW can show different local behavior, particularly if AWS is applied with a low degree of smoothing or if local circumstances (such as a lake-side location) demand (favor) expert knowledge. In summary, our paper demonstrates how land values can be estimated using a transparent statistical procedure. In addition to academic research, the procedure should be useful for practitioners as it provides a statistical method to which they can bring their expert knowledge.
+The remainder of the paper is organized as follows. In Section 2, we explain the BRW, which serve as benchmark in our study. In Section 3, we explain AWS in the context of our application and detail in Section 4 the computational aspects of our implementation. Section 5 describes the transaction data. Section 6 presents the results of our empirical analysis. The final section concludes.
+2 Expert-based land values
+Local surveyor commissions are obliged by the German Building Law (Baugesetzbuch) to assess land values (Bodenrichtwerte, BRW) at least every two years. The members of a surveyor commission act on an honorary basis and are independent from the local administration. The local administration provides support, however, by collating information on the market and individual transactions.
+The surveyors assess BRW with the sales comparison approach using land prices of comparable lots that were sold recently. Land transactions dating further back can be considered, too, once adjusted for the general price trend. Effects of unusual site conditions on the transaction price should be corrected for. Besides land prices, other real estate market information should be used too whenever deemed as being relevant. Such information can include transaction prices of developed land, zoning restrictions, and rent levels. In addition to the land value for a location, the surveyors
+6
+
+have also to decide on areas for which BRW are equal. Guidelines provide further details on how such areas should be found and on how BRW should be derived (Richtlinie zur Ermittlung von Bodenrichtwerten).
+Figure 1 shows the BRW map for Berlin, with 1 January 2010 as the reference date. The expert-based land values are therefore effectively for the year 2009, as the map is based on transaction information up and including this year. Land values within the first percentile of the value distribution are shown in light grey (bright yellow). The intensity increases to dark grey (bright red) for land values that fall within the tenth percentile of the distribution. From this distant view, the dominating feature of the map is the declining (color) intensity in the outward direction away from the city center. At the aggregate level, the land value map seems to confirm the prediction of the monocentric city model that the land value gradient falls with distance from the city center.2
+[Figure 1 about here.]
+At close view, however, there is indication that the land value gradient is not strictly monotone in all directions. Figure 2 shows a detail of the BRW map for the center of Berlin. BRW areas are indicated by the dashed (red) lines and the solid (red) lines in case that the areas share borders with special development areas (Entwicklungsbereiche). Area 1132 in the lower left quadrant of the map detail, for instance, has a BRW of 2900 EUR per square meter. M1 indicates that this area is developed densely for commercial use mainly. Within area 1132, there are also areas with a higher BRW, such as the Gendarmenmarkt square in area 1335.
+[Figure 2 about here.]
+The detail reveals even better than Figure 1 that the BRW map consists of areas with identical land values and that the areas have sharp boundaries. Even between
+2Fitting a third degree polynomial for the distance to the CBD gives such a decreasing function with an R2 = 0.2345.
+7
+
+adjacent areas, BRW can vary substantially. At the same time, BRW can be the same in areas that are disconnected. Any statistical estimator of land values should be able to mimic this behavior. We now explain that AWS is such an estimator.
+
+3 Adaptive Weights Smoothing
+
+We consider the nonparametric regression model
+
+yi = (xi) + i
+
+(1)
+
+for our application of land value estimation. yi is the log land price per sqm of a site with location coordinates xi = [x1i, x2i]. (xi) is the log land value at xi and i  N (0, 2) is independent of xi.3 As discussed in Section 1, it is reasonable to assume that land values can be the same at different locations, whereby the locations do not have to be adjacent. We denote with U (xi) the set of locations where the log land value is (xi). If we knew the set U (xi), it would be straightforward to estimate (xi). On the other hand, if we knew (xi) for all observations, then it would be straightforward to determine the set U (xi).
+
+In an iterative procedure AWS identifies, for each location xi, such sets of observations and uses the kernel estimator
+
+^i  ^(xi) =
+
+n j=1
+
+wij
+
+yj
+
+n j=1
+
+wij
+
+.
+
+(2)
+
+to estimate  (xi). The weights are
+
+wij = K1 (distij) × K2 (levij) .
+
+(3)
+
+3Scatterplots of the estimated AWS land values, ^(xi), against the land prices, yi, (not reported) as well as kernel density estimates of the estimated AWS residuals, ^i, (not reported) indicate that the assumption of normally distributed and homoscedastic (log) land prices is approximately satisified in our application below.
+
+8
+
+The kernel functions K1(u) and K2(u) work on a positive argument u, are strictly positive and non-increasing on the support [0, 1] and zero otherwise. Examples are the uniform kernel function K(u) = I(u  [0, 1]), which is constant on the support and the triangular kernel function K(u) = (1 - u)I(u  [0, 1]), which is decreasing on the support. The arguments in the kernel functions in Eq. 3 are the distance measure for the locations i and j scaled by bandwidth h
+
+distij
+
+
+
+(xi, xj) h
+
+(4)
+
+and the test statistic for a constant local level of land values scaled by its critical
+
+value
+
+levij
+
+
+
+Tij 
+
+.
+
+(5)
+
+While the role of the first kernel in Eq. 3 should be clear to readers familiar with nonparametric regression, the role of the second kernel needs motivation. This is best done by going through the first two iterative steps of AWS, where the second kernel becomes relevant after the initial step and plays a role at the extensive and the intensive margin of weighting.
+
+In the initial estimation step, k = 0, levi0j = 0 for all i, j, so that K(levi0j) = 1. The bandwidth h0 is set very small, leading to a small set U 0(xi). The observations in this set are spatially close to xi and we can be confident that their land values are approximately the same. Using Eq. 2, we estimate
+
+^i0 =
+
+n j=1
+
+wi0j
+
+yj
+
+n j=1
+
+wi0j
+
+(6)
+
+with weights
+
+wi0j = K1 disti0j .
+
+(7)
+
+Eq. 6 is the conventional Nadaraya-Watson kernel estimator of (xi). Because only few spatially close observations are used, ^i0 will be a very local estimate of (xi). It might be that the initial bandwidth is too small and that the estimate could be
+
+9
+
+improved by increasing the bandwidth to h1 > h0, thereby increasing the number of observations used to estimate (xi). Increasing the bandwidth has the well-known effect of reducing the variability of the estimates, but may introduce bias. This will not occur if those observations in the now enlarged neighborhood can be identified that have the same land value as observation i. In this case, the larger bandwidth leads to variance reduction, because more observations are used to estimate the land value without introducing bias.
+It is therefore crucial to test if (xj) is the same as (xi). To understand how this is implemented in AWS, suppose we used initially the most local version of the estimator in Eq. 6 by setting h0 so small that only observation i would be used. The land value estimate would be ^i0 = yi. Increasing the bandwidth to h1 > h0 would imply that more observations become available that could be used for the estimation of (xi). For each such observation j, we had to decide if we should include the observation into U 1(xi). Obviously, we should do this only if the land values are the same at both locations and if
+
+H0 : (xi) = (xj)
+
+(8)
+
+is true. Given the model from Eq. 1, the null hypothesis implies ^i0 - ^j0 = yi - yj = i - j and ^i0 - ^j0 H0 N (0, 22). We can therefore construct the test statistic
+
+^i0 - ^j0 H0 N (0, 1) 22
+
+
+
+Ti1j 
+
+^i0 - ^j0 22
+
+2
+H0 21 .
+
+(9)
+
+If we knew 2, we could compute Ti1j and compare it with the critical value  of the 21 distribution at some significance level . Whenever Ti1j-1 = levi1j < 1, we could not reject the null hypothesis in Eq. 8 at significance level  and K2(levi1j) > 0. The observation with location xj should become member of U 1(xi) and yj should be used for the estimation of (xi). If, on the other hand, levi1j > 1, then observation j should not become member of U 1(xi) and yj should not be used to estimate (xi)
+
+10
+
+and K2(levi1j) = 0. The treatment of the borderline case levi1j = 1 depends on the chosen kernel function and could lead to the in- or exclusion of observation j.
+We see that K2(levi1j) works at the extensive margin by indicating whether observation j should be included in U 1(xi) or not. But K2(levi1j) plays also a role at the intensive margin as long as K2(u) < 0. For observations in U 1(xi), the magnitude of K2(levi1j) is then inversely related to the magnitude of levi1j. If we now consider the weights from Eq. 3 for step k = 1
+
+wi1j = K1 dist1ij × K2 levi1j ,
+
+(10)
+
+we see that the weight of observation yj in the average formed at i is determined by both kernel functions. The first kernel plays the same role as in conventional nonparametric regression. It will allocate more weight to observation j the closer xj is to xi. In step k = 1, the distance penalty is relaxed because a larger bandwidth h1 is employed than in the initial step. Hence, more observations are used for ^i1. The second kernel controls that this does not introduce bias. At the extensive margin, only those observations receive a nonzero weight for which the assumption of local constancy is not rejected. At the intensive margin, the included observations receive a higher weight the more likely it is that they fit with the null hypothesis.
+Comparing the weights from Eqs. 7 and 10 reveals how AWS differs from and improves upon conventional kernel smoothing. Introducing a second kernel function, which kicks in at iteration k = 1, makes AWS `structurally adaptive'. It incorporates information about the local properties of the regression function from the previous iterative step. If there is evidence for local constancy, then increasing the bandwidth h is beneficial (`propagation') as the constant land value will be estimated with more land price observations. If, however, the previous step estimates ^i0 and ^j0 differ considerably, then Ti1j will be large relative to  and local homogeneity will be rejected and K2(levi1j) will assign a zero weight to observation j (`separation'). Successive estimation and testing are thus intertwined to improve estimation precision and to
+
+11
+
+identify the set of locations where land values are the same.
+
+In the motivation just given, we made several simplifying assumptions that need qualification. First, we assumed that the initial bandwidth is set so small that only observation yi is considered. This will lead to a very imprecise initial estimate of (xi). As a consequence, AWS starts with a small bandwidth, but one that is typically large enough to allow computation of ^i0 at most locations with more than one observation. The test statistic becomes
+
+Ti1j = A0i
+
+^i0 - ^j0 2^2
+
+2
+,
+
+(11)
+
+where A0i =
+
+n j=1
+
+wi0j ,
+
+i.e.,
+
+the
+
+sum
+
+of
+
+the
+
+weights
+
+at
+
+i
+
+from
+
+step
+
+0,
+
+which
+
+can
+
+be
+
+regarded as the `local sample size'.4 Second, AWS is an iterative algorithm and the
+
+distributional assumption regarding Tikj will only hold in the first iteration, k = 1.
+
+We summarize the iterative AWS algorithm. In step 0, ^i0 is estimated for each location with an observation using a Nadaraya-Watson kernel estimator using a small bandwidth h0. The estimated land values are used to compute the pairwise terms levi0j. In step 1, the bandwidth is increased to h1. More observations are now available for the estimation of (xi). However, some observations will have markedly
+different land values from (xi) and should not be used. The estimator from Eq. 2
+controls for this via the second kernel. Observations with land values similar to (xi) will receive positive weight in the estimator ^i1, those with markedly different values will receive no weight at all. The estimated land values ^i1 are used to compute the pairwise terms levi1j. In step 2, the bandwidth is increased to h2 and so on. The procedure terminates in step k, when the bandwidth reaches the threshold h.
+
+4Obviously, if only the observation itself was used in step 0, Ai0 = 1, and Eq. 11 becomes Eq. 9.
+
+12
+
+4 Implementation
+
+For our application, we use the R-package: Adaptive weights smoothing (Polzehl 2014). We work on a grid of bins instead of the individual site location to increase computational speed. In our preferred implementation, bins have the size of 152×152 meters, which is smaller than the average BRW area. Combinations of adjacent bins therefore have the potential to recombine into BRW areas. Given that Berlin covers an area of 891 km2, with 45 km distance from west to east and 38 km from south to north, this leads to a grid of 300 × 300 = 90, 000 equally-sized bins.
+Within each bin, we average the log transaction prices pj,i. These bin-averages become the dependent variable yi. Binning smoothes the transaction data and increases computational speed with only small cost to accuracy (Fan and Marron 1994). For instance, given our choice of k, the algorithm takes about 14 minutes of CPU time on the preferred grid. On a 500 × 500 grid, the algorithm takes already about 29 minutes to run. The algorithm would take much longer if the individual transaction data were used instead. Visual inspection of the land values estimated on the 500 × 500 and the 300 × 300 grids show no discernable differences. A grid coarser than 300 × 300 speeds up the computation further, but differences in the estimated land value maps become discernable.
+Given the grid structure of our data, the location coordinates are integers and indicate the row and column position of bin i in the grid. Therefore, xi = [ri, ci] with r, c  {1, . . . , 300}. Correspondingly, the bandwidth h is an integer. To measure the distance between observations in Eq. 4, we use the Manhattan distance
+
+(xi, xj) = |ri - rj| + |ci - cj| .
+
+(12)
+
+We use the triangular kernel function on the positive semi-axis
+
+K(u) = (1 - u)I(u  [0, 1])
+
+(13)
+
+13
+
+for both K1(u) and K2(u). We have experimented also with other kernel functions, but the choice was negligible for the results.
+To motivate what these choices imply, we use Figure 3 and focus on bin i = 25 in the center. For h = 2, we have (x25, x25) = 0, (x25, x24) = (x25, x26) = 1 and (x25, x27) = 2. The scaled distance measures are dist25,25 = 0, dist25,24 = dist25,26 = 0.5 and bins further to the left or right have a distance measure of at least one. This implies that the distance kernel gives y25 the most weight, y24 and y26 lesser weight and, for instance, y27 no weight at all.
+
+[Figure 3 about here.]
+
+We estimate the variance for the level penalty term in Eq. 11 with
+
+
+
+^2
+
+=
+
+1 N
+
+N
+
+
+1
+
+i=1  ni - 1
+
+ni (pj,i - yi)2 j=1 
+
+.
+
+(14)
+
+Only bins i with at least two transaction prices pj,i are relevant for this average over estimated within-bin variances. N is the total number of such bins.
+The crucial smoothing parameter of AWS is , which can be viewed as the `bandwidth' in the level direction. Choosing  too high will lead to a loss of sensitivity to changes in the land value map. Choosing  too low will result in forgoing the benefits of extending the number of observations that can be used to estimate the local land value. This trade-off is akin to the familiar bias-variance trade-off of non-adaptive, conventional nonparametric regression. In the latter case, the desirable properties of data-driven smoothing parameter selectors such as cross-validation have been established. However, working out such a theory for the adaptive, iterative AWS procedure is very challenging and has not yet been accomplished.
+While there is no established data-driven method for choosing , Polzehl and Spokoiny (2006, 2008) have proposed an approach to arrive at a suitable, objective value. This approach is based on the observation that the level penalty of AWS can
+
+14
+
+be viewed as a test statistic, Tikj, with  acting as the critical value (see Eqs. 9 and 11 above). For Tikj > , the null hypothesis of local homogeneity is rejected and yj should not be used to estimate (xi). If the null hypothesis is true, then this amounts to a type-I error: an artificial `edge' has been detected when there should have been propagation. Hence, one may choose  such that the probability of a type-I error is sufficiently small. This suggests to choose  as the 1- percentile of the 12-distribution.5 Due to the multiple testing of the null hypothesis in each iteration step, at every design point, however,  does not equal the probability of a type-I error. Thus, no unique, well-defined choice for  can be made within this approach.
+To arrive at a unique value of , Polzehl and Spokoiny (2006, 2008) have suggested to consider the following extreme situation: the case where (xi) = , i.e. the regression function is globally homogenous. In this hypothetical situation, the null hypothesis of homogeneity holds everywhere and the AWS algorithm should continue to propagate in each iteration step such that it arrives at the global model in the final iteration step k at all design points. Obviously, this can be achieved by choosing   . To arrive at a sensible value of , Polzehl and Spokoiny thus propose to choose the smallest value of  such that the algorithm will, with a high probability, continue to propagate everywhere in the case of the globally constant model. We will refer to this smallest value of  satisfying the propagation condition as .
+Since the hypothetical situation of a globally constant regression model is considered,  must be found by Monte Carlo simulation. We follow the simulation design proposed by Becker (2014) and Becker and Math´e (2013) and adapt it to our context. We maintain the assumption that the errors of the regression model are normally distributed and homoscedastic. The variance used to simulate the data equals the conditional variance estimate obtained from our transactions data using
+5While the exact sampling distribution of Tikj can only be derived in iteration step k = 1 if the bandwidth h0 is very small, the 21-distribution may still be a good approximation in every iteration step k under the assumptions of normally distributed, homoscedastic errors.
+15
+
+Eq. 14. Becker (2014) and Becker and Math´e (2013) have shown that in our case of Gaussian regression,  does not depend on the value of . We thus set (xi) =  = 0, for simplicity. We simulate data for this normal regression with constant mean and fixed variance on a quadratic grid of 100 × 100 points. This is close to the number of bins for which we observe land transactions and is exactly a third of the grid used in our application. The bandwidth for the location penalty is set to 45. This is a third of the bandwidth h = 135 in our actual application, see Section 6 below.
+The definition of  requires to specify the desired level at which one safeguards against not propagating everywhere at the end of the iteration process in the case of the globally constant model. In the formulation of Becker (2014) and Becker and Math´e (2013), this `propagation level' can be interpreted as the expected probability that AWS (erroneously) separates in the homogenous situation (xi) =  = 0. We set = 0.0005. Given , Becker (2014) and Becker and Math´e (2013) provide a sufficient condition for checking whether a candidate value of  is meeting the desired propagation level.6  is then found as the smallest value of  meeting this requirement for the simulated data.
+5 Data
+The transaction data has been provided by Berlin's surveyor commission (Gutachterausschuss fu¨r Grundstu¨ckswerte, GAA). The GAA is entitled by law to request and collect information on all real estate transactions occurring in Berlin. The data has 24,519 observations and covers arms-length transactions of undeveloped land during the years 1996-2009. For each observation, information is provided on the transaction price per square meter (sqm), geo-coordinates, unusual features of the site, and information on aspects of the business dealings. The BRW map shown in
+6The condition involves the probability that the Kullback Leibler divergence between the adaptive AWS estimate and the globally constant  is bounded and that the bound does not increase in the iteration process for a given propagation level . Becker and Math´e (2013) also propose a method for estimating this probability from the simulated data.
+16
+
+Figure 1 is based on these land transactions, but the GAA surveyors will have considered also other real estate market information. We have therefore only a subset of the information that was available to the surveyors. Figure 4 shows the locations of the transacted sites.
+[Figure 4 about here]
+Most transactions of undeveloped land took place in the residential areas at the outskirts of the city. Less transactions of undeveloped land took place in the densely developed city center.
+Table 1 presents summary statistics for the transaction data. The land prices are in real terms and adjusted for unusual features of the site and unusual aspects of the business dealing. Unusual features of the site include physical aspects such as structural damage or flooding risk and legal aspects such as rights of way or use for pipes or cables. Such easements are rather common. Unusual aspects of business transaction include price rebates, installment payment, and investment obligations. The Appendix explains the adjustments. We could match 23,950 transactions with their BRW using the geo-coordinates. For the remaining 569 transactions, the GAA did not compute a BRW, perhaps because of restrictions on land use or land disposal.
+[Table 1 about here]
+Land prices and the corresponding BRW show substantial variation, both at the natural and the log scale, as indicated by their standard deviations. The average levels of land prices and BRW are quite similar, indicating that our adjustments for the general price trend and unusual aspects are in line with adjustments done by the GAA surveyors.
+[Figure 5 about here]
+17
+
+Applying the 300 × 300 grid to the transaction data, 7,448 bins end up with transactions, of which 2,924 bins contain exactly one transaction. On average, the filled bins contain 3.29 land transactions. Figure 5 shows a map with the non-empty land price bins and as backdrop the map of expert-based log land values. The more satiated a bin, the higher is yi. Inspection reveals that in some areas land prices yi are similar to surrounding expert-based land values, but in others they are not. As to be expected, the expert-based land values are smoother than the raw land prices, see Figure 6.
+[Figure 6 about here]
+If we apply the same grid to the expert-based land values, we obtain 21,842 nonempty bins. Denoting with BRWi the bin-average of the log expert-based land values, we observe this variable for 7,222 of the 7,448 bins with land transactions. Table 2 presents summary statistics for the binned data conditional on the bin containing at least one transaction.
+[Table 2 about here]
+Binning corrects for the fact that we observe relatively more transactions in the lower-priced residential than the higher-priced central areas of the city. This explains why binned land prices and binned BRW are higher on average and show larger variation than the observations at the level of individual transactions, see the relevant statistics in Tables 1 and 2.
+6 Results
+We start by motivating the numerical values of the two smoothing parameters, h and , employed in our AWS application. We set the initial bandwidth h0 = 2. A smaller bandwidth corresponds to yi and therefore an imprecise estimate of ^0.
+18
+
+Even our initial bandwidth choice leads to a jaggy land value map. The iterative algorithm stops when the location bandwidth reaches h = 135.7 This corresponds to a radius of 20,520 meters.
+To assess if AWS can reproduce the BRW values, we estimate the land values for an array of different  values. We choose critical values of the 12-distribution for this array. The critical values correspond to the 1- percentiles of the 21distribution with 0 = 0.05 and 1-p = 0.051.125k for p = 1 . . . 6. As we discussed in Section 3, the test statistic in iteration step k = 1 will follow the 12-distribution under the null hypothesis if h0 is very small. Even though our initial bandwidth is slightly larger, Figure 7 shows that Ti1j follows the 12-distribution fairly.
+[Figure 7 about here]
+Although this distributional result is unlikely to hold in later steps of the algorithm, we feel that our choice of  is less arbitrary than others. To further safeguard against separation in homogenous regions, we estimate also the land values using  = 19.9 which has been chosen with the simulation explained in Section 4.
+We begin our discussion of the AWS results by showing in Figure 8 the estimated Berlin-wide land value map for . As our AWS procedure works on a bin grid, the estimated land values are visualized by framed bins. For coloring the bins in Figure 8 we employ the same scheme as in the BRW map of Figure 1.
+[Figure 8 about here]
+Comparing both maps shows that he AWS bins in Figure 8 only cover a part of the continuously shaded BRW areas of Figure 1. In view of the map of transactions in Figure 4, it becomes clear that the expert-based BRW map involves a substantial amount of extrapolation as there were no transactions in the areas not covered by
+7We use the sequence h = {1, 2, 3, 4, 5, 7, 9, 11, 14, 18, 22, 28, 35, 44, 55, 69, 86, 108, 135} to increase hk in the k = 19 iteration steps.
+19
+
+one of the AWS bins. Moreover, the comparison of the BRW and AWS maps shows that both approaches agree fairly well in terms of their spatial color patterns. Hence, at least for , the estimated log-land values based on AWS appear to correspond quite closely to their expert-based benchmark.
+Both the differences of AWS and BRW in terms of their spatial coverage as well as their general agreement in log-land values is summarized in Figure 9 where both maps have been superimposed (rectangular AWS bins are in the foreground, continuously shaded BRW areas in the background).
+[Figure 9 about here]
+In order to investigate the dependency of the AWS land values on , particularly the (dis-)agreement between AWS and BRW land values, we run a series of bivariate least-squares regressions. The dependent variable in each regression is the AWS land value obtained for a given value of .
+We start by regressing the AWS land values on the land prices yi. The resulting coefficients of determination, R2, is reported in the `Land price' row of Table 3. We find that the in-sample fit is fairly good for all values of . Moreover, the R2s from these regressions show the expected pattern: more smoothing (i.e. a larger value of ) leads to a worse in-sample fit. While these results suggest that AWS delivers sensible results for a range of values of , they can not give an answer about which value of  to prefer.
+[Table 3 about here]
+We therefore run a second set of regressions, where we regress the AWS land values on the corresponding bin averages of the expert-based land value, i.e. the BRWi. The R2s of these regressions are reported in the row `BRW' of Table 3. There is generally good agreement between the AWS and BRW land values for all considered values of . Though, the R2 values show an inverse U-shape pattern:
+20
+
+they initially increase but eventually decrease for successively higher values of . The strongest agreement occurs at  = 23.284 (R2 = 0.783). For our favoured , the coefficient of determination is only slightly smaller. While this exercise is not the equivalent of independent out-of sample evidence, the observed pattern still suggests that the simulation based method delivers a reasonable choice of . That is, if we regard the expert-based BRW as a benchmark,  offers a good-compromise between over­ and under-smoothing for our data.
+While Table 3 collects some evidence on the impact of  at the global level, its influence on the AWS procedure is also noticeable at a more local level. This is illustrated in Figure 10 which shows AWS results for a particular area of the city that roughly corresponds to the Rudow and Alt-Glienicke localities of the boroughs of Neuk¨olln and Treptow (to locate this area within the Berlin-map it is marked by a rectangle in Figure 9). The estimates in the upper panel are based on  while the lower panel shows results for the considerably smaller  = 3.8415.8
+[Figure 10 about here]
+In the upper panel, it can be seen that with  AWS identifies three distinct areas of homogenous land values marked by dashed ellipsoids. While roughly these three areas are also visible in the lower panel, the AWS estimates for the small value of  show considerably more variation in the levels of land values and in the shapes of locally homogenous areas. In the light of the discussion in the previous paragraph, where  was found to overall deliver a good agreement between AWS and BRW land values, Figure 10 suggests that the surveyors appear to implicitly apply a relatively high degree of smoothing when judging differences in land values at different locales rather than aiming at a very detailed map that AWS delivers for small .
+Finally, in Figure 11 we consider the local degree of (dis-)agreement between the estimated AWS land values (shown in the upper panel) and the BRWi land values
+8 = 3.8415 corresponds to the 5% percentile of the 12-distribution.
+21
+
+(shown in the lower panel). The depicted area is again the locality defined by the black rectangular in Figure 9. The AWS land values are estimated using our favored .
+[Figure 11 about here]
+It is apparent that the AWS land values divide the locality into roughly the same three areas of local homogeneity (indicated by the encircled areas) as the BRWi. At the very local level, however, the BRWi bring the surveyors' expert-knowledge to the fore. For instance, the BRWi close to the river `Dahme' (indicated by the arrows) are significantly higher than the corresponding AWS land values which implies an area of local homogeneity across the river banks. It is clear, that at this micro-level, the surveyors have a knowledge advantage, as compared to the data-driven AWS algorithm which must rely on the globally set .
+7 Conclusions
+In this paper, we applied adaptive weights smoothing (AWS) to a problem of substantial economic relevance, the estimation of the contour map of land values of a city. Using AWS has several advantages over standard nonparametric regression. It allows the size and shape of areas with a common land value to be completely determined by the data. As illustrated by our application, these areas need not be symmetric or adhere to a particular shape. Moreover, unlike kernel regression, AWS does not require the land value map to be smooth. AWS identifies these areas by relaxing the distance penalty in successive iterations and implicitly testing for local constancy of land values. As long as the land values are sufficiently similar, relaxing the distance penalty is justified and adjacent areas are subsumed into one.
+Our application to the Berlin market revealed that estimated land value maps based on AWS generally agree fairly well with the benchmark of expert-based land
+22
+
+values (BRW). This is paricularly true if AWS' crucial smoothing parameter is chosen by the simulation based method based on the propagation condition. We also find, though, that land values estimated with AWS and BRW can show different local behavior, for instance if local circumstances (such as a lake-side location) favor expert knowledge. However, such expert-knowledge may contain subjective judgement or may be unvailable altogether. Our paper demonstrates that AWS, on the other hand, is a transparent statistical procedure. It delivers in our application land values that should at least provide a sound basis for academic research. AWS land values may also be useful for practitioners as a statistical basis to which they can bring their expert knowledge
+In future research, we will enlarge our land data by including house and condominium prices purged of the building component as in Bryan and Satre (2009). This will increase our data set to about 250,000 observations. The larger data set will allow us to fill gaps in the current AWS land value map. Remaining gaps for residential land (developed or undeveloped) will then be interpolated.
+
+Acknowledgements
+We have benefited from comments received at the Applicable Semiparametrics Conference in Berlin 2013 and from two anonymous referees. Financial support from the Deutsche Forschungsgemeinschaft, CRC 649 Economic Risk, is gratefully acknowledged. The usual disclaimer applies.
+
+A Appendix
+We adjust the land prices as follows. First, we run the regression pj,t = dj + xj + zj + j,t , 23
+
+(A1)
+
+where pj,t is the log price of site j transacted in quarter t. The column vector dj has T elements: the first element for the overall constant is one, the period t element is one if site j was transacted in this period, zero otherwise. 1996Q1 is the omitted reference period. The vector xj contains binary indicators for unusual features of the site and for unusual aspects of the business dealings. The vector zj contains binary indicators for Berlin's 96 administrative sub-districts (Ortsteile). The site will be located in one of these sub-districts. The vector zj also contains a binary indicator for site location adjacent to a lake or the bank of a river. Finally, the vector contains binary indicators for site's location rating. This rating comes from Berlin's Senate Department for Urban Development and rates natural amenities, the quality of existing buildings, access to public transport and shopping facilities with in the neighborhood. The rating for a site takes one of four values: low, medium, high, very high. The variables in zj control crudely for location effects. Without the inclusion, the estimates of  and  may suffer from omitted variable bias. Table A1 presents least squares estimates of the model in Eq. A1. The in-sample fit, as measured by the R2, is reasonably good. Except for the coefficient for ground monument, all coefficients are statistically significant at the 5% significance level. The signs of the point estimates, as well as their magnitude, are plausible.
+
+[Table A1 about here]
+
+Second, given the coefficient estimates, we compute the adjusted log real land
+
+price as
+
+pj = pj,t - (dj - db) - xj,t .
+
+(A2)
+
+The first entry of db is one, the entries for the four quarters of the year 2009 are 0.25 each, the remainig entries are zero. The term in brackets in Eq. A2 converts prices to the base year 2009. The estimated value of zj is not considered for pj, because it enters Eq. A1 only to prevent bias. The resulting pj is in real terms and adjusted for unusual circumstances of the site. Using it in our analysis puts us on an equal footing with the land price information used by local surveyors to produce the
+
+24
+
+BRW. The summary statistics for prices in natural scale in Table 1 are computed using Pj = exp pj + 0.52 , where 2 is the estimated variance of the error term in Eq. A1 (Kennedy 1983).
+References
+Ahlfeldt, G. M. and Maennig, W.: 2010, Impact of sport arenas on land values: Evidence from Berlin, Annals of Regional Science, 44, 205­227.
+Becker, S.: 2014, The Propagation-Separation approach. Theoretical study and application to magnetic resonance imaging, PhD thesis, Humboldt-Universita¨t zu Berlin.
+Becker, S. and Math´e, P.: 2013, A different perspective on the PropagationSeparation Approach, Electronic Journal of Statistics, 7, 2702­2736.
+Bostic, R. W., Longhofer, S. D. and Redfearn, C. L.: 2007, Land leverage: decomposing home price dynamics, Real Estate Economics, 35, 183­208.
+Bryan, K. A. and Satre, P.-D. G.: 2009, Semiparametric estimation of land price gradients using large data sets, Federal Reserve Bank of Richmond Economic Quarterly, 95, 53­74.
+Diamond, D. B.: 1980, The relationship between amenities and urban land prices, Land Economics, 56, 21­32.
+Fan, J. and Marron, J. S.: 1994, Fast implementations of nonparametric curve estimators, Journal of Computational and Graphical Statistics, 3, 35­56.
+Kennedy, P.: 1983, Logarithmic dependent variables and prediction bias, Oxford Bulletin of Economics and Statistics 45, 389­92.
+Polzehl, J.: 2014, Adaptive weights smoothing, R package version 1.9-4, http://CRAN.R-project.org/package=aws.
+25
+
+Polzehl, J. and Spokoiny, V.: 2000, Adaptive weights smoothing with applications to image restoration, Journal of the Royal Statistical Society Series B, 62, 335­354.
+Polzehl, J. and Spokoiny, V.: 2003, Image denoising: pointwise adaptive approach, Annals of Statistics, 31, 30­57.
+Polzehl, J. and Spokoiny, V.: 2006, Propagation-separation approach for local likelihood estimation, Probability Theory and Related Fields, 135, 335­362.
+Polzehl, J. and Spokoiny, V.: 2008, Structural adaptive smoothing by PropagationSeparation-methods, 471­492, in: Chen, C., Ha¨rdle, W. and Unwin, A. (eds.), Handbook of Data Visualization, Springer, Berlin and Heidelberg.
+Stone, C. J.: 1985, Additive regression and other nonparametric models, Annals of Statistics, 13, 689­705.
+26
+
+Table 1: Summary statistics for transacted land. Number of observations is 24,519. BRW information is available for 23,950 of these observations. Land prices are adjusted for unusual features of the site and unusual aspects of the business dealing. Land price and BRW are in real (year 2009) Euro. Discrete characteristics are in percent. Other unusual aspects of business transaction include price rebates, installment payment, and investment obligations. Expert-based location rating comes from Berlin's Senate Department for Urban Development.
+
+Mean Median
+
+Land price per sqm
+
+Natural scale
+
+182.65 117.24
+
+Log scale
+
+4.774 4.667
+
+Expert-based land value per sqm (BRW)
+
+Natural scale
+
+190.65 110.00
+
+Log scale
+
+4.943 4.701
+
+Unusual features of the lot
+
+Ground monument
+
+0.009
+
+Contaminated soil
+
+0.030
+
+Demolished structure 0.350
+
+Land easement
+
+0.211
+
+Aspects of business dealing
+
+Non-private seller
+
+0.352
+
+Non-private buyer
+
+0.179
+
+Infrastructure charge 0.418
+
+Other unusual aspects 0.098
+
+Amenities and expert-based location rating
+
+Lake side
+
+0.025
+
+Low quality
+
+0.417
+
+Medium quality
+
+0.458
+
+High quality
+
+0.114
+
+Very high quality
+
+0.009
+
+Std. Dev.
+416.45 0.647
+407.69 0.590
+
+27
+
+Table 2: Summary statistics for binned data. Reports summary statistics for land prices and BRW at the bin level, conditional on the bin covering at least one transaction. Of the 7,448 bins fulfilling this criterion, 7,222 have also BRW information.
+
+Mean Median Std. Dev.
+
+Land price per sqm
+
+Natural scale 225.66 126.63
+
+545.97
+
+Log scale
+
+4.880 4.727
+
+0.736
+
+Expert-based land value per sqm (BRW)
+
+Natural scale 240.03 140.00
+
+562.55
+
+Log scale
+
+5.085 4.942
+
+0.683
+
+28
+
+Table 3: Explanatory power. Reports coefficient of determination R2 for bivariate regressions of BRWi and land prices yi on AWS land values i. Regressions include a constant. Number of observations used for regressions in first row is 7,222 and 7,448 for regressions in second row.
+
+BRW Land price
+
+ 19.9 0.7747 0.6992
+
+3.8415 0.7274 0.8661
+
+4.4756 0.7390 0.8526
+
+10.5180 0.7640 0.7734
+
+ 16.8410 0.7720 0.7195
+
+23.2840 0.7828 0.6764
+
+29.7938 0.7733 0.6525
+
+36.346 0.7690 0.6418
+
+29
+
+Table A1: Parameter estimates for land price adjustment model. Reports OLS estimates of the parameters in Eq. A1. Dependent variable is log price per sqm of undeveloped land. Regression uses 24,519 observations. Expert-based location rating comes from Berlin's Senate Department for Urban Development. Reference category is low location quality. Sub-district dummies, quarterly time dummies and overall constant are included, but estimated coefficients are not reported. Heteroscedasticity robust standard errors are reported in brackets. ** significant at 1%-level * significant at 5%-level.
+
+Ground monument Contaminated soil Demolished structure Land easement Recoupment charge Non-private buyer Non-private seller Other unusual circumstances Lake side Medium location quality High location quality Very high location quality 2 R2
+
+-0.104 -0.120 0.030 -0.113 0.082 0.098 -0.075 0.063 0.212 0.067 0.191 0.246
+0.194
+0.581
+
+[0.056] [0.033] [0.006] [0.008] [0.007] [0.011] [0.008] [0.016] [0.024] [0.009] [0.015] [0.095]
+
+30
+
+Green Spaces
+
+Water
+
+3.2453
+
+BRW Land Values (log) 7.3386
+
+31
+
+Figure 1: Expert-based land value (BRW) map for Berlin. Shows map of expert-based land values (BRW, in logs) for Berlin. Reference date for map is 1 January 2010. Source: Geoportal Berlin/Bodenrichtwerte 01.01.2010.
+
+Figure 2: Detail of expert-based land value (BRW) map. Shows central business district including the boulevard Unter den Linden, the Museumsinsel, and the Alexanderplatz. Reference date for map is 1 January 2010. Source: Geoportal Berlin/Bodenrichtwerte 01.01.2010.
+32
+
+Figure 3: Distance weighting of observations in AWS estimator. Illustrates scaled Manhattan distance and Kernel weight for bandwidth h0 = 2. We want to compute (x25) for the dark red shaded bin 25 in the center. Scaled distance for this bin is zero and y25 receives the highest distance weight in 205. The light red shaded bins have a scaled distance of 0.5 to the reference bin. Prices yj from these bins receive less weight in 205. The scaled distance of the light yellow shaded bins is 1. These bins (as those further away) are not considered in 205.
+33
+
+34
+
+Green Spaces Water Observation
+Figure 4: Location of transacted sites within Berlin. Shows the location of 24,519 undeveloped sites that have been transacted between 1996 to 2009. Solid lines represent the borders of Berlin's 12 administrative districts (as of the year 2000).
+.
+
+Green Spaces
+
+Water
+
+3.2453
+
+Binned / BRW Land Values (log) 7.3386
+
+35
+
+Figure 5: Land price bins for Berlin. Shows the 7,448 non-empty bins with yi, i.e., the log land prices averaged by bin. Backdrop is expert-based land value map.
+
+Figure 6: Detail of raw land prices and BRW land values. Upper panel shows bins with raw land prices. Lower panel shows bin average of BRW land values.
+36
+
+2.5
+
+2
+
+1.5
+
+Density
+
+1
+
+.5
+
+0 0
+
+5 10 15 20 25
+
+Figure 7: Kernel density estimate of realizations of the test statistic. Shows kernel density estimate of realizations of test statistic in iteration k = 1. Bandwidth is computed according to Silverman's rule of thumb. Shaded area is 95% pointwise confidence interval. Dashed curve is 2-density with 1 degree of freedoms. Number of observations is 16,022.
+.
+
+37
+
+Green Spaces
+
+Water
+
+3.2453
+
+AWS Land Values (log) 7.3386
+
+38
+
+Figure 8: AWS land value map for Berlin. Shows contour map of estimated AWS land values. Level bandwidth is set to  = 19.9.
+
+Green Spaces
+
+Water
+
+3.2453
+
+AWS / BRW Land Values (log) 7.3386
+
+39
+
+Figure 9: AWS land value map for Berlin. Shows contour map of estimated AWS land values. Level bandwidth is set to  = 19.9. Coloured areas in background are BRW.
+
+Figure 10: Detail of AWS land values for different  values. Upper panel sets level bandwidth to  = 19.9. Lower panel sets level bandwidth to  = 3.8415.
+40
+
+Figure 11: Detail of AWS land values and BRW land values. Upper panel shows estimated AWS land values. Level bandwidth is set to  = 19.9. Lower panel shows bin average of BRW land values.
+41
+
+SFB 649 Discussion Paper Series 2015
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Pricing Kernel Modeling" by Denis Belomestny, Shujie Ma and Wolfgang Karl Härdle, January 2015.
+002 "Estimating the Value of Urban Green Space: A hedonic Pricing Analysis of the Housing Market in Cologne, Germany" by Jens Kolbe and Henry Wüstemann, January 2015.
+003 "Identifying Berlin's land value map using Adaptive Weights Smoothing" by Jens Kolbe, Rainer Schulz, Martin Wersing and Axel Werwatz, January 2015.
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasrecahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+

@@ -2,18 +2,22 @@ Name of Quantlet: Q-Kolleg2016
 
 Description: This folder provides quantlets for Q-Kolleg 2016.
 Files: 
-- The "main.R" file loads neccessary files in an approprite order. Run step by step for first time. As long CRC 649 page is not updated or JEL code have not changed, for 2nd time go directly to Textmining_Q-Kolleg"
-- The "helperfunctions_Q-Kolleg.R" file provides helper functions for whole procedure.
-- The "Webscraping.R" file scrapes information from the CRC649 publication website, and saves the information on the Q-Kolleg database, hosted at RDC (Humboldt-University). Only has to be performed before Analysis or if new publications were added at CRC649 website.
-- The "Treetagger.R" file removes non-english abstracts and applies natural language processing on the remaining ones. As a result, a new table with name "treetagger" is added to the Q-Kolleg database, with stemmed and  lemmatized versions of the abstracts.
-- The "JEL_scraping.R" file scrapes information on JEL Codes from Wikipedia and constructs a dictionary and saves the dictionaries in a new table called "dictionary" in the Q-Kolleg database. 
-- The "Textmining_Q-Kolleg.R" file performs textmining in the preliminary way that we have seen in the beginning of the course.
-    It clusters the data and attempts to find clusters that coincide with project codes.
-- The "Dictionary_Classification.R" file gets the JEL-dictionaries from the database and matches the abstracts with those JEL-dictionaries. It attempts to classify abstracts with a JEL code.
+- This project consists of 2 approaches to text mining that each require multiple steps: 
+    1) Scraping of data from CRC 649  (01_Scraping)
+    2) Converting scraped data into usable text format for R (02_PDF_to_txt)
+    3) Combine text data in a corpus (03_Stem_TDM_TFIDF)
+    4) Run the analyses (04_Analysis)
+- Every step depends on the outcome of the previous step, but starting points are provided for every step in form of .Rdata-files. The .Rdata-files contain the outcome of the previous step. This allows you to focus on one particular step of the process, without having to deal with preparation steps. 
+
+- Two approaches are used to find coherent structures among the articles:
+    1) Clustering of academic articles based on their abstracts
+    2) Topic modeling (LDA) based on the entire article
+- Files used for approach 1 are labeled as "Abstracts_*", whereas files used for approach are called "Articles_*"
+- In the analysis of both approaches, the outcomes will be compared to JEL (Journal of Economic Literature) codes and project groups of the CRC 649.
 
 
 
-Keywords: MySQL, RMySQL, database in R, textmining, wordcloud
+Keywords: Topic modeling, R, Webscraping, Latent Dirichlet Allocation, Textmining, Clustering, Wordcloud
 
 Author: Ken Schröder, Johannes Stoiber
 

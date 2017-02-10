@@ -1,0 +1,1261 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2005-026
+Projection Pursuit for Exploratory Supervised
+Classification
+Eun-Kyung Lee* Dianne Cook*
+Sigbert Klinke** Thomas Lumley***
+* Department of Statistics, Iowa State University, USA ** Institute for Statistics and Econometrics, Humboldt-Universit‰t zu Berlin, Germany
+*** Department of Biostatistics, University of Washington, USA
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+Projection Pursuit for Exploratory Supervised Classification 0
+EUN-KYUNG LEE1, DIANNE COOK2, SIGBERT KLINKE3, and THOMAS LUMLEY4 1 Department of Statistics, Ewha Womans University 2 Department of Statistics, Iowa State University
+3 Institute for Statistics and Econometrics, Humboldt-Universita®t zu Berlin 4 Department of Biostatistics, University of Washington
+ABSTRACT
+In high-dimensional data, one often seeks a few interesting low-dimensional projections that reveal important features of the data. Projection pursuit is a procedure for searching high-dimensional data for interesting low-dimensional projections via the optimization of a criterion function called the projection pursuit index. Very few projection pursuit indices incorporate class or group information in the calculation. Hence, they cannot be adequately applied in supervised classification problems to provide low-dimensional projections revealing class differences in the data . We introduce new indices derived from linear discriminant analysis that can be used for exploratory supervised classification.
+Key Words: Data mining; Exploratory multivariate data analysis; Gene expression data; Discriminant
+analysis;
+0This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 Economic Risk.
+1
+
+1. Introduction
+
+This paper is about methods for finding interesting projections of multivariate data when the observations
+
+belong to one of several known groups. The type of data is denoted as a p-dimensional vector Xij representing
+
+the jth observation of the ith class, i = 1, . . . , g, g is the number of classes, j = 1, . . . , ni, and ni is the number
+
+of observations in class i. Let XØ i. =
+
+ni j=1
+
+Xij
+
+/ni
+
+be
+
+the
+
+ith
+
+group
+
+mean
+
+and
+
+XØ ..
+
+=
+
+g i=1
+
+ni j=1
+
+Xij /n
+
+be
+
+the total mean, where n =
+
+g i=1
+
+ni
+
+.
+
+Interesting
+
+projections
+
+correspond
+
+to
+
+views
+
+where
+
+there
+
+are
+
+the
+
+biggest
+
+difference between the observations from different classes, that is, the classes are clustered in the view. In
+
+this paper, the approach to finding interesting projections uses the measures of between group variation,
+
+relative to within-group variation. These new methods are important for exploratory data analysis and data
+
+mining purposes when the task is to (1) examine the nature of clustering in the space of the data due to
+
+class information, and (2) to build a classifier for predicting the class of new data.
+
+Projection pursuit is a method to search for interesting linear projections by optimizing some pre-
+
+determined criterion function, called a projection pursuit index. This idea originated with Kruskal (1969),
+
+and Friedman and Tukey (1974) first used the term "projection pursuit" describing a technique for ex-
+
+ploratory analysis of multivariate data. It is useful for an initial data analysis, especially when data is in
+
+a high dimensional space. A problem many multivariate analysis techniques face is "the curse of dimen-
+
+sionality", that is, most of high dimensional space is empty. Projection pursuit methods help us explore
+
+multivariate data in interesting low dimensional spaces. The definition of an "interesting" projection depends
+
+on the projection pursuit index and on the application or purpose.
+
+Many projection pursuit indices have been developed to define interesting projections. Because most
+
+low-dimensional projections are approximately normal (Huber, 1985), most of the projection pursuit indices
+
+are focused on non-normality. For example, the entropy index and the moment index (Jones and Sibson,
+
+1987), the Legendre index (Friedman, 1987), the Hermite index (Hall, 1989), and the Natural Hermite index
+
+(Cook, et al, 1993), all search for projections where the data exhibit a high degree of non-normality.
+
+2
+
+Visual inspection of high dimensional data using projections is helpful to understand data, especially when it is combined with dynamic graphics. GGobi is an interactive and dynamic software system for data visualization and projection pursuit is implemented in it dynamically (Swayne, et al, 2003). The Holes index and the central mass index in GGobi are helpful in finding projections with few observations in the center and projections containing an abundance of points in the center, respectively (Cook, et al, 1993).
+As the data mining area has grown, projection pursuit methods are increasingly used in classification and clustering to escape the curse of dimensionality. Posse (1992) suggested a method for projection pursuit discriminant analysis for two groups. He used kernel density estimation of the projected data instead of the original data and used the total probability of misclassification of the projected data as a projection pursuit index. Polzehl (1995) considered the cost of misclassification and used the expected overall loss as a projection pursuit index. Flick, et al (1990) uses a basis function expansion to estimate density and minimizes a measure of scatter. These projection pursuit methods for classification focus on 1-dimensional projections and it is hard to extend them to k-dimensional projections. Examining higher than 1-dimensional projections is important for visual inspection of high-dimensional data.
+The methods presented in this paper start from a well-known classification method called linear discriminant analysis(LDA). This approach is extended to provide new projection pursuit indices for exploratory supervised classification. These indices use Fisher's linear discriminant ideas and expand Huber's ideas on projection pursuit for classification. These new indices are helpful for building understanding about how class structure relates to measured variables and they can be used to provide graphics to assess and verify supervised classification results. These indices are implemented as an R package, and these indices are available in GGobi for dynamic graphics (Swayne, et al, 2003)
+This paper is organized as follows. Section 2 introduces the new projection pursuit indices and describes their properties. The optimization method to find the interesting projections is discussed in Section 3. Section 4 describes how to apply these indices using two gene expression data sets.
+3
+
+2. Index Definition
+
+2.1 LDA projection pursuit index
+
+The first index is derived from classical linear discriminant analysis (LDA). The approach, first developed
+
+by Fisher (1938), finds linear combinations of the data which have large between-group sums of squares
+
+relative to within-group sums of squares. (For detailed explanations, see Johnson and Wichern, 2002 and
+
+Duda et al. 2001) Let
+
+g
+
+B=
+
+ni(XØ i. - XØ ..)(XØ i. - XØ ..)T : between-group sums of squares,
+
+i=1
+
+g ni
+
+W=
+
+(Xij - XØ i.)(Xij - XØ i.)T : within-group sums of squares.
+
+i=1 j=1
+
+(1) (2)
+
+Dimension reduction is achieved by finding the linear projection, a, that maximizes (aT Ba)/(aT Wa), which
+
+leads to the natural definition of a projection pursuit index. (aT Ba)/(aT Wa) ranges between 0 and 1,
+
+where low values correspond to projections that display little class difference and high values correspond to
+
+projections that have large differences between the classes. To extend to an arbitrary-dimensional projection, we consider a test statistic used in multivariate analysis of variance (MANOVA) called Wilks  = W / W+
+
+B . This quantity also ranges between 0 and 1, although the interpretation of numerical values are reversed from the 1-dimensional measure defined above. Small values of  correspond to large differences between
+
+the classes.
+
+Let A = [a1 a2 ∑ ∑ ∑ ak] define an orthogonal projection onto a k-dimensional space. In projection pursuit
+
+the convention is that interesting projections are the ones that maximize the projection pursuit index, so we
+
+use the negative value of Wilks Lambda and add 1 to keep this index between 0 and 1. This gives the LDA
+
+projection pursuit index (LDA index) as:
+
+
+   ILDA(A) =
+
+1-
+
+AT WA AT W+B A
+
+
+
+ 
+
+0
+
+for AT W + B A = 0 for AT W + B A = 0
+
+(3)
+
+4
+
+Low index values correspond to little difference between classes and high values correspond to large differences between classes. The next proposition quantifies the minimum and maximum values. For simplicity, we denote W + B as .
+
+Proposition 1. Let rank() = p, k  min(p, g). Then,
+
+kp
+
+1 - i  ILDA(A)  1 -
+
+i
+
+i=1 i=p-k+1
+
+(4)
+
+where
+
+1,  2  ∑ ∑ ∑  p  0 : eigenvalues of -1/2W-1/2,
+
+e1, e2, ∑ ∑ ∑ , ep : corresponding eigenvectors of -1/2W-1/2,
+
+f1, f2, ∑ ∑ ∑ , fp : eigenvectors of -1/2B-1/2.
+
+In (4), the right equality holds when A= -1/2[ep ep-1 ∑ ∑ ∑ ep-k+1] = -1/2[f1 f2 ∑ ∑ ∑ fk] and the
+
+left equality holds when A= -1/2[ek ek-1 ∑ ∑ ∑ e1] = -1/2[fp-k+1 fp-k+2 ∑ ∑ ∑ fp].
+
+A problem arises for LDA when rank(W) = r < p. We need to remove collinearity by removing variables, before applying LDA. Otherwise, we need to modify the W-1 calculation, for example, to use the pseudo-inverse (pseudo LDA : Fukunaga, 1990) , or to use a ridge estimate instead of W such as regularized discriminant analysis (Friedman, 1989). For projection pursuit, because we make calculations in k-dimensional space instead of p-dimensional space, we can find interesting projections without an initial dimension reduction or modified W calculation. The next proposition shows how the LDA index works when rank(W) < p.
+
+Proposition 2. Let rank() = r < p, k  min(r, g). Then,
+
+kr
+
+1 - i  ILDA(A)  1 -
+
+i
+
+i=1 i=r-k+1
+
+(5)
+
+5
+
+where
+
+  
+
+=
+
+PQ
+
+  
+
+0  
+
+PT
+
+ 
+
+=
+
+PPT
+
+:
+
+spectral
+
+decomposition
+
+of
+
+,
+
+ 0
+
+0   QT 
+
+P : k ◊ r matrix, PT P = Ir, Q : k ◊ (k - r) matrix, QT Q = Ik-r,
+
+ = diag[1, 2, ∑ ∑ ∑ , r] : r ◊ r diagonal matrix, 1, 2, ∑ ∑ ∑ , r : eigenvalues of -1/2PT WP-1/2, e1, e2, ∑ ∑ ∑ , er : corresponding eigenvectors of -1/2PT WP-1/2.
+
+In (5), the right equality holds when A = P-1/2[er er-1 ∑ ∑ ∑ er-k+1], and the left equality holds
+
+when A = P-1/2[ek ek-1 ∑ ∑ ∑ e1].
+
+(a)
+(c)
+
+(b)
+
+(c)
+
+5 10 15 20 25 30
+
+0 5 10 15 20 25 30 35
+
+(b)
+
+0
+
+-2 -1
+
+0
+
+1
+
+1D projected data
+
+2
+
+-4 -3 -2 -1 0 1 2 3 1D projected data
+
+Figure 1. (a) Huber's plot(1990) using ILDA on data simulated from two bivariate normal population. The symbols and + represent two different classes. The solid ellipse represents ILDA value for all 1-dimensional projections, and the dashed circle is a guide set at the median ILDA value. The straight dotted line labelled (b) is the optimal projection direction using ILDA and the histogram of the projected data is shown in the correspondingly labelled plot (b). In plot (a) the dotted line labelled (c) is the first principal component direction and the the histogram of the projected data is shown in the correspondingly labelled plot (c).
+
+The proofs of these two propositions are provided in Lee (2003). To illustrate the behavior of the LDA 6
+
+index (Figure 1), we use a type of plot that was introduced by Huber (1990). In one-dimensional projections
+
+from a 2-dimensional space, for  = 0, ∑ ∑ ∑ , 179, the projection pursuit index is calculated using projection
+
+a = (cos, sin) and displayed radially as a function of . In each figure, the data points are plotted in the center. The solid ellipse represents the index value, ILDA, plotted at distances relative to the center. The
+
+dotted circle is a guide line plotted at the median index value.
+
+Figure 1 shows how the LDA index works. Data are simulated from two normal distributions with
+
+
+
+
+
+
+
+1 0.95
+
+-1 1
+
+the
+
+same
+
+variance,
+
+
+
+=
+
+ 
+
+ 
+
+,
+
+and
+
+different
+
+means,
+
+µ1
+
+=
+
+ 
+
+ 
+
+and
+
+µ2
+
+=
+
+ 
+
+.
+
+
+
+
+
+
+
+0.95 1
+
+0.6 -0.6
+
+Each group has 50 samples. Figure 1(a) shows that the LDA index function (solid line) is smooth and
+
+has a maximum value when the projected data reveals two separated classes. Figure 1(b) and Figure 1(c)
+
+are the histograms of the optimal projected data using the LDA index and the data projected onto the
+
+first principal component. The LDA index finds separated class structure. Principal component analysis is
+
+commonly used to find revealing low-dimensional projections, but it really does not work well in classification
+
+problems. Here, principal component analysis solves a different problem: It finds a projection that shows
+
+large variation (Johnson and Wichern, 2002).
+
+The LDA index works well generally, but it has some problems in special circumstances. One special
+
+situation is 2-dimensional data generated from a uniform mixture of three Gaussian distributions, with
+
+identity variance-covariance matrices and centers at the vertices of an equilateral triangle. Figure 2(a) shows
+
+the theoretical case where three classes have the exact same variance-covariance matrix and three class means
+
+are the vertices of an equilateral triangle. In this case, all directions have the same LDA index values. The
+
+best projection is the full 2-dimensional data space. Figure 2(b) shows data simulated from this distribution.
+
+Because of the sampling, variances are slightly different in each class and the three means do not lie exactly
+
+on an equilateral triangle. Therefore the optimal direction(the dotted straight line in Figure 2(b)) depends
+
+on the sampling variation. If a new sample is generated, a completely different optional projection will occur.
+
+This is not what we want in exploratory methods. We would like to be able to find all the interesting data
+
+7
+
+structures, which in this case would be the three 1-dimensional projections revealing each group separated from the other two groups. We extend this problem of the LDA index to define a new index that is able to detect interesting structures in this situation.
+2.2 LDA extended projection pursuit index using Lr-norm
+We start from the 1-dimensional index. Let yij = aT Xij be a projected observation onto a 1-dimensional space. In the LDA index, we use aT Ba and aT Wa as the measures of between-group and within-group variations, respectively. These two measures can be explained as the square of L2 vector norm, as follows.
+
+(a) 2 13
+
+(b)
+
+2
+
+2
+
+2222 2222222222222222222222222222222222222222222222222222222222222222222222222222
+
+2 2 22 222
+
+2 2
+
+22 1 11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+
+2
+
+2 33 33
+
+3 1
+
+3333333333333333333333333333333333333333333333333333333333333333333333333333333
+
+3
+
+1
+
+3 33
+
+Figure 2. This plot illustrates a problem situation for ILDA. (a) The theoretical case where the three classes have the exact same variance and the three class means come are located on the vertices of an equilateral triangle. All directions have exactly same ILDA values (solid circle). The best projection is really the full 2-dimensional data space! (b) What happens in practice? This plot contains data generated from the theoretical distribution. An optimal projection is found purely due to sampling variation. If a new sample were generated a completely different optimal projection will be found.
+8
+
+g ni
+
+aT Ba =
+
+(yØi. - yØ..)2 = ||MyØg - 1nyØ..||2 2
+
+i=1 j=1
+
+g ni
+
+aT Wa =
+
+(yij - yØi.)2 = ||y - MyØg||2 2
+
+i=1 j=1
+
+g ni
+
+aT a =
+
+(yij - yØ..)2 = {||y - 1nyØ..||2}2 = ||MyØg - 1nyØ..||2 2 + ||y - MyØg||2 2
+
+i=1 j=1
+
+(6) (7) (8)
+
+where M = diag(1n1 , ∑ ∑ ∑ , 1ng ), yØg = [yØ1., yØ2., ∑ ∑ ∑ , yØg.]T , y = y1T , y2T , ∑ ∑ ∑ , ygT T , yi = yi1, yi2, ∑ ∑ ∑ , ying T ,
+
+and 1n = [1, 1, ∑ ∑ ∑ , 1]T : n ◊ 1 vector. We extend to the Lr norm. Let
+
+Br = Wr =
+
+g ni
+
+||MyØg - 1nyØ..||r r =
+
+|yØi. - yØ..|r
+
+i=1 j=1
+
+g ni
+
+||y - MyØg||r r =
+
+|yij - yØi.|r.
+
+i=1 j=1
+
+(9) (10)
+
+Then
+
+g ni
+
+g ni
+
+g ni
+
+{||y - 1nyØ..||r}r =
+
+|yij - yØ..|r 
+
+|yØi. - yØ..|r +
+
+|yij - yØi.|r = Br + Wr.
+
+i=1 j=1
+
+i=1 j=1
+
+i=1 j=1
+
+(11)
+
+Even though the additivity does not hold for the Lr vector norm, Br and Wr can be substitutes for the
+
+measures of between-group and within-group variabilities. We use these measures to define our new index.
+
+The 1-dimensional Lr projection pursuit index (Lr index) is defined by
+
+ILr (a) =
+
+Br 1/r Wr
+
+=
+
+||MyØg - 1nyØ..||r ||y - MyØg||r
+
+=
+
+g i=1 g i=1
+
+ni j=1
+
+(yØi.
+
+-
+
+yØ..)r
+
+ni j=1
+
+(yij
+
+-
+
+yØi.)r
+
+1/r
+.
+
+(12) (13)
+
+Taking the ratio to the 1/r power, prevents this index value from getting too big. The 1-dimensional LDA
+
+index is a special case of this index when r = 2. For a k-dimensional projection A, let Yij = AT Xij = [yij1, yij2, ∑ ∑ ∑ , yijk]T be a projected observation
+
+9
+
+(a) r=1 2
+13
+
+(b) r=3 2
+13
+
+(c) r=5 2
+13
+
+Figure 3. Huber's plot showing behavior of ILr index on the special data that caused problems for ILDA. (a) IL1 : The optimal projections separate each class from the other two. (b) IL3 : The optimal projections separate all three classes. (c) IL5 : The optimal projections separate each class from the other two. When r=2 and r=4, the index is the same as ILDA, shown in Figure 2(a).
+
+onto the k dimensional space spanned by A. Then
+
+[AT BA]lm =
+
+g ni
+(yØi.l - yØ..l) (yØi.m - yØ..m) ,
+
+i=1 j=1
+
+[AT WA]lm =
+
+g ni
+(yijl - yØi.l) (yijm - yØi.m)
+
+i=1 j=1
+
+(14) (15)
+
+where l, m = 1, 2, ∑ ∑ ∑ , k. The diagonals of these matrices represent the variances of the between (or within)
+
+group for each variable and the off-diagonals represent covariances between variables. We take only the
+
+diagonal parts of these between-group and within-group variance and extend these sums of squares to Lr
+
+norms. Then,
+
+ILr (A) =
+
+k l=1
+k l=1
+
+g i=1
+g i=1
+
+ni j=1
+
+(yØi.l
+
+-
+
+yØ..l)r
+
+ni j=1
+
+(yijl
+
+-
+
+yØi.l)r
+
+1/r
+.
+
+(16)
+
+For detailed explanations, see Lee (2003).
+
+Figure 3 shows how the new index ILr (r = 1, 2, 3) performs for the special situation that caused problem for ILDA. When r = 1, all three optimal projections separate one class from the other two classes. When
+
+r = 3, the optimal projections separate the three classes. With the L5 index, we found the same optimal
+
+10
+
+projections as the L1 index but the index function is smoother than the L1 index. When r is 2 and 4, these indices have the same value for all directions, just like the LDA index.
+The LDA index and the Lr index (r  2) are usually sensitive to outliers, mainly due to use the sums of squares or higher power, which are sensitive measure to outliers. On the other hand, the L1 index uses the sums of absolute values. Therefore it is more robust to outliers than other indices. Figure 4 shows how these indices work in the presence of an outlier. In each plot, there are two classes (1 and 2). The class 1 has 21 observations with one outlier and the class 2 has 20 observations. The histogram of the optimal 1-dimensional projected data using the L1 index (Figure 4 (a-1)) shows that the outlier is separated from two groups and the best projection is not affected by this outlier. When r  2, the best projections are leveraged towards the direction of the outlier. With the exception of the outlier, the L1 index provides a more separated view of the two classes than the best projection of the Lr(r  2) index.
+
+(a) r=1
+
+(b) r=2
+
+(c) r=3
+
+111111111 222222222222222
+1
+
+111111111 222222222222222
+1
+
+111111111 222222222222222
+1
+
+(a-1)
+
+(b-1)
+
+(c-1)
+
+10 15
+
+10 12 14
+
+8
+
+0 2 4 6 8 10
+
+6
+
+111111111111 1
+
+222222222222 2222
+
+-1.5
+
+-1.0
+
+-0.5
+
+0.0
+
+0.5
+
+1.0
+
+1.5
+
+2.0
+
+1D projected data
+
+0
+
+2
+
+4
+
+222 2 222222222222
+
+1 11111 1111111
+
+-1.5
+
+-1.0
+
+-0.5
+
+0.0
+
+0.5
+
+1.0
+
+1D projected data
+
+1.5
+
+0
+
+5
+
+11111111 111 1
+
+22222222222 2 222
+
+-1.5
+
+-1.0
+
+-0.5
+
+0.0
+
+0.5
+
+1.0
+
+1D projected data
+
+1.5
+
+Figure 4. The behavior of the ILr in the presence of a outlier, using simulated data with 2 classes, where class 1
+
+11
+
+has an outlier. (a) Huber's plot of IL1 , (a-1) Histogram of the projected data onto the L1 optimal projection (b) Huber's plot of IL2 , (b-1) Histogram of the projected data onto the L2 optimal projection (c) Huber's plot of IL3 , (c-1) Histogram of the projected data onto the L3 optimal projection.
+3. Optimization
+A good optimization procedure is an important part of projection pursuit. The purpose of projection pursuit optimization is to find all of the interesting projections, not only to find one global maximum, because sometimes the local maximum can reveal unexpectedly interesting data structure. For this reason, the projection pursuit optimization algorithm needs to be flexible enough to find global and local maxima.
+Posse (1990) compared the several optimization procedures, and suggest a random search for finding the global maximum of a projection pursuit index. Cook, et al (1995) use a grand tour alternated with a simulated annealing optimization of a projection pursuit index, to creating a continuous stream of projections that are displayed for exploratory visualization of multivariate data. Klein and Dubes (1989) showed that simulated annealing can produce results as good as those obtained by conventional optimization methods and this method performs well for large data sets.
+Simulated annealing was first proposed by Kirkpatrick, et al (1983) as a method to minimize objective functions that have many variables. The fundamental idea of simulated annealing is that a re-scaling parameter, called the "temperature", allows control of the speed of convergence to a minimum value. For an objective function h(), called the "energy", we start from the initial value 0. A value,  is generated in the neighborhood of 0. Then,  is accepted as a new value with probability , defined by the temperature and the energy difference between 0 and . This probability  guards against getting trapped into a local minimum allowing the algorithm to visit a local minimum and then jump out and explore for other minima. For detailed explanations, see Bertsimas and Tsitsiklis (1993).
+For our projection pursuit optimization we maximize an objective function. We use two different tem-
+12
+
+peratures, one (Di) is for neighborhood definition, and the other (Ti) is for the probability  . Di is re-scaled by the predetermined cooling parameter c and Ti is defined by T0/ log(i + 1). Before we start, we need to choose the cooling parameter, c, and the initial temperature, T0. The cooling parameter, c, determines how many iterations are needed to converge and whether the maximum is likely to be a local maximum or a global maximum. The initial temperature, T0, also controls the speed of convergence. Even if the cooling parameter c is small, there is a chance that the algorithm will stop before it reaches the peak. If c is large, more iterations are needed to get a final value, but this final solution is more likely to be at the peak value, and that it is a global maximum. Therefore this algorithm is quite flexible for finding interesting projections. (For detailed discussion, see Lee, 2003.)
+
+Simulated Annealing Optimization Algorithm for Projection Pursuit
+
+1. Set an initial projection, A0, and calculate the initial projection pursuit index value I0 = I(A0)
+
+For the ith iteration,
+
+2. Generate a projection Ai from NDi (A0), where Di = ci, c is the predetermined cooling parameter in the range (0,1),
+
+NDi (A0) = {A : A is an orthonormal projection with direction A0 + DiB,  random projections B}
+
+3.
+
+Calculate
+
+Ii
+
+=
+
+I (Ai ),
+
+Ii
+
+=
+
+Ii
+
+-
+
+I0,
+
+Ti
+
+=
+
+T0 log(i+1)
+
+,
+
+4.
+
+Set A0 = Ai and I0 = Ii with probability  = min exp
+
+Ii Ti
+
+,1
+
+and increase i to i+1
+
+Repeat 2-4 until Ii is small.
+
+4. Application
+
+DNA microarray technologies provide a powerful tool for analyzing thousands of genes simultaneously. Comparison of gene expression levels between samples can be used to obtain information about important
+13
+
+.
+
+genes and their functions. Because microarrays contain a large number of genes on each chip but typically few chips are used, analyzing DNA microarray data usually means dealing with large p, small n challenges. A recent publication that compares classification methods for gene expression data (Dudoit, et al., 2002) has focused on the classification error. We will use the same data sets to demonstrate the use of new projection pursuit indices.
+
+4.1 Data sets
+
+Leukemia This data set originated from a study of gene expression in two types of acute leukemias, acute
+lymphoblastic leukemia(ALL) and acute myeloid leukemia(AML). The data set consists of n1 = 25 cases of AML and n2 = 47 cases of ALL(38 cases of B-cell ALL and 9 cases of T-cell ALL), giving n = 72. After preprocessing, we have p = 3571 human genes. This data set is available at http://www-genome.wi.mit.edu/mpr and was described by Golub, et al. (1999).
+NCI60 This data set consists of 8 different tissue types where cancer was found : n1 = 9 cases from breast,
+n2 = 5 cases from central nervous system(CNS), n3 = 7 cases from colon, n4 = 8 cases from leukemia, n5 = 8 cases from melanoma, n6 = 9 cases from non-small-cell lung carcinoma(NSCLC), n7 = 6 cases from ovarian, and n8 = 9 cases from renal, and p=6830 human genes. Missing values are imputed by a simple k nearest-neighbor algorithm (k = 5). We use these data to show how to use exploratory projection pursuit classification when the number of classes is large. This data set is available at http://genomewww.stanford.edu/sutech/download/nci60/index.html and was described by Ross, et al. (2000).
+
+Standardization and Gene Selection The gene expression data were standardized so that each observa-
+
+tion has mean 0 and variance 1. For gene selection, we use the ratio of between-group to within-group sums
+
+of squares. where xØ.,j = (1/n)
+
+BW (j) =
+
+n i=1
+
+xi,j
+
+and
+
+xØk,j
+
+=(
+
+n i=1
+
+g k=1
+
+I (yi
+
+=
+
+k)(xØk,j
+
+-
+
+xØ.,j )2
+
+n i=1
+
+g k=1
+
+I (yi
+
+=
+
+k)(xi,j
+
+-
+
+xØk,j )2
+
+(17)
+
+n i=1
+
+I (yi
+
+=
+
+k)xi,j )/(
+
+n i=1
+
+I
+
+(yi
+
+=
+
+k)).
+
+At
+
+the
+
+beginning,
+
+we
+
+follow
+
+14
+
+(a) Leukemia : r=1
+
+(b) Leukemia : r=2
+
+(c) Leukemia : r=3
+
+Frequency 10 15 20 25
+
+Frequency 5 10 15 20 25 30
+
+10 15 20
+
+Frequency
+
+5
+
+0
+
+3 3333 3 2
+111111 111111 111
+
+2 2222222222222
+
+-2 -1
+
+0
+
+1
+
+proj.data
+
+2
+
+0
+
+1 1111111111111
+
+33 3333333 22222222222222222222 2
+
+-1.5 -1.0 -0.5 0.0 0.5 1.0 proj.data
+
+0
+
+5
+
+3 3333 3 33
+
+2 2222222222222222222 1111111111111 1
+
+-3 -2 -1
+
+0
+
+proj.data
+
+1
+
+1: AML 2: B-cell ALL 3 : T-cell ALL
+
+Figure 5. Leukemia data : 1-dimensional projection (p=40) (a) the histogram of the optimal projected data using IL1 (b) the histogram of the optimal projected data using IL2 (c) the histogram of the optimal projected data using IL3
+
+the original study (Dudoit, et al, 2002) and start with p = 40 for the leukemia data and p = 30 for the NCI60 data and discuss different numbers of genes later.
+4.2 Results 1-dimensional projection
+Figure 5 displays the histograms of the projected data onto the optimal 1-dimensional projections. For this application, we choose a very large cooling parameter (0.999) which gives us the global maximum. In the Leukemia data, when r=1 (Figure 5-a), the B-cell ALL class is separated from the other classes except for one case. When r = 2 (Figure 5-b), the three classes are almost separable when the L2 index is used, which is the same result as for the LDA index. As r is increased, the index tends to separate the T-cell ALL from the others (Figure 5-c).
+The NCI60 data is a quite challenging example. For such a small number of observations, there are too
+
+15
+
+a
+
+b Leukemia
+
+c Colon
+
+Renal
+
+d
+
+Breast
+
+e
+
+f NSCLC
+
+Melanoma
+
+g
+
+Ovarian CNS
+
+Frequency 10 20 30
+
+0
+
+(a) NCI60
+
+868865685786775168726258215218711533333 -1 0
+
+1 proj.data
+
+444444 23
+
+(b) NCI60
+
+(c) NCI60
+
+(d) NCI60
+
+10 15
+
+Frequency
+
+Frequency 0 2 4 6 8 10 12
+
+10 15 20
+
+Frequency
+
+5
+
+5
+
+8888888 5565555676776666 777 221 2112 11121
+
+3
+
+-2 -1
+
+0
+
+1
+
+proj.data
+
+33333 3 2
+
+888888 8 -2
+
+777 7 7 6 66666 6 55 5 55555
+2 22 2 1 1 1111 1
+
+-1 0 proj.data
+
+1
+
+1
+
+0
+
+2226556625566556 777777
+
+11111 1
+
+-2.0
+
+-1.0
+
+0.0 0.5 1.0 1.5
+
+proj.data
+
+0
+
+1:Breast 2:CNS 3:Colon 4:Leukemia 5:Melanoma 6:NSCLC 7:Ovarian 8:Renal
+Figure 6. NCI60 data : the 1-dimensional projection (p=30). (a) The histogram of the optimal projection using the LDA index. Leukemia group is separated from the others - peel off Leukemia group. (b)Colon group is separated (c) Renal group is separated (d) Breast group is separated.
+
+16
+
+many classes. For these data, we try an isolation method that applies projection pursuit iteratively and takes off one class at a time (Friedman and Tukey, 1974). The 8 classes are too many to separate with a single 1-dimensional projection. After finding one split, we apply projection pursuit to each partition. Usually one class is peeled off from the others in each step. The tree diagram in Figure 6 illustrates the steps. In the first step (Figure 6-a), we separate the Leukemia class from the others. At the second step, Colon class is separated (Figure 6-b). Then, the Renal, the Breast, the NSCLC, and the Melanoma classes are separated sequentially. Finally, the Ovarian and the CNS classes are separated.
+2-dimensional projection
+Figures 7 and 8 show the plot of the data projected onto the optimal 2-dimensional projections for the Leukemia data. All three classes separate easily using the LDA index. Using the L1 index, the B-cell ALL class is separated with one exception - the same outlier of the result of the 1-dimensional projection in Figure 5(c). In the 2-dimensional case, the LDA index is only the same as the L2 index if B and W are diagonal matrices. The best result is obtained using the ILDA index, where all three classes are clearly separated. In the NCI60 data, the Leukemia class is clearly separated from the others for all indices (Figure 8).
+
+Classification
+Table 1. Test set error. Median and Upper quartile of the misclassified samples from 200 replications. (ntest = 24)
+
+Median Upper quartile
+
+Fisher's Linear Discriminant Analysis (LDA)
+
+3
+
+4
+
+Diagonal linear discriminant analysis (DLDA)
+
+0
+
+1
+
+Diagonal quadratic discriminant analysis (DQDA) 1
+
+2
+
+LDA projection pursuit method
+
+2.5 4
+
+L1 projection pursuit method
+
+12
+
+Even though our projection pursuit indices are developed for the exploratory data analysis, especially for
+
+17
+
+-1 0 1 2 3 4
+
+(a) Leukemia : LDA
+
+3
+
+3 333
+
+33
+
+33
+
+111111111111111111111
+-1.0 -0.5
+
+22222222222222222222222222222222
+0.0 0.5
+
+1.0
+
+-1.5 -1.0 -0.5 0.0 0.5 1.0 1.5
+
+(b) Leukemia : r=1
+
+2 2 222222222222222222222
+
+2
+
+3
+
+-2 -1
+
+313311111131111111111111111
+01
+
+-1.5 -1.0 -0.5 0.0 0.5 1.0
+
+(c) Leukemia : r=2 333333 22222222222222222222222222222222222
+33 3
+1 1111111111111111111 1
+-1.5 -1.0 -0.5 0.0 0.5 1.0
+
+1: AML 2: B-cell ALL 3 : T-cell ALL Figure 7. Leukemia data : 2-dimensional projection (p=40). (a) ILDA : The three classes are separated. (b) IL1 : The B-cell ALL class is separated from the other two except for one case. (c) IL2 : The three classes are separated, although the gap between classes 2 and 3 is small.
+
+-1 0 1 2
+
+(a) NCI60 : LDA 4444444
+
+3 33333
+-2 -1
+
+8 7717161165762177625516251525528858688888
+01
+
+-4 -3 -2 -1 0 1 2
+
+(b) NCI60 : r=1 8555211515211826878188652787866757866 3
+33 3 33
+
+4
+44444
+-4 -3 -2 -1
+
+0
+
+1
+
+-1 0 1 2 3
+
+(c) NCI60 : r=2 444444
+535338853351317615128711357865126656762867622868
+-2.0 -1.5 -1.0 -0.5 0.0 0.5
+
+1:Breast 2:CNS 3:Colon 4:Leukemia 5:Melanoma 6:NSCLC 7:Ovarian 8:Renal Figure 8. NCI60 : the 2-dimensional projection (p=30). (a) ILDA : The Leukemia and Colon classes are separated from the others. (b) IL1 : The Leukemia class and Colon classes are separated from the others, but Colon class is not clearly separated. (c) Only the Leukemia class is separated from the others.
+
+18
+
+the visual inspection, they can be used for classification. For comparison to the other methods, we show the results of Dudoit, et al(2001) on the Leukemia data with two classes : AML and ALL. For a 2/3 training set (ntrain = 48), we calculate BW(Equation 17) values for each gene and select the 40 genes with the larger BW values. Using this 40 gene training set, find the optimal projection. Let a be the optimal projection, XØ AML be the mean of the observations in AML groups, XØ ALL be the mean of the observations in ALL groups, and X be an observation. Then, we build a classifier : If aT (X - XØ AML) < aT (X - XØ ALL), then X belongs to the AML group. Else, X belongs to the ALL group. (For detailed explanation, see Johnson and Wichern, 2002). Using this classifier, we compute the test error. This is repeated 200 times. The median and upper quartile of the test errors are summarized in Table 1. The results of Fisher's LDA, DLDA, and DQDA are from Dudoit, et al (2001). As we expect, ILDA has similar results to Fisher's LDA. The L1 compares well with the other methods.
+5. Discussion
+We have proposed new projection pursuit indices for exploratory supervised classification and examined their properties. In most applications, the LDA index works well to find a projection that has well-separated class structure. The Lr index can lead us to projections that have special features. With the L1 index, we can get a projection that is robust to outliers. This index is useful for discovering outliers. As r is increased, the Lr index tends to be more sensitive to outliers. For exploratory supervised classification, we need to use several projection pursuit indices (at least LDA and L1 indices) and examine different results. These indices can be used to obtain a better understanding of the class structure in the data space and their projection coefficients help find the important variables that best separate classes (Lee, 2003). The insights learned from plotting the optimal projections are useful when building a classifier and for assessing classifiers.
+Projection pursuit methods can be applied to multivariate tree methods. Several authors have considered the problem of constructing tree-structured classifiers that have linear discriminants at each node. Friedman
+19
+
+(1977) reported that applying Fisher's linear discriminants, instead of univariate features, at some internal nodes was useful in building better trees. This is a similar approach to the isolation method that we applied to NCI 60 data (Figure 6).
+A major issue revealed by the gene expression application is that when there are too few cases for variables the reliability of the classifications is questionable. There is a high probability of a separating hyperplane purely by chance when the number of genes is larger than half the sample size (the perceptron capacity bound). When the number of genes is larger than the sample size, most of high dimensional space is empty and we can find a separating hyperplane that divides groups purely by chance (see Ripley, 1996). For more detailed discussion, see Lee (2003).
+For a large number of variables, our simulated annealing optimization algorithm for projection pursuit method is quite slow to find the global optimal projection. A faster annealing algorithm described by Ingber (1989) may be better.
+Finally we have used the R language for this research and provide the classPP package (available at CRAN). These indices are also available for the guided tour in the software GGobi (http://www.ggobi.org).
+REFERENCE
+[1] Bertsimas, D., Tsitsiklis, J. (1993). "Simulated Annealing." Statistical Science, 8(1), 10-15. [2] Cook, D., Buja, A., and Cabrera, J. (1993). "Projection Pursuit Indexes Based on Orthogonal Function Expansions." Journal of Computational and Graphical Statistics, 2(3), 225-250. [3] Cook, D., Buja, A., Cabrera, J., and Hurley, C. (1995). "Grand Tour and Projection Pursuit." Journal of Computational and Graphical Statistics, 4(3), 155-172. [4] Duda, R. O., Hart, P. E., and Stork, D. G. (2001). Pattern Classification, 2nd edition, Wiley-Interscience Publication . [5] Dudoit, S., Fridlyand, J., and Speed, T. P. (2002) "Comparison of Discrimination Methods for the Clas-
+20
+
+sification of Tumors Using Gene Expression Data." Journal of the American Statistical Association, 97(1), 77-87. [6] Fisher, R. A. (1938). "The Statistical Utilization of Multiple Measurements." Annals of Eugenics, 8, 376-386. [7] Flick, T. E., Jones, L. K., Priest, R. G., and Herman, C. (1990). "Pattern Classification using Projection Pursuit." Pattern Recognition, 23(12), 1367-1376. [8] Friedman, J. H. (1977). "A Recursive Partitioning Decision Rule for Nonparametric Classification." IEEE Transactions on Computers, 26, 404-408. [9] Friedman, J. H. (1987). "Exploratory Projection Pursuit." Journal of the American Statistical Association, 82(1), 249-266. [10] Friedman, J. H. (1989). "Regularized Discriminant Analysis." Journal of the American Statistical Association, 84(1), 165-175. [11] Friedman, J. H., and Tukey, J. W. (1974). "A Projection Pursuit Algorithm for Exploratory Data Analysis." IEEE Transactions on Computers, C-23, 881-890. [12] Fukunaga, K. (1990). Introduction to Statistical Pattern Recognition, Academic Press, San-Diego. [13] Golub, T. R., Slonim, D. K., Tamayo, P., Huard, C., Gaasenbeek, M., Mesirov, J. P., Coller, H., Loh, M., Downing, J. R., Caligiuri, M. A., Bloomfield, C. D., and Lander, E. S. (1999). "Molecular Classification of Cancer: Class Discovery and Class Prediction by Gene Expression Monitoring." Science, 268, 531-537. [14] Hall, P. (1989). "On Polynomial-Based Projection Indices for Exploratory Projection Pursuit." The Annals of Statistics, 17(2), 589-605. [15] Hastie, T., Tibshirani, R., and Friedman, J. (2001). The Elements of Statistical Learning, Springer. [16] Huber, P. J. (1985). "Projection Pursuit." (with discussion) The Annals of Statistics, 13(2), 435-525. [17] Huber, P. J. (1990). "Data Analysis and Projection Pursuit." Technical Report PJH-90-1, MIT [18] Ingber, L. (1989). "Very fast simulated re-annealing." Mathl. Comput. Modelling, 12(8), 967-973.
+21
+
+[19] Johnson, R. A., and Wichern, D. W. (2002). Applied Multivariate Statistical Analysis, 5th edition, Prentice-Hall, New Jersey. [20] Jones, M. C., and Sibson, R. (1987). "What is Projection Pursuit?" (with discussion) Journal of the Royal Statistical Society, A, 150(1), 1-36. [21] Kirkpatrick, S., Gelatt, C. D., and Vecchi, M. P. (1983). "Optimization by Simulated Annealing." Science, 220, 671-680. [22] Klein, R. W., Dubes, R. C. (1989). "Experiments in projection and clustering by simulated annealing." Pattern Recognition, 22(2), 213-220. [23] Kruskal, J. B.(1969) "Toward a Practical Method which Helps Uncover the Structure of a Set of Multivariate Observations by Finding the Linear Transformation which Optimizes a New `Index of condensation'." Statistical Computing, New York : Academic press, 427-440 [24] Lee, E. (2003). "Projection Pursuit for Exploratory Supervised Classification." Ph.D thesis, Department of Statistics, Iowa State University. [25] Piers, A. M. (2003). "Robust Linear Discriminant Analysis and the Projection Pursuit Approach, practical aspects." Developments in Robust Statistics : International Conference on Robust Statistics 2001 , Ed. Dutter, Filzmoser, Gather and Rousseeuw. Springer-Verlag, 317-329. [26] Polzehl, J. (1995). "Projection pursuit discriminant analysis." Computational statistics and data analysis, 20(2), 141-157. [27] Posse, C. (1990). "An Effective Two-dimensional Projection Pursuit Algorithm." Communications in Statistics - Simulation and Computation, 19(4), 1143-1164. [28] Posse, C. (1992). "Projection Pursuit Discriminant Analysis for Two Groups." Communications in Statistics - Theory and Method, 21(1), 1- 19. [29] Ripley, B. D. (1996). Pattern Recognition and Neural Networks, Cambridge University Press. [30] Ross, D. T., Scherf, U., Eisen, M. B., Perou, C. M., Spellman, P., Iyer, V., Jeffrey, S. S., de Rijn, M. V.,
+22
+
+Waltham, M., Pergamenschikov, A., Lee, J. C. F., Lashkari, D., Shalon, D., Myers, T. G., Weinstein, J. N., Botstein, D., and Brown, P. O. (2000). "Systematic variation in gene expression patterns in human cancer cell lines." Nature Genetics, 24(3), 227-234. [31] Swayne, D.F., Lang, D.T., Buja, A., and Cook, D. (2003). "GGobi : evolving from XGobi into an extensible framework for interactive data visualization." Computational Statistics and Data Analysis, 43(4), 423-444.
+23
+
+SFB 649 Discussion Paper Series
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Nonparametric Risk Management with Generalized Hyperbolic Distributions" by Ying Chen, Wolfgang H‰rdle and Seok-Oh Jeong, January 2005.
+002 "Selecting Comparables for the Valuation of the European Firms" by Ingolf Dittmann and Christian Weiner, February 2005.
+003 "Competitive Risk Sharing Contracts with One-sided Commitment" by Dirk Krueger and Harald Uhlig, February 2005.
+004 "Value-at-Risk Calculations with Time Varying Copulae" by Enzo Giacomini and Wolfgang H‰rdle, February 2005.
+005 "An Optimal Stopping Problem in a Diffusion-type Model with Delay" by Pavel V. Gapeev and Markus Reiﬂ, February 2005.
+006 "Conditional and Dynamic Convex Risk Measures" by Kai Detlefsen and Giacomo Scandolo, February 2005.
+007 "Implied Trinomial Trees" by Pavel CÌzek and Karel Komor·d, February 2005.
+008 "Stable Distributions" by Szymon Borak, Wolfgang H‰rdle and Rafal Weron, February 2005.
+009 "Predicting Bankruptcy with Support Vector Machines" by Wolfgang H‰rdle, Rouslan A. Moro and Dorothea Sch‰fer, February 2005.
+010 "Working with the XQC" by Wolfgang H‰rdle and Heiko Lehmann, February 2005.
+011 "FFT Based Option Pricing" by Szymon Borak, Kai Detlefsen and Wolfgang H‰rdle, February 2005.
+012 "Common Functional Implied Volatility Analysis" by Michal Benko and Wolfgang H‰rdle, February 2005.
+013 "Nonparametric Productivity Analysis" by Wolfgang H‰rdle and Seok-Oh Jeong, March 2005.
+014 "Are Eastern European Countries Catching Up? Time Series Evidence for Czech Republic, Hungary, and Poland" by Ralf Br¸ggemann and Carsten Trenkler, March 2005.
+015 "Robust Estimation of Dimension Reduction Space" by Pavel CÌzek and Wolfgang H‰rdle, March 2005.
+016 "Common Functional Component Modelling" by Alois Kneip and Michal Benko, March 2005.
+017 "A Two State Model for Noise-induced Resonance in Bistable Systems with Delay" by Markus Fischer and Peter Imkeller, March 2005.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+018 "Yxilon ≠ a Modular Open-source Statistical Programming Language" by Sigbert Klinke, Uwe Ziegenhagen and Yuval Guri, March 2005.
+019 "Arbitrage-free Smoothing of the Implied Volatility Surface" by Matthias R. Fengler, March 2005.
+020 "A Dynamic Semiparametric Factor Model for Implied Volatility String Dynamics" by Matthias R. Fengler, Wolfgang H‰rdle and Enno Mammen, March 2005.
+021 "Dynamics of State Price Densities" by Wolfgang H‰rdle and Zdenk Hl·vka, March 2005.
+022 "DSFM fitting of Implied Volatility Surfaces" by Szymon Borak, Matthias R. Fengler and Wolfgang H‰rdle, March 2005.
+023 "Towards a Monthly Business Cycle Chronology for the Euro Area" by Emanuel Mˆnch and Harald Uhlig, April 2005.
+024 "Modeling the FIBOR/EURIBOR Swap Term Structure: An Empirical Approach" by Oliver Blaskowitz, Helmut Herwartz and Gonzalo de Cadenas Santiago, April 2005.
+025 "Duality Theory for Optimal Investments under Model Uncertainty" by Alexander Schied and Ching-Tang Wu, April 2005.
+026 "Projection Pursuit For Exploratory Supervised Classification" by Eun-Kyung Lee, Dianne Cook, Sigbert Klinke and Thomas Lumley, May 2005.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

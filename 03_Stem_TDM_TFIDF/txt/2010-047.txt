@@ -1,0 +1,1948 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2010-047
+FX Smile in the Heston Model
+Agnieszka Janek* Tino Kluge**
+Rafal Weron*** Uwe Wystup**
+* Institute of Mathematics and Computer Science, Wroclaw University of  Technology, Poland 
+** MathFinance AG, Waldems, Germany  *** Institute of Organization and Management, Wroclaw University of 
+Technology, Poland  This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+FX Smile in the Heston Model1
+Agnieszka Janek2, Tino Kluge3, Rafal Weron4, and Uwe Wystup3
+Abstract: The Heston model stands out from the class of stochastic volatility (SV) models mainly for two reasons. Firstly, the process for the volatility is nonnegative and mean-reverting, which is what we observe in the markets. Secondly, there exists a fast and easily implemented semi-analytical solution for European options. In this article we adapt the original work of Heston (1993) to a foreign exchange (FX) setting. We discuss the computational aspects of using the semi-analytical formulas, performing Monte Carlo simulations, checking the Feller condition, and option pricing with FFT. In an empirical study we show that the smile of vanilla options can be reproduced by suitably calibrating three out of five model parameters.
+Keywords: Heston model; vanilla option; stochastic volatility; Monte Carlo simulation; Feller condition; option pricing with FFT
+JEL: C5, C63, G13
+1 Chapter prepared for the 2nd edition of Statistical Tools for Finance and Insurance, P.Cizek, W.H‰rdle, R.Weron (eds.), Springer-Verlag, forthcoming in 2011. Research partially supported by Deutsche Forschungsgemeinschaft via SFB 649 ,,÷konomisches Risiko", Humboldt-Universit‰t zu Berlin.
+2 Institute of Mathematics and Computer Science, Wroclaw University of Technology, Poland 3 MathFinance AG, Waldems, Germany 4 Institute of Organization and Management, Wroclaw University of Technology, Poland
+
+1 FX Smile in the Heston Model
+Agnieszka Janek, Tino Kluge, Rafal Weron, and Uwe Wystup
+1.1 Introduction
+The universal benchmark for option pricing is flawed. The Black-Scholes formula is based on the assumption of a geometric Brownian motion (GBM) dynamics with constant volatility. Yet, the model-implied volatilities for different strikes and maturities of options are not constant and tend to be smile shaped (or in some markets skewed). Over the last three decades researchers have tried to find extensions of the model in order to explain this empirical fact.
+As suggested already by Merton (1973), the volatility can be made a deterministic function of time. While this approach explains the different implied volatility levels for different times of maturity, it still does not explain the smile shape for different strikes. Dupire (1994), Derman and Kani (1994), and Rubinstein (1994) came up with the idea of allowing not only time, but also state dependence of the volatility coefficient, for a concise review see e.g. Fengler (2005). This local (deterministic) volatility approach yields a complete market model. It lets the local volatility surface to be fitted, but it cannot explain the persistent smile shape which does not vanish as time passes. Moreover, exotics cannot be satisfactorily priced in this model.
+The next step beyond the local volatility approach was to allow the volatility to be driven by a stochastic process. The pioneering work of Hull and White (1987), Stein and Stein (1991), and Heston (1993) led to the development of stochastic volatility (SV) models, for reviews see Fouque, Papanicolaou, and Sircar (2000) and Gatheral (2006). These are multi-factor models with one of the factors being responsible for the dynamics of the volatility coefficient. Different driving mechanisms for the volatility process have been proposed, including GBM and mean-reverting Ornstein-Uhlenbeck type processes.
+
+2 1 FX Smile in the Heston Model
+The Heston model stands out from this class mainly for two reasons. Firstly, the process for the volatility is non-negative and mean-reverting, which is what we observe in the markets. Secondly, there exists a fast and easily implemented semi-analytical solution for European options. This computational efficiency becomes critical when calibrating the model to market prices and is the greatest advantage of the model over other (potentially more realistic) SV models. Its popularity also stems from the fact that it was one of the first models able to explain the smile and simultaneously allow a front-office implementation and a valuation of many exotics with values closer to the market than the BlackScholes model. Finally, given that all SV models generate roughly the same shape of implied volatility surface and have roughly the same implications for the valuation of exotic derivatives (Gatheral, 2006), focusing on the Heston model is not a limitation, rather a good starting point.
+This chapter is structured as follows. In Section 1.2 we define the model and discuss its properties, including marginal distributions and tail behavior. Next, in Section 1.3 we adapt the original work of Heston (1993) to a foreign exchange (FX) setting. We do this because the model is particularly useful in explaining the volatility smile found in FX markets; in equity markets the typical volatility structure is a strongly asymmetric skew (also called a smirk or grimace). In Section 1.4 we show that the smile of vanilla options can be reproduced by suitably calibrating the model parameters. Finally, in Section 1.5 we briefly discuss the alternatives to the Heston model.
+
+1.2 The Model
+
+Following Heston (1993) consider a stochastic volatility model with GBM-like dynamics for the spot price:
+
+dSt = St µ dt + vtdWt(1)
+
+(1.1)
+
+and a non-constant instantaneous variance vt driven by a mean-reverting square root (or CIR) process:
+
+dvt = ( - vt) dt + vtdWt(2).
+
+(1.2)
+
+The stochastic increments of the two processes are correlated with parameter , i.e. dWt(1)dWt(2) = dt. The remaining parameters ≠ µ, , , and  ≠ can be interpreted as the drift, the long-run variance, the rate of mean reversion
+
+1.2 The Model
+
+3
+
+FX rate Volatility [%]
+
+6 5.5
+5 4.5
+4 3.5
+0
+
+GBM Heston
+0.2 0.4 0.6 0.8 Time [years]
+
+1
+
+35 30 25 20 15 10
+5 0 0.2 0.4 0.6 0.8 1 Time [years]
+
+Figure 1.1: Sample trajectories (left panel ) and volatilities (right panel ) of the GBM and the Heston spot price process (1.1) obtained with the same set of random numbers.
+STF2hes01.m
+
+to the long-run variance, and the volatility of variance (often called the vol of vol), respectively. Sample paths and volatilities of the GBM and the Heston spot price process are plotted in Figure 1.1.
+By setting xt = log(St/S0) - µt, we can express the Heston model (1.1)-(1.2) in terms of the centered (log-)return xt and vt. The process is then characterized by the transition probability Pt(x, v | v0) to have (log-)return x and variance v at time t given the initial return x = 0 and variance v0 at time t = 0. The time evolution of Pt(x, v | v0) is governed by the following Fokker-Planck (or forward Kolmogorov) equation:
+
+ t
+
+P
+
+=
+
+
+
+ v
+
+{(v
+
+-
+
+)P }
+
++
+
+1 2
+
+ x
+
+(vP
+
+)
+
++
+
++
+
+
+
+2 x v
+
+(vP )
+
++
+
+1 2
+
+2 x2
+
+(vP )
+
++
+
+2 2
+
+2 v2
+
+(vP ).
+
+(1.3)
+
+Solving this equation yields the following semi-analytical formula for the density
+
+of centered returns x, given a time lag t of the price changes (Dragulescu and
+
+Yakovenko, 2002):
+
+Pt(x)
+
+=
+
+1 2
+
++
+eix+Ft () d ,
+-
+
+(1.4)
+
+4 1 FX Smile in the Heston Model
+
+with
+
+Ft()
+
+=
+
+ 2
+
+t -
+
+2 2
+
+log
+
+cosh
+
+t 2
+
++
+
+2 - 2 +2 2
+
+sinh
+
+t 2
+
+,
+
+ =  + i, and  = 2 + 2(2 - i).
+
+Somewhat surprisingly, the introduction of SV does not change the properties of the spot price process in a way that could be noticed just by a visual inspection of its realizations, see Figure 1.1 where sample paths of a GBM and the spot process (1.1) in the Heston model are plotted. To make the comparison more objective both trajectories were obtained with the same set of random numbers.
+
+In both cases the initial spot rate S0 = 4 and the domestic and foreign interest
+
+rates are 2%. The
+
+rd = 5% and rf = 3%, volatility in the GBM
+
+risescpoencsttivaenlty,yvietld=ing 4a%dr=ift2o0f%µ,
+
+= rd - rf = while in the
+
+Heston model it is driven by the mean-reverting process (1.2) with the initial
+
+variance v0 = 4%, the long-run variance  = 4%, the speed of mean reversion
+
+ = 2, and the vol of vol  = 30%. The correlation is set to  = -0.05.
+
+A closer inspection of the Heston model does, however, reveal some important differences with respect to GBM. For instance, the probability density functions (pdfs) of (log-)returns have heavier tails ≠ exponential compared to Gaussian, see Figure 1.2. In this respect they are similar to hyperbolic distributions (Weron, 2004, see also Chapter ??), i.e. in the log-linear scale they resemble hyperbolas, rather than parabolas of the Gaussian pdfs.
+
+1.3 Option Pricing
+
+Consider the value function of a general contingent claim U (t, v, S) paying g(S) = U (T, v, S) at time T . We want to replicate it with a self-financing portfolio. Due to the fact that in the Heston model we have two sources of uncertainty (the Wiener processes W (1) and W (2)) the portfolio must include the possibility to trade in the money market, the underlying and another derivative security with value function V (t, v, S).
+
+We start with an initial wealth X0 which evolves according to:
+
+dX =  dS +  dV + rd(X - V ) dt - (rd - rf )S dt,
+
+(1.5)
+
+where  is the number of units of the underlying held at time t and  is the number of derivative securities V held at time t.
+
+1.3 Option Pricing
+
+5
+
+PDF(x) PDF(x)
+
+2.5 GBM
+2 Heston
+1.5
+1
+0.5
+
+100 10-2 10-4 10-6
+
+0 10-8
+
+-1 -0.5 0 0.5 1
+
+-2 -1 0 1 2
+
+xx
+
+Figure 1.2: The marginal pdfs in the Black-Scholes (GBM) and Heston models for the same set of parameters as in Figure 1.1 (left panel ). The tails of the Heston marginal pdfs are exponential, which is clearly visible in the log-linear scale (right panel ).
+STF2hes02.m
+
+The goal is to find  and  such that Xt = U (t, vt, St) for all t  [0, T ]. The standard approach to achieve this is to compare the differentials of U and X obtained via Ito^'s formula. After some algebra we arrive at the partial differential equation (PDE) which U must satisfy (for details on the derivation in the foreign exchange setting see Hakala and Wystup, 2002):
+
+1 2
+
+vS2
+
+2U S2
+
++
+
+vS
+
+2U Sv
+
++
+
+1 2
+
+2
+
+v
+
+2U v2
+
++ (rd
+
+-
+
+rf
+
+)S
+
+U S
+
++
+
++
+
+( - v) - (t, v, S)
+
+U v
+
+- rdU
+
++
+
+U t
+
+= 0.
+
+(1.6)
+
+The term (t, v, S) is called the market price of volatility risk. Heston (1993) assumed it to be linear in the instantaneous variance vt, i.e. (t, v, S) = vt, in order to retain the form of the equation under the transformation from the statistical (or risky) measure to the risk-neutral measure.
+
+6 1 FX Smile in the Heston Model
+
+1.3.1 European Vanilla FX Option Prices and Greeks
+
+We can solve (1.6) by specifying appropriate boundary conditions. For a European vanilla FX option these are:
+
+U (T, v, S) = max{(S - K), 0},
+
+U (t, v, 0) = 1 -  Ke-rd , 2
+
+U S
+
+(t,
+
+v,
+
+)
+
+=
+
+1
+
++ 2
+
+
+
+e-rf
+
+
+
+,
+
+(1.7) (1.8) (1.9)
+
+rdU (t, 0, S)
+
+=
+
+(rd
+
+-
+
+rf
+
+)S
+
+U S
+
+(t,
+
+0,
+
+S)
+
++
+
++
+
+
+
+U v
+
+(t,
+
+0,
+
+S)
+
++
+
+U t
+
+(t, 0, S),
+
+U (t, , S) =
+
+Se-rf  , for  = +1, Ke-rd , for  = -1,
+
+(1.10) (1.11)
+
+where  = ±1 for call and put options, respectively. The strike K is in units of the domestic currency and  = T - t is the time to maturity (i.e. T is the expiration time in years and t is the current time).
+Heston (1993) solved the PDE analytically using the method of characteristic functions. For European vanilla FX options the price is given by:
+
+h( ) = HestonVanilla(, , , , , rd, rf , vt, St, K, , ) =  e-rf  StP+() - Ke-rd P-() ,
+
+where
+
+u1,2
+
+=
+
+±
+
+1 2
+
+,
+
+b1
+
+=
+
+
+
++
+
+
+
+-
+
+,
+
+b2
+
+=
+
+
+
++
+
+,
+
+and
+
+(1.12)
+
+dj = (i - bj)2 - 2(2uji - 2),
+
+gj
+
+=
+
+bj bj
+
+- -
+
+i i
+
++ -
+
+dj dj
+
+,
+
+Cj (, ) = (rd - rf )i +
+
++
+
+ 2
+
+(bj - i + dj) - 2 log
+
+1 - gj edj 1 - gj
+
+Dj(, ) =
+
+bj - i + dj 2
+
+1 - edj 1 - gj edj
+
+,
+
+(1.13) (1.14) (1.15) ,
+(1.16)
+
+1.3 Option Pricing
+
+7
+
+fj(x, vt, , ) = exp{Cj(, ) + Dj(, )vt + ix},
+
+Pj (x, vt, , y) =
+
+1 2
+
++
+
+1 
+
+
+
+0
+
+e-iyfj (x, vt, , ) i
+
+d.
+
+(1.17) (1.18)
+
+Note that the functions Pj are the cumulative distribution functions (in the variable y = log K) of the log-spot price after time  = T - t starting at x = log St for some drift µ. Finally:
+
+P+()
+
+=
+
+1
+
+- 2
+
+
+
++
+
+P1(x,
+
+vt,
+
+,
+
+y),
+
+P-()
+
+=
+
+1
+
+- 2
+
+
+
++
+
+P2(x,
+
+vt,
+
+,
+
+y).
+
+(1.19) (1.20)
+
+The Greeks can be evaluated by taking the appropriate derivatives or by exploiting homogeneity properties of financial markets (Reiss and Wystup, 2001). In the Heston model the spot delta and the so-called dual delta are given by:
+
+
+
+=
+
+h(t) St
+
+=
+
+e-rf  P+()
+
+and
+
+h(t) K
+
+=
+
+-e-rd P-(),
+
+(1.21)
+
+respectively. Gamma, which measures the sensitivity of delta to the underlying
+
+has the form:
+
+=
+
+ St
+
+=
+
+e-rf St
+
+
+
+p1(log
+
+St,
+
+vt,
+
+
+
+,
+
+log
+
+K
+
+),
+
+(1.22)
+
+where
+
+pj(x, v, , y)
+
+=
+
+1 
+
+
+
+0
+
+e-iyfj(x, v, , )
+
+d,
+
+j = 1, 2,
+
+(1.23)
+
+are the densities corresponding to the cumulative distribution functions Pj (1.18).
+
+The time sensitivity parameter theta = h(t)/t can be easily computed from (1.6), while the formulas for rho are the following:
+
+h(t) rd
+
+=
+
+Ke-rd  P-(),
+
+h(t) rf
+
+=
+
+-Ste-rf   P+().
+
+(1.24)
+
+Note, that in the foreign exchange setting there are two rho's ≠ one is a derivative of the option price with respect to the domestic interest rate and the other is a derivative with respect to the foreign interest rate.
+
+8 1 FX Smile in the Heston Model
+
+The notions of vega and volga usually refer to the first and second derivative with respect to volatility. In the Heston model we use them for the first and second derivative with respect to the initial variance:
+
+h(t) vt
+
+=
+
+e-rf
+
+
+
+St
+
+ vt
+
+P1
+
+(log
+
+St
+
+,
+
+vt
+
+,
+
+
+
+,
+
+log
+
+K
+
+)
+
+-
+
+-
+
+K
+
+e-rd
+
+ vt
+
+P2(log
+
+St,
+
+vt,
+
+,
+
+log
+
+K
+
+),
+
+2h(t) vt2
+
+=
+
+e-rf
+
+
+
+St
+
+2 vt2
+
+P1(log
+
+St
+
+,
+
+vt
+
+,
+
+
+
+,
+
+log
+
+K
+
+)
+
+-
+
+-
+
+K
+
+e-rd
+
+2 vt2
+
+P2(log
+
+St,
+
+vt,
+
+
+
+,
+
+log
+
+K
+
+),
+
+(1.25) (1.26)
+
+where
+
+ vt
+
+Pj
+
+(x,
+
+vt
+
+,
+
+
+
+,
+
+y)
+
+=
+
+1 
+
+
+
+0
+
+D(, )e-iyfj(x, vt, , ) i
+
+d, (1.27)
+
+2 vt2
+
+Pj
+
+(x,
+
+vt
+
+,
+
+
+
+,
+
+y)
+
+=
+
+1 
+
+
+
+0
+
+D2(, )e-iyfj(x, vt, , ) i
+
+d. (1.28)
+
+1.3.2 Computational Issues
+Heston's solution is semi-analytical. Formulas (1.19-1.20) require to integrate functions fj, which are typically of oscillatory nature. Hakala and Wystup (2002) propose to perform the integration in (1.18) with the Gauss-Laguerre quadrature using 100 for  and 100 abscissas. J®ackel and Kahl (2005) suggest using the Gauss-Lobatto quadrature (e.g. Matlab's quadl.m function) and transform the original integral boundaries [0, +) to the finite interval [0, 1].
+As a number of authors have recently reported (Albrecher et al., 2006; Gatheral, 2006; J®ackel and Kahl, 2005), the real problem starts when the functions fj are evaluated as part of the quadrature scheme. In particular, the calculation of the complex logarithm in eqn. (1.15) is prone to numerical instabilities. It turns out that taking the principal value of the logarithm causes Cj to jump discontinuously each time the imaginary part of the argument of the logarithm crosses the negative real axis. One solution is to keep track of the winding number in the integration (1.18), but is difficult to implement because standard numerical integration routines cannot be used. J®ackel and Kahl (2005) provide a practical solution to this problem.
+
+1.3 Option Pricing
+
+9
+
+A different approach was taken by Albrecher et al. (2006), see also Gatheral (2006). They proposed to make a simple transformation when computing the characteristic function and proved that the numerical stability of the resulting formulas is guaranteed under the full dimensional and unrestricted parameter space. Namely, their idea is to switch from gj in (1.14) to
+
+g~j
+
+=
+
+1 gj
+
+=
+
+bj bj
+
+- -
+
+i i
+
+- +
+
+dj dj
+
+,
+
+(1.29)
+
+which leads to new formulas for Cj and Dj:
+
+Cj(, ) = (rd - rf )i +
+
++
+
+ 2
+
+(bj - i - dj) - 2 log
+
+1 - g~j e-dj 1 - g~j
+
+Dj(, ) =
+
+bj - i - dj 2
+
+1 - e-dj 1 - g~j e-dj
+
+,
+
+(1.30) ,
+(1.31)
+
+in (1.17). Note, that the only differences between eqns. (1.14)-(1.16) and (1.29)(1.31), respectively, are the flipped minus and plus signs in front of the dj's.
+The mispricings resulting from using (1.14)-(1.16) are not that obvious to notice. In fact, if we price and backtest on short or middle term maturities only, we might not detect the problem at all. However, the deviations can become extreme for longer maturities (typically above 3-5 years; the exact threshold is parameter dependent, see Albrecher et al., 2006).
+
+Apart from the above semi-analytical solution for vanilla options, alternative approaches can be utilized. These include the general Fast Fourier Transform (FFT) approach of Carr and Madan (1999), finite differences, finite element methods and Monte Carlo simulations. The FFT-based pricing technique is discussed in Section 1.3.4. As for the other methods, finite differences must be used with care since high precision is required to invert scarce matrices. The CrankNicholson, ADI (Alternate Direction Implicit), and Hopscotch schemes can be used, however, ADI is not suitable to handle nonzero correlation. Boundary conditions must be set appropriately, for details see Kluge (2002). On the other hand, finite element methods can be applied to price both the vanillas and exotics, as explained for example in Apel, Winkler, and Wystup (2002).
+
+Finally, the Monte Carlo approach requires attention as the simple Euler discretization of the CIR process (1.2) may give rise to a negative variance. To deal with this problem, practitioners generally either adopt (i) the absorbing vt = max(vt, 0), or (ii) the reflecting principle vt = max(vt, -vt). More elegant,
+
+10 1 FX Smile in the Heston Model
+
+but computationally more demanding solutions include sampling from the exact transition law (Glasserman, 2004) or application of the quadratic-exponential (QE) scheme (Andersen, 2008). For a recent survey see the latter reference, where several new algorithms for time-discretization and Monte Carlo simulation of Heston-type SV models are introduced and compared in a thorough simulation study. Both the absorbing/reflecting patches and the QE scheme are implemented in the simHeston.m function used to plot Figure 1.1.
+
+1.3.3 Behavior of the Variance Process and the Feller Condition
+
+The CIR process for the variance, as defined by (1.2), always remains nonnegative. This is an important property which, for instance, is not satisfied by the Ornstein-Uhlenbeck process. However, ideally one would like a variance process which is strictly positive, because otherwise it degenerates to a deterministic function for the time it stays at zero. As it turns out, the CIR process remains strictly positive under the condition that
+
+
+
+:=
+
+4 2
+
+
+
+2,
+
+(1.32)
+
+which is often referred to as the Feller condition. We call  the dimensionality of the corresponding Bessel process (see below). If the condition is not satisfied, i.e. for 0 <  < 2, the CIR process will visit 0 recurrently but will not stay at zero, i.e. the 0-boundary is strongly reflecting.
+
+Unfortunately, when calibrating the Heston model to market option prices it is not uncommon for the parameters to violate the Feller condition (1.32). This is not a complete disaster, as the variance process can only hit zero for an infinitesimally small amount of time, but it is still worrying as very low levels of volatility (e.g. say below 1%) are repeatedly reached for short amounts of time and that is not something observed in the market.
+
+Besides being important from a modeling point of view, the Feller condition also plays a role in computational accuracy. For Monte Carlo simulations special care has to be taken so that the simulated paths do not go below zero if (1.32) is not satisfied. On the PDE side, the Feller condition determines whether the zero-variance boundary is in- or out-flowing, that is to say whether the convection vector at the boundary points in- or outwards. To see this, we need
+
+1.3 Option Pricing
+
+11
+
+to write the log-spot transformed Heston PDE in convection-diffusion form
+
+ t
+
+U
+
+=
+
+div(A grad
+
+U)
+
+-
+
+div(U b)
+
++
+
+f,
+
+(1.33)
+
+and obtain
+
+b(x, v) = v
+
+1 2
++
+
++
+
+1 2
+
+ +
+
+1 2
+
+2
+
+rf -
+
+- 
+
+rd
+
+,
+
+which is out-flowing at the v = 0 boundary if
+
+(1.34)
+
+1 2
+
+2
+
+-
+
+
+
+<
+
+0,
+
+(1.35)
+
+in which case the Feller condition (1.32) is satisfied.
+Having introduced and discussed the importance of this condition, the question remains how it is derived. We only give an overview here and refer the interested reader to Chapter 6.3 in Jeanblanc, Yor, and Chesney (2009) for a more thorough treatment.
+
+The main idea is to relate the CIR process to the family of squared Bessel processes which have well known properties. We call Xt an -dimensional squared Bessel process and denote it by BES2() if it follows the dynamics of
+
+dXt =  dt + 2 Xt+ dWt,
+
+(1.36)
+
+with Xt+ := max{0, Xt}. This definition makes sense for any real valued . However, in the case of integer valued  we have an interesting interpretation: a BES2() process Xt, with X0 = 0, follows the same dynamics as the squared
+distance to the origin of an -dimensional Brownian motion, i.e.
+
+
+
+Xt =
+
+Bt(i) ,
+
+i=1
+
+(1.37)
+
+with B(i) being independent Brownian motions. From this we can already conclude that for  = 2, Xt will never reach zero and, using the stochastic comparison theorem (Rogers and Williams, 2000), this property remains true for any   2. Similarly for 0 <   1 the value zero will be repeatedly hit (for  = 1 this happens as often as a one-dimensional Brownian motion crosses zero).
+
+12 1 FX Smile in the Heston Model
+
+The stochastic comparison theorem also immediately tells us that BES2() processes are non-negative for non-negative : for  = 0 we get the trivial solution Xt = 0 and increasing the drift term to  > 0 cannot make the paths any smaller. Different methods are needed, however, to examine the behavior for 1 <  < 2 (which turns out to be similar to the case of 0 <   1). For a proof we refer to Chapter V.48 in Rogers and Williams (2000), from which we also state the following additional properties. If Xt is an -dimensional squared Bessel process BES2() and X0  0 then it is always non-negative and:
+
+1. for 0 <  < 2 the process hits zero and this is recurrent, but the time spent at zero is zero,
+2. for  = 2 the process is strictly positive but gets arbitrarily close to 0 and ,
+3. for  > 2 the process is strictly positive and tends to infinity as time approaches infinity.
+
+To translate these properties to the class of CIR processes, we only need to
+apply the following space-time transformation to the squared Bessel process. Define dYt := e-t X(et -1). Then Yt follows the dynamics of
+
+dYt = ( - Yt) dt + 2 Yt dWt,
+
+(1.38)
+
+which
+
+is
+
+the
+
+same
+
+as
+
+the
+
+dynamics
+
+of
+
+the
+
+CIR
+
+process
+
+(1.2)
+
+if
+
+we
+
+set
+
+
+
+=
+
+2 4
+
+and
+
+
+
+=
+
+ 
+
+=
+
+4 2
+
+.
+
+1.3.4 Option Pricing with FFT
+In this section, we briefly describe the numerical option pricing approach of Carr and Madan (1999), which utilizes the characteristic function (cf) of the underlying instrument's price process. The basic idea of the method is to compute the price by Fourier inversion given an analytic expression for the cf of the option price.
+The rationale for using this approach is twofold. Firstly, the algorithm offers a speed advantage, including the possibility to calculate prices for a whole range of strikes in a single run. Secondly, the cf of the log-price is known and has a simple form for many models, while the pdf is often either unknown in closedform or complicated from the numerical point of view. For instance, for the
+
+1.3 Option Pricing
+
+13
+
+Heston model the cf takes the form (Heston, 1993; J®ackel and Kahl, 2005):
+
+E{exp(i log ST )} = f2(x, vt, , ),
+
+(1.39)
+
+where f2 is given by (1.17).
+Let us now derive the formula for the price of a European vanilla call option. Derivation of the put option price follows the same lines, for details see Lee (2004) and Schmelzle (2010). Alternatively we can use the call-put parity for European vanilla FX options (see e.g. Wystup, 2006). Let hC( ; k) denote the price of the call option maturing in  = T - t years with a strike of K = exp(k):
+
+
+
+hC ( ; k) =
+
+e-rT (es - ek)qT (s)ds,
+
+k
+
+(1.40)
+
+where qT is the risk-neutral density of sT = log ST . The function hC( ; k)
+
+is not square-integrable (see e.g. Rudin, 1991) because it converges to S0 for k  -. Hence, consider a modified function HC ( ; k) = ekhC ( ; k), which
+
+is square-integrable for a suitable constant  > 0. A sufficient condition is
+
+given by:
+
+E{(ST )+1} < ,
+
+(1.41)
+
+which is equivalent to T (0), i.e. the Fourier transform of HC( ; k), see (1.42) below, being finite. In an empirical study Schoutens, Simons, and Tistaert (2004) found that  = 0.75 leads to stable algorithms, i.e. the prices are well replicated for many model parameters. This value also fulfills condition (1.41) for the Heston model (Borak, Detlefsen, and Ha®rdle, 2005). Note, that for put options the condition is different: it is sufficient to choose  > 0 such that E{(ST )-} <  (Lee, 2004).
+
+Now, compute the Fourier transform of HC ( ; k):
+
+T (v) =
+
+
+eivkHC ( ; k)dk
+
+-
+
+
+
+= eivk eke-rT (es - ek)qT (s)dsdk
+
+-
+
+k
+
+s
+
+=
+
+e-rT qT (s)
+
+ek+s - e(+1)k eivkdkds
+
+-
+
+-
+
+=
+
+
+e-rT qT (s)
+-
+
+e(+1+iv)s  + iv
+
+-
+
+e(+1+iv)s  + 1 + iv
+
+ds
+
+=
+
+e-rT f2{v - ( + 2 +  - v2 + i(2
+
+1)i} + 1)v
+
+,
+
+(1.42)
+
+14 1 FX Smile in the Heston Model
+
+Call option price
+
+0.12 0.1
+0.08 0.06 0.04 0.02
+0 1.1
+
+FFT Analytical
+
+1.15 1.2 1.25 Strike price
+
+1.3
+
+MAPE [%]
+
+1 0.8 0.6 0.4 0.2
+0 1.1
+
+1.15 1.2 1.25 Strike price
+
+1.3
+
+Put option price
+
+0.12 0.1
+0.08 0.06 0.04 0.02
+0 1.1
+
+FFT Analytical
+1.15 1.2 1.25 Strike price
+
+1.3
+
+MAPE [%]
+
+1 0.8 0.6 0.4 0.2
+0 1.1
+
+1.15 1.2 1.25 Strike price
+
+1.3
+
+Figure 1.3: European call (top left ) and put (bottom left ) FX option prices obtained using the FFT method and the `Analytical' formula (1.12) for a sample set of parameters. Right panels: The percentage differences between the prices: (FFT-Analytical)/Analytical◊100%.
+STF2hes03.m
+
+where f2 is the cf of qT , see (1.39). We get the option price in terms of T using Fourier inversion:
+
+hC( ; k)
+
+=
+
+exp(-k) 
+
+
+e-ivk  (v)dv.
+0
+
+(1.43)
+
+This integral can be numerically approximated as (Carr and Madan, 1999):
+
+hC ( ; ku)
+
+
+
+e-ku 
+
+N
+
+e-
+
+2i N
+
+(j-1)(u-1)
+
+eibvj
+
+(vj
+
+)
+
+ 3
+
+{3
+
++
+
+(-1)j
+
+-
+
+j-1},
+
+(1.44)
+
+j=1
+
+1.4 Calibration
+
+15
+
+where
+
+ku
+
+=
+
+1 
+
+{-
+
++
+
+2 N
+
+(u
+
+-
+
+1)},
+
+u
+
+=
+
+1, . . . , N ,
+
+
+
+>
+
+0
+
+is
+
+the
+
+distance
+
+between
+
+the points of the integration grid, vj = (j - 1), j = 1, . . . , N , and  is the
+
+Dirac function.
+
+As can be seen in Figure 1.3 the differences between the FFT method and the (semi-)analytical formula (1.12) are relatively small. The differences result form the fact that the former method yields `exact' values only on the grid ku. In order to preserve the speed of the FFT-based algorithm we use linear interpolation between the grid points. This approach, however, slightly overestimates the true prices since the option price is a convex function of the strike (Borak, Detlefsen, and Ha®rdle, 2005). It can be clearly seen that near the grid points the prices obtained by both methods coincide, while between the grid points the FFT-based algorithm generates higher prices than the analytical solution, see the right panels in Figure 1.3.
+
+1.4 Calibration
+
+1.4.1 Qualitative Effects of Changing the Parameters
+
+Before calibrating the model to market data we will show how changing the input parameters affects the shape of the fitted smile curve. This analysis will help in reducing the dimensionality of the problem. In all plots of this subsection the solid blue curve with x's is the smile obtained for v0 = 0.01,  = 0.2,  = 1.5,  = 0.015, and  = 0.05.
+
+First, take a look at the initial variance (top left panel in Figure 1.4). Apparently, changing v0 allows for adjustments in the height of the smile curve. On the other hand, the volatility of variance (vol of vol) has a different impact on the smile. Increasing  increases the convexity of the fit, see the top right panel in Figure 1.4. In the limiting case, setting  equal to zero would produce a deterministic process for the variance and, hence, a volatility which does not admit any smile (a constant curve).
+
+The effects of changing the long-run variance  are similar to those observed
+
+by changing the seems promising
+
+initial variance, compare the to choose the initial variance a
+
+left panels priori, e.g.
+
+in set
+
+Figvu0 r=e
+
+1.4. It implied
+
+at-the-money (ATM) volatility, and only let the long-run variance  vary. In
+
+particular, a different initial variance for different maturities would be incon-
+
+sistent.
+
+16 1 FX Smile in the Heston Model
+
+Implied volatility [%]
+
+Implied volatility [%]
+
+13 v0 = 0.010
+12 v0 = 0.008 v0 = 0.012
+11
+
+13  = 0.2  = 0.1
+12  = 0.3
+11
+
+10 10
+
+9 10
+
+30 50 70 Delta [%]
+
+90
+
+9 10
+
+30 50 70 Delta [%]
+
+90
+
+Implied volatility [%]
+
+Implied volatility [%]
+
+13  = 0.015  = 0.010
+12  = 0.020
+11
+
+13  = 1.5  = 0.5
+12  = 3.0
+11
+
+10 10
+
+9 10
+
+30 50 70 Delta [%]
+
+90
+
+9 10
+
+30 50 70 Delta [%]
+
+90
+
+Figure 1.4: The effects of changing the model parameters on the shape of the smile: initial variance v0 (top left ), volatility of variance  (top right ), long-run variance  (bottom left ), and mean reversion level  (bottom right ).
+STF2hes04.m
+
+Changing the mean reversion  affects the ATM part more than the extreme wings of the smile curve. The low/high deltas () remain almost unchanged while increasing the mean reversion lifts the center, see the bottom right panel in Figure 1.4. Moreover, the influence of  is often compensated by a stronger vol of vol . This suggests fixing mean reversion (at some level, say  = 1.5) and only calibrating the remaining three parameters. If the obtained parameters do not satisfy the Feller condition (1.32), it might be worthwhile to fix  at a different level, say ~ = 3, recalibrate the remaining parameters and check if the new estimates fulfill the condition and lead to a more realistic variance process.
+
+1.4 Calibration
+
+17
+
+Implied volatility [%] Implied volatility [%]
+
+13  = 0.05  = -0.15
+12  = 0.15
+11
+
+13 =0  = -0.5
+12  = 0.5
+11
+
+10 10
+
+9 10
+
+30 50 70 Delta [%]
+
+90
+
+9 10
+
+30 50 70 Delta [%]
+
+90
+
+Figure 1.5: The effects of changing the correlation on the shape of the smile. STF2hes05.m
+
+Finally, let us look at the influence of correlation. The uncorrelated case produces a fit that looks like a symmetric smile curve centered at-the-money, see Figure 1.5. However, it is not exactly symmetric. Changing  changes the degree of symmetry. In particular, positive correlation makes calls more expensive, negative correlation makes puts more expensive. Note, that the model yields a volatility skew, a typically observed volatility structure in equity markets, only when the correlation is set to a very high or low value
+1.4.2 The Calibration Scheme
+Calibration of SV models can be done in two conceptually different ways. One is to look at the time series of historical data. Estimation methods such as Generalized, Simulated, and Efficient Methods of Moments (respectively GMM, SMM, and EMM), as well as Bayesian MCMC have been extensively applied. See Broto and Ruiz (2004) for a review. In the Heston model we could also try to fit empirical distributions of returns to the marginal distributions specified in (1.4) via a minimization scheme. Unfortunately, all historical approaches have one common flaw: they do not allow for the estimation of the market price of volatility risk (t, v, S). Observing only the underlying spot price and estimating SV models with this information will not yield correct prices for the derivatives.
+
+18 1 FX Smile in the Heston Model
+
+This leads us to the second estimation approach: instead of using the spot data we calibrate the model to the volatility smile (i.e. prices of vanilla options). In this case we do not need to worry about estimating the market price of volatility risk as it is already embedded in the market smile. This means that we can set  = 0 by default and just determine the remaining parameters.
+
+As a preliminary step, we have to retrieve the strikes since the smile in FX markets is specified as a function of delta. Comparing the Black-Scholes type formulas (in the FX market setting we have to use the Garman and Kohlhagen (1983) specification) for delta and the option premium yields the relation for the strikes Ki. From a computational point of view this stage requires only an inversion of the Gaussian distribution function. Next, based on the findings of Section 1.4.1, we fix two parameters (initial variance v0 and mean reversion ) and fit the remaining three: volatility of variance , long-run variance , and correlation  for a fixed time to maturity and a given vector of market BlackScholes implied volatilities {^i}in=1 for a given set of delta pillars {i}in=1.
+After fitting the parameters we compute the option prices in the Heston model using (1.12) and retrieve the corresponding Black-Scholes model implied volatilities {i}ni=1 via a standard bisection method (function fzero.m in Matlab uses a combination of bisection, secant, and inverse quadratic interpolation methods). The next step is to define an objective function, which we choose to be the Sum of Squared Errors (SSE):
+
+n
+SSE(, , , , v0) = {^i - i(, , , , v0)}2.
+i=1
+
+(1.45)
+
+We compare the volatilities because they are all of similar magnitude, in contrast to the prices which can range a few orders of magnitude for it-the-money (ITM) vs. out-of-the-money (OTM) options. In addition, one could introduce weights for all the summands to favor ATM or OTM fits. Finally we minimize over this objective function using a simplex search routine (fminsearch.m in Matlab) to find the optimal set of parameters.
+
+1.4.3 Sample Calibration Results
+We are now ready to calibrate the Heston model to market data. First, we take the EUR/USD volatility surface on July 1, 2004 and fit the parameters in the Heston model according to the calibration scheme discussed earlier. The results are shown in Figures 1.6≠1.7. Note, that the fit is very good for intermediate
+
+1.4 Calibration
+
+19
+
+Implied volatility [%]
+
+12 11.5
+
+1W smile Heston fit
+
+11
+
+10.5
+
+10
+
+9.5 10 25
+
+50 Delta [%]
+
+75 90
+
+Implied volatility [%]
+
+10.8 10.6
+
+1M smile Heston fit
+
+10.4
+
+10.2
+
+10
+
+9.8 10 25
+
+50 Delta [%]
+
+75 90
+
+Implied volatility [%]
+
+11.2 11
+10.8 10.6 10.4 10.2
+10 10 25
+
+3M smile Heston fit
+
+50 Delta [%]
+
+75 90
+
+Implied volatility [%]
+
+11.6 11.4 11.2
+11 10.8 10.6 10.4 10.2
+10 25
+
+6M smile Heston fit
+
+50 Delta [%]
+
+75 90
+
+Figure 1.6: The EUR/USD market smile on July 1, 2004 and the fit obtained with the Heston model for  = 1 week (top left ), 1 month (top right ), 3 months (bottom left ), and 6 months (bottom right ).
+STF2hes06.m
+
+and long maturities (three months and more). Unfortunately, the Heston model does not perform satisfactorily for short maturities (see Section 1.5.2 for a discussion of alternative approaches). Comparing with the fits in Weron and Wystup (2005) for the same data, the long maturity (2Y) fit is better. This is due to a more efficient optimization routine (Matlab 7.2 vs. XploRe 4.7) and utilization of the transformed formulas (1.29)-(1.31) instead of the original ones (1.14)-(1.16).
+
+20 1 FX Smile in the Heston Model
+
+Implied volatility [%]
+
+11.8 11.6 11.4 11.2
+11 10.8 10.6 10.4
+10 25
+
+1Y smile Heston fit
+
+50 Delta [%]
+
+75 90
+
+Implied volatility [%]
+
+11.8 11.6 11.4 11.2
+11 10.8 10.6 10.4
+10 25
+
+2Y smile Heston fit
+
+50 Delta [%]
+
+75 90
+
+Vol of vol ()
+
+0.35 0.3
+0.25 0.2
+0.15 0.1
+0.05 0 0
+
+0.5 1 1.5 Tau [year]
+
+Correlation ()
+
+0.06 0.04 0.02
+0 -0.02 -0.04 20
+
+0.5 1 1.5 Tau [year]
+
+2
+
+Figure 1.7: The EUR/USD market smile on July 1, 2004 and the fit obtained with the Heston model for  = 1 year (top left ) and 2 years (top right ). The term structure of the vol of vol and correlation visualizes the problem with fitting the smile in the short term (bottom panels).
+STF2hes06.m
+
+Now we take a look at more recent data and calibrate the Heston model to the EUR/USD volatility surface on July 22, 2010. The results are shown in Figures 1.8≠1.9. Again the fit is very good for intermediate and long maturities, but unsatisfactory for maturities under three months. The term structure of the vol of vol and correlation visualizes the problem with fitting the smile in the short term for both datasets. The calibrated vol of vol is very low for the 1W smiles, then jumps to a higher level. The correlation behaves similarly, for the 1W smiles it is much lower than for the remaining maturities. In 2004 it
+
+1.4 Calibration
+
+21
+
+Implied volatility [%]
+
+16.5 16
+15.5 15
+14.5 14
+13.5 13 10 25
+
+1W smile Heston fit
+
+50 Delta [%]
+
+75 90
+
+Implied volatility [%]
+
+15.5 15
+14.5 14
+13.5 13
+12.5 12 10 25
+
+1M smile Heston fit
+
+50 Delta [%]
+
+75 90
+
+Implied volatility [%]
+
+17 3M smile
+16 Heston fit
+
+15
+
+14
+
+13
+
+12 10 25
+
+50 Delta [%]
+
+75 90
+
+Implied volatility [%]
+
+19 18 17 16 15 14 13 12
+10 25
+
+6M smile Heston fit
+
+50 Delta [%]
+
+75 90
+
+Figure 1.8: The EUR/USD market smile on July 22, 2010 and the fit obtained with the Heston model for  = 1 week (top left ), 1 month (top right ), 3 months (bottom left ), and 6 months (bottom right ).
+STF2hes07.m
+
+additionally changes sign as the skew changes between short and longer-term tenors. Also note, that the more skewed smiles in 2010 require much higher (anti-)correlation (-0.4 <  < -0.3 for   1M) to obtain a decent fit than the more symmetric smiles in 2004 (-0.01 <  < 0.05 for   1M).
+As these examples show, the Heston model can be successfully applied to modeling the volatility smile of vanilla FX options in the mid- to longer-term. There are essentially three parameters to fit, namely the long-run variance (), which corresponds to the ATM level of the market smile, the vol of vol (), which corresponds to the convexity of the smile (in the market often quoted as but-
+
+22 1 FX Smile in the Heston Model
+
+Implied volatility [%]
+
+18 17 16 15 14 13 12
+10 25
+
+1Y smile Heston fit
+
+50 Delta [%]
+
+75 90
+
+Implied volatility [%]
+
+15 14.5
+14 13.5
+13 12.5
+12 11.5
+10 25
+
+2Y smile Heston fit
+
+50 Delta [%]
+
+75 90
+
+Vol of vol ()
+
+0.6 0.5 0.4 0.3 0.2 0.1
+0
+
+0.5 1 1.5 Tau [year]
+
+Correlation ()
+
+-0.2 -0.4 -0.6 -0.8
+-1 20
+
+0.5 1 1.5 Tau [year]
+
+2
+
+Figure 1.9: The EUR/USD market smile on July 22, 2010 and the fit obtained with the Heston model for  = 1 year (top left ) and 2 years (top right ). Again the term structure of the vol of vol and correlation visualizes the problem with fitting the smile in the short term (bottom panels ).
+STF2hes07.m
+
+terflies), and the correlation (), which corresponds to the skew of the smile (quoted as risk reversals). It is this direct link of the model parameters to the market that makes the Heston model so attractive to practitioners.
+The key application of the model is to calibrate it to vanilla options and afterwards employ it for pricing exotics (like one-touch options, see Wystup, 2003) in either a finite difference grid or a Monte Carlo simulation. Surprisingly, the results often coincide with the traders' rule of thumb pricing method (Wystup,
+
+1.5 Beyond the Heston Model
+
+23
+
+2006). This might also simply mean that a lot of traders use the same model. After all, it is a matter of belief which model reflects the reality most suitably. Recent ideas are to take prices of one-touch options along with prices of vanilla options from the market and use this common input to calibrate the Heston model.
+
+1.5 Beyond the Heston Model
+
+1.5.1 Time-dependent Parameters
+
+As we have seen in Section 1.4.3, performing calibrations for different time slices of the volatility matrix produces different values of the parameters. This suggests a term structure of some parameters in the Heston model. Therefore, we need to generalize the CIR process (1.2) to the case of time-dependent parameters, i.e. we consider the process:
+
+dvt = (t){(t) - vt} dt + (t)vt dWt,
+
+(1.46)
+
+for some nonnegative deterministic parameter functions (t), (t), and (t). The formula for the mean turns out to be:
+
+t
+E(vt) = g(t) = v0e-K(t) + (s)(s)eK(s)-K(t) ds,
+0
+
+(1.47)
+
+with K(t) =
+
+t 0
+
+(s)
+
+ds.
+
+The
+
+result
+
+for
+
+the
+
+second
+
+moment
+
+is:
+
+t
+E(vt2) = v02e-2K(t) + {2(s)(s) + 2(s)}g(s)e2K(s)-2K(t) ds,
+0
+
+(1.48)
+
+and hence for the variance (after some algebra):
+
+t
+Var(vt) = 2(s)g(s)e2K(s)-2K(t) ds.
+0
+
+(1.49)
+
+The formula for the variance allows us to compute forward volatilities of vari-
+ance explicitly. Assuming known values T1 and T2 for times 0 < T1 < T2, we want to determine the forward volatility of variance T1,T2 which matches the
+
+24 1 FX Smile in the Heston Model
+
+corresponding variances, i.e.
+
+T2
+T22 g(s)e2(s-T2) ds =
+0 T1
+= T21 g(s)e2(s-T2) ds +
+0
+
+(1.50)
+T2
+T21,T2 g(s)e2(s-T2) ds.
+T1
+
+The resulting forward volatility of variance is thus:
+
+T2 1 ,T2
+
+=
+
+T22 H(T2) - T21 H(T1) , H(T2) - H(T1)
+
+(1.51)
+
+where
+
+H(t) =
+
+t 0
+
+g(s)e2s
+
+ds
+
+=
+
+ 2
+
+e2t
+
++
+
+1 
+
+(v0
+
+-
+
+)et
+
++
+
+1 
+
+ 2
+
+-
+
+v0
+
+.
+
+(1.52)
+
+Assuming known values T1 and T2 for times 0 < T1 < T2, we want to determine the forward correlation coefficient T1,T2 to be active between times T1 and T2 such that the covariance between the Brownian motions of the variance
+process and the exchange rate process agrees with the given values T1 and T2 . This problem has a simple answer, namely:
+
+T1,T2 = T2 , T1  t  T2.
+
+(1.53)
+
+This can be seen by writing the Heston model in the form:
+
+dSt
+
+=
+
+St
+
+µ
+
+dt
+
++
+
+ vt
+
+dWt(1)
+
+,
+
+dvt
+
+=
+
+(
+
+-
+
+vt)
+
+dt
+
++
+
+  vt
+
+dWt(1)
+
++
+
+1
+
+-
+
+2
+
+  vt
+
+dWt(2),
+
+(1.54) (1.55)
+
+for a pair of independent Brownian motions W (1) and W (2). Observe that choosing the forward correlation coefficient as stated does not conflict with the computed forward volatility.
+
+1.5.2 Jump-diffusion Models
+While trying to calibrate short term smiles, the volatility of volatility often seems to explode along with the speed of mean reversion. This is a strong indication that the process `wants' to jump, which of course it is not allowed
+
+1.5 Beyond the Heston Model
+
+25
+
+to do. This observation, together with market crashes, has lead researchers to consider models with jumps (Gatheral, 2006; Martinez and Senge, 2002). Such models have been investigated already in the mid-seventies (Merton, 1976), long before the advent of SV. Jump-diffusion (JD) models are, in general, more challenging to handle numerically than SV models. Like the latter, they result in an incomplete market. But, whereas SV models can be made complete by the introduction of one (or a few) traded options, a JD model typically requires the existence of a continuum of options for the market to be complete.
+Bates (1996) and Bakshi, Cao, and Chen (1997) suggested using a combination of jumps and stochastic volatility. This approach allows for even a better fit to market data, but at the cost of a larger number of parameters to calibrate from the same market volatility smile. Andersen and Andreasen (2000) let the stock dynamics be described by a JD process with local volatility. This method combines ease of modeling steep, short-term volatility skews (jumps) and accurate fitting to quoted option prices (deterministic volatility function). Other alternative approaches utilize L¥evy processes (Cont and Tankov, 2003; Eberlein, Kallsen, and Kristen, 2003) or mixing unconditional disturbances (Tompkins and D'Ecclesia, 2006).
+
+26 1 FX Smile in the Heston Model
+
+Bibliography
+Albrecher, H., Mayer, P., Schoutens, W. and Tistaert, J. (2006). The little Heston trap, Wilmott Magazine, January: 83≠92. 231≠262.
+Andersen, L. and Andreasen, J. (2000). Jump-Diffusion Processes: Volatility Smile Fitting and Numerical Methods for Option Pricing, Review of Derivatives Research 4: 231≠262.
+Andersen, L. (2008). Simple and efficient simulation of the Heston stochastic volatility model, The Journal of Computational Finance 11(3), 1≠42.
+Apel, T., Winkler, G., and Wystup, U. (2002). Valuation of options in Heston's stochastic volatility model using finite element methods, in J. Hakala, U. Wystup (eds.) Foreign Exchange Risk, Risk Books, London.
+Bakshi, G., Cao, C. and Chen, Z. (1997). Empirical Performance of Alternative Option Pricing Models, Journal of Finance 52: 2003≠2049.
+Bates, D. (1996). Jumps and Stochastic Volatility: Exchange Rate Processes Implicit in Deutsche Mark Options, Review of Financial Studies 9: 69≠ 107.
+Borak, S., Detlefsen, K., and Ha®rdle, W. (2005). FFT-based option pricing, in P. Cizek, W. Ha®rdle, R. Weron (eds.) Statistical Tools for Finance and Insurance, Springer, Berlin.
+Broto, C., and Ruiz, E. (2004). Estimation methods for stochastic volatility models: A survey, Journal of Economic Surveys 18(5): 613≠649.
+Carr, P. and Madan, D. (1999). Option valuation using the fast Fourier transform, Journal of Computational Finance 2: 61≠73.
+Cont, R., and Tankov, P. (2003). Financial Modelling with Jump Processes, Chapman & Hall/CRC.
+
+28 Bibliography
+Derman, E. and Kani, I. (1994). Riding on a Smile, RISK 7(2): 32≠39.
+Dragulescu, A. A. and Yakovenko, V. M. (2002). Probability distribution of returns in the Heston model with stochastic volatility, Quantitative Finance 2: 443≠453.
+Dupire, B. (1994). Pricing with a Smile, RISK 7(1): 18≠20.
+Eberlein, E., Kallsen, J., and Kristen, J. (2003). Risk Management Based on Stochastic Volatility, Journal of Risk 5(2): 19≠44.
+Fengler, M. (2005). Semiparametric Modelling of Implied Volatility, Springer.
+Fouque, J.-P., Papanicolaou, G., and Sircar, K.R. (2000). Derivatives in Financial Markets with Stochastic Volatility, Cambridge University Press.
+Garman, M. B. and Kohlhagen, S. W. (1983). Foreign currency option values, Journal of International Monet & Finance 2: 231≠237.
+Gatheral, J. (2006). The Volatility Surface: A Practitioner's Guide, Wiley.
+Glasserman, P. (2004). Monte Carlo Methods in Financial Engineering, Springer-Verlag, New-York.
+Hakala, J. and Wystup, U. (2002). Heston's Stochastic Volatility Model Applied to Foreign Exchange Options, in J. Hakala, U. Wystup (eds.) Foreign Exchange Risk, Risk Books, London.
+Heston, S. (1993). A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options, Review of Financial Studies 6: 327≠343.
+Hull, J. and White, A. (1987). The Pricing of Options with Stochastic Volatilities, Journal of Finance 42: 281≠300.
+J®ackel, P. and Kahl, C. (2005). Not-So-Complex Logarithms in the Heston Model, Wilmott Magazine 19: 94≠103.
+Jeanblanc, M., Yor, M. and Chesney, M. (2009). Mathematical Methods for Financial Markets, Springer.
+Kluge, T. (2002). Pricing derivatives in stochastic volatility models using the finite difference method, Diploma thesis, Chemnitz Technical University.
+Lee, R., (2004). Option pricing by transform methods: extensions, unification and error control, Journal of Computational Finance 7(3): 51≠86.
+
+Bibliography
+
+29
+
+Martinez, M. and Senge, T. (2002). A Jump-Diffusion Model Applied to Foreign Exchange Markets, in J. Hakala, U. Wystup (eds.) Foreign Exchange Risk, Risk Books, London.
+Merton, R. (1973). The Theory of Rational Option Pricing, Bell Journal of Economics and Management Science 4: 141≠183.
+Merton, R. (1976). Option Pricing when Underlying Stock Returns are Discontinuous, Journal of Financial Economics 3: 125≠144.
+Reiss, O. and Wystup, U. (2001). Computing Option Price Sensitivities Using Homogeneity, Journal of Derivatives 9(2): 41≠53.
+Rogers, L.C.G. and Williams, D. (2000). Diffusions, Markov Processes, and Martingales ≠ Volume Two: Ito^ Calculus, McGraw-Hill.
+Rubinstein, M. (1994). Implied Binomial Trees, Journal of Finance 49: 771≠ 818.
+Rudin, W., (1991). Functional Analysis, McGraw-Hill.
+Schoutens, W., Simons, E. and Tistaert, J. (2004). A perfect calibration! Now what? Wilmott March: 66≠78.
+Schmelzle, M., (2010). Option pricing formulae using Fourier transform: Theory and application, Working paper.
+Stein, E. and Stein, J. (1991). Stock Price Distributions with Stochastic Volatility: An Analytic Approach, Review of Financial Studies 4(4): 727≠752.
+Tompkins, R. G. and D'Ecclesia, R. L. (2006). Unconditional Return Disturbances: A Non-Parametric Simulation Approach, Journal of Banking and Finance 30(1): 287≠314.
+Weron, R. (2004). Computationally intensive Value at Risk calculations, in J.E. Gentle, W. Ha®rdle, Y. Mori (eds.) Handbook of Computational Statistics, Springer.
+Weron, R., and Wystup. U. (2005). Heston's model and the smile, in P. Cizek, W. Ha®rdle, R. Weron (eds.) Statistical Tools for Finance and Insurance, Springer.
+Wystup, U. (2003). The market price of one-touch options in foreign exchange markets, Derivatives Week, 12(13).
+Wystup, U. (2006). FX Options and Structured Products, Wiley.
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Volatility Investing with Variance Swaps" by Wolfgang Karl H‰rdle and Elena Silyakova, January 2010.
+002 "Partial Linear Quantile Regression and Bootstrap Confidence Bands" by Wolfgang Karl H‰rdle, Ya'acov Ritov and Song Song, January 2010.
+003 "Uniform confidence bands for pricing kernels" by Wolfgang Karl H‰rdle, Yarema Okhrin and Weining Wang, January 2010.
+004 "Bayesian Inference in a Stochastic Volatility Nelson-Siegel Model" by Nikolaus Hautsch and Fuyu Yang, January 2010.
+005 "The Impact of Macroeconomic News on Quote Adjustments, Noise, and Informational Volatility" by Nikolaus Hautsch, Dieter Hess and David Veredas, January 2010.
+006 "Bayesian Estimation and Model Selection in the Generalised Stochastic Unit Root Model" by Fuyu Yang and Roberto Leon-Gonzalez, January 2010.
+007 "Two-sided Certification: The market for Rating Agencies" by Erik R. Fasten and Dirk Hofmann, January 2010.
+008 "Characterising Equilibrium Selection in Global Games with Strategic Complementarities" by Christian Basteck, Tijmen R. Daniels and Frank Heinemann, January 2010.
+009 "Predicting extreme VaR: Nonparametric quantile regression with refinements from extreme value theory" by Julia Schaumburg, February 2010.
+010 "On Securitization, Market Completion and Equilibrium Risk Transfer" by Ulrich Horst, Traian A. Pirvu and GonÁalo Dos Reis, February 2010.
+011 "Illiquidity and Derivative Valuation" by Ulrich Horst and Felix Naujokat, February 2010.
+012 "Dynamic Systems of Social Interactions" by Ulrich Horst, February 2010.
+013 "The dynamics of hourly electricity prices" by Wolfgang Karl H‰rdle and Stefan Tr¸ck, February 2010.
+014 "Crisis? What Crisis? Currency vs. Banking in the Financial Crisis of 1931" by Albrecht Ritschl and Samad Sarferaz, February 2010.
+015 "Estimation of the characteristics of a LÈvy process observed at arbitrary frequency" by Johanna Kappusl and Markus Reiﬂ, February 2010.
+016 "Honey, I'll Be Working Late Tonight. The Effect of Individual Work Routines on Leisure Time Synchronization of Couples" by Juliane Scheffel, February 2010.
+017 "The Impact of ICT Investments on the Relative Demand for HighMedium-, and Low-Skilled Workers: Industry versus Country Analysis" by Dorothee Schneider, February 2010.
+018 "Time varying Hierarchical Archimedean Copulae" by Wolfgang Karl H‰rdle, Ostap Okhrin and Yarema Okhrin, February 2010.
+019 "Monetary Transmission Right from the Start: The (Dis)Connection Between the Money Market and the ECB's Main Refinancing Rates" by Puriya Abbassi and Dieter Nautz, March 2010.
+020 "Aggregate Hazard Function in Price-Setting: A Bayesian Analysis Using Macro Data" by Fang Yao, March 2010.
+021 "Nonparametric Estimation of Risk-Neutral Densities" by Maria Grith, Wolfgang Karl H‰rdle and Melanie Schienle, March 2010.
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Fitting high-dimensional Copulae to Data" by Ostap Okhrin, April 2010. 023 "The (In)stability of Money Demand in the Euro Area: Lessons from a
+Cross-Country Analysis" by Dieter Nautz and Ulrike Rondorf, April 2010. 024 "The optimal industry structure in a vertically related market" by
+Raffaele Fiocco, April 2010. 025 "Herding of Institutional Traders" by Stephanie Kremer, April 2010. 026 "Non-Gaussian Component Analysis: New Ideas, New Proofs, New
+Applications" by Vladimir Panov, May 2010. 027 "Liquidity and Capital Requirements and the Probability of Bank Failure"
+by Philipp Johann Kˆnig, May 2010. 028 "Social Relationships and Trust" by Christine Binzel and Dietmar Fehr,
+May 2010. 029 "Adaptive Interest Rate Modelling" by Mengmeng Guo and Wolfgang Karl
+H‰rdle, May 2010. 030 "Can the New Keynesian Phillips Curve Explain Inflation Gap
+Persistence?" by Fang Yao, June 2010. 031 "Modeling Asset Prices" by James E. Gentle and Wolfgang Karl H‰rdle,
+June 2010. 032 "Learning Machines Supporting Bankruptcy Prediction" by Wolfgang Karl
+H‰rdle, Rouslan Moro and Linda Hoffmann, June 2010. 033 "Sensitivity of risk measures with respect to the normal approximation
+of total claim distributions" by Volker Kr‰tschmer and Henryk Z‰hle, June 2010. 034 "Sociodemographic, Economic, and Psychological Drivers of the Demand for Life Insurance: Evidence from the German Retirement Income Act" by Carolin Hecht and Katja Hanewald, July 2010. 035 "Efficiency and Equilibria in Games of Optimal Derivative Design" by Ulrich Horst and Santiago Moreno-Bromberg, July 2010. 036 "Why Do Financial Market Experts Misperceive Future Monetary Policy Decisions?" by Sandra Schmidt and Dieter Nautz, July 2010. 037 "Dynamical systems forced by shot noise as a new paradigm in the interest rate modeling" by Alexander L. Baranovski, July 2010. 038 "Pre-Averaging Based Estimation of Quadratic Variation in the Presence of Noise and Jumps: Theory, Implementation, and Empirical Evidence" by Nikolaus Hautsch and Mark Podolskij, July 2010. 039 "High Dimensional Nonstationary Time Series Modelling with Generalized Dynamic Semiparametric Factor Model" by Song Song, Wolfgang K. H‰rdle, and Ya'acov Ritov, July 2010. 040 "Stochastic Mortality, Subjective Survival Expectations, and Individual Saving Behavior" by Thomas Post and Katja Hanewald, July 2010. 041 "Prognose mit nichtparametrischen Verfahren" by Wolfgang Karl H‰rdle, Rainer Schulz, and Weining Wang, August 2010. 042 "Payroll Taxes, Social Insurance and Business Cycles" by Michael C. Burda and Mark Weder, August 2010. 043 "Meteorological forecasts and the pricing of weather derivatives" by Matthias Ritter, Oliver Muﬂhoff, and Martin Odening, September 2010. 044 "The High Sensitivity of Employment to Agency Costs: The Relevance of Wage Rigidity" by Atanas Hristov, September 2010. 045 "Parametric estimation of risk neutral density functions" by Maria Grith and Volker Kr‰tschmer, September 2010.
+
+SFB 649 Discussion Paper Series 2010
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+046 "Mandatory IFRS adoption and accounting comparability" by Stefano Cascino and Joachim Gassen, October 2010.
+047 "FX Smile in the Heston Model" by Agnieszka Janek, Tino Kluge, Rafal Weron, and Uwe Wystup, October 2010.
+
+

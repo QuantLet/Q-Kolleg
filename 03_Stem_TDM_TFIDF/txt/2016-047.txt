@@ -1,0 +1,838 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2016-047
+Time Varying Quantile Lasso
+Lenka Zbonakova* Wolfgang Karl Härdle*
+Weining Wang*
+* Humboldt-Universität zu Berlin, Germany This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Time Varying Quantile Lasso
+Lenka Zbon´akov´a, Wolfgang Karl H¨ardle  and Weining Wang §
+November 03, 2016
+Abstract
+In the present paper we study the dynamics of penalization parameter  of the least absolute shrinkage and selection operator (Lasso) method proposed by Tibshirani (1996) and extended into quantile regression context by Li and Zhu (2008). The dynamic behaviour of the parameter  can be observed when the model is assumed to vary over time and therefore the fitting is performed with the use of moving windows. The proposal of investigating time series of  and its dependency on model characteristics was brought into focus by H¨ardle et al. (2016), which was a foundation of FinancialRiskMeter (http://frm.wiwi.hu-berlin.de). Following the ideas behind the two aforementioned projects, we use the derivation of the formula for the penalization parameter  as a result of the optimization problem. This reveals three possible effects driving ; variance of the error term, correlation structure of the covariates and number of nonzero coefficients of the model. Our aim is to disentangle these three effect and investigate their relationship with the tuning parameter , which is conducted by a simulation study. After dealing with the theoretical impact of the three model characteristics on , empirical application is performed and the idea of implementing the parameter  into a systemic risk measure is presented. The codes used to obtain the results included in this work are available on http://quantlet.de/d3/ia/.
+JEL classification: C21, G01, G20, G32 Keywords: Lasso, quantile regression, systemic risk, high dimensions, penalization parameter
+Financial support from the Deutsche Forschungsgemeinschaft via CRC "Economic Risk" and IRTG 1792 "High Dimensional Non Stationary Time Series", Humboldt-Universit¨at zu Berlin, is gratefully acknowledged.
+Corresponding author. C.A.S.E. - Center for Applied Statistics & Economics, Humboldt-Universita¨t zu Berlin, Spandauer Str. 1, 10178 Berlin, Germany (e-mail: zbonakle@hu-berlin.de)
+ C.A.S.E. - Center for Applied Statistics & Economics, Humboldt-Universita¨t zu Berlin, Spandauer Str. 1, 10178 Berlin, Germany; Singapore Management University, 50 Stamford Road, 178899 Singapore, Singapore
+§Department of Economics, City, University of London, Northampton Square, London EC1V 0HB, United Kingdom; C.A.S.E. - Center for Applied Statistics & Economics, Humboldt-Universita¨t zu Berlin, Spandauer Str. 1, 10178 Berlin, Germany
+1
+
+1 Introduction
+
+The least absolute shrinkage and selection operator (Lasso) method as proposed by Tibshirani (1996) has been widely used and extended during recent years. The literature presents a method which simultaneously completes the task of model selection and parameter estimation, while studying its consistency. A key factor for the estimation precision is choosing a tuning parameter which controls the degree of penalization. Although there is much literature on Lasso, including a time series context, the time variation of the tuning parameter remains unexplored.
+
+Here we explain dynamics of the penalization parameter  and how it can be used in finan-
+cial practice, particularly when dealing with systemic risk. Let us assume for the moment
+a linear model with a vector of responses Y = (Y1, Y2, . . . , Yn) , a vector of parameters  = (1, . . . , p) , an (n × p) design matrix X, which might be either fixed or random, and a vector of independent identically distributed errors  with zero mean and variance 2. Then
+the objective function of Lasso is
+
+
+
+1 n
+
+min
+
+
+
+2  i=1
+
+2
+
+p
+
+
+Yi - Xi  +  |j| ,
+
+j=1 
+
+(1)
+
+with tuning parameter   0 and Xi, 0  i  n, denoting row vectors of X. In (1) one
+
+assumes that the columns of the matrix X = (xij)i=1,...,n,j=1,...,p have been standardized, i.e.
+
+n-1
+
+n i=1
+
+xij
+
+=
+
+0
+
+and
+
+n-1
+
+n i=1
+
+x2ij
+
+=
+
+1.
+
+Solving
+
+this
+
+type
+
+of
+
+penalized
+
+least
+
+squares
+
+problem
+
+with L1-penalization allows some of the coefficients of the model to shrink to 0. This is
+
+a highly advantageous property when dealing with high-dimensional data, since variable
+
+selection and shrinkage of coefficients are performed simultaneously. Shrinking some of the
+
+coefficients to exactly 0 also improves the interpretability of the fitted model.
+
+Modification of Lasso in quantile regression (Koenker and Basset (1978)) studied by Li and Zhu (2008) and Belloni and Chernozhukov (2011) solves the optimization problem with
+
+
+
+1 n
+
+min  2
+
+i=1
+
+
+
+Yi - Xi 
+
+p
+ +  |j| ,
+j=1 
+
+(2)
+
+where   (0, 1) and  (·) is the check function
+
+ · x if x > 0;  (x) = -(1 -  ) · x otherwise.
+
+(3)
+
+The Lasso models described above account for independent observations. However, there is much literature on the Lasso in time series context as well. For the univariate case we refer to Wang et al. (2007), Nardi and Rinaldo (2011) and Chen and Chan (2011). The case of multivariate time series, particularly vector autoregression, was covered by e.g. Hsu et al. (2008).
+Lasso in quantile regression has been used by Ha¨rdle et al. (2016) to model tail event dependencies among U.S. financial companies. Based on the penalization parameters the FinancialRiskMeter (FRM), http://frm.wiwi.hu-berlin.de, was developed, see Figure 1.
+2
+
+The value of the averaged penalization parameter  was elevated during the financial crises. This fact led us to the question we indicated above; what drives the penalization parameter  and what are the dynamics of ? We investigate this by simulation study and empirical application.
+
+Figure 1: Time series of  taken from FinancialRiskMeter (http://frm.wiwi.hu-berlin. de), normalized to interval (0,1).
+The computations included in this paper were performed in the environment of R software developed by R Core Team (2014) and the codes are available on http://quantlet.de/d3/ ia/.
+
+2 Lasso method
+
+2.1 Lasso as an optimization problem
+
+In this section we firstly follow Osborne et al. (2000) to derive formula for the penalization parameter  of the Lasso method when applied in linear regression problems. Then we aim our focus on the representation of  in penalized quantile regression.
+
+If we treat  as a fixed value in the objective function of the penalized regression
+
+
+
+1 n f (, ) =
+ 2 i=1
+
+2
+
+p
+
+
+Yi - Xi  +  |j| ,
+
+j=1 
+
+(4)
+
+then the function f (, ) is convex in parameter . Moreover, with diverging  we observe
+
+that f (, )  . Hence there exists at least one minimum of the function f (·, ). According
+
+to Osborne (1985) this minimum is attained in () if and only if the null-vector 0  Rp is
+
+an element of the subdifferential
+
+f (, ) = -X (Y - X) + u(), 
+
+(5)
+
+3
+
+where u() = (u1(), . . . , up()) is defined as uj() = 1 if j > 0, uj() = -1 if j < 0 and
+
+uj()  [-1, 1] if j = 0. Then, for () as a minimizer of f (, ) the following has to be
+
+satisfied
+
+0 = -X {Y - X()} + u(()),
+
+(6)
+
+Here we denote the estimator of a parameter vector  as a function of the penalization
+
+parameter . This dependency follows from the formulation of the penalized regression
+
+method and its objective function (4), where we first select  and then search for () which
+
+minimizes (4). Using the fact that u()  =
+
+p j=1
+
+|j |
+
+=
+
+||||1,
+
+where
+
+|| · ||1
+
+denotes
+
+L1-norm
+
+of a p-dimensional vector, (6) can be further rewritten in the formula
+
+{Y - X()} X() = .
+||()||1
+
+(7)
+
+The identity (7) leads us to consider possible constituents which influence the value of parameter  and therein its dynamics when treated in a time-dependent framework. Here we propose to study three effects which are related to the size of :
+
+1. size of residuals of the model; 2. absolute size of the coefficients of the model, ||||1; 3. singularity of a matrix X X.
+
+The second effect can also be translated into the effect of a number of nonzero parameters
+
+the so-called active set of the model, q = ||||0 =
+
+p j=1
+
+I(j
+
+=
+
+0),
+
+where
+
+|| · ||0
+
+stands
+
+for
+
+L0-norm on Rp and I(·) is an indicator function. As a measure of the third structure, the
+
+condition number (X X) defined as the ratio max(X X)/min(X X), the maximum and
+
+the minimum eigenvalue of the matrix X X, can be used.
+
+Similarly, one can derive formulae for the penalization parameter  in a quantile regression problem (2) and (3). Following Li and Zhu (2008)
+
+ X() = ,
+||()||1
+
+where  = (1, . . . , n) satisfies the following
+
+  
+i = -(1 -  )
+
+ 
+
+ (-(1 -  ),  )
+
+if Yi - Xi () > 0; if Yi - Xi () < 0; if Yi - Xi () = 0.
+
+(8) (9)
+
+Hence, we observe that  depends on cardinality of the active set q, which is again influenced by the correlation structure of the design matrix. Direct impact of the variance of residuals disappears and only the sign of the residuals stays in effect. However, when looking at Figure 2 one can see similarities between the time series of  and historic values of the implied volatility index (VIX) reported by the Chicago Board Options Exchange. This fact leads us to believe that the dynamics of  is also influenced by the changes in the variance of model residuals.
+
+4
+
+Figure 2: Normalized implied volatility index (blue) and  from FinancialRiskMeter (red). XFGTVP LambdaVIX
+2.2 Choosing the penalization parameter
+In theory the equalities (7) and (8) hold for every solution of the Lasso optimization problems (1) and (2) respectively, since first  is chosen and afterwards the model is fitted according to the given value of the penalization parameter. One of the commonly used methods of choosing estimator of  is cross-validation in its three forms; k-fold, leave-one-out and generalized cross-validation method, see e.g. Tibshirani (1996). As pointed out in Hastie et al. (2009), cross-validation is a widely used method for estimation of prediction error. This feature is used when estimating  in Lasso method, where, on a grid of penalization parameters , the one which minimizes estimated prediction error is chosen. However, as Leng et al. (2006) argued in their work, methods of choosing penalization parameter based on prediction accuracy are in general not consistent when variable selection is considered. The same argument was used by Wang et al. (2009) where they compared the asymptotic behaviour of the generalized cross-validation to the one of Akaike's information criterion (AIC); it is efficient if one is interested in the model error, but inconsistent in selecting the true model.
+The second widely used method of estimating  is the Bayesian information criterion (BIC). By 0 = (01, . . . , 0p) we denote the true vector of coefficients of the regression model and q0 defines the number of its nonzero elements, i.e. 0j = 0 for 1  j  q0 and 0j = 0 for j > q0. The permutation of the elements of 0 is performed without loss of generality, so the previous notation holds. Secondly, by S = {j1, . . . , jq} we denote an arbitrary model with XS = (Xj1, . . . , Xjq )  Rn×q as a design matrix associated with it. Vector of coefficients of a model S is S = (j1, . . . , jq ) and the model size is |S| = q. The true model is referred to by S0.
+5
+
+Using the notation from above, the BIC is written in the following form
+
+BICS
+
+=
+
+log(S2 )
+
++
+
+|S
+
+|
+
+log(n) n
+
+Cn,
+
+(10)
+
+with S2 = n-1 SSES = infS (n-1||Y - XS S ||22) where || · ||2 denotes L2-norm of a vector and Cn is some positive constant. Wang and Leng (2007) prove the consistency of (10) in
+selecting a true model also for a diverging parameter vector dimension p and a true number
+
+of nonzero coefficients q0. This is shown in unpenalized as well as in penalized regression models.
+
+Modification of (10) in terms of a tuning parameter leads to
+
+BIC
+
+=
+
+log(2 )
+
++
+
+|S
+
+|
+
+log(n) n
+
+Cn,
+
+(11)
+
+where 2 = n-1 SSE = n-1||Y - X()||22 and S = {j : ()j = 0}. The estimation of the tuning parameter  is then chosen by minimizing (11) with Cn = log{log(p)} or Cn = n/p, see Chand (2012).
+
+Consistency of the BIC selector holds for the penalized regression methods such as smoothly clipped absolute deviation (SCAD) method defined by Fan and Li (2001) and adaptive Lasso introduced by Zou (2006). For the regular Lasso method by Tibshirani (1996) the additional assumption on a design matrix X called irrepresentable condition has to be fulfilled.
+
+The aforementioned condition was presented by Zhao and Yu (2006). Firstly they assumed that n-1X X p C, with C a positive definite matrix
+
+C=
+
+C11 C12 C21 C22
+
+.
+
+(12)
+
+Here C11 is a (q0 × q0) matrix that corresponds to the q0 active predictors and is assumed to be invertible. Then the formulation of the irrepresentable condition is
+
+C21C1-11 sgn(S0 ) k  1, k = 1, . . . , p - q0.
+
+(13)
+
+Adopting the notation from above, q0 is a number of nonzero parameters in the true model S0 and sgn(S0) = (sgn(01), . . . , sgn(0q0)) with sign function sgn(j) = 1 if j > 0, sgn(j) = -1 if j < 0 and sgn(j) = 0 if j = 0.
+
+Modified selection criteria for penalized quantile regression which were used by Li and Zhu (2008) are BIC for quantile regression presented by Koenker et al. (1994) and generalized approximate cross-validation criterion (GACV) introduced by Yuan (2006)
+
+n
+
+BIC() = log n-1  {Yi - Xi ()}
+
+i=1
+
+n
+
+ {Yi - Xi ()}
+
+GACV() = i=1
+
+,
+
+n - df()
+
+log(n) + df(),
+2n
+
+(14) (15)
+
+where df() stands for the estimated effective dimension of the fitted model. Li and Zhu (2008) argued that number of interpolated observations Yi denoted by E is a plausible measure for this quantity, i.e. df() = |E|.
+
+6
+
+2.3 Algorithms to solve Lasso
+Finding a feasible solution of the optimization problems (1) and (2) can be computationally demanding, since one has to check all of the combinations of values of the tuning parameter  and its respective model parameter estimates (). Only after all of the possible combinations are found, the particular method of choosing  can be applied.
+The first algorithm for finding solution of Lasso was presented by Tibshirani (1996) in his work introducing the Lasso method itself. Then Osborne et al. (2000) developed an algorithm which works not only for the case where p < n but also n > p. In order to make the computation more efficient, Efron et al. (2004) proposed the use of the least angle regression algorithm (LARS). The latter procedure is as efficient as a single least squares fit and can also be used in cases where number of parameters of the investigated model is much larger than the number of observations. As a selection criterion of  for LARS, Efron et al. (2004) suggested to use Cp-type selection criterion. Zou et al. (2007) then defined model selection criteria such as Cp, Akaike information criterion (AIC) and BIC suitable for the Lasso framework.
+Another approaches to find a path of Lasso solutions, particularly for the quantile regression, were proposed by Belloni and Chernozhukov (2011) and Li and Zhu (2008). The second one comes into focus in this paper, since one is interested in modeling tail event dependencies when dealing with systemic risk evaluations.
+3 Simulation study
+As derived in the previous section, the penalization parameter  of the Lasso regression depends on three effects. The factors driving its dynamics are variance of the error term of the model, conditionality of the matrix X X and absolute size of the coefficients of the model, ||||1. In this section we conduct simulations which describe the relationships between these three effects and the parameter  focusing mainly on a quantile regression case. Our aim is to disentangle these effects and find the way to explain behaviour of  in dependency of the three aforementioned elements.
+3.1 Penalty  dependent on variance 2
+Firstly we investigate the effect of the size of variance 2 of the error term  on the penalty parameter . According to the identity (7)  is supposed to rise with higher 2 and vice versa. This holds for the linear regression problem, and as discussed previously for the quantile regression as well. The evidence is visible from Figure 2, whereas when considering the formula (8) this dependency is not straightforward to follow.
+In our simulation study we use quantile regression model Y = X +  with a vector of responses Y = (Y1, . . . , Yn) , a vector of parameters  = (1, . . . , p) , an (n × p) design matrix X and iid error term  = (1, . . . , n) such that P(i  0|Xi = x) =  for almost every x  Rp with   (0, 1) denoting conditional quantile of Y .
+7
+
+The design matrix X is simulated from the p-dimensional normal distribution
+
+{Xi}in=1  Np(0, ), where the elements of (p × p) covariance matrix  = (ij)pi,j=1 are defined as follows
+ij = |i-j| for i, j = 1, . . . , p,
+
+(16) (17)
+
+with  = 0.5 as in Tibshirani (1996). Here we select n = 600 and p = 100. In order to study
+
+the effect of increased dispersion (in the error term ) on , the vector of parameters is set
+
+to
+
+0(100×1) = (1, 1, 1, 1, 1, 0, . . . , 0) .
+
+(18)
+
+The error term is simulated such that its variance changes after the observation i0 = 300.
+
+We assume i for i = 1, . . . , n to be independently distributed with asymmetric Laplace
+
+distribution
+
+
+
+ 
+
+ALD(0,
+
+1,
+
+0.05),
+
+i 
+
+if i  i0 .
+
+(19)
+
+ 
+
+ALD(0,
+
+2,
+
+0.05),
+
+i > i0
+
+The density of asymmetric Laplace distribution is
+
+f (x|µ, ,  ) =  (1 -  ) exp -  (x - µ) , 
+
+(20)
+
+with location parameter µ, scale parameter  > 0, skewness parameter   (0, 1) and the check function  (·) as defined in (3). The idea to use this type of distribution comes from Lee et al. (2014).
+
+We simulate 50 scenarios using the algorithm designed by Li and Zhu (2008) and select  according to BIC (14). For model fitting we apply moving windows technique to capture the dynamics of the tuning parameter . The size of the moving window is set to be w = 80. Resulting values of  obtained by simulation settings above are, together with other model characteristics of interest, captured in Figure 3.
+
+As can be seen from Figure 3, the values of the estimated tuning parameter  are indeed increasing with higher variation 2 of the error term. Number of nonzero parameters q0 = ||0||0 was set to be constant over all n = 600 observations and also the level around which the condition number (X X) fluctuates stays constant. However, the L1-norm of estimated model coefficients ||()||1 changes with higher values of . Since that is an idea of the Lasso method itself, this can be seen as a natural effect.
+
+In order to study the size of impact of 2 on  we conducted a set of simulations, where different values of scale parameter  were used after the change point i0. The starting value was defined as in the previous case,  = 1, and the relative and absolute change of average  were examined. Observed changes are noted in Table 1.
+
+From Table 1 one can see that the penalization parameter  increases in dependency of the change in the scale parameter  of the distribution of the error term in the assumed model. This conclusion of course corresponds to what we see from Figure 2. Again we use BIC as a selection criterion. However, as discussed before, theoretically other methods yield the same dependency structure.
+
+8
+
+(a) Penalty parameter 
+
+(b) Cardinality of active set q
+
+(c) L2-norm of residuals
+
+(d) L1-norm of coefficients
+
+Figure 3: Time series of  (blue), other model characteristics and their respective averages (red) drawn from the 50 simulations with change of i after i0 = 300, moving windows of length 80.
+XFGTVP LambdaSim
+
+i i > i0
+1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0
+
+¯end ¯start
+1.061 1.084 1.112 1.135 1.144 1.162 1.169 1.177 1.187 1.199
+
+¯end - ¯start
+0.027 0.037 0.050 0.060 0.064 0.072 0.075 0.079 0.083 0.089
+
+Table 1: Relative and absolute change in averaged values of  before and after the change point i0 = 300 with starting value of the scale parameter i = 1 for i  i0.
+
+9
+
+3.2 Penalty  dependent on model size q
+
+The second effect driving the size of the penalization parameter  is the number of nonzero
+
+parameters q. In order to study this case, the design matrix X was again set as in (16) and
+
+(17) with  = 0.5. The error term i was simulated to have scale  = 1 for all 1  i  n and the change in vector of model parameters  came into focus. The number of nonzero
+
+parameters of the model was defined by setting 0 to have the form
+
+  (1, 1, 1, 1, 1, 0, . . . , 0) , 
+0i = (1, 1, . . . , 1, 0, . . . , 0) ,
+  10×
+
+i  i0 i > i0.
+
+(21)
+
+Thus, the first i0 simulated observations have five active parameters and the rest has ten of them.
+
+The paths of the values of  obtained from the aforementioned simulation settings are plotted in Figure 4. Visible are also other characteristics of the model which we are interested in to examine.
+
+(a) Penalty parameter 
+
+(b) Cardinality of active set q
+
+(c) L2-norm of residuals
+
+(d) L1-norm of coefficients
+
+Figure 4: Time series of  (blue), other model characteristics and their respective averages (red) drawn from the 50 simulations with change of q0 after i0 = 300, moving windows of length 80.
+XFGTVP LambdaSim
+As expected from (8) defining , an increasing value of ||()||1 or q results in a decreasing
+
+10
+
+value of the tuning parameter . In this specific case ||0||1 = q0. From Figure 4 one can see that the value of  decreased with higher q.
+
+To study the reaction of  on the cardinality of the active set q, we performed simulations
+with different changes of q after the observation i0, the starting value was always q0 = 5. The results are summarized in Table 2. From equation (8) the relationship between  and ||()||0 as well as q is inversely proportional and values in Table 2 correspond to this statement.
+
+q0i i > i0
+6 7 8 9 10 15
+
+¯end ¯start
+0.952 0.922 0.905 0.862 0.837 0.736
+
+¯end - ¯start
+-0.021 -0.035 -0.043 -0.062 -0.073 -0.118
+
+Table 2: Relative and absolute change in averaged values of  before and after the change point i0 = 300 with starting number of nonzero parameters q0i = 5 for i  i0.
+
+We may conclude that the cardinality of the active set q has a real impact on change in value of . Since in (8) the effect of q is captured by the effect of ||()||1, this is also of our interest. Another simulation was conducted to investigate the impact of the L1-norm of the model coefficients. Previously the coefficients were hard thresholded, i.e. cut off abruptly and set to be zero. Now the parameters are allowed to decrease to zero more smoothly
+
+  (1, 1, . . . , 1, 0, . . . , 0) , 
+
+i  i0
+
+0i =
+
+10×
+
+ 
+
+(1, 0.9, 0.8, . . . , 0.2, 0.1, 0, . . . , 0)
+
+,
+
+i > i0,
+
+(22)
+
+i.e. ||0i||1 = 10 for i  i0 and ||0i||1 = 5.5 for i > i0.
+
+We put this simulation setting forward, because it seems more natural that the effect of particular covariates fades away rather than disappears. Time series of model characteristics of this case are to be found in Figure 5. The relative and absolute change of average  after the point i0 = 300 is 1.245 and 0.091 respectively.
+
+3.3 Penalty  dependent on design
+
+We examine the dependency of the parameter  on the design matrix X of the given model through the characteristics called condition number of a matrix:
+
+(X
+
+X) = max(X
+
+X) ,
+
+min(X X)
+
+where max(·) and min(·) are the largest and the smallest eigenvalues of a matrix. If the condition number  is low the problem is called well-conditioned, matrices with higher  values are referred to as ill-conditioned. The condition number can help to diagnose a multicollinearity issue. With the presence of multicollinearity, one can expect more coefficients to be incorrectly defined as significant and therefore values of q and ||||1 to rise. This is in
+
+11
+
+(a) Penalty parameter 
+
+(b) Cardinality of active set q
+
+(c) L2-norm of residuals
+
+(d) L1-norm of coefficients
+
+Figure 5: Time series of  (blue), other model characteristics and their respective averages (red) drawn from the 50 simulations with change of ||0i||1 after i0 = 300, moving windows of length 80.
+XFGTVP BetaChange
+
+analogy to the situation described in the previous subsection and regarding the formula (8) we expect the tuning parameter  to decrease with higher condition number of the matrix X X.
+The simulation settings are as follows; parameter 0 as in (18) and the error term is iid with i  ALD(0, 1, 0.05) for 0  i  n. The design matrix X is simulated from (16) and (17), but here the parameter  is allowed to change after the point i0 = 300. The case where i = 0 for i  i0 and i = 0.5 for i > i0 is illustrated in Figure 6.
+Indeed, our expectations presented above hold true. Increased correlation between the covariates and with that increased condition number (X X) result in decreasing values of the estimated tuning parameter . This case together with other simulated changes in correlation structure between covariates are summarized in Table 3. Starting value of  from (17) is always 0.
+
+12
+
+(a) Penalty parameter 
+
+(b) Cardinality of active set q
+
+(c) L2-norm of residuals
+
+(d) L1-norm of coefficients
+
+Figure 6: Time series of  (blue), other model characteristics and their respective averages (red) drawn from the 50 simulations with change of i after i0 = 300, moving windows of length 80.
+XFGTVP LambdaSim
+
+i i > i0
+0.1 0.3 0.5 0.7 0.9
+
+¯end ¯start
+1.023 0.943 0.890 0.692 0.750
+
+¯end - ¯start
+0.012 -0.028 -0.055 -0.155 -0.126
+
+Table 3: Relative and absolute change in averaged values of  before and after the change point i0 = 300 with starting number of nonzero parameters i = 0 for i  i0.
+
+3.4 All factors affecting the value of 
+
+So far we investigated the effect of the change in the variance of error term 2, in structure of the vector of parameters  and in the correlation structure of the covariates ceteris paribus. In this subsection we focus on all of the factors driving dynamics of  at once and examine the strength of their impact when combined together.
+
+13
+
+For each of the elements driving the dynamics of the penalization parameter  we simulated three cases. The values of interest either stayed constant, increased or decreased after the point i0 = 300. If constant, the scale parameter  of the distribution of the error term was set to be 1. Otherwise it increased from the value of 1 to 2 or decreased from 2 to the value of 1. Number of nonzero parameters was either q0 = 5 for all n = 600 observations or it increased to the value q0 = 10 or decreased from q0 = 10 to q0 = 5 after the point i0. The change of the design matrix was again defined by the change of the correlation structure between corresponding covariates, i.e. change of  from (17). For the constant case it was set to be  = 0.5, when increased it had value 0.9 after the i0-th observation and for the decreasing case it was  = 0.9 for i  i0 and  = 0.5 for i > i0.
+
+Results of all combinations of the changes in the factors having impact on  are summarized in Table 4. There we can see that the effects can overpower each other when combined. This holds particularly for the cases, when the condition number  is increased and number of nonzero parameters q0 decreased and vice versa. This fact can be explained by the issue of multicollinearity as discussed before.
+
+q0 q0  q0
+
+ 0.884 0.992 1.162
+
+2  1.101 1.198 1.403
+
+ 1.311 1.425 1.555
+
+ 0.783 0.854 1.000
+
+2   0.843 1.001 1.172
+
+ 1.003 1.191 1.300
+
+ 0.659 0.719 0.759
+
+2  0.710 0.843 0.889
+
+ 0.841 0.998 1.125
+
+Table 4: Relative changes end/start as a result of combinations of changes in a model. Blue and red colours indicate increased and decreased values of  after the change point respectively, and white colour denotes cases when there is no change in  visible.
+
+Empirically, when considering the situation on financial markets (particularly modeling of stock prices), increased volatility indicates elevated risk. Parameter  is sensitive to the changes in degree of variation and therefore can be bound to the risk evaluation problem. Another aspect indicating time series of  as a measure of systemic risk is its dependency on interconnectedness of financial institutions, which can be measured by the number of nonzero parameters in estimated model and their magnitude.
+
+4 Empirical analysis
+4.1 Data description
+In order to be able to apply our insight to the FinancialRiskMeter (http://frm.wiwi. hu-berlin.de), we closely follow the choice of data of H¨ardle et al. (2016). Due to the computational efficiency, our dataset consists of daily stock returns of the first 100 largest U.S. financial companies ordered by market capitalization according to NASDAQ company list. In the FRM case it is 200. The stock returns are downloaded from Yahoo Finance and the list of the corresponding companies is to be found in Table 6.
+As a characterization of the general state of the economy, six macroprudential variables are used as covariates in our model settings. These are implied volatility index reported by
+14
+
+the Chicago Board Options Exchange, daily S&P500 index returns, daily Dow Jones U.S. Real Estate index returns, changes in the three-month Treasury bill rate, changes in the slope of the yield curve corresponding to the yield spread between the ten-year Treasury rate and the three-month bill rate and, finally, changes in the credit spread between BAA-rated bonds and the Treasury rate. The former three are obtained from Yahoo Finance and the latter three from the Federal Reserve Board. The macro state variables are summarized in Table 7. The data are downloaded with help of FRM download data.
+All of the variables are recorded in the time interval from 03 January 2007 to 17 August 2016. For the macroprudential variables we use 1 day lagged values.
+4.2 Construction of time series of 
+In order to capture interdependencies among the companies and to reduce the dimensionality of the data set into single time series of the penalization parameter  of the Lasso regression, we proceed as follows.
+We take each of the 100 companies as a dependent variable and use the remaining 99 together with the macro variables as predictors, i.e. p = 105. This way we get hundred regression models, which are then fitted with help of the quantile Lasso method by Li and Zhu (2008). To record the dynamics of , we use moving windows of size 63 observations (n = 63) which in this case represents 3 months.
+Within each window algorithm designed by Li and Zhu (2008) is used to fit the Lasso model. Then the best fit and with it also the tuning parameter  are chosen with help of the BIC criterion (14). We obtain time series of tuning parameters k for each of the hundred regressed companies. These are plotted in Figure 7(a) together with the average over all estimated parameters k, k = 1, . . . , 100, which we are interested in.
+Indeed as suggested in our previous simulation study,  is driven by characteristics of an investigated model. From Figure 7 we can see that its values are higher when the residuals of the model are higher, too. There are several peaks in time series of , which correspond to time periods of financial crises. This fact drives us to the conclusion that the dynamics of  can serve as an indicator of a systemic risk.
+4.3  and systemic risk measures
+In the past decade, much attention has been paid to measuring of systemic risk, particularly after the financial crisis between 2007 and 2009. It has uncovered the cross-sectional dependencies among financial institutions to be important when determining the risk on the market. Adrian and Brunnermeier (2016), Hautsch et al. (2015) and Ha¨rdle et al. (2016), just to mention a few, dealt with evaluating systemic risk according to the relevance of each financial institution itself. This inspired us to connect the Lasso parameter  with the systemic risk, since it depends not only on the volatility but also on the size of model parameters and the correlation structure of the design matrix. The latter two effects can be translated into the connectedness of financial institutions throughout the market.
+15
+
+(a) Penalty parameter 
+
+(b) Cardinality of active set q
+
+(c) L2-norm of residuals
+
+(d) L1-norm of coefficients
+
+Figure 7: Time series of k (blue) and other model characteristics and their respective averages (red) when fitted to given dataset, moving windows of length 63.
+XFGTVP FRM
+To illustrate the connection between  computed according to the method mentioned previously and other systemic risk measures, we plotted their common time development starting from 3 April 2007 to 17 August 2016, see Figure 8.
+We chose VIX to show the dependency between  and volatility observed on the financial market. The Standard & Poor's 500 stock market index (S&P500) moves in opposite direction of , which can also provide some information about behaviour of  in connection to the situation on financial markets. Another systemic risk measure is CoVaR presented by Adrian and Brunnermeier (2016) and extended by H¨ardle et al. (2016), where a single index model for generalized quantile regression instead of linear quantile regression was employed. The data for CoVaRS were downloaded from TENET VaR CoVaR where only weekly data between 7 December 2007 and 4 January 2013 were available. Financial turbulence as a risk measure was proposed by Kritzman and Li (2010). Its comovement with the time series of  is visible from the Figure 8(d). A composite indicator of systemic risk (CISS) is an indicator of contemporaneous stress in the financial system developed by Hollo´ et al. (2012) and computed for the area of Europe on weekly basis. Even when considering another financial market, particularly collecting data from another countries, periods where CISS was elevated correspond to the periods of higher  values. And, finally, credit spread, i.e. changes in
+16
+
+(a)  and VIX
+
+(b)  and S&P500
+
+(c)  and CoVaRS
+
+(d)  and Turbulence
+
+(e)  and CISS
+
+(f)  and Credit spread
+
+Figure 8: Time series of  (red) and various systemic risk measures (blue). XFGTVP LambdaSysRisk
+
+the credit spread between BAA-rated bonds and the Treasury rate, suggested by Giglio et al. (2016), was used to relate  to systemic risk level.
+From Figure 8 it is visible, that  has a common trend with some of the aforementioned systemic risk measures. For CoVaRS and S&P500 index it holds, that their time development goes in opposite direction compared to .
+In order to show there is a comovement between  and other systemic risk measures also from the statistical point of view, we conducted several cointegration tests. When looking
+
+17
+
+at Figure 8 one can see, that the time series of observed measures are nonstationary, however, there may exist cointegration relations between them which would make it a stationary stochastic process.
+
+As a testing procedure we chose the Johansen (1991) test, where we used its eigenvalue type. In Table 5 there are stated resulting values of test statistics and their corresponding critical values on significance levels 10 % and 5%. Variable r corresponds to a number of cointegration relations found between the two investigated nonstationary time series, i.e. for the valid inference we require that r = 1.
+
+VIX S&P500 CoVaRS CoVaRL Turbulence CISS Volatility Connectedness Yield Slope Credit Spread
+
+H0 r1 r=0 r1 r=0 r1 r=0 r1 r=0 r1 r=0 r1 r=0 r1 r=0 r1 r=0 r1 r=0
+
+Test statistic 4.80
+87.43 7.59 9.20 4.52
+50.58 4.59
+57.15 8.94
+212.24 6.90
+31.12 9.48
+10.51 7.20
+13.63 5.45
+42.29
+
+10 % 7.52 13.75 10.49 16.85 10.49 16.85 10.49 16.85 10.49 16.85 10.49 16.85 10.49 16.85 10.49 16.85 10.49 16.85
+
+5% 9.24 15.67 12.25 18.96 12.25 18.96 12.25 18.96 12.25 18.96 12.25 18.96 12.25 18.96 12.25 18.96 12.25 18.96
+
+Table 5: Cointegration of  with systemic risk measures, r is number of cointegration relations in Johansen procedure, measures cointegrated with  are written in bold.
+
+In Table 5 we included 3 more systemic risk measures. We chose also CoVaR computed with variable selection based on linear quantile regression (CoVaRL). Another systemic risk measure is the volatility connectedness index designed by Diebold and Yilmaz (2014) and accessed from http://financialconnectedness.org. Yield slope denotes changes in the slope of the yield curve corresponding to the yield spread between the 10-year Treasury rate and the 3-month bill rate.
+As we can see, many of the measures are cointegrated with the estimated Lasso parameter .
+
+18
+
+WFC JPM BAC C AIG GS USB AXP MS BLK MET PNC BK SCHW COF PRU TRV CME CB MMC BBT ICE STT AFL AON SEIC ETFC AMG RJF UNM NYCB Y SBNY CMA AJG JLL TMK WRB AFG SIVB EWBC ROL ZION AIZ PACW AFSI ORI PBCT CACC BRO
+
+Wells Fargo & Company JP Morgan Chase & Co. Bank of America Corporation Citigroup Inc. American International Group, Inc. Goldman Sachs Group, Inc. (The) U.S. Bancorp American Express Company Morgan Stanley BlackRock, Inc. MetLife, Inc. PNC Financial Services Group, Inc. (The) Bank Of New York Mellon Corporation (The) The Charles Schwab Corporation Capital One Financial Corporation Prudential Financial, Inc. The Travelers Companies, Inc. CME Group Inc. Chubb Corporation (The) Marsh & McLennan Companies, Inc. BB&T Corporation Intercontinental Exchange Inc. State Street Corporation Aflac Incorporated Aon plc SEI Investments Company E*TRADE Financial Corporation Affiliated Managers Group, Inc. Raymond James Financial, Inc. Unum Group New York Community Bancorp, Inc. Alleghany Corporation Signature Bank Comerica Incorporated Arthur J. Gallagher & Co. Jones Lang LaSalle Incorporated Torchmark Corporation W.R. Berkley Corporation American Financial Group, Inc. SVB Financial Group East West Bancorp, Inc. Rollins, Inc. Zions Bancorporation Assurant, Inc. PacWest Bancorp AmTrust Financial Services, Inc. Old Republic International Corporation People's United Financial, Inc. Credit Acceptance Corporation Brown & Brown, Inc.
+
+ALL BEN STI MCO PGR AMP AMTD HIG TROW NTRS MTB FITB IVZ L EFX PFG RF MKL LNC CBG KEY NDAQ CINF CNA HBAN ERIE OZRK WTM SNV ISBC MKTX LM CBSH BOKF EEFT DNB WAL EV CFR MORN THG UMPQ CNO FHN WBS PB PVTB SEB FCNCA MTG
+
+Allstate Corporation (The) Franklin Resources, Inc. SunTrust Banks, Inc. Moody's Corporation Progressive Corporation (The) AMERIPRISE FINANCIAL SERVICES, INC. TD Ameritrade Holding Corporation Hartford Financial Services Group, Inc. (The) T. Rowe Price Group, Inc. Northern Trust Corporation M&T Bank Corporation Fifth Third Bancorp Invesco Plc Loews Corporation Equifax, Inc. Principal Financial Group Inc Regions Financial Corporation Markel Corporation Lincoln National Corporation CBRE Group, Inc. KeyCorp The NASDAQ OMX Group, Inc. Cincinnati Financial Corporation CNA Financial Corporation Huntington Bancshares Incorporated Erie Indemnity Company Bank of the Ozarks White Mountains Insurance Group, Ltd. Synovus Financial Corp. Investors Bancorp, Inc. MarketAxess Holdings, Inc. Legg Mason, Inc. Commerce Bancshares, Inc. BOK Financial Corporation Euronet Worldwide, Inc. Dun & Bradstreet Corporation (The) Western Alliance Bancorporation Eaton Vance Corporation Cullen/Frost Bankers, Inc. Morningstar, Inc. The Hanover Insurance Group, Inc. Umpqua Holdings Corporation CNO Financial Group, Inc. First Horizon National Corporation Webster Financial Corporation Prosperity Bancshares, Inc. PrivateBancorp, Inc. Seaboard Corporation First Citizens BancShares, Inc. MGIC Investment Corporation
+
+Table 6: List of 100 U.S. largest financial companies
+
+19
+
+1. VIX 2. Daily change in the 3-month Treasury maturities 3. Change in the slope of the yield curve 4. Change in the credit spread 5. Daily Dow Jones U.S. Real Estate index returns 6. Daily S&P500 index returns
+Table 7: List of macro state variables.
+5 Summary
+In the present paper we proposed to study dynamics of the penalization parameter of the Lasso regression by Tibshirani (1996) and its quantile regression extension by Li and Zhu (2008). We focused on three effects driving the time-dependent behaviour of the penalization parameter , particularly variation of the model residuals, size of active set of the model and the covariance structure of its respective design matrix.
+In the simulation study we justified our expectations about relationships between the aforementioned effects and . These results led us to relate the dynamics of  to the evaluation of systemic risk, since both interdependency among covariates and variability of the error term are neatly connected to the problem of risk controlling.
+For the empirical study we chose to follow the setup of the risk control time series FinancialRiskMeter (http://frm.wiwi.hu-berlin.de) and focused on 100 largest U.S. financial companies and 6 macroprudential variables to obtain time series of the estimated Lasso parameter . Consequently, we found cointegration relations between estimated  and several systemic risk measures.
+Thus, we may conclude there is a substantiated reason to study time series of  and build theoretical model, which would provide further insight into prediction of the Lasso parameter  and systemic risk simultaneously. Furthermore, implementing our work into time series context or the network framework might be of interest.
+References
+Adrian, T. and Brunnermeier, M. K. (2016). CoVaR, American Economic Review 106: 1705­ 1741.
+Belloni, A. and Chernozhukov, V. (2011). l1-Penalized Quantile Regression in HighDimensional Sparse Models, The Annals of Statistics 39: 82­130.
+Chand, S. (2012). On Tuning Parameter Selection of Lasso-Type Methods - A Monte Carlo Study, Proceedings of 9th International Bhurban Conference on Applied Sciences & Technology, 120­129.
+Chen, K. and Chan, K. S. (2011). Subset ARMA Selection via the Adaptive Lasso, Statistics and Its Interface 4: 197­205.
+20
+
+Diebold, F. X. and Yilmaz, K. (2014). On the Network Topology of Variance Decompositions: Measuring the Connectedness of Financial Firms, Journal of Econometrics 182: 119­134.
+Efron, B., Hastie, T., Johnstone, I. and Tibshirani, R. (2004). Least Angle Regression, The Annals of Statistics 32: 407­499.
+Fan, J. and Li, R. (2001). Variable Selection via Nonconcave Penalized Likelihood and its Oracle Properties, Journal of the American Statistical Association 96: 1348­1360.
+Giglio, S., Kelly, B. and Pruitt, S. (2016). Systemic Risk and the Macroeconomy: An Empirical Evaluation, Journal of Financial Economics 119: 457­471.
+Hastie, T., Tibshirani, R. and Friedman, J. (2009). The Elements of Statistical Learning: Data mining, Inference and Prediction, 2nd ed, Springer Verlag, New York.
+Hautsch, N., Schaumburg, J. and Schienle, M. (2015). Financial Network Systemic Risk Contributions, Review of Finance 19: 685­738.
+Ha¨rdle, W. K., Wang, W. and Yu, L. (2016). TENET: Tail-Event Driven NETwork Risk, Journal of Econometrics 192: 499­513.
+Hsu, N. J., Hung, H. L. and Chang, Y. M. (2008). Subset Selection for Vector Autoregressive Processes Using Lasso, Computational Statistics and Data Analysis 52: 3645­3657.
+Hollo´, D., Kremer, M. and Lo Duca, M. (2012). CISS - A Composite Indicator of Systemic Stress in the Financial System, ECB Working Paper Series No. 1426.
+Johansen, S. (1991). Estimation and Hypothesis Testing of Cointegration Vectors in Gaussian Vector Autoregressive Models, Econometrica 59: 1551­1580.
+Koenker, R. and Basset, G. (1978). Regression Quantiles, Econometrica 46: 33­50.
+Koenker, R., Ng, P. and Portnoy, S. (1994). Quantile Smoothing Splines, Biometrica 81: 673­680.
+Kritzman, M. and Li, Y. (2010). Skulls, Financial Turbulence, ans Risk Management, Financial Analysts Journal 66: 30­41.
+Lee, E. R., Noh, H. and Park, B. U. (2014). Model Selection via Bayesian Information Criterion for Quantile Regression Models, Journal of the American Statistical Association 109: 216­229.
+Leng, C., Lin, Y. and Wahba, G. (2006). A Note on the Lasso and Related Procedures in Model Selection, Statistica Sinica 16: 1273­1284.
+Li, Y. and Zhu, J. (2008). L1-Norm Quantile Regression, Journal of Computational and Graphical Statistics 17: 1­23.
+Nardi, Y. and Rinaldo, A. (2011). Autoregressive Process Modeling via the Lasso Procedure, Journal of Multivariate Analysis 102: 528­549.
+Osborne, M. R. (1985). Finite Algorithms in Optimization and Data Analysis, Wiley Series in Probability and Mathematical Statistics, Chichester, Wiley.
+21
+
+Osborne, M. R., Presnell, B. and Turlach, B. A. (2000). On the LASSO and its Dual, Journal of Computational and Graphical Statistics 9: 319­337.
+R Core Team (2014). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna. http://www.R-project.org/ (Accessed: 15th April 2015).
+Tibshirani, R. (1996). Regression Shrinkage and Selection via the Lasso, Journal of the Royal Statistical Society: Series B 58: 267­288.
+Wang, H. and Leng, C. (2007). Unified LASSO Estimation by Least Squares Approximation, Journal of the American Statistical Association 102: 1039­1048.
+Wang, H., Li, G. and Tsai, C. L. (2007). Regression Coefficient and Autoregressive Order Shrinkage and Selection via the Lasso, Journal of the Royal Statistical Society: Series B 69: 63­78.
+Wang, H., Li, B. and Leng, C. (2009). Shrinkage Tuning Parameter Selection with a Diverging Number of Parameters, Journal of the Royal Statistical Society: Series B 71: 671­683.
+Yuan, M. (2006). GACV for Quantile Smoothing Splines, Computational Statistics & Data Analysis 50: 813­829.
+Zhao, P. and Yu, B. (2006). On Model Selection Consistency of Lasso, Journal of Machine Learning Research 7: 2541­2563.
+Zou, H. (2006). The Adaptive Lasso and its Oracle Properties, Journal of the American Statistical Association 101: 1418­1429.
+Zou, H., Hastie, T. and Tibshirani, R. (2007). On the "Degrees of Freedom" of the Lasso, The Annals of Statistics 35: 2173­2192.
+22
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Downside risk and stock returns: An empirical analysis of the long-run and short-run dynamics from the G-7 Countries" by Cathy Yi-Hsuan Chen, Thomas C. Chiang and Wolfgang Karl Härdle, January 2016.
+002 "Uncertainty and Employment Dynamics in the Euro Area and the US" by Aleksei Netsunajev and Katharina Glass, January 2016.
+003 "College Admissions with Entrance Exams: Centralized versus Decentralized" by Isa E. Hafalir, Rustamdjan Hakimov, Dorothea Kübler and Morimitsu Kurino, January 2016.
+004 "Leveraged ETF options implied volatility paradox: a statistical study" by Wolfgang Karl Härdle, Sergey Nasekin and Zhiwu Hong, February 2016.
+005 "The German Labor Market Miracle, 2003 -2015: An Assessment" by Michael C. Burda, February 2016.
+006 "What Derives the Bond Portfolio Value-at-Risk: Information Roles of Macroeconomic and Financial Stress Factors" by Anthony H. Tu and Cathy Yi-Hsuan Chen, February 2016.
+007 "Budget-neutral fiscal rules targeting inflation differentials" by Maren Brede, February 2016.
+008 "Measuring the benefit from reducing income inequality in terms of GDP" by Simon Voigts, February 2016.
+009 "Solving DSGE Portfolio Choice Models with Asymmetric Countries" by Grzegorz R. Dlugoszek, February 2016.
+010 "No Role for the Hartz Reforms? Demand and Supply Factors in the German Labor Market, 1993-2014" by Michael C. Burda and Stefanie Seele, February 2016.
+011 "Cognitive Load Increases Risk Aversion" by Holger Gerhardt, Guido P. Biele, Hauke R. Heekeren, and Harald Uhlig, March 2016.
+012 "Neighborhood Effects in Wind Farm Performance: An Econometric Approach" by Matthias Ritter, Simone Pieralli and Martin Odening, March 2016.
+013 "The importance of time-varying parameters in new Keynesian models with zero lower bound" by Julien Albertini and Hong Lan, March 2016.
+014 "Aggregate Employment, Job Polarization and Inequalities: A Transatlantic Perspective" by Julien Albertini and Jean Olivier Hairault, March 2016.
+015 "The Anchoring of Inflation Expectations in the Short and in the Long Run" by Dieter Nautz, Aleksei Netsunajev and Till Strohsal, March 2016.
+016 "Irrational Exuberance and Herding in Financial Markets" by Christopher Boortz, March 2016.
+017 "Calculating Joint Confidence Bands for Impulse Response Functions using Highest Density Regions" by Helmut Lütkepohl, Anna StaszewskaBystrova and Peter Winker, March 2016.
+018 "Factorisable Sparse Tail Event Curves with Expectiles" by Wolfgang K. Härdle, Chen Huang and Shih-Kang Chao, March 2016.
+019 "International dynamics of inflation expectations" by Aleksei Netsunajev and Lars Winkelmann, May 2016.
+020 "Academic Ranking Scales in Economics: Prediction and Imdputation" by Alona Zharova, Andrija Mihoci and Wolfgang Karl Härdle, May 2016.
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+021 "CRIX or evaluating blockchain based currencies" by Simon Trimborn and Wolfgang Karl Härdle, May 2016.
+022 "Towards a national indicator for urban green space provision and environmental inequalities in Germany: Method and findings" by Henry Wüstemann, Dennis Kalisch, June 2016.
+023 "A Mortality Model for Multi-populations: A Semi-Parametric Approach" by Lei Fang, Wolfgang K. Härdle and Juhyun Park, June 2016.
+024 "Simultaneous Inference for the Partially Linear Model with a Multivariate Unknown Function when the Covariates are Measured with Errors" by Kun Ho Kim, Shih-Kang Chao and Wolfgang K. Härdle, August 2016.
+025 "Forecasting Limit Order Book Liquidity Supply-Demand Curves with Functional AutoRegressive Dynamics" by Ying Chen, Wee Song Chua and Wolfgang K. Härdle, August 2016.
+026 "VAT multipliers and pass-through dynamics" by Simon Voigts, August 2016.
+027 "Can a Bonus Overcome Moral Hazard? An Experiment on Voluntary Payments, Competition, and Reputation in Markets for Expert Services" by Vera Angelova and Tobias Regner, August 2016.
+028 "Relative Performance of Liability Rules: Experimental Evidence" by Vera Angelova, Giuseppe Attanasi, Yolande Hiriart, August 2016.
+029 "What renders financial advisors less treacherous? On commissions and reciprocity" by Vera Angelova, August 2016.
+030 "Do voluntary payments to advisors improve the quality of financial advice? An experimental sender-receiver game" by Vera Angelova and Tobias Regner, August 2016.
+031 "A first econometric analysis of the CRIX family" by Shi Chen, Cathy YiHsuan Chen, Wolfgang Karl Härdle, TM Lee and Bobby Ong, August 2016.
+032 "Specification Testing in Nonparametric Instrumental Quantile Regression" by Christoph Breunig, August 2016.
+033 "Functional Principal Component Analysis for Derivatives of Multivariate Curves" by Maria Grith, Wolfgang K. Härdle, Alois Kneip and Heiko Wagner, August 2016.
+034 "Blooming Landscapes in the West? - German reunification and the price of land." by Raphael Schoettler and Nikolaus Wolf, September 2016.
+035 "Time-Adaptive Probabilistic Forecasts of Electricity Spot Prices with Application to Risk Management." by Brenda López Cabrera , Franziska Schulz, September 2016.
+036 "Protecting Unsophisticated Applicants in School Choice through Information Disclosure" by Christian Basteck and Marco Mantovani, September 2016.
+037 "Cognitive Ability and Games of School Choice" by Christian Basteck and Marco Mantovani, Oktober 2016.
+038 "The Cross-Section of Crypto-Currencies as Financial Assets: An Overview" by Hermann Elendner, Simon Trimborn, Bobby Ong and Teik Ming Lee, Oktober 2016.
+039 "Disinflation and the Phillips Curve: Israel 1986-2015" by Rafi Melnick and Till Strohsal, Oktober 2016.
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2016
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+040 "Principal Component Analysis in an Asymmetric Norm" by Ngoc M. Tran, Petra Burdejová, Maria Osipenko and Wolfgang K. Härdle, October 2016.
+041 "Forward Guidance under Disagreement - Evidence from the Fed's Dot Projections" by Gunda-Alexandra Detmers, October 2016.
+042 "The Impact of a Negative Labor Demand Shock on Fertility - Evidence from the Fall of the Berlin Wall" by Hannah Liepmann, October 2016.
+043 "Implications of Shadow Bank Regulation for Monetary Policy at the Zero Lower Bound" by Falk Mazelis, October 2016.
+044 "Dynamic Contracting with Long-Term Consequences: Optimal CEO Compensation and Turnover" by Suvi Vasama, October 2016.
+045 "Information Acquisition and Liquidity Dry-Ups" by Philipp Koenig and David Pothier, October 2016.
+046 "Credit Rating Score Analysis" by Wolfgang Karl Härdle, Phoon Kok Fai and David Lee Kuo Chuen, November 2016.
+047 "Time Varying Quantile Lasso" by Lenka Zbonakova, Wolfgang Karl Härdle, Phoon Kok Fai and Weining Wang, November 2016.
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+

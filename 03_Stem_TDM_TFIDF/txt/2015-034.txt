@@ -1,0 +1,3092 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2015-034
+Factorisable Sparse Tail Event Curves
+Shih-Kang Chao* Wolfgang K. Härdle*
+Ming Yuan**
+* Humboldt-Universität zu Berlin, Germany ** Singapore Management University, Singapore
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Factorisable Sparse Tail Event Curves
+
+Shih-Kang Chao
+
+Wolfgang K. Ha¨rdle June 27, 2015
+
+Ming Yuan§
+
+Abstract
+In this paper, we propose a multivariate quantile regression method which enables localized analysis on conditional quantiles and global comovement analysis on conditional ranges for high-dimensional data. The proposed method, hereafter referred to as FActorisable Sparse Tail Event Curves, or FASTEC for short, exploits the potential factor structure of multivariate conditional quantiles through nuclear norm regularization and is particularly suitable for dealing with extreme quantiles. We study both theoretical properties and computational aspects of the estimating procedure for FASTEC. In particular, we derive nonasymptotic oracle bounds for the estimation error, and develope an efficient proximal gradient algorithm for the non-smooth optimization problem incurred in our estimating procedure. Merits of the proposed methodology are further demonstrated through applications to Conditional Autoregressive Value-at-Risk (CAViaR) (Engle and Manganelli; 2004), and a Chinese temperature dataset.
+Keyword: High-dimensional data analysis, multivariate quantile regression, quantile regression, value-at-risk, nuclear norm, multi-task learning. JEL: C38, C55, C63, G17, G20.
+1. Introduction
+High-dimensional multivariate quantile analysis is crucial for many applications, such as
+risk management and weather analysis. In these applications, quantile functions qY ( ) of
+random variable Y such that P{Y  qY ( )} =  at the "tail" of the distribution, namely at
+Financial support from the Deutsche Forschungsgemeinschaft (DFG) via SFB 649 "Economic Risk", IRTG 1792, Einstein Foundation Berlin via the Berlin Doctoral Program in Economics and Management Science (BDPEMS), and National Science Foundation and National Institute of Health of the US are gratefully acknowledged.
+Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. - Center for applied Statistics and Economics, Humboldt-Universit¨at zu Berlin, Unter den Linden 6, 10099 Berlin, Germany. Email: shih-kang.chao@cms.hu-berlin.de; haerdle@wiwi.hu-berlin.de.
+Sim Kee Boon Institute for Financial Economics, Singapore Management University, 50 Stamford Road, Singapore 178899, Singapore.
+§Department of Statistics, University of Wisconsin-Madison, 1300 University Avenue, Madison, WI 53706, U.S.A. Email: myuan@stat.wisc.edu.
+1
+
+ close 0 or 1, such as  = 1%, 5% or  = 95%, 99%, is of great interest. This is because the quantile at level  can be interpreted as the lower (upper) bound with confidence level 1 -  ( ) of the possible outcome of a random variable, which can assist the process of decision making for treatment or risk management. Some practical examples:
+· Financial risk management: quantiles qY ( ) of asset return with small  indicates the lower bound of the potential loss, which is of interest of both risk manager and market regulator. In particular, the quantile of asset return with  = 1% is called "value-atrisk". At the same time, this is a high-dimensional problem as there are often several hundreds or thousands of asset returns to be considered.
+· Temperature analysis: quantiles at high and small  give the range of possible temperature variation, which is useful for crop growth or studying climate change. There may be hundreds of weather stations depending on the size of the region being considered.
+A global analysis in the behavior of dispersion of high-dimensional random variables can be done based on the observation that the difference of the quantile pair (q( ), q(1 -  )) gives a flavor of range, which we refer as  -range. For example  = 25% gives the interquartile range, which is known to be a robust measure of distribution dispersion. The terminology global refers to the analysis of the pattern of dispersion of variables, which should be distinguished from the localized analysis specialized at a quantile level. While the factors for each of the two quantile allows for modeling asymmetry of distribution, we can detect asymmetric change of the range of the variables, such as expanding, shrinking, shifting, or shifting while expanding/shrinking, by the sign of loadings and the trend of the factors.
+Most previous data analysis method for high-dimensional data emphasizes on the variance and covariance structure of the high-dimensional data, and methods based on that such as principal component analysis can describe the linear dependence in variables when the data are symmetric, in similar scale and no outliers. However, knowing the linear dependence of the random variables does not lead to the knowledge in their lower and/or upper bounds. Moreover, for non-Gaussian and highly asymmetric (skewed) data, the methods based on covariance structure can be highly corrupted if no correction is made.
+2
+
+To see that the information from the covariance and quantiles are not much related, we analayse data simulated from an asymmetric model. The data are simulated with
+
+Yij = -1(Uij)Xi 1,j1(Uij < 0.5), j = 1, ..., 100, Yij = -1(Uij)Xi 2,j1(Uij  0.5), j = 101, ..., 200,
+
+(1.1)
+
+for i = 1, ..., 500, where {Xi} are i.i.d. from a joint uniform [0, 1] distribution with Xi  R200, {Uij} are i.i.d. uniform [0, 1] over both i and j. 1,j and 2,j are j column vector of matrices 1, 2  Rp×m, which are of rank 2 and p = m = 200. (·) is the cdf of standard Gaussian distribution. Conditioning on Xi, Yij is independent over j. Notice that the distribution of Yij is highly asymmetric and skewed, since the first 100 variables are essentially negative and the last 100 are nonnegative. Moreover, the distribution of Yij is not continuous, since there is nonzero density mass (1/2) at 0.
+
+Var 1
+
+Var 101
+
+-400 -300 -200 -100 0 100 200 -400 -300 -200 -100 0 100 200
+
+0 100 200 300 400 500 0 100 200 300 400 500
+Figure 1.1: The variable simulated by (1.1). The left is Y1 bounded above by 0 and the left is Y101 bounded below by 0.
+The left figure of Figure 1.2 is the biplot of PCA on the matrix Y = (Yij), which suggests that Y42 and Y1 are different variables, and Y42 seems to be negatively associated with Y1 and is perpendicular to Y142. However, the quantile based factor analysis (our method) classifies the data with respect to the behavior of their quantiles at the tail ( = 1%, 99%) of the distribution. As the first 100 random variables are similar in their tail behavior (bounded by 0 above), they all lie horizontally close to the x-axis, while the last 100 variables are lying vertically close to the y-axis. The reason for such phenomenon is that PCA takes a
+3
+
+Comp.2 -0.20 -0.15 -0.10 -0.05 0.00 0.05 0.10 0.15
+-1000 -500 0 500
+
+Var 1
+
+102
+
+10V8ar814424731094V1024a4021218r631337697475327214108342422393248201478853509431146372V8224V11214035684372415562a429a2174641484411332417r65r191529323129127511612911334351495514139968155122446723144361217383909038123192194254304971122117403451121191572232313121097203829V482463288699643722394871280418854242262715754210143272454033a2V241629833993VV939424VV49613V674324V32VVVVV5924743303V36V141V1V9V1r0V24294V43VV7V23V53V1VV44a4V022686V2VV2912V7aa42VV2V15aa223538V11VVV431V1Va47V0V03a2803aVaaa81Va640VV7V7181248aV33861VVVaa2a5a2526aVr1246VaV88a7aaa1103aaV3a1a347V3rr3061V1aV2a3a2rr9115140VV2VaV24VV3aa98a2rV1312V17ra49391aa13arrrrV26VaVrVV48aVa229a776r3a68463arrrV38ra132aV8a4r3V728242raVaara14Vr23r2r550rrrV4a3r6405V1aV5a42430r45Vr7r691615a255233136ra9314V38rar27raV85813V173a3ra4430a4arr2190raa1r10r2ar1471a9r31153r3841a314953a5raaVa28ar54r5r41248137461322r32r0rr1573a5938192a14r301a11171194r1232351ar32a15134r0V7a49791969a14r12a316228r5r6a4280132023V1954r91r180rr112874r3r45a8V71a25r174019312564ra1041711833916245r81191720rrrrV534V9r11944616802171143381786456Va59r523627r71196000r733113141401384r8336557Vr82757182028580r02834261489r12r4539161759r9689166723a89106923642448275843692r1412749r160162813201833r02a136960331585924949815365570606032a10715784553981492724259029773110r2aa04045111249841890618607574711634732a94V029948130755723430725111182a943286797868r819177276013214522138496824610025809325151r271716719436123429345629052r4562754990V012832464734685414rr61V90268816344387775491219r73644501253748744776r3a4225684V351204228201V64782799195290480315433438914763232468494410876340333499892a61640132478348a9474319139816213339r330052134714263257085514693284a364315a73625174124063213535659378144028r4451306213r0747682236216574409910833678753424252444r74345r64852273371030726168061166288817292279278170119324051054042215912537301322085543041133538341679241618315564276903083V84420845424576451060511532711a9177680346214484r196936856913841336867391619673983039784553
+
+476
+
+206
+
+-0.20
+
+-0.15
+
+-0.10
+
+46
+-0.05 0.00 Comp.1
+
+0.05
+
+0.10
+
+0.15
+
+Figure 1.2: The PCA biplot on data Y. PCA is based on the covariance and does not capture the pattern in the quantiles of the distribution.
+
+centralized view and looks at the covariance Cov(Yij, Yik) for j = k, and based on (1.1), the inner product of vectors j and k plays a big role in it.
+Our method, however, looks at the dispersion of the data Yij from an uncentralized view. From the factors and factor loadings in both figures of Figure 1.3, the pattern of change in
+
+quantiles at 1% and 99% and in  -range can be determined. Furthermore, in a classification
+
+perspective, the variables close with each other on the right of Figure 1.3 have similar pattern
+
+in the change of the  -range.
+
+1st factor
+
+142 111
+
+-1500 -1000 -500 0 500 1000 Loadings of factor 1 of 99% MQR
+0.00 0.05 0.10 0.15 0.20
+
+412
+
+0 100 200 300 400 500 0.00
+
+0.05
+
+0.10
+
+0.15
+
+Loadings of factor 1 of 1% MQR
+
+Figure 1.3: The first factor of 1% and 99% quantiles of data Y(left) and the factor loadings(right). Variables have close distance on the right figure have similar change in  -range,  = 1%.
+
+4
+
+In this paper, we estimate the conditional quantile for high-dimensional data with covariates which is factorisable. This method allows for the global analysis of  -range and localized analysis of a specific quantile of high-dimensional data, and is more robust to outliers and is capable of capturing the asymmetric distributional dispersion in the data. The key intermediate step of implementation is to estimate conditional quantiles for multivariate responses, which is done via the nuclear norm regularized multivariate quantile regression(MQR), in which the we factorise the covariates and then using the factors to interpret the data. To handle high-dimensional data, we assume that the coefficient matrix is of low rank. The detail is discussed in later sections.
+The low-rank regression has been applied to handle the problem of overparametrization and sparse sample size. Reduced-rank multivariate regression is of interest in a wide variety of science fields for cross-sectional data. The earliest work dates back to Anderson (1951) in which the relation between a set of macroeconomic variables and set of manipulable noneconomic variables was considered. Izenman (1975) formally introduced the term "reduced-rank regression" and anlaysed the model in detail. For more historical accounts, see Reinsel and Velu (1998) among others. The multivariate regression problem focuses on the expected values of the conditional distributions of m response variables, given p-dimensional covariates. The reduced-rank multivariate regression factorizes the covariates into a parsimonious group of r factors, which decompose the variation of the conditional expectations of the response variables and improve the interpretability of the cross-sectional data.
+The estimation of the conditional quantiles with low rank covariate matrix involves minimization of the empirical loss based on the "check function" of Koenker and Bassett (1978), with an additional regularization term of nuclear norm. Our model is equivalent to a multitask quantile regression with low-rank structure. Fan et al. (2013) also consider multi-task quantile regression under transnormal model.
+Our contributions are summarized as follows:
+1. The factor model for the quantiles of cross-sectional data is proposed;
+2. A method of estimation is designed for the nuclear norm regularized non-smooth empirical loss function and its efficiency is O(1/ ) where is a given accuracy level;
+5
+
+3. The nonasymptotic risk bounds for the multivariate quantile regression are derived and are illustrated by numerical analyses;
+4. A CAViaR modification for financial risk management is demonstrated.
+5. A nonparametric curve model is considered for quantile curves and applied on temperature data.
+The modification of the Conditional Autoregressive Value-at-Risk (CAViaR) model of Engle and Manganelli (2004) leads to a Sparse Asymmetric Multivariate Conditional Value-at-Risk (SAMCVaR) model. It can be viewed as a multiple factor version of White et al. (2015), but there is no need to identify the factors nor specifying the number of the factors. We apply SAMCVaR to a dataset consisting of banks, insurance companies and financial service firms from around the world between mid 2007 to mid 2010, including the period of financial crisis. Our first finding is the negative leverage effect, in the sense that loss leads more to the drop of lower quantile factor than the rise of upper quantile factor, which is a step further of the classical result that only suggests the loss leading to higher dispersion of the distribution. Moreover, we show the main risk drivers and risk sensitive firms in the crisis period after the beginning of year 2009. Nonparametric quantile curve model is an extension for the linear multivariate quantile regression model. Using the temperature data, we show that the quantile curve model discriminates the two extreme temperature types in China very well.
+1.1. Related work
+Multivariate quantile regression is studied under several different frameworks by previous authors, but none of them considered high-dimensional case. Serfling (2002) gives a survey of this research direction. Suppose the samples (X1, Y1), ..., (Xn, Yn) are i.i.d. copies of (X, Y ) in Rp+m. Koenker and Portnoy (1990) suggested M -estimation in multiresponse linear regression model with weighting matrix. The estimator has an efficient covariance structure, but the estimator fails to be affine equivariant. Chaudhuri (1996), Koltchinskii
+6
+
+(1997), and Chakraborty (2003) consider the geometric quantile, which is the minimizer
+
+arg min SRp×m
+
+n
+Yi - S Xi + u (Yi - S Xi) ,
+i=1
+
+(1.2)
+
+where u  Bm-1 = {v  Rm : v < 1} controls the direction of deviation from the center of the data cloud and u measures the magnitude of the deviation; particularly, u = 0 corresponds to the median of the data cloud and u close to 1 corresponds to the tail of the distribution. Another line of literature tries to link quantile regression and data depth of Tukey (1975). Kong and Mizera (2012) estimate quantile halfspace by first projecting data on an oriented straight line with unit vector u, and then finding the quantile hyperplane which is perpendicular to the vector u and coincides with the line at the quantile of the projected data. The quantile halfspace is the space lying above the hyperplane. They show that their quantile halfspace correspond to Tukey's halfspace depth at each chosen unit vector u. However, in practice their method cannot be used to construct the halfspace depth, because that would require estimating uncountably many quantile spaces. Hallin et al. (2010) propose a novel estimation method quantile halfspaces, and show that the upper envelop of the resulting upper quantile halfspaces coincides with Tukey's halfspace depth and is computable. Asymptotic properties including a Bahadur representation are also established in this paper.
+High-dimensional multivariate regression (MR) has been extensively studied in recent years, though the non high-dimensional MR has been around for decades. We review some key ingredients of this model. Suppose
+
+Yi =  Xi + i, ,
+
+(1.3)
+
+where the entries of i are independent with mean 0. In order to recover the matrix , assuming that i  N (0, ), one minimizes the loss (or negative log likelihood) tr (Y - XS)(Y - XS) with respect to matrix S, where  is a weighting matrix. Common choices are  = -1 and Im, while the former choice generates the efficient estimator and the later choice only guarantees consistency. An issue of this approach is that it neglects the
+7
+
+dependency in the response variables in covariates X (heteroskedasticity). Another issue is overparametrization, since p and m can be large relative to n and one cannot hope to consistently estimate the model. To deal with these two issues, Izenman (1975) proposed the reduced rank approach. For a predetermined integer r > 0,
+
+arg min tr (Y - XS)(Y - XS) SRp×m
+
+s.t. rank(S)  r.
+
+The number of variables unknown is thus reduced to r max{p, m}. Reinsel and Velu (1998) gave an explicit review of this approach.
+In the traditional approach described above, r has to be determined ex-ante. In more recent developments, Yuan et al. (2007) proposed a penalization approach, in which they estimate the  matrix by minimizing:
+
+Y - X F +   ,
+
+(1.4)
+
+where  > 0 is a constant. They pointed out the connection between the reduced rank model and factor analysis and proved that an estimator  can be obtained by soft-thresholding the OLS estimator. Bunea et al. (2011) estimate  by minimizing Y - X F +  rank(), and they show nonasymptotic risk bounds for both their estimator and the estimator from minimizing (1.4). They also show that both estimators recover the rank of  with high probability. In high-dimensional setting, Negahban and Wainwright (2011) consider two cases that  is either exact low rank or near low rank. For both cases, they obtain nonasymptotic risk bounds for estimating the true  with nuclear norm penalized estimator . Negahban et al. (2012) present a unified framework for analyzing high-dimensional M -estimator with differentiable convex loss functions and decomposable penalizing term. Although the nuclear norm is decomposable, the asymmetric absolute loss function for estimating conditional quantiles is not differentiable and cannot be minorized with a quadratic function, so that the framework of Negahban et al. (2012) cannot be directly applied to our problem.
+For high-dimensional multi-task quantile regression, Fan et al. (2013) consider the problem under a transnormal model. They estimate transformations of independent variables
+8
+
+which simultaneously explain the quantile of each response variable and make the joint distribution of transformed covariates and response Gaussian. Comparing to their work, our method assumes low-rank structure, but we do not impose any distribution assumption.
+
+1.2. Organization of the paper
+The remaining part of this paper is organized as follows. In Section 2 we discuss the factorisation, and its similarity to the estimation of factors in traditional factor models. Section 3 is devoted to the algorithm for solving the optimization problem and analyzing the convergence property of the algorithm. The tuning procedure is also explained in this section. In Section 4 the oracle properties of our estimator are investigated. A Monte Carlo simulation study is presented in Section 5. Section 6 is devoted to applying our technique to the estimation of SAMCVaR. Empirical results are presented. Section 7 discuss a nonparametric estimation of multivariate quantile curves, which again can be factorised into factor curves. A real data application on Chinese temperature data is also presented. Detailed proofs are shifted to the supplement material.
+
+1.3. Notations
+
+The following notations are adopted throughout this paper. Given two scalars x and
+
+y, x  y d=ef min{x, y} and x  y d=ef max{x, y}. 1(x  0) is an index function, which
+
+is equal to 1 when x  0 and 0 when x > 0. For a vector v = (v1, ..., vp)  Rp, let
+
+v 2=(
+
+p j=1
+
+vj2)1/2
+
+and
+
+v  = maxjp |vj| be the vector
+
+2 and infinity norm. For a matrix
+
+A = (Aij)  Rp×m, given the singular values of A: 1(A)  2(A)  ...  pm(A), let
+
+A = max1jmin{p,m} j(A), A  =
+
+min{p,m} j=1
+
+j (A)
+
+and
+
+A F=
+
+min{p,m} j=1
+
+j
+
+(A)2
+
+=
+
+tr(AA )1/2 = tr(A A)1/2 = (
+
+p j=1
+
+m k=1
+
+Ai2j
+
+)1/2
+
+and
+
+be
+
+the
+
+matrix
+
+spectral
+
+norm,
+
+nuclear
+
+norm (or trace norm), Frobenius norm. The jth column vector of A is denoted by Aj.
+
+Similarly, the ith row vector of A is denoted by Ai. The minimal and maximal singular
+values of A is denoted by min(A) and max(A). Ip denotes the p × p identity matrix, and 1
+denotes the matrix with all entries equal to 1. ·, · : Rn×m × Rn×m  R denotes the trace
+
+inner product given by A, B = tr(AB ). For a function f : Rp  R, and Zi  Rp, define
+
+9
+
+the empirical process Gn(f (Zi)) = n-1/2 ni=1{f (Zi) - E[f (Zi)]}.
+Definition 1.1 (Sub-Gaussian variable and sub-Gaussian norm). A random variable X is called sub-Gaussian if there exists some positive constant K2 such that P(|X| > t)  exp(1- t2/K22) for all t  0. The sub-Gaussian norm of X is defined as X 2 = supp1 p-1/2(E |X|p)1/p.
+
+2. Factorizable sparse multivariate quantile regression
+To motivate the estimation of factors in the quantile of a random variable, we first shortly review the classical linear factor model. Linear factor models, such as Capital Asset Pricing Model (CAPM) and Arbitrage Pricing Theory (APT), are popular in economics and finance for describing the relationship between asset returns and factors. The standard setting is
+
+Yij = j1Fi1 + j2Fi2 + ... + jrFir + ij,
+
+(2.1)
+
+where Yi  Rm is a vector of asset returns, Fi1,...,Fir are factors and ij is the portion not related to the factors. Assumptions are Cov(Fik, ij) = 0 for all k = 1, ..., r and j = 1, ..., m, Cov(ij, il) = 0 for all j = l. Factors Fik can be viewed as hedging portfolios or macroeconomic drivers depending on the context. Note that the number of factor is exactly one in terms of CAPM.
+The linear factor model (2.1) can be estimated even when the factors are not identified ex-ante. The multivariate regression model can estimate the factors and loadings, if it is known that some exogenous macroeconomic variables Xi  Rp are relevant to Fik. Taking conditional expectation to factor model (2.1) gives
+
+r
+E[Yij|Xi] = jk E[Fik|Xi],
+k=1
+
+(2.2)
+
+Suppose that E[Fi,k|Xi] = k Xi, where k = (k1, ..., kp). We have the multivariate regression model
+
+E[Yi|Xi] = jXi, 10
+
+(2.3)
+
+where j = (
+
+r k=1
+
+j,k k,1 ,
+
+...,
+
+r k=1
+
+j,k
+
+k,p
+
+).
+
+ can be estimated with a multivariate
+
+regression model (1.3) with the rank of  being r. The benefit of considering such model is
+
+that this incorporates the cross-sectional information in Yi. This is closely related to multi-
+
+task learning paradigm in machine learning literature. Gibbons and Ferson (1985) was the
+
+first to present the model (2.3). One can also see Chapter 8 of Reinsel and Velu (1998) for
+
+detail. One remark is that for the traditional multivariate regression technique introduced
+
+in Reinsel and Velu (1998), the number of factor r is assumed to be known or has to be
+
+obtained via other method. However, using the advanced regularization method of Yuan
+
+et al. (2007), Bunea et al. (2011) or Negahban and Wainwright (2011), knowing r is not
+
+necessary for estimation.
+
+One remark is that knowing  does not trivially yield the estimate for factors and factor
+
+loadings, because the decomposition of  =  is not unique, in which  corresponds
+
+to the factors and  corresponds to the factor loadings. The ideal decomposition requires
+
+ to be a matrix with r nonzero columns, so that we have r factors, and  is a unitary
+
+matrix. As pointed out in Section 2 of Yuan et al. (2007), this can be done via singular value
+
+decomposition. Suppose the singular value decomposition of  is  = UDV , where U
+
+and V are unitary matrices and D is rectangular diagonal matrix with kth diagonal element
+
+being the singular value k, and k = 0 for k > r. The factor loadings j = Vj satisfies j 2 = 1 for 1  j  m. Letting  = D U .  has only r nonzero rows. The factor is formed as Fik = kUkXi.
+
+Conditional quantile is of our focus. We estimate the quantile of response variables
+
+Yij, j = 1, ..., m parametrically as (2.3). Let qj( |Xi) be the conditional quantile of Yij conditional on Xi  Rp, for j = 1, ..., m and i = 1, ..., n,
+
+qj( |Xi) = Xi j( ),
+
+(2.4)
+
+where j is jth column of matrix   Rp×m, which is assumed of low rank r min{p, m}. The model is posed in a high-dimensional setting: p, m   while the sample size n  .
+Furthermore, model (2.4) is factorisable. Suppose the SVD of  is  = UDV and the
+
+11
+
+number of nonzero singular values is r, similarly to (2.2),
+
+r
+qj( |Xi) = Vj,kfk (Xi),
+k=1
+
+(2.5)
+
+where fk (Xi) = kUkXi. With slight abuse of terminology, we also call fk (Xi) "factors" with Vj,k being "factor loadings". For mean regression (2.3), factorisation would give a factor model (2.1). In the practice of multi-task or multivariate quantile regression, factors are handy for classification and prediction. We will explore its power with real data in Section 6.
+To find an estimator  for , quantile regression proposed by Koenker and Bassett (1978) allows to recover the conditional quantile of a univariate response. Our loss function
+
+nm
+
+( ) d=ef arg min SRp×m
+
+(mn)-1
+
+ Yij - Xi Sj
+
+i=1 j=1
+
++ S 
+
+,
+
+(2.6)
+
+where  (u) = u( - 1{u  0}) and Sj is jth column of matrix S. The first term controls the quality of fitting, which is similar to the loss function proposed in Koenker and Portnoy (1990). The second term nuclear norm regularization is applied to encourage the accurate estimation, as the rank of the matrix  is degenerate and is sparse. The quantity  is considered fixed in our discussion.
+Note that  (u) is not globally differentiable, where 0 <  < 1 is a given quantile level. The idea of solving (2.6) is first smoothing the loss function by the method of Nesterov (2005), and then applying the fast iterative proximal gradient algorithm of Beck and Teboulle (2009). It will be shown in Theorem 3.2 that our method achieves the efficiency of O(1/ ), where is a given rate of accuracy, say 10-6. Nonasymptotic oracle properties of  are established in Section 4.
+
+3. Computation
+In this section, we discuss how the estimate defined by (2.6) can be computed efficiently. The procedure can be summarized in Algorithm 1. The main result on efficiency of the
+12
+
+algorithm is Theorem 3.2. Detailed proofs can be found in the supplement material. The problem of solving a nonlinear program like (1.4) and (2.6) has received a lot of
+attention recently. One strand of literature using the proximal gradient approach, exploits the fact that the proximity operator of nuclear norm has a closed form, which performs softthresholding of the singular values of the input matrix. Such algorithm requires singular value decomposition (SVD) in each iteration, and this may be computationally expensive when the matrix is large. Ji and Ye (2009) and Toh and Yun (2010) propose algorithms in this line
+ which obtain -accurate solution in O(1/ ) steps. A second strand of literature reformulates the optimization problem into a semidefinite program and then applies available solvers. Though traditional solvers such as SDPT3 or SeDuMi are not suitable for high-dimensional data, Jaggi and Sulovsky´ (2010) constructed an algorithm based on the algorithm of Hazan (2008) and applied it on large datasets. This approach avoids performing SVD in each step, but in general it requires O(1/ ) steps to reach a -accurate solution.
+Our algorithm follows the first line of proximal gradient algorithm. As in Jaggi and Sulovsky´ (2010) it is required that the loss function to be differentiable. In our simulation study we show that our algorithm is able to handle matrices with hundreds of rows and columns.
+A key difference between our problem to those studied in the articles mentioned above is that, beside the nuclear norm penalty term, the first term in our loss function in (2.6) is non-smooth, and this suggests that the direct application of proximal gradient algorithm may not generate desirable result. Therefore, there are two important questions one needs to answer: how to transform the problem so that it produces favorable properties and what is the price for such transformation? In what follows we will answer both questions by showing a procedure to smooth the non-smooth loss function and obtain the convergence rate of our algorithm. Our approach is inspired by Chen et al. (2012), who deal with sparse regression problem with non-smooth structured sparsity-inducing penalties. They apply the method of Nesterov (2005), who suggests a systematic way to approximate the non-smooth objective function by a function with Lipschitz continuous gradient. Our smoothing method is based on this idea as well.
+13
+
+Recall that our goal is to minimize the following loss function:
+
+nm
+
+L() = (mn)-1
+
+ Yij - Xi j +    d=ef Q () +   ,
+
+i=1 j=1
+
+(3.1)
+
+where  (u) = u( - 1{u  0}) with given 0 <  < 1. Q () is clearly non-smooth. To handle this problem, we introduce the dual variables
+ij to rewrite as
+
+nm
+
+Q () = max (mn)-1
+
+ij
+
+ij [ -1, ]
+
+i=1 j=1
+
+Yij - Xi j
+
+.
+
+(3.2)
+
+To see that this equation holds, note that for each pair of i, j, when Yij -Xi j > 0, ij =  since  is the largest "positive" value in the interval [ - 1,  ]; when Yij - Xi j  0, ij =  - 1 since  is the smallest "negative" value in the interval [ - 1,  ]. This verifies the equation. Observe that it is necessary to choose [ - 1,  ] rather than { - 1,  } for the support of ij in order to satisfy the convex set conditions given in Nesterov (2005). Though both choices fulfill the equation, the previous one is an interval and therefore a convex set while the later one is not convex. This choice is the key to the smoothing approximation discussed later and will influence the gradient of the smoothed loss function.
+The formulation of Q () given in (3.2) is still a non-smooth function of , and this makes the subgradient based algorithm inefficient. To smooth this function, denote  = (ij) the matrix of ij, we consider the smooth approximation to Q ():
+
+Q,() = max ij [ -1, ]
+
+(mn)-1
+
+(, ) -  2
+
+
+
+2 F
+
+,
+
+(3.3)
+
+where (, ) =
+
+n i=1
+
+m j=1
+
+ij
+
+Yij - Xi j
+
+, and  > 0 is a smoothing regularization
+
+constant depending on m, n and the desired accuracy. When   0, the approximation
+
+is getting closer to the function before smoothing. We anlayse the convergence rate of our
+
+algorithm based on Theorem 1 of Nesterov (2005).
+
+LEMMA 3.1. (, ) can be expressed as (, ) = -X,  + Y,  .
+
+Since the function
+
+ 2
+
+
+
+2 F
+
+is
+
+strongly
+
+convex,
+
+the
+
+optimal
+
+solution
+
+()
+
+for
+
+achieving
+
+14
+
+(3.3) is unique for each . We introduce a notation: for any matrix A = (Aij), [[A]] =
+
+([[Aij]] ) where
+
+
+,    
+[[Aij]] = Aij,      - 1,
+
+if Aij   ; if  - 1 < Aij <  ; if Aij   - 1.
+
+This function performs componentwise projection on a real matrix to the interval [ - 1,  ].
+
+The next theorem presents properties of the (smooth) function Q,().
+
+THEOREM 3.1. For any  > 0, Q,() is well-defined, convex and continuously-differentiable function in  with the gradient Q,() = -(mn)-1X ()  Rp×m, where () is the optimal solution to (3.3), namely
+
+() = [[(mn)-1(Y - X)]] .
+
+(3.4)
+
+The gradient Q,() is Lipschitz continuous with the Lipschitz constant M = (m2n2)-1 X 2.
+By inserting (3.4) into the equation of Q,(), we arrive at the gradient which will be applied in our algorithm:
+
+Q,() = -(mn)-1X [[(mn)-1(Y - X)]] .
+
+(3.5)
+
+Observe that (3.5) is similar to the subgradient -X{ - 1(Y - X  0)} of Q (), where the operator  - 1(·  0) applies componentwise to the matrix Y - X with a slight abuse of notation. The major difference lies in the fact that (3.5) replaces the discrete non-Lipschitz  - 1(Y - X  0) with a Lipschitz function [[-1(Y - X)]] . Figure 3.1 illustrates this approximation property in a univariate framework with m = n = 1 and X = 1. Denote  (u) =  - 1(u  0) the subgradient of  (u). The solid line pictures the function  (u) with  = 0.5, which has a jump at the origin. The dashed line corresponds to the smoothing approximation gradient [[-1(Y - X)]] associated with  = 0.5, which connects the discontinuous part and joins the function  (u) when it reaches  the right end and  - 1 at the left end. As  decreases to 0.05, we observe that the smoothing
+15
+
+approximation function is getting steeper around the origin and closer to  .
+
+-0.5 0.0 0.5
+
+=0.5 =0.2
+
+=0.05
+
+0.0
+
+Figure 3.1: The solid line is the function  (u) =  - 1(u  0) with  = 0.5, which has a jump at the origin. The dashed line corresponding to the smoothing gradient [[-1(Y -
+X)]] associated with  = 0.5. As  decreases to 0.05, we observe that the smoothing approximation function is closer to  (u).
+
+Let S(·) be the proximity operator given in Theorem C.1 in the supplement material. We state the main result of this section in Algorithm 1 for the optimization problem (2.6). The name of the algorithm reflects the fact that it is a combination of the smoothing procedure and the fast iterative shrinkage-thresholding algorithm (FISTA) of Beck and Teboulle (2009).
+
+Algorithm 1: Smoothing fast iterative shrinkage-thresholding algorithm (SFISTA)
+
+1
+
+Input:
+
+Y,
+
+X,
+
+,
+
+
+
+=
+
+2mn ,
+
+M
+
+=
+
+1 m2n2
+
+X
+
+2;
+
+2 Initialization: 0 = 0, 1 = 0, step size 1 = 1;
+
+3 for t = 1, 2, ..., T do
+
+4
+
+t
+
+=
+
+S/M
+
+t
+
+-
+
+1 M
+
+Q,(t)
+
+;
+
+5
+
+t+1 = 1+
+
+;1+4t2
+2
+
+6
+
+t+1
+
+=
+
+t
+
++
+
+(t-1
+t+1
+
+t
+
+-
+
+t-1);
+
+7 end
+
+8 Output  = T
+
+The efficiency of Algorithm 1 is given by the following theorem.
+
+16
+
+THEOREM 3.2 (Convergence analysis of Algorithm 1). Let {t}tT=0 be the sequence generated by Algorithm 1, and  be the optimal solution for minimizing (3.1). Then for any t and > 0,
+
+|L(t) - L()| 
+
+(  {1 -  })2 4mn +
+
+0 - 
+
+2 F
+
+X
+
+2
+.
+
+2 (t + 1)2
+
+(3.6)
+
+If we require L(t) - L()  , then
+
+ t  2 mn
+
+ - 0
+
+F
+
+X
+
+.
+
+1
+
+-
+
+( {1- })2 2
+
+(3.7)
+
+REMARK 3.1. 1. The first term on the right hand side of (3.6) is related to the smooth-
+
+ing error, which cannot be made small by increasing the number of iteration, but can
+
+only be reduced by choosing a smaller smoothing parameter . This is the price we
+
+pay for the smooth approximation. The second term is related to the fast iterative
+
+shrinkage-thresholding algorithm of Beck and Teboulle (2009).
+
+ 2. The original FISTA algorithm without smoothing yield the convergence rate O(1/ ).
+
+In our case, smoothing approximation error deteriorates the convergence rate and
+
+the best we can do is O(1/ ), which is comparable to the rate obtained by Nesterov
+
+(2005). As an improvement, our rate is still better than O(1/ 2) given by the general
+
+subgradient method.
+
+3. The quantile level  enters the numerical bound (3.6) by a factor
+
+1
+
+-
+
+( {1- })2 2
+
+-1
+,
+
+which increases when  is getting close to the boundary of (0, 1).
+
+For implementation, it is crucial to appropriately select . In theory, one can select  based on (4.13) which gives the oracle result in Section 4, but the value does not adapt to the data very well. We propose a way to select  based on the "pivotal principle", which are better adaptive to the data.
+Define the random variable
+
+ = (nm)-1 X W , 17
+
+(3.8)
+
+where Wij = 1(Uij  0) -  , {Uij} for i = 1, ..., n and j = 1, ..., m are i.i.d. uniform (0,1) random variables, independently distributed from the input variables X1, ..., Xn. The random variable  is pivotal conditioning on design X, as it does not depend on unknown parameter . Notice that (nm)-1X W is the score Q (). Set
+
+ = 2 · (1 - |X),
+
+(3.9)
+
+where (1 - |X) d=ef (1 - )-quantile of  conditional on X, and c is an absolute constant. This is consistent with the pivotal principle applied in the high-dimensional quantile regression of Belloni and Chernozhukov (2011) and square-root Lasso Belloni et al. (2011). The choice of the statistics (3.8) is motivated by Q(), which plays a crucial role in oracle inequalities in Section 4.
+
+4. Oracle inequalities
+In this section we present the non-asymptotic oracle bounds of the estimator  defined in (2.6). The main results are Theorem 4.1 and Corollary 4.1, which are established through the convexity and geometric argument of Belloni and Chernozhukov (2011), concentration inequalities, and E-net arguments.
+Our risk bounds resemble the corresponding results of multivariate regression for mean, such as those in Negahban and Wainwright (2011) and Koltchinskii et al. (2011). We will compare our results to theirs in Remark 4.1. Koltchinskii (2013) presents an oracle inequality for excess risk on nuclear norm penalized convex empirical risk minimization. We cannot apply their result because our quantile loss function is not differentiable. In a novel paper, Belloni and Chernozhukov (2011) develop theory for high-dimensional Lasso estimator of non-multivariate regression for quantiles. The idea to prove their main theorem is very general and can be adapted to our case of multivariate regression for quantiles. However, some technical properties still need to be established before their method can be applied.
+Let (X1, Y1), ..., (Xn, Yn) be i.i.d. copies of (X, Y ) random vectors in Rp+m. Recall  (u) = u( - 1{u  0}) and its subgradient  (u) =  - 1(u  0), and that  is defined as
+18
+
+(2.6). Recall also the empirical loss
+
+nm
+
+Q (S) = (nm)-1
+
+ Yij - Xi Sj
+
+i=1 j=1
+
+and its expectation Q (S). We define  be the minimizer of Q (S), and the difference  =  - . The subgradient for the empirical loss function Q () is the matrix
+n
+Q () = (nm)-1 XiWi = (nm)-1X W  Rp×m,
+i=1
+where X is the design matrix and
+
+Wi d=ef 1(Yij - Xi j  0) -  1jm , W = [W1, ..., Wn]  Rn×m.
+
+In what follows we generalize the support of vector to matrix by projections. If A  Rp×m is
+
+of rank r, and the singular value decomposition of A is A =
+
+r j=1
+
+(A)uj
+
+vj
+
+with orthogonal
+
+vectors u1, ..., ur  Rp and v1, ..., vr  Rm, the support of A is defined by (S1, S2) in which
+
+S1 = span{u1, ..., ur} and S2 = span{v1, ..., vr}. We define the projection matrix on S1 by
+
+P1 = Ur(Ur Ur)-1Ur = UrUr in which Ur is a p × r matrix whose columns are formed
+
+by {u1, ..., ur}, and Ur Ur = Ir because {u1, ..., ur} is an orthonormal basis. Similarly, P2 = VrVr . On the other hand, define the orthogonal projection of P1 and P2 by P1 and P2. For any matrix S  Rp×m, we define the projections:
+
+PA(S) d=ef S - P1SP2; PA(S) d=ef P1 SP2 .
+
+Define the cone
+
+K(; c0) d=ef
+
+S  Rp×m :
+
+P
+
+ A
+
+(S)
+
+  c0
+
+P A (S)
+
+
+
+.
+
+(4.1)
+
+Assumption 4.1 (Sampling setting). Samples (X1, Y1), ..., (Xn, Yn) are i.i.d. copies of
+
+(X, Y ) random vectors in Rp+m.
+
+F -1 Yij |Xi
+
+(
+
+|x)
+
+=
+
+x
+
+j( ).
+
+Conditioning on Xi, Yij is
+
+independent in j.
+
+19
+
+Assumption 4.1 postulates that the data are i.i.d and there is no cross-sectional dependence in Yi1, ..., Y1m conditioning on Xi. This suggests that all dependency in the components of Yi is captured by the covariates Xi. This assumption is stronger than that usually required for factor models, for which uncorrelatedness is often sufficient.
+
+Assumption 4.2 (Covariance matrix condition). Let the covariance matrix of X be X,
+
+assume that 0 < min(X) < max(X) < . Moreover, assume the sample covariance
+
+matrix
+
+of
+
+covariates
+
+X
+
+=
+
+1 n
+
+X
+
+X satisfies
+
+P min(X )  c1min(X ), max(X )  c2max(X )  1 - n.
+
+(4.2)
+
+When the covariates come from a joint p-Gaussian distribution N (0, X), Lemma C.3 in the supplement material shows that (4.2) holds with c1 = 1/9, c2 = 9 and n = 4 exp(-n/2).
+
+Assumption 4.3 (Conditional density condition). There exist f > 0 and f¯ <  such that
+
+|
+
+ yj
+
+fYij
+
+|Xi
+
+(yi
+
+|x)|
+
+
+
+f¯
+
+and infjm infx fYij|Xi (x
+
+j|x)  f , where fYij|Xi
+
+is the conditional
+
+density function of Yij on Xi.
+
+Similar condition as Assumption 4.3 can be found in Belloni and Chernozhukov (2011). The quantity f controls the curvature of the population loss function, which can influence the estimation error. Negahban et al. (2012) give an extensive account on this issue.
+
+Assumption 4.4 (Restricted eigenvalue and nonlinearity). For a given probability distribution  for X,
+
+,3 d=ef inf  > 0 :  P() F   L2(),   K(, 3)
+
+
+
+d=ef
+
+3f 8 f¯
+
+inf
+K(,3)
+
+m-1
+
+=0
+
+
+
+3 L2()
+
+m j=1
+
+E[|Xi
+
+j |3 ]
+
+>
+
+0,
+
+> 0,
+
+(4.3) (4.4)
+
+where
+
+S
+
+2 L2()
+
+d=ef
+
+m-1
+
+E
+
+S Xi 22.
+
+The cone K(, 3) appears often in Lasso literature, for example in Bickel et al. (2009) and Negahban and Wainwright (2011) among others. Similar assumption on the existence of constant ,3 can also be found in Negahban and Wainwright (2011) and Koltchinskii et al.
+
+20
+
+(2011). From Assumption 4.2 and the fact that P() F   F, we have a rough lower bound ,3  m-1/2 min(X ).
+The restricted nonlinearity constant  is proposed by Belloni and Chernozhukov (2011), which is used to control the quality of minorization given in Lemma 4.2 (i). Section 2.5 of Belloni and Chernozhukov (2011) calculate  for various data generating processes under different design.
+The following lemma asserts that the empirical error  -  lies in the cone K(, 3). The detailed proof can be found in the supplement material.
+
+LEMMA 4.1. Suppose   2 Q() and  =  - . Then P()   3 P() . That is,   K(, 3).
+
+The next lemma characterizes useful properties which will be used later. The detailed proof can be found in the supplement material.
+
+LEMMA 4.2. Under Assumptions 4.3 and 4.4, we have
+
+(i) If
+
+
+
+L2()
+
+
+
+4
+
+and
+
+
+
+
+
+K(, 3),
+
+Q ( +
+
+) - Q ()
+
+
+
+1 4
+
+f
+
+
+
+L2();
+
+
+
+(ii) If   K(, 3),
+
+
+
+ 4 2r
+ ,3
+
+
+
+L2(), where r = rank().
+
+The following technical lemma characterizes the convergence rate on the empirical error
+
+of the loss function. In the proof we repeatedly apply the Hoeffding's inequalities and
+
+Assumption 4.2. The detailed proof can be found in the supplement material.
+
+LEMMA 4.3. Under Assumptions 4.1-4.4. Let
+
+m
+
+A(t) =
+
+sup
+
+Gn m-1
+
+ {Yij - Xi (j + j)} -  {Yij - Xi j}
+
+ L2()t,K(,3)
+
+j=1
+
+.
+
+(4.5)
+
+Then
+
+A(t) 
+
+2{  (1 -  )} +2
+
+t
+
+c2max(X ) log(p + m)
+
+Cm
+
+with probability greater than 1 - 9(p + m)-2 - n, where c2, C are universal constants from
+
+
+
+Assumption
+
+4.2
+
+and
+
+Lemma
+
+C.1
+
+in
+
+the
+
+supplement
+
+material,
+
+
+
+=
+
+4 2r ,3
+
+with
+
+r
+
+=
+
+rank(),
+
+,3 from Assumption 4.4, and p + m > 3.
+
+21
+
+The following theorem derives the bounds for the prediction error, Frobenius and nuclear norm, expressed in terms of , condition number X,  and f . The proof follows similar steps as proving Theorem 2 in Belloni and Chernozhukov (2011), which explicitly exploits the convexity of the loss function and the cone condition.
+
+THEOREM 4.1. Under Assumptions 4.1-4.4,   2 Q() and the growth condition on
+
+r:
+
+
+
+C
+
+max(X) log(p + m) + 
+
+4
+
+2r < .
+
+m nf
+
+f ,3
+
+(4.6)
+
+Then
+
+  -  L2()  4C
+
+max(X )
+
+log(p
+
++
+
+m)
+
++
+
+ 4
+
+m nf
+
+f
+
+-
+
+F
+
+
+
+4C
+
+ mf
+
+max(X ) min(X )
+
+
+
+log(p + m)
+
+m
+
++ 4
+
+n min(X )f
+
+ -    4C 2
+
+max(X ) mf
+
+log(p + m)
+
+2
+
++ 4
+
+nf
+
+(4.7) (4.8) (4.9)
+
+
+
+with
+
+probability
+
+1-9(p+m)-2 -n,
+
+where
+
+
+
+=
+
+4 2r ,3
+
+with
+
+r
+
+=
+
+rank(),
+
+,3
+
+from
+
+Assumption
+
+4.4, C =
+
+2{ (1- )} C
+
++
+
+2
+
+ c2, C
+
+> 0 is a universal constant from Lemma C.1 in the
+
+supplement material, c2 from Assumption 4.2 and p + m > 3.
+
+Proof of Theorem 4.1. Let
+
+1 = the event that Assumption 4.2 holds;
+
+
+
+2 = the event A(t)  C t
+
+.max(X ) log(p+m) m
+
+Note that the probability of event P(1  2)  1 - n - 9(p + m)-2. Set
+
+ t = 4C
+
+max(X) log(p + m) + 4  > 0.
+
+m nf
+
+f
+
+We show that on 12, X  > t is infeasible. Let  = -. On event { X   t},
+
+22
+
+from Lemma 4.1, one has
+
+0 > inf Q ( + ) - Q () + (  +   -  ),  L2()t,K(,3)
+
+(4.10)
+
+As argued in the proof of Theorem 2 of Belloni and Chernozhukov (2011), from the facts that
+
+1. Q (·) +  ·  is convex; 2. K(, 3) is a cone,
+
+(4.10) forces the value of Q ( + ) +   +   on { :  L2()  t,   K(, 3)} to be less than that evaluated at  = 0. Convexity implies that Q (+)+ +  evaluated at { :  L2() = t,   K(, 3)} must be smaller than that evaluated at  = 0. Thus, we have the inequality
+
+0 > inf Q ( + ) - Q () + (  +   -  ),  L2()=t,K(,3)
+It can be further deducted that
+
+0 > inf Q ( + ) - Q () - n-1/2A(t) + (  +   -  ),  L2()=t,K(,3)
+By triangle inequality, +  -         L2() = t on the set {  L2() = t,   K(, 3)}. Furthermore, by Lemma 4.3, on event 1  2
+
+ A(t)  C
+
+max(X ) log(p + m) t. m
+
+Therefore, on event 1  2, it holds from Lemma 4.2 (ii) that
+
+ 0 > inf Q ( + ) - Q () - C
+ L2()=t,K(,3)
+
+max(X) log(p + m) t - t, mn
+
+23
+
+Finally, applying Lemma 4.2 (i) as  > t/4 =  L2()/4, we have
+
+0>
+
+
+
+inf
+L2()=t,K(,3)
+
+1 f t2 4
+
+-
+
+C
+
+
+
+max(X) log(p + m) t - t. mn
+
+(4.11)
+
+With our choice of t, (4.11) cannot hold. Thus, the inequality (4.7) holds.
+
+The inequality (4.8) can be obtained by the simple observation that
+
+
+
+2 L2()
+
+
+
+(min(X )/m)
+
+
+
+F2 .
+
+The inequality (4.9) for   follows from the fact that   K(, 3) by Lemma 4.1,
+
+Lemma 4.2 (ii) and the bound for  L2().
+
+Next
+
+lemma
+
+gives
+
+the
+
+bound
+
+for
+
+1 n
+
+X
+
+W . From which we obtain a bound for
+
+Q() .
+
+The detailed proof can be found in the supplement material.
+
+LEMMA 4.4. Under Assumption 4.1 and 4.2,
+
+1 X W  C n
+
+max(X ){  (1 -  )}
+
+p+m ,
+
+where
+
+C = 4
+
+n
+
+2 c2 log 8 C
+
+(4.12)
+
+with probability greater than 1 - 3e-(p+m) log 8 - n, where C and c2 are absolute constants given by Lemma C.1 in the supplement material and Assumption 4.2.
+Let us take the rough bound ,3  m-1/2 min(X). Lemma 4.4 and Lemma 4.1 suggest to take
+
+C =2
+m
+
+max(X ){  (1 -  )}
+
+p+m .
+n
+
+(4.13)
+
+By the choice (4.13), Theorem 4.1 yields the oracle rate, which we summarize in Corollary 4.1.
+The last result in this section gives the rate of convergence under the choice of  given in (4.13), which will be the guideline for simulation comparison in Section 5.
+COROLLARY 4.1. Assume that Assumptions 4.1-4.4 hold and select  as (4.13). Under the growth condition on r:
+
+C max(X )   (1 -  ) f m min(X )
+
+log(p + m) p + m  + r < .
+nn
+
+24
+
+(4.14)
+
+Then
+
+-
+
+L2() 
+
+C fm
+
+max(X ) min(X )
+
+   (1 -  ) r
+
+log(p + m) p + m +,
+nn
+
+-
+
+F
+
+C f
+
+max(X ) m2 in(X )
+
+   (1 -  ) r
+
+log(p + m) p + m +,
+nn
+
+-
+
+
+
+C f
+
+max(X ) m2 in(X )
+
+  (1 -  )r
+
+log(p + m) p + m +,
+nn
+
+(4.15) (4.16) (4.17)
+
+with probability greater than 1 - n - 9(p + m)-2 - 3e-(p+m) log 8 and p + m > 3, where
+
+ C = 8 2
+
+2 +
+C
+
+2   (1 -  )
+
+ c2  4
+
+2 c2 log 8 , C
+
+(4.18)
+
+ C = 4 2C with r = rank(), ,3 from Assumption 4.4 and c2 from Assumption 4.2.
+
+Proof of Corollary 4.1. Let events 1 and 2 be defined as in the proof of Theorem 4.1, and
+
+3 =
+
+1 the event that
+n
+
+X
+
+W
+
+ C
+
+X {  (1 -  )}
+
+p+m .
+n
+
+Note that the probability P(123)  1-n-9(p+m)-2-3e-(p+m) log 8. On 123, the bounds (4.7), (4.8), (4.9), and (4.12) hold. Inserting the rate of  in (4.13) and the lower bound ,3  m-1/2 min(X) into (4.7), (4.8),and (4.9) yields bounds (4.15), (4.16),and (4.17).
+
+REMARK 4.1. 1. The restricted nonlinearity constant  enters the bounds only through the growth condition (4.14) on r. This corresponds to the Lasso for quantile regression of Belloni and Chernozhukov (2011).
+
+2. Component of the risk bounds: Corollary 4.1 shows that the errors are close to the estimation error given the true model. The bounds (4.15), (4.16), and (4.17) consist of three components: the dimensionality, covariance matrix of the covariates and conditional density of Y given X. When p and m are fixed with respect to n, the errors decrease in n-1/2. p and m are allowed to grow with n; however, they are not allowed to grow faster than n. This phenomenon is also found in the multivariate regression for
+25
+
+mean, see Negahban and Wainwright (2011), Koltchinskii et al. (2011) among others.
+
+Rank r of matrix  enters the bound as a factor, and r(p + m) is the number of un-
+
+known parameters. The covariates can influence the bounds (4.15), (4.16), and (4.17)
+
+through
+
+the
+
+condition
+
+number
+
+max(X ) min(X )
+
+of
+
+the
+
+covariance
+
+matrix
+
+X .
+
+Large
+
+condition
+
+number also introduces instability to multivariate regression for quantiles as for mean.
+
+Finally, the minimal value of densities f and the quantile level  are related to the
+
+conditional distribution of Yij give Xi and are only seen in multivariate regression for quantiles. We show in (4.15), (4.16), and (4.17) that small minimal value of densities
+
+f , which may result from the large support of Yij, can result in inaccurate estimation. On the other hand, the estimation at  close to 0 or 1 is also difficult as   (1 -  )
+
+enters as a factor to the estimation errors.
+
+5. Simulation
+In this section we check the performance of the proposed method via Monte Carlo simulations and verify the oracle properties in Section 4. In the first set of simulation, we consider three symmetric models, which are different in terms of the degree of sparsity. In the second set of simulation, an asymmetric setting is considered with two different degree of sparsity. We consider three symmetric models with different degrees of sparsity in Section 5.1. Section 5.2 is devoted to two asymmetric models.
+5.1. Symmetric models
+We consider three models that differ in complexity:
+· Model LS (Less sparse): Set m = p = n = 500. In each iteration, each entry of the p × m coefficient matrix  is generated from a i.i.d. normal distribution. Setting the last 375 singular values of  to 0;
+· Model MS (Moderate sparse): Generating  as Model LS. Setting the first 10 singular values to 30, and 0 for the rest;
+
+26
+
+· Model ES (Extremely sparse): Generating  as Model LS. Replacing the first singular values by 20, and 0 for the rest.
+Given the  generated by the model above, at each iteration, we generate Xi from N (0, ) with ij = 0.5|i-j|. The response variable is generated as
+
+Yi =  Xi + i,
+
+(5.1)
+
+where i is a random vector in which each element is from i.i.d. standard normal distribution. We estimate the model at quantile levels  = 0.05, 0.1, 0.2, 0.5, 0.8, 0.9, 0.95. In order
+to get some ideas on the solution path, we set  = (5 × 10-6, 10-5, 5 × 10-5, 10-4) for comparison purpose. For reference, using the tuning technique in Section 3, the simulated  = (0.00477, 0.00465, 0.00438, 0.00346) for  = 5%, 10%, 20%, 50%. The  for  = 95%, 90% and 80% are the same as that of  = 5%, 10%, 20% by symmetry. The iteration run is 500.
+We stop the SFISTA algorithm at step t when the difference of loss function at step t - 1 and t is less than 10-6. Moreover, considering the size of our model and the choice of  in the simulation study of Chen et al. (2012), we directly set  = 0.0001, rather than applying the  given by Theorem 3.2.
+The performance of  is measured by:
+· Prediction error: m-1 X( - ) F;
+· Model selection: Frobenius error  -  F and nuclear error  -  ;
+· Estimated number of nonzero singular values;
+· Computational time.
+The number of nonzero singular values is determined by the sudden drop in singular values of . If the drop from r^th singular value to (r^ + 1)th singular value is greater than a given threshold, then we record the number of nonzero singular values as r^. Notice that the three symmetric models only differ in sparsity. From the simulation, we can clearly see what role sparsity plays.
+
+27
+
+The results are shown as boxplots from Figure 5.2 to 5.4. Each figure consists of five rows, which presents the prediction error, Frobenius error, nuclear error, estimated number of factors and the computational time, and the columns correspond to different values of .
+The errors as functions in  of the three models show "V" shape. This confirms the term   (1 -  ) appeared in the oracle bounds in Theorems 4.1. Furthermore, the model complexity rank() influences the error. Among the three models, the errors are smaller in the most sparse Model ES and larger in the less sparse Model LS. This confirms the factor rank() appeared in the oracle bounds given in Theorems 4.1.
+The  inducing the smallest error in the simulation of each model slightly differs. Notice that all components involved in selecting  in (4.13) are equivalent for the three symmetric models, so the optimal  should be the same for the three models. In addition,  changes the way how errors depend on  . In Model LS, the "V" shape shown in the Frobenius and nuclear deviation becomes more flat. Hence, in such model we should choose a smaller  when the quantile at level  = 0.5 is to be estimated, and a bigger  when the quantiles at  close to 0 or 1 are to be estimated.
+The number of factors selected for the three models are generally accurate. We find that for  = 0.5 the algorithm almost always makes correct selection for all the choices of  and all the three symmetric models. For Model ES the algorithm selects the correct number of factors even for  = 0.2, 0.8 when  is large. For other  , particularly the extremes ones close to 0 or 1, it is more difficult to recover the true number of factors.
+About the computational efficiency of our algorithm, the time required for the algorithm to converge increases with the complexity. This fact corresponds to the term  - 0 F in inequality (3.7). When we look at the most sparse Model ES Figure 5.4, the algorithm converges in less than 80 seconds in the best case  = 10-5. For Model LS and MS, smaller choices of  usually imply longer time for the algorithm to converge, while larger choices of  allow the algorithm to converge in less than 250 seconds for Model LS and 100 seconds for Model MS. On the other hand,  has influence on the convergence time, which corresponds to the inequality (3.7) and the third point of Remark 3.1. For example, in the last row of Figure 5.2 and 5.3, the case  = 0.5 takes least time when  is small, but this situation
+28
+
+reverses in the most sparse Model ES.
+
+5.2. Asymmetric models
+
+To further illustrate our method, beside adjusting the level of sparsity as done in Section 5.1, in this section we specify asymmetric models for the conditional distribution of Yij. Let 1 and 2 be two p × m matrices of rank r1 and r2 with following two specifications:
+· Model AES (asymmetric extremely sparse): (r1, r2) = (2, 2);
+
+· Model AMS (asymmetric moderately sparse): (r1, r2) = (2, 10). For each model, two matrices 1 and 2 are chosen:
+1. Generating vectors {a1, ..., ar1} and {b1, ..., br2} in Rp. The components of each vector are i.i.d. uniform distributed random variables supported on [0, 1];
+
+2. Each jth column in 1 is
+
+r1 k=1
+
+k,j
+
+ak
+
+where
+
+k,j
+
+are
+
+independent
+
+random
+
+variables
+
+in U [0, 1]; similarly, each jth column in 2 is
+
+r2 k=1
+
+k,j bk
+
+where
+
+k,j
+
+are
+
+independent
+
+random variables in U [0, 1].
+
+Now we discuss the data generation. Let Uij be i.i.d. uniform random variable supported on [0, 1], i = 1, ..., n and j = 1, ..., 500. Generating Xi from N (0, ) with ij = 0.5|i-j| and then setting Xi = (Xi). Xi will have support [0, 1]p and be correlated according to Falk (1999). The response variables are generated by
+
+Yij = -1(Uij)Xi [1,j1(Uij < 0.5) + 2,j1(Uij  0.5)] ,
+
+(5.2)
+
+where (·) is the cdf of N (0, 1). Yi is i.i.d. by construction. Notice that when conditioning on Xi, the randomness comes only from Uij, which is independent of Xi. Hence, Yij is independent in j when conditioning on Xi.
+The exact conditional quantile function qj( |x) of Yij on x is
+
+qj( |x) = -1( )x 1,j,  < 0.5; qj( |x) = -1( )x 2,j,   0.5,
+29
+
+for j = 1, ..., 500. Note that at -1(0.5) = 0, and therefore the coefficient matrix at  = 0.5 is 0.
+Figure 5.1 gives an illustration of the marginal densities of Yij for j = 1, ...500. The left figure is associated with Model AMS in which the densities tend to be asymmetric, in the sense that they have thick right tails and thin left tails. The densities are also more disperse. The right figure is associated with Model AES, and the densities are more symmetric and less disperse.
+
+0.015
+
+0.015
+
+0.010
+
+0.010
+
+Marginal density functions
+
+0.005
+
+0.005
+
+0.000
+
+0.000
+
+-1000
+
+0
+
+1000
+
+2000
+
+3000
+
+-500
+
+0
+
+500
+
+1000
+
+1500
+
+Figure 5.1: The plot of all 500 marginal densities of Yi in asymmetric models. The left figure is associated with Model AMS in which the densities tend to be asymmetric (thick right tails and thin left tails). The right figure is associated with Model AES in which the densities are more symmetric.
+
+The simulation run is 500. The measure of performance is the same as that of symmetric models. In this simulation, we select  = (0.005, 0.01, 0.05, 0.1). The numerical performance of the asymmetric model is shown in Figure 5.5 and 5.6. For reference, the simulated  for  = 5%, 10%, 20%, 50% are  = (0.002308, 0.002310, 0.002314, 0.002308). The  for  = 95%, 90% and 80% are the same as that of  = 5%, 10%, 20% by symmetry.
+Some patterns can be observed from the simulated estimation errors of the two models. Despite the fact that 1 = 2, the asymmetry in distribution is not significant and the error as a function of  from Model AES is in symmetric "V" shape. This again corresponds to the factor   (1 -  ) in Theorems 4.1. In terms of the choice of , small  appears to give smaller errors for both models. However, the errors corresponding to  > 0.5 in Model AMS are notably higher than those in Model AES. This is owing to the fact that the matrix 2
+
+30
+
+in Model AMS is less sparse than Model AES. This simulation result confirms the factor rank() in the oracle bounds in Section 4.
+The number of nonzero singular values is almost always correctly estimated in Model AES. As expected, the estimated number of nonzero singular values of Model AMS is higher than that in Model AES when  > 0.5. However, we find that the estimated number of nonzero singular values is 2 in Model AES and between 5-7 in Model AMS, seemingly the average of the rank of 1 and 2. However, the true number of nonzero singular values at  = 0.5 is exactly 0. This shows that the singular values are hard to be accurately estimated if the coefficient matrix  is not continuous in  .
+The computational time generally follows the rule of (3.7). When  is small, we find that the variation of  = 0.5 tends to be large. Due to high rank(2) in Model AMS, it is more computationally demanding to recover  for  > 0.5, as implied by the term  - 0, F in inequality (3.7).
+31
+
+Prediction error
+0.5 1.0 1.5 2.0
+
+ = 5e-06
+
+ = 1e-05
+
+ = 5e-05
+
+ = 1e-04
+
+0.5 1.0 1.5 2.0
+
+0.5 1.0 1.5 2.0
+
+0.5 1.0 1.5 2.0
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+100 200 300
+
+100 200 300
+
+100 200 300
+
+Frobenius error
+100 200 300
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+800 1200 1600
+
+800 1200 1600
+
+800 1200 1600
+
+Nuclear error
+800 1200 1600
+
+32
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+126
+
+126
+
+126
+
+No. of factors
+125 126
+
+0 500 1000 1500 2000 125
+
+0 500 1000 1500 2000 125
+
+0 500 1000 1500 2000 125
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+Comp. time
+0 500 1000 1500 2000
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+Figure 5.2: The symmetric Model LS. The horizontal axis is  . The true number of factors is 125.
+
+Prediction error
+0.4 0.6 0.8 1.0 1.2
+
+ = 5e-06
+
+ = 1e-05
+
+ = 5e-05
+
+ = 1e-04
+
+0.4 0.6 0.8 1.0 1.2
+
+0.4 0.6 0.8 1.0 1.2
+
+0.4 0.6 0.8 1.0 1.2
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+50 100 150
+
+50 100 150
+
+50 100 150
+
+Frobenius error
+50 100 150
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+100 200 300 400 500
+
+100 200 300 400 500
+
+100 200 300 400 500
+
+Nuclear error
+100 200 300 400 500
+
+33
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+11
+
+11
+
+11
+
+No. of factors
+10 11
+
+0 200 400 600 800 10
+
+0 200 400 600 800 10
+
+0 200 400 600 800 10
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+Comp. time
+0 200 400 600 800
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+Figure 5.3: The symmetric Model MS. The horizontal axis is  . The true number of factors is 10.
+
+Prediction error
+0.0 0.4 0.8
+
+ = 5e-06
+
+ = 1e-05
+
+ = 5e-05
+
+ = 1e-04
+
+0.0 0.4 0.8
+
+0.0 0.4 0.8
+
+0.0 0.4 0.8
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+5 10 15 20
+
+5 10 15 20
+
+5 10 15 20
+
+Frobenius error
+5 10 15 20
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+50 100 150 200
+
+50 100 150 200
+
+50 100 150 200
+
+Nuclear error
+50 100 150 200
+
+34
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+2
+
+2
+
+2
+
+No. of factors
+12
+
+1
+
+1
+
+1
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+60 100 140
+
+60 100 140
+
+60 100 140
+
+60 100 140
+
+Comp. time
+
+20
+
+20
+
+20
+
+20
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+Figure 5.4: The symmetric Model ES. The horizontal axis is  . The true number of factors is 1.
+
+Prediction error
+0 50 100 150 200
+
+ = 0.01
+
+ = 0.03
+
+ = 0.05
+
+ = 0.07
+
+ = 0.1
+
+0 50 100 150 200
+
+0 50 100 150 200
+
+0 50 100 150 200
+
+0 50 100 150 200
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0 100 200 300 400
+
+0 100 200 300 400
+
+0 100 200 300 400
+
+0 100 200 300 400
+
+Frobenius error
+0 100 200 300 400
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0 100 300 500
+
+0 100 300 500
+
+0 100 300 500
+
+0 100 300 500
+
+Nuclear error
+0 100 300 500
+
+35
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+12
+
+12
+
+12
+
+12
+
+No. of factors
+123
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0 20 40 60 80
+
+0 20 40 60 80
+
+0 20 40 60 80
+
+0 20 40 60 80
+
+Comp. time
+0 20 40 60 80
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+0.05
+
+0.2 0.5 0.8 0.9
+
+Figure 5.5: The asymmetric Model AES. The horizontal axis is  . The true number of factors is 2 for  < 0.5 and 10 for  > 0.5. 0 for  = 0.5.
+
+Prediction error
+0 200 400 600 800
+
+ = 0.01
+
+ = 0.03
+
+ = 0.05
+
+ = 0.07
+
+ = 0.1
+
+0 200 400 600 800
+
+0 200 400 600 800
+
+0 200 400 600 800
+
+0 200 400 600 800
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+500 1000 1500
+
+500 1000 1500
+
+500 1000 1500
+
+500 1000 1500
+
+500 1000 1500
+
+Frobenius error
+
+0
+
+0
+
+0
+
+0
+
+0
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+2000
+
+2000
+
+2000
+
+2000
+
+2000
+
+0 500 1000
+
+0 500 1000
+
+0 500 1000
+
+0 500 1000
+
+0 500 1000
+
+Nuclear error
+
+36
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+10 15
+
+10 15
+
+10 15
+
+10 15
+
+10 15
+
+No. of factors
+
+5
+
+5
+
+5
+
+5
+
+5
+
+0
+
+0
+
+0
+
+0
+
+0
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+100 150
+
+100 150
+
+100 150
+
+100 150
+
+100 150
+
+Comp. time
+
+50
+
+50
+
+50
+
+50
+
+50
+
+0
+
+0
+
+0
+
+0
+
+0
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+0.05 0.1 0.2 0.5 0.8 0.9 0.95
+
+Figure 5.6: The asymmetric Model AMS. The horizontal axis is  . The true number of factors is 2 for  < 0.5 and 10 for  > 0.5. 0 for  = 0.5.
+
+6. Real data application: SAMCVaR model
+In this section, we apply the regularized multiple quantile regression on financial data. In Section 6.1, we propose a modification of CAViaR model. Section 6.2 deals with the data selection and choice of the tuning parameter . Section 6.3 is devoted to the empirical findings.
+6.1. Model
+Since Engle and Manganelli (2004) proposed the conditional autoregressive value at risk (CAViaR) model, financial econometricians have applied it in many empirical studies and proposed many variations for it. The model analyses a univariate autoregressive structure in quantiles, which does not account for the interdependence of asset returns. As the financial spillover effect has been widely understood as a risk source, the quantification of spillover effects has been an important issue for financial econometricians.
+White et al. (2008) introduce a multi-quantile modification of CAViaR (MQ-CAViaR), which allows a sequence of conditional quantile of asset returns to depend on each other. Combining with the robust estimation for skewness and kurtosis using quantiles of Kim and White (2004), they study the time varying patterns of higher moments of asset returns. In White et al. (2015), they consider the spillover effect in asset returns by the multivariate MQ-CAViaR (MVMQ-CAViaR) model, which combines the MQ-CAViaR models of a set of asset returns. Nonetheless, they estimated a simpler bivariate CAViaR for each asset return with a single universal market index, for which they took the World Financials price index provided by Datastream.
+In contrast to previous models, we consider a multivariate model which jointly incorporates multiple asset returns. Let Yj,t be the asset return for firm j, j = 1, ..., m, at time t, t = 1, ..., T . Let qt,j( |Ft-1) be the conditional quantile at level  for asset return j at time t on filtration Ft-1. From the spirit of multivariate CAViaR, we consider the Sparse
+37
+
+Asymmetric Multivariate Conditional Value-at-Risk model (SAMCVaR):
+
+mm
+
+qt,j( |Ft-1) =
+
+1,j,k( )|Yt-1,k| +
+
+2,j,k( )Yt--1,k,
+
+k=1 k=1
+
+(6.1)
+
+where Y - = max{-Y, 0} and j( ) = (1,j( ) , 2,j( ) ) and l,j( ) = (l,j,1( ), ..., l,j,m( ))
+
+for l = 1, 2. The rank r of  satisfies r m. Following the discussion in Section 2, we
+
+impose the condition that
+
+r k=1
+
+j2,k
+
+ 1.
+
+Let
+
+Xt-1 = (|Yt-1,1|, ..., |Yt-1,m|, Yt--1,1, ..., Yt--1,m)  R2m.
+
+(6.2)
+
+We may therefore rewrite (6.1) as
+
+qt,j( |Ft-1) = qt,j( |Xt-1) = Xt-1j( ).
+If letting qt( |Xt-1) = (qt,1( |Xt-1), ..., qt,m( |Xt-1)) be a vector of quantiles of all the firms in the sample, then qt( |Xt-1) =  Xt-1, where  = [1, ..., m], and we have the multivariate quantile regression model (2.4)
+This model is a multivariate variation of CAViaR, and we replace the autoregressive qt-1,j( ) in CAViaR model by a dispersion measure |Yt-1,j| for asset j in the information set at time t - 1. The inclusion of the lag negative return Yt--1,j, which also appears in the CAViaR model with "asymmetric slope", is based on the intuition that "one bad day makes the probability of the next somewhat greater" (Engle and Manganelli; 2004). Two major features of model (6.1) are that the quantile of each firm is time-varying; moreover, (6.1) accounts for the spillover effect on financial firm j from financial firm l = j.
+We estimate  via the nuclear norm regularized multivariate quantile regression. We select  = 1% and 99%, in which  = 1% corresponds to the VaR of the asset returns, while  = 99% corresponds to the growth potential of the assets.
+The factorisation described in Section 2 is applied to gain an insight into the common structure. We factorise the covariates into factors ft,1( ), ..., ft,r( ) where r m by using the left singular vectors of . We investigate two aspects related to the factors. The first
+
+38
+
+is how a firm Yt-1,j contributes to the factor; the second is how sensitive the conditional quantile of a firm is relative to the factor. We may study the contribution of firm j to the variation of the market by the coefficients associated to the two transformations |Ytj|, Yt-j in the factor fk:
+
+Contribution
+
+from
+
+component
+
+j
+
+to
+
+fk( )
+
+:
+
+fk( ) (|Yj|, Yj-)
+
+=
+
+(1,k,j , 2,k,j ).
+
+(6.3)
+
+Note that the contribution from component j to fr( ) does not vary over time. On the other hand, the sensitivity to the variation of the market can be described by
+
+Sensitivity
+
+of
+
+j
+
+quantile
+
+to
+
+fk( )
+
+:
+
+qj( |X) fk( )
+
+=
+
+j,k .
+
+(6.4)
+
+With the singular value decomposition  = UDV , the contribution of j firm to the factor fk defined in (6.3) can be computed by the j, j + m element in the Uk  R2m times k, where k is the kth singular value on the diagonal of D. The quantity in (6.4) can be found by the kth component in Vk.
+
+6.2. Data and tuning
+
+We obtain a set of stock prices consists of m = 230 major global financial firms. The dataset can be downloaded from Simone Manganelli's website, which is used in White et al. (2015). Their data period is from Dec. 31, 1999 to Aug. 6, 2010. The regional and industrial characteristics can be found in Table 1 of White et al. (2015), which we include in Table 6.1 for completeness.
+
+EU North America Asia Total
+
+Bank 47 25 47 119
+
+Financial Service 22 17 14 53
+
+Insurance 27 28 3 58
+
+Total 96 70 64
+m = 230
+
+Table 6.1: The summary of financial firms in the data.
+
+We use the data from August 31, 2007 to August 6, 2010. There are 766 closing prices 39
+
+for each stock in the sample. We compute the daily log-return. This results in sample size n = 765. The dimension of the input variables Xt is p = 2m = 460, as we consider two transformations for each asset return, as in formula (6.2). Figure 6.1 shows the time series plots of the log-returns of the 230 financial institutions over this data period, and a plot of volatility index (VIX) kept by Chicago Board Options Exchange. The plot of asset returns suggests there are two large high volatility clusters before and after the beginning of the year 2009, which corresponds to the subprime mortgage crisis. Another phase of volatility increase is around mid 2010, which corresponds to the rising concern of the European debt crisis. The data show strong asymmetry, as the returns demonstrate high negative skewness. Though VIX is constructed by the returns of the S&P500 constituents, it appears to approximate the global financial risk too.
+
+20 30 40 50 60 70 80 -150 -100 -50 0 50
+
+Daily Log returns of 230 firms(%)
+
+2008
+
+2009
+
+2010
+
+VIX(%)
+
+2008
+
+2009
+
+2010
+
+Figure 6.1: The upper figure shows the time series plots of the 230 global financial institutions with different grey level distributions and thicknesses. The lower figure shows the time series of VIX.
+
+To select the tuning parameter , applying the procedure described in Section 3 gives  = 0.02467565 for  = 1%. By symmetry we also apply  = 0.02467565 for  = 99%.
+
+40
+
+6.3. Empirical findings from global financial data
+
+In this section we discuss the empirical findings from factorizing the multivariate quantile
+
+regression (6.1) at level  = 1% and 99%. After the factorisation by SVD, the time series
+
+plot of the first two factors for the two sets of quantile regression are reported in Figure
+
+6.2. Both first factors f 1(0.01) and f 1(0.99) are volatile and moving away from 0 at the end of 2008 and in the first quarter of 2009, and mid 2010, which corresponds to the phases of
+
+volatility increase as indicated in Figure 6.1. Moreover, as can be seen from the figures, the
+
+two time series f 1(0.01) and f 1(0.99) are negatively correlated. The absolute scale of the two second factors f 2(0.01) and f 2(0.99) are much smaller than the first factors. A sharp peak appears in the plot of f 2(0.01) at the first quarter of 2009. The time series of f 2(0.99) is volatile before and after the beginning of the year 2009.
+
+1st factor
+
+2nd factor
+
+-1.0 -0.5 0.0 0.5 1.0
+
+100 200
+
+-200 -100 0
+
+2008
+
+2009
+
+2010
+
+2008
+
+2009
+
+2010
+
+Figure 6.2: The time series plots for the first 2 factors. The black lines corresponds to 1% quantile factors and the blue lines corresponds to 99% quantile factors.
+
+In what follows, Section 6.3.1 presents the estimated factors and the analysis of  -range at  = 1%. Section 6.3.2 presents the tail factor analysis at  = 1%.
+
+6.3.1.  -range analysis
+In this subsection we discuss the common structure of  -range of global financial returns with  = 1%.
+
+41
+
+First we consider the contribution to and the loadings associated with the first factor. Figure 6.3 shows that the contribution to the first factors lie in the second quadrant, which suggests that all the covariates have negative impact to the first factor of 1% multivariate quantile regression, and positive impact to the first factor of 99% multivariate quantile regression. The dots and firm names in black represent the lag absolute log-returns, and they tend to lie around the diagonal line or even above it. This suggests that the absolute lag log-returns tend to contribute equally to both f 1(0.01) and f 1(0.99), which is consistent to the intuition that higher return in period t - 1 induces higher volatility in period t. On the other hand, the lag negative part Yt--1,j marked in red are more located below the diagonal line, which suggests that the Yt--1,j contributes more to f 1(0.01) than to f 1(0.99). The well-known "leverage effect" postulated by Black (1976) suggests the tendency that the volatility of an asset is negatively correlated to the the asset return. Furthermore, it is suggested that such effect is asymmetric: the coincidence between the loss in period t-1 and larger volatility in period t is more frequent than the coincidence between the gain in period t - 1 and lower volatility in period t, as documented by Engle and Ng (1993). However, as volatility or variance is a symmetric measure of dispersion of distribution, it is incapable of revealing information of the potentially asymmetric contribution to such dispersion. Figure 6.3 uncovers the fact that the increasing dispersion (volatility) of the distribution in asset return in response to the nonnegative loss Yt--1,j is largely due to the drop of lower quantile factor f 1(0.01) rather than the rise of upper quantile factor f 1(0.99). In particular, such increase in volatility creates as much impact in loss but relatively less potential in gain.
+Figure 6.4 illustrate the loadings to the first factor of of 1% and 99% multivariate quantile regression. The loadings are all positive, and lying on the 45 degree line, which suggests that the firm highly associated with the first factor of 1% MQR would also be highly associated with the first factor of 99% MQR. This implies that the direction of change in the  -range over the returns is similar, but the magnitudes is different. Indeed, the firms lying on the far top right corner are the firms with high market risk sensitivity, including Huntington Bancshares Inc., American International Group, Allied Irish Banks and more, whose time series patterns best resemble that of the first factors f 1(0.01) and f 1(0.99). The return time
+42
+
+0.20
+
+0.15
+
+0.10
+
+Contribution to factor 1 of 99% MQR
+
+AMERICAN.INTL.GP.
+
+BANK.OF.IRELAND HARTFORD.FINLL.ISNVCSO.GLNP..NAT.
+
+ALLIED.IRISH.BANKS
+
+XL.GROUP HUNTINGTON.BCSH.
+
+REGIONS.FINL.NEW
+
+CITIGROFUIPFTH.THIRMDA.BRBASANHNKCAKEOL.YORLC.PF.O..IALRMSPLEERYICA KBC.GROUP
+SLM ORIX
+ROYAL.BANK.OF.SCLTLO.GYPD.S.BANKAIGNEGA.GSR.S.EOTXUBO.APFRROECRBLTRAIASYN.SD DEXIA
+
+ALLIED.IRISH.BBAANNKKS.O- F.IRELANDROYAL.BANK.OF.SCTL.GP.-
+
+0.05
+
+0.00
+
+-0.15 -0.10 -0.05 Contribution to factor 1 of 1% MQR
+
+0.00
+
+Figure 6.3: The contribution to the first factor of 1% and 99% MQR from the 230+230
+covariates. The firm name and the dots in black denote the lag absolute log return |Yt-1,j|. Dots and firm name with "­" in red denote the lag negative return Yt--1,j.
+
+series of several risky firms are shown in Figure 6.9, in the sense that during financial crisis
+of 2008-2009, the range of their distribution is very disperse, which leads to large volatility.
+BANK.OF.IRELAND HUNTINGTON.BCSH.
+ALLIED.IRISHA.MBAENRKICSAN.INTL.GP. HARTLFINOXCRLOD.GL.FNRI.NONLUA.SPT.VS.GP. REGIONS.FINL.NEW BANMFKAIF.ROTSFHH..ATAMHLSEILLRR.M.D.IICL.BSAALNECYORP
+CITIGROUP
+
+Loadings of factor 1 of 99% MQR 0.05 0.10 0.15
+
+0.00
+
+VALIANT..R.
+0.00
+
+0.05
+
+0.10
+
+Loadings of factor 1 of 1% MQR
+
+0.15
+
+Figure 6.4: The factor loadings of 230 firms on the first factors f 1(0.01) and f 1(0.99).
+
+Second factors f 2(0.01) and f 2(0.99) describe the extreme market movement in the 43
+
+beginning of 2009. In Figure 6.5, the dots in black, corresponding to the contribution from lag absolute returns, are more located above the line corresponding to zero contribution to factor f 2(0.99), while the red dots, corresponding to the contribution from the lag negative part, tend to gather below the line. This suggests again that the lag negative part has less impact on the factor associated with the upper quantile. Moreover, the dots lying at far right and separate from the other points are associated mainly with the Bank of Ireland, Allied Irish Banks and the Royal Bank of Scotland Group, which lead to the peak of f 2(0.99).
+
+STANDARSDT.OCRHEABRRTAENRDED OLD.MAULLTIUAANLZ..XET. SGCAHMRO.HDOELRADXSINAG
+
+LLOYDS.BANKING.GROUP ROYALA.BLALINEKD..OIRFI.SSHC.TBLA.NGKPS.
+
+ROYAL.BANK.OF.SCATLLL.GIEPD.-.IRISH.BANKS-
+BANK.OF.IRELAND BANK.OF.IRELAND-
+
+Contribution to factor 2 of 99% MQR -0.0015 -0.0010 -0.0005 0.0000 0.0005
+
+XL.GROUPFIFTH.THLIKRINEDCY.BOCAOLNNRC.PNO-ARTP.--
+
+AMERICAN.INTL.GP.-
+-0.001
+
+0.000
+
+0.001
+
+0.002
+
+Contribution to factor 2 of 1% MQR
+
+0.003
+
+Figure 6.5: The contribution to the second factor of 1% and 99% MQR from the 230+230
+covariates. The firm name and the dots in black denote the lag absolute log return |Yt-1,j|. Dots and firm name with "­" in red denote the lag negative return Yt--1,j.
+
+The factor loadings of firms on the second factor f 2(0.01) can be applied to distinguish the firms being influenced most by the sharp peak of f 2(0.01) at the beginning of 2009. In Figure 6.6, the loadings of asset returns on f 2(0.01) and f 2(0.99) are mainly distributed in the first and third quadrants. The firms whose  -range influenced negatively by the peak of f 2(0.99) are in the second and third quadrants. In particular, the  -range of the firms located in the second quadrant shift downward at the beginning of 2009. On the contrary, the  -range of the firms located in the third quadrant expands at the beginning of 2009. The  -range expanding the most are PNC Financial Services Group, Inc., State Street, Lloyds
+
+44
+
+Banking Group PLC.
+
+SUMITOMO.TRUST...BANKING
+
+Loadings of factor 2 of 99% MQR -0.15 -0.10 -0.05 0.00 0.05 0.10
+
+ALLIED.IRISH.BANKS
+KBC.GROUP LLOYDS.BANKING.GROUP
+
+SCHRODERS
+
+GOLDMAN.SACHS.GP.
+SUNTRUST.BANKS REGIONS.FAINFLLA.NCEW
+
+STATWE.ESLTLRSE.FEATRGOJ..P.C.MOORBGAANNK..COHFA.NSEEW....CYOO.RK.MELLOCNHARLES.SCHWAB
+
+BANK.OF.AMERICA US.BANCORP MARSHALL...ILSLEY
+
+LINCOLN.NAT.
+
+NORTHERN.TRUST TRAVELERS.COS.
+
+PNC.FINL.SVS.GP.
+
+XL.GROUP
+
+-0.2
+
+-0.1
+
+0.0
+
+Loadings of factor 2 of 1% MQR
+
+0.1
+
+Figure 6.6: The factor loadings of 230 firms on the second factors f 2(0.01) and f 2(0.99).
+
+6.3.2. Tail factor analysis
+In this section, we discuss the empirical findings by looking at the contribution to and the loadings associated with the first two factors of 1% multivariate quantile regression.
+Figure 6.7 illustrates the contribution from the covariates to the first and second factor of 1% MQR. Lag negative returns concentrates on the lower right of the figure and is below the horizontal line y = 0, and lag absolute returns spread around the horizontal line y = 0. The absolute and negative lag return of Allied Irish Bank, Bank of Royal Scotland Group and Bank of Ireland are more isolated and located at the top left corner, and are highly related to the first and second factor of 1% MQR. This suggests that they have high association with the downside risk of the global financial market.
+Figure 6.8 shows the factor loadings of each firm on the first and second factors of 1% MQR. The points are gathering on the top left with positive loadings on factor 2, and then spreading to the lower right like a fan. The pattern suggests that the firms positively associated with the first factor of 1% MQR tend to be negatively associated with the second factor of 1% MQR. Together with the information that the first factor of 1% MQR is generally
+45
+
+0.002
+
+0.001
+
+Contribution to factor 2 of 1% MQR
+
+ALLIED.IRISH.BANKS
+
+ALLIED.IRISH.BANKS-
+
+ROYAL.BANK.OF.SCTL.GP.
+
+BANK.OF.IRELAND
+
+ROYAL.BANK.OF.SCTL.GP.LLOYDS.BANKINGB.GARNOK.UOPF.IRELAND-
+
+AGEAS..EX.FORTIS.
+
+KBC.GROUP HARTCFITOIGRDR.OFUINPL.SVSS.GTBMPOA.RARREBCBSALRHNAAKYNL.SOLD.F...IALMSLEERYICA
+HUNTINGTON.BCSH. LINCOLN.NAT. FSILFMTH.THIRD.BANCORP DEXIA
+
+XL.GROUP
+
+REGIONS.FINL.NEW ORIX
+KEYCORP
+
+AMERICAN.INTL.GP.
+
+0.000
+
+-0.001
+
+-0.15
+
+-0.10 Contribution to factor 1 of 1% MQR
+
+-0.05
+
+0.00
+
+Figure 6.7: The contribution to the first and second factor of 1% MQR from the 230+230
+covariates. The firm name and the dots in black denote the lag absolute log return |Yt-1,j|. Dots and firm name with "­" in red denote the lag negative return Yt--1,j.
+
+negative and the second factor of 1% MQR has a positive peak from Figure 6.2, Figure 6.8 implies that the firms lying on the lower right direction bear high market risk in our sample.
+The similarity in the lower tail of the distribution can be inferred by the distance in Figure 6.8. The shorter the distance between the two points on Figure 6.8, the larger their similarity is in the 1% quantile. For example, the distance between State Street and PNC Financial Services Group, Inc. is close, and their 1% quantile time series have similar behavior, which can be seen from their time series plots in Figure 6.9.
+
+46
+
+Loadings of factor 2 of 1% MQR -0.20 -0.15 -0.10 -0.05 0.00 0.05 0.10
+
+XL.GROUP
+AMERICAN.INTL.GP. LINCOLN.NAT. HARSTLFMORD.FINL.SVS.GP.
+
+0.00
+
+CITIGROUP BANK.OF.IRELAND
+HUNTINGTON.BCSH. FIFTH.THIRD.BANCORP MARSHALL...ILSLEY
+ALLIED.IRISH.BANKS REGIONS.FINL.NEW JP.MUOSR.BGAANNC.OCHRAPSE...CO. KBC.GROUP
+SUNTRUST.BANKS
+WELLS.FARGO...CO PNC.FINL.SVS.GPL. LOYDS.BANKINBGA.GNRK.OOUFP.AMERICA
+STATE.STREET
+
+0.05 0.10 Loadings of factor 1 of 1% MQR
+
+0.15
+
+Figure 6.8: The factor loadings of 230 firms on the second factors f 1(0.01) and f 2(0.01) of 1% MQR.
+
+47
+
+-50 0 50
+
+AMERICAN.INTL.GP.
+
+ALLIED.IRISH.BANKS
+
+-80 -60 -40 -20 0 20
+
+2008
+
+2009 Time
+BANK.OF.AMERICA
+
+2010
+
+2008
+
+2009 Time
+BANK.OF.IRELAND
+
+2010
+
+-80 -60 -40 -20 0 20 40
+
+-30 -20 -10 0 10 20 30
+
+-40 -20 0 20 40
+
+2008
+
+2009 Time
+CITIGROUP
+
+2010
+
+2008
+
+2009 Time
+HUNTINGTON.BCSH.
+
+2010
+
+-20 0 20 40
+
+2008
+
+2009 Time
+
+2010
+
+LLOYDS.BANKING.GROUP
+
+2008
+
+2009 Time
+PNC.FINL.SVS.GP.
+
+2010
+
+-40 -20 0 20
+
+-40 -20 0 20 40
+
+2008
+
+2009 Time
+
+2010
+
+ROYAL.BANK.OF.SCTL.GP.
+
+2008
+
+2009 Time
+STATE.STREET
+
+2010
+
+-80 -60 -40 -20 0 20
+
+-100 -80 -60 -40 -20 0 20
+
+2008
+
+2009 Time
+
+2010
+
+2008
+
+2009 Time
+
+2010
+
+Figure 6.9: Plots of individual asset time series and their 1% and 99% fitted quantiles. 48
+
+7. Factor curves model
+In this section, we extend the parametric linear multivariate quantile regression model to a nonparametric model, in which the unknown conditional curves are approximated by sieve spaces. Section 7.1 introduces the factorisable "quantile curve" and the factor curves. Section 7.2 deals with the estimation of the model. Section 7.3 applies the nonparametric factorisable quantile curves on the temperature data of 159 weather stations from China and classifies the primary patterns in Chinese temperature.
+7.1. Model
+For functional data, the concept of "quantile" is not as well understood as that for a usual univariate random variable. The functional data can be understood as the realizations of a functional variable (see, e.g. Ferraty and Vieu (2006)), which is a map Y :   C, where  is the sample space and C is the set of all continuous function on T . Without loss of generality, T can be a bounded interval. As an example, the standard Brownian motion W (, t) is also a functional variable.
+Definition 7.1 (Quantile curves). For 0 <  < 1, the  quantile curve q (t) of functional variable Y is also a continuous function in t satisfying
+P { : Y (, t)  q (t), t  T } = .
+For fixed t  T , it holds that P { : Y (, t)  q (t), t  T } =  . Taking standard 
+Brownian motion W (t) as an example, the  quantile of W (t) is q (t) = t-1( ), where (·) is the cdf of standard normal distribution. When  is close to 0 or 1, we call q (t) a tail event curve.
+Consider m functional variables Y1(t), ..., Ym(t), denote their quantile curves q,j(t). Suppose that q,j(t) lies in F which is the class of functions f defined on [0, 1] whose sth derivative
+49
+
+f (s) exists and satisfies a Lipschitz condition of order :
+
+|f (s )(t ) - f (s )(t)|  C|t - t|, for t , t  [a, b],
+
+for s = s +  > 0.5. We assume that s  1 and  > 0 throughout the following discussion. Based on the construction of Schumaker (1981) and Stone (1985), each function q,j  F can be approximated by an element qn,,j(t)  Sn so that qn,,j - q,j  = O(p-n 1) (see the discussion in p. 150 of Newey (1997)), where Sn is an expanding functional class with basis functions {bl, 1  l  pn}. Denote b(t) = (b1(t), ..., bpn(t)), so that
+
+qn,,j(t) = jb(t),
+
+(7.1)
+
+where j is jth column of matrix . The timings of measurement are t1, ..., tn for all j. Denote B = (Bil)  Rn×pn with
+Bil = bl(ti) and Y = (Yij)  Rn×m with Yij = Yj(ti). The matrix  can be viewed as the coefficient matrix in the multivariate quantile regression model
+
+qn, (t) = B.
+
+qn, (t) = (qn,,1(t), ..., qn,,m(t)), and  can be estimated as in Section 3, but now the covariates are the values of the basis functions evaluated at t1, ..., tn.
+Furthermore, model (7.1) is also factorisable. If the SVD of  is  = UDV and the number of singular values of  is r. Similarly to (2.5),
+
+r
+qn,,j(t) = Vj,kfk (t),
+k=1
+
+(7.2)
+
+where fk (t) = kUkb(t) may be called factor curves with factor loadings Vj,k.
+
+50
+
+7.2. Estimation
+
+Similar to Section 3, we minimize the following loss function:
+
+nm
+
+(nm)-1
+
+ Yij - Bij +    d=ef Q,b() +   ,
+
+i=1 j=1
+
+(7.3)
+
+with  (u) = u( - 1{u  0}) with given 0 <  < 1. The empirical loss Q,b() is non-smooth. Apply the approach in Section 3, the smoothed
+version of Q,b() with a Lipschitz gradient is Q,b,(). Algorithm 2 can be directly applied by using Q,b,(). The convergence analysis is similar to Theorem 3.2. The details are omitted for brevity.
+
+Algorithm 2: Smoothing fast iterative shrinkage-thresholding algorithm (SFISTA)
+
+1
+
+Input:
+
+Y,
+
+B,
+
+,
+
+
+
+=
+
+2mn ,
+
+M
+
+=
+
+1 m2n2
+
+B
+
+2;
+
+2 Initialization: 0 = 0, 1 = 0, step size 1 = 1;
+
+3 for t = 1, 2, ..., T do
+
+4
+
+t
+
+=
+
+S/M
+
+t
+
+-
+
+1 M
+
+Q,b,(t)
+
+;
+
+5
+
+t+1 = 1+
+
+;1+4t2
+2
+
+6
+
+t+1
+
+=
+
+t
+
++
+
+(t-1
+t+1
+
+t
+
+-
+
+t-1);
+
+7 end
+
+8 Output  = T
+
+For the choice of the number of spline basis pn, from bias and variance decomposition of spline estimator (Huang; 2003), under the fact that the functions to be estimated in our case are univariate, the convergence rate of the estimator is OP (pn-s + pn/n). The order of pn minimizes the convergence rate is n1/(2s+1). A usual assumption is s = 2.
+
+7.3. Application: Chinese Temperature Data
+In this section we apply the nonparametric multivariate regression model to real data. We utilize the Chinese temperature data in the year 2008 from 159 weather stations around China, which can be downloaded from the website of Research Data Center of CRC 649 of Humboldt-Universit¨at zu Berlin. The dataset consists of one year time series of daily averaged temperature.
+51
+
+Detrended Temperature ( ° C)
+-30 -10 10 30
+
+Temperature ( ° C)
+-5 0 5 15 25
+
+Before applying our method, we first fit a mean curve with smoothing spline which describes the mean temperature of China in the year 2008. In Figure 7.1, the bottom subfigure is the fitted trend curve, which shows seasonal pattern. The detrended temperature time series of 159 weather stations in the top figure of Figure 7.1 also demonstrate a seasonality pattern. The deviation to the mean temperature is larger in winter than in summer among these weather stations.
+0.0 0.2 0.4 0.6 0.8 1.0
+0.0 0.2 0.4 0.6 0.8 1.0 Time
+Figure 7.1: The temperature time series in excess to national mean of the 159 weather stations around China with different grey levels and thicknesses. The figure below is the temperature trend curve estimated by smoothing spline.
+We will apply the nonparametric multivariate quantile regression to further investigate the detrended temperature curves. The B-spline basis functions are used, and the number of basis function is p = n0.4 = 11. The timing of measurement is daily t1, ..., t365. The quantile levels are  = 1% and 99%. We choose the tuning parameter  by applying the procedure of simulating (3.8) and compute  by (3.9), the estimated value is  = 0.000156.
+52
+
+7.3.1.  -range analysis
+
+In this section, we present the factors and the  -range analysis using the loadings to the
+
+factor curves.
+
+Figure 7.2 presents the first four factors. The first factor of 1% and 99% quantile regres-
+
+sion enclose a region which is wide in both ends and narrow in the middle. This matches
+
+our observation for Figure 7.1 that the deviation in temperature among weather stations
+
+tends to be higher in winter but lower in summer. Moreover, the two first factors captures
+
+two types of seasonality. The reverse V or U shape of the first factor of 99% multivariate
+
+quantile regression represents a "seasonality at high temperature", while the V or U shape
+
+of the first factor of 1% represents a "seasonality at low temperature".
+
+1st factor
+
+2nd factor
+
+-20 -10 0 10 20
+
+0 50 100 150
+
+-100
+
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+
+3rd factor
+
+4th factor
+
+-0.2 0.0 0.2 0.4
+
+-0.5 0.0 0.5
+
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+Figure 7.2: The time series plots for the first 4 factors. The black lines corresponds to 1% quantile factors and the blue lines corresponds to 99% quantile factors.
+The factor loadings of the first factor for 1% and 99% quantile regression demonstrate a nearly "L" shape, as shown in Figure 7.3. This suggests that the weather stations positively
+53
+
+0.20
+
+associated with the first factor of 1% multivariate quantile regression have almost no association with the first factor of 99% multivariate quantile regression. Such dichotomy pattern allows for classifying the weather stations into groups.
+In Figure 7.3, the temperature curve of Tulihe has the highest factor loading in the first factor of 1% multivariate quantile regression, while the temperature curve of Dongfang has the highest factor loading in the first factor of 99% multivariate quantile regression. Thus, Tulihe is classified as showing strong "seasonality at low temperature" and Dongfang shows strong "seasonality at high temperature". Notice that the factor loading to the first factor of 99% multivariate quantile regression is slightly negative for Tulihe, and the factor loading to the first factor of 1% multivariate quantile regression is close to 0 for Dongfang. Another weather station marked in the figure is located in Yushu, which has small positive loadings to the first factor of both 1% and 99% multivariate quantile regression, and is hard to be classified to any of the two seasonality patterns.
+dongfang
+yushu
+tulihe
+0.00 0.05 0.10 0.15 0.20
+Loadings on factor 1 of 1% QR
+Figure 7.3: The plot of weather stations based on their factor loadings to 1% and 99% multivariate quantile regression. Each point denotes a weather station in China.
+7.3.2. Selected weather station analysis This section discusses the three selected weather stations from Figure 7.3. 54
+
+0.15
+
+0.10
+
+Loadings on factor 1 of 99% QR
+
+0.05
+
+0.00
+
+Figure 7.4 shows the temperature plot, 1% and 99% quantile curves, and the location of the three weather stations marked in Figure 7.3. Tulihe is located in far northeastern Inner Mongolia, China, which is well-known for its bitter cold in winter and large temperature difference between summer and winter. While the estimated 99% factors are mainly influenced by the temperature curves from warmer areas, the reverse V-shaped yearly temperature curve of Tulihe cannot be captured by the 99% factors, and the estimated curve is flat. Dongfang, however, is located in tropics, and in winter at warmest the temperature is 25 degrees celsius higher than the national average. The estimated 1% factors dominated by cold regions cannot fit the V-shaped yearly temperature curve of Dongfang, so its 1% quantile curve is flat. Yushu is located in central west China and belongs to highland climate. The average altitude in the region of Yushu is over 4000 meters. It has high temperature variation within a day, and is generally slightly cooler in summer and warmer in winter than the national average. The seasonality for Yushu is not significant, and both the 1% and 99% factors do not fit Yushu's yearly temperature curve well.
+55
+
+Temperature in excess to national mean -35 -30 -25 -20 -15 -10 -5 0
+
+tulihe
+
+tulihe
+
+yushu
+dongfang
+yushu
+
+0.0 0.2 0.4 0.6 0.8 1.0
+Time
+dongfang
+
+10 15 20 25 30
+
+5 10
+
+Temperature in excess to national mean
+
+-15 -10 -5 0
+
+Temperature in excess to national mean
+
+5
+
+0
+
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+
+Time
+
+Time
+
+Figure 7.4: Plots of temperature observations, 1%, and 99% temperature quantile curves at the three selected weather stations in the year 2008. The location of the weather stations are marked in the upper left map of China.
+
+References
+Anderson, T. W. (1951). Estimating linear restrictions on regression coefficients for multivariate normal distributions, Annals of Mathematical Statistics 22: 327­351.
+Beck, A. and Teboulle, M. (2009). A fast iterative shrinkage-thresholding algorithm for linear inverse problems, SIAM Journal on Imaging Sciences 2(1): 183­202.
+Belloni, A. and Chernozhukov, V. (2011). 1-penalized quantile regression in highdimensional sparse models, The Annals of Statistics 39(1): 82­130.
+
+56
+
+Belloni, A., Chernozhukov, V. and Wang, L. (2011). Square-root lasso: pivotal recovery of sparse signals via conic programming, Biometrika 98(4): 791­806.
+Bickel, P. J., Ritov, Y. and Tsybakov, A. B. (2009). Simultaneous analysis of Lasso and Dantzig selector, The Annals of Statistics 37(4): 1705­1732.
+Black, F. (1976). Studies of stock market volatility changes, Proceedings of the American Statistical Association, Business and Economic Statistics, pp. 177­181.
+Bunea, F., She, Y. and Wegkamp, M. H. (2011). Optimal selection of reduced rank estimators of high-dimensional matrices, The Annals of Statistics 39(2): 1282­1309.
+Cai, J.-F., Cand`es, E. J. and Shen, Z. (2010). A singular value thresholding algorithm for matrix completion, SIAM Journal on Optimization 20(4): 1956­1982.
+Chakraborty, B. (2003). On multivariate quantile regression, Journal of Statistical Planning and Inference 110: 109­132.
+Chaudhuri, P. (1996). On a geometric notion of quantiles for multivariate data, Journal of American Statistical Association 91(434): 862­872.
+Chen, X., Lin, Q., Kim, S., Carbonell, J. G. and Xing, E. P. (2012). Smoothing proximal gradient method for general structured sparse regression, The Annals of Applied Statistics 6(2): 719­752.
+Engle, R. F. and Ng, V. (1993). Measuring and testing the impact of news on volatility, Journal of Finance 48: 1749­1778.
+Engle, R. and Manganelli, S. (2004). CAViaR: Conditional autoregressive value at risk by regression quantiles, Journal of Business & Economic Statistics 22: 367­381.
+Falk, M. (1999). A simple approach to the generation of uniformly distributed random variables with prescribed correlation, Communications in Statistics - Simulation and Computation 28(3): 785­791.
+57
+
+Fan, J., Xue, L. and Zou, H. (2013). Multi-task quantile regression under the transnormal model.
+Ferraty, F. and Vieu, P. (2006). Nonparametric Functional Data Analysis: Theory and Practice, Springer.
+Gibbons, M. and Ferson, W. (1985). Testing asset pricing models with changing expectations and an unobservable market portfolio, Journal of Financial Economics 14: 217­236.
+Hallin, M., Paindaveine, D. and Siman, M. (2010). Multivariate quantiles and multipleoutput regression quantiles: From L1 optimization to halfspace depth, The Annals of Statistics 38(2): 635­669.
+Hazan, E. (2008). Sparse approximate solutions to semidefinite programs, LATIN 2008: Theoretical Informatics.
+Huang, J. Z. (2003). Local asymptotics for polynomial spline regression, Annals of Statistics 31(5): 1600­1635.
+Izenman, A. J. (1975). Reduced-rank regression for the multivariate linear model, Journal of Multivariate Analysis 5: 248­264.
+Jaggi, M. and Sulovsky´, M. (2010). A simple algorithm for nuclear norm regularized problems, Proceedings of the 27th International Conference on Machine Learning.
+Ji, S. and Ye, J. (2009). An accelerated gradient method for trace norm minimization, Proceedings of the 26th International Conference on Machine Learning.
+Kim, T.-H. and White, H. (2004). On more robust estimation of skewness and kurtosis, Finance Research Letters 1: 56­73.
+Koenker, R. and Bassett, G. S. (1978). Regression quantiles, Econometrica 46(1): 33­50.
+Koenker, R. and Portnoy, S. (1990). M estimation of multivariate regressions, Journal of American Statistical Association 85(412): 1060­1068.
+58
+
+Koltchinskii, V. (2013). Sharp oracle inequalities in low rank estimation, in B. Sch¨olkopf, Z. Luo and V. Vovk (eds), Empirical Inference: Festschrift in Honor of Vladimir N. Vapnik, Springer, pp. 217­230.
+Koltchinskii, V. I. (1997). M -estimation, convexity and quantiles, The Annals of Statistics 25(2): 435­477.
+Koltchinskii, V., Lounici, K. and Tsybakov, A. B. (2011). Nuclear-norm penalization and optimal rates for noisy low-rank matrix completion, The Annals of Statistics 39(5): 2243­ 2794.
+Kong, L. and Mizera, I. (2012). Quantile tomography: using quantiles with multivariate data, Statistica Sinica 22: 1589­1610.
+Negahban, S. N., Ravikumar, P., Wainwright, M. J. and Yu, B. (2012). A unified framework for high-dimensional analysis of M -estimators with decomposable regularizers, Statistical Science 27(4): 538­557.
+Negahban, S. N. and Wainwright, M. J. (2011). Estimation of (near) low-rank matrices with nose and high-dimensional scaling, The Annals of Statistics 39(2): 1069­1097.
+Nesterov, Y. (2005). Smooth minimization of non-smooth functions, Mathematical Programming 103(1): 127­152.
+Newey, W. K. (1997). Convergence rates and asymptotic normality for series estimators, Journal of Econometrics 79: 147­168.
+Reinsel, G. C. and Velu, R. P. (1998). Multivariate Reduced-Rank Regression, Springer, New York.
+Schumaker, L. (1981). Spline Functions: Basic Theory, Wiley, New York.
+Serfling, R. (2002). Quantile functions for multivariate analysis: approaches and applications, Statistica Neerlandica 56(2): 214­232.
+59
+
+Stone, C. J. (1985). Additive regression and other nonparametric models, Annals of Statistics 13(2): 689­705.
+Toh, K.-C. and Yun, S. (2010). An accelerated proximal gradient algorithm for nuclear norm regularized least squares problems, Pacific Journal of Optimization 6: 615­640.
+Tukey, J. W. (1975). Mathematics and picturing data, in R. D. James (ed.), Proceedings of the International Congress on Mathematics.
+Vershynin, R. (2012). Compressed Sensing, Theory and Applications, Cambridge University Press, chapter 5, pp. 210­268.
+Wainwright, M. J. (2009). Sharp thresholds for high-dimensional and noisy sparsity recovery using 1-constrained quadratic programming (Lasso), IEEE Transactions on Information Theory 55: 2183­2202.
+White, H., Kim, T.-H. and Manganelli, S. (2008). Modeling autoregressive conditional skewness and kurtosis with multi-quantile CAViaR, in J. Russell and M. Watson (eds), Volatility and Time Series Econometrics: A Festschrift in Honor of Robert F. Engle.
+White, H., Kim, T.-H. and Manganelli, S. (2015). VAR for VaR: measuring systemic risk using multivariate regression quantiles, Journal of Econometrics 187: 169­188.
+Yuan, M., Ekici, A., Lu, Z. and Monteiro, R. (2007). Dimension reduction and coefficient estimation in multivariate linear regression, Journal of the Royal Statistical Society: Series B 69(3): 329­346.
+60
+
+SFB 649 Discussion Paper Series 2015
+
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001 002
+003
+004 005
+006 007 008 009 010 011 012 013 014 015 016 017
+018 019 020 021
+
+"Pricing Kernel Modeling" by Denis Belomestny, Shujie Ma and Wolfgang Karl Härdle, January 2015. "Estimating the Value of Urban Green Space: A hedonic Pricing Analysis of the Housing Market in Cologne, Germany" by Jens Kolbe and Henry Wüstemann, January 2015. "Identifying Berlin's land value map using Adaptive Weights Smoothing" by Jens Kolbe, Rainer Schulz, Martin Wersing and Axel Werwatz, January 2015. "Efficiency of Wind Power Production and its Determinants" by Simone Pieralli, Matthias Ritter and Martin Odening, January 2015. "Distillation of News Flow into Analysis of Stock Reactions" by Junni L. Zhang, Wolfgang K. Härdle, Cathy Y. Chen and Elisabeth Bommes, January 2015. "Cognitive Bubbles" by Ciril Bosch-Rosay, Thomas Meissnerz and Antoni Bosch-Domènech, February 2015. "Stochastic Population Analysis: A Functional Data Approach" by Lei Fang and Wolfgang K. Härdle, February 2015. "Nonparametric change-point analysis of volatility" by Markus Bibinger, Moritz Jirak and Mathias Vetter, February 2015. "From Galloping Inflation to Price Stability in Steps: Israel 1985­2013" by Rafi Melnick and till Strohsal, February 2015. "Estimation of NAIRU with Inflation Expectation Data" by Wei Cui, Wolfgang K. Härdle and Weining Wang, February 2015. "Competitors In Merger Control: Shall They Be Merely Heard Or Also Listened To?" by Thomas Giebe and Miyu Lee, February 2015. "The Impact of Credit Default Swap Trading on Loan Syndication" by Daniel Streitz, March 2015. "Pitfalls and Perils of Financial Innovation: The Use of CDS by Corporate Bond Funds" by Tim Adam and Andre Guettler, March 2015. "Generalized Exogenous Processes in DSGE: A Bayesian Approach" by Alexander Meyer-Gohde and Daniel Neuhoff, March 2015. "Structural Vector Autoregressions with Heteroskedasticy" by Helmut Lütkepohl and Aleksei Netsunajev, March 2015. "Testing Missing at Random using Instrumental Variables" by Christoph Breunig, March 2015. "Loss Potential and Disclosures Related to Credit Derivatives ­ A CrossCountry Comparison of Corporate Bond Funds under U.S. and German Regulation" by Dominika Paula Galkiewicz, March 2015. "Manager Characteristics and Credit Derivative Use by U.S. Corporate Bond Funds" by Dominika Paula Galkiewicz, March 2015. "Measuring Connectedness of Euro Area Sovereign Risk" by Rebekka Gätjen Melanie Schienle, April 2015. "Is There an Asymmetric Impact of Housing on Output?" by Tsung-Hsien Michael Lee and Wenjuan Chen, April 2015. "Characterizing the Financial Cycle: Evidence from a Frequency Domain Analysis" by Till Strohsal, Christian R. Proaño and Jürgen Wolters, April 2015.
+
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2015
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Risk Related Brain Regions Detected with 3D Image FPCA" by Ying Chen, Wolfgang K. Härdle, He Qiang and Piotr Majer, April 2015.
+023 "An Adaptive Approach to Forecasting Three Key Macroeconomic Variables for Transitional China" by Linlin Niu, Xiu Xu and Ying Chen, April 2015.
+024 "How Do Financial Cycles Interact? Evidence from the US and the UK" by Till Strohsal, Christian R. Proaño, Jürgen Wolters, April 2015.
+025 "Employment Polarization and Immigrant Employment Opportunities" by Hanna Wielandt, April 2015.
+026 "Forecasting volatility of wind power production" by Zhiwei Shen and Matthias Ritter, May 2015.
+027 "The Information Content of Monetary Statistics for the Great Recession: Evidence from Germany" by Wenjuan Chen and Dieter Nautz, May 2015.
+028 "The Time-Varying Degree of Inflation Expectations Anchoring" by Till Strohsal, Rafi Melnick and Dieter Nautz, May 2015.
+029 "Change point and trend analyses of annual expectile curves of tropical storms" by P.Burdejova, W.K.Härdle, P.Kokoszka and Q.Xiong, May 2015.
+030 "Testing for Identification in SVAR-GARCH Models" by Helmut Luetkepohl and George Milunovich, June 2015.
+031 "Simultaneous likelihood-based bootstrap confidence sets for a large number of models" by Mayya Zhilova, June 2015.
+032 "Government Bond Liquidity and Sovereign-Bank Interlinkages" by Sören Radde, Cristina Checherita-Westphal and Wei Cui, July 2015.
+033 "Not Working at Work: Loafing, Unemployment and Labor Productivity"
+by Michael C. Burda, Katie Genadek and Daniel S. Hamermesh, July 2015. 034 "Factorisable Sparse Tail Event Curves" by Shih-Kang Chao, Wolfgang K.
+Härdle and Ming Yuan, July 2015.
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasrecahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+

@@ -1,0 +1,1320 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2007-069
+Solving Linear Rational Expectations
+Models with Lagged Expectations
+Quickly and Easily
+Alexander Meyer-Gohde*
+* Technische Universität Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Solving Linear Rational Expectations Models with Lagged Expectations Quickly and Easily
+Alexander Meyer-Gohde
+Technische Universit¨at Berlin; Department of Economics; Section Macroeconomics, H 52; Straße des 17. Juni 135; 10623 Berlin; Germany
+This version: December 11, 2007
+A solution method is derived in this paper for solving a system of linear rationalexpectations equation with lagged expectations (e.g., models incorporating sticky information) using the method of undetermined coefficients for the infinite MA representation. The method applies a combination of a Generalized Schur Decomposition familiar elsewhere in the literature and a simple system of linear equations when lagged expectations are present to the infinite MA representation. Execution is faster, applicability more general, and use more straightforward than with existing algorithms. Current methods of truncating lagged expectations are shown to not generally be innocuous and the use of such methods are rendered obsolete by the tremendous gains in computational efficiency of the method here which allows for a solution to floating-point accuracy in a fraction of the time required by standard methods. The associated computational application of the method provides impulse responses to anticipated and unanticipated innovations, simulations, and frequency-domain and simulated moments.
+JEL classification: C32, C63
+Keywords: Lagged expectations; linear rational expectations models; block tridiagonal; Generalized Schur Form; QZ decomposition; LAPACK
+I am indebted to Frank Heinemann and Harald Uhlig for useful comments, suggestions, and discussions. This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk". Any and all errors are entirely my own.
+
+1 Introduction
+In this paper, I present an undetermined-coefficients method for solving linear rational expectations models with lagged expectations. This method treats systems without lagged expectations as a subcase of systems with a finite number of lagged expectations and explicitly handles systems with an infinite number of lagged expectations. The freely-available software1 for use with MATLAB R strives to minimize processing time both on behalf of the user and his computer and to maximize pre-packaged output providing impulse responses to unanticipated and anticipated shocks (pre-announced shocks), frequency-domain moments, and simulations with sample moments. The method and its software application should be of great interest to researchers interested in, e.g., models with "sticky information" `a la Mankiw and Reis (2002), and should also be useful for researchers interested in analyzing the effects of anticipated (pre-announced) shocks in all DSGE models.
+The method presented here is an extension of the methods provided by Taylor (1986). By combining the Generalized Schur Decomposition with a finite system of linear equations, the method in this paper drastically reduces computational requirements and eliminates tedious and user-error-prone manual state-space expansion for systems with a finite number of lagged expectations. For models possessing an infinite number of lagged expectations, e.g. models with the sticky-information Phillips Curve of Mankiw and Reis (2002), both an explicit convergence criterium to allow for approximation with arbitrary accuracy and a method to ensure the accuracy of the asymptotic behavior of the approximated recursion are introduced. Much of the current literature that examines sticky information (e.g., Andr´es, L´opez-Salido, and Nelson (2005)) imposes some form of truncation on an other infinite sum of lagged expectations. The methods presented in this paper face a near-linear cost of including additional lagged expectations of variables and, thus, can include as many lagged expectations as are required to reach floating-point tolerance for adding additional lagged expectations. This allows not only for a more accurate solution to be derived more quickly, but also allows for the examination of the consequences of the truncation methods frequently encountered in the literature.
+Alternative methods in the literature explicitly designed for solving models with lagged expectations have, the exception being Wang and Wen (2006), been model-specific. By combing the numerical efficiency of a tri-diagonal system for coefficients as implemented by Mankiw and Reis (2007) with a modified version of the Generalized Schur Decomposition as presented by Klein (2000) and a convergence criterium, this method provides recursive solutions to a general class of models more quickly and reliably than existing algorithms.
+Following Blanchard and Kahn (1980), King and Watson (1998), King and Watson (2002), and Uhlig (1999) and unlike Klein (2000) and Sims (2001), predetermined variables are defined by the user input on the model structure and possess a zero one-step prediction error as opposed to an arbitrary exogenous prediction error. Furthermore, the software provided requires that the MA coefficients of exogenous processes follow a first-order autonomous recursion (or, abstracting from unit root processes, VAR(1)) in order to take advantage of all features; although this lack of generality has been criticized in, e.g., Anderson
+1Software with examples available at: http://www.wm.tu-berlin.de/~ makro/Meyer-Gohde/Working-Papers.htm
+1
+
+(2006), the same author acknowledges that "straightforward formulae" exist to achieve the same level of generality. Thus, some generality has been sacrificed in the approach in favor of transparency with respect to existing methods for solving linear rational expectations models.
+Following the method and associated software of Uhlig (1999), the method here strives to provide a "cookbook" method to users, shifting the burden of calculation from the user to the computer. Likewise as Uhlig (1999, p. 32), "the issue of existence or multiplicity of equilibria as well as the reasons for concentrating on stable solutions are not discussed." However, by operating on the infinite moving average representation of the solution, the method here will provide the unique, stable (with respect to an exogenous growth restriction) solution of the problem should it exist.
+The remainder of the paper is organized as follows: section (2) states the form of the model to be analyzed, section (3) presents the solution methods for the foregoing problem, section (4) examines the dangers associated with prematurely truncating the number of lagged expectations included in the solution, section (5) compares the method of this paper and its performance with existing methods, section (6) briefly outlines the necessary steps for implementing the solution method presented here, and section (7) concludes.
+2
+
+2 Statement of the Problem
+Many macroeconomic problems can be summarized by first-order conditions, budget constraints, and market clearing restrictions. Log-linearizing these conditions (see, e.g., Uhlig (1999)) yields a system of expectational difference equations linear in the percentage deviations of variables from their respective nonstochastic steady states:
+
+I II
+
+0=
+
+AiEt-i [Yt+1] + BiEt-i [Yt] + CiEt-i [Yt-1]
+
+i=0 i=0 i=0
+
+II
+
+(1) + FiEt-i [Wt+1] + GiEt-i [Wt]
+
+i=0 i=0
+
+
+(2) Wt = Njt-j, t  i.i.d.N (0, )
+j=0
+
+(3)
+
+lim
+j
+
+-j Et
+
+[Yt+j ]
+
+=
+
+0,
+
+
+
+
+
+R s.t. 
+
+> gu,
+
+where
+
+gu
+
+1
+
+where Yt be a k × 1 vector of endogenous variables of interest, Wt an n × 1 vector of exogenous processes with given moving average coefficients {Nj}j=0, and where I  N0. That the system not be underdetermined, the dimensions of the matrices in (1) are such that there are as many equations (k) as endogenous variables of interest. Following, e.g., Uhlig (1999) and Sims (2001), variables dated t are in the information set at t.
+Equation (1) represents the aforementioned collection of log-linearized equilibrium equations. Equation (2) specifies the exogenous process Wt as a vector M A() process. Equation (3) may be interpreted as a transversality condition derived as a condition from intertemporal maximization, where gu is the maximal growth rate of endogenous variables (see, e.g., Sims (2001) or Burmeister (1980) for discussion on the limitations of this interpretation). Sims (2001) formulates this restriction as upper bounds on the growth rates of a set of linear combinations of variables. This is obviously more general than the assumption here, but the restriction here is slightly more general than that used in Klein (2000) insofar as non-stationary solutions that conform to the uniform growth restriction are included in the solution space.
+Following Muth (1961) and Taylor (1986), the solution will take the form
+
+
+(4) Yt = jt-j .
+j=0
+
+3
+
+Inserting (4) and (2) into (1) yields
+
+ min(I,j) 
+
+ min(I,j) 
+
+0=
+
+
+
+Ai j+1t-j + 
+
+Bi j t-j
+
+j=0
+
+i=0
+
+j=0
+
+i=0
+
+ min(I,j+1) 
+
+ min(I,j) 
+
++
+
+Ci jt-j-1 + 
+
+Fi Nj+1t-j
+
+j=0
+
+i=0
+
+j=0
+
+i=0
+
+ min(I,j) 
+
+(5) + 
+
+Gi Njt-j
+
+j=0
+
+i=0
+
+Defining
+
+min(I ,j )
+
+(6)
+
+M~ j =
+
+Mi, for M = A, B, C, F, G
+
+i=0
+
+one can rewrite the foregoing as
+
+ 
+
+0=
+
+A~j j+1t-j + B~j j t-j + C~j+1j t-j-1
+
+j=0
+
+j=0
+
+j=0
+
+
+(7) + F~j Nj+1t-j + G~j Nj t-j
+
+j=0
+
+j=0
+
+Comparing coefficients, this yields the non-stochastic linear recursion
+
+(8) 0 = A~j j+1 + B~j j + C~j j-1 + F~j Nj+1 + G~j Nj
+
+with initial conditions
+
+(9) -1 = 0
+
+and terminal conditions from (3)
+
+(10)
+
+lim
+j
+
+-j
+
+j
+
+=
+
+0
+
+4
+
+3 Solution of the Problem
+In the following, I shall differentiate between three cases
+1. I = 0
+2. 0 < I < 
+3. I  
+The distinction between the first two is unnecessary, but serves to compare the solution here with methods in the literature for standard (i.e. without lagged expectations) formulations. The limiting case will need to be handled separately as I shall need to make some assumptions regarding the convergence of matrix sums.
+
+3.1 Case 1: I = 0
+This is the standard case examined in the literature. Here (11) M~ j = M0, for M = A, B, C, F, G and thus (8) reduces to a recursion with constant coefficients
+
+(12)
+
+0 = A0j+1 + B0j + C0j-1 + F0Nj+1 + G0Nj
+
+this system can then be rewritten in first-order form as
+
+(13)
+
+0 -A0 I0
+
+j j+1
+
+=
+
+C0 0
+
+B0 I
+
+j-1 j
+
++
+
+F0Nj+1 + G0Nj 0
+
+Following Klein (2000) and Sims (2001), one uses the QZ Method to look for
+
+a Generalized Schur Decomposition (cf. Golub and van Loan (1989, p. 394-6),
+
+i.e. unitary matrices Q and Z and upper-triangular matrices S and T such that
+
+Q
+
+0 -A0 I0
+
+Z = S and Q
+
+C0 B0 0I
+
+Z = T.
+
+The generalized eigenvalue i of the
+
+system is given by the pair Si,i, Ti,i as
+
+(14)
+
+i =
+
+Ti,i Si,i
+
+if Si,i = 0
+
+ otherwise
+
+noting the abuse of language as acknowledged by Klein (2000). The degenerate case (or "mundane source" of non-uniqueness or non-existence) discussed by King and Watson (1998, p. 1017) would reveal itself here if both Si,i, Ti,i = 0 for some i, it shall be assumed that there are no unrestricted linear combination of variables in the system and, therefore, that this case is irrelevant. The decomposition will be arranged such that the 2k generalized eigenvalues are split into two groups: the first s eigenvalues are those less than or equal to the maximal growth rate gu (thus satisfying (3)) and the remaining 2k - s eigenvalues (u) greater than gu (thus violating(3)) follow thereafter.
+Following Blanchard and Kahn (1980), the solution will be unique if s = k, indeterminate if s > k, and explosive if s < k. This can be readily seen by the structure of the problem: the initial conditions (9) require that Yt-1 not be a function of t (i.e. variables from yesterday cannot respond to innovations
+
+5
+
+today), leaving an additional k restriction to complete the deterministic recur-
+
+sion. If the system has k eigenvalues greater than gu in modulus, the terminal
+
+conditions (2) should provide the missing k linear restrictions needed to com-
+
+plete the recursion. This is, as Klein (2000) notes, unfortunately not enough:
+
+that the system have k eigenvalues greater than gu need not necessarily mean
+
+that these k eigenvalues can be associated with the conditions remaining to be
+
+determined; if the upper-left k × k block of Z (responsible for completing this
+
+association) is invertible, however, this problem will not arise. Further general-
+
+ity could be achieved by relaxing the assumption of a uniform growth restriction
+
+on all variables to allow for "non-homogeneous growth rates" (Sims 2001).
+
+Thus, assuming that s = k and that Z11 is of full rank and defining
+
+sj uj
+
+
+
+Z+
+
+j-1 j
+
+, (13) can be rewritten as
+
+(15)
+
+0 I
+
+-A0 0
+
+Z
+
+js+1 ju+1
+
+=
+
+C0 0
+
+B0 I
+
+Z
+
+js ju
+
++
+
+F0Nj+1 + G0Nj 0
+
+multiplying through with Q and recalling that S and T are upper-triangular,
+
+(16)
+
+S11 S12 0 S22
+
+js+1 ju+1
+
+=
+
+T11 0
+
+T12 T22
+
+sj uj
+
++
+
+Q1 Q2
+
+F0Nj+1 + G0Nj 0
+
+Following Klein (2000), uj can be solved forward, yielding
+
+(17)
+
+
+uj = -T2-21
+
+T2-21S22 k Q2
+
+F0Nj+1+k + G0Nj+k 0
+
+k=0
+
+as long as2
+
+(18)
+
+lim
+k
+
+T2-21S22
+
+k Q2
+
+F0Nj+1+k + G0Nj+k 0
+
+=0
+
+Defining,
+
+(19)
+
+
+Mj = -T2-21
+
+T2-21S22 k Q2
+
+F0Nj+1+k + G0Nj+k 0
+
+k=0
+
+then
+
+(20)
+
+uj = Mj
+
+Following Theorem 5.1 of Klein (2000, p. 1417),
+
+(21)
+
+j = Z21Z1-11 j-1 + Z22 - Z21Z1-11Z12 Mj
+
+yielding a recursive form, along with (9), for the MA-coefficients of Yt. The difference between the solution form here, based on the infinite MA-
+representations proposed by Muth (1961) and Taylor (1986), and those more commonly encountered in the literature (e.g. Uhlig (1999) or Klein (2000)),
+
+2See Appendix (A) for a discussion of the existence of this limit.
+
+6
+
+is that the solution derived here yields a recursive form for the infinite MA coefficients, whereas current standard methods solve for a recursive law of motion for the endogenous variables themselves. The solution derived here can, assuming an autoregressive representation of the exogenous process exists, be reformulated into such a recursive law of motion as will be shown in section (3.4):
+
+3.2 Case 2: 0 < I < 
+
+This is a deviation of the standard case examined in the literature. Here (22) M~ j = M~ I , for M = A, B, C, F, G, and j  I
+
+and thus (8) reduces to a recursion with constant coefficients j  I.
+
+(23)
+
+0 = A~I j+1 + B~I j + C~I j-1 + F~I Nj+1 + G~I Nj
+
+This system can then be rewritten in first-order form
+
+(24)
+
+0 -A~I I0
+
+j j+1
+
+=
+
+C~I 0
+
+B~I I
+
+j-1 j
+
++
+
+F~I Nj+1 + G~I Nj 0
+
+Analogously to the foregoing section, if s = k and if
+
+(25)
+
+lim
+k
+
+T2I2-1S2I2
+
+k
+Q2I
+
+F~I Nj+1+k + G~I Nj+k 0
+
+=0
+
+where the superscript I refers to the matrices associated with the Generalized Schur Decomposition of (24), then
+
+(26)
+
+
+MjI = -T2I2-1
+
+T2I2-1S2I2
+
+k
+QI2
+
+F~I Nj+1+k + G~I Nj+k 0
+
+k=0
+
+and
+
+(27)
+
+j = Z2I1Z1I1-1 j-1 + Z2I2 - Z2I1Z1I1-1Z1I2 MjI , j  I
+
+Thus, this yields a recursive solution for all MA-coefficients from I onward. The remaining coefficients can then be obtained as the solutions to
+
+B~0 A~0 0
+
+...
+
+C~1 B~1 A~1 0
+
+...
+
+ 
+
+0
+
+C~2 B~2 A~2 0
+
+...
+
+  
+
+...
+
+ 0
+
+...
+
+0 C~I-1
+
+B~I-1
+
+ 0
+
+. . . 0 - Z2I1Z1I1-1
+
+0
+
+  0 
+
+0
+0 ...
+
+ 
+
+
+1
+
+
+
+ 
+ 
+
+2
+
+ 
+
+ 
+ 
+
+
+...
+
+  
+
+A~I
+
+ -1 
+
+
+I-1
+
+ 
+
+I I
+
+(28)
+
+ F~0N1 + G~0N0 
+
+ F~1N2 + G~1N1 
+
+ 
+
+F~2N3 + G~2N2
+
+ 
+
+=
+
+ 
+
+
+
+...
+
+  
+
+ 
+
+F~I-1NI + G~I-1NI-1
+
+ 
+
+ Z2I2 - Z2I1Z1I1-1Z1I2
+
+ MII
+
+7
+
+The left-hand side of the equation is sparse with a block tri-diagonal structure, which can be readily exploited numerically (see, e.g., Golub and van Loan (1989, p. 170)).
+As in the case when I = 0, the method here provides a linear recursion for the infinite MA coefficients for j  I, but solves a sparse system of equations for all coefficients up to I. Note that in solving the sparse system, a boundary condition consistent with the recursion thereafter is added.
+As discussed at the end of the foregoing section, the solution here can as well be reformulated as a recursive law of motion as will be shown in section(3.4).
+
+3.3 Case 3: I  
+
+Unlike the previous two cases, (8) cannot be reduced to a linear recursion with constant coefficients for j  I. Assuming, however, that (where l and m denote row and column)
+
+(29)
+
+lim
+j
+
+M~ j
+
+=
+l,m
+
+M~ 
+
+, for M = A, B, C, F, G
+l,m
+
+exists and is finite, then there exists, by the definition of a limit in R1, some I()M,l,m for each M , l, and m, such that
+
+(30)  > 0, I()M,l,m s.t. n > I()M,l,m  | M~ n - M~  | < 
+l,m l,m
+and, thus, there exists some upper bound I()max = max{I()M,l,m} (31)
+ > 0, I()max s.t. n > I()max  | M~ n - M~  | < ; M, l, m
+l,m l,m
+Therefore, (8) can be approximated as
+(32) 0 = A~j j+1 + B~j j + C~j j-1 + F~j Nj+1 + G~j Nj , 0  j < I()max
+and
+(33) 0 = A~j+1 + B~j + C~j-1 + F~Nj+1 + G~Nj , j  I()max
+This system is now analogous to the system in the foregoing section where I now equals I()max and can be solved using the methods presented there.
+The main distinction, however, is that the autonomous recursion is defined by the limiting coefficients (I  ) rather and not by the finite I = I()max coefficients. As the behavior of the system in the limit is decisive for the application of (3) to determine whether additional restrictions exist to determine the system, the use of coefficients other than those of the limiting case might produce spurious results; e.g. in the knife-edge case of a unit root in the recursive solution for the MA coefficients, any deviation of the autonomous coefficients from the limiting ones would produce the spurious result of an asymptotically stable or unstable solution.
+The existence and uniqueness of a solution, thus, now depends on the eigenvalues of the system defined by these limiting coefficients. The assumption of the existence of element-wise limits in the coefficient matrices rules out the possibility of periodic coefficients (i.e. M~ i+j = M~ j for some i) and ensures that by choosing an appropriate , any desired degree of accuracy can be achieved without endangering the asymptotic behavior of the recursion.
+
+8
+
+3.4 A Recursive Law of Motion
+For a recursive law of motion, infinite MA solution can be rewritten as
+
+(34)
+
+
+
+I -1
+
+
+
+Yt = j t-j = j t-j + jt-j
+
+j=0
+
+j=0
+
+j=I
+
+Assuming the MA coefficients of the exogenous process Wt follow the simple recursion Nj+1 = N Nj with all eigenvalues of N less than or equal to gu, a recursive law of motion can be derived as all MA coefficients after I (recalling
+from the foregoing section that I = I()max with infinite lagged expectations) follow an autonomous recursion. From equations (26) and (27), as well as Klein
+(2000, p. 1423),
+
+(35)
+
+j = Z2I1Z1I1-1 j-1 + Z2I2 - Z2I1Z1I1-1Z1I2 M I N j , j  I
+
+where (36)
+
+vec M I
+
+= - N   S2I2 - I  T2I2 vec
+
+QI2
+
+F~I N + G~I 0
+
+Defining (37)
+
+
+Ut = j t+I-j
+j=I
+
+then (38)
+
+I -1
+Yt = jt-j + Ut-I
+j=0
+
+where (39) Ut = Z2I1Z1I1-1 (Ut-1 + I-1t) + Z2I2 - Z2I1Z1I1-1Z1I2 M I N I Wt
+
+Noting that in the foregoing only superscripts associated with the matrix N imply exponents.
+Thus, the solution in the case of VAR(1) exogenous processes can be written as
+
+(40)
+
+I -1
+
+Yt =
+
+jt-j + Ut-I
+
+j=0
+
+Ut = Z2I1Z1I1-1 (Ut-1 + I-1t)
+
++ Z2I2 - Z2I1Z1I1-1Z1I2 M I N I Wt
+
+Wt = N Wt-1 + t
+
+9
+
+or, by taking conditional expectations,
+
+(41)
+
+I -1
+
+Yt =
+
+jt-j + Et-I [Yt]
+
+j=0
+
+Et [Yt+I ] = Z2I1Z1I1-1 (Et-1 [Yt+I-1] + I-1t)
+
++ Z2I2 - Z2I1Z1I1-1Z1I2 M I Et [Wt+I ]
+
+Wt = N Wt-1 + t
+
+Note that if I = 0, the foregoing reduces to
+
+(42)
+
+Yt = Et [Yt] Et [Yt] = Z201Z101-1 Et-1 [Yt-1]
++ Z202 - Z201Z101-1Z102 M 0Et [Wt] Wt = N Wt-1 + t
+
+or simply
+
+(43)
+
+Yt = Z201Z101-1 Yt-1 + Z202 - Z201Z101-1Z102 M 0Wt Wt = N Wt-1 + t
+
+the same form for the recursive law of motion as found in, e.g., Uhlig (1999) using the Generalized Schur Decomposition of Klein (2000) and Sims (2001).
+The recursive law of motion for systems with lagged expectations, i.e. equation (41), is not, however, as directly applicable empirically as recursive laws of motion without lagged expectations: Whereas with I = 0 one need only specify Yt-1 and Wt-1 ­ both potentially observable empirically ­ for (43) as well as {t+i}iT=0 to determine {Yt+i, Wt+i}Ti=0, one would need to specify Et-I [Yt] ­ a much more formidable challenge ­ {t-i}iI=0, and Wt-I-1 for (41) as well as {t+i}iT=0 to determine {Yt+i, Wt+i}iT=0. This disadvantage is not limited to the solution method of this paper, but is common to all solution methods when models with lagged expectations are analyzed. Expanding the vector of variables to conform to the form of equation (43) as is required by standard methods would necessitate the inclusion of additional state variables in the form of lagged expectations in the vector Yt-1: these inherited expectations are, generally, not observable.
+
+10
+
+4 The Perils of Premature Truncation
+Aside from the numerical deficiencies in terms of computation that I shall discuss in the section (5), the use of standard methods of solving linear rational expectations models when many lagged expectations appear in the structural equations entails premature truncation of the number of lagged expectations included in the model. If such a truncation should not cause significant changes to the predictions of the model, then the truncation ought to be considered justified; this is, however, not generally the case.
+The model of Mankiw and Reis (2002), incorporating an infinite sum of lagged expectations, has presented the literature with an alternative to the New Keyensian sticky-price Phillips Curve or, according to McCallum (2003, p. 1159), "today's near-canonical monetary policy model." The prospects of an alternative to this near-canonical model has led to several articles that juxtapose sticky-information and sticky-price models. Korenok (2007 In Press) and Korenok and Swanson (2007), as in Mankiw and Reis's (2002) original model, investigate purely backward-looking models (the assumed money-demand function and log-preferences in the latter leads to a purely backward-looking model, once interest rates are solved for) that allow for an analytical solution of the infinite MA representation. Andr´es, Lo´pez-Salido, and Nelson (2005), Trabandt (2007), Keen (2007), Paustian and Pytlarczyk (2006), Wang and Wen (2006), and Wang and Wen (2007) are a few examples of models that combine forwardlooking agents and an infinity of lagged expectations: all of them truncate this infinity with the truncation point ranging from 3, Andr´es, L´opez-Salido, and Nelson (2005), to 50, Wang and Wen (2006). Kiley (2007, p. 112) compares sticky-price and sticky-information empirically and notes," [i]n practice, the longest information lag is truncated at four quarters." I shall demonstrate that this truncation can be far from innocuous.
+Mankiw and Reis's (2002) model of sticky information can be represented by the following four equations
+(44) mt = t + yt
+
+(45)
+
+yt = yt + yt-1
+
+(46) mt = mt-1 + t, t  WN 0, 2
+
+(47)
+
+t
+
+=
+
+ 1-
+
+yt
+
++
+
+
+
+
+
+(1 - )j Et-j-1 [t + yt]
+
+j=0
+
+where equations (44), (45), and (46) are the quantity equation in first-difference form, the definition of a first difference, and the exogenous process for the growth of money, respectively; with mt, t, yt, and yt being the growth of money, the gross inflation rate, the growth of the output gap, and the output gap itself. Equation (47) is the sticky-information Phillips curve and, as it is
+
+11
+
+the only equation here to contain lagged expectations, will be the focus of the examination of the consequences of truncation.
+Andr´es, L´opez-Salido, and Nelson (2005) and Trabandt (2007) both solve models that include sticky-information Phillips curves with an infinity of lagged expectations by using the same truncation method. Andr´es, Lo´pez-Salido, and Nelson (2005, p. 1033) notes that to make the model tractable, "[they] approximate it by truncating [lagged expectations in the Phillips curve] at three quarters."3 Using this truncation, but extending the truncation point for comparability with Kiley (2007), would alter equation (47) to
+
+(48)
+
+t
+
+=
+
+ 1 -  yt
+
++
+
+3
+ (1 -
+j=0
+
+)j
+
+Et-j-1
+
+[t
+
++
+
+yt]
+
+Kiley (2007, p. 112) follows a different truncation technique and states," the
+
+probabilities of information arrival are constant in each period up to the trun-
+
+cation period, with the remaining mass of the probability distribution placed on
+
+the last period." Following this truncation, equation (47) would be rewritten as
+
+(49)
+
+
+
+t
+
+=
+
+1
+
+ -
+
+yt
+
++
+
+
+
+2
+
+(1
+
+-
+
+)j
+
+Et-j-1
+
+[t
+
++
+
+yt]
+
++
+
+(1
+
+- )3 
+
+Et-4
+
+[t
+
++
+
+yt]
+
+j=0
+
+Figure (1), clockwise starting from the upper-left panel, shows the impulse responses of inflation to a negative one-standard-deviation shock to the money growth rate, the impulse responses of the output gap to the same, the crosscorrelations of the output gap with contemporary inflation, and the autocorrelation of inflation for the two approximations and the original specification of Mankiw and Reis (2002). As the model does not contain any standard forwardlooking behavior ("the relevant expectations are past expectations of current economic conditions" (Mankiw and Reis 2002, p. 1300)), the initial responses of inflation and the output gap are the same in all three versions. The second truncation, equation (49), displays a sharp jump in the response of inflation four periods after the innovation, owing to the large weight attached to lagged expectations at this horizon. Neither of the two truncations can reproduce the maximal response of inflation at seven quarters. The impulse response of the output gap is insightful insofar as it shows the transition of the rate of convergence of the output gap from the first truncation, equation (48), to the second. Although the second truncation predicts the same asymptotic rate of convergence as the non-truncated specification, it systematically underestimates the cross-correlation of the output gap with inflation and the autocorrelation of the latter. The first specification, despite its shortcomings with respect to the impulse responses, matches the autocorrelation of inflation within the displayed horizon remarkably well, though it misses the horizon of the lead of the output gap in the cross-correlation. That there may exist another truncation with the same horizon that more closely matches the impulses responses and second moments of the non-truncated model certainly cannot be ruled out; yet, it would
+3Note that Andr´es, Lo´pez-Salido, and Nelson (2005, p. 1038) interpret the parameter for the probability of the arrival of new information according to the non-truncated version and concludes that its estimated value "leads to an average duration slightly higher than six quarters" despite the fact that their estimated model permits a duration of at most three quarters.
+
+12
+
+% Deviations from Steady-State
+
+0 x 10-3 -0.5
+-1 -1.5
+-2 -2.5
+-3 -3.5
+-1
+
+0
+
+Impulse Response to a Shock in Money Growth
+
+Inflation (Truncation Type 1) Inflation (Truncation Type 2) Inflation
+
+123 Years since Shock Realization
+
+4
+
+5
+
+% Deviations from Steady-State
+
+0 -0.002 -0.004 -0.006 -0.008
+-0.01 -0.012
+-1
+
+Impulse Response to a Shock in Money Growth
+
+Output Gap (Truncation Type 1) Output Gap (Truncation Type 2) Output Gap
+
+01234 Years since Shock Realization
+
+5
+
+13
+
+Correlation Coefficient
+
+(a) Impulse Response of Inflation
+
+(b) Impulse Response of Output Gap
+
+Frequency-Domain Autocorrelation of Inflation at t+j with Inflation at t
+1
+0.9
+0.8
+0.7
+0.6
+0.5 Inflation (Truncation Type 1) 0.4 Inflation (Truncation Type 2)
+Inflation
+0.3
+0.2
+0.1
+0 -6 -4 -2 0 2 4
+j
+
+6
+
+Correlation Coefficient
+
+Frequency-Domain Cross-Correlations of Output Gap at t+j with Inflation at t
+1
+0.9
+0.8
+0.7
+0.6
+0.5
+Output Gap (Truncation Type 1) 0.4 Output Gap (Truncation Type 2)
+Output Gap
+0.3
+0.2
+0.1
+0 -6 -4 -2 0 2 4 6
+j
+
+(c) Autocorrelation of Inflation
+
+(d) Cross-correlation of the Output Gap with Inflation
+
+Figure 1: Consequences of Truncation in the Model of Mankiw and Reis (2002)
+
+seem unreasonable to suppose that such an "optimal" truncation form would be invariant to model structures and parameter settings and, furthermore, to find such a truncation form would assume the knowledge of the true solution, which would make the search for such a form moot.
+The absence of traditional forward-looking behavior in the model of Mankiw and Reis (2002) admits an analytical solution to the linearized problem and, furthermore, leads to the equivalence of the two truncation forms and the nontruncated versions for the impulse responses in the first three periods following an innovation. When forward-looking behavior is, in a non-trivial and nondisentanglable manner, added to the model, then current responses will depend on the future trajectories: as the trajectories differed under the different truncation forms, so too will all current responses. Wang and Wen (2006) present a simple model with sticky information and monopolistic competition on the supply side (leading to a sticky-information Phillips curve) and capital accumulation, a cash-in-advance constraint, bond holdings, and labor and consumption decisions maximized intertemporally on the demand side.
+Using the truncation methods presented above, figure (2)4 shows the impulse responses of inflation and marginal costs (replacing output gap from the previous Phillips curve) to a positive unit innovation in the money growth rate. Both truncation methods (again, with truncation imposed at four quarters) fail to match the peak of inflation as occurring six periods after the innovation, with responses differing now both before and after truncation. The impulse responses of marginal costs demonstrate similar short-comings. Whereas the first truncation, analogous to equation (48), might have been interpreted as being superior to the second when applied to the model of Mankiw and Reis (2002); yet here, one might draw the opposite conclusion.
+Different truncation methods can have different consequences, which themselves might differ when applied to different models. Knowing a priori which method will be appropriate for the given application and what consequences the method will have for the predictions of the model would seem difficult to accomplish. Both of the truncation methods presented above, as found in the literature, will converge to the true model if the truncation point is extended. Exactly this extension is computationally prohibitive with standard methods, but is exactly the advantage of the method presented by this paper: the truncation point can be extended to ensure floating-point-accuracy of the solution in less time with the method of this paper than would be required by standard (state-space QZ) methods with just a few lagged expectations included.
+4The solution not labeled as a truncation is implemented using the method developed here with  (the tolerance parameter from section (3.3)) set to floating point accuracy. This level of tolerance implies that the computer is no longer capable of distinguishing between the autonomous recursion from the limiting coefficients, see equation (33), and the non-autonomous recursion, see equation (32), continued past I()max. The floating point precision of the machine used is 5E-324 and this  leads to I()max of 3329. Computation time required is about 1.9 seconds.
+14
+
+% Deviations from Steady-State
+
+0.35
+
+Impulse Response to a Shock in Money Growth
+
+0.3
+
+0.25 Inflation (Truncation Type 1) Inflation (Truncation Type 2)
+0.2 Inflation
+
+0.15
+
+0.1
+
+0.05
+
+0 -2 0 2 4 6 8 10
+Years since Shock Realization
+
+% Deviations from Steady-State
+
+0.45 0.4
+0.35 0.3
+0.25 0.2
+0.15 0.1
+0.05 0 -2
+
+(a) Impulse Response of Inflation
+Impulse Response to a Shock in Money Growth
+Marginal Costs (Truncation Type 1) Marginal Costs (Truncation Type 2) Marginal Costs
+0 2 4 6 8 10
+Years since Shock Realization
+
+(b) Impulse Response of Marginal Costs
+
+Figure 2: Consequences of Truncation in the First Model of Wang and Wen
+
+(2006)
+
+15
+
+5 Comparison of Solution Methods
+
+In this section, I compare the solutions generated by the method presented in the foregoing section with several methods presented in the literature for models with and without lagged expectations. I first show that, in the case of a model without lagged expectations, the solution method presented above performs favorably in comparison with the software associated with Uhlig (1999), establishing that the method fits within the class of existing methods for models without lagged expectations insofar as computation time is concerned. Thereafter, I compare the solution method of this paper with three alternative solution methods for models with lagged expectations (potentially going back into the infinite past). I demonstrate that, for the models and methods presented in these papers, the solution method here strictly dominates all three in terms of computation time and/or implementation time on behalf of the user for given error tolerances.
+Table 1: Computation Comparison with Uhlig (1999)
+Time in Seconds, Averaged over 1000 Runs
+
+Model from Uhlig (1999)'s Toolkit
+exampl0.m
+exampl3.m
+
+Method Uhlig (1999) QZ Mat. Quad. QZ Mat. Quad.
+
+Computation Speed 0.0054 0.0046 0.0088 0.0069
+
+Method Here QZ
+QZ
+
+Computation Speed 0.0023
+0.0041
+
+The first case examined in the foregoing section is the standard case in the literature, i.e. when the problem is formulated such that no lagged expectations are present. Anderson (2006) provides a comparison of the performance of the most common methods for solving such linear rational expectations models and can be used to compare the method presented here with those more commonly encountered in the literature. In essence, the method here for models without lagged expectations is analogous to the method of Klein (2000) and its computational efficiency should thusly be self-evident, but the assumed structure of the model and the use of pre-compiled LAPACK routines in MATLAB to reorder the Schur decomposition present potentially substantial computational differences. Table (1) compares the computation times in seconds required to solve the first and fourth examples of Uhlig's (1999) toolkit (the only routine examined by Anderson (2006) to compare favorably with authors' own method). Striking here is that the method provided in this paper appears to be considerably faster than those of Uhlig (1999). This should, however, be tempered as it is not the computational times of the actual solution methods that are compared, but rather the run times of the programs (for Uhlig's (1999) method, the time required to run solve.m is reported) used to build the solution (i.e. overhead, etc. are not controlled for)5. Nonetheless, this should suffice to demonstrate
+5Note that Uhlig (1999) and Sims (2001), and Klein (2000) until recently, use Christopher Sims's programs qzdiv.m and qzswitch.m to reorder the QZ decomposition. With the inclusion of the MATLAB functions ordeig and ordqz in the standard release of MATLAB version 7.0.1, a gain in efficiency can be achieved as the MATLAB functions are pre-compiled and directly use LAPACK functions *TGSEN to reorder the the Schur decomposition
+
+16
+
+that the method here fits neatly, insofar as computational times are concerned, into the class of existing methods.
+In what follows, the solution method presented here is compared with three alternate methods in the literature for solving models with lagged expectations. Computation times and relative errors of impulse responses (measured using a Euclidean norm and (Golub and van Loan 1989, p. 54)) between the alternative solution methods and the method presented here are reported. Trabandt (2007) does provide computation times for his "up-to-date unix machine", but as the software is not publicly available, the comparison must restrict itself to comparing computation time across platforms. For both Wang and Wen (2006) and Mankiw and Reis (2007), software is publicly available from the authors' websites and can be used to compare computation times and calculated impulse responses on the same platform6.
+Trabandt (2007) uses an existing method (the QZ implementation of Uhlig (1999)) to solve a general equilibrium model with sticky information via an expansion of the state vector. That is, a variable Et-1 [xt] is modeled by defining xt1-1 = Et-1 [xt] and adding the additional equation x1t = Et [xt+1]. While this method has the advantage of using standard methods, it requires the definition of an ever-increasing state vector through the inclusion of additional variables and relationships. That the number of additional variables required increases more quickly than the number of lagged expectations included can be seen by examining the variable Et-2 [xt]: define xt2-,11 = Et-1 [xt] and add xt2,1 = Et [xt+1] to the system of equations; define and add xt2,2 = Et xt2+,11 ; define
+and add x2t ,3 = xt2-,21; thus x2t-,31 = x2t-,22 = Et-2 xt2-,11 = Et-2 [xt]. Thus, three
+additional variables were necessary to bring Et-2 [xt] into the canonical form required by Uhlig (1999): this is costly not only in terms of computation time, but also in terms of programming time as these lagged expectations must either be manually redefined by additional variables or an additional algorithm must be programmed to accomplish the same.
+
+Table 2: Computation Comparison with Trabandt (2007)
+Time in Seconds, N= Number of Lagged Expectations Included
+
+Method Trabandt (2007)
+I=20
+
+Computation Time
+180
+
+Method Here I=20 I=2583
+
+Computation Time 0.0131 1.8416
+
+In Table (2), computation times required to solve Trabandt's (2007) model are reported. Note that the method of Trabandt (2007) requires three minutes to find a recursive solution for the model derived there with only twenty lagged expectations included, whereas the method here requires approximately oneand-a-half hundredths of a second to incorporate twenty lagged expectations. When the tolerance for convergence for the matrix sums (as presented Section (3.3)) is set to floating-point accuracy, the resulting number of included lagged expectations rises to 2583; the method here is still two orders of magnitude
+6Platform used: Pentium R IV 3 GHz machine with 2 GB of RAM running MATLAB R version R2007a under Windows R XP 2002 SP 2.
+
+17
+
+faster than the solution of Trabandt (2007) and incorporates more than one hundred times as many lagged expectations.
+The enormous computational disadvantage of methods based on the QZ decomposition and state-vector expansion is due to the computation costs associated with a QZ decomposition. The number of floating-point operations (flops) involved in the calculation of the QZ decomposition is a function of the cube of the dimensions of the matrix pencil in question. (Golub and van Loan 1989, p. 404) As was just shown, the application of traditional methods entails an expansion of the state space and, thereby, an expansion of the dimensions of the matrix pencil (see Klein (2000)) used in the QZ decomposition: thus, the number of flops increases cubically with the number of lagged expectations of endogenous variables included. Anderson and Moore's (1985) AIM-method presents an alternative to eigenvalue-based methods and, as shown be Anderson (2000, p. 20), their method entails a number of flops that is a function of the mere square of lags and leads. Exploiting the this numerical advantage, Matthias Trabandt7 notes that the application of the AIM-method reduces computation time to 1.75 seconds 8. While this presents a substantial improvement, it is still more than two orders of magnitude slower than the method developed here. The advantage of the method presented in this paper comes from its division of the problem into an autonomous and a non-autonomous part. The autonomous recursion (imposed after all lagged expectations have been included or tolerance has been reached) involves a QZ decomposition with non-expanded dimensions: the calculation of the QZ step is invariant to the inclusion of lagged expectations. The non-autonomous part of the recursion is modeled via the block tri-diagonal system of linear equations which, due to the high degree of bandedness (cf. Golub and van Loan (1989, pp. 149-157, 170-177), can be solved via, e.g., Gaussian elimination with the number of floating point operations being a near linear function of the the number of lagged expectations of variables included in the system.
+Wang and Wen (2006) present a method for solving linear rational expectations models with lagged expectations that, in several ways, is very similar to the solution presented here. In contrast to the method here, however, the authors' work directly with a recursion in state variables and solve for the forecast errors induced by lagged expectations. By approximating models with lagged expectations reaching back into the infinite past with a finite number of forecast errors to be solved for, Wang and Wen (2006) impose the same condition that is imposed in the method presented here: namely that after the inclusion of some finite number of lagged expectations, the system is represented by the system with the limiting coefficients. Their method, however, requires the modeler to reformulated lagged expectations into expectation errors, opening an unnecessary window for user error. Furthermore, the solution method of Wang and Wen (2006) poses a much more general and complicated fix-point problem than the (block) tri-diagonal problems posed by Mankiw and Reis (2007) and this paper and relies on a non-linear equation solver (fsolve.m in the software associated with Wang and Wen (2006), which appears to be a variant of Prof. Sims's csolve.m). Both the formulation of the fix-point problem and the convergence parameter used by the non-linear solver would seem to contribute to the limita-
+7Personal communication 8Computation times achieved using a Windows Intel Xeon 3GHZ, 2,75 GB RAM machine.
+18
+
+tions of Wang and Wen's (2006) method in terms of accuracy with the former also being a likely culprit for the rather excessive increase in computation time when nlag (the authors' parameter for the number of lagged expectation errors included) is increased past 100.
+In Figure (3), for varying values of  (the convergence criterium defined in the section (3.3)) and nlag (the number of lagged forecast errors included in the method of Wang and Wen (2006)), the computation time and relative errors associated with solving the first example in Wang and Wen's (2006) paper are compared. Using the software available from the website of the the authors of Wang and Wen (2006), direct comparisons regarding computation times and relative errors are made. The relative errors refer to the relative distances (using a Euclidean norm) of the (vectorzied) impulse responses of consumption, inflation, labor, capital, marginal costs, output, nominal interest rate, and money growth with respect to a shock to the rate of money growth (responses calculated out to 3329 periods after the shock) relative to the impulses calculated when using, respectively,  equal to floating-point accuracy (eps(0) in MATLAB) and nlag = 252. The relatively low value of nlag [for comparison, the baseline with the method of this paper is I( = eps(0))max = 3329] is used, as calculating using nlag = 252 itself took more than one hour. As can be seen in the figure, the method proposed here solves the model for a given relative error at least 100 times more quickly than the method of Wang and Wen (2006).
+The methods used by Trabandt (2007) and Wang and Wen (2006) differ theoretically in a subtle but non-trivial manner. Contrary to the claim of Trabandt (2007, p. 18) that "Wang and Wen (2006) propose a solution algorithm for linear difference systems with a finite number of lagged expectations" (as is the case with the method of Trabandt (2007)), Wang and Wen (2006) propose a solution algorithm for linear difference systems with a finite number of lagged expectation (or forecast) errors. The consequences of this subtle difference can be readily illustrated by the method proposed in this paper. The approximation of systems with an infinite number of lagged expectations as proposed in section (3.3) replaces the non-autonomous recursion for the MA-coefficients of endogenous variables with an autonomous recursion for all MA-coefficients past some N ()max. If, contrary to the approximation proposed in section (3.3), the autonomous recursion were to use the coefficients implied by the non-autonomous coefficients based on the matrix sums M~ N()max , for M = A, B, C, F, G, the solution would be equivalent to that in Trabandt (2007) and would imply an approximation by using only a finite number of lagged expectations. This recursion would not preserve the asymptotic qualities of the non-autonomous recursion (e.g. in the case of a stationary gross inflation rate in a sticky-information model, the price level would be susceptible to displaying erroneous stationary behavior). The methods proposed by Wang and Wen (2006) and in this paper, by contrast, do preserve these asymptotic qualities. Though, in the limiting case of letting the number of past expectations or past expectation errors go to infinity, all three approaches are (at least theoretically, as the method of Trabandt (2007) would imply an infinite vector space) equivalent; it would seem desirable to select a method which preserves these asymptotic qualities.
+Mankiw and Reis (2007) develop a solution method from the MA representation as in this paper following the method of Taylor (1986) and the representation of Muth (1961). There solution method differs in two major respects from the method presented here. Firstly, they reduce the problem to a second-order
+19
+
+20
+
+Relative Error (Euclidean Norm)
+
+100
+
+10-2
+
+10-4
+
+10-6
+
+10-8
+
+10-10 10-12 10-14
+10-2
+
+||Method Here(V arying )-Method Here(=eps(0))||2 ||Method Here(=eps(0))||2
+||Method Here(V arying )-Method W ang W en(nlag=252)||2 ||Method W ang W en(nlag=252)||2
+||Method W ang W en(V arying nlag)-Method Here(V arying )||2 ||Method Here(V arying )||2
+||Method W ang W en(V arying nlag)-Method W ang W en(nlag=252)||2 ||Method W ang W en(nlag=252)||2
+
+10-1
+
+100 101 Time in Seconds
+
+102
+
+Figure 3: Comparison of the Method Here and that of Wang and Wen (2006) Computation Time versus Accuracy
+
+103
+
+non-autonomous difference equation in a single variable (the MA response of prices). This has the notable disadvantage that considerable work is required on behalf of the modeler to reduce the number of variables in the system and, as such, is liable to considerable user error. Furthermore, it is not clear that every model can be reduced to a scalar second-order difference equation. The method developed here is more general and not as liable to user error as no manual reduction is necessary and the structure of a scalar second-order difference equation is not imposed on the model. Secondly, Mankiw and Reis (2007) solve the model by imposing a stability condition for inflation prematurely. This difference certainly does not in and of itself pose a problem with respect to the method presented here, as this paper imposes an autonomous recursion prematurely; both are liable to some approximation error. Both the method of Mankiw and Reis (2007) and the method here exploit readily available and fast implementations of Gaussian elimination to solve a (block) tri-diagonal system. That the autonomous recursion consistent with the limiting coefficients is imposed instead of the boundary conditions themselves allows fewer non-autonomous coefficients to be added to achieve a given relative error.
+In Figure (4), for varying values of  (the convergence criterium defined in the previous section) and N (the number of MA coefficients included before the boundary conditions are imposed in the method of Mankiw and Reis (2007)) the computation time and relative errors associated with solving the model in Mankiw and Reis (2007) are compared. The interpretation of computation times, however, needs to be tempered by at least two differences in the methods used. Firstly, the method here solves for the joint responses of ten endogenous variables to five exogenous shocks as opposed to six endogenous variables and their responses to five exogenous shocks solved serially as in Mankiw and Reis (2007). Secondly, the method of this paper entirely avoids the several pages of "tedious algebra" included in and excluded from the technical appendix of Mankiw and Reis (2007) to arrive at their solution. That Mankiw and Reis's (2007) method solves the model more quickly than the method presented here for large relative errors is most likely due to the initial fixed costs of the programs associated with this paper that attack the problem with a higher level of generality. The method presented in this paper, however, requires a smaller increase in computational time for a given increase in the level of accuracy; at some level of accuracy, the method here surpasses that of Mankiw and Reis (2007) in terms of computation time and remains superior until numerical limitations on the QZ decomposition are reached. Less than two seconds are needed to solve the model using the convergence criterium  = eps(0), incorporating 3651 lagged expectations, thus including thrice as many lagged expectations in half as much time. That the two methods perform comparably in terms of computation time would seem to give the method of this paper an enormous advantage, as the method derived here is not model specific and does not require any manual reformulation or variable reduction on behalf of the user.
+When the model to be analyzed possesses no lagged expectations, the method here fits within the class of solution methods used throughout the literature. For models with lagged expectations, the method derived in this paper is superior to current models with respect to computation and/or implementation times. With the exception of the method derived by Wang and Wen (2006), the method here is the only non-model-specific one and can be readily applied to existing and new DSGE models both with and without lagged expectations efficiently.
+21
+
+100 10-2 10-4
+
+||Method Here(V arying )-Method Here(=eps(0))||2 ||Method Here(=eps(0))||2
+||Method Here(V arying )-Method Mankiw Reis(T =4000)||2 ||Method Mankiw Reis(T =4000)||2
+||Method Mankiw Reis(V arying T )-Method Here(V arying )||2 ||Method Here(V arying )||2
+||Method Mankiw Reis(V arying T )-Method Mankiw Reis(T =4000)||2 ||Method Mankiw Reis(T =4000)||2
+
+Relative Error (Euclidean Norm)
+
+10-6
+
+22
+
+10-8
+
+10-10
+
+10-12
+
+10-14
+
+10-3
+
+10-2
+
+10-1
+
+100
+
+101
+
+102
+
+103
+
+Time in Seconds
+
+Figure 4: Comparison of the Method Here and that of Mankiw and Reis (2007) Computation Time versus Accuracy
+
+6 The General Procedure and Use of the Algorithm
+In this section, I shall break the method of solution into several steps and outline the necessary inputs for the algorithms following Uhlig (1999).
+The solution procedure can be characterized by the following steps: · Derive and collect the necessary equations for an equilibrium; i.e. first-
+order conditions, budget constraints, market-clearing constraints, and exogenous processes · Solve for the steady state(s) · Log-linearize the necessary equations · Define the matrices needed for the equations (1) and (2) · Analyze the results The necessary methods for the first three steps can be found in, e.g., Uhlig (1999). The software package requires (in this order): · Numerical values for parameters · Steady-state relationships in terms of parameters · Labels for the endogenous and exogenous variables in the order in which they appear in the vectors Yt and Wt · Matrices A0, B0, C0, F0, G0 dependant on parameters and steady states · Declaration of the value of I as an integer or "infinity" · Matrix functions Aj, Bj, Cj, Fj , Gj as strings dependant on parameters, steady states, and j for j = 1 to I · Matrix N , the VAR(1) coefficients of the exogenous processes · Matrix , the covariance matrix of the exogenous innovations No definitions or reformulations of the necessary conditions are required. The only new (compared to standard methods such as Uhlig (1999)) technique required is the formulation of the matrix functions. The user's guide associated with the software9 explains how this is done and works through a couple of examples.
+9Software with examples available at: http://www.wm.tu-berlin.de/~ makro/Meyer-Gohde/Working-Papers.htm
+23
+
+7 Conclusion
+I have derived a method for solving linear rational expectations models with lagged expectations based on a QZ decomposition for the autonomous recursion of the MA coefficients and a sparse block tri-diagonal system of equations for the non-autonomous coefficients. With lagged expectations reaching back into the infinite past, the non-autonomous recursion is replaced after some iteration (consistent with a convergence criterium) with the autonomous recursion implied by the limiting coefficients of the original non-autonomous recursion.
+The software provided minimizes user input, eliminating intensive reformulation and variable reduction, and provides solutions with considerably less computation time than existing methods. To further simplify the work on behalf of the user, the software package calculates impulse responses to innovations, simulated and population moments, provides simulations, and automatically calculates impulse responses to anticipated (or pre-announced) innovations. This final feature, a direct consequence of the MA representation Taylor (1986), should make the software attractive even for users not interested in models with lagged expectations and the package as a whole should facilitate the analysis of models with lagged expectations.
+The solution method derived here fits favorably in the class of standard methods when no lagged expectations are present. When lagged expectations are present, the solution method here is computationally superior to standard methods and existing general methods for models with lagged expectations, achieving an at least equal degree of computational efficiency as the most efficient model-specific solution method presented in Mankiw and Reis (2007). The frequently encountered shortcut of truncating the number of lagged expectations can be avoided while still achieving a level of computational efficiency compatible with, e.g., Bayesian estimation techniques. The investigation and estimation of models containing lagged expectations ought now to be limited only by available data and not the computational capabilities of available solution methods.
+24
+
+References
+Anderson, G. S. (2000): "A reliable and computationally efficient algorithm for imposing the saddle point property in dynamic models," Discussion paper.
+(2006): "Solving linear rational expectations models: a horse race," Discussion paper.
+Anderson, G. S., and G. Moore (1985): "A linear algebraic procedure for solving linear perfect foresight models," Economics Letters, 17(3), 247­252.
+Andr´es, J., J. D. Lo´pez-Salido, and E. Nelson (2005): "Sticky-price models and the natural rate hypothesis," Journal of Monetary Economics, 52(5), 1025­1053.
+Blanchard, O. J., and C. M. Kahn (1980): "The Solution of Linear Difference Models under Rational Expectations," Econometrica, 48(5), 1305­11.
+Burmeister, E. (1980): "On Some Conceptual Issues in Rational Expectations Modeling," Journal of Money, Credit and Banking, 12(4), 800­816.
+Golub, G. H., and C. F. van Loan (1989): Matrix Computations. The Johns Hopkins University Press, second edn.
+Keen, B. D. (2007): "Sticky Price And Sticky Information Price-Setting Models: What Is The Difference?," Economic Inquiry, 45(4), 770­786.
+Kiley, M. T. (2007): "A Quantitative Comparison of Sticky-Price and StickyInformation Models of Price Setting," Journal of Money, Credit and Banking, 39(s1), 101­125.
+King, R. G., and M. W. Watson (1998): "The Solution of Singular Linear Difference Systems under Rational Expectations," International Economic Review, 39(4), 1015­26.
+(2002): "System Reduction and Solution Algorithms for Singular Linear Difference Systems under Rational Expectations," Computational Economics, 20(1-2), 57­86.
+Klein, P. (2000): "Using the Generalized Schur Form to Solve a Multivariate Linear Rational Expectations Model," Journal of Economic Dynamics and Control, 24(10), 1405­1423.
+Korenok, O. (2007 In Press): "Empirical Comparison of Sticky Price and Sticky Information Models," Journal of Macroeconomics.
+Korenok, O., and N. R. Swanson (2007): "How Sticky Is Sticky Enough? A Distributional and Impulse Response Analysis of New Keynesian DSGE Models," Journal of Money, Credit and Banking, 39(6), 1481­1508.
+Mankiw, N. G., and R. Reis (2002): "Sticky Information Versus Sticky Prices: A Proposal To Replace The New Keynesian Phillips Curve," The Quarterly Journal of Economics, 117(4), 1295­1328.
+(2007): "Sticky Information in General Equilibrium," Journal of the European Economic Association, 5(2-3), 603­613.
+25
+
+McCallum, B. T. (2003): "Multiple-Solution Indeterminacies in Monetary Policy Analysis," Journal of Monetary Economics, 50(5), 1153­1175.
+Muth, J. F. (1961): "Rational Expectations and the Theory of Price Movements," Econometrica, 29(3), 315­335.
+Paustian, M., and E. Pytlarczyk (2006): "Sticky contracs or sticky information: Evidence from an estimated Euro area DSGE model," mimeo.
+Sims, C. A. (2001): "Solving Linear Rational Expectations Models," Computational Economics, 20(1-2), 1­20.
+Taylor, J. B. (1986): "Econometric Approaches to Stabilization Policy in Stochastic Models of Macroeconomic Fluctuations," in Handbook of Econometrics, ed. by Z. Griliches, and M. D. Intriligator, vol. 3 of Handbook of Econometrics, chap. 34, pp. 1997­2055. Elsevier.
+Trabandt, M. (2007): "Sticky Information vs. Sticky Prices: A Horse Race in a DSGE Framework," Sveriges Riksbank Working Paper Series 209, Sveriges Riksbank.
+Uhlig, H. (1999): "A Toolkit for Analysing Nonlinear Dynamic Stochastic Models Easily," in Computational Methods for the Study of Dynamic Economies, ed. by R. Marimon, and A. Scott, chap. 3, pp. 30­61. Oxford University Press.
+Wang, P., and Y. Wen (2006): "Solving Linear Difference Systems with Lagged Expectations by a Method of Undetermined Coefficients," Working Papers 2006-003, Federal Reserve Bank of St. Louis.
+Wang, P., and Y. Wen (2007): "Inflation dynamics: A cross-country investigation," Journal of Monetary Economics, 54(7), 2004­2031.
+26
+
+A Exposition on the Existence of Equation (18)
+
+Assuming that Nj+1 = Nj (i.e., the exogenous process is a VAR(1)), and defining
+
+Hk =
+
+T2-21S22 k Q2
+
+F0Nj+1+k + G0Nj+k 0
+
+ = T2-21S22
+
+
+
+=
+
+Q2
+
+F0N j+1 + G0N j 0
+
+then
+
+Hk = kk  Hk+1 = Hk  vec (Hk+1) = (  ) vec (Hk)
+
+defining
+
+ =   
+
+then the stability of this recursion (and thusly the convergence of the limit) is determined by
+eig () = vec eig () eig ()
+
+but
+
+as,
+
+by definition,
+
+|eig () |
+
+<
+
+1 gu
+
+then
+
+|eig () |
+
+<
+
+1
+
+so long as
+
+|eig () |
+
+
+
+gu.
+
+Thus, so long as the moving-average coefficients of the exogenous process follow a
+
+recursion that itself satisfies the uniform growth restriction, (18) holds, allowing
+
+(17) to be well defined.
+
+27
+
+SFB 649 Discussion Paper Series 2007
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Trade Liberalisation, Process and Product Innovation, and Relative Skill Demand" by Sebastian Braun, January 2007.
+002 "Robust Risk Management. Accounting for Nonstationarity and Heavy Tails" by Ying Chen and Vladimir Spokoiny, January 2007.
+003 "Explaining Asset Prices with External Habits and Wage Rigidities in a DSGE Model." by Harald Uhlig, January 2007.
+004 "Volatility and Causality in Asia Pacific Financial Markets" by Enzo Weber, January 2007.
+005 "Quantile Sieve Estimates For Time Series" by Jürgen Franke, JeanPierre Stockis and Joseph Tadjuidje, February 2007.
+006 "Real Origins of the Great Depression: Monopolistic Competition, Union Power, and the American Business Cycle in the 1920s" by Monique Ebell and Albrecht Ritschl, February 2007.
+007 "Rules, Discretion or Reputation? Monetary Policies and the Efficiency of Financial Markets in Germany, 14th to 16th Centuries" by Oliver Volckart, February 2007.
+008 "Sectoral Transformation, Turbulence, and Labour Market Dynamics in Germany" by Ronald Bachmann and Michael C. Burda, February 2007.
+009 "Union Wage Compression in a Right-to-Manage Model" by Thorsten Vogel, February 2007.
+010 "On -additive robust representation of convex risk measures for unbounded financial positions in the presence of uncertainty about the market model" by Volker Krätschmer, March 2007.
+011 "Media Coverage and Macroeconomic Information Processing" by Alexandra Niessen, March 2007.
+012 "Are Correlations Constant Over Time? Application of the CC-TRIGt-test to Return Series from Different Asset Classes." by Matthias Fischer, March 2007.
+013 "Uncertain Paternity, Mating Market Failure, and the Institution of Marriage" by Dirk Bethmann and Michael Kvasnicka, March 2007.
+014 "What Happened to the Transatlantic Capital Market Relations?" by Enzo Weber, March 2007.
+015 "Who Leads Financial Markets?" by Enzo Weber, April 2007. 016 "Fiscal Policy Rules in Practice" by Andreas Thams, April 2007. 017 "Empirical Pricing Kernels and Investor Preferences" by Kai Detlefsen,
+Wolfgang Härdle and Rouslan Moro, April 2007. 018 "Simultaneous Causality in International Trade" by Enzo Weber, April
+2007. 019 "Regional and Outward Economic Integration in South-East Asia" by
+Enzo Weber, April 2007. 020 "Computational Statistics and Data Visualization" by Antony Unwin,
+Chun-houh Chen and Wolfgang Härdle, April 2007. 021 "Ideology Without Ideologists" by Lydia Mechtenberg, April 2007. 022 "A Generalized ARFIMA Process with Markov-Switching Fractional
+Differencing Parameter" by Wen-Jen Tsay and Wolfgang Härdle, April 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "Time Series Modelling with Semiparametric Factor Dynamics" by Szymon Borak, Wolfgang Härdle, Enno Mammen and Byeong U. Park, April 2007.
+024 "From Animal Baits to Investors' Preference: Estimating and Demixing of the Weight Function in Semiparametric Models for Biased Samples" by Ya'acov Ritov and Wolfgang Härdle, May 2007.
+025 "Statistics of Risk Aversion" by Enzo Giacomini and Wolfgang Härdle, May 2007.
+026 "Robust Optimal Control for a Consumption-Investment Problem" by Alexander Schied, May 2007.
+027 "Long Memory Persistence in the Factor of Implied Volatility Dynamics" by Wolfgang Härdle and Julius Mungo, May 2007.
+028 "Macroeconomic Policy in a Heterogeneous Monetary Union" by Oliver Grimm and Stefan Ried, May 2007.
+029 "Comparison of Panel Cointegration Tests" by Deniz Dilan Karaman Örsal, May 2007.
+030 "Robust Maximization of Consumption with Logarithmic Utility" by Daniel Hernández-Hernández and Alexander Schied, May 2007.
+031 "Using Wiki to Build an E-learning System in Statistics in Arabic Language" by Taleb Ahmad, Wolfgang Härdle and Sigbert Klinke, May 2007.
+032 "Visualization of Competitive Market Structure by Means of Choice Data" by Werner Kunz, May 2007.
+033 "Does International Outsourcing Depress Union Wages? by Sebastian Braun and Juliane Scheffel, May 2007.
+034 "A Note on the Effect of Outsourcing on Union Wages" by Sebastian Braun and Juliane Scheffel, May 2007.
+035 "Estimating Probabilities of Default With Support Vector Machines" by Wolfgang Härdle, Rouslan Moro and Dorothea Schäfer, June 2007.
+036 "Yxilon ­ A Client/Server Based Statistical Environment" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, June 2007.
+037 "Calibrating CAT Bonds for Mexican Earthquakes" by Wolfgang Härdle and Brenda López Cabrera, June 2007.
+038 "Economic Integration and the Foreign Exchange" by Enzo Weber, June 2007.
+039 "Tracking Down the Business Cycle: A Dynamic Factor Model For Germany 1820-1913" by Samad Sarferaz and Martin Uebele, June 2007.
+040 "Optimal Policy Under Model Uncertainty: A Structural-Bayesian Estimation Approach" by Alexander Kriwoluzky and Christian Stoltenberg, July 2007.
+041 "QuantNet ­ A Database-Driven Online Repository of Scientific Information" by Anton Andriyashin and Wolfgang Härdle, July 2007.
+042 "Exchange Rate Uncertainty and Trade Growth - A Comparison of Linear and Nonlinear (Forecasting) Models" by Helmut Herwartz and Henning Weber, July 2007.
+043 "How do Rating Agencies Score in Predicting Firm Performance" by Gunter Löffler and Peter N. Posch, August 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+044 "Ein Vergleich des binären Logit-Modells mit künstlichen neuronalen Netzen zur Insolvenzprognose anhand relativer Bilanzkennzahlen" by Ronald Franken, August 2007.
+045 "Promotion Tournaments and Individual Performance Pay" by Anja Schöttner and Veikko Thiele, August 2007.
+046 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, August 2007.
+047 "Risiken infolge von Technologie-Outsourcing?" by Michael Stephan, August 2007.
+048 "Sensitivities for Bermudan Options by Regression Methods" by Denis Belomestny, Grigori Milstein and John Schoenmakers, August 2007.
+049 "Occupational Choice and the Spirit of Capitalism" by Matthias Doepke and Fabrizio Zilibotti, August 2007.
+050 "On the Utility of E-Learning in Statistics" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, August 2007.
+051 "Mergers & Acquisitions and Innovation Performance in the Telecommunications Equipment Industry" by Tseveen Gantumur and Andreas Stephan, August 2007.
+052 "Capturing Common Components in High-Frequency Financial Time Series: A Multivariate Stochastic Multiplicative Error Model" by Nikolaus Hautsch, September 2007.
+053 "World War II, Missing Men, and Out-of-wedlock Childbearing" by Michael Kvasnicka and Dirk Bethmann, September 2007.
+054 "The Drivers and Implications of Business Divestiture ­ An Application and Extension of Prior Findings" by Carolin Decker, September 2007.
+055 "Why Managers Hold Shares of Their Firms: An Empirical Analysis" by Ulf von Lilienfeld-Toal and Stefan Ruenzi, September 2007.
+056 "Auswirkungen der IFRS-Umstellung auf die Risikoprämie von Unternehmensanleihen - Eine empirische Studie für Deutschland, Österreich und die Schweiz" by Kerstin Kiefer and Philipp Schorn, September 2007.
+057 "Conditional Complexity of Compression for Authorship Attribution" by Mikhail B. Malyutov, Chammi I. Wickramasinghe and Sufeng Li, September 2007.
+058 "Total Work, Gender and Social Norms" by Michael Burda, Daniel S. Hamermesh and Philippe Weil, September 2007.
+059 "Long-Term Orientation in Family and Non-Family Firms: a Bayesian Analysis" by Jörn Hendrich Block and Andreas Thams, October 2007.
+060 "Kombinierte Liquiditäts- und Solvenzkennzahlen und ein darauf basierendes Insolvenzprognosemodell für deutsche GmbHs" by Volodymyr Perederiy, October 2007.
+061 "Embedding R in the Mediawiki" by Sigbert Klinke and Olga ZlatkinTroitschanskaia, October 2007.
+062 "Das Hybride Wahlmodell und seine Anwendung im Marketing" by Till Dannewald, Henning Kreis and Nadja Silberhorn, November 2007.
+063 "Determinants of the Acquisition of Smaller Firms by Larger Incumbents in High-Tech Industries: Are they related to Innovation and Technology Sourcing? " by Marcus Wagner, November 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+064 "Correlation vs. Causality in Stock Market Comovement" by Enzo Weber, October 2007.
+065 "Integrating latent variables in discrete choice models ­ How higherorder values and attitudes determine consumer choice" by Dirk Temme, Marcel Paulssen and Till Dannewald, December 2007.
+066 "Modelling Financial High Frequency Data Using Point Processes" by Luc Bauwens and Nikolaus Hautsch, November 2007.
+067 "A stochastic volatility Libor model and its robust calibration" by Denis Belomestny, Stanley Matthew and John Schoenmakers, December 2007
+068 "Why Votes Have a Value" by Ingolf Dittmann, Dorothea Kübler, Ernst Maug and Lydia Mechtenberg, December 2007.
+069 "Solving Linear Rational Expectations Models with Lagged Expectations Quickly and Easily" by Alexander Meyer-Gohde, December 2007.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

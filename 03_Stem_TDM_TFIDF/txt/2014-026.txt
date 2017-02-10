@@ -1,0 +1,2337 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2014-026
+Credit Risk Calibration based on CDS Spreads
+Shih-Kang Chao* Wolfgang Karl Härdle*
+Hien Pham-Thu*
+* Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Credit Risk Calibration based on CDS Spreads
+Shih-Kang Chao, Wolfgang Karl H¨ardle§, Hien Pham-Thu,¶
+May 9, 2014
+Abstract
+As observed in the financial crisis, CDS spreads tend to increase simutaneously as a reaction to common shocks. Focusing on the spillover effects triggered by extreme events, we propose a credit risk analysis tool by applying credit default swap spread returns to the concept of CoVaR suggested by Adrian and Brunnermeier (2011). The interconnection and mutual impact on credit spreads are investigated based on CDS spreads of the biggest derivative dealers in the market. By including factors identified as determinants of CDS spreads to the set of explanatory variables such as equity return and equity volatility and implementing the variable selection technique least absolute shrinkage and selection operator (LASSO), the results demonstrate an improved performance in CDS spread VaR calculation. The enhancement is more significant in pre-crisis period but both methodologies tend to overestimate risk in turbulent period. Further, non-linear effects between CDS spreads in extreme events are captured by the introduction of a partial linear model in the CoVaR calculation.
+JEL: G12, G13, G23 Keywords: CDS, VaR, CoVaR, stressed VaR, Central Counterparty, Quantile Regression
+Financial support from the Deutsche Forschungsgemeinschaft (DFG) via SFB 649 "Economic Risk" and International Research Training Group (IRTG) 1792 are gratefully acknowledged.
+Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. - Center for applied Statistics and Economics, Humboldt-Universita¨t zu Berlin, Unter den Linden 6, 10099 Berlin, Germany. Email: shihkang.chao@cms.hu-berlin.de
+Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. - Center for applied Statistics and Economics, Humboldt-Universita¨t zu Berlin, Unter den Linden 6, 10099 Berlin, Germany. Email: haerdle@wiwi.huberlin.de
+§School of Business, Singapore Management University, 50 Stamford Road, Singapore 178899, Singapore.
+¶Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. - Center for applied Statistics and Economics, Humboldt-Universita¨t zu Berlin, Unter den Linden 6, 10099 Berlin, Germany. Email: hien.phamthu@cms.hu-berlin.de
+1
+
+1. Introduction
+Nowaday derivatives are standard elements of the financial market and cover a wide variety of products. There are listed derivatives such as exchange traded futures and options but also over-the-counter (OTC) products such as forwards or swaps traded bilaterally by financial institutions, fund managers, and corporate treasurers. The flexibility of OTC derivatives in the area of hedging and risk management, price discovery and enhancement of liquidity is one of the reasons for the fast growth of these products in the market (Acharya et al. (2009)). Since the financial crisis unfolded several vulnerabilities in OTC trading (lack of transparency, interconnectedness and change in counterparty credit risk) regulators advocate for the clearing of OTC derivative transactions through central counterparties. This has been legally established in the DoddFrank Wall Street Reform and Consumer Protection Act of 2010 for the United States of America (SEC (2010)) and regulatory adopted by the European Parliament and The Council (ESMA (2013)). The Basel Committee supports this attempt by offering incentives for centrally cleared OTC derivative transactions through counterparty credit risk reforms under Basel III framework (BIS (2011)). The main objective of these acts are to centrally control the counterparty credit risk of those trades and to anticipate systemic risk mitigation. This regulation is facing two main challenges. One is the implementation of standardized contractual terms and operational processes. A legal standardisation is important for netting and effective risk management whereas operational standardisation of trade terms is vital for setting initial and variation margins. The second challenge is an appropriate counterparty credit risk allocation for an adequate risk controlling. A mapping of risk contribution to individual counterparties has two main enhancements. Firstly, it provides further information how the default or distress of one bank impacts the system. Secondly, it reduces the incentive for risk-seeking behavior and fosters effective risk monitoring.
+The recent financial crisis and its aftermath disclose the boost in interconnectedness within financial market participants. High correlation among financial firms can usually be explained by simultaneous response to common risk factors. Moreover, in stressed period market participants are engaged progressively in "flight to quality" when market participants are forced to reduce risk and invest in securities with good credit ratings. Further, the increased trading of derivatives contributes to the high sensitivity to counterparty credit risk in the financial industry. Thus, mutual impacts play an important role within the system. As a consequence, monitoring of individual risk is not sufficient and systemic risk contribution needs to be considered. The interconnection and
+2
+
+externality effects of financial institutions have already been examined by Acharya et al. (2010), Adrian and Brunnermeier (2011), Hautsch et al. (2013), Brownlees and Engle (2010) or Du¨llmann and Sosinska (2007), Upper and Worm (2004) with focus on the German banking sector. Further, the Basel Committee on Banking Supervision included supplementary methodology in December 2011 to identify systemically important banks (Global Systemically Important Banks (G-SIBs)). The assessment methodology is based on five categories: size, interconnectedness, substituability, cross-border activity, and complexity of the bank.
+
+In this paper we propose a macro-prudential view from a central counterparty's perspective. This research is focused on the measurement of spillover effects of credit risk by using credit default swaps spreads as a proxy for credit risk. The scope of our work is the analysis of counterparty credit risk effects of a distressed counterparty on other market members. This requires the study of 'tail events' given that one of the market participants is in stress. Quantitatively speaking this falls into the category of VaR (value at risk) and more precisely conditional value at risk. Therefore, we employ CoVaR of Adrian and Brunnermeier (2011). It denotes the maximum loss in time t + d which will only be exceeded under a confidence level of  , where 0 <  < 1. This measure is expressed statistically by the  -quantile of the conditional distribution of returns
+
+VaRt+d = inf {x  R : P(Xt+d  x | Ft)   } ,
+
+(1)
+
+where Ft is the information set up to time t. The CoVaR is defined as the VaR of an institution j conditional on an event of
+institution i denoted by C(Xi).
+
+Pr Xj  CoVaRj|C(Xi) | C(Xi) = .
+
+(2)
+
+Subsequently, the systemic contribution of each institution is determined by the delta CoVaR ( CoVaR) level conditional on the median state of the institution and the status where the institution is under distress
+
+CoVaRj|i = CoVaRj|Xi=VaRi - CoVaRj|Xi=Median
+
+(3)
+
+This quantity exhibits the marginal contribution of individual financial institutions to the remainder within the system. The benefit in applying CoVaR measure is versatile. The main advantage lies in its ability to reflect the effect of the distress of one individual
+
+3
+
+institution on another firm based on the stand-alone risk level. In addition, CoVaR is effective for the identification of systemically relevant counterparties. This measure reflects the concept of the "stressed VaR" proposed by Basel Committee to supplement the VaR framework - a risk measure of stand-alone risk under extreme and volatile market conditions.
+In order to capture credit risk properly we add further variables which are identified to have major impact on CDS spreads including variables at firm level. Since this inclusion greatly inflates the number of variables, multicollinearity or strong correlation between covariates might cause inadequate error in the estimation results of the regression. Therefore, we apply least absolute shrinkage and selection operator (LASSO) as a simple variable selection technique to overcome this problem. As the proposed method generates less exceedance in backtesting our method improves the performance in the VaR prediction in comparison to the earlier methodology.
+Corresponding to Espinosa et al. (2013) we discover that the most relevant coefficients for CDS spreads VaR are the VIX and the liquidity spread. The LASSO technique reveals that CDS spread returns can be mostly solely described by the covariate VIX. This could result from the fact that market volatility have a high impact on the remaining variables as the CDS spread returns are described by more coefficients when VIX is excluded from the set of explanatory variables. In contrast to Breitenfellner and Wagner (2012) we find a predominant negative influence of stock market volatitlity on spread changes relative to stock market return. The influence increases during the crisis. This result goes along with the findings from Alexander and Kaeck (2008) for crisis period. The CoVaR from our research reveals that the effect of distress varies between banks and there are institutions which have a higher effects on their counterparties and therefore can be considered as more systemic relevant than others.
+The remainder of the paper is organised as follows. The next section introduces the structure and risk management of a central counterparty. Section 2 provides a short discussion about the application of CDS spreads in credit risk predictions. Thereafter, the methodology is introduced and data are described. An empirical anaylsis is given in section 5. Section 6 concludes and presents further remarks.
+4
+
+2. Concept of Central Counterparty
+The OTC derivatives market is facing many changes. One of these major changes is the mandatory clearing of standardized OTC derivatives via central clearing counterparty (CCP). Standardized OTC derivatives offer pre-determined terms in legal and operational specifications which are provided by the ISDA master agreement ISDA (2013). A CCP can be seen as a counterparty which interposes itself between the initial counterparties of the derivative contract and takes the position as a seller to the original buyer and the position of a buyer to the original seller. The original bilateral relationship between the counterparties is then withdrawn. The main benefit of this new structure lies in the reduction of the total exposure. In the example shown in figure 1, the total exposure amounts to 760 without netting. The total exposure is reduced from 760 to 420 in case netting effects are taken into account. Herein, the long and short position between two counterparties are offset. Multilateral netting further reduces the total exposure of the trades from 420 to 180. It is important to note that the exposure reduces or increases when there are more than one CCPs which clear different classes of OTC derivatives (Duffie et al. (2010), Duffie and Zhu (2011), Cont and Kokholm (2013)).
+Due to the replacement of the original contract by two new contracts, the positions with opposite direction are automatically offset and CCP barely faces less market risk. However, the CCP internalizes counterparty credit risk from its clearing members. When a counterparty defaults, the CCP has to unwind the defaulted position. In case replacement costs exceed the deposit collateral the remaining losses are then mutualized to their clearing members.
+Figure 1: Market structure of OTC derivatives market with and without central clearing counterparty
+Currently, CCPs rely on different risk management mechanism such as stringent membership access, initial margin, variation margin and default fund contribution. Ini-
+5
+
+tial margins are deposits required by opening new position and cover the extreme changes of potential future exposures whereas variation margin is needed to cover daily changes in mark-to-market value. Default fund contribution is an additional deposit where each clearing member has to contribute. It represents further buffer in case the occurred losses exceed the variation and initial margins. However, there still exists a lack of standard in the risk management mechanism of a CCP (Duffie et al. (2010)). There is a necessity in a distinct credit risk mapping in the calculation of the default fund contribution based on the severeness of the spillover effects. As the default fund covers the loss from extreme events, there is a need to find a stressed risk measure reflecting severe changes in the credit spreads. Default funds' relevant losses occur when a counterparty defaults and losses are not fully covered by deposit collateral. Further, a CCP needs to consider the mark-to-market changes of derivative trades initiated by distressed derivative dealers. An application of our work is the identification of credit risk contribution of individual clearing members to the central clearing counterparty (CCP).
+To understand the challenges a CCP faces in the real world, we refer to the insurance corporation American International Group (AIG) as an example. This monoline was struggling from significant losses in securities lending businesses, mark-to-market losses on CDS and associated margin calls as a consequence of excessive CDS selling. Due to lack in liquidity and downgrade by the major rating agencies, AIG could not fulfill all collateral requirements. In order to avoid spill-over effects caused by AIG's bankruptcy, the company was bailed out by the US government. AIG is an example worth mentioning because it could not fullfil the collateral requirements resulting from mark-to-market changes in derivatives among other circumstances. As a consequence, the question arises whether a central counterparty can prevent financial market participants from such excessive CDS selling and manage the risks implied by distressed market environment? By offering clearing and settlement procedures, the CCP would be highly sensitive to counterparty credit risk due to changes in market value and therefore depends on accurate future exposure simulation methods. Therefore, the central clearing counterparty should put emphasis on the identification of risks triggered by default of a clearing member and take precautionary measures.
+Further discussion of the structure and the risk of central counterparty is to be found in Pirrong (2011). Economical analysis on the reduction of counterparty credit risk by introducing a unique CCP is given in Duffie and Zhu (2011). Duffie and Zhu show that counterparty credit risk can diminish in case there is an unique existing CCP but also
+6
+
+point out that multiple CCP might decrease netting opportunities and increase risk. Arora et al. (2012) support and complement the results provided by Duffie and Zhu (2011).
+3. Data
+3.1. Credit Default Swaps Spread and its determinants
+Until recently, many papers have been published referring to the evaluation of counterparty risk by using CDS spreads as a proxi for credit risk. A credit default swap (CDS) is an insurance contract on debt of a reference entity. The buyer of the CDS receives a payment in case the reference entity defaults and makes a fixed payment (usually quarterly) to the CDS seller as long as default has not been occurred. The spread on the reference entity is expressed as a fair premium based on the expected loss given default and the probability default.
+Towards credit risk assessment by rating, CDS spreads are more benificial as they are traded market indicators for credit risk and react quickly to market events. Further, they directly reflect the market's perception of credit risk (Longstaff et al. (2007)) and express the implied price of risk on the reference entity to a certain extent. This is illustrated by the soaring CDS spread of AIG during the financial crisis in 2. Another example is Bear Stearns which was in financial distress from mid February until mid March in 2008. In mid February, the spread of a CDS on Bear Stearns' senior unsecured debt with 5 year maturity was located at 100 basis points. In mid March, it rose to almost 250 basis points. When the crisis by Bear Stearns was solved through its sale to JP Morgan Chase arranged by the Fed, the spreads reverted within a month to its midFebruary levels. This example taken from Acharya and Subrahmanyam (2008) shows the impacts of distress and new information on CDS spreads movements. In addition, it also reveals the relevant impact of liquidity risk. The scarcity of CDS seller could also lead to high CDS spreads which automatically increases the concentration on the market. CDS spreads not only reflect the credit risk of the underlying entity, but also include the credit risk of the counterparty providing the protection.
+Our research raises the question how to forecast CDS spreads and how to quantify the effect of correlation within a portfolio of CDS. By using the macro variables observed in the market, we are able to analyse the effect of market development on the change of CDS spreads for individual counterparty. It is obvious that counterparties which
+7
+
+Figure 2: AIG bid-ask level
+show high systemic importance and high dependence to market movements in its CDS spread should meet higher capital requirements than others, which is also applied by the standard regulatory tools such as supervision and risk-based capital requirements in Duffie (2010). Since the group of derivative dealers and especially CDS dealers is small, it increases the interconnectedness on the dealer market and could lead to a rise in replacement costs in case a dealer defaults and other market participants have to amend the derivative trade. Therefore, CoVaR would not only give an credit risk overview of one counterparties to the remaining counterparty of the portfolio. Furthermore, it also provides the basis for the overall credit risk effect on replacement cost of a derivative contract. This effect is illustrated in the high bid-ask spreads of CDS derivatives and IRS during and after the financial crisis of the distressed firm. The credit risk from financial institutions are not only determined by their fundametals but also affected by spillover effects created by the condition of the macroeconomics and conditions of other system relevant financial institutions on the market.
+3.2. Data selection
+The CDS data are obtained from Bloomberg and cover the period from September 12, 2002 to December 31, 2011. The data set is divided into two periods which are considered as pre-crisis and crisis. The shock event is marked by the default of Lehman on September 16, 2008. CDS spreads of fourteen biggest derivative dealers in the market are included, which contain Bank of America (BoA), Barclays (BARC), BNP Paribas
+8
+
+4000
+
+3000
+
+2000
+
+CDS spread
+
+(BNP), Citigroup (Citi), Credit Suisse (CS), Deutsche Bank (DB), Goldman Sachs (GS), HSBC (HSBC), J.P. Morgan (JPM), Morgan Stanley (MS), Royal Bank of Schottland (RBS), Soci´et´e G´en´erale (SG), UBS, and Lehman Brothers. In addition, we add the monoline AIG to the variable set to capture extreme high spread development. Until the shock event in 2008, the majority of the financial institutions receive an AA rating from Standard and Poor's (S&P). However, the CDS spreads show significant movement after Lehman's default in September 2008. At the end of 2008 and the beginning of 2009, AA-rated banks were downgraded to A level except for Barclays, BNP and HSBC. In the late post shock period, all financial institutions are rated on an A level by S&P. The overall sample contains 2208 observations for all institutions except for Lehman and a descriptive statistic overview of CDS spread level and CDS spread log returns is given in table 1 and 2. The spread curves of selected representative institutions are shown in Figure 3.
+Citi BoA Barclay RBS Lehman AIG
+12.09.2002 25.01.2004 08.06.2005 21.10.2006 04.03.2008 17.07.2009 29.11.2010 Date
+Figure 3: CDS spreads of the representative 5 global financial institutions and one global insurance company
+As CDS spread determinants we considered in total 37 independent variables. The panel data covers 7 state variables suggested by Adrian and Brunnermeier (2011). It includes the VIX for implied volatility of the stock market reported by Chicago Board Options Exchange. The short term liquidity spread which is measured by the difference between the three-month repo rate and three-month bill rate. The change in the three-month Treasury bill rate from the Federal Reserve Board is also included as its
+9
+
+1000
+
+0
+
+Table 1: Descriptive statistics of CDS spreads in basis point
+
+CITI BOA BARCLAYS BNP CS DB GS HSBC JPM MS RBS SG UBS LEHMAN AIG
+
+Mean
+104,795 87,620 65,094 50,618 62,647 59,720 95,775 45,008 61,303
+123,375 83,709 64,678 63,464 59,429
+279,207
+
+Std. Dev
+121,726 95,516 68,200 59,424 52,799 53,089 89,719 41,161 43,124
+138,067 94,375 78,502 70,687 71,726
+500,674
+
+Skewness
+1,748 1,586 0,991 2,168 0,978 1,087 1,561 0,996 0,979 2,521 1,124 2,124 1,316 3,411 3,096
+
+Kurtosis
+3,498 2,397 -0,066 5,560 0,215 0,762 2,116 0,114 0,291 10,767 0,474 5,274 1,337 13,356 11,119
+
+Min
+7,438 8,003 5,594 5,375 8,397 9,550 18,750 4,937 11,450 17,833 3,964 5,964 4,500 18,821 8,156
+
+Median
+34,709 32,167 23,209 23,268 45,509 38,035 53,750 25,000 46,492 55,488 23,750 24,317 21,125 34,402 42,667
+
+Max
+665,532 483,064 278,637 359,586 263,295 311,601 545,143 183,530 232,301 1239,997 395,937 440,265 361,675 641,911 3758,987
+
+Autocorr
+0,996 0,997 0,997 0,997 0,996 0,996 0,993 0,997 0,995 0,984 0,998 0,997 0,997 0,991 0,992
+
+Table 2: Descriptive statistics of CDS spread log returns. Mean and median of CDS spread returns of all financial institution are almost at zero and therefore are not shown in the table.
+
+CITI BOA BARCLAYS BNP CS DB GS HSBC JPM MS RBS SG UBS LEHMAN AIG
+
+Std. Dev
+0.023 0.023 0.021 0.021 0.019 0.020 0.020 0.019 0.019 0.023 0.024 0.020 0.020 0.019 0.024
+
+Skewness
+0.871 0.579 1.045 0.160 0.172 0.682 -0.040 -0.294 0.453 4.678 1.884 -0.209 0.439 -2.040 1.106
+
+Kurtosis
+27.203 14.454 24.028 17.017 17.983 22.554 28.865 13.582 15.169 118.434 87.755 21.404 20.372 30.336 61.673
+
+Min
+-0.174 -0.182 -0.155 -0.192 -0.168 -0.156 -0.248 -0.147 -0.138 -0.255 -0.368 -0.223 -0.153 -0.226 -0.253
+
+Max
+0.286 0.247 0.270 0.214 0.182 0.252 0.219 0.151 0.213 0.475 0.376 0.187 0.218 0.148 0.402
+
+Autocorr.
+0.032 0.008 0.115 0.117 0.065 0.143 0.222 0.067 0.117 -0.006 -0.072 0.129 0.090 0.138 0.237
+
+10
+
+rate is significant in explaining the tails of financial sector market-valued asset returns. The risk-free interest rate is also a component of the structural model (Merton (1974)) which decreases the likelihood of default as it gets higher. We assume that interest rate and credit spread reveal a negative relationship, since in a macroeconomic context, a high level of interest rate is usually found in an economy with high growth where default rarely occurs. In our research, we consider the three month treasury bill as the risk free interest rate referring to Adrian and Brunnermeier (2011). Several fixed-income factors that capture the time variation in tails of asset returns are further included such as change in slope of the yield curve, where an increase in the slope of the yield curve indicates an improvement in economic growth. Another factor is the change in credit spreads between BAA-rated bonds and treasury rate (both instruments with maturity of 10 years), which reflects default premium based on market risk. A rise suggests a high default premium and therefore implies an increase in market risk. In accordance with Galil et al. (2013) daily equity market returns (CRSP) as determinant of CDS spreads is also included in addition to daily real estate sector excess return over the market return.
+Following the structure model rationale stock returns and stock volatility returns are components in the spread calculation. Variables such as asset growth, asset volatility and leverage have a direct impact on credit spreads as the model assumes that they are the key driving factors for bankcruptcy. As a consequence, we include financial institution's individual equity return as a proxy for the change in firm value. A high equity return increases firm value which leads to reduction in the spread level of the financial institution. It is also obvious to assume that stock return and credit spread expose a negative relationship. Refer to Galil et al. (2013) change in leverage is not statistically significant as a determinant for CDS spread and is therefore excluded from the set of explanatory variables. However, as change in leverage is highly correlated with stock return this factor is considered through equity return to a certain extent.
+4. Methodology
+4.1. Quantile regression
+For the calculation of value at risk (VaR), we apply the quantile regression proposed by Koenker and Bassett (1978), which reveals the relationship between the predictive variables and a specific quantile of the response variables. By considering the CDS spreads movements in quantile, we capture the risk and variability of the credit spreads of the constituents under extreme scenario. Denote Xi as the CDS spread return of
+11
+
+institution i with i = 1, ..., N , where N is the number of financial institutions (FIs) considered in our sample. Referring to Adrian and Brunnermeier (2011), the predicted quantiles of the CDS spread return is modeled through a linear equation as the following:
+
+Xi,t = i + i Mt-1 + i,t,
+
+(4)
+
+where the vector Mt represents state variables, i describes the intercept and transposed vector i outlines the parameters respective to Mt. i,t is independent in i and t with  quantile equal to 0. Again with linear modeling paradigm as equation (4), if we
+are interested in the CDS spread returns of Xj, we can form a linear function of state variables Mt and another CDS spread returns Xi (j = i) so that
+
+Xj,t = j|i + j|iXi,t + j|iMt-1 + j,t.
+
+(5)
+
+Recent findings have questioned the linear relationship between returns of financial institutions (Chao et al. (2014)). Since the linearity relation between institutions' CDS spread returns is not evident nor justified by any economic theory, a partial linear model has been chosen to model the relationship between the input and output variables. Figure 4 demonstrates the non-linearity between the CDS spreads returns especially in extreme events from different institutions as the linear function is not lying within the confidence bands of the nonparametric curve, which is constructed in Song et al. (2012). PLM approach has the virtue of allowing more flexibility in the model while avoiding the curse of dimensionality. Given scalar response variable Xj,t and explanatory scalar variable Xi,t and state variables vector Mt, the PLM is defined as
+
+Xj,t = f (Xi,t) +  Mt + j,t
+
+(6)
+
+where f is an unknown nonparametric function to be estimated, and  is a transposed coefficient vector. A detailed explanation about the estimation procedure can be found in Song et al. (2012). The idea behind the fitting procedure is first finding a reasonable estimate of ^ for , and then regressing the residual Xj,t -  Mt on Xi,t via local linear quantile smoothing (Detailed algorithm description is explained in the PLM appendix).
+Following by the parameter estimation, the VaR of institution i and the CoVaR of j conditional on the V aR event of institution i are given by
+
+V aRi,t = ^i + ^i Mt-1, CoV aRj|i,t = ^j|i + f^j|i V aRi,t + ^j|iMt-1.
+
+(7) (8)
+
+12
+
+LEHMAN CDS Spreads Returns -0.2 0.0 0.2
+
+LEHMAN CDS Spreads Returns -0.2 0.0 0.2
+
+q qq q
+
+qq
+
+q
+
+q
+
+q
+qq q
+
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+
+q qq q
+q
+
+qq q q
+qq
+
+q
+
+qq
+
+qq
+
+q
+
+qq
+
+q
+
+q q
+
+q
+
+q
+
+-0.1
+
+0.0
+
+0.1
+
+GS CDS Spreads Returns
+
+q
+
+qq q
+
+q
+
+qq
+
+q
+
+q q
+
+q
+
+qq
+qq q
+q q qq
+
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+
+qq q
+q
+q
+
+q q
+
+q
+q q
+
+q q
+
+qq
+
+qq q
+
+q
+
+qq
+
+q
+
+q q
+q
+
+-0.1 0.0
+
+0.1
+
+Citi CDS Spreads Returns
+
+qq
+
+AIG CDS Spreads Returns 0.0 0.2
+
+AIG CDS Spreads Returns 0.0 0.2
+
+qq q
+
+q
+
+q
+
+q q
+
+q
+
+qq
+
+qq
+
+q
+
+q q
+
+q
+qqqqqq qqqq q
+q
+
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+
+q qqqq
+
+q qq q qq
+q
+
+q qq
+
+q
+
+qq
+
+q q q
+
+qq q
+
+q q
+
+q
+
+q
+
+q
+
+q q
+q
+
+q
+
+q qq
+
+qq
+
+q qq
+
+q q
+
+qq
+q q
+q
+
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+
+q
+
+q
+
+q q
+
+q qq
+
+q
+
+qq
+
+q q
+
+q qq
+
+q q
+
+q
+
+-0.2
+
+-0.2
+
+-0.1
+
+0.0
+
+0.1
+
+GS CDS Spreads Returns
+
+-0.2
+
+-0.1
+
+0.0
+
+0.1
+
+Lehman CDS Spreads Returns
+
+Figure 4: Quantile regression at 0.01 level on CDS spread return. The blue line shows the partial linear quantile regression function. The four dashed lines express the asymptotic (magenta) and bootstrap (red) confidence bands at 95% confidence level.
+
+13
+
+This construction follows from Adrian and Brunnermeier (2011). The algorithm to estimate f^j|i ·) is proposed by Song et al. (2012), and is described in detail in the appendix.
+
+4.2. Least Absolute Shrinkage and Selection Operator for Quantile Regression
+
+Since Chao et al. (2014) show unsatisfactory backtesting results regarding VaR values, we apply a different way to compute the individual VaR in our paper. First, we apply the linear Least Absolute Shrinkage and Selection Operator (LASSO) technique in order to find variables with significant effect on CDS spread returns. The LASSO variable selection method has been introduced by Tibshirani (1996). It is widely known that LASSO outperforms ridge regression in terms of shrinkage effect. For the typical case described by Tibshirani (1996), the loss function for LASSO can be viewed as constrained versions of the ordinary least squares (OLS) regression loss function, which can also be presented in the Lagrange form as
+
+Llasso(1, ..., p) = Y - X 22, s.t.  1  t1,
+
+where Y  Rn the dependent variable, X  Rnp the independent variable and   Rp denotes the coefficients. The LASSO penalty can also be applied to quantile regression analysis. One is referred to Koenker (2005) for more details. The loss function reads:
+
+np
+Llasso() =  Yi - Xi  + n |j|,
+i=1 j=1
+
+(9)
+
+where  (u) = { - 1(u  0)}u and 0    1 is a given constant. In our empirical analysis, we use 37 variables for Xi, as mentioned in Section 3.2.
+In the section of empirical findings, we will see that the coefficients associated to many of the independent variable are shrunk to zero as the result of LASSO. To choose the penalty parameter n, we apply the generalized approximate cross-validation (GACV) of Yuan (2006) and Li et al. (2007).
+
+4.3. Backtesting
+For check of accuracy of the out-of-sample VaR estimation we compare the actual CDS spread returns to the calculated VaR (model VaR). Following Christoffersen (1998),
+
+14
+
+the hit sequence is defined as
+
+It( ) =
+
+1, if Xt < VaRt 0, otherwise.
+
+The probability of getting x exceedance from T observations is therefore
+
+f (x | T, ) = T x(1 - )T -x x
+
+where  is the probability of an exceedance for a given confidence level. As the VaR is calculated under a 1%-quantile, this leads to an expectation of one exceedance every 100 days. The unconditional coverage test introduced by Kupiec(Kupiec (1995)) explores the frequency of the violations over specific time interval (proportion of failure (POF)). The null hypothesis for the Kupiec test is represented by
+
+x H0 :  = 0 = T .
+
+The test statistic is calculated as
+
+LRP OF = 2 log
+
+1 - ^ T -I() ^ I()
+
+1-
+
+
+
+1 ^ = I( )
+T
+
+T
+
+I( ) =
+
+It( )
+
+t=1
+
+In case the value of the test statistic LRP OF exceeds the critical value of the 2 distribution with onedegree of freedom, the null hypothesis is to be rejected and the model is considered as inaccurate. We expect the VaR to be in line with the confidence level. A failure of the unconditional coverage leads to the conclusion that the VaR does not measure the risk accurately.
+
+However, it is not only important to test the sequence of exceedance but also look at the clustering of violations. The conditional coverage test suggested by Christoffersen (Christoffersen (1998)) includes a seperate statistic for the detection of exceedance's independence. We assume that the calculated value accurately reflects the change in market condition when the exceedance is independent from the previous state. This means no effect on current exceedance whether there was a violation the day before,
+
+15
+
+It-1 = 1, or no violation has occured, It-1 = 0. Let Tij be the total number of event (It-1, It) = (j, i) in the data for i, j  {0, 1}. Denote the probability of observing a violation condition on the state i  {0, 1} by
+
+i
+
+=
+
+Ti1 . Ti0 + Ti1
+
+The unconditional probability for violation is
+
+=
+
+T01 + T11
+
+.
+
+T00 + T01 + T10 + T11
+
+The test statistic of independence is denoted by
+
+LRind = 2 log
+
+(1 - )(T00+T10)(T01+T11) (1 - 0)T00 0T10 (1 - 1)T10 1T11
+
+.
+
+Under the hypothesis that the method for VaR estimation is accurate, the sequence of violations should statisfy the unconditional coverage property as well as the independence property. Therefore, as suggested in Christoffersen (1998), we consider the "conditional coverage" test statistic:
+LRCC = LRP OF + LRind
+exceeds the critical value given by 2 distribution with two degrees of freedom. The rejection of the test indicates an inaccurate coverage, clustered violations or both.
+
+5. Empirical results
+5.1. Variables that drive the tails
+Our regression analysis confirms the relationship between the tail of CDS spread return and the market volatility, approximated by VIX returns. Interestingly, the effect of firm specific volatility is not as strong as volatility of the market indicated by the VIX index. By LASSO, we observe from Tables 10 and 11 that the CDS spread return is almost described by the VIX log-returns, S&P500 log-returns and the change in daily real estate sector return in excess to the market return, in which VIX plays the dominant role.
+It is surprising to see that the firm specific variables are so underselected. For some CDS spreads, such as Citi in pre-crisis period, and CITI, DB, GS, JPM, MS and UBS in crisis period, firm specific variables are not selected at all. To check for the important role
+
+16
+
+that VIX return plays in modeling the tail of CDS spread returns, we redo the LASSO without VIX log-return. we find that it is impossible to arrive with a parsimoneous model, because all variables are selected with nonzero frequency for both pre- and crisis periods in Table 12 and 13. In both tables, V2 which describes the short term liquidity spread becomes the most popular choice. In particular, firm specific variables are selected more often than in crisis period than in pre-crisis period.
+The time series of VaR computed from LASSO 37-factor model and AB 7-factor model show different behavior, as can be seen in Figures 5 and 6. We only present the pre-crisis time series plots because we want to visualize which model performs better in capturing the upcoming shock induced by the default of Lehman Brothers in the September of 2008. The VaR time series plots for the period after the default of Lehman Brothers behave similar to white noice and do not demonstrate much structure. It is generally observed that the trajectory of LASSO VaR varies less violently than its counterpart using 7-factor model, while it still accurately captures the risk as the violations are rather few. It is considered as a benefit because this suggests that with our VaR model, the financial practitioners do not have to adjust their capitals frequently, and therefore the transaction cost and be reduced.
+Table 3 and 4 show the p-values using the conditional coverage test, which allows a joint test of unconditional coverage rate and independence. Table 3 shows the precrisis backtesting results. Both AB 7 factor model and our LASSO QR model generate independent hit sequence, as the independence test statistics are 0 for our data set. However, we found that the AB 7 factor model performs significantly worse than LASSO QR model in terms of unconditional coverage. AB's model leads to too many downside exceedances and therefore does not yield a good risk measure. Same phenomenon can be observed for crisis period data as shown in Table 4.
+5.2. Network of Risk
+As almost all the LASSO VaRs pass the backtesting test, we proceed to use the VaR prediction to compute CoVaR by the construction in the equation (8).
+CoVaR demonstrate different dynamics than VaR. Table 6 and 7 present the exceedances for two periods: 2005-2007 and 2009-2011. In 2008-2009 periods there are no CoVaR exceedances, because all financial firms in the sample have large VaR and the CoVaR computed based on the VaR is also very large. This suggests that CoVaR dynamics heavily depends on the company conditioned on. Tabel 6 shows that CoVaR value conditioning on different firms differ trmendously. From the aspect of the sum of total exceedance, conditioning on firms such as BOA and MS leads to few exceedances,
+17
+
+while conditioning on firms such as SG, UBS, CS, AIG leads to many exceedances. The exceedance time series of CoVaR shown in Figure 7 demonstrate strong clustering
+phenomenon. In the pairs of AIG on JPM, AIG on MS and Citi on BOA, the exceedances accumulate in certain periods. In the crisis period, few exceedances are observed, but the CoVaR seems to over-estimate the risk in the sense that the estimated CoVaRs are far below the realizations of returns.
+The idea of CoVaR calibration on credit risk and intergration of state variables as well as firm-specific variables have been applied on the model suggested by Adrian and Brunnermeier (2011). Our results show that the CoVaR results from the period until Lehman's default reveals different effects on financial institutions from different regions. As shown in Table 9, for the US financial institutions, the CoVaR effect is high when the distressed counterparty is a US financial institution. The same can be observed for European based financial institutions. This shows that the CoVaR captures the spillover effect owing to the geological closeness, as we would expect.
+Given the VaR obtained from the last section based on 37 variables for pre-crisis period and crisis period, we are able to compute the CoV aR with (8) using partial linear model at levels  = 1% and 50%. The CoV aR can therefore be obtained by the difference of the two CoVaRs.
+The mean and the maximum of the estimated CoV aRs are summarized in Table 8 for pre-crisis period and Table 9. Comparing the two tables, the CoVaRs of crisis period are in general greater than that of the pre-crisis period in terms of absolute value. In pre-crisis period, among the 15 financial institutions, BoA, Barc, RBS and JPM are the ones which introduce the most risk to the market, while AIG and HSBC contribute the fewest. RBS's high risk contribution reflects its risk seeking business model before the crisis. AIG's low risk contribution may be due to its nature as an insurance company, but CoVaR seems to underestimate AIG's potential impact to the market due to its gigantic CDS position before the crisis. However, it is interesting to note that after LEH defaults, SG, DB and GS become largest risk contributors, while AIG, Citi, Barc and MS contribute the fewest. Among the smallest risk contributors in the crisis period, the first ones are the ones which suffer the greatest hit of the crisis, while MS shifted its business orientation to a more conservative ground after the crisis.
+In order to visualize the risk contribution defined by CoVaR, we make the network plots. We focus on the data in 3 periods: 2005-2007 (first pre-crisis period), 20072008 (eve of crisis) and 2008-2011 (crisis), as shown in Figures 8, 9 and 10. In these figures, the nodes represent the financial institutions, the edges represent the amount of risk contribution and the arrows show the direction of risk contribution. The thicker
+18
+
+the edge, the larger the CoVaR in absolute value and therefore the larger the risk contribution.
+It can be seen in Figure 8 for the period 2005-2007 that several financial institutions are connected through risk contribution. RBS contributes much risk to BARC, which could be due to their geographic closeness; moreover it is obvious that RBS also contribute risk to HSBC, SG and CS. JPM and LEH contribute much risk to AIG, while AIG seemingly conveys not too much risk to the others, except BOA. BOA transmits much risk to CITI and GS.
+For the period 2007-2008, the relationship between these firms varies. The risk contribution to AIG becomes prominent. RBS still contribute risk to BARC and SG, but the contribution to HSBC becomes less obvious. BOA still conveys much risk to CITI. At this moment, although the international financial market looks interconnected, but regional effect actually plays a big role.
+We then proceed to the last network figure for crisis periof depicted in Figure 10. The boundaries of region crash and firms from different regions can contribute significant risk to each other, while the firms in the same region remain very much connected. SG contribute much risk to JPM, BOA and GS. It is also interesting to note that the direction of risk contribution can also change. BOA contributes risk to CITI in pre-crisis period, but in crisis it is the other way around. SG is mainly a risk receiver before the crisis, but it changes its role to a risk contributor for this period. This could result from European debt crisis in 2011, during which the fear of bankrupcy for SG drives its CDS spread higher and thus introduce huge amount of uncertainty into the global financial market.
+19
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(a) Citi-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(b) Citi-AB7
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(c) BOA-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(d) BOA-AB7
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+
+(e) Barclays- (f) Barclays-AB7 LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(g) BNP-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(h) BNP-AB7
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+
+(i) Credit Suisse- (j) Credit Suisse-AB7 (k) DB-LASSO37 LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(l) DB-AB7
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(m) GS-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(n) GS-AB7
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(o) HSBC-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(p) HSBC-AB7
+
+Figure 5: First part: The plots VaR from LASSO 37 factors model and AB 7 factor model in pre-crisis period Sep. 2002-Sep. 2008.
+
+20
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(a) JPM-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(b) JPM-AB7
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(c) MS-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(d) MS-AB7
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(e) RBS-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(f) RBS-AB7
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+
+(g) SocGen-LASSO37 (h) SocGen-AB7
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(i) UBS-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(j) UBS-AB7
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+
+(k) Lehman-LASSO37 (l) Lehman-AB7
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(m) AIG-LASSO37
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(n) AIG-AB7
+
+Figure 6: Second part: The plots VaR from LASSO 37 factors model and AB 7 factor model in pre-crisis period Sep. 2002-Sep. 2008.
+
+6. Conclusion
+Best overall performance for VaR estimation is achieved via LASSO quantile regression while considering 37 independent variables and under the variable selection method LASSO (following notified as LASSO-37-VaR) which is confirmed by backstesting re-
+
+21
+
+sults. The calculated VaR also shows a good performance during the crisis period and is able cover certain extreme CDS spreads drops. However, these VaR overestimate the risk during the crisis period whereas VaR simulated via standard quantile regression by using 7 state variables suggested by (Adrian and Brunnermeier, 2011) shows a lower VaR level. On the other hand, LASSO-37-VaR show a more accurate and stable VaR estimation during the pre-crisis and crisis period. VaR simulated under the assumptionof Adrian and Brunnermeier tends to over-estimate CDS spread returns in calm period.
+Based on our findings, the calculated CoVaR can be used as a basis for risk weights which described the change between normal circumstances and a stressed VaR. As a consequence, risk contribution can be charged based on idiosyncratic risk and further on the spillover effects given by the risk weight. A valuable question of how counterparty credit risk affects the pricing of CDS contracts could also be investigated based on the overall effects of one distressed institution on CDS spreads of other market players. In addition, this approach provides the possibility to measure spread widening effect from derivative dealer on spread level from reference entities. Effect of extreme CDS spreads of bid dealers on spread level of reference entitiy when it comes to CDS spread central clearing.
+22
+
+7. Appendix
+
+PLM Fitting For the PLM estimation, we adopt the algorithm described in Song et al. (2012). Given data {(Xt, Yt)}Tt=1 bivariate and {Mt}tT=1 multivariate random variables. The PLM is:
+Yt = f (Xt) +  Mt + t.
+Suppose the support of Xt is bounded in [0, 1] for simplicity. Let an denote an increasing sequence of positive integers and set bn = an-1. For each n = 1, 2, ..., dividing the interval [0, 1] into an subintervals Ii, i = 1, ..., an with equal length bn. On each Ii, f (·) can approximately be taken as a constant.
+The PLM estimation procedure is:
+1. Inside each partition Ii, a linear quantile regression is performed to get ^i, then their weighted mean gives ^. Formally, let  (·) be the check function. f1, ..., fan are constants, then
+
+T
+
+^ = argmin min
+
+
+
+ f1,...,fan t=1
+
+an
+Yt -  Mt - fi1(Xt  Ii)
+i=1
+
+2. Perform the local linear quantile estimates of f (·) from {(Xt, Yt - ^ Mt)}tT=1.
+
+23
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(a) Pre-crisis: AIG on JPM
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(b) Pre-crisis: AIG on MS
+
+CDS spread returns -0.4 -0.2 0.0 0.2 0.4
+
+CDS spread returns -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3
+
+02.10.2003 25.03.2005 16.09.2006 09.03.2008 Date
+(c) Pre-crisis: Citi on BOA
+
+22.09.2009 20.05.2010 15.01.2011 12.09.2011 Date
+(d) Crisis: BOA on GS
+
+CDS spread returns -0.4 -0.2 0.0 0.2 0.4
+
+CDS spread returns -0.4 -0.2 0.0 0.2 0.4
+
+22.09.2009 20.05.2010 15.01.2011 12.09.2011 Date
+(e) Crisis: BOA on SG
+
+22.09.2009 20.05.2010 15.01.2011 12.09.2011 Date
+(f) Crisis: BNP on SG
+
+Figure 7: The plots for the time series of CoVaR.
+
+24
+
+LEH UBS
+
+AIG
+
+CITI
+
+BOA
+
+BARC
+BNP
+
+SG RBS
+
+MS
+
+JPM
+
+HSBC
+
+CS DB GS
+
+Figure 8: CoVaR network: average CoVaR between FIs from 2005 to 2007.
+
+LEH UBS
+
+AIG
+
+CITI
+
+BOA
+
+BARC
+BNP
+
+SG RBS
+
+MS
+
+JPM
+
+HSBC
+
+CS DB GS
+
+Figure 9: CoVaR network: average CoVaR between FIs from 2007 to 2008.
+
+25
+
+UBS SG RBS
+MS
+
+AIG JPM
+
+CITI
+HSBC
+
+BOA GS
+
+BARC
+BNP CS DB
+
+Figure 10: CoVaR network: average CoVaR between FIs within the crisis period.
+
+26
+
+Table 3: Backtesting results for LASSO-QR VaR and AB's 7 factor model for data in pre-crisis periods.
+
+LASSO-QR VaR
+
+Fin. Firms CITI BOA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS LEH AIG
+
+LRP OF 3.22 5.27 1.01 4.19 1.01 7.73
+13.73 3.22 4.19 5.27 3.22 6.45 1.62 27.17 12.11
+
+LRcond 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+p-value 0.20 0.07 0.60 0.12 0.60 0.02* 0.001** 0.20 0.12 0.07 0.20 0.04* 0.44 < 0.001*** 0.002**
+
+AB 7 Factor
+
+LRP OF 38.69 41.17 17.22 27.17 59.9 62.76 57.08 46.27 93.73
+103.77 43.7
+22.99 33.91 51.58 93.73
+
+LRcond 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+p-value < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001***
+
+Table 4: Backtesting results for LASSO-QR VaR and AB's 7 factor model for data in crisis periods.
+
+LASSO-QR VaR
+
+Fin. Firms LRP OF LR p-value
+
+CITI
+
+1.75 0 0.42
+
+BOA
+
+0.07 0 0.97
+
+BARC
+
+8.95 0 0.01*
+
+BNP
+
+10.88 0 0.004**
+
+CS 1.75 0 0.42
+
+DB 0.91 0 0.63
+
+GS 5.54 0 0.06
+
+HSBC
+
+2.81 0 0.24
+
+JPM
+
+0.27 0 0.97
+
+MS 8.95 0 0.01*
+
+RBS
+
+0.32 0 0.85
+
+SG 4.09 0 0.13
+
+UBS
+
+17.47 0 < 0.001***
+
+AIG 0.07 0 0.97
+
+AB 7 Factor
+
+LRP OF 30.67 10.88 33.6 39.72 25.09 42.9 17.47 19.9 8.95 25.09 17.47 63.54 17.47 36.62
+
+LRcond 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+p-value < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001*** < 0.001***
+
+27
+
+Table 5: The variables used for predicting VaR
+
+Index V1 V2 V3 V4 V5 V6 V7 V8 V9 V10 V11 V12 V13 V14 V15 V16 V17 V18 V19 V20 V21 V22 V23 V24 V25 V26 V27 V28 V29 V30 V31 V32 V33 V34 V35 V36 V37
+
+Variable VIX Short term liquidity spread 3 months Treasury Bill rate Slope of the yield curve Credit spread between 10 years BAA-rated bonds and Treasury Bond rate S&P500 index log-return Dow Jones US Real Estate Index CITIGROUP equity BANK of AMERICA equity BARCLAYS equity BNP PARIBAS equity CREDIT SUISSE equity DEUTSCHE BANK GOLDMAN SACHS HSBC JP MORGAN equity MORGAN STANLEY equity ROYAL BANK of SCOTLAND equity SOCIETE GENERALE equity UBS equity LEHMAN BROTHERS equity AIG equity CITIGROUP equity volatility BANK of AMERICA equity volatility BARCLAYS equity volatility BNP PARIBAS equity volatility CREDIT SUISSE equity volatility DEUTSCHE BANK GOLDMAN SACHS HSBC JP MORGAN equity volatility MORGAN STANLEY equity volatility ROYAL BANK of SCOTLAND equity volatility SOCIETE GENERALE equity volatility UBS equity volatility LEHMAN BROTHERS equity volatility AIG equity volatility
+
+28
+
+Table 6: The exceedances of CoVaR in pre-crisis period.
+
+VaR Input Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS LEH AIG sum
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS LEH AIG
+
+- 60 7-
+186 54 188 86 119 83
+79 116 20 82 109 91 21 61 20 51 173 160 171 117 245 120 43 37 82 54
+
+68 53 67 142 35
+
+17 29 12 65 86
+
+- 27 21 147 190
+
+20 -
+
+21 180 209
+
+83
+
+52 -
+
+73 116
+
+29
+
+39 16 -
+
+99
+
+53 23 57 77 -
+
+9 18 11 114 90
+
+17 50 11 69 55
+
+79 29 34 41 31
+
+12 139 21 29 213
+
+27 28 33 188 193
+
+9 52 30 147 157
+
+26 72 47 92 124
+
+108 53 77 116 62
+
+120 24 36 37 104 93 64 84 987
+
+42 19 15 25 23 14 30 26 403
+
+33
+
+27 150
+
+32 14
+
+28 114 163 1000
+
+32
+
+44 159
+
+29 21
+
+34 137 153 1125
+
+111
+
+31 17
+
+69 71
+
+91 159 115 1071
+
+56 44 57 33 42 61 59 146 797
+
+76 13 22 61 149 55 42 74 784
+
+- 23 66 14 5 20 41 120 622
+
+37 -
+
+44 111 24 123 50 85 737
+
+40 18 -
+
+41 36 65 19 61 545
+
+10 19 173 -
+
+5 26 148 122 1077
+
+49
+
+45 157
+
+59 -
+
+66 155 149 1266
+
+45
+
+34 64
+
+47 144 -
+
+172 249 1270
+
+48
+
+12 107
+
+69 13
+
+40 -
+
+60 747
+
+94
+
+26 46
+
+92 98 139 100
+
+- 1065
+
+29
+
+Table 7: The exceedances of CoVaR in crisis period.
+VaR Input Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS AIG sum
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS AIG
+
+-2 142 42 36 74 31 10 5 10 63 34 0 11 99 24 35
+
+4 15 4 9 6
+
+5 00 31
+
+-
+
+82
+
+4 10
+
+4
+
+-3
+
+4 12
+
+3 8 - 5 16
+
+4
+
+92
+
+-8
+
+10 8 4 3 -
+
+1
+
+82
+
+2 10
+
+0 20 12
+
+19 24 14 13 11
+
+2
+
+12 1
+
+3 10
+
+1 52 29
+
+15 13 7 12 24
+
+11
+
+20 12
+
+7 11
+
+3 0 5 5 12 6 1 72
+
+4
+
+03
+
+12
+
+17
+
+1 37
+
+3 2 6 1 6 6 1 51
+
+4 3 6 0 5 3 2 48
+
+3 12 5
+
+05
+
+5 1 69
+
+4 3 6 2 3 4 1 50
+
+6
+
+03
+
+35
+
+13
+
+2 58
+
+- 0 6 2 5 4 0 45
+
+2
+
+-2
+
+02
+
+9 1 21
+
+9
+
+5-
+
+4 19
+
+13
+
+2 136
+
+4 5 9 - 7 3 29 85
+
+1 0 5 0 - 3 0 29
+
+6 31 11
+
+3 12
+
+- 1 144
+
+54 73 13 44 19 9 - 308
+
+Table 8: CoVaR estimated in the pre-crisis period. The upper table indicates an overview of average CoVaR, whereas the lower table shows the maximum negative effects on CoVaR.
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS LEH AIG
+
+Citi
+-0.07 -0.01 0.00 -0.01 0.00 -0.05 0.00 -0.05 -0.04 -0.03 0.00 0.00 -0.04 -0.02
+
+BoA
+-0.04 -
+-0.04 -0.01 -0.02 -0.01 -0.04 -0.01 -0.05 -0.03 -0.02 -0.01 -0.02 -0.04 -0.02
+
+BARC
+-0.03 -0.04 -0.05 -0.04 -0.05 -0.02 -0.04 -0.03 -0.03 -0.12 -0.04 -0.05 -0.03 -0.01
+
+BNP
+-0.02 -0.04 -0.05
+-0.03 -0.03 -0.03 -0.03 -0.03 -0.02 -0.04 -0.03 -0.04 -0.03 -0.03
+
+CS
+-0.03 -0.02 -0.05 -0.03
+-0.04 -0.03 -0.03 -0.05 -0.03 -0.05 -0.02 -0.05 -0.03 -0.02
+
+DB
+-0.02 -0.03 -0.05 -0.03 -0.04
+-0.02 -0.02 -0.03 -0.03 -0.07 -0.02 -0.05 -0.03 -0.02
+
+GS
+-0.03 -0.05 -0.03 -0.02 -0.03 -0.03
+-0.01 -0.04 -0.05 -0.02 -0.01 -0.02 -0.04 -0.03
+
+HSBC
+-0.01 -0.04 -0.06 -0.04 -0.04 -0.03 -0.03 -0.04 -0.03 -0.09 -0.03 -0.05 -0.02 -0.01
+
+JPM
+-0.03 -0.05 -0.04 -0.02 -0.02 -0.03 -0.04 -0.02
+-0.03 -0.04 -0.01 -0.02 -0.04 -0.03
+
+MS
+-0.03 -0.04 -0.03 -0.02 -0.02 -0.03 -0.04 -0.01 -0.03
+-0.02 -0.01 -0.03 -0.03 -0.02
+
+RBS
+-0.03 -0.04 -0.07 -0.05 -0.03 -0.04 -0.03 -0.05 -0.03 -0.03
+-0.04 -0.06 -0.03 -0.02
+
+SG
+-0.02 -0.05 -0.06 -0.04 -0.02 -0.02 -0.03 -0.03 -0.04 -0.04 -0.09
+-0.03 -0.03 -0.02
+
+UBS
+-0.03 -0.04 -0.07 -0.05 -0.04 -0.04 -0.02 -0.04 -0.03 -0.02 -0.15 -0.04
+-0.04 -0.03
+
+LEH
+-0.04 -0.04 -0.03 -0.02 -0.02 -0.01 -0.03 -0.02 -0.03 -0.03 -0.03 -0.01 -0.01
+-0.02
+
+AIG
+-0.04 -0.04 -0.03 -0.01 -0.02 -0.02 -0.04 -0.02 -0.04 -0.05 -0.02 -0.01 -0.01 -0.04
+-
+
+sum
+-0.41 -0.58 -0.61 -0.38 -0.38 -0.37 -0.46 -0.32 -0.52 -0.43 -0.78 -0.28 -0.43 -0.46 -0.28
+
+30
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS LEH AIG
+
+Citi
+0.00 -0.52 -0.42 -0.33 -0.29 -0.23 -0.27 -0.33 -0.29 -0.27 -0.32 -0.19 -0.41 -0.35 -0.34
+
+BoA
+-0.37 0.00 -0.29 -0.15 -0.13 -0.22 -0.28 -0.19 -0.25 -0.25 -0.35 -0.10 -0.25 -0.29 -0.32
+
+BARC
+-0.23 -0.33 0.00 -0.31 -0.28 -0.52 -0.29 -0.31 -0.20 -0.50 -1.67 -0.23 -0.31 -0.26 -0.36
+
+BNP
+-0.25 -0.32 -0.48 0.00 -0.29 -0.26 -0.27 -0.44 -0.31 -0.37 -0.39 -0.25 -0.48 -0.21 -0.25
+
+CS
+-0.28 -0.20 -0.51 -0.24 0.00 -0.34 -0.36 -0.31 -0.31 -0.31 -0.60 -0.20 -0.51 -0.24 -0.26
+
+DB
+-0.27 -0.26 -0.35 -0.21 -0.23 0.00 -0.22 -0.26 -0.23 -0.36 -0.80 -0.16 -0.28 -0.32 -0.21
+
+GS
+-0.35 -0.29 -0.42 -0.30 -0.20 -0.16 0.00 -0.32 -0.24 -0.37 -0.16 -0.18 -0.24 -0.30 -0.28
+
+HSBC
+-0.20 -0.35 -0.33 -0.24 -0.24 -0.50 -0.26 0.00 -0.27 -0.33 -0.71 -0.21 -0.27 -0.36 -0.27
+
+JPM
+-0.32 -0.27 -0.35 -0.17 -0.15 -0.21 -0.22 -0.22 0.00 -0.23 -0.55 -0.14 -0.22 -0.25 -0.21
+
+MS
+-0.27 -0.21 -0.30 -0.18 -0.15 -0.24 -0.27 -0.20 -0.46 0.00 -0.22 -0.33 -0.27 -0.29 -0.27
+
+RBS
+-0.34 -0.50 -0.46 -0.41 -0.18 -0.52 -0.61 -0.35 -0.50 -0.56 0.00 -0.32 -0.39 -0.27 -0.52
+
+SG
+-0.32 -0.39 -0.38 -0.22 -0.21 -0.28 -0.29 -0.25 -0.32 -0.56 -0.93 0.00 -0.40 -0.21 -0.25
+
+UBS
+-0.49 -0.37 -0.55 -0.27 -0.19 -0.37 -0.27 -0.42 -0.31 -0.32 -1.11 -0.24 0.00 -0.28 -0.36
+
+LEH
+-0.42 -0.33 -0.58 -0.38 -0.30 -0.29 -0.34 -0.41 -0.45 -0.27 -0.46 -0.25 -0.52 0.00 -0.36
+
+AIG
+-0.45 -0.43 -0.52 -0.29 -0.29 -0.50 -0.28 -0.35 -0.26 -0.47 -0.46 -0.22 -0.37 -0.32 0.00
+
+Table 9: CoVaR estimated in the crisis period. The upper table indicates an overview of average CoVaR, whereas the lower table shows the maximum negative effects on CoVaR.
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS AIG
+
+Citi
+-0.19 -0.11 -0.12 -0.13 -0.15 -0.21 -0.13 -0.17 -0.11 -0.10 -0.15 -0.10 -0.01
+
+BoA
+-0.16 -
+-0.15 -0.18 -0.17 -0.16 -0.20 -0.17 -0.18 -0.13 -0.17 -0.25 -0.16 -0.03
+
+BARC
+-0.07 -0.14 -0.13 -0.11 -0.13 -0.13 -0.13 -0.09 -0.07 -0.12 -0.13 -0.10 -0.05
+
+BNP
+-0.09 -0.17 -0.13
+-0.13 -0.16 -0.17 -0.14 -0.12 -0.09 -0.15 -0.16 -0.14 -0.02
+
+CS
+-0.09 -0.14 -0.12 -0.15
+-0.16 -0.20 -0.16 -0.14 -0.11 -0.19 -0.16 -0.13 -0.06
+
+DB
+-0.05 -0.13 -0.10 -0.12 -0.10
+-0.15 -0.13 -0.12 -0.08 -0.16 -0.14 -0.10 -0.06
+
+GS
+-0.15 -0.20 -0.12 -0.10 -0.12 -0.19
+-0.14 -0.17 -0.17 -0.17 -0.21 -0.12 -0.04
+
+HSBC
+-0.12 -0.13 -0.13 -0.17 -0.16 -0.19 -0.19 -0.16 -0.13 -0.13 -0.18 -0.17 -0.02
+
+JPM
+-0.15 -0.19 -0.12 -0.16 -0.16 -0.18 -0.22 -0.19
+-0.14 -0.12 -0.24 -0.12 -0.03
+
+MS
+-0.11 -0.18 -0.08 -0.11 -0.10 -0.17 -0.18 -0.09 -0.17
+-0.12 -0.18 -0.10 -0.04
+
+RBS
+-0.07 -0.13 -0.14 -0.18 -0.17 -0.20 -0.14 -0.17 -0.14 -0.10
+-0.22 -0.15 -0.05
+
+SG
+-0.08 -0.16 -0.13 -0.21 -0.17 -0.20 -0.17 -0.18 -0.15 -0.11 -0.14
+-0.17 -0.04
+
+UBS
+-0.06 -0.07 -0.08 -0.12 -0.10 -0.11 -0.07 -0.11 -0.06 -0.06 -0.09 -0.12
+-0.05
+
+AIG
+-0.11 -0.11 -0.10 -0.19 -0.12 -0.16 -0.14 -0.15 -0.13 -0.13 -0.16 -0.17 -0.11
+-
+
+sum
+-1.32 -1.96 -1.51 -1.94 -1.74 -2.16 -2.16 -1.89 -1.80 -1.42 -1.80 -2.31 -1.68 -0.49
+
+31
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS AIG
+
+Citi
+-0.84 -1.72 -0.63 -1.19 -1.41 -0.90 -0.73 -0.58 -1.26 -0.69 -0.89 -0.51 -0.61
+
+BoA
+-0.79 -
+-0.78 -0.88 -1.09 -0.82 -1.18 -0.83 -0.54 -0.94 -0.67 -1.02 -1.00 -0.41
+
+BARC
+-0.97 -0.55 -0.48 -0.47 -0.97 -0.63 -0.60 -0.34 -0.83 -0.39 -0.38 -0.39 -0.65
+
+BNP
+-0.38 -0.54 -0.44
+-1.13 -1.63 -0.63 -0.34 -0.45 -0.45 -0.40 -0.54 -0.40 -0.27
+
+CS
+-0.60 -0.42 -1.07 -0.50
+-0.58 -1.25 -0.62 -0.44 -1.16 -0.50 -0.75 -0.61 -1.15
+
+DB
+-0.79 -0.58 -0.58 -0.45 -0.39
+-1.09 -0.65 -0.42 -1.05 -0.52 -0.44 -0.51 -0.71
+
+GS
+-1.03 -0.83 -0.90 -0.48 -1.31 -1.60
+-0.75 -0.55 -0.95 -0.81 -0.90 -0.57 -0.37
+
+HSBC
+-0.58 -0.57 -0.48 -0.49 -0.58 -1.57 -1.22 -0.72 -0.68 -0.53 -0.49 -0.62 -0.39
+
+JPM
+-1.55 -0.58 -0.46 -0.73 -1.18 -1.52 -0.73 -0.65
+-0.89 -0.55 -0.79 -0.47 -0.49
+
+MS
+-1.36 -1.19 -0.42 -0.76 -0.61 -1.32 -1.99 -0.38 -1.07
+-0.47 -0.71 -0.81 -0.58
+
+RBS
+-1.06 -0.45 -0.95 -0.64 -0.75 -0.74 -1.51 -0.62 -0.44 -1.40
+-0.63 -0.56 -0.78
+
+SG
+-0.51 -0.65 -0.47 -0.81 -0.67 -2.19 -0.94 -0.76 -0.61 -1.14 -0.61
+-0.75 -0.31
+
+UBS
+-0.48 -0.34 -0.42 -0.72 -0.35 -1.94 -0.76 -0.44 -0.34 -0.74 -0.40 -0.46
+-0.72
+
+AIG
+-1.24 -0.56 -0.74 -0.78 -0.90 -1.35 -1.66 -0.75 -0.77 -2.31 -0.64 -0.54 -1.30
+-
+
+Table 10: The frequency of variable selection in pre-crisis period. The total number of the procedure of data selection performed is 1145.
+
+32
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS AIG
+
+V1 1145 V2 8 V3 6 V4 4 V5 0 V6 14 V7 16
+V8 0 V9 0 V10 1 V11 1 V12 1 V13 1 V14 0 V15 0 V16 6 V17 1 V18 1 V19 1 V20 1 V21 0 V22 1
+V23 0 V24 0 V25 0 V26 0 V27 0 V28 0 V29 0 V30 0 V31 0 V32 0 V33 0 V34 0 V35 0 V36 0 V37 0
+
+1145 1 1 1 1
+11 15
+1 1 0 0 1 0 0 0 1 0 0 1 0 1 1
+1 0 0 1 1 0 0 1 0 0 0 0 1 0 1
+
+1145 15 11 10 10 65 68
+0 0 1 1 6 1 1 5 1 0 8 5 7 7 8
+2 0 1 1 1 0 1 0 0 0 1 1 2 0 5
+
+1145 6 2 4 3
+23 37
+0 1 2 1 0 1 2 2 2 1 2 3 2 3 2
+1 0 2 0 0 0 0 1 0 0 1 1 0 1 0
+
+Market variables
+
+1145 1145 1145
+
+1145 1145
+
+10 10
+
+7
+
+62
+
+233
+
+31
+
+477
+
+41
+
+133
+
+41
+
+46 29 70
+
+19 48
+
+36 79 33
+
+36 65
+
+Institution-wise equity returns
+
+021
+
+10
+
+013
+
+20
+
+130
+
+20
+
+010
+
+21
+
+010
+
+10
+
+004
+
+21
+
+111
+
+10
+
+011
+
+00
+
+121
+
+21
+
+013
+
+20
+
+013
+
+00
+
+032
+
+11
+
+124
+
+21
+
+025
+
+20
+
+010
+
+21
+
+Institution-wise volatility
+
+001
+
+01
+
+001
+
+10
+
+010
+
+10
+
+000
+
+10
+
+000
+
+00
+
+000
+
+01
+
+000
+
+00
+
+012
+
+00
+
+004
+
+00
+
+002
+
+11
+
+100
+
+10
+
+020
+
+00
+
+010
+
+00
+
+000
+
+00
+
+010
+
+00
+
+1145 4 1 2 2
+29 17
+1 1 1 1 1 1 1 0 1 1 0 1 1 0 1
+1 1 0 1 0 0 0 0 0 0 0 0 0 0 0
+
+1145 4 2 5 3
+42 63
+
+1145 10 5 7 6 32 57
+
+00 12 23 22 04 01 04 22 21 13 23 32 20 24 24
+
+20 10 01 12 11 00 10 00 02 02 32 20 01 10 11
+
+1145 2 1 2 1
+25 14
+1 1 1 0 1 1 0 0 0 1 1 0 0 1 1
+0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+
+1145 8 8 6 4
+21 49
+0 3 3 2 2 3 2 1 3 3 3 2 2 1 3
+0 0 3 1 0 0 0 1 1 0 2 2 2 0 1
+
+Table 11: The frequency of variable selection in crisis period. The total number of the procedure of data selection performed is 561.
+
+33
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS AIG
+
+V1 561 V2 2 V3 0 V4 3 V5 2 V6 87 V7 77
+V8 1 V9 0 V10 1 V11 1 V12 0 V13 0 V14 0 V15 0 V16 0 V17 0 V18 1 V19 1 V20 2 V22 1
+V23 0 V24 0 V25 0 V26 0 V27 0 V28 0 V29 0 V30 0 V31 0 V32 0 V33 0 V34 0 V35 0 V37 0
+
+561 2 1 2 2
+83 87
+1 0 0 1 1 0 1 1 1 1 0 0 0 1
+1 0 0 0 1 0 0 0 0 0 0 0 0 0
+
+Market variables
+
+561 561 561 561 561
+
+561 561 561 561 561 561 561
+
+3
+
+51
+
+11
+
+3 1 1 22 2 1
+
+1
+
+41
+
+00
+
+3 1 0 22 0 1
+
+1
+
+11 1
+
+00
+
+3 1 1 32 1 2
+
+2
+
+41
+
+00
+
+3 1 1 22 1 1
+
+30 25 49 16 140
+
+52 23 65 51 51 18 74
+
+24 42 26 19 117
+
+28 89 144 34 61
+
+9 61
+
+Institution-wise equity returns
+
+1
+
+31
+
+00
+
+1 0 1 21 0 1
+
+1
+
+51
+
+00
+
+3 1 1 11 0 1
+
+1
+
+31
+
+00
+
+3 0 1 22 0 0
+
+1
+
+21
+
+00
+
+2 0 0 22 0 0
+
+0
+
+21
+
+00
+
+1 0 1 21 0 1
+
+1
+
+21
+
+00
+
+0 0 1 02 0 1
+
+0
+
+11
+
+00
+
+2 0 0 01 0 1
+
+0
+
+41
+
+00
+
+2 0 1 01 0 1
+
+0
+
+11
+
+00
+
+0 0 0 12 0 0
+
+1
+
+20
+
+00
+
+1 0 1 21 0 0
+
+0
+
+41
+
+00
+
+3 0 1 02 0 1
+
+1
+
+21
+
+00
+
+2 0 1 21 0 0
+
+0
+
+00
+
+00
+
+1 0 1 22 0 0
+
+1
+
+30
+
+00
+
+2 0 1 21 0 1
+
+Institution-wise volatility
+
+0
+
+01
+
+00
+
+1 0 0 00 0 0
+
+0
+
+01
+
+00
+
+0 0 0 01 0 0
+
+0
+
+00
+
+00
+
+1 0 0 00 0 1
+
+0
+
+00
+
+00
+
+1 0 0 10 0 1
+
+0
+
+20
+
+00
+
+1 0 0 00 0 0
+
+0
+
+10
+
+00
+
+1 0 0 01 0 1
+
+0
+
+00
+
+00
+
+1 0 0 11 0 0
+
+0
+
+00
+
+00
+
+2 0 0 01 0 0
+
+0
+
+00
+
+00
+
+0 0 0 00 0 0
+
+0
+
+00
+
+00
+
+0 0 0 00 0 0
+
+0
+
+01
+
+00
+
+1 0 0 00 0 0
+
+0
+
+01
+
+00
+
+1 0 0 00 0 1
+
+0
+
+00
+
+00
+
+1 0 0 01 0 0
+
+0
+
+00
+
+00
+
+0 0 0 01 0 0
+
+Table 12: The frequency of variable selection in pre-crisis period excluding VIX. The total number of the procedure of data selection performed is 1145.
+
+34
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS AIG
+
+V2 1145 V3 148 V4 132 V5 105 V6 287 V7 302
+V8 60 V9 61 V10 64 V11 77 V12 101 V13 96 V14 86 V15 94 V16 100 V17 93 V18 74 V19 88 V20 90 V21 87 V22 79
+V23 72 V24 59 V25 66 V26 64 V27 86 V28 91 V29 87 V30 81 V31 21 V32 65 V33 61 V34 62 V35 65 V36 48 V37 67
+
+1145 120 113 101 272 415
+65 87 79 71 90 90 68 71 84 71 66 77 97 86 85
+63 76 76 71 85 75 64 55 34 52 36 68 58 67 76
+
+1145 92 95 65
+300 236
+45 54 60 46 60 50 47 46 65 48 55 56 55 44 56
+40 34 29 36 54 36 29 58 15 19 38 51 40 31 41
+
+1145 173 164 141 355 379
+88 123
+89 104 113
+98 112 126 114 128 125
+87 119 117 115
+67 99 91 122 83 90 52 130 97 63 53 84 63 53 102
+
+Market variables
+
+1145 1145 1145
+
+1145 1145
+
+123 164 159
+
+128 190
+
+122 141 181
+
+121 168
+
+94 119 142
+
+98 150
+
+271 323 439
+
+273 443
+
+322 282 481
+
+281 472
+
+Institution-wise equity returns
+
+70 96 72
+
+95 97
+
+64 107 85
+
+85 111
+
+75 96 86
+
+75 117
+
+79 69 85
+
+66 93
+
+81 96 86
+
+76 100
+
+70 98 89
+
+77 109
+
+70 97 66
+
+85 119
+
+83 88 92
+
+89 111
+
+75 93 98
+
+74 113
+
+74 107 93
+
+77 120
+
+72 101 81
+
+74 121
+
+57 88 88
+
+82 84
+
+82 78 96
+
+86 128
+
+56 97 96
+
+65 115
+
+79 118 99
+
+90 126
+
+Institution-wise volatility
+
+77 85 81
+
+71 82
+
+64 97 91
+
+52 100
+
+68 83 89
+
+35 100
+
+68 65 75
+
+55 64
+
+73 100 65
+
+61 96
+
+60 102 78
+
+46 113
+
+49 54 48
+
+27 88
+
+75 102 86
+
+88 112
+
+63 45 48
+
+44 88
+
+34 50 50
+
+42 52
+
+56 56 63
+
+40 78
+
+42 82 66
+
+51 91
+
+62 86 85
+
+68 120
+
+60 61 70
+
+45 94
+
+74 99 67
+
+85 58
+
+1145 258 187 158 507 612
+104 118 109 115 126 125 115 128 115 129 118 105 121 146 141
+133 112 135 119
+94 128
+84 114
+96 70 71 124 141 78 95
+
+1145 61 55 51
+276 272
+
+1145 128 135 109 265 266
+
+15 60 39 94 30 102 33 96 35 106 28 108 32 100 28 97 36 86 34 100 38 104 35 99 33 92 35 73 29 94
+
+24 51 24 63 28 93 27 100 34 26 19 90 23 82 27 85 10 78 17 88 21 77 34 89 31 52 14 22 19 29
+
+1145 204 179 160 472 480
+106 128 121 119 132 115 104 130
+97 133 110 116 124 128 120
+93 80 103 95 115 91 30 117 99 58 48 104 129 103 86
+
+1145 124 114 102 262 303
+87 86 89 84 70 98 86 104 98 91 73 74 69 92 94
+87 94 87 78 87 84 31 95 95 43 69 61 65 63 57
+
+Table 13: The frequency of variable selection in crisis period excluding VIX. The total number of the procedure of data selection performed is 561.
+
+35
+
+Citi BoA BARC BNP CS DB GS HSBC JPM MS RBS SG UBS AIG
+
+V2 561 V3 201 V4 203 V5 205 V6 427 V7 403
+V8 198 V9 200 V10 197 V11 191 V12 190 V13 197 V14 189 V15 196 V16 181 V17 194 V18 196 V19 198 V20 195 V22 201
+V23 183 V24 170 V25 168 V26 174 V27 183 V28 191 V29 183 V30 186 V31 180 V32 170 V33 195 V34 182 V35 197 V37 200
+
+561 186 193 200 353 422
+180 183 182 168 178 182 179 178 177 177 179 176 177 186
+167 171 171 165 159 183 168 172 172 186 149 172 181 180
+
+Market variables
+
+561 561 561 561 561
+
+561 561 560 561 561 561 561
+
+194 172 192 170 245
+
+173 161 213 212 184 195 189
+
+200 174 194 174 250
+
+173 164 211 222 192 196 192
+
+204 189 200 180 250
+
+183 162 226 221 207 202 194
+
+418 352 421 388 507
+
+406 375 507 520 401 418 439
+
+462 439 470 443 435
+
+431 344 485 503 439 476 430
+
+Institution-wise equity returns
+
+197 164 187 168 241
+
+172 161 206 214 178 192 184
+
+195 171 187 165 245
+
+173 159 210 213 182 186 189
+
+193 170 186 168 241
+
+168 153 208 214 184 189 189
+
+197 168 182 162 232
+
+164 154 194 212 181 188 182
+
+192 162 186 153 229
+
+163 153 205 203 175 181 187
+
+190 165 186 164 242
+
+168 156 211 201 173 189 176
+
+180 158 175 161 234
+
+166 149 195 195 170 177 179
+
+167 163 184 162 227
+
+167 152 205 208 180 184 178
+
+189 162 181 163 235
+
+165 148 190 196 175 180 174
+
+190 170 187 165 235
+
+172 155 206 207 179 195 185
+
+195 170 187 171 247
+
+174 159 210 212 180 187 177
+
+192 172 191 168 240
+
+165 155 207 213 181 194 187
+
+193 169 180 168 235
+
+171 158 212 208 174 187 181
+
+196 173 190 165 241
+
+172 158 211 210 184 194 187
+
+Institution-wise volatility
+
+174 162 181 149 228
+
+159 155 173 200 168 190 170
+
+160 159 171 146 214
+
+146 125 151 168 163 159 184
+
+141 118 165 142 219
+
+136 142 189 184 150 144 137
+
+140 154 157 131 188
+
+146 111 186 183 151 168 176
+
+183 153 178 158 207
+
+161 152 206 171 169 181 168
+
+189 158 185 161 228
+
+174 145 195 214 163 184 187
+
+162 137 171 149 217
+
+157 140 177 181 160 172 181
+
+173 167 187 149 211
+
+158 149 198 208 166 170 179
+
+177 155 166 131 187
+
+130 138 187 182 164 141 168
+
+185 163 163 137 225
+
+149 141 206 199 164 186 166
+
+182 148 181 159 216
+
+144 141 201 201 155 168 175
+
+186 156 189 154 230
+
+164 154 208 191 165 190 178
+
+192 164 190 157 228
+
+166 152 202 208 166 193 188
+
+195 170 183 166 244
+
+172 160 213 202 180 194 182
+
+References
+Acharya, V., Engle, R., Figlewski, S., Lynch, A. and Subrahmanyam, M. (2009). Centralized Clearing for Credit Derivatives, Wiley, chapter 11, pp. 251­268.
+Acharya, V. V., Pedersen, L. H., Philippon, T. and Richardson, M. (2010). Measuring systemic risk, Working Paper 10-02, Federal Reserve Bank of Cleveland.
+Acharya, V. V. and Subrahmanyam, M. G. (2008). Time to lift the veil.
+Adrian, T. and Brunnermeier, M. K. (2011). CoVaR, Staff Reports 348, Federal Reserve Bank of New York.
+Alexander, C. and Kaeck, A. (2008). Regime dependent determinants of credit default swap spreads, Journal of Banking and Finance 32: 1008­1021.
+Arora, N., Gandhi, P. and Longstaff, F. A. (2012). Counterparty credit risk and the credit default swap market, Journal of Financial Economics 103: 280­293.
+BIS (2011). Basel iii: A global regulatory framework for more resilient banks and banking systems, Basel Committee on Banking Supervision .
+Breitenfellner, B. and Wagner, N. (2012). Explaining aggregate credit default swap spreads, International Review of Financial Analysis 22: 18­29.
+Brownlees, C. T. and Engle, R. (2010). Volatility, correlation and tails for systemic risk measurement, Working paper, NYU Stern School of Business.
+Chao, S.-K., Ha¨rdle, W. and Wang, W. (2014). Quantile regression in risk calibration, in C.-F. Lee (ed.), Handbook of Financial Econometric and Statistics, Springer-Verlag, chapter 54.
+Christoffersen, P. F. (1998). Evaluating interval forecasts, International Economic Review 39(4): 841­862.
+Cont, R. and Kokholm, T. (2013). Central clearing of otc derivatives: bilateral vs multilateral netting. URL: arXiv:1304.5065
+36
+
+Duffie, D. (2010). How Big Banks Fail And What to do About It Darrell Duffie, Princeton University Press.
+
+Duffie, D., Li, A. and Lubke, T. (2010). Policy perspectives on OTC derivatives market infrastructure, Staff Reports 424, Federal Reserve Bank of New York.
+
+Duffie, D. and Zhu, H. (2011). Does a central clearing counterparty reduce counterparty risk?, Review of Asset Pricing Studies 1(1): 74­95.
+
+Du¨llmann and Sosinska (2007). Credit default swap prices as risk indicators of listed german banks, Financial Markets and Portfolio Management 21(3): 269­292.
+
+ESMA (2013). The clearing obligation under emir, Discussion Paper .
+
+Espinosa, G., Rubia, A., Valderrama, L. and Anton, M. (2013). Good for one, bad for all: Determinants of individual versus systemic risk, Journal of Financial Stability 9: 287­299.
+
+Galil, K., Shapir, O. M., Amiran, D. and Ben-Zion, The determinants of cds spreads, Journal of Banking http://dx.doi.org/10.1016/j.jbankfin.2013.12.005.
+
+U. (2013). & Finance
+
+Hautsch, N., Schaumburg, J. and Schienle, M. (2013). Financial network systemic risk contributions, Submitted to the Review of Finance (2011-072).
+
+ISDA (2013). Non-cleared otc derivatives: Their importance to the global economy, The International Swaps and Derivatives Association, Inc. .
+
+Koenker, R. (2005). Quantile Regression, Cambridge University Press.
+
+Koenker, R. and Bassett, G. S. (1978). Regression quantiles, Econometrica 46: 33­50.
+
+Kupiec, P. (1995). Techniques for verifying the accuracy of risk management models, Journal of Derivatives 3: 73­84.
+
+Li, Y., Lui, Y. and Zhu, J. (2007). Quantile regression in reproducing kernel hilbert spaces, J. Am. Stat. Assoc. 102(477): 255­268. URL: http://dx.doi.org/10.1198/016214506000000979
+
+Longstaff, F. A., Pan, J., Pedersen, L. and Singleton, K. (2007). How sovereign is
+
+37
+
+sovereign credit risk?, NBER Working Paper 13658. Merton, R. C. (1974). The pricing of corporate debt: The risk structure of interest rates,
+Journal of Finance 29 (2): 449¡V470. Pirrong, C. (2011). The economics of central clearing: Theory and practice, Discussion
+Paper 1, International Swaps and Derivatives Association. SEC (2010). Dodd-frank wall street reform and consumer protection act, United States
+Securities and Exchange Commission (SEC) . Song, S., Ha¨rdle, W. and Ritov, Y. (2012). Partial linear quantile regression and boot-
+strap confidence bands, Journal of Multivariate Analysis 107: 244­262. Tibshirani, R. (1996). Regression shrinkage and selection via the Lasso, Journal of the
+Royal Statistical Society, Series B 58: 267­288. Upper, C. and Worm, A. (2004). Estimating bilateral exposures in the german interbank
+market: Is there a danger of contagion?, European Economic Review 48: 827­849. Yuan, M. (2006). GACV for quantile smoothing splines, Computational Statistics &
+Data Analysis 50: 813­829.
+38
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001 002 003 004 005 006 007 008 009 010 011 012 013 014 015 016 017 018
+
+"Principal Component Analysis in an Asymmetric Norm" by Ngoc Mai Tran, Maria Osipenko and Wolfgang Karl Härdle, January 2014. "A Simultaneous Confidence Corridor for Varying Coefficient Regression with Sparse Functional Data" by Lijie Gu, Li Wang, Wolfgang Karl Härdle and Lijian Yang, January 2014. "An Extended Single Index Model with Missing Response at Random" by Qihua Wang, Tao Zhang, Wolfgang Karl Härdle, January 2014. "Structural Vector Autoregressive Analysis in a Data Rich Environment: A Survey" by Helmut Lütkepohl, January 2014. "Functional stable limit theorems for efficient spectral covolatility estimators" by Randolf Altmeyer and Markus Bibinger, January 2014. "A consistent two-factor model for pricing temperature derivatives" by Andreas Groll, Brenda López-Cabrera and Thilo Meyer-Brandis, January 2014. "Confidence Bands for Impulse Responses: Bonferroni versus Wald" by Helmut Lütkepohl, Anna Staszewska-Bystrova and Peter Winker, January 2014. "Simultaneous Confidence Corridors and Variable Selection for Generalized Additive Models" by Shuzhuan Zheng, Rong Liu, Lijian Yang and Wolfgang Karl Härdle, January 2014. "Structural Vector Autoregressions: Checking Identifying Long-run Restrictions via Heteroskedasticity" by Helmut Lütkepohl and Anton Velinov, January 2014. "Efficient Iterative Maximum Likelihood Estimation of HighParameterized Time Series Models" by Nikolaus Hautsch, Ostap Okhrin and Alexander Ristig, January 2014. "Fiscal Devaluation in a Monetary Union" by Philipp Engler, Giovanni Ganelli, Juha Tervala and Simon Voigts, January 2014. "Nonparametric Estimates for Conditional Quantiles of Time Series" by Jürgen Franke, Peter Mwita and Weining Wang, January 2014. "Product Market Deregulation and Employment Outcomes: Evidence from the German Retail Sector" by Charlotte Senftleben-König, January 2014. "Estimation procedures for exchangeable Marshall copulas with hydrological application" by Fabrizio Durante and Ostap Okhrin, January 2014. "Ladislaus von Bortkiewicz - statistician, economist, and a European intellectual" by Wolfgang Karl Härdle and Annette B. Vogt, February 2014. "An Application of Principal Component Analysis on Multivariate TimeStationary Spatio-Temporal Data" by Stephan Stahlschmidt, Wolfgang Karl Härdle and Helmut Thome, February 2014. "The composition of government spending and the multiplier at the Zero Lower Bound" by Julien Albertini, Arthur Poirier and Jordan RoulleauPasdeloup, February 2014. "Interacting Product and Labor Market Regulation and the Impact of Immigration on Native Wages" by Susanne Prantl and Alexandra SpitzOener, February 2014.
+
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasrecahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+019 "Unemployment benefits extensions at the zero lower bound on nominal interest rate" by Julien Albertini and Arthur Poirier, February 2014.
+020 "Modelling spatio-temporal variability of temperature" by Xiaofeng Cao, Ostap Okhrin, Martin Odening and Matthias Ritter, February 2014.
+021 "Do Maternal Health Problems Influence Child's Worrying Status? Evidence from British Cohort Study" by Xianhua Dai, Wolfgang Karl Härdle and Keming Yu, February 2014.
+022 "Nonparametric Test for a Constant Beta over a Fixed Time Interval" by Markus Reiß, Viktor Todorov and George Tauchen, February 2014.
+023 "Inflation Expectations Spillovers between the United States and Euro Area" by Aleksei Netsunajev and Lars Winkelmann, March 2014.
+024 "Peer Effects and Students' Self-Control" by Berno Buechel, Lydia Mechtenberg and Julia Petersen, April 2014.
+025 "Is there a demand for multi-year crop insurance?" by Maria Osipenko, Zhiwei Shen and Martin Odening, April 2014.
+026 "Credit Risk Calibration based on CDS Spreads" by Shih-Kang Chao, Wolfgang Karl Härdle and Hien Pham-Thu, May 2014.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

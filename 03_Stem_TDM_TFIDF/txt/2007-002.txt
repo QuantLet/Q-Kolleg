@@ -1,0 +1,1354 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2007-002
+Robust Risk Management. Accounting for
+Nonstationarity and Heavy Tails
+Ying Chen* Vladimir Spokoiny*
+* Weierstrass Institute for Applied Analysis and Stochastics, Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+Robust Risk Management. Accounting for Nonstationarity and Heavy Tails
+
+Chen, Ying Weierstrass-Institute,
+Mohrenstr. 39, 10117 Berlin, Germany
+
+Spokoiny, Vladimir Weierstrass-Institute,
+Mohrenstr. 39, 10117 Berlin, Germany
+
+chen@wias-berlin.de
+
+spokoiny@wias-berlin.de
+
+January 10, 2007
+
+Abstract
+In the ideal Black-Scholes world, financial time series are assumed 1) stationary (time homogeneous) and 2) having conditionally normal distribution given the past. These two assumptions have been widely-used in many methods such as the RiskMetrics, one risk management method considered as industry standard. However these assumptions are unrealistic. The primary aim of the paper is to account for nonstationarity and heavy tails in time series by presenting a local exponential smoothing approach, by which the smoothing parameter is adaptively selected at every time point and the heavy-tailedness of the process is considered. A complete theory addresses both issues. In our study, we demonstrate the implementation of the proposed method in volatility estimation and risk management given simulated and real data. Numerical results show the proposed method delivers accurate and sensitive estimates.
+JEL codes: C14, C53 Keywords: exponential smoothing; spatial aggregation. Acknowledgement: This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 Economic Risk.
+1
+
+1 Introduction
+In the ideal Black-Scholes world, financial time series are assumed 1) stationary (time homogeneous) and 2) having conditionally normal distribution given the past. These two assumptions have been widely-used in many methods such as the RiskMetrics which has been considered as industry standard in risk management after introduced by J.P. Morgan in 1994. However, these assumptions are very questionable as far as the real life data is concerned. The time homogeneous assumption does not allow to model structure shifts or breaks on the market and to account for e.g. macroeconomic, political or climate changes. The assumption of conditionally Gaussian innovations leads to underestimation of the market risk. Recent studies show that the Gaussian and sub-Gaussian distributions are too light to model the market risk associated with sudden shocks and crashes and heavy-tailed distributions like Student-t or Generalized Hyperbolic are more appropriate. A realistic risk management system has to account for the both stylized facts of the financial data, which is a rather complicated task. The reason is that these two issues are somehow contradictory. A robust risk management which is stable against extremes and large shocks in financial data is automatically less sensitive to structural changes and vice versa. The aim of the present paper is to offer an approach for a flexible modeling of financial time series which is sensitive to structural changes and robust against extremes and shocks on the market.
+1.1 Accounting for Non-stationarity
+It is rational to surmise that the structure of volatility process shifts through time, possibly due to policy adjustments or economic changes. This non-stationary effect is illustrated in Figure 1, by which the realized variances, the sum of squared returns sampled at 15 minutes tick-by-tick, of Dow Jones Euro StoXX 50 Index futures are presented ranging from December 8, 2004 to May 2, 2005. The realized variance measure has been considered as a robust estimator of the variance of financial asset, see Anderson, Bollerslev, Diebold and Labys (2001) and Zhang, Mykland and AitSahalia (2005). We here use the realized variance to illustrate the movement of the unobserved variance. In the figure, an evident change of market situation is observed in the last 10 days. It indicates that volatility estimates obtained by averaging over a long historical interval will significantly underestimate the current volatility and lead to a large estimation bias.
+2
+
+1.6
+
+1.4
+
+1.2
+
+1
+
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+0 2004/12/08
+
+2005/02/18
+
+2005/05/02
+
+Figure 1: The realized variances, the sum of squared returns sampled at 15 minutes tick-by-tick, of Dow Jones Euro StoXX 50 Index futures ranging from December 8, 2004 to May 2, 2005.
+
+The standard way of accounting for non-stationarity is to recalibrate (reestimate) the model parameters at every time point using the latest available information from a time varying window. Alternatively, the exponential smoothing approach assigns some weights to historical data which exponentially decrease with the time. The choice of a small window or rapidly decreasing weights results in high variability of the estimated volatility and, as a consequence, of the estimated value of the portfolio risk from day to day. In turns, a large window or a low pass volatility filtering method results in the loss of sensitivity of the risk management system to the significant changes of the market situation.
+An adaptive approach aims to select large windows or slowly decreasing weights in the time homogeneous situation and it switches to high pass filtering if some structural change is detected.
+Recently a number of local parametric methods has been developed, which investigates the structure shifts, or equivalently to say, adjusts the smoothing parameter to avoid serious estimation errors and achieve the best possible accuracy of estimation. For example, Fan and Gu (2003) introduce several semiparametric techniques of estimating volatility and portfolio risk. Mercurio and Spokoiny (2004) present an
+3
+
+approach to specify local homogeneous interval, by which volatility is approximated by a constant. Belomestny and Spokoiny (2006) present the spatial aggregation of the local likelihood estimates (SSA). Among others, we refer to Spokoiny (2006) for a detailed description of the local estimation methods. These works however concern only one issue, namely the nonstationarity of time series, and rely on the unrealistic Gaussian distributional assumption.
+1.2 Accounting for Heavy Tails in Innovations
+As already mentioned, the evidence of non-Gaussian heavy-tailed distribution for the standardized innovations of the financial time series is well documented. For instance, Student-t or Generalized Hyperbolic distributions are much more accurate in estimating the quantiles of the standardized returns, see e.g. Embrechts, McNeil and Straumann (2002) and Eberlein and Keller (1995), among other. However, the existent methods and approaches to modeling such phenomena are based on one or another kind of parametric assumptions, and hence, are not flexible for modeling structural changes in the financial data.
+The primary aim of the paper is to present a realistic approach that accounts for the both features: nonstationarity and heavy tails in financial time series. The whole approach can be decomposed in few steps. First we develop an adaptive procedure for estimation of the time dependent volatility under the assumption of the conditionally Gaussian innovations. Then we show that the procedure continues to apply in the case of sub-Gaussian innovations (under some exponential moment conditions). To make this approach applicable to the heavy-tailed data, we make a power transformation of the underlying process. Box and Cox (1964) stimulated the application of the power transformation to non-Gaussian variables to obtain another distribution more close to the normal and homoscedastic assumption. Here we follow this way and replace the squared returns by their p -power to provide that the resulting "observations" have exponential moments.
+1.3 Volatility Estimation by Exponential Smoothing
+Let St be an observed asset process in discrete time, t = 1, 2, . . . , while Rt defines the corresponding return process: Rt = log(St/St-1) . We model this process via the
+4
+
+conditional heteroskedasticity assumption:
+
+Rt = tt ,
+
+(1.1)
+
+where t , t  1 , is a sequence of standardized innovations satisfying
+
+IE t | Ft-1 = 0,
+
+IE t2 | Ft-1 = 1
+
+where Ft-1 = (R1, . . . , Rt-1) is the (  -field generated by the first t - 1 observations), and t is the volatility process which is assumed to be predictable with respect to Ft-1 .
+In this paper we focus on the problem of filtering the parameter t from the past observations R1, . . . , Rt-1 . This problem naturally arises as an important building block for many tasks of financial engineering like Value-at-Risk or Portfolio Optimization. Among others, we refer to Christoffersen (2003) for a systematic introduction of risk analysis.
+The exponential smoothing (ES) and its variation have been considered as good functional approximations of variance by assigning weights to the past squared returns:
+
+t
+
+=
+
+1 1-
+
+
+
+mRt2-m-1,
+
+m=0
+
+  [0, 1).
+
+Many time series models such as the ARCH proposed by Engle (1982) and the GARCH by Bollerslev (1986) can be considered as variation of the ES. For example, the GARCH(1,1) setup can be reformulated as:
+
+t
+
+=
+
+
+
++
+
+Rt2-1
+
++ t-1
+
+=
+
+1
+
+ -
+
+
+
++
+
+
+
+ m Rt2-m-1 .
+
+m=0
+
+With a proper reparametrization, this is again an exponential smoothing estimate.
+It is worth noting that the ES is in fact a local maximum likelihood estimate (MLE) based on the Gaussian distributional assumption of the innovations, see e.g. Section 2. One can expect that this method also does a good job if the innovations are not conditionally Gaussian but their distribution is not far away from normal. Our theoretical and numerical results confirm this hint for the case of a sub-Gaussian distribution of the innovations t , see Section 2 for more details.
+
+5
+
+To implement the ES approach, one first faces the problem to choose the smoothing parameter  (or  ) which can be naturally treated as a memory parameter. The values of  close to one correspond to a slow decay of the coefficients m and hence, to a large averaging window, while the small values of  result in a high-pass filtering. The classical ES methods choose one constant smoothing (memory) parameter. For instance, in the RiskMetrics design,  = 0.94 has been thought of as an optimized value. This, however, raises the question whether the experience-based value is really better than others. Another more reliable but computationally demanding approach is to choose  by optimizing some objective function such as forecasting errors (Cheng, Fan and Spokoiny, 2003) or log-likelihood function (Bollerslev and Woolridge, 1992).
+In our study, the smoothing parameter is adaptively selected at every time point. Given a finite set 1, . . . , K of the possible values of the memory parameter, we calculate K local MLEs {t(k)} at every time point t . Then these "weak" estimates are aggregated in one adaptive estimate by using the Spatial Stagewise Aggregation (SSA) procedure from Belomestny and Spokoiny (2006). Alternatively, we choose one k such that its corresponding MLE t(k) has the best performance in the estimation among the considered set of K estimates, referred as LMS. Furthermore, we extend the local exponential smoothing in the heavy-tailed distributional framework. Chen, H®ardle and Jeong (2005) show that the normal inverse Gaussian (NIG) distribution with four distributional parameters is successful in imitating the distributional behavior of real financial data. It is therefore practically interesting to show that the quasi ML estimation is applicable under the NIG distributional assumption. Finally, we demonstrate the implementation of the proposed local exponential smoothing method in volatility estimation and risk management.
+The paper is organized as follows. The local exponential smoothing is described, by which the SSA and LMS methods are used to select the smoothing parameter in Section 2. In particular, Section 2.4 investigates the choice of parameters involved in the localization. Sensitivity analysis is reported. Later in this section, an alternative parameter tuning is illustrated by minimizing forecasting errors. The quasi ML estimation under the NIG distributional assumption is discussed in Section 3. Section 4 compares the proposed methods with the stationary ES approach based on simulated data. Moreover, risk exposures of two German assets, one US equity and two exchange rates are examined using the proposed local volatility estimation under the normal and NIG distributional assumption.
+6
+
+Our theoretical study in Section 2.2 claims a kind of "oracle" optimality for the proposed procedure while the numerical results for simulated and real data demonstrates the quite reasonable performance of the method in the situations we focus on.
+
+2 Accounting For Non-Stationarity. Gaussian And
+Sub-Gaussian Innovations
+This section presents the method of adaptive estimation of time inhomogeneous volatility process t based on aggregating the ES estimates with different memory parameters  . For this section the innovations t in the model (1.1) are assumed to be Gaussian or sub-Gaussian. An extension to heavy-tailed innovations will be discussed in Section 3.
+We follow the local parametric approach from Spokoiny (2006). First we show that the ES estimate is a particular case of the local parametric volatility estimate and study some of its properties. Then we introduce the SSA procedure for aggregating a family of "weak" ES estimates into one adaptive volatility estimate and study its properties in the case of sub-Gaussian innovations.
+
+2.1 Local Parametric Modeling
+A time-homogeneous (time-homoskedastic) model means that t is a constant. For the homogeneous model t   for t from the given time interval I , the parameter  can be estimated using the (quasi) maximum likelihood method. Suppose first that the innovations t are conditionally on Ft-1 standard normal. Then the joint distribution of Rt for t  I is described by the log-likelihood
+
+LI() =
+
+(Yt, )
+
+tI
+
+where (y, ) = -(1/2) log(2)-y/(2) is the log-density of the normal distribution N(0, ) and Yt mean the squared returns, Yt = Rt2 . The corresponding maximum likelihood estimate (MLE) maximizes the likelihood:
+
+I = argmax LI() = argmax (Yt, ),
+
+
+
+ tI
+
+7
+
+where  is a given parametric subset in IR+ . If the innovations t are not conditionally standard normal, the estimate I is
+still meaningful and it can be considered as a quasi MLE.
+The assumption of time homogeneity is usually too restrictive if the time interval I is sufficiently large. The standard approach is to apply the parametric modeling in a vicinity of the point of interest t . The localizing scheme is generally given by the collection of weights Wt = {wst} which leads to the local log-likelihood
+
+L(Wt, ) =
+
+(Ys, )wst
+
+s
+
+and to the local MLE t defined as the maximizer of L(Wt, ) . In this paper we only consider the localizing scheme with the exponentially decreasing weights wst = t-s for s  t , where  is the given "memory" parameter. We also cut the weights when they become smaller than some prescribed value c > 0 , e.g. c = 0.01 . However, the properties of the local estimate t are general and apply to any localizing scheme.
+We denote by t the value maximizing the local log-likelihood L(Wt, ) :
+
+t = argmax L(Wt, ).
+
+The volatility model is a particular case of an exponential family, so that a closed form representation for the local MLE t and for the corresponding fitted log-likelihood L(Wt, t) are available, see Polzehl and Spokoiny (2006) for more details.
+
+Theorem 2.1. For every localizing scheme Wt
+
+t = Nt-1
+
+Yswst
+
+s
+
+where Nt denotes the sum of the weights wst :
+
+Nt = wst.
+s
+
+Moreover, for every  > 0 the fitted likelihood ratio L(Wt, , ) = max L(Wt,  , ) with L(Wt,  , ) = L(Wt,  ) - L(Wt, ) satisfies
+
+L(Wt, t, ) = NtK(t, )
+
+(2.1)
+
+8
+
+where
+
+K(,  ) = -0.5 log(/ ) + 1 - /
+
+is the Kullback-Leibler information for the two normal distributions with variances  and  : K(,  ) = IE log IP/dIP .
+Proof. One can see that
+
+L(Wt,
+
+)
+
+=
+
+-
+
+Nt 2
+
+log(2)
+
+-
+
+1 2
+
+Yswst
+
+s
+
+(2.2)
+
+This representation yields the both assertions of the theorem by simple algebra.
+
+Remark 2.1. The results of Theorem 2.1 only rely on the structure of the function (y, ) and do not utilize the assumption of conditional normality of the innovations t . Therefore, they apply whatever the distribution of the innovations t is.
+
+2.2 Some Properties of the Estimate t in the Homogeneous Situation
+This section collects some useful properties of the (quasi) MLE t and of the fitted loglikelihood L(Wt, t, ) in the homogeneous situation s =  for all s . We assume the following condition on the set  of possible values of the volatility parameter.
+() The set  is a compact interval in IR+ and does not containing  = 0 .
+First we discuss the case of Gaussian innovations s . Theorem 2.2 (Polzehl and Spokoiny, 2006). Assume () . Let s =    for s . If the innovations s are i.i.d. standard normal, then for any z > 0
+IP L(Wt, t, ) > z  IP NtK(t, ) > z  2e-z.
+Theorem 2.2 claims that the estimation loss measured by K(t, ) is with high probability bounded by z/Nt provided that z is sufficiently large. This result helps to establish a risk bound for a power loss function and to construct the confidence sets for the parameter  .
+Theorem 2.3. Assume () . Let Yt be i.i.d. from N(0, ) . Then for any r > 0
+IE L(Wt, t, ) r  IE NtK(t, ) r  rr .
+9
+
+where rr = 2r z0 zr-1e-zdz = 2r (r) . Moreover, if z satisfies 2e-z   , then
+
+Et, =  : NtK t,   z
+
+(2.3)
+
+is an  -confidence set for the parameter  in the sense that
+
+IP Et,   .
+
+Proof. By Theorem 2.2
+
+IE L(Wt, t, ) r  -
+
+zrdIP(L(Wt, t, ) > z)
+
+z0
+
+r
+
+zr-1IP(L(Wt, t, ) > z)dz  2r
+
+zr-1e-zdz
+
+z0 z0
+
+and the first assertion is fulfilled. The last assertion is proved similarly.
+
+The assumption of normality for the innovations t is often criticized in the financial literature. The basic result of Theorem 2.2 and its corollaries can be extended to the case of non-Gaussian innovations under some exponential moment conditions. We refer to this situation as the sub-Gaussian case. Later these results in combination with the power transformation of the data will be used for studying the heavily tailed innovations, see Section 5.
+
+Theorem 2.4. Assume () . Let the innovations s be i.i.d., IEs2 = 1 , and
+
+log IE exp (2s - 1)  ()
+
+(2.4)
+
+for some  > 0 and some constant () . Then there is a constant µ0 > 0 such that for all ,   
+
+IE exp µ0L(Wt, , )  IE exp µ0NtK(t, )  1
+
+(2.5)
+
+and
+
+IP L(Wt, t, ) > z  IP NtK(t, ) > z  2e-µ0z.
+
+(2.6)
+
+Proof. For brevity of notation we omit the subscript t . It holds for L(W, , ) =
+
+10
+
+L(W, ) - L(W, )
+
+2L(W, , ) = -N log(/) - (1/ - 1/) Ysws .
+s
+Under the measure IP , the squared returns Yt can be represented as Yt = t2 leading to the formula
+
+2L(W, , ) = N log(/) - (/ - 1) s2ws
+s
+= N log(1 + u) - u 2sws = N log(1 + u) - N u - u (s2 - 1)ws
+ss
+with u = / - 1 . For any µ such that maxs uµws   this yields by independence of the s 's
+
+log IE 2µL(W, , )
+
+= µN log(1 + u) - µN u + log IE exp -uµws(2s - 1)
+s
+= µN log(1 + u) - µN u + (-uµws).
+s
+
+It is easy to see that the condition () implies (-uµws)  0u2µ2ws2  0u2µ2ws for some 0 > 0 . This yields
+
+log IE 2µL(W, , )
+
+ µN log(1 + u) - µN u + 0u2µ2ws
+s
+= µN log(1 + u) - u + 0µu2 .
+
+The condition () ensures that u = u() = / - 1 is bounded by some constant u for all    . The expression log(1 + u) - u + 0µu2 is negative for all |u|  u and sufficiently small µ yielding (2.5).
+Lemma 6.1 from Polzehl and Spokoiny (2006) implies that
+
+{NtK(t, ) > z}  {NtK(-, ) > z}  {NtK(+, ) > z}
+
+for some fixed points +, - depending on z . This and (2.5) prove (2.6).
+
+The results of Theorem 2.3 can be similarly extended to the case of sub-Gaussian innovations.
+
+11
+
+Theorem 2.5. Assume () and (2.4). Then for any r > 0
+IE L(Wt, t, ) r  IE NtK(t, ) r  rr µ-0 r.
+Moreover, if z satisfies 2e-µ0z   , then Et, from (2.3) is an  -confidence set for the parameter  .
+
+2.3 Spatial Stagewise Aggregation (SSA) Procedure
+
+In this section we focus on the problem of adaptive (data-driven) estimation of the
+parameter t . We assume that a finite set {k, k = 1, . . . , K} of values of the smoothing parameter is given. Every value k leads to the localizing weighting scheme ws(kt ) = kt-s for s  t and to the local ML estimate t(k) :
+
+Nk =
+
+Mk
+
+ws(kt ) =
+
+km,
+
+s m=0
+
+t(k) = Nk-1
+
+Mk
+
+ws(kt )Ys = Nk-1
+
+kmyt-m-1.
+
+s m=0
+
+(2.7)
+
+where Mk = log c/ log k - 1 is the cutting point and guarantees that the weights after Mk are bounded by the prescribed value c , i.e. kMk+1  c . It is easy to see that the sum of weights Nk = s ws(kt ) does not depend on t , thus we suppress the index t in the notation. The corresponding fitted log-likelihood L(Wt(k), t(k), )
+reads as
+
+L(Wt(k), t(k), ) = NkK(t(k), ).
+The local MLEs t(k) will be referred to as "weak" estimates. Usually the parameter k runs over a wide range from values close to one to rather small values, so that at least one of them is "good" in the sense of estimation risk. However, the proper choice of the parameter  generally depends on the variability of the unknown random process s . We aim to construct a data-driven estimate t which performs nearly as good as the best one from this family.
+In what follow we consider the spatial stagewise aggregation (SSA) method which originates from Belomestny and Spokoiny (2006). The underlying idea of the method is to aggregate all the weak estimates in form of a convex combination instead of
+
+12
+
+choosing one of them. The procedure is sequential and starts with the estimate t(1) having the largest variability, that is, we set t(1) = t(1) . At every step k  2 the new estimate t(k) is constructed by aggregating the next "weak" estimate t(k) and the previously constructed estimate t(k-1) . Following to Spokoiny (2006), the aggregation is done in terms of the canonical parameter  which relates to the natural parameter  by  = -1/(2) . With t(k) = -1/(2t(k)) and t(k-1) = -1/(2t(k-1))
+t(k) = kvt(k) + (1 - k)t(k-1), t(k) = -1/(2t(k)).
+
+Equivalently one can write
+
+t(k) =
+
+k t(k)
+
++
+
+1 - k t(k-1)
+
+-1
+
+The mixing weights {k} are computed on the base of the fitted log-likelihood by checking that the previously aggregated estimate t(k-1) is in agreement with the next "weak" estimate t(k) . The difference between these two estimates is measured by the
+quantity
+
+k = Kag
+
+1 zk-1
+
+L(Wt(k),
+
+t(k),
+
+t(k-1))
+
+= Kag
+
+1 zk-1
+
+Nk
+
+K(t(k),
+
+t(k-1))
+
+(2.8)
+
+where z1, . . . , zK-1 are the parameters of the procedure, see Section 2.4 for more
+details, and Kag(∑) is the aggregation kernel. This kernel monotonously decreases on
+IR+ , is equal to one in a neighborhood of zero and vanishes outside the interval [0, 1] , so that the mixing coefficient k is one if there is no essential difference between t(k) and t(k-1) and zero, if the difference is significant. The significance level is measured
+by the "critical value" zk-1 . In the intermediate case, the mixing coefficient k is
+between zero and one. The procedure terminates after step k if k = 0 and we define in this case t(m) = t(k) = t(k-1) for all m > k . The formal definition reads as
+
+1. Initialization: (1) = (1) .
+
+2. Loop: for k  2
+
+t(k) =
+
+k t(k)
+
++
+
+1 - k t(k-1)
+
+-1
+
+13
+
+where the aggregating parameter k is computed as by (2.8). If k = 0 then terminate by letting t(k) = . . . = t(K) = t(k-1) .
+3. Final estimate: t = t(K) .
+In a special case of the SSA procedure with the binary k equal to zero or one, every estimate t(k) and hence, the resulting estimate t coincide with one of the "weak" estimates t(k) . This fact can easily be seen by induction arguments. Indeed, if k = 1 , then t(k) = t(k) and if k = 0 , then t(k) = t(k-1) . Therefore, in this situation the SSA method reduces to a kind of local model selection procedure (LMS). One limitation of the SSA compared to the alternative approach LMS is that it may magnify the bias through the summation, which will be illustrated in the later simulation study. On the meanwhile, the LMS may suffer from a high variability since it merely concerns discrete and finite values of the smoothing parameter.
+The next section discusses in details the problem of the parameter choice and critical values identification for the SSA procedure.
+2.4 Parameter Choice and Implementation Details
+To run the procedure, one has to specify the setup and fix the parameters of the procedure.
+The considered setup mainly concerns the set of localizing schemes Wt(k) = {ws(kt )} for k = 1, . . . , K yielding a set of "weak" estimates t(k) . Due to Theorem 2.4, variability of every t(k) is characterized by the local sample size Nk (the sum of the corresponding weights ws(kt ) over s ) which increases with k . In this paper we focus on the exponentially decreasing localizing schemes, so that every Wt(k) is completely specified by the rate k and the cutting level c .
+So, the aggregating procedure for a family of the "weak" ES estimates assumes that a growing sequence of values 1 < 2 < . . . < K is given in advance. This set leads to the sequence of localizing schemes Wt(k) with ws(kt ) = kt-s for s  t and kt-s > c otherwise ws(kt ) = 0 . The set corresponding "weak" estimates t(k) is defined by (2.7). The procedure applies to any such sequence for which the following condition is satisfied:
+(MD) for some u0, u with 0 < u0  u < 1 , the values N1, . . . , NK satisfy
+u0  Nk-1/Nk  u.
+14
+
+Here we present one example of constructing such a set {k} which is used in our simulation study and application examples.
+
+Example 2.1. [Set {k} ] Given values 1 < 1 and a > 1 , define
+
+Nk+1 Nk
+
+
+
+1 - k 1 - k+1
+
+=
+
+a
+
+>
+
+1.
+
+(2.9)
+
+The coefficient a controls the decreasing speed of the variations. The starting value 1 should be sufficiently small to provide a reasonable degree of localization. Our default values are a = 1.25 , 1 = 0.6 , and c = 0.01 . The total number K of the considered localizing schemes is fixed by the condition that K does not exceed the prescribed value  < 1 . One can expect a very minor influence of the mentioned parameters a, c on the performance of the procedure. This is confirmed by our simulation study in Section 4.
+
+The definition of the mixing coefficients k involves the "aggregation" kernel Kag . Our theoretical study is done under the following assumptions on this kernel:
+
+(Kag) The aggregation kernel Kag is monotonously decreasing for u  IR+ , Kag(0) = 1 , Kag(1) = 0 . Moreover, there exists some u0  (0, 1) such that Kag(u) = 1 for u  u0 .
+Our default choice is Kag(u) = {1-(u-1/6)+}+ so that Kag(u) = 1 for u  1/6 . Another choice is the uniform aggregation kernel Kag(u) = 1(u  1) . This choice leads the binary mixing coefficients k and hence, to the local model selection procedure. Next we discuss the most important question of choosing the critical values zk . The idea of selecting the critical values zk is to provide the prescribed performance of the procedure in the simple parametric situation with t   . In this situation, all the squared returns Yt are i.i.d. and follow the equation Yt = t2 . The corresponding joint distribution of all Yt is denoted by IP . The approach assumes that the distribution of the innovations s is known and it satisfies the condition (2.4). A natural candidate is the Gaussian distribution. However, we consider below in Section 3 the case when the s 's are obtained from the normal inverse Gaussian distribution, the heavy-tailed distribution, by some power transformation. The way of selecting the critical values is based on the so called "propagation" condition and it can be formulated in a quite general setup. Recall that the SSA
+
+15
+
+procedure is sequential and delivers after the step k the estimate t(k) which depends on the parameters z1 ,. . . , zk-1 . We now consider the performance of this procedure in the simple "parametric" situation of constant volatility t   . In this case the "ideal" or optimal choice among the first k estimates t(1) , . . . , t(k) is the one with the smallest variability, that is, the latest estimate t(k) whose variability is measured by the quantity Nk , see Theorem 2.3. Our approach is similar to the one which is widely used in the hypothesis testing problem: to select the parameters (critical
+values) by providing the prescribed error under the "null", that is, in the parametric
+situation. The only difference is that in the estimation problem the risk is measured
+by another loss function. This consideration leads to the following condition: for all
+   and all k = 2, . . . , K
+
+IE L(Wt(k), t(k), t(k)) r  IE NkK t(k), t(k)
+
+r
+
+
+
+(k - 1)rr K -1
+
+.
+
+(2.10)
+
+Here rr is from Theorem 2.3, and r and  are the fixed global parameters. The
+meaning of this condition is that the statistical difference between the adaptive estimate t(k) and the "oracle" estimate t(k) after the first k steps measured by the left hand-side of (2.10) is bounded by a prescribed constant which linearly grows with k . As a particular case for k = K , the condition (2.10) implies for t = t(K)
+
+IE NK K t(K), t r  rr .
+
+This means that the final adaptive estimate t is sufficiently close to its non-adaptive counterpart t(K) .
+The relation (2.10) gives us K-1 inequalities to fix K-1 parameters z1, . . . , zK-1 . However, these parameters only implicitly enter in (2.10) and it is unclear, how they
+can be selected in a numerical algorithmic way. The next section describes a sequen-
+tial procedure for selecting the parameters z1, . . . , zK-1 one after another by Monte Carlo simulations.
+The condition (2.10) is stated uniformly over  . However, the following technical result allows to reduce the condition to any one particular  , e.g. for  = 1 .
+
+Lemma 2.6. Let the squared returns Yt follow the parametric model with the constant volatility parameter  , that is, Yt = t2 . Then the distribution of the "test statistics" L(Wt(k), t(k), t(k-1)) = NkK(t(k), t(k-1)) under IP is the same for all  > 0 .
+16
+
+Proof. Under IP the squared returns Ys fulfill Yt = t2 and for every k , the estimate t(k) can be represented as
+
+t(k) = Nk-1
+
+Ysws(kt ) = Nk-1
+
+2sws(kt ),
+
+ss
+
+so that t(k) is  times the estimate computed for  = 1 . The same applies by simple induction argument to the aggregated estimate t(k-1) . It remains to note that the Kullback-Leibler divergence K(t(k), t(k-1)) is a function of the ratio t(k)/t(k-1) ,
+in which  cancels.
+
+The condition (2.10) involves two more "hyperparameters" r and  . The parameter r in (2.10) specifies the selected loss function. To provide a stable performance of the method and to minimize the Monte Carlo error we suggest the choice r = 1/2 . The parameter  is similar to the test level parameter, and, exactly as in the testing setup, its choice depends upon the subjective requirements on the procedure. Small values of  mean that we put more attention to the performance of the methods in the time homogeneous (parametric) situation and such a choice leads to a rather conservative procedure with relatively large critical values. Increasing  would result in a decrease of the critical values and an increase of the sensitivity of the method to the changes in the underlying parameter t at cost of some loss of stability in the time homogeneous situation. For the most of applications, a reasonable range of values  is between 0.2 and 1. Section 4 presents a small simulation study which demonstrates the dependence of the critical values on the parameters r and  .
+It is important to note that the "hyperparameters" r and  are global and their proper choice depends on the particular application while the estimation procedure is local and it constructs the estimate t separately at each point. The parameters r and  can be selected in a data driven way by fixing some objective function, e.g., by minimizing the forecasting error, see Section 2.5, however, we prefer to keep this choice free for the user.
+Below we present one way of selecting the critical values zk using Monte Carlo simulations from the parametric model successively, starting from k = 1 . To specify the contribution of z1 in the final risk of the method, we set all the remaining values z2, . . . , zK-1 equal to infinity: z2 = . . . = zK-1 =  . Now, for every particular z1 , the whole set of critical values zk is fixed and can run the procedure leading to the estimates t(k)(z1) for k = 2, . . . , K . The value z1 is selected as the minimal one for
+17
+
+which
+
+IE NkK t(k), t(k)(z1)
+
+r
+
+
+
+rr K-
+
+1
+
+,
+
+k = 2, . . . , K.
+
+(2.11)
+
+Such a value exists because the choice z1 =  leads to t(k)(z1) = t(k) for all k . Notice that the rule of "early stop" (the procedure terminates and sets t(k) = . . . , t(K) = t(k-1) if k = 0 ) is important here, otherwise zk =  leads to k = 1 and t(k) = t(k) for all k  2 .
+Next, with z1 fixed in this way, we select z2 . The method is similar: set z3 =
+. . . = zK-1 =  and play with z2 . Every particular value of z2 determines the whole
+set of critical values z1, z2, , . . . ,  . The procedure with such critical values results in the estimates t(k)(z1, z2) for k = 3, . . . , K . We select z2 as the minimal value which fulfills
+
+IE NkK t(k), t(k)(z1, z2)
+
+r
+
+
+
+2rr K -1
+
+,
+
+k = 3, . . . , K.
+
+(2.12)
+
+Such a value exists because the choice z2 =  provides a stronger inequality (2.11). We continue this way for all k < K . Suppose z1, . . . , zk-1 have been already fixed. We set zk+1 = . . . = zK-1 =  and play with zk . Every particular choice of zk leads to the estimates (m)(z1, . . . , zk) for m = k + 1, . . . , K coming out of the procedure with the parameters z1, . . . , zk, , . . . ,  . We select zk as the minimal value which fulfills
+
+IE NlK t(l), t(l)(z1, . . . , zk)
+
+r
+
+
+
+krr K -1
+
+,
+
+l = k + 1, . . . , K.
+
+(2.13)
+
+By simple induction arguments one can see that such a value exists and that the final
+procedure with the such defined parameters fulfills (2.10).
+Note that the proposed Monte Carlo procedure heavily relies on the joint distribution of the estimates t(1), . . . , t(K) under the parametric measure IP . In particular, it automatically accounts for the correlation between the estimates t(k) .
+It is also worth mentioning that the numerical complexity of the proposed proce-
+dure is not very high. It suffices to generate once M samples from IP and compute and store the estimates t(k,m) for every realization, m = 1, . . . , M and k = 1, . . . , K . The SSA procedure operates with the estimates t(k) and there is no need to keep the samples themselves. Now, with the fixed set of parameters zk , computing the estimates t(k) requires only the finite number of operations proportional to K . One
+
+18
+
+can roughly bound the total complexity of the Monte Carlo study by CM K2 for some fixed constant C .
+Below we present some numerical results for the proposed procedures for selecting the critical values. We first specify our setup. Then we illustrate how the resulting critical values depend on the other "hyperparameters" like r and  .
+The parameters {k} defining the weighting scheme Wt(k) are fixed by setting the values c, a, 1 .We select c = 0.01 , a = 1.25 and 1 = 0.6 . We also restrict the largest K to be smaller than  = 0.985 .
+To understand the impact of using a continuous aggregation kernel, we also consider the LMS procedure which comes out of the algorithm for the uniform aggregation kernel Kag(u) = 1(u  1) .
+For the above defined family of localizing schemes, the critical values zk of the SSA and LMS procedures are fixed by the method from Section 2.4. The coefficients {k} , the corresponding local window width Mk and the resulting critical values are reported in Table 1. An interesting observation is that the first critical value z1 is relatively small compared with the second and third values. A possible explanation is that the first two localizing schemes Wt(1) and Wt(2) are close to each other leading to a strong correlation between the estimates t(1) and t(2) . The parameter z1 is responsible just for the risk associated with the discrepancy N2K(t(2), t(1)) which can be bounded with a high probability by a relatively small value z1 .
+Next few numerical results illustrate the influence of the parameters r ,  , a , and c on the critical values zk .
+The sequences of the critical values zk for the SSA procedure for different combinations of r ,  , a , and c are detailed in Table 2. We start with the default choice and then slightly vary one parameter fixing the others to the default.
+The numerical results can be summarized as follows:
+∑ r (Default choice: r = 0.5 ): The parameter r is the power of the loss function. Our numerical results confirm that the growth of the power loss results in an increase of the critical values and hence, in a more conservative and less sensitive procedure, see Section 2.4.
+∑  (Default choice:  = 1 ): As already mentioned, the parameter  has the same meaning as the test level. Correspondingly, a decrease of  results in an increase of zk and hence, in a less sensitive procedure.
+19
+
+k k Mk
+
+Nk zk (SSA) zk (LMS)
+
+1 0.600 9 2.485 0.192
+
+0.192
+
+2 0.680 11 3.095 0.548
+
+0.141
+
+3 0.744 15 3.872 0.587
+
+0.091
+
+4 0.795 20 4.843 0.220
+
+0.065
+
+5 0.836 25 6.045 0.134
+
+0.053
+
+6 0.869 32 7.555 0.145
+
+0.043
+
+7 0.895 41 9.446 0.117
+
+0.035
+
+8 0.916 52 11.806 0.087
+
+0.030
+
+9 0.933 66 14.759 0.076
+
+0.025
+
+10 0.946 83 18.446 0.065
+
+0.020
+
+11 0.957 104 23.051 0.050
+
+0.016
+
+12 0.966 131 28.816 0.037
+
+0.012
+
+13 0.973 165 36.024 0.022
+
+0.007
+
+14 0.978 207 45.029 0.015
+
+0.001
+
+15 0.982 259 56.280
+
+Table 1: Critical values of the SSA and LMS methods w.r.t. the default choice: c = 0.01 , a = 1.25 , 1 = 0.6 , r = 0.5 and  = 1 .
+
+∑ a (Default choice: a = 1.25 ): This parameter specifies how dense is the set of possible values k . The values of a close to one result in a rather dense set which becomes more and more rare with the increase of a . Therefore, for smaller a -values we have more estimates to select between. This can be helpful for improving the accuracy of approximation and thus, for reducing the bias of estimation. This improvement is however, at cost of some loss of sensitivity, because the growth of K requires more conditions to be checked. Note also that our theoretical upper bound for the critical values zk from Theorem 2.7 presented later linearly increases with K . From the other side, the use of a relatively small a results in a strong correlation between the estimates t(k) which leads to a decrease of the critical values zk . Figure 2 shows the critical values zk for the default choice ( K = 15 ), a = 1.5 ( K = 9 ) and a = 1.1 ( K = 34 ).
+∑ c (Default choice: c = 0.01 ): The parameter c specifies the cutting point
+20
+
+k default 1 0.192 2 0.548 3 0.587 4 0.220 5 0.134 6 0.145 7 0.117 8 0.087 9 0.076 10 0.065 11 0.050 12 0.037 13 0.022 14 0.015 rr 0.401
+
+r = 0.3 0.122 0.280 0.236 0.108 0.079 0.075 0.065 0.053 0.046 0.040 0.032 0.025 0.017 0.022 0.535
+
+r = 0.7 0.294 0.921 1.055 0.413 0.173 0.242 0.204 0.120 0.105 0.095 0.069 0.044 0.024 0.002 0.321
+
+r = 1.0 0.578 1.547 1.690 0.764 0.193 0.407 0.549 0.206 0.120 0.144 0.103 0.050 0.020 0.001 0.252
+
+ = 0.5 0.246 0.691 0.933 0.415 0.155 0.219 0.202 0.137 0.114 0.107 0.093 0.069 0.053 0.066 0.401
+
+ = 0.7 0.225 0.603 0.757 0.285 0.151 0.178 0.158 0.112 0.095 0.087 0.070 0.054 0.037 0.039 0.401
+
+ = 1.5 0.170 0.439 0.421 0.155 0.114 0.104 0.082 0.066 0.053 0.043 0.030 0.019 0.008 0.001 0.401
+
+c = 0.005 0.198 0.500 0.568 0.209 0.131 0.143 0.111 0.086 0.075 0.064 0.049 0.036 0.022 0.014 0.400
+
+c = 0.02 0.342 0.602 0.513 0.190 0.177 0.161 0.116 0.091 0.081 0.069 0.052 0.039 0.024 0.016 0.403
+
+Table 2: Sensitivity analysis: comparison of the SSA critical values zk .
+
+of the exponential smoothing window. As one can expect, this value has only minor influence on the critical values and on the whole procedure. This is in agreement with our numerical results.
+
+2.5 Parameter Tuning by Minimizing the Forecast Errors
+
+The proposed procedure is local in the sense that the the adaptation (model selection or aggregation) is performed at every time instant t separately. However, the procedure involves some global parameters like the loss power r or the level  . Their choice can be done in a data-driven way by minimizing the global forecasting error as suggested in Cheng et al. (2003). The estimated value t can be viewed as a forecast for the volatility for a short forecasting horizon h . So, a good performance of the method means a relatively small forecasting error which is measured as
+
+mean h -step-ahead forecasting errors: 21
+
+T
+
+1 h
+
+h-1
+
+yt+m - t
+
+p
+
+t=t0 m=0
+
+1.8 a = 1.25 (default) a = 1.1
+1.6 a = 1.5
+1.4
+1.2
+1
+0.8
+0.6
+0.4
+0.2
+0 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95
+Figure 2: Sequences of critical values zk for the default choice a = 1.25 ( K = 15 ), a = 1.5 ( K = 9 ) and a = 1.1 ( K = 34 ) w.r.t. the smoothing parameter k for k = 1, . . . , K - 1 .
+for some power p > 0 .
+2.6 Some Theoretical Properties of the SSA Estimate
+Belomestny and Spokoiny (2006) claimed some "oracle" property of the SSA estimate t . However, the results presented there only apply to the local maximum likelihood estimates obtained from independent observations. Here we show that the similar results continue to apply in the sub-Gaussian case and in the time series framework.
+The first result gives an upper bound for the critical values zk . Theorem 2.7 (Belomestny and Spokoiny (2006, Theorem 5.1)). Let the innovations t be i.i.d. standard normal. Assume (MD) and (Kag) . There are three constants a0, a1 and a2 depending on u0 , u and u0 only such that the choice
+zk = a0 + a1 log -1 + a2r log Nk
+ensures (2.10) for all k  K .
+The result and the proof extend in a straightforward way to the case of the sub-
+22
+
+Gaussian innovations using the result of Theorem 2.4. In that case, the constants
+a0, a1 , and a2 also depend on µ0 shown in Theorem 2.4. The construction of the procedure ensures some risk bound for the adaptive esti-
+mate  in the time homogeneous situation, see (2.10). It is natural to expect that
+a similar behavior is valid in the situation when the time varying parameter t does not significantly deviates from some constant value  . Here we quantify this property
+and show how the deviation from the parametric time homogeneous situation can be
+measured. Denote by It(k) the support of the k th weighting scheme corresponding to the
+memory parameter k : It(k) = [t - Mk, t] , k = 1, . . . , K . Define for each k and 
+
+(tk)() =
+
+IK Ps, P ,
+
+sIt(k)
+
+(2.14)
+
+where IK Ps, P means the Kullback-Leibler distance between two distributions
+of Ys with the parameter values s and  . In the case of Gaussian innovations, IK Ps, P = K(s, ) . The value (tk)() can be considered as a distance from the time varying model at hand to the parametric model with the constant parameter  on the interval It(k) .
+Note that the volatility s is in general a random process. Thus, the value (tk)() is random as well. Our small modeling bias condition means that there is a number k such that the modeling bias (tk)() is small with a high probability for some  and all k  k . Consider the corresponding estimate t(k) obtained after the first k steps of the algorithm. The next "propagation" result claims that the behavior of
+the procedure under the small modeling bias condition is essentially the same as in
+the pure parametric situation.
+
+Theorem 2.8. Assume () , (MD) , and (2.4). Let  and k be such that
+
+max
+kk
+
+IE(tk)()
+
+
+
+
+
+for some   0 . Then for any r > 0
+
+IE log
+
+1
+
++
+
+Nkr Kr
+
+t(k), t(k) Rr
+
+IE log
+
+1
+
++
+
+Nkr Kr t(k), Rr
+
+
+
+23
+
+ 1 + ,  1+
+
+(2.15)
+
+where Rr = rr in the case of Gaussian innovations and Rr = µ-0 rrr in the case of sub-Gaussian innovations with the constant µ0 from Theorem 2.4.
+Proof. The proof is based on the following general result.
+Lemma 2.9. Let IP and IP0 be two measures such that the Kullback-Leibler divergence IE log(dIP/dIP0) , satisfies
+
+IE log(dIP/dIP0)   < .
+
+Then for any random variable  with IE0 < 
+
+IE log 1 +    + IE0.
+
+Proof. By simple algebra one can check that for any fixed y the maximum of the function f (x) = xy - x log x + x is attained at x = ey leading to the inequality xy  x log x - x + ey . Using this inequality and the representation IE log 1 +  = IE0 Z log 1 +  with Z = dIP/dIP0 we obtain
+
+IE log 1 + 
+
+= IE0 Z log 1 +   IE0 Z log Z - Z + IE0(1 + ) = IE0 Z log Z + IE0 - IE0Z + 1.
+
+It remains to note that IE0Z = 1 and IE0 Z log Z = IE log Z .
+The first assertion of the theorem is just a combination of this result and the condition (2.10). The second follows in a similar way from Theorem 2.3 for the case of Gaussian innovations and from Theorem 2.4 in the sub-Gaussian case.
+Due to the "propagation" result, the procedure performs well as long as the "small modeling bias" condition k()   is fulfilled. To establish the accurate result for the final estimate  , we have to check that the aggregated estimate k does not vary much at the steps "after propagation" when the divergence k() from the parametric model becomes large.
+Theorem 2.10 (Belomestny and Spokoiny (2006), Theorem 5.3). It holds for every k  K
+
+NkK t(k), t(k-1)  zk. 24
+
+(2.16)
+
+Moreover, under (MD) , it holds for every k with k < k  K
+
+NkK t(k ), t(k)  a2cu2 zk
+
+(2.17)
+
+where cu = (u-1/2 - 1)-1 , a is a constant depending on  only, and zk = maxlk zl .
+Combination of the "propagation" and "stability" statements implies the main result concerning the properties of the adaptive estimate t .
+The result claims again the "oracle" accuracy Nk-1/2 for  up to the log factor zk . We state the result for r = 1/2 only. An extension to an arbitrary r > 0 is obvious.
+
+Theorem 2.11 ("Oracle" property). Assume () , (MD) , (2.4), and let IEt(k)   for some k ,  and  . Then
+
+IE log
+
+1
+
++
+
+Nk1/2K1/2 t, aR1/2
+
+
+
+ log 1 + cuR1-/12 zk +  +  + 1
+
+where cu is the constant from Theorem 2.10 and R1/2 from Theorem 2.8.
+
+Remark 2.2. Before proving the theorem, we briefly comment on the result claimed. By Theorem 2.8, the "oracle" estimate t(k) ensures that the estimation loss K1/2 t(k),  is stochastically bounded by Const. /Nk1/2 where Const. is a constant depending on  from the condition (2.15). The "oracle" result claims the same property for the adaptive estimate t but the loss K1/2(t, ) is now bounded by Const. zk/Nk . By Theorem 2.7, the parameter zk is at most logarithmic in the sample size. Hence, the accuracy of adaptive estimation is the same in order as for the "oracle" up to a logarithmic factor which can be viewed as "payment for adaptation". Belomestny and Spokoiny (2006) argued that the "oracle" result implies rate optimality of the adaptive estimate  and that the log-factor zk cannot be removed or improved.
+Proof. Similarly to the proof of Theorem 2.10,
+
+K1/2 t, 
+
+k
+
+ aK1/2 t(k),  + aK t(k), t(k) + a
+
+K1/2 t(l), t(l-1)
+
+l=k+1
+
+ aK1/2 t(k),  + aK1/2 t(k), t(k) + acu zk /Nk .
+
+This, the elementary inequality log(1 + a + b)  log(1 + a) + log(1 + b) for a, b  0
+
+25
+
+implies similarly to Theorem 2.8 that
+
+IE log
+
+1
+
++
+
+Nk1/2K1/2 t, aR1/2
+
+
+
+
+
+ log
+
+1
+
++
+
+cu zk R1/2
+
++ IE log
+
+1 + Nk1/2K1/2
+
+t(k), t(k) + Nk1/2K1/2 R1/2
+
+t(k), 
+
+ log
+
+1
+
++
+
+cu zk R1/2
+
++++1
+
+as required.
+
+3 Accounting for Heavy Tails
+
+The proposed local exponential smoothing methods and the calculation of the critical values are valid in the Gaussian framework. They can be easily extended to the sub-Gaussian framework considered in Section 2.2. Financial time series however often indicates a heavily tailed behaviour which goes far beyond the sub-Gaussian case. In this section, we extend the methods in the normal inverse Gaussian (NIG) distributional framework which can well describe the heavy-tailed behavior of the real series. The density is of the form:
+
+fNIG(; , , , µ) =
+
+ K1 
+
+ 2 + ( - µ)2 2 + ( - µ)2
+
+exp{
+
+2 - 2 + ( - µ)},
+
+where the distributional parameters fulfill conditions: µ  IR,  > 0 and ||   , and K(∑) is the modified Bessel function of the third kind which is of the form:
+
+K(y)
+
+=
+
+1 2
+
+ 0
+
+y-1
+
+exp{-
+
+y 2
+
+(y
+
++
+
+y-1)}
+
+dy.
+
+We refer to Prause (1999) for a detailed description of the NIG distribution.
+One can easily see that the exponential moment IE{exp(t2)} of the squared NIG innovations t2 does not exist. Hence, the results of Section 2.2 do not apply to NIG innovations. Apart the theoretical reasons, the quasi MLE t computed from the squared returns Yt with the heavy-tailed innovations indicates high variability and is very volatile. To ensure a robust and stable risk management, we suggest to
+replace the squared returns Yt by their p -power. The choice of 0  p < 1/2 ensures
+
+26
+
+that the resulting "observations" yt,p = Ytp have exponential moments, see Chen et al. (2005). This enables us to apply the proposed SSA procedure to the transformed
+data yt,p to estimate the parameter t . One easily gets
+
+IE{yt,p | Ft-1} = IE{Ytp | Ft-1} = tpIE|t|2p = tpCp = t,p
+
+(3.1)
+
+where Cp = IE|t|2p is a constant and relies on p and the distribution of the innovations t which is assumed to be NIG. Note that the equation (3.1) can be rewritten as
+
+yt,p = t,pt2,p where the "new" standardized squared innovations
+
+t2,p = yt,p/t,p = Ytp/(Cptp)
+satisfy IE{t2,p | Ft-1} = 1 .
+An important question for this application is the choice of parameters of the method, especially of the critical values zk . The formal application of the approach of Section 2.4 requires to use the underlying NIG distribution of the innovations t for the Monte Carlo simulations. This means that one has to first simulate the NIG data Yt under the time homogeneous situation Yt = t2 with NIG t and then compute the transformed data yt,p for the calculation of "weak" estimates t(,kp) . This approach would require the exact knowledge of the parameters of the NIG distribution of t which is difficult to expect in real life situation. On the other hand, the use of power transformation with an appropriate choice of p makes the distribution of the "new" innovations t,p close to the Gaussian case. This suggests to apply the critical values zk computed for the Gaussian case. Below in Section 4 we calculate critical values zk given the true distributional parameters of the NIG innovations, which shows that the use of Gaussian t,p in the Monte Carlo simulations and the values of p around 1/2 works well and delivers almost the same results as if the true NIG distribution for the t 's would be utilized.
+The adaptive procedure delivers the estimate t,p of the "new" variable t,p . To get the estimate of the original variance t from the relation (3.1), we need to know the constant Cp which depends upon the parameters of the NIG distribution. We suggest two ways to fix this constant. One is based on the fact that the standardized
+
+27
+
+innovations t2 = Yt/t should satisfy IE2t = 1 . The estimates t = t1,/pp/Cp1/p lead to the estimated squared innovations t2 = Yt/t = Cp1/pYt/t1,/pp , so that an estimate of Cp can be obtained from the equation
+
+t1
+n-1Cp1/p
+t=t0
+
+Yt 1t,/pp
+
+= 1,
+
+(3.2)
+
+where n = t1-t0+1 means the number of observations based on which the estimation is done. A small problem with this approach is that the presented sum of Yt/1t,/pp is quite sensitive to extreme values of Yt and even one or two outliers can dramatically destroy the resulting estimate.
+The other method of fixing the constant Cp is based on the proposal of Section 2.5 to minimize the mean of forecasting error. Namely, we define the value Cp in a way to minimize
+
+t1
+
+1 h
+
+h-1
+
+Yt+m - t
+
+p
+
+=
+
+t1
+
+1 h
+
+h-1
+
+Yt+m - 1t,/pp/Cp1/p
+
+p.
+
+t=t0 m=0
+
+t=t0 m=0
+
+After the constant Cp is estimated one can use the estimated returns t for fixing the NIG parameters which will be used for our risk evaluation.
+The adaptive procedure for the NIG innovations is summarized as:
+
+1. Do power transformation to the squared returns Yt : Yt,p = Ytp .
+2. Compute the estimate t,p of the parameter t,p from Yt,p applying the critical values zk obtained for the Gaussian case.
+3. Estimate the value Cp from the equation (3.2).
+4. Compute the estimates t = (t,p/Cp)1/p and identify the NIG distributional parameters from t = Rtt-1/2 .
+5. (Optional) Calculate critical values zk with the identified NIG parameters using Monte Carlo simulation. Repeat the above procedure to estimate t .
+All the theoretical results from Section 2.6 applies to the such constructed estimate t,p of the parameter t,p if p < 1/2 is taken. This automatically yields the "oracle" accuracy for the back transformed estimate t of the original volatility t . For reference convenience, we present the "oracle" result. Below P means the
+
+28
+
+distribution of Yt,p = |t|2p with NIG t . Note that neither the procedure nor the result does not assume that the parameter of the NIG distribution are known.
+
+Theorem 3.1 ("Oracle" property for NIG innovations). Let the innovations t be NIG and p < 1/2 . Assume () , (MD) , and let, for some k ,  and  ,
+
+IE IK Pt,p, P  .
+tI
+
+Then
+
+IE log
+
+1
+
++
+
+Nk1/2K1/2 t,p, aR1/2
+
+
+
+ log 1 + cuR1-/12 zk +  +  + 1
+
+where cu is the constant from Theorem 2.10 and R1/2 from Theorem 2.8.
+
+4 Simulation Study
+This section aims to compare the performance of the proposed adaptive procedures and the well established stationary ES estimation with the default parameter  = 0.94 and with the optimized parameter for the given data by hand. We consider two versions of the SSA procedure: one with the default parameter set and the other one with the uniform kernel Kag which does a model selection and therefore, referred to as LMS.
+In the simulation study, wegenerate 1000 stochastic processes driven by the hidden Markov model: Rt = tt with t either standard normal or NIG with parameters  = 1.340 ,  = -0.015 ,  = 1.337 , µ = 0.010 . These NIG parameters are in fact the maximum likelihood estimates of the devolatilized Deutsche Mark to the US Dollar daily rates (innovations) from 1979/12/01 to 1994/04/01. The data is available at the FEDC (http://sfb649.wiwi.hu-berlin.de/fedc). The designed volatility process has 7 states : 0.2, 0.25, 0.3, 0.4, 0.5, 0.7 and 1 , see Figure 3. The sample size of the stochastic processes is T = 1000 . The first 300 observations are reserved as a training set for the very beginning volatility estimations since the largest smoothing parameter K in the adaptive procedure corresponds to 259 past observations.
+In the simulation study, we apply the power transform with the frontier value p = 0.5 as a default choice. We also present a small sensitivity analysis by varying
+29
+
+values of p and show the accuracy of estimation based on the critical values driven in the Gaussian and NIG distributional assumptions respectively. Two criteria are used to measure the accuracy of estimation:
+1. Sum of the absolute error (AE) of the estimated volatility.
+
+T
+
+AE =
+
+t1/2 - t1/2 .
+
+t=301
+
+2. Ratio of the AE (RAE) of the adaptive approach to that of the stationary ES.
+
+RAE
+
+=
+
+AESSA AEES
+
+or
+
+AELMS AEES
+
+The volatility estimates of one realization with t  N(0, 1) is displayed in Figure 3, by which the adaptive SSA estimates fast react to jumps of the process. The LMS displays the similar pattern and the difference between these two adaptive approaches is not significant. It shows that the adaptive estimates better illustrate the movement of the generated volatility process than the ES.
+Over the 1000 simulations with the Gaussian innovations, the LMS with the average AE of 68.84 and the SSA with 69.55 are more accurate than the "optimized" stationary ES 82.50 with  = 0.94 . The corresponding average values of RAE of the SSA is 84.42% indicating a roughly 16% improvement over the ES. Moreover, Figure 4 illustrates the boxplot of RAEs w.r.t. not only the adaptive but also the stationary ES approaches with smoothing parameters in the default sequence of {k} for k = 1, . . . , 15 , see Table 1. The best performance of the stationary ES is realized for  = 0.895 that corresponds to k = 7 . The adaptive ES approaches, namely the SSA and the LMS, show even better performance than the "best" stationary ES approach. The figure also approves that a potential limitation of the SSA compared to the LMS is that it may magnify the bias through the summation as mentioned before.
+Table 3 summarizes the estimation errors w.r.t. different values of the four parameters analyzed in Section 2.4. The comparison of the RAEs reasons the default choice in the SSA approach.
+Given the simulated heavy-tailed data with the NIG innovations, we follow the procedure explained in Section 3 by first applying the critical values zk computed for the Gaussian case to the transformed data. Furthermore, we calculate the critical
+
+30
+
+1.5 generated vol SSA LMS ES ( = 0.94)
+1
+
+0.5
+
+0 300 400 500 600 700 800 900 1000
+Figure 3: Estimated volatility process based on one realized simulation data with t  N(0, 1) . The "optimized" ES (  = 0.94 ), LMS and SSA estimates and the generated volatility process are displayed.
+
+def. SSA 0.84
+
+r, def. 0.5 0.3 0.7 1.0 0.85 0.87 0.92
+
+, def. 1 0.5 0.7 1.5 0.88 0.86 0.84
+
+a, def. 1.25 1.1 1.5 0.84 0.86
+
+c, def. 0.01 0.005 0.02 0.84 0.85
+
+Table 3: Average RAE of the 1000 simulation data sets with t  N(0, 1) , by which the SSA method is applied w.r.t. several values of the parameters involved in the
+adaptive approach. In the stationary ES,  = 0.94 is applied.
+
+values given the true NIG distributional parameters in the Monte Carlo simulation and reestimate the volatility following the adaptive procedure. Compared to the "optimized" ES, the SSA approach is sensitive to the structure shifts. One realization of the estimated volatility process is displayed in Figure 5. In our study, we also measure the influence of the parameter p over a range from 0.1 to 1 on the estimation, see Table 4. The default choice p = 0.5 for example results in an average value of RAE with 90.27% over the 1000 simulations, indicating a better performance of the adaptive method than the "optimized" ES. The RAEs of the SSA estimates based on the critical values under the Gaussian case and the NIG case are reported in the
+31
+
+3.00
+2.25
+1.50
+0.75
+01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 LMS SSA
+Figure 4: The boxplots of the RAEs of the SSA, LMS and ES with k for k = 1, . . . , K .
+table as well. It is observed that the Gaussian-based critical values works well and the accuracy of estimation is improved as the values of p are close to the default choice.
+p 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 CV N(0, 1) 1.09 1.08 1.06 1.03 0.99 0.94 0.91 0.90 0.90 0.91
+CV NIG 1.01 0.96 0.93 0.91 0.90 0.90 0.90 0.90 0.90 0.91 Table 4: Average RAEs over 1000 simulated NIG data sets with different values of p , by which p = 0.5 is default choice. Two sequences of critical values calculated in the Gaussian case and given the true NIG parameters are used in the adaptive procedure.
+5 Application to Risk Analysis
+The aim of this section is to illustrate the performance of the risk management approach based on the adaptive SSA procedure.
+32
+
+1.6 generated vol SSA ES ( = 0.94)
+1.4
+1.2
+1
+0.8
+0.6
+0.4
+0.2
+0 300 400 500 600 700 800 900 1000
+Figure 5: Estimated volatility process based on one realized simulation data with t  NIG(1.340, -0.015, 1.337, 0.010) . The ES (  = 0.94 ) and SSA ( p = 0.5 and critical values given the true NIG parameters) estimates and the generated volatility process are displayed.
+
+A sound risk management system is of great importance, because a large devaluation in the financial market is often followed by economic depression and bankruptcy of credit system. Therefore, it is necessary to measure and control risk exposures using accurate methods. As mentioned before, a realistic risk management method should account for nonstationarity and heavy tailedness of financial time series. In this section, we implement the proposed local exponential smoothing approaches to estimate the time-varying volatility and assume that the innovations are either NIG or Gaussian distributed:
+
+Rt = tt, where t  N(0, 1) or t  NIG
+
+(5.1)
+
+We consider here log-returns of three assets Microsoft (MC), Volkswagen (VW), Deutsche Bank (DB) with daily closed price from 2002/01/01 to 2006/01/05 (972 observations) and of two exchange rates: EUR/USD (EURUSD) and EUR/JPY (EURJPY) ranging from 1997/01/02 to 2006/01/05 (2332 observations). The data sets have been provided by the financial and economic data center (FEDC) of the Col-
+
+33
+
+laborative Research Center 649 on Economic Risk of the Humboldt-Universit®at zu Berlin. The NIG innovations (standardized returns) are assumed to be stationary. The KPSS tests of stationarity are not rejected at the 90% confidence level, see Table 5.
+
+data MC
+VW
+DB
+EURUSD
+EURJPY
+
+vola SSA LMS ES SSA LMS ES SSA LMS ES SSA LMS ES SSA LMS ES
+
+mean 0.001 -0.004 -0.003 -0.063 -0.061 -0.054 -0.097 -0.100 -0.087 -0.008 -0.006 -0.014 -0.007 -0.006 -0.010
+
+s.d. 1.235 1.204 1.071 1.150 1.132 1.050 1.142 1.132 1.025 1.091 1.074 1.043 1.121 1.092 1.051
+
+skewness 0.261 0.065 0.545 0.493 0.477 0.680 -0.661 -0.631 -0.558 -0.172 -0.051 -0.278 0.164 0.186 0.164
+
+kurtosis 10.494 10.173 12.492 9.530 10.382 10.016 7.868 8.855 6.561 4.190 4.175 3.773 4.942 4.953 4.646
+
+KPSS 0.059 0.085 0.036 0.065 0.076 0.056 0.317 0.308 0.242 0.317 0.258 0.270 0.313 0.274 0.292
+
+Table 5: Descriptive statistics of the standardized returns. The critical value of the KPSS test without trend is 0.347 (90%).
+
+Two mainly used risk measures at probability pr , Value-at-Risk (VaR) and expected shortfall (ExS), are calculated:
+VaRt,pr = -quantile(Rt)pr = - t  quantile(t)pr ExS = IE{-Rt| - Rt > VaRt,pr}.
+The performance of the proposed local exponential smoothing approaches is evaluated from the viewpoints of regulator, investors and internal supervisor. Minimum regulatory requirement: The main goals of risk regulatory are to ensure the adequacy of capital and restrict the happening of large losses of financial institutions. It regulates that the financial institutions shall reserve appropriate
+34
+
+amount of capital related to 1% risk level of their portfolio, namely the market risk charge (RC), in the central bank:
+
+RCt = max
+
+Mf
+
+1 60
+
+60
+
+VaRt-i, VaRt
+
+i=1
+
+(5.2)
+
+where the multiplicative factor Mf has a floor value 3 . According to the modification of the Basel market risk paper in 1997, financial institutions are allowed to use their internal models to measure the market risks. The internal models are verified in accordance with the "traffic light" rule that counts the number of exceedances over VaR at 1% probability spanning the last 250 days and identifies the multiplicative factor Mf in the form (5.2), see Table 6, cited from Franke, H®ardle and Hafner (2004). It is clear that an increase of Mf or concerning an extremal risk level such as 0.5%
+
+Number of exceedances 0 bis 4 5 6 7 8 9
+More than 9
+
+Increase of Mf 0 0.4 0.5
+0.65 0.75 0.85
+1
+
+Zone green yellow yellow yellow yellow yellow
+red
+
+Table 6: Traffic light as a factor of the exceeding amount.
+
+results in a large amount of risk charge and consequently a low ratio of profit. This
+
+observation indicates that the regulatory rule in fact motivates financial institutions
+
+to control VaR at
+
+1.6% =
+
+4 250
+
+level instead of
+
+1% .
+
+Therefore an internal model is
+
+particularly desirable by generating an empirical probability pr that is smaller or
+
+equal to 1.6% ,
+
+pr
+
+=
+
+number number of
+
+of exceedances total observations
+
+,
+
+and simultaneously requiring risk charge as small as possible. Table 7 gives a detailed report of risk analysis, which shows that all the considered
+models locate either in the green or yellow zone. The Gaussian-based adaptive ES
+
+35
+
+models successfully fulfill the minimal requirement of regulatory. To be more specific, the LMS for MC, VW and EURUSD and the SSA for DB generate the favorable results. The EURJPY data is extraordinary by which the models with the Gaussian noise can not fulfill the regulatory requirement. A compensate choice is the ES with the NIG noise. Investors' review: From the viewpoint of investors, it is important to measure the size of loss instead of the frequency of loss since investors suffer loss at bankruptcy. Even in the "best" case, the loss equals to the difference between the total realized loss and the reserved risk capital. As a consequence, investors care the ExS more than the VaR.
+Table 7 shows that the Gaussian-based model in general generates larger values of ExS than the NIG-based model. Furthermore, the adaptive ES are desirable for investors concerning extreme risk level. The ExS values of EURJPY at the expected 0.5% level, for example, are 0.231 (SSA), 0.255 (LMS) and 0.263 (ES) with NIG innovations. It is clear that the SSA procedure is superior to the other two. Internal supervisory review: It is important for internal supervisory to exactly measure the market risk exposures before controlling them. Based on this criterion, it is rational to choose a model that generates the empirical risk level pr as close as possible to the target one:
+In the real data analysis, the models with the NIG innovations and using the local exponential smoothing approaches generate more precise empirical values than other alternative methods at two risk levels 0.5% and 1% .
+On summary, the models based on the local volatility estimates and the NIG distributed residuals best suit the requirements of investors and supervisory. The VaR models based on the adaptive approaches and the normal distributional assumption, on the contrary, is successful to fulfill the regulatory requirement.
+References
+Anderson, T., Bollerslev, T., Diebold, F. and Labys, P. (2001). The distribution of realized exchange rate volatility, Journal of the American Statistical Association pp. 42≠55.
+Belomestny, D. and Spokoiny, V. (2006). Spatial aggregation of local likelihood estimates with applications to classification, WIAS Preprint.
+36
+
+MC except. prob.
+ExS VaR VW except. prob. ExS VaR DB except. prob. ExS VaR EURUSD except. prob. ExS VaR EURJPY except. prob. ExS VaR
+
+1% t  N(0, 1) SSA LMS ES 12 11 8 0.018 0.016 0.012 0.409 0.377 0.325 17.18 17.43 r 18.92 SSA LMS ES 12 10 10 0.018 0.015 0.015 0.623 0.567 0.567 27.83 28.37 r 28.82 SSA LMS ES 10 10 7 0.015 0.015 0.010 0.397 0.397 0.285 28.00 r 28.35 29.06 SSA LMS ES 34 30 22 0.017 0.015 0.011 0.417 0.372 0.309 28.00 28.35 r 28.65 SSA LMS ES 52 50 41 0.026 0.025 0.020 0.884 0.900 0.797 32.53 33.09 33.67
+
+1% t  NIG SSA LMS ES
+765 0.010 s 0.009 0.007 0.317 0.285 0.265 i 22.08 21.94 21.94
+SSA LMS ES
+786 0.010 s 0.012 0.009 0.443 0.492 0.360 i 32.44 32.58 33.21
+SSA LMS ES
+546 0.007 0.006 0.009 s 0.190 0.148 i 0.259 31.23 31.84 30.19
+SSA LMS ES
+15 16 18 0.008 0.008 0.009 s 0.207 i 0.212 0.248 29.51 29.95 29.53
+SSA LMS ES
+21 20 21 0.010 0.010 s 0.010 0.442 0.428 i 0.463 40.32 40.21 r 40.31
+
+0.5% t  N(0, 1) SSA LMS ES
+
+10 7
+
+6
+
+0.015 0.010 0.009
+
+0.374 0.303 0.286
+
+0.5% t  NIG SSA LMS ES
+433 0.006 0.004 s 0.004 0.225 0.193 i 0.202
+
+SSA 8 0.012 0.488
+
+LMS 8 0.012 0.488
+
+ES 7 0.010 0.439
+
+SSA 2 0.003 0.167 i
+
+LMS 2 0.003 0.167
+
+ES 3 0.004 s 0.215
+
+SSA 8 0.012 0.323
+
+LMS 7 0.010 0.301
+
+ES 4 0.006 0.168
+
+SSA
+3 0.004 s 0.099 i
+
+LMS 3 0.004 0.099
+
+ES 3 0.004 0.126
+
+SSA 20 0.010 0.255
+
+LMS 21 0.010 0.254
+
+ES 9 0.004 0.134
+
+SSA 11 0.005 0.149
+
+LMS 10 0.005 s 0.143
+
+ES 7 0.003 0.105 i
+
+SSA 34 0.017 0.655
+
+LMS 30 0.015 0.597
+
+ES 28 0.014 0.572
+
+SSA
+10 0.005 s 0.231 i
+
+LMS 11 0.005 0.255
+
+ES 10 0.005 0.263
+
+37
+
+Table 7: Risk analysis of the real data. The exceedances are marked in green, yellow or red according to the traffic light
+rule. An internal model is accepted if it is in the green zone. The best results to fulfill the regulatory requirement are marked by r . The recommended method to the investor is marked by i . For the internal supervisory, we recommend the method marked by s .
+
+Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity, Journal of Econometrics pp. 307≠327.
+Bollerslev, T. and Woolridge, J. (1992). Quasi-maximum likelihood estimation and inference in dynamic models with time-varying covariances, Econometric Reviews pp. 143≠172.
+Box, G. and Cox, D. (1964). An analysis of transformations, Journal of the Royal Statistical Society. Series B (Methodological) pp. 211≠252.
+Chen, Y., H®ardle, W. and Jeong, S. (2005). Nonparametric risk management with generalized hyperbolic distributions, SFB 649, discussion paper.
+Cheng, M., Fan, J. and Spokoiny, V. (2003). Dynamic nonparametric filtering with application to volatility estimation, in M. Akritas and D. Politis (eds), Recent advances and trends in nonparametric statistics, Elsevier, pp. 315≠334.
+Christoffersen, P. (2003). Elements of Financial Risk Management, Adademic Press.
+Eberlein, E. and Keller, U. (1995). Hyperbolic distributions in finance, Bernoulli 1: 281≠299.
+Embrechts, P., McNeil, A. and Straumann, D. (2002). Correlation and dependence in risk management: properties and pitfalls, in M. Dempster (ed.), Risk Management: Value at Risk and Beyond, Cambridge University Press.
+Engle, R. (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of uk inflation, Econometrica pp. 987≠1008.
+Fan, J. and Gu, J. (2003). Semiparametric estimation of value-at-risk, Econometrics Journal 6: 261≠290.
+Franke, J., H®ardle, W. and Hafner, C. (2004). Statistics of Financial Markets, Springer-Verlag Berlin Heidelberg New York.
+Mercurio, D. and Spokoiny, V. (2004). Statistical inference for time inhomogeneous volatility models, The Annals of Statistics 32: 577≠602.
+Polzehl, J. and Spokoiny, V. (2006). Propagation-separation approach for local likelihood estimation, Probability Theory and Related Fields pp. 335≠362.
+38
+
+Prause, K. (1999). The generalized hyperbolic model: Estimation, financial derivatives and risk measures, dissertation.
+Spokoiny, V. (2006). Local parametric methods in nonparametric estimation, SpringerVerlag Berlin Heidelberg New York.
+Zhang, L., Mykland, P. and Ait-Sahalia, Y. (2005). A tale of two time scales: Determining integrated volatility with noisy high-frequency data, Journal of The American Statistical Association pp. 1394≠1411.
+39
+
+SFB 649 Discussion Paper Series 2007
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Trade Liberalisation, Process and Product Innovation, and Relative Skill Demand" by Sebastian Braun, January 2007.
+002 "Robust Risk Management. Accounting for Nonstationarity and Heavy Tails" by Ying Chen and Vladimir Spokoiny, January 2007.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

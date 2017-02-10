@@ -1,0 +1,1142 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2013-008
+Forecasting systemic impact
+in financial networks
+Nikolaus Hautsch* Julia Schaumburg**
+Melanie Schienle**
+* Humboldt-Universität zu Berlin, Germany ** Leibniz Universität Hannover, Germany This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Forecasting systemic impact in financial networks 
+Nikolaus Hautsch Julia Schaumburg Melanie Schienle
+Abstract
+We propose a methodology for forecasting the systemic impact of financial institutions in interconnected systems. Utilizing a five-year sample including the 2008/9 financial crisis, we demonstrate how the approach can be used for timely systemic risk monitoring of large European banks and insurance companies. We predict firms' systemic relevance as the marginal impact of individual downside risks on systemic distress. The so-called systemic risk betas account for a company's position within the network of financial interdependencies in addition to its balance sheet characteristics and its exposure towards general market conditions. Relying only on publicly available daily market data, we determine time-varying systemic risk networks, and forecast systemic relevance on a quarterly basis. Our empirical findings reveal time-varying risk channels and firms' specific roles as risk transmitters and/or risk recipients.
+Keywords: Forecasting systemic risk contributions, time-varying systemic risk network, model selection with regularization in quantiles JEL classification: G01, G18, G32, G38, C21, C51, C63
+ Nikolaus Hautsch, Center for Applied Statistics and Economics (CASE), Humboldt-Universität zu Berlin and Center for Financial Studies, Frankfurt, email: nikolaus.hautsch@wiwi.hu-berlin.de. Julia Schaumburg, Leibniz Universität Hannover, email: schaumburg@ewifo.uni-hannover.de. Melanie Schienle, CASE and Leibniz Universität Hannover, email: schienle@ewifo.uni-hannover.de. Research support by the Deutsche Forschungsgemeinschaft via the Collaborative Research Center 649 "Economic Risk" is gratefully acknowledged.
+1
+
+1. Introduction
+The breakdown risk for the financial system induced by the distress of an individual firm has long been neglected in financial regulation. Up to the financial crisis 2007-2009, this systemic risk has been exclusively attributed to the idiosyncratic risk of an institution, abstracting from the strong network cross-dependencies in the financial sector causing potential risk spillover effects. In an extensive study for the U.S. financial system, however, Hautsch, Schaumburg, and Schienle (2012) (HSS) show that it is mainly the interconnectedness within the financial sector that determines the systemic relevance of a particular firm. To quantify the systemic impact of an individual company, they propose the socalled realized systemic risk beta, the total effect of a company's time-varying Value at Risk (VaR) on the VaR of the entire system. Firms' tail risk is determined from companyspecific relevant factors among other companies' tail risks, individual balance sheet characteristics, and financial indicators, where components are selected as being "relevant" via a data-driven statistical regularization technique. The resulting individual-specific models give rise to a financial risk network, capturing exposures of financial firms towards the distress of others. These network risk spill-over channels contain important information for supervision authorities as sources for systemic risk. Their data-driven determination of firms' systemic relevance from publicly available data distinguishes HSS from the number of other recently proposed methods for refined measurement and prediction of systemic risk, see, e.g., Adrian and Brunnermeier (2011), White, Kim, and Manganelli (2010), Huang, Zhou, and Zhu (2009), Brownlees and Engle (2011), Acharya, Pedersen, Philippon, and Richardson (2010), Giesecke and Kim (2011), Billio, Getmansky, Lo, and Pelizzon (2012), Koopman, Lucas, and Schwaab (2011), Engle, Jondeau, and Rockinger (2012), or Schwaab, Koopman, and Lucas (2011) among many others.
+Effective regulation requires models which can be used for forecasting and which are reliable even if estimation periods are short. The original HSS framework, however, is not tailored to short-term forecasting of systemic risk and must be adapted for prediction purposes. Firstly, the HSS-systemic risk network is static, i.e., it is estimated once us-
+2
+
+ing the entire dataset and then forms the basis for estimation of respective time-varying realized betas. However, empirical evidence suggests that network links might change over time, especially in crisis periods. Secondly, in order to exploit additional variation, quarterly balance sheet characteristics are interpolated by cubic splines over the analyzed time period. Therefore, out-of-sample forecasting is not possible. Thirdly, the penalty parameter required for the model selection step is chosen such that a backtest criterion is optimized. VaR backtests, however, generally rely on counting and analyzing VaR exceedances, which is reasonable when the time series is long. Though for short estimation periods, these tests should be replaced by more adequate quantile versions of F-tests.
+In this paper, we extend the HSS framework to allow for flexible systemic risk forecasting. The estimation period is shortened using rolling windows of only one year of data. This excludes influence of back-dated events on current forecasts while still pertaining sufficient prediction accuracy. The models are re-estimated each quarter, resulting in time-varying systemic risk networks. Instead of interpolating, information on firmspecific balance sheets is only updated when it is published at the end of each quarter. The model selection penalty is chosen such that the in-sample fit in the respective annual observation window is optimal. This is examined via an F-test for quantile regression. The empirical analysis investigates systemic risk in Europe. The data set covers stock prices and balance sheets of major European banks and insurance companies as well as financial indicators, including country-specific variables, during the period around the 2008/9 financial crisis. We illustrate that our approach could serve as a monitoring tool for regulators as it captures and effectively predicts systemic relevance over time.
+The remainder of the paper is structured as follows. Section 2 outlines the forecasting methodology and gives an algorithm for model selection and estimation of firm-specific VaRs. Furthermore, the estimation method for realized systemic risk betas is given. Section 3 describes the dataset, before discussing estimation results and their implications in detail in Section 3.2. Section 4 concludes.
+3
+
+2. Forecasting Methodology
+We extend the framework of Hautsch, Schaumburg, and Schienle (2012) (HSS) and the HSS measure for systemic relevance in the presence of network effects, the realized systemic risk beta. Whereas HSS focus on a single static network as a basis for estimating systemic impact of financial institutions, we progress by determining time-varying networks in a forecasting setting. These allow capturing changing risk spillover channels within the system, which are tailored to short-term forecasts from the model.
+2.1. Time-Varying Networks
+In a densely interconnected financial system, the tail risk of an institution i at a time point t is determined not only by its own balance sheet characteristics Zti-1 and general market conditions Mt-1 but also by indications for distress in closely related banks in the system. For each bank in the system, we count a corresponding return observation as marking a distress event whenever this return is below the empirical 10% quantile. In such cases, these extreme returns might induce cross-effects on the riskiness of other banks in the system. We record these as so-called loss exceedances, i.e., the values of returns in case of an exceedance of the 10% quantile and zeros otherwise. Accordingly, the set of potential risk drivers R for a bank i therefore comprises network impacts Nt-i from any other bank in the system, where each component of Nt-i consists of loss exceedances for any bank but firm i in the system.
+We measure tail risk by the conditional Value at Risk, V aRi, for firm i and by V aRs for the system, respectively. Using a post-LASSO technique as in HSS, the large set of potential risk drivers Rt = (Zti-1, Mt-1, Nt-i) for institution i can be reduced to a group of "relevant" risk drivers Rt(i) . Selected tail-risk cross-effects from other banks in the system constitute network links from these banks to institution i. Repeating the analysis for all banks i in the system, relevant risk channels can be depicted and summarized in a respective network graph. The recent financial crisis, however, has shown that such
+4
+
+network interconnections may change over time as the relevance of certain institutions for the risk of others might vary substantially. Thus adequate short-run predictions of systemic importance should mainly be based on current dependency structures. We address this issue by a time-dependent selection of relevant risk drivers Rt(i,t) according to the algorithm described below. Driven by the quarterly publication frequency of companies' balance sheet information we re-evaluate the relevance of all potential risk drivers for each institution in the system at the beginning of each quarter based on data from the respective previous year and incorporate the latest balance sheet news. We therefore obtain quarterly time-varying tail risk networks which reflect the most current information of risk channels within the financial system. They are tailored for short-term quarterly predictions of the systemic riskiness of firms in the system.
+With the relevant risk drivers R(i,t) for firm i and time t in a specific quarter, individual tail risk can be determined from observations up to one year before t as
+
+V
+
+i
+aRt
+
+=
+
+0i,t
+
++
+
+i,tRt(i,t)
+
+,
+
+(1)
+
+where coefficients  are obtained in the post-LASSO step from quantile regression of Xi on (1, R(i,t)) as part of the procedure described below.
+
+Algorithm for selecting relevant risk drivers and determining their effects in firms' tail risk
+We adapt the data-driven procedure of HSS to account for time-variation in tail risk networks and marginal systemic risk contributions. The automatic selection procedure is based on a sequential F-test in contrast to the backtest criterion in HSS. Determination of relevant risk drivers R(i,t0) at the beginning of a quarter t0 uses information of observations within the previous year. Hence it is based on approximately  = 250 observations Rt0- , . . . , Rt0, where each Rt consists of centered observations of the potential regressors and has K dimensions. We fix a -equidistant grid c = {c1 > . . . > cl =
+5
+
+c1 - (l - 1) > cL = 0} for values of a constant c, where c1 is chosen such that the corresponding penalty parameter is sufficiently large for selecting not more than one regressor into the model. For our purposes, we set c1 = 30 and  = 1.
+
+Step 1: For each c  c, determine the penalty parameter it0(c) from the data in the following two sub-steps as in Belloni and Chernozhukov (2011):
+
+Step a) Take  + 1 iid draws from U [0, 1] independent of Rt0- , . . . , Rt0 denoted as U0, . . . , U . Conditional on observations of R, calculate
+
+ti0
+
+=
+
+(
+
++
+
+1) max 1kK
+
+
+
+1 +
+
+1
+
+ Rt0-t,k(q - I(Ut  q)) t=0 ^k q(1 - q)
+
+.
+
+Step b) Repeat step a) B=500 times generating the empirical distribution of it0 conditional on R through it01, . . . , ti0B. For a confidence level  = 0.1 in the selection, set
+
+ti0(c) = c · Q(it0, 1 - |Rt0-t),
+
+where Q(it0, 1 - |Rt0-t) denotes the (1 - )-quantile of ti0 given Rt0-t. Step 2: Run separate l1-penalized quantile regressions for ti0(c1) and it0(c2) from step
+1 and obtain
+
+qit0 (c)
+
+=
+
+argmini
+
+
+
+1 +
+
+1
+
+
+
+q
+
+Xti0-t + Rt0-ti
+
++ it0 (c)
+
+t=0
+
+q(1 - q) 
+
+K
+
+^k|ki | ,
+
+(2)
+
+k=1
+
+with the set of potentially relevant regressors Rt0-t = (Rt0-t,k)kK=1, componentwise
+
+variation ^k2
+
+=
+
+1  +1
+
+ t=0
+
+(Rt0-t,k
+
+)2
+
+and
+
+loss
+
+function
+
+q (u)
+
+=
+
+u(q
+
+-
+
+I (u
+
+<
+
+0)),
+
+where the indicator I(·) is 1 for u < 0 and zero otherwise.
+
+Step 3: Drop all components in R with absolute marginal effects |ti0(c)| below a threshold  = 0.0001 keeping only the Kit0(c) remaining relevant regressors R(i,t0)(c) for c  {c1, c2}. As c1 > c2, the sets of selected relevant regressors are nested R(i,t0)(c1)  R(i,t0)(c2) = {R(i,t0)(c1), R(i,t0)(c2\c1)}. If R(i,t0)(c2\c1) is the empty
+
+6
+
+set, restart Step 2 with i(c2) and i(c3) from Step 1. Otherwise re-estimate (2) without penalty term for the larger model c2 only with the respective selected relevant uncentered regressors R(i,t0)(c2) and an intercept. This regression yields the post-LASSO estimates qit0(c2). Apply an F-test for joint significance of regressors R(i,t0)(c2\c1) at 5% level. If they are significant, restart Step 2 with i(c2) and i(c3) from Step 1b. Continue until additional regressors R(i,t0)(cl+1\cl) from penalty cl to cl+1 are no longer found to be significant. Then the final model is obtained from cl yielding the set of relevant regressors R(i,t0)(c2) with corresponding post-LASSO estimates qit0(cl) for the coefficients.
+
+2.2. Forecasting Systemic Impact
+
+In an interconnected financial system, we measure the systemic impact of a specific bank i as the total realized effect of its riskiness on distress of the entire financial system given network and market externalities. This can be empirically determined via
+
+V
+
+aRts
+
+=
+
+s,t
+
++
+
+s|i,t(Zti- 1)V
+
+i
+aRt
+
++
+
+ s,t Mt-1
+
++
+
+s,tV
+
+(-i,t)
+aRt
+
+,
+
+(3)
+
+(-i)
+where V aR comprises tail risks of all other banks in the system selected as relevant risk drivers for bank i in the corresponding network topology. The marginal effect s|i,t of the risk of company i might vary linearly over time in selected firm-specific balance sheet characteristics Zti- 1. Coefficients in (3) can be obtained via standard quantile regression analogously to (2) without penalty term. Corresponding to the one-year estimation window for the time-varying network, we also determine parameters in (3) at the beginning of each quarter, based on observations dating back no longer than one year. The systemic relevance of a company can then be predicted from the beginning of a quarter t0 to the next quarter t0 + ~ as realized beta
+
+ s|i t0+~|t0-
+
+=
+
+s|i,t0 (Zti0-1)V
+
+i
+aRt0
+
+(4)
+
+7
+
+where t- denotes information up to time t. Within a quarter, predictions are updated by
+
+ts+|i1|t-
+
+=
+
+s|i,t0 (Zti0-1)V
+
+i
+aRt
+
+(5)
+
+for any time point t0  t  t + ~.
+
+3. Data and Results
+3.1. Data
+Our sample of financial firms comprises 20 European banks and insurance companies. A list can be found in Table 1. The dataset covers Europe-based banks deemed as systemically relevant by Financial Stability Board (2011), for which complete data sets over the considered period are available.1 It includes the ten largest European banks by assets in 2010. Furthermore, six insurance companies are selected, all belonging (by assets) to the top 10 insurers in the world in 2010. The regressors explaining the individual Value at Risk (V aRi) are selected among other companies' loss exceedances, individual balance sheet ratios, and several financial indicators, including country-specific variables.
+From quarterly balance sheets obtained from Datastream/Worldscope, three key ratios are calculated: Leverage, correponding to total assets divided by total equity; maturity mismatch, the quotient of short-term debt and total debt; and size, defined as the logarithm of total assets. Furthermore, we include quarterly stock price volatility in the set of possible regressors, which is estimated over the time span between quarterly reports. Instead of interpolating the data to daily values, we keep them constant until new information is published.2
+1Banco Espirito Santo is the only bank which is not listed by the Financial Stability Board. We include it because otherwise, financial firms from Southern Europe would be underrepresented.
+2For simplicity, we assume that quarterly balance sheets become public information on fixed dates: March 31, June 30, September 30 and December 31.
+
+8
+
+The set of financial indicator variables contains the return on EuroStoxx 600, relative changes of the volatility index VStoxx, and returns on three major bond indices for Europe: IBOXX Sovereign, containing government bonds, iBOXX Subsovereigns, consisting of bonds issued by government owned banks, supranationals and other subsovereigns, and iBOXX Corporates. Furthermore, we include changes in three months Euribor, the interbank lending interest rate, and a liquidity spread between three months Eurepo, the average repo rate reflecting the cost of repurchase agreements, and the three month Bubill (German government bond rate) as proxy for the risk free rate. To capture aggregate credit quality in Europe, we also add the change in the one year and five year default probability indices from Fitch as well as the change in the five year continued series of the credit default swap index iTraxx Europe. Another two relevant economic indicators are the gold price and relative changes of the MSCI Europe Real Estate Price Index.
+As proxies for the market's expectations on economic growth and to capture countryspecific effects on individual VaRs, we include several ten year government bond yields (Germany, United Kingdom, Spain, United States, and Greece) as well as yield spreads (ten years minus three months yields) of German and U.S. government bonds. Finally, accounting for the global interconnectedness of financial markets, we include returns on financial sector indices, FTSE Financials Japan, Asia, and US.
+When estimating systemic risk betas in the second stage, a subset of the above macro financial indicators is required as control variables. Here, we take the changes in the EuroStoxx 600 index, VStoxx, Euribor, iTraXX, the three FTSE Financial indices, the real estate index, and the spread between Eurepo and the Bubill rate.
+9
+
+3.2. Results
+Time-varying tail risk networks
+Having identified the tail risk drivers for each firm allows us constructing a tail risk network. Following HSS, we take all firms as nodes in a network and identify a network link from firm i to firm j whenever the loss exceedance of i is selected as a tail risk driver for j. Figures 1 to 3 show the resulting systemic risk networks for the 20 financial institutions computed based on one-year rolling windows from 2006 to 2010. In order to illustrate cross-country and inter-country risk channels, we order the institutions in the graph according to their (main) home countries.
+We identify several risk connections which are quite stable over time and seem to be fundamental risk channels of the European financial network during the period under consideration. An interesting tail risk connection is the link between Royal Bank of Scotland (RBS) and Barclays. RBS was strongly affected by the break-down of the U.S. housing and credit markets and realized substantial write-downs in April 2008. In the beginning of 2009, RBS faced a record loss and was bailed out by the UK government which increased its stake in the company to 70 percent. Conversely, Barclays was relatively well funded until beginning of 2008 and even explored options to take over the defaulting U.S. investment bank Lehman Brothers. A further bolstering of Barclays' balance sheet was due to the raise of new capital by investors in fall 2008. Consequently, Barclays was less exposed to credit crunches and did not participate in government's insurance schemes for toxic assets. The network analysis, however, reveals that both banks have been deeply connected. Being bi-directional before the crisis, the links became particularly pronounced and rather one-directional during the financial crisis. In particular, RBS received substantial tail risk from Barclays further increasing RBS's potential losses and making both companies systemically risky. Interestingly, the strong risk connection between Barclays and RBS vanishes in the aftermath of the financial crisis which might be a result of RBS's bailout and ongoing re-structuring in both banks. Persistent risk connections are also identified be-
+10
+
+tween Deutsche Bank and various big insurance companies, particularly Allianz as well as between Deutsche Bank and Commerzbank. The latter faced significant distress due to investments in toxic assets originating from the U.S. housing market, and was the first commercial lender in Germany accepting capital injections from the government. In the beginning of 2009, Commerzbank was partly nationalised with the government taking a 25% stake. Our analysis reflects that the distress of Commerzbank also spilled over to Deutsche Bank and thus in turn to big insurances such as Allianz and Münchener Rück. Hence, governmental support of Commerzbank was an important step to reduce its systemic risk contribution. This is empirically confirmed by our analysis as we observe a declining tail risk connectedness of Commerzbank after the bailout.
+Furthermore, the networks reveal persistent connections between UBS and Credit Suisse, UBS and Crédit Agricole, Agricole and Société Générale as well as Credit Suisse and Agricole. The strong interconnections between these Swiss and French banks are likely to be driven by exposure to the same toxic assets and resulting liquidity shortages stemming from the U.S. market making these banks facing common funding problems. This happened during 2008/09, where all of these banks also received substantial tail risk spillovers from others. For instance, our analysis reveals that Credit Suisse was subject to tail risk inflow from Barclays and BNP Paribas which - according to the identified network connections - spilled over to the 'risk neighbors' of Credit Suisse. All of these banks received bailout packages from the Swiss and French government, respectively. As a possible consequence of these bailouts and a relaxation of the bank's funding situation in the aftermath, Credit Suisse's sensitivity to tail risk inflow from Barclays and BNP Paribas actually declined in 2009. Likewise, also the Spanish bank Santander and the Portugese bank Banco Espirito Santo seem to be deeply interconnected. As discussed below, Santander serves as an originator and transmitter of systemic risk to various other companies. These dependencies become particularly visible and pronounced during and after the financial crisis and might have contributed to the instability and distress of the Spanish banking system in 2012. Hence, though all these institutions operate on a global level, we still observe a substantial extent of persistent country-specific risk channels. These ef-
+11
+
+fects reflect a strong interconnectedness and consequently inherent instability of national banking systems. These within-country dependencies are complemented by cross-country linkages and industry-specific channels. Examples for the latter are tail risk connections prevailing within the insurance sector including Allianz, AXA, Aviva, Münchener Rück and Aegon. Their interconnectedness even increased during the financial crisis causing a substantial threat for the system in case of the default of one of these companies.
+Our approach, however, also captures interesting time variations in tail risk channels. In particular, in 2008/09, we observe high fluctuations of network connections. Several risk channels identified in this period seem to be rather caused by crisis-specific turbulences and consequently vanished in the aftermath. Examples are connections from Santander to HSBC, BNP Paribas, Allianz and AXA. These links make Santander systemically quite risky as the bank obviously produced and transmitted tail risk to various major players in the system. These findings are confirmed by the estimated systemic risk betas shown below. A further example is a strong connection between ING and Aviva which built up and increased through the crisis and vanished thereafter. The Dutch bank ING realized significant losses, had to cut jobs in 2009 and received capital injections from the Dutch government. Hence, our analysis shows that substantial tail risk from ING was spreading out to Aviva and in turn to other insurances.
+Analyzing the pure number of outgoing tail risk connections (illustrated by the size of nodes in the network graphs), we identify Barclays, Santander, AXA, BNP Paribas, ING, Société Générale and Crédit Agricole as deeply connected companies. Actually, the latter four were companies which have been bailed out by their governments and got partly nationalized. Our analysis indicates that these governmental capital injections were indeed justifiable as these companies have been (and still are) in the core of the network and therefore serve as distributors and multipliers of systemic risk. According to the identified network connections, failure of one of these institutions would substantially threaten the stability of the financial system.
+12
+
+Systemic risk rankings
+Table 2 reports systemic risk rankings for all quarters between the beginning of 2007 and the end of 2010. They are based on realized systemic risk betas at the end of the respective foregoing quarter, and therefore contain forecasts of relative systemic relevance. Prior to the estimation, we conducted a test on joint significance of V aRi and V aRi · Zi with i = 1, ...20, for V aRs, using all five years of data. Apart from two exceptions, all individual VaRs turn out to be statistically significant for the system's VaR. The two exceptions are, on the one hand, Banco Espirito Santo, which is the largest bank in Portugal, but much less internationally active than the other banks in our sample. On the other hand, Société Generale is found to be insignificant. We attribute this finding to the fact that in 2008, the bank was affected by large losses induced by the unauthorized propriety trading of one of its employees. This was a materialization of (idiosyncratic) operational risk, and may have distorted the test results concerning systemic relevance. We expect that on a longer horizon, Société Generale' systemic risk beta would be significant. In the following, however, we exclude it from the systemic risk rankings, together with Banco Espirito Santo.
+It should be noted, that often differences in beta estimates between direct neighboring firms in the obtained rankings are small and thus not statistically significant. Hence orderings in Table 2 should rather be seen as an indication for a company's relative systemic importance characterizing groups of similar relative systemic impact.3 Figure 5 illustrates the time-varying cross-sectional distribution of the estimated betas. We observe the overall highest systemic risk betas during the height of the financial crisis. Furthermore, representatively for other firms, we depict the estimated systemic impacts of Barclays, Crédit Agricole, Santander and UBS. It turns out that the respective systemic risk betas move in locksteps before mid 2008, but strongly diverge during the crisis. Similar relationships are also shown for other companies and reflect distinct crisis-specific effects.
+3At some time points, estimated systemic risk betas become negative. We interpret this finding as negligible systemic impacts of the respective firm in the respective quarter and therefore omit it in the ranking.
+13
+
+These effects are supported by Table 2 revealing strong variations of the relative systemic riskiness during the crisis. This is obviously induced by a severe instability of the financial system during this period and is also confirmed by the high variability of network connections as discussed above. Conversely, a higher stability of systemic risk patterns over time is observed in the periods before and after the financial crisis (i.e., 2007 and 2010).
+Overall, we identify BNP Paribas, HSBC and Santander as being most risky with the highest realized risk betas between 2007 and 2010. BNP Paribas was strongly affected by the credit crunch and an evaporation of liquidity in the funding market in 2007/08 and was bailed out by the French government end of October. Our findings reflect that after the bailout, BNP's systemic riskiness was still comparably high. According to the network analysis above, this is obviously due its strong interconnectedness making BNP to one of the major originators of tail risk spillovers in 2010. In contrast HSBC's connectedness is only moderate. However, its size and the identified tail risk connections to Barclays, BNP and Santander make it systemically quite risky. These connections became obviously quite relevant due to HSBC's heavy exposure to U.S. housing and credit markets. Consequently, the bank's distress induced by significant losses during the crisis have been spread out in the system resulting in a particularly high systemic riskiness around beginning of 2009. This is backed by the fact that HSBC had to cut a substantial amount of jobs at beginning of 2009. Our results indicate that also in the aftermath of the crisis, HSBC still remains systemically quite risky. In case of Santander, the relative systemic riskiness (compared to other banks) even tends to increase after the financial crisis (particularly in 2010). This finding might already indicate funding problems in the Spanish banking market becoming particularly evident in 2012. These results are in line with the findings of the network analysis above identifying Santander as a deeply interconnected bank being linked to several insurance companies and (particularly during the crisis) to other major players like Barclays and HSBC.
+14
+
+Monitoring systemic risk rankings over the course of the financial crisis provides interesting insights into the systemic importance of individual firms under extreme conditions of market distress. Four prominent examples are RBS, Barclays, Deutsche Bank and HBSC. According to the estimated systemic risk betas, we classify RBS as belonging to the most systemically risky companies in 2008. Also Barclays is identified as being systemically very relevant in several (though not all) periods in 2008/09. The identified network connections revealed that the strong connection between Barclays and RBS was obviously one driving force of the systemic relevance of both. This is also confirmed by the fact that the systemic relevance of both (as indicated by the realized betas) declined as the tail risk connection between both vanishes in 2009. Likewise, Deutsche Bank faces a steady increase of its systemic relevance in 2007 and belongs to the group of systemically most risky companies in 2008. This is confirmed by the network analysis above showing that particularly during 2008, Deutsche Bank was deeply interconnected with risk channels to various major insurance companies. Consequently, a default of Deutsche Bank would have had dramatic consequences for the insurance industry and thus the stability of the entire system. Although Deutsche Bank was not subject to any government bailouts it went through a process of substantial internal restructuring. This is confirmed by our estimates showing a decline of Deutsche Bank's systemic importance during 2009 and 2010.
+Finally, for the post-crisis period, we observe a tendency for the insurance companies becoming relatively more risky. Particularly in 2010, Allianz, Aviva, Axa, Generali and Münchener Rück reveal relatively high (though not always significant) systemic risk betas. Likewise, also Société Générale and Credit Suisse are identified as systemically risky in 2010. These findings are confirmed by the network analysis showing a comparably high connectedness of Société Générale, Axa and Generali.
+15
+
+4. Conclusion
+In this paper, we propose a framework for forecasting financial institutions' marginal contribution to systemic risk based on their interconnectedness in terms of extreme downside risks. There are four major challenges in this context: Firms' (conditional) tail risks are unobserved and must be estimated from data. Determining such individual risk levels appropriately results in high-dimensional models due to the large number of potential network connections. These network dependencies, however, are inherently instable over time. Therefore forecasting stability and responsiveness require careful balancing. To tackle these issues, we adapt the two-stage quantile regression approach by Hautsch, Schaumburg, and Schienle (2012) to a rolling window out-of-sample prediction setting based on time-varying networks.
+In a sample of large European banks covering the period 2007 to 2010, the adapted procedure reveals the dynamic nature of interconnectedness and corresponding risk channels in the European financial system around and during the financial crisis. The time evolution of network dependencies provides valuable insights into a bank's role in the system identifying originators and transmitters of tail risk over time. Determined relevant tail risk connections and systemic risk rankings both provide valuable input for regulation. Given the need for better and more timely market surveillance, our approach can thus serve as a useful vehicle for providing a continuous assessment of systemic risk dependencies based on market data.
+16
+
+Appendix
+
+Table 1: List of included financial institutions. As most of them provide a broad range of services, we differentiate between banks and insurance companies, according to their main field of business activities. Furthermore, we state the country their headquarters are located in.
+
+Aegon (Insurance, NL) Allianz (Insurance, DE) Aviva (Insurance, UK) AXA (Insurance, FR) Banco Espirito Santo (Bank, PT) Barclays (Bank, UK) BNP Paribas (Bank, FR) Commerzbank (Insurance, DE) Crédit Agricole (Bank, FR) Credit Suisse (Bank, CH)
+
+Deutsche Bank (Bank, DE) Generali (Insurance, IT) HSBC (Bank, UK) ING Groep (Bank, NL) Lloyds Banking Group (UK) Muenchener Rueck (Insurance, DE) Royal Bank of Scotland (Bank, UK) Santander (Bank, ES) Société Générale (Bank, FR) UBS (Bank, CH)
+
+17
+
+Estimation period: Q1.2006 - Q4.2006
+
+RoyalBankScotland Lloyds
+HSBC
+Barclays
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Aviva
+BancoEspiritoSanto
+ING Aegon Generali
+
+Muenchener.Ruck
+Santander
+AXA BNPParibas CreditAgricole SocieteGenerale
+
+Estimation period: Q3.2006 - Q2.2007
+
+RoyalBankScotland Lloyds HSBC
+Barclays
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Aviva
+
+BancoEspiritoSanto
+
+ING
+
+Aegon
+
+Generali SocieteGenerale
+
+Muenchener.Ruck
+Santander
+AXA BNPParibas CreditAgricole
+
+Estimation period: Q2.2006 - Q1.2007
+
+RoyalBankScotland Lloyds HSBC
+Barclays
+Aviva
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Muenchener.Ruck
+
+BancoEspiritoSanto
+ING
+Aegon Generali SocieteGenerale
+
+Santander
+AXA BNPParibas CreditAgricole
+
+Estimation period: Q4.2006 - Q3.2007
+
+RoyalBankScotland Lloyds
+HSBC Barclays
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Aviva
+
+BancoEspiritoSanto
+
+ING
+
+Aegon
+
+Generali SocieteGenerale
+
+Muenchener.Ruck
+Santander
+AXA BNPParibas CreditAgricole
+
+18
+
+Figure 1: Estimates of yearly systemic risk network rolled over from Q4/2006 to Q3/2007.
+
+Estimation period: Q1.2007 - Q4.2007
+
+RoyalBankScotland Lloyds HSBC
+Barclays
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Aviva
+
+Muenchener.Ruck
+
+BancoEspiritoSanto
+ING
+Aegon Generali SocieteGenerale
+
+Santander
+AXA BNPParibas CreditAgricole
+
+Estimation period: Q3.2007 - Q2.2008
+
+RoyalBankScotland Lloyds HSBC
+Barclays
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Aviva
+
+Muenchener.Ruck
+
+BancoEspiritoSanto
+
+Santander
+
+ING
+Aegon Generali SocieteGenerale
+
+AXA
+BNPParibas CreditAgricole
+
+Estimation period: Q2.2007 - Q1.2008
+
+RoyalBankScotland CreditSuisse Lloyds HSBC
+Barclays
+
+UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Aviva
+
+BancoEspiritoSanto
+
+ING
+
+Aegon
+
+Generali
+
+Muenchener.Ruck
+Santander
+AXA BNPParibas CreditAgricole SocieteGenerale
+
+Estimation period: Q4.2007 - Q3.2008
+
+RoyalBankScotland CreditSuisse Lloyds HSBC
+Barclays
+Aviva
+BancoEspiritoSanto
+ING Aegon Generali SocieteGenerale
+
+UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Muenchener.Ruck
+
+Santander
+AXA BNPParibas CreditAgricole
+
+19
+
+Figure 2: Estimates of yearly systemic risk network rolled over from Q4/2007 to Q3/2008.
+
+Estimation period: Q1.2008 - Q4.2008
+
+CreditSuisse RoyalBankScotland Lloyds HSBC
+Barclays
+
+UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Aviva
+BancoEspiritoSanto
+ING Aegon Generali SocieteGenerale
+
+Muenchener.Ruck
+Santander
+AXA BNPParibas CreditAgricole
+
+Estimation period: Q3.2008 - Q2.2009
+
+RoyalBankScotland Lloyds HSBC
+Barclays
+Aviva
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Muenchener.Ruck
+
+BancoEspiritoSanto
+
+ING
+
+Aegon
+
+Generali SocieteGenerale
+
+Santander
+AXA BNPParibas CreditAgricole
+
+Estimation period: Q2.2008 - Q1.2009
+
+RoyalBankScotland Lloyds
+HSBC Barclays
+Aviva
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Muenchener.Ruck
+
+BancoEspiritoSanto
+
+ING
+
+Aegon
+
+Generali
+
+Santander
+AXA BNPParibas CreditAgricole SocieteGenerale
+
+Estimation period: Q4.2008 - Q3.2009
+
+RoyalBankScotland Lloyds HSBC
+Barclays
+Aviva
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Muenchener.Ruck
+
+BancoEspiritoSanto
+ING Aegon Generali
+
+Santander AXA BNPParibas SocieteGeneraClereditAgricole
+
+20
+
+Figure 3: Estimates of yearly systemic risk network rolled over from Q4/2008 to Q3/2009.
+
+Estimation period: Q1.2009 - Q4.2009
+
+CreditSuisse RoyalBankScotland Lloyds
+HSBC
+Barclays
+
+UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Aviva
+
+Muenchener.Ruck
+
+BancoEspiritoSanto
+ING Aegon Generali
+
+Santander
+AXA
+BNPParibas CreditAgricole SocieteGenerale
+
+Estimation period: Q3.2009 - Q2.2010
+
+CreditSuisse RoyalBankScotland Lloyds
+HSBC
+Barclays
+Aviva
+BancoEspiritoSanto
+ING Aegon Generali SocieteGenerale
+
+UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Muenchener.Ruck
+
+Santander
+AXA BNPParibas CreditAgricole
+
+Estimation period: Q2.2009 - Q1.2010
+
+CreditSuisse RoyalBankScotland Lloyds
+HSBC
+Barclays
+
+UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Aviva
+
+Muenchener.Ruck
+
+BancoEspiritoSanto
+ING Aegon Generali
+
+Santander
+AXA BNPParibas SocieteGeneraClereditAgricole
+
+Estimation period: Q4.2009 - Q3.2010
+
+RoyalBankScotland Lloyds HSBC Barclays
+Aviva
+
+CreditSuisse UBS
+
+Allianz
+
+Commerzbank
+
+DeutscheBank
+
+Muenchener.Ruck
+
+BancoEspiritoSanto
+ING Aegon Generali SocieteGenerale
+
+Santander
+AXA BNPParibas CreditAgricole
+
+21
+
+Figure 4: Estimates of yearly systemic risk network rolled over from Q4/2004 to Q3/2010.
+
+realized beta forecast*100 0.0 0.5 1.0 1.5 2.0
+
+q q
+q
+
+Barclays CreditAgricole Santander UBS
+
+qq
+
+q
+q q
+
+qq
+
+q
+
+q
+
+qq q
+
+q qq q
+
+q
+
+q
+
+q qq q
+
+q
+
+q
+
+q
+
+q
+
+q qq q
+
+q q
+
+qqqq
+
+q
+
+qq
+
+q qq
+
+q qq
+
+q
+
+qq q qq q q
+
+q qq q
+
+q q qq
+
+q
+q qq
+
+q q
+
+q qq
+
+q q
+
+qq qq
+
+q q
+
+q q
+
+q
+
+q
+
+q q
+
+q q
+
+q q q
+
+q q
+
+q
+
+q qq
+
+q q q
+
+qqq
+
+2007
+
+2008
+
+2009
+
+2010
+
+22
+
+Figure 5: Illustration of time-varying risk rankings, highlighting the evolution of realized systemic risk beta forecasts ~ of four major banks. The upper shaded area depicts the pointwise range between the maximum and the 75%-quantile of ~ for all systemically relevant firms. The
+lower one marks the corresponding pointwise lower interquartile range of significant realized systemic risk beta forecasts.
+
+Table 2: Systemic risk rankings for 2007 - 2010, based on quarterly realized beta forecasts s|i · 100, see equation 4.5
+
+rank
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+1 2 3 4 5 6 7 8 9 10 11 12
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+1 2 3 4 5 6 7 8 9 10 11
+
+name Q1.2007
+Aegon Commerzbank Generali Credit Agricole Barclays HSBC Allianz BNP Paribas Lloyds AXA Aviva ING Deutsche Bank Royal Bank of Scotland
+Q3.2007 UBS HSBC Deutsche Bank Credit Suisse Generali Santander Barclays AXA ING Credit Agricole Commerzbank Lloyds
+Q1.2008 BNP Paribas Barclays Santander Commerzbank Deutsche Bank Royal Bank of Scotland Credit Suisse AXA Credit Agricole Muenchener Rueck Allianz Lloyds Aviva Aegon
+Q3.2008 Santander Barclays Aviva Credit Suisse Generali Muenchener Rueck Deutsche Bank HSBC Royal Bank of Scotland ING BNP Paribas
+
+forecast
+0.7667 0.6495 0.5392 0.5077 0.3703 0.3611 0.3492 0.3016 0.2887 0.2453 0.1888 0.163 0.1379 0.0556
+0.4234 0.3127 0.3068 0.2296 0.2087 0.1947 0.1663 0.1425 0.1203 0.1007 0.0681 0.0672
+0.5472 0.487 0.4507 0.4375 0.3819 0.3783 0.3508 0.2114 0.1429 0.1351 0.1281 0.1148 0.071 0.0255
+1.07 0.7768 0.4461 0.4029 0.349 0.2384 0.2113 0.1727 0.167 0.1566 0.0598
+
+rank
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
+1 2 3 4 5 6 7 8 9
+
+name
+Q2.2007 BNP Paribas UBS Aviva Commerzbank Deutsche Bank AXA Aegon Muenchener Rueck Allianz ING Credit Suisse Royal Bank of Scotland Santander Barclays
+Q4.2007 Deutsche Bank Aviva Royal Bank of Scotland Credit Agricole BNP Paribas Credit Suisse AXA HSBC ING Aegon Muenchener Rueck Allianz Commerzbank Lloyds Santander Barclays
+Q2.2008 AXA Royal Bank of Scotland Muenchener Rueck Lloyds Generali Credit Agricole BNP Paribas Deutsche Bank HSBC Commerzbank Aegon Aviva Barclays Santander Credit Suisse UBS Allianz
+Q4.2008 HSBC Deutsche Bank Santander Royal Bank of Scotland BNP Paribas UBS Generali Muenchener Rueck Lloyds
+
+forecast
+1.0964 0.434 0.3012 0.276 0.2436 0.2324 0.2095 0.1625 0.1252 0.0914 0.0865 0.051 0.0393 0.0067
+0.71 0.5619 0.5504 0.4205 0.3934 0.3529 0.3306 0.3203 0.3126 0.3104 0.1954 0.1594 0.1045 0.0957 0.0779 0.0109
+0.9152 0.8259 0.7661 0.5474 0.543 0.5294 0.5003 0.4948 0.4339
+0.35 0.2153 0.201 0.1925 0.1582 0.1427 0.0508 0.0112
+1.4631 0.6341 0.5148 0.4998 0.3873 0.346 0.3118 0.2926 0.0985
+
+Continued on next page
+
+5Avoiding multicollinearity, we include in Zi only the one component of Zi which exhibits the lowest correlation with V aRi in the respective interaction term in (3).
+
+23
+
+rank
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+1 2 3 4 5 6 7 8 9 10 11 12 13
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
+
+Table 2 ­ Continued from previous page
+
+name
+
+forecast rank name
+
+Q1.2009
+
+Q2.2009
+
+Aegon
+
+2.1546 1 Aegon
+
+Barclays
+
+1.7557 2 ING
+
+AXA
+
+1.5601 3 Lloyds
+
+Aviva
+
+1.5562 4 BNP Paribas
+
+Allianz
+
+1.3241 5 Santander
+
+BNP Paribas
+
+0.8262 6 Barclays
+
+Credit Agricole
+
+0.7485 7 Aviva
+
+HSBC
+
+0.6697 8 HSBC
+
+Santander
+
+0.5945 9 Credit Agricole
+
+UBS 0.5514 10 Credit Suisse
+
+Commerzbank
+
+0.2947 11 Muenchener Rueck
+
+Generali
+
+0.2347 12 Allianz
+
+Credit Suisse
+
+0.1561 13 AXA
+
+Royal Bank of Scotland 0.068 14 UBS
+
+ING 0.0455 15 Royal Bank of Scotland
+
+Q3.2009
+
+Q4.2009
+
+Commerzbank
+
+1.1065 1 Santander
+
+Aviva
+
+1.0086 2 Credit Agricole
+
+ING 0.8852 3 HSBC
+
+AXA
+
+0.8303 4 BNP Paribas
+
+Lloyds
+
+0.7041 5 Allianz
+
+BNP Paribas
+
+0.6744 6 Royal Bank of Scotland
+
+Santander
+
+0.6615 7 Barclays
+
+Credit Suisse
+
+0.568 8 Lloyds
+
+Aegon
+
+0.3393 9 ING
+
+HSBC
+
+0.284 10 Deutsche Bank
+
+Credit Agricole
+
+0.1044 11 AXA
+
+Royal Bank of Scotland 0.0325 12 Generali
+
+UBS 0.0276 13 Aviva
+
+14 Muenchener Rueck
+
+Q1.2010
+
+Q2.2010
+
+Credit Suisse
+
+1.058 1 Credit Suisse
+
+Lloyds
+
+1.0418 2 UBS
+
+Generali
+
+1.0407 3 ING
+
+UBS 1.0388 4 Aviva
+
+Aegon
+
+0.9752 5 Generali
+
+Allianz
+
+0.7554 6 Santander
+
+AXA
+
+0.7471 7 Royal Bank of Scotland
+
+BNP Paribas
+
+0.6706 8 Aegon
+
+Santander
+
+0.5692 9 Deutsche Bank
+
+Commerzbank
+
+0.5583 10 Allianz
+
+Aviva
+
+0.5208 11 Muenchener Rueck
+
+HSBC
+
+0.4992 12 Credit Agricole
+
+ING 0.4722 13 AXA
+
+Deutsche Bank
+
+0.4712 14 BNP Paribas
+
+Credit Agricole
+
+0.4019
+
+Barclays
+
+0.2284
+
+Royal Bank of Scotland 0.1944
+
+Q3.2010
+
+Q4.2010
+
+Aviva
+
+0.6092 1 BNP Paribas
+
+Generali
+
+0.6008 2 Generali
+
+HSBC
+
+0.4951 3 Muenchener Rueck
+
+Santander
+
+0.4588 4 Royal Bank of Scotland
+
+Credit Suisse
+
+0.4493 5 Santander
+
+Muenchener Rueck
+
+0.261 6 Aviva
+
+Aegon
+
+0.2226 7 Allianz
+
+UBS 0.151 8 ING
+
+Credit Agricole
+
+0.1475 9 AXA
+
+ING 0.1452 10 UBS
+
+AXA
+
+0.1233 11 Commerzbank
+
+Allianz
+
+0.1148 12 Aegon
+
+Commerzbank
+
+0.0935 13 Credit Agricole
+
+BNP Paribas
+
+0.0554
+
+Lloyds
+
+0.0426
+
+Barclays
+
+0.0345
+
+Royal Bank of Scotland 0.0222
+
+forecast
+2.0523 1.4088 1.3672 1.3462 1.3259 1.031 0.9001 0.732 0.7251 0.4722 0.4417 0.4111 0.2842 0.1028 0.0619
+1.0097 0.9243 0.8437 0.6894 0.6225 0.6093 0.5571 0.4588 0.3702 0.3661 0.1541 0.0858 0.0699 0.0471
+0.8629 0.7561 0.5004 0.4999 0.4217
+0.4 0.3386 0.2928 0.2234 0.2227 0.1033 0.0703 0.0384 0.016
+1.4491 0.503 0.4914 0.4371 0.3784 0.3737 0.3589 0.3017 0.2553 0.1886 0.1858 0.1367 0.0334
+
+24
+
+References
+Acharya, Viral V., Lasse H. Pedersen, Thomas Philippon, and Matthew Richardson, 2010, Measuring Systemic Risk, Working Paper.
+Adrian, Tobias, and Markus K. Brunnermeier, 2011, CoVaR, Working Paper, Princeton University.
+Belloni, A., and V. Chernozhukov, 2011, l1-penalized quantile regression in highdimensional sparse models, The Annals of Statistics 39, 82­130.
+Billio, Monica, Mila Getmansky, Andrew W. Lo, and Loriana Pelizzon, 2012, Econometric measures of connectedness and systemic risk in the finance and insurance sectors, Journal of Financial Economics 104, 535U 559.
+Brownlees, C. T., and R. F. Engle, 2011, Volatility, Correlation and Tails for Systemic Risk Measurement, Working Paper, Stern School Business, New York University.
+Engle, Robert, Eric Jondeau, and Michael Rockinger, 2012, Systemic Risk in Europe, Working Paper.
+Financial Stability Board, 2011, Policy Measures to Address Systemically Important Financial Institutions, http://www.financialstabilityboard.org/publications.
+Giesecke, K., and B. Kim, 2011, Systemic risk: What defaults are telling us, Management Science, forthcoming.
+Hautsch, Nikolaus, Julia Schaumburg, and Melanie Schienle, 2012, Financial Network Systemic Risk Contributions, CRC 649 working paper 2012-053.
+Huang, Xin, Hao Zhou, and Haibin Zhu, 2009, A framework for assessing the systemic risk of major financial institutions, Journal of Banking & Finance 33, 2036U 2049.
+Koopman, S. J., A. Lucas, and B. Schwaab, 2011, Modeling frailty correlated defaults using many macroeconomic covariates, Journal of Econometrics 162, 312­325.
+Schwaab, B., S. J. Koopman, and Andre Lucas, 2011, Systemic risk diagnostics: coincident indicators and early warning signals, Working Paper.
+25
+
+White, Halbert, Tae-Hwan Kim, and Simone Manganelli, 2010, VAR for VaR: Measuring systemic risk by multivariate regression quantiles, mimeo, ECB.
+26
+
+SFB 649 Discussion Paper Series 2013
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Functional Data Analysis of Generalized Quantile Regressions" by Mengmeng Guo, Lhan Zhou, Jianhua Z. Huang and Wolfgang Karl Härdle, January 2013.
+002 "Statistical properties and stability of ratings in a subset of US firms" by Alexander B. Matthies, January 2013.
+003 "Empirical Research on Corporate Credit-Ratings: A Literature Review" by Alexander B. Matthies, January 2013.
+004 "Preference for Randomization: Empirical and Experimental Evidence" by Nadja Dwenger, Dorothea Kübler and Georg Weizsäcker, January 2013.
+005 "Pricing Rainfall Derivatives at the CME" by Brenda López Cabrera, Martin Odening and Matthias Ritter, January 2013.
+006 "Inference for Multi-Dimensional High-Frequency Data: Equivalence of Methods, Central Limit Theorems, and an Application to Conditional Independence Testing" by Markus Bibinger and Per A. Mykland, January 2013.
+007 "Crossing Network versus Dealer Market: Unique Equilibrium in the Allocation of Order Flow" by Jutta Dönges, Frank Heinemann and Tijmen R. Daniëls, January 2013.
+008 "Forecasting systemic impact in financial networks" by Nikolaus Hautsch, Julia Schaumburg and Melanie Schienle, January 2013.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

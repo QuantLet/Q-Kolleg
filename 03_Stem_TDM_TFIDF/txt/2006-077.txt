@@ -1,0 +1,859 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2006-077
+Estimation of Default Probabilities with Support
+Vector Machines
+Shiyi Chen* Wolfgang K. Härdle** Rouslan A. Moro***
+* China Center for Economic Studies (CCES), Fudan University, China
+** Center for Applied Statistics and Economics (CASE), Humboldt-Universität zu Berlin, Germany
+*** Center for Applied Statistics and Economics (CASE), Humboldt-Universität zu Berlin
+and Deutsches Institut für Wirtschaftsforschung (DIW), Germany This research was supported by the Deutsche
+Forschungsgemeinschaft through the SFB 649 "Economic Risk". http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Estimation of Default Probabilities with Support Vector Machines
+Shiyi Chen, Wolfgang K. H¨ardle, R. A. Moro§
+Abstract
+Predicting default probabilities is important for firms and banks to operate successfully and to estimate their specific risks. There are many reasons to use nonlinear techniques for predicting bankruptcy from financial ratios. Here we propose the so called Support Vector Machine (SVM) to estimate default probabilities of German firms. Our analysis is based on the Creditreform database. The results reveal that the most important eight predictors related to bankruptcy for these German firms belong to the ratios of activity, profitability, liquidity, leverage and the percentage of incremental inventories. Based on the performance measures, the SVM tool can predict a firms default risk and identify the insolvent firm more accurately than the benchmark logit model. The sensitivity investigation and a corresponding visualization tool reveal that the classifying ability of SVM appears to be superior over a wide range of the SVM parameters. Based on the nonparametric Nadaraya-Watson estimator, the expected returns predicted by the SVM for regression have a significant positive linear relationship with the risk scores obtained for classification. This evidence is stronger than empirical results for the CAPM based on a linear regression and confirms that higher risks need to be compensated by higher potential returns.
+This work was supported by Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk". R. A. Moro was also supported by the German Academic Exchange Service (DAAD).
+China Center for Economic Studies (CCES), Fudan University, 220 Handan Road, 200433 Shanghai, P.R.China; e-mail: shiyichen@fudan.edu.cn.
+Center for Applied Statistics and Economics (CASE), Humboldt-Universita¨t zu Berlin, Spandauer Str. 1, 10178 Berlin, Germany; e-mail: stat@wiwi.hu-berlin.de.
+§Center for Applied Statistics and Economics (CASE), Humboldt-Universit¨at zu Berlin, Spandauer Str. 1, 10178 Berlin, Germany and German Institute for Economic Research (DIW); e-mail: moro@wiwi.hu-berlin.de.
+1
+
+Keywords: Support Vector Machine; Bankruptcy; Default Probabilities Prediction; Expected Profitability; CAPM
+JEL classification: C14; G33; C45; G32
+1 Introduction
+Predicting default probabilities and deducing corresponding risk classification becomes more and more important for firms to operate successfully and for banks to clearly grasp their clients specific risk class. Particularly, the near implementation of the Basel II accord will further exert pressure on firms and banks. As both the risk premium and the credit costs are determined by the default risk, the firms rating will have a deep economic impact on banks as well as on firms themselves than ever before. Thus, from a risk management perspective, the choice of a correct rating model that can carry consistent predictive information about the probabilities of default over some successive time periods is of crucial importance.
+There are strands of literature in the statistical and stochastic analysis of default probabilities (Chakrabarti & Varadachari, 2004). One models default events by using accounting data; whereas, the other recommends using market information. Market-based models can be further classified into structural models and reduced form models. There exists also a hybrid approach that uses accounting data as well as market information to predict probability of default. The market based approach relies on the time series of company market and accounting data. Unfortunately, time series long enough to reliably compute variances of parameters are not available for most companies. Moreover, the majority of German firms are not listed and, therefore, their market price is unknown. This justifies the choice of a model for which only cross-sectional accounting data would be required. For this study accounting data for bankrupt and operating German companies were provided by Creditreform.
+Among the accounting-based models, the first attempts to identify the difference between the values of financial ratios of solvent and insolvent firms were the studies of Ramser & Foster (1931), Fitzpatrick (1932), Winakor & Smith (1935) and Merwin (1942). These studies settled the fundamentals for bankruptcy prediction research. It was not until the 1960s that the traditional research was changed. Beaver (1966) pioneeringly presented the univariate approach to discriminant analysis (DA) for bankruptcy prediction. Altman (1968) expanded this analysis to multivariate analysis. Till the 1980's DA was the dominant method in bankruptcy prediction. However, there are obvious modelling restrictions of this approach, some of which are
+2
+
+the assumptions of normality, equality of covariance matrices, and no adjustment for multicollinearity. During the 1980's the DA method was replaced by logistic analysis which fits linear logistic regression model for binary or ordinal response data by the method of maximum likelihood. Among the first users of the logit analysis in the context of bankruptcy were Ohlson (1980) and Platt, Platt & Pedersen (1994). The advantage of the logit model is that it does not assume multivariate normality and equal covariance matrices as DA does. In fact, the logit model uses the logistic cumulative distribution function in modeling the default probability. Despite this, previous studies have argued that in practice the explanatory power of logit models is similar to that of DA ((Lo, 1986) and (Collins & Green, 1982)). Common to DA and logit modelling is a linear classifying hyperplane which separates insolvent and solvent firms. This works, of course, well if the company parameters (typically financial ratios) are linear separable. The risk scores are calculated as the values of that classifying function. A linear separating hyperplane is, however, not suitable if there is doubt that the separation mechanism is of nonlinear kind. There are good reasons to take the linear nonseparability case seriously (Falkenstein, Boral & Carty, 2000).
+A nonlinear nonparametric method, the artificial neural network (ANN), was introduced to analyze the bankrupt firms in the 1990's. This method discards the assumption of linearity and mutual independence of explanatory variables for the default prediction function ((Wilson & Sharda, 1994), (Serrano, Martin & Gallizo, 1993), (Back, Laitinen & Sere, 1994) and (Back, Laitinen, Sere & Wezel, 1996)). While the ANN can classify a dataset much better than the linear models, however, it has been criticized to be vulnerable to the over-fitting and multiple minima problem which usually lead to a poor level of classification for the out-of-sample data (Haykin, 1999).
+Based on statistical learning theory an alternative nonlinear separation method ­ the Support Vector Machine (SVM) ­ has been introduced recently in default risk analysis. The SVM yields a single minimum without undesirable local fits that ANN often produces. This property results from the minimized target function that is convex quadratic and linearly restricted which ensures that the solution cannot get trapped in local minima. Moreover, the SVM does not need any parameter restrictions and prior assumptions such as that about the distribution for latent errors. The current literature in statistical learning theory has produced strong evidence that SVMs systematically outperform standard pattern recognition/classification, function regression and data analysis techniques ((Vapnik, 1995) and (Haykin, 1999)). The application of SVM to company default analysis is less existent in the management science and finance literature. First papers indicate though that in comparison with the traditional DA and logit models in predicting
+3
+
+the probabilities of default (PD) and rating firms the SVM has a superior performance ((H¨ardle, Moro & Sch¨afer, 2005) and (H¨ardle, Moro & Sch¨afer, 2007)). This paper studies the applicability of this new technique to predicting the PDs of German firms from the Creditreform database spanned from 1996 through 2002. The aim is to investigate (1) which of the accounting ratios are meaningful and have predictive character for bankruptcy, (2) if a well-specified SVM model consistently outperforms the benchmark logit model in predicting PDs, and (3) if there is a significant positive linear relationship between expected returns and default risk.
+The third part deserves a more elaborate description. The capital asset pricing model (CAPM) of Sharpe (1964) and Lintner (1965) marks the birth of asset pricing theory which builds on the model of portfolio choice developed by Markowitz (1959). The attraction of the CAPM is that it offers powerful and intuitively pleasing predictions about how to measure risk and its relationship with expected returns. Unfortunately, the empirical record of the model is questionable and poor enough to invalidate the way it is used in applications. However, the CAPMs empirical problems may not reflect theoretical failures but be the result of many simplifying assumptions. They may also be caused by difficulties in implementing valid tests of the model: the original CAPM and its extensions during the 1970s and 1980s only adopt the parametric linear model. From the 1990s on such new methods as nonlinear model, chaos analysis, semi- and nonparametric estimation, and systematic simulation begin to be employed to improve the CAPM. It is one of our aims to apply the nonparametric Nadaraya-Watson (NW) estimator to estimating the return-risk function.
+The rest of the paper is organized as follows. In the next section we give a short introduction to the Support Vector Machine (SVM) for classification. Section 3 describes the Creditreform database and the variables and ratios used in our study. In section 4, we present the validation procedures, resampling technique, performance measures and the ratios selection methods. Section 5 analyzes the empirical results, including the predictors related to bankruptcy, the sensitivity of SVM parameters, and graphical tools. In section 6, a nonparametric NW estimator is used to investigate the accuracy of the CAPM. Section 7 offers conclusions.
+2 The Support Vectore Machine
+The term Support Vector Machine (SVM) originates from Vapnik's statistical learning theory ((Vapnik, 1995) and (Vapnik, 1997)), which formulates the classification problem as a quadratic programming (QP) problem. The
+4
+
+principles on which the SVM is based, especially the regularisation principle for solving ill-posed problems, are also described in (Tikhonov, 1963), (Tikhonov & Arsenin, 1977) and (Vapnik, 1979). The SVM transforms by nonlinear mapping the input space (of covariates) into a high dimensional feature space and then solves a linear separable classification problem in this feature space. Thus, linear separable classification in the output feature space corresponds to nonlineary separable classification in the lower dimensional input space. As the name implies, the design of the SVM hinges on the extraction of a subset of the training data that serves as support vectors and that represents a stable characteristic of the data.
+Given a training data set {xi, yi}in=1, where inputs xi  Rd and outputs yi  {+1, -1} (-1 = "successful", +1 = "bankrupt") we aim at finding an unknown decision function g(x) = sign {f (x)} that is based on the classifying (score) function f (x). In the logistic and the DA case this is simply a linear function. In the SVM case the classifying function is:
+
+m
+f (x) = wjj(x) + b,
+j=1
+
+(1)
+
+where
+
+(x) = [1(x), . . . , m(x)] .
+
+The nonlinear functions represent the features of the input space. A simple example offeatures for a quadratic function in a two-dimensional space is 1 = x21, 2 = 2x1x2 and 2 = x22. The dimension of the feature space is m which is directly related to the capacity of the SVM to approximate a smooth input-output mapping; the higher the dimension of the feature space, the more accurate, at the cost of variability, the approximation will be. Parameter wj denotes a set of linear weights connecting the feature space to the output space, and b is the bias or threshold. Using the classifying function f (x) one can predict the class as y = sign {f (x)}.
+The statistical problem is to construct a classification hyperplane (or hypersurface) and obtain the classifying function f (x). If the data set is lineary separable, the perfect classification hyperplane exists and can be derived from maximizing the margin 2/ w , or minimizing w 2 /2 (Vapnik, 1995). If the training set is lineary nonseparable, the hyperplane that can correctly classify the training set does not exist any more and, naturally, we need to find a hypersurface instead. For hypersurface, however, we know less about the concept of the geometrical margin that is particular for hyperplane; therefore, it is more difficult to find a hypersurface than hyperplane. The transformation from the input space into higher dimensional Hilbert space, i.e. x  (x), is then introduced in the SVM. It is possible that the new training set in
+
+5
+
+Figure 1: Linear classification with the SVM.
+
+the Hilbert space {(xi), yi}ni=1 becomes lineary separable. Accordingly, the problem of finding a hypersurface in the input space is transformed into find-
+
+ing a hyperplane in the Hilbert space and letting its margin or the "safe"
+
+distance between classes, where in the perfectly separable case no observation
+
+can lie, to be maximized.
+
+Because the hyperplane may not correctly classify all observations so that
+
+not all data points can satisfy the constraint condition, the slack variable
+
+i  0 is introduced for the ith data point and the condition is softened to yi w(xi) + b + i  1. Obviously, the vector  = (1, . . . , n) repre-
+
+sents the tolerance to misclassification errors on the training set which can
+
+be gin
+
+measured by
+
+n i=1
+
+i
+
+.
+
+Thus, two targets exist:
+
+still maximize the
+
+2/ w and simultaneously minimize the misclassification degree
+
+mar-
+
+n i=1
+
+i.
+
+The penalty parameter C > 0 may be introduced to integrate the weights of
+
+two targets and we obtain a new target function as below.
+
+min
+w,b,
+
+1 2
+
+w 2+C
+
+n
+
+i
+
+i=1
+
+(2)
+
+s.t. yi w(xi) + b + i  1, i  0, i = 1, 2, . . . , n.
+
+(3) (4)
+
+This is the primal problem of the SVM. Its optimal solution w, b and , can be used to construct the classification hyperplane w(x) + b = 0 and the classifying function f (x) = w(x) + b.
+
+6
+
+The corresponding dual problem of SVM can be derived using the KarushKuhn-Tucker conditions as follows.
+
+min 
+
+1 2
+
+n
+
+nn
+yiyjijK(xi, xj) - j
+
+i=1 j=1
+
+i=1
+
+(5)
+
+s.t. 0  i  C,
+
+n i=1
+
+yii
+
+=
+
+0,
+
+i = 1, 2, . . . , n.
+
+(6) (7)
+
+where i and j are Lagrange multipliers. Deng & Tian (2004) demonstrate
+that the dual problem is easier to solve than the primal problem. Then we can use the optimal solution i to obtain the solution of the primal problem:
+
+n
+b = yi - yiiK(xi, xj),
+i=1
+
+n
+w = yiixi,
+i=1
+j  j|0 < j < C .
+
+(8) (9)
+
+By substituting, the nonlinear classyfying (score) function can be ob-
+
+tained:
+
+n
+
+f (x) = yiiK(xi, xj) + b,
+
+(10)
+
+j=1
+
+where K(xi, xj) = (xi)(xj) is the kernel function. The SVM theory considers the form of K(xi, xj) in the Hilbert space without specifying (x) explicitly and without computing all corresponding inner products. Therefore, kernels are a crucial part of SVM which provide the flexibility of the high dimensional Hilbert space for low computational costs.
+Therefore, it is necessary to find an appropriate kernel function and the value of C parameter in order to solve the optimization problem of SVM. In this study, we choose an anisotropic Gaussian kernel for the SVM:
+
+K(xi, xj) = exp -(xi - xj)r-2-1(xi - xj)/2 ,
+
+(11)
+
+where  is the variance-covariance matrix. The kernel coefficient r is related to the complexity of classifying functions: the higher the r is, the lower is the complexity.
+
+7
+
+3 Data and Financial Ratios
+3.1 Data Description
+The data used in this study is the Creditreform database. It contains a random sample of 20,000 solvent and 1,000 insolvent firms in Germany and spans the period from 1996 to 2002, although the data are concentrated in 2001 and 2002 with approximately 50% of the observations coming from this period. Most firms appear in the database several times in different years. Each firm is described by a set of financial statement variables such as those in balance sheets and income statements. The data of the insolvent firms are collected two years prior to insolvency.
+Figure 2 describes the industry composition and size distribution of the database. The industries to which each firm belongs can be systematically classified according to an internationally recognized system ­ Classification of Economic Activities, Edition 1993 (WZ 93) ­ published by the German Federal Statistical Office. WZ 93 uses a hierarchy of five different levels. The higher the level, the more precise the description of the main activity is. In terms of the classification industry codes by WZ 93, as shown in Figure 2 (a) and (b), the 1,000 insolvent firms consist of about 39.7% of construction, 25.7% of manufacturing, 20.1% of wholesale and retail trade, 9.4% of real estate and 5.1% of the others. The other part among 1,000 insolvent firms includes agriculture, mining, electricity, gas and water supply, hotels and restaurants, transport and communication, financial intermediation and social service activities. The industries of 20,000 solvent firms are manufacturing (27.4%), wholesale and retail trade (24.8%), real estate (16.9%), construction (13.9%) and the others (17.1%). Different from the other part of insolvency, the others in solvency contain additional industries such as publishing, administration and defense, education and health.
+The distribution of total assets can be regarded as the representative of the distribution of the firm size. In Figure 2 (c) and (d), the 1,000 insolvent sample comprises 12 firms located in the size category of 104 EUR, 216 in 105 EUR, 587 in 106 EUR, 164 in 107 EUR and 21 in 108 EUR category. (Here, 104 EUR represents one category of asset size in which the firms have total assets between 10,000 EUR and 99,999 EUR. The definition of the other size categories is similar to the one for the 104 EUR). The firm number corresponding to every category of asset size among 20,000 solvent firms is 13 (103 EUR and below), 353 (104 EUR), 3153 (105 EUR), 7633 (106 EUR), 6373 (107 EUR), 2126 (108 EUR), 295 (109 EUR) and 54 (1010 EUR and above).
+In an attempt to obtain a more homogeneous company sample we are
+8
+
+Figure 2: The industry composition and size distribution of the companies in the Creditreform database.
+cleaning the database of companies whose characteristics are very different from the others. However, we do not attempt to cover all firms in the database for our study because of the very different nature of some firms. Thus, in focusing on predicting the PDs of German firms we eliminated the following types of firms from our analysis:
+Firms within small percentage composition of industry ­ that is, we eliminate the firms which belong to the other part of the industries in insolvent and solvent databases, for example, financial intermediation and public institutions. Thus only four main types of industry (Construction, Manufacturing, Wholesale & Retail Trade and Real Estate) are remaining in this study.
+Smallest and largest firms ­ that is, we exclude those firms which of their asset size do not locate in the category of 105, 106, and 107 EUR. As Khandani, Lozano & Carty (2001) denoted, the credit quality of the smallest firms is often as dependent on the finances of a key individual as on the firm itself; the number of largest firms which go bankrupt is usually very small in Germany.
+We further clean the database to ensure that the value of some variables as the denominator when calculating the ratios should not be zero. We also exclude the solvent firms in 1996 because of missing values of insolvency in
+9
+
+this year. Thus, 783 insolvent firms and 9,583 solvent firms are chosen and analyzed
+in the following part. The bankrupt firms are paired with nonbankrupt firms with the similar industry and total asset size. Correspondingly, the predicted default probabilities and rating results in this study are only suitable for the German firms from four main industry sectors (Construction, Manufacturing, Wholesale & Retail Trade and Real Estate) and with medium asset size (lying within the category of 105, 106, and 107 EUR).
+3.2 Ratio Definitions
+The Creditreform database provides many financial statement variables for each firm. In accordance with existing literature 28 ratios have been selected for the bankruptcy analysis. In summary there are 28 ratios (including one size variable) and a binary response, which records whether the firm went bankrupt within two years of the financial statements or not. There is also information on the industry distribution and on the year of the accounts. There are no missing values. These ratios can be grouped into the following six broad categories (factors): profitability, leverage, liquidity, activity, firm size and the percentage change for some variables. Table 1 describes these ratios and how they have been calculated. For simplicity we have provided short names for some ratios which capture the essence of what they measure. The variables applied to calculate these ratios are shown in Table 2. Table 3 summarizes the descriptive statistics of 28 ratios for both insolvency and solvency sample.
+In previous studies, profitability ratios appear to be strong predictors related to bankruptcy. In addition, among all the potential risk factors, there are more profitability ratios than any other factor. The profitability ratios employed in our study are return on assets (ROA, NI/TA), net profit margin (NI/SALE), OI/TA, operating profit margin (OI/SALE), EBIT/TA, EBITDA and EBIT/SALE, denoted orderly as x1, x2, x3, x4, x5, x6 and x7.
+The ROA figure gives investors an idea of how effectively the firm is converting the money it has to invest into net income. The higher the ROA number, the better, because the firm is earning more money on less investment. Net profit margin measures how much out of every dollar of sales a firm actually keeps in earnings. A higher profit margin indicates a more profitable firm that has better control over its costs compared to its competitors. Some investors add extraordinary items back into net income when performing this calculation because they would like to use operating returns on assets which represent a firm's true operating performance. Operating income is also required to calculate operating profit margin, which describes
+10
+
+a firm's operating efficiency and pricing strategy. EBIT is all profits before taking into account interest payments and income taxes. An important factor contributing to the widespread use of EBIT is the way in which it nullifies the effects of different capital structures and tax rates used by different firms. By excluding both taxes and interest expenses the figure homes in on the firm's ability to profit and thus makes for easier cross-firm comparisons. EBIT is the precursor to EBITDA, which takes the process further by removing two non-cash items from the equation (depreciation and amortization). Our assumption is that, on average, defaulting firms have lower profitability values.
+Leverage is also a key measure of firm risk. In this study seven leverage ratios are analyzed. They are simple and adjusted equity ratio, CL/TA, net indebtedness, TL/TA, debt ratio (DEBT/TA) and interest coverage ratio (EBIT/INTE), represented by x8 through x14.
+The equity ratio measures the ratio of a firm's equity to its assets. The simple version is widely used in credit models which is basically the mirror image of TL/TA as is expected: they are mathematical complements. We have made some adjustments to a simple equity ratio to counter creative accounting practices, and to try to generate a better measure of firm credit strength. The adjustments are also used in (Khandani, Lozano & Carty, 2001). Net indebtedness measures the level of short-term liabilities not covered by firm's most liquid assets as a proportion of its total assets. Thus, in addition to measuring the short-term leverage for a firm, it also provides a measure of the liquidity of a firm. While debt ratio does about as well as TL/TA for public firms, it does considerably worse among private firms, which makes TL/TA preferred. The difference between debt and liabilities is that liabilities is a more inclusive term that includes debt, deferred taxes, minority interest, accounts payable, and other liabilities. The interest coverage ratio is highly predictive. Falkenstein, Boral & Carty (2000) argue that the interest coverage ratio turns out to be one of the most valuable explanatory variables in the public firm dataset in a multivariate context though in the private firm database its relative power drops significantly.
+Six liquidity ratios such as CASH/TA, cash ratio, quick ratio, current ratio, WC/TA and CL/TA (x15 through x20) are analyzed in this paper. Liquidity is a common variable in most credit decisions which represents the ability to convert an asset into cash quickly. In the private dataset CASH/TA is the most important single variable relative to default. Quick ratio is an indicator of a firm's short-term liquidity which measures a firm's ability to meet its short-term obligations with its most liquid assets. The higher the quick ratio is, the better the position of the firm. The quick ratio is more conservative than the current ratio because it excludes inventory from current
+11
+
+Ratio x1 x2 x3 x4 x5 x6 x7 x8 x9
+x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26
+x27
+x28
+
+Definition NI/TA
+NI/SALE OI/TA
+OI/SALE EBIT/TA (EBIT+AD)/TA EBIT/SALE EQUITY/TA (EQUITY-ITGA)/ (TA-ITGA-CASH-LB)
+CL/TA (CL-CASH)/TA
+TL/TA DEBT/TA EBIT/INTE CASH/TA CASH/CL
+QA/CL CA/CL WC/TA CL/TL TA/SALE INV/SALE AR/SALE AP/SALE Log(TA) IDINV/INV
+IDL/TL
+IDCASH/CASH
+
+Interpretation Return on Assets (ROA)
+Net Profit Margin
+Operating Profit Margin
+EBITDA
+Equity Ratio (simple)
+Equity Ratio (adjusted)
+Net Indebtedness
+Debt Ratio Interest Coverage Ratio
+Cash Ratio Quick Ratio Current Ratio
+Asset Turnover Inventory Turnover Account Receivable Turnover Account Payable Turnover
+Percentage of incremental inventories
+Percentage of incremental liabilities
+Percentage of incremental cash flow
+
+Category Profitability Profitability Profitability Profitability Profitability Profitability Profitability
+Leverage
+Leverage Leverage Leverage Leverage Leverage Leverage Liquidity Liquidity Liquidity Liquidity Liquidity Liquidity Activity Activity Activity Activity
+Size Percentage
+Percentage
+Percentage
+
+Table 1: The Definitions of Accounting Ratios.
+
+12
+
+Abbr. CASH INV
+CA ITGA
+TA QA AR LB EQUITY CL TL WC
+
+Variables name Cash and Cash Equivalents
+Inventories Current Assets Intangible Assets
+Total Assets Quick Assets (=CA-INV)
+Accounts Receivable Lands and Buildings
+Equity Current Liabilities
+Total Liabilities Working Capital (=CA-CL)
+
+Abbr. DEBT
+AP SALE
+AD INTE EBIT
+OI NI IDINV IDL IDCASH
+
+variables name Debt
+Accounts Payable Total Sales
+Amortization and Depreciation Interest Expense
+Earnings before Interest and Tax Operating Income Net Income
+Increase (Decrease) Inventories Increase (Decrease) Liabilities Increase (Decrease) Cash Flow
+
+Table 2: Variables used in the study.
+
+assets. Current ratio is mainly used to give an idea of the firm's ability to pay back its short-term liabilities (debt and payables) with its short-term assets (cash, inventory, receivables). If a firm is in default, its current ratio must be low. Yet, just as the cash in your wallet does not necessarily imply wealth, a high current ratio does not necessarily imply health. Working capital measures both a firm's efficiency and its short-term financial health. Altman (1968) denoted that the WC/TA ratio is a measure of the net liquid assets of the firm relative to the total capitalization which proved to be more valuable than the current ratio and the quick ratio. Falkenstein, Boral & Carty (2000) showed that, firstly, the ratio of CL/TL appears of little use in forecasting; second, the quick ratio appears slightly more powerful than the ratio of WC/TA; third, the quick ratio and current ratio have roughly similar information.
+Activity ratios also capture important bankruptcy information and are frequently used when performing fundamental analysis for different firms. We analyze four different activity ratios: the asset turnover (TA/SALE, x21), the inventory turnover (INV/SALE, x22), the account receivable and payable turnover (AR/SALE, x23; AP/SALE, x24).
+The asset turnover ratio is a standard financial ratio illustrating the sales generating ability of the firm's assets. Usually the asset turnover is nonmonotonic and very flat. Note that some studies denote the asset turnover degrades model predictability, for example, the Z-score that drops the asset turnover performs better than the one that keeps it. The reciprocal of the inventory turnover shows how many times a firm's inventory is sold and
+
+13
+
+Ratios
+x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28
+
+q0.05 -0.1870 -0.1477 -0.2219 -0.1644 -0.1902 -0.1308 -0.1446 0.0000 -0.0076 0.1796 0.1188 0.2863 0.0000 -7.9034 0.0004 0.0007 0.1828 0.5646 -0.3218 0.3400 0.2410 0.0186 0.0152 0.0328 13.0050 -1.1988 -0.4416 -12.7070
+
+Insolvent
+
+med.
+
+q0.95
+
+0.0030 0.0901
+
+0.0017 0.0567
+
+0.0049 0.1036
+
+0.0031 0.0655
+
+0.0247 0.1270
+
+0.0677 0.2088
+
+0.0149 0.1017
+
+0.0529 0.3964
+
+0.0545 0.5647
+
+0.5239 0.9150
+
+0.4933 0.8926
+
+0.7559 0.9822
+
+0.2125 0.6064
+
+1.0480 7.1983
+
+0.0184 0.1637
+
+0.0344 0.4281
+
+0.6824 1.8964
+
+1.2616 3.7333
+
+0.1475 0.6293
+
+0.8431 1.0000
+
+0.6140 2.3270
+
+0.1643 0.8890
+
+0.1197 0.3301
+
+0.1386 0.3608
+
+14.8650 17.1630
+
+0.0000 0.7473
+
+0.0000 0.4755
+
+0.0000 0.9420
+
+IQR 0.0438 0.0281 0.0617 0.0407 0.0667 0.0829 0.0430 0.1316 0.1681 0.3564 0.3627 0.3481 0.2875 2.4710 0.0540 0.1133 0.5402 0.8375 0.3635 0.3724 1.7380 0.2640 0.1116 0.1038 1.6878 0.3412 0.1465 0.7851
+
+q0.05 -0.0935 -0.0684 -0.1065 -0.0800 -0.0892 -0.0427 -0.0673 0.0000 -0.0025 0.0881 -0.0542 0.1551 0.0000 -6.7813 0.0004 0.0008 0.2452 0.6441 -0.2221 0.2208 0.1620 0.0060 0.0032 0.0109 12.8170 -0.8137 -0.5276 -7.1253
+
+Solvent
+
+med.
+
+q0.95
+
+0.0174 0.1898
+
+0.0084 0.0952
+
+0.0334 0.2690
+
+0.0158 0.1318
+
+0.0514 0.2689
+
+0.1078 0.3521
+
+0.0248 0.1441
+
+0.1389 0.5970
+
+0.1609 0.9549
+
+0.4210 0.8784
+
+0.3595 0.8321
+
+0.6484 0.9619
+
+0.1511 0.5948
+
+2.1560 73.9480
+
+0.0326 0.3169
+
+0.0848 1.4045
+
+0.9390 4.5457
+
+1.5830 7.1496
+
+0.2505 0.7319
+
+0.8549 1.0000
+
+0.4800 2.0260
+
+0.1135 0.5623
+
+0.0930 0.2516
+
+0.0653 0.2350
+
+15.4120 17.9510
+
+0.0000 0.5645
+
+0.0000 0.9359
+
+0.0000 0.9078
+
+IQR 0.0576 0.0269 0.0874 0.0413 0.0907 0.1243 0.0468 0.2307 0.3161 0.3913 0.4098 0.4043 0.3132 5.6904 0.1016 0.2860 0.9981 1.5642 0.4109 0.4361 1.5530 0.1584 0.0883 0.0777 2.3665 0.0704 0.1421 0.5225
+
+Table 3: Descriptive statistics of 28 accounting ratios. IQR is the interquartile range.
+
+14
+
+replaced over a period. A high turnover implies poor sales and, therefore, excess inventory. High inventory levels are unhealthy because they represent an investment with a rate of return of zero. Accounts payable and receivable turnover ratios are more powerful predictors, the reciprocal of which also display how many times firm's accounts are converted into sales over a period. The former is a short-term liquidity measure used to quantify the rate at which a firm pays off its suppliers. The latter is a measure used to quantify a firm's effectiveness in extending credit as well as collecting debts. By maintaining accounts receivable, firms are indirectly extending interest-free loans to their clients.
+Sales or total assets are almost indistinguishable as reflections of size risk, which makes the choice between the two measures arbitrary. In this study, we use the natural logarithm of total assets (x25) to represent the firm size. Due to the available variables provided by Creditreform database, we also compute three ratios of the percentage of incremental inventories, liabilities and cash flow (x26, x27, x28), respectively. For example, the increased (decreased) cash flow is the additional operating cash flow that an organization receives from taking on a new project. A positive incremental cash flow means that the firm's cash flow will increase with the acceptance of the project, the ratio of which is a good indication that an organization should spend some time and money investing in the project.
+Previous empirical research has found that a firm is more likely to go bankrupt if it is unprofitable, highly leveraged, and suffers cashflow difficulties ((Myers, 1977), (Aghion & Bolton, 1992) and (Lennox, 1999)). Moreover, large firms are less likely to encounter credit constraints because of reputation effects. This is clearly demonstrated in Table 3, which shows that insolvent firms are typically small, have poor profitability and liquidity, and are highly leveraged, compared to solvent firms, with only few exceptions such as x7, x8 and x14 for leverage. In addition, the firms which go on to default have higher values for activity ratio. Except for the last three, all ratios for insolvent firms vary less than for solvent ones because of a lower number of observations.
+The statistics described in Table 3 reveal that several of the ratios are highly skewed and there are many outliers; this may affect whether they can be of much help in identifying the insolvent and solvent firms. It is also possible that many of these outliers are errors of some kind. Therefore, the ratios used in the following analysis are processed as below: if xi < q0.05(xi) then xi = q0.05(xi) and if xi > q0.95(xi) then xi = q0.95(xi), i = 1, 2, , . . . , 28. q(xi) is an  quantile of xi. Thus, the discriminating results obtained from both the SVM and the logit model are robust and not sensitive to outliers.
+15
+
+4 Prediction Framework
+4.1 The Validation Procedure
+In order to calibrate a model one needs the data for model training, which are chosen from 1997 through 1999, and validation data, which are selected from 2000 through 2002. Then the model is firstly estimated using the training data; once the model form and parameters are established, the model is used to identify insolvencies among all the firms available during the holdout period (2000-2002). Note that the predicted outputs for 2000 through 2002 are out of time for firms existing in the previous three years, and out of sample for all the firms whose data become available only after 2000. Such out-of-sample and out-of-time tests are the most appropriate way to compare model performance. The validation result set is the collection of all the out-of-sample and out-of-time model predictions which can then be used to analyze the performance of the model in more detail. For an introduction to the validation framework see (Sobehart, Keenan & Stein, 2001).
+Following the above procedure, we construct a training set containing 387 insolvent and 3534 solvent companies and a validation set containing 396 default events and 6049 non-defaulters. Note that the training and validation sets are themselves a subsample of the population and, therefore, may yield spurious model performance differences based only on data anomalies. A common approach to overcome this problem is to use the resampling techniques to leverage the available data and reduce the dependency on the particular sample at hand ((Efron & Tibshirani, 1993), (Herrity, Keenan, Sobehart & Falkenstein, 1999) and (Horowitz, 2001)). Resampling approaches provide two related benefits (Sobehart, Keenan & Stein, 2001). First, they give an estimate of the variability around the actual reported model performance. This variability can be used to determine whether differences in model performance are statistically significant, using familiar statistical tests. Second, because of the low numbers of defaults, resampling approaches decrease the likelihood that individual defaults (or non-defaults) will overly influence particular model chances of being ranked higher or lower than another model. Similar to previous bankruptcy studies, this paper also adopts a matched pairs approach for drawing subsamples for both the training and validation set. The advantage of the matching procedure is that it helps to cut the cost of data collection, as the proportion of insolvent firms in the population is very small. The problem that the use of relatively small samples could lead to over-fitting can be avoided by the resample techniques.
+The resampling technique employed in this analysis is the bootstrap which proceeds as follows. We use all insolvent firms, 387 in the training set and
+16
+
+396 in the validation one, and randomly select a subsample with the same number of solvencies from 3534 solvencies in the training set and 6049 solvencies in the validation set, respectively. This subsample of the training set will be estimated and the performance measure for the validation subset is calculated and recorded. Then we perform a Monte Carlo experiment: another subsample is then drawn, and the process is repeated. This continues for many repetitions until a distribution for each performance measure is established. In this paper the process will be repeated 30 times.
+4.2 Performance Measures
+Now, we introduce three metrics for measuring and comparing the performance of credit risk models: Accuracy Ratio (AR), Conditional Information Entropy Ratio (CIER) and misclassification error. All of these measures aim to determine the power of discrimination that a model exhibits in warning of default risk. These techniques are quite general and can be used to compare different types of models even when the model outputs differ and are difficult to compare directly.
+AR is a valuable and simple tool to determine the discriminative power of risk models. AR can be derived from Cumulative Accuracy Profile (CAP) curve which is particularly useful in that it simultaneously measures Type I and Type II errors. In statistical terms, the CAP curve represents the cumulative probability distribution of default events for different percentiles of the risk score scale. To obtain CAP curves, firms are first ordered by their risk scores. For a given fraction x% of the total number of firms, a CAP curve is constructed by calculating the percentage y(x) of the defaulters whose risk score is equal to or lower than the one for fraction x. In other words, for a given x, y(x) measures the fraction of defaulters (out of total defaulters) whose risk scores are equal or lower than those of the fraction x (out of total firms). One would expect a concentration of non-defaulters at the highest scores and defaulters at the lowest scores.
+Figure 3 shows a CAP plot. The random CAP represents the case of zero information (which is equivalent to a random assignment of scores). The ideal CAP represents the case in which the model is able to discriminate perfectly, and all defaults are caught at the lowest model output. The actual CAP shows the performance of the model being evaluated. It depicts the percentage of defaults captured by the model.
+Therefore, AR is defined as the ratio of the area between a models CAP curve and the random CAP curve to the area between the perfect CAP curve and the random CAP curve (see Figure 3). The AR value is a fraction between zero and one. Risk measures with AR that approach zero have little
+17
+
+Figure 3: Cumulative accuracy profile (CAP) curve.
+
+advantage over a random assignment of risk scores while those close to one
+
+display good predictive power. Mathematically, if y = {0; 1}, the AR value
+
+is defined as
+
+AR =
+
+1 0
+
+1 0
+
+y(x)dx
+
+-
+
+1 2
+
+yideal(x)dx -
+
+1 2
+
+.
+
+(12)
+
+If the number of bankruptcies equals to the number of operating compa-
+
+nies in the sample, then AR becomes:
+
+1
+AR = 4 y(x)dx - 2.
+0
+
+(13)
+
+The Conditional Information Entropy Ratio (CIER) compares the amount of "uncertainty" regarding default in the case where we have no model (a state of more uncertainty about the possible outcomes) to the amount of uncertainty left after we have introduced a model (presumably, a state of less ignorance) with a given accuracy. Thus, the CIER can be used to measure the amount of uncertainty about defaults contained in different models as long as all models are evaluated on the same data set.
+To calculate the CIER we firstly calculate the uncertainty IE0, associated with the event of default without introducing any model. This information entropy reflects knowledge common to all models. Then we calculate the uncertainty IEmodel A after having taken into account the predictive power of some model A. The CIER is one minus the ratio of the latter to the former.
+
+18
+
+The expressions for the CIER are presented below.
+
+I E0
+
+=
+
+-
+
+1 n
+
+n
+
+p¯ln(p¯) + (1 - p¯) ln(1 - p¯),
+
+i=1
+
+(14)
+
+IEmodel A = - n1 n p¯i ln(p¯i) + (1 - p¯i) ln(1 - p¯i), i=1
+
+IER
+
+=
+
+I Emodel I E0
+
+A,
+
+CIER = 1 - IER,
+
+(15)
+(16) (17)
+
+where pi is the probability of default estimated for firm i using model A and p¯ is the average sample default rate. If the model holds no predictive power, the CIER would be zero. If it is perfectly predictive, the CIER would be one. Because the information entropy measures the reduction of uncertainty, a higher CIER indicates a better model.
+In addition, when evaluating the explanatory power of the bankruptcy models, it is helpful to define two types of the prediction error: a type I error, which indicates low default risk when in fact the risk is high, and a type II error, which conversely indicates high default risk when in fact risk is low. Usually, minimizing one type of error comes at the expense of increasing the other type of error. Clearly, the type I and type II error rates depend on the number of firms predicted to fail. The higher (lower) the number of firms predicted to go bankrupt, the smaller (larger) is the type I error rate and the larger (smaller) is the type II error rate. The number of predicted bankruptcies depends on the cut-off probability which is equal to 0.5 in our study. From a supervisory viewpoint, type I errors are more problematic as they produces higher costs. Usually the cost of a default is higher than the loss of prospective profits. Altman, Haldeman & Narayanan (1977) estimated the relative costs of type I and type II errors for commercial bank loans as being 7:1. Sobehart, Keenan & Stein (2001) also described the cost scenarios schematically. For more details on the performance measures we refer to (Herrity, Keenan, Sobehart & Falkenstein, 1999), (Keenan & Sobehart, 1999) and (Sobehart, Keenan & Stein, 2001).
+
+4.3 Predictor Selection
+Before we begin to explain the empirical results, the process of the predictor selection is illustrated.
+For a parametric model we can estimate the distribution of the coefficients at the predictors and their confidence intervals. However, we cannot do so for
+19
+
+nonparametric models. Instead we can use bootstrap technique, as described in the subsection on the validation procedure, to empirically estimate the distribution of the AR and CIER on many subsamples. In this study we randomly select 30 subsamples and compute corresponding ARs and CIERs 30 times. The median AR and CIER provide a robust measure to compare different ratios as predictors. For each stage the distribution of the AR and CIER will be illustrated as box plots. The line in the middle of the box depicts medians. The lower and upper limits of the box are 25th and 75th percentiles of the sample. The distance between the top and bottom of the box is the interquartile range (IQR). The whiskers are lines extending above and below the box which are 1.5 times IQR. The circles beyond the whiskers denote the outliers.
+There are so many possible financial ratios that can be used as explanatory variables in credit scoring models that some selection criteria are needed to obtain a parsimonious model. There are two main methods for selecting the appropriate ratios (Falkenstein, Boral & Carty, 2000). The first is forward stepwise selection. Start with the predictor that has the highest performance accuracy and then sequentially add the next predictor that also has the highest accuracy in the group and higher than the former until additional predictors have no additional improvement. The second is backward elimination in which one starts with all predictors, then reduces all of the poor variables. In this study, forward selection is preferred for both the SVM and logit model due to its relatively lower computational cost. The discriminating power of each ratio is assessed using the following performance measures: principally the AR and auxiliarily the CIER.
+4.4 The Calculation of Default Probabilities from the Scores
+In the case of the logit model the scores can be directly transformed into a default probability, while for the SVM model the probabilities of default need to be calculated using the risk scores predicted with the classifying function. Following (H¨ardle, Moro & Sch¨afer, 2007) the calculating process consists of the estimation of probabilities of default for the observations of the training set with a subsequent monotonization (the first two steps) and the calculation of the probabilities of default for some new firms (the third step) as described as below.
+The first step is to estimate the probabilities of default for the firms of the training set. We use the kernel techniques to preliminary evaluate the
+20
+
+default probabilities for observation i from the training set, i = 1, 2, . . . , n:
+
+P D(xi) =
+
+n i=1
+
+Kh(xi, xj)I{yi
+
+n i=1
+
+Kh(xi,
+
+xj )
+
+=1}
+
+.
+
+(18)
+
+Here a k-nearest-neighbor Gaussian kernel was used (H¨ardle, Mu¨ller, Sperlich & Werwatz, 2004), h is the kernel bandwidth.
+Usually, the dependence between scores and probabilities can be assumed to be monotonous. The preliminary probabilities of default evaluated at the first step are not necessarily a monotonic function of the scores. The monotonization of PDs will be obtained in the second step by using the Pool Adjacent Violator (PAV) algorithm ((Ayer, Brunk, Ewing, Reid & Silverman, 1955), (Barlow, Bartholomew, Bremmer & Brunk, 1972) and (Mammen, 1991)). Therefore we achieve monotonized probabilities of default for the observations over the training period.
+At the third step, the probabilities of default are calculated for any observation described with x as an interpolation between two default probabilities of the neighboring, in terms of the scores, observations from the training set xi and xi-1, i = 1, 2, . . . , n:
+
+P
+
+D(x)
+
+=
+
+P
+
+D(xi)
+
++
+
+f (x) - f (xi-1) f (xi) - f (xi-1)
+
+{P
+
+D(xi)
+
+-
+
+P
+
+D(xi-1)}
+
+.
+
+(19)
+
+If the score for an observation x lies beyond the ranges of scores for the training set, then P D(x) equals to the score of the first neighboring observation of the training set.
+
+5 Empirical Results
+This section discusses the empirical results during each stage of analyzing the German bankruptcy data using an SVM model.
+5.1 Selection of the First Predictor and the Sensitivity of the SVM Parameters
+The first stage of analyzing default risk is the selection of the first best predictor related to bankruptcy among 28 ratios using the box plots in which the SVM model has one input.
+Based on Figure 4 we can see that x24 (AP/SALE, Accounts Payable Turnover) provides the highest median AR, 49.17%. We can also notice that ratios x20, x27 and x28 have a very low accuracy: their median AR values
+21
+
+Figure 4: AR and CIER for a univariate SVM model.
+are below zero. Although median CIER of x24 (0.155) is less than that of x14 (0.158), they have no big difference and are all much higher than the other ratios. For the next step we will select ratio x24 as the first best single predictor related to German default firms that is somewhat different from the previous studies in which it was usually argued that the most significant predictors belong to profitability or leverage ratios.
+The accounts payable turnover ratio is calculated by taking the average accounts payable amount and dividing it by the total sales during the same period. Its reciprocal shows investors how many times per period the firm pays its average payable amount. If the turnover ratio is increasing from one period to another, this is a sign that it takes firm longer to pay off its suppliers than it was before. The opposite is true when the turnover ratio is falling, which means that the firm is paying off suppliers at a faster rate. Therefore, the firms with higher accounts payable turnover values will have lower ability to convert their accounts into sales, have lower revenues, and easier go bankrupt.
+The results in Figure 5 are obtained from the SVM with C = 10 and r = 0.6, which are chosen according to the following sensitivity investigation of SVM parameters. Obviously, the SVM differs in different values of the penalty parameter C and the Gaussian kernel coefficient r. C controls the tolerance to misclassification errors on the training set, while r represents the complexity of classifying functions. Because of the absence of a data-driven way to choose parameter values of the SVM, we investigated the sensitivity of the SVM to the free parameters C and r as presented in Figure 5 and Table 4. The ratio x24 is exemplified and the result for the benchmark logit model is also listed.
+Here the median AR and CIER are also estimated on 30 bootstrapped subsamples. As a whole, the discriminating ability of the SVM seems to be more sensitive to the r than C value. In the above part of Figure 5, with the
+22
+
+Figure 5: The sensitivity of the SVM to different parameters.
+fixed r = 0.6, the median of the AR starts from 47.4% for C = 0.001 and reaches the highest value 49.2% for C = 10 and slightly decreases to 48.7% when C = 1000. The varying range is very small. The below part of Figure 5 illustrates the AR of the SVM versus r with fixed C = 10. Within the interval r is found to have strong impact on the AR value which starts with 34.4% when r = 0.002 and drasticly increases to the highest value 49.2% when r = 0.6 and then reduces to 37.7% when r = 2000. In both parts the discriminating performance of the logit model is inferior to that of the SVM with different parameters.
+As we have seen, C = 10 and r = 0.6 seem to be the best choice of the parameter combination for the study in this paper. Thus, if we do not mention it particularly, the results of the SVM in the remaining part of this paper are all obtained using these parameter values.
+Table 4 describes the percentage of misclassified out-of-sample observations for the logit model and the SVM with different parameters using the singe predictor, x24. These errors are also obtained by bootstrap, which are all significant according to the standard deviations listed in Table 4. Lower values indicate better model accuracy. As shown in this table, the logit model has higher type I, type II and total error rates than the SVM just with only
+23
+
+Model SVM logit
+
+Parameters Cr 0.001 0.6 0.1 0.6 10 0.6 100 0.6 1000 0.6 10 0.002 10 0.06 10 0.6 10 60 10 2000
+
+Type I Error mean std 40.57 0.1167 38.42 0.5125 34.43 1.2126 25.22 0.6176 25.76 0.7705 37.20 2.4512 31.86 3.1527 34.43 1.2126 37.27 0.5112 41.09 0.0791 38.15 0.5625
+
+Type II Error mean std 23.43 0.9812 24.45 1.1938 27.86 1.6370 34.66 1.3541 34.26 1.3805 32.79 2.5753 29.25 2.2887 27.86 1.6370 25.87 1.2134 24.85 0.3265 32.77 1.1888
+
+Total Error mean std 32.01 0.5723 31.44 0.7014 31.15 0.9433 29.94 0.8086 30.01 0.8712 34.99 1.7611 30.56 1.1405 31.15 0.9433 31.57 0.7798 32.97 0.1123 35.46 0.7151
+
+Table 4: Misclassification Error (30 randomly selected samples; one predictor X24).
+
+few exceptions, suggesting that a well-specified SVM model is superior to a logit model. For the SVM, with the increase of C from 0.001 through 1,000, type II errors also increase but type I errors decrease, total errors firstly decrease and then increase slightly. As for increasing r values, type I and total errors also follow the U shape trend and type II errors have a monotonic negative relation with r values. Therefore, C = 10 and r = 0.6 also appear to be the appropriate trade-off choice for our study in the following part of this paper. They produce only 34.43% type I errors, 27.86% type II errors and 31.15% total errors, while logit analysis produces 38.15% type I errors, 32.77% type II errors and 35.46% total errors, respectively.
+5.2 The Comparison of Models with Two Predictors
+and the PD Visualization
+Figure 6 describes the identifying performance of bivariate SVM models using the best predictor from the univariate model (x24) and one of the rest. The median values of the AR and CIER all direct to the profitability ratio OI/TA (x3), the values of which rise to the highest 56.46% and 0.158, respectively, which indicates that x3 is the best choice for the second predictor.
+Therefore, different from the usual study that NI/TA dominates other profitability ratios related to default risk, our results reveals that OI/TA performs better than the others in identifying German bankrupt firms. As the operating income does not include items such as investments in other
+
+24
+
+Figure 6: AR and CIER for bivariate SVM models.
+firms, taxes, interest expenses and depreciation, its ratio represents a firm's true operating performance.
+For two dimensions, i.e. two predictors, graphics are obviously an extremely useful tool for learning the data and assessing the quality of different default risk models. In addition, because of its nonlinearity it is more necessary for the SVM to use visual tools than for the logit model to represent classification results. We demonstrate an application of visualization techniques for default analysis based on the SVM in Figure 7. These graphs are a subset of those used in the study. White and black points represent insolvent and solvent firms (equal number in this case) from the validation set. The classifying decision function is represented by the line marked with 0.5 along which default probability equals 0.5. The lines with 0.27 and 0.73 are the lower and upper margin boundaries which correspond to the scores equal to -1 and +1. Obviously, most successful firms lying in the blue area have positive profitability (NI/TA) and relatively lower account payable turnover (AP/SALE) while a majority of bankrupt firms is located in the opposite area.
+Figure 7 (a) describes the classification results with a logit model. Because the disadvantage of the logit model is the linearity of its solution, we see a straight classification line which is the linear combination of two predictors. Figure 7 (b) represents the discriminating results obtained with the SVM using the classifying function of a moderate complexity (r = 0.6) and C = 10. This nonlinear classifying line (score = 0 and P D = 0.5) seems to identify two types of firms well with the areas in which solvent and insolvent firms being localized.
+Fix r = 0.6. If the degree of penalty is too low (C reduces to 0.01 and 0.1 as in Figure 7 (c) and (d)), the discriminating curve becomes flatter
+25
+
+than that in Figure 7 (b). The default probabilities calculated are too small to display the two boundaries of margin. The insolvent and solvent firms are clustered in two separate areas. If the degree of penalty increases , for example, C = 500 as in Figure 7 (e), the identifying ability of SVM cannot be increased further as compared to that in Figure 7 (b).
+Fix C = 10. If the complexity of classifying functions increases (the r value goes down to 0.06 as illustrated in Figure 7 (f)), the SVM will try to capture each observation. The complexity in this case is too high for the given sample. If the r value rises to 60 (Figure 7 (g)), the classifying curve becomes flatter than that with r = 0.6; if r rises further to 2000 (Figure 7 (h)), the discriminating curve can be approximated as a linear combination of two predictors and is the same as for the benchmark logit model, although the coefficients of the predictors may be different. Calculated default probabilities are also very small. The complexity here is too low to get a more detailed picture.
+The information obtained from this graphical analysis is similar to (H¨ardle, Moro & Sch¨afer, 2005) and also confirms the choice combination of parameters as described in sensitivity investigation in above subsection.
+While the analysis here has been restricted to only two classes, namely bankruptcy and solvency, it can be easily generalized to multiple classes. In a multiple class case financial analysts usually prespecify rating classes (i.e. AAA, A, BB, C, etc.). A certain range of scores and default probabilities is associated with each rating class. The ranges are computed on the basis of historical data. According to the similarity of the scores a new firm is assigned to one particular class. Therefore, we can draw more than one classifying function in the figure above to separate different rating classes.
+5.3 Powerful Predictors Related to German Insolvent
+Firms
+The above procedure will be repeated for each new ratio added. The values of the AR and CIER are growing till the model includes eight ratios then they slowly decline. The medians of the AR and CIER for the models with eight ratios are shown in Figure 8. Most of the models we tested had the AR and CIER values in the range of 43.50% to 60.51% and 0.156 to 0.183, respectively for out-of-sample and out-of-time tests. The results we report here are the product of the bootstrap approach described in the previous section. Obviously, the SVM model including ratios x24, x3, x15, x12, x26, x22, x5 and x2 attains the highest median AR (60.51%) and CIER (0.183). For comparison, we also plot the median AR and CIER for the benchmark
+26
+
+Figure 7: Risk scores predicted for a random subsample of 396 insolvent and 396 solvent firms plotted for the ratios x24 and x3 (the logit model and SVM with different parameters).
+27
+
+Figure 8: AR and CIER for SVM model with eight ratios.
+logit model with the same ratios. We can see that, for models containing the former 7 ratios and one of the remaining, the medians of the AR and CIER are always higher for the SVM. This clearly reveals that the SVM model is always consistently superior to the benchmark logit model in identifying bankrupt firms. With respect to the percentage of correctly classified out-ofsample observations a similar result is achieved (71.85% for SVM vs. 67.24% for the logit model).
+It is noteworthy that, because of the insolvency data collected two years prior to insolvency, the predicted risk scores and calculated performance metrics in this study measure models ability to identify the firms that are going to default within the next two years. For example, predicted default probability for 2002 denotes the probability that a firm defaults in 2003 or 2004.
+We could not significantly improve upon our results by adding more ratios, and no model with fewer ratios performed as well. Eight selected predictors related to German bankrupt firms are AP/SALE (Account payable turnover, x24), OI/TA (x3), CASH/TA (x15), TL/TA (x12), IDINV/INV (Percentage of changing inventories, x26), INV/SALE (Inventory turnover, x22), EBIT/TA (x5) and NI/SALE (Net Profit Margin, x2). In contrast to other studies, firm size (x25) has been shown to have no important effects on the probability of bankruptcy that could be the result of preselecting only medium sized companies.
+Among the powerful predictors in identifying German bankrupt firms, there are two activity ratios (x24 and x22), three profitability ratios (x3, x5 and x2), one liquidity ratio (x15), one leverage ratio (x12) and one percentage of change ratio (x26). It seems that activity ratios play the most important role in predicting the default probabilities of German firms. Activity ratio
+28
+
+measures firm's ability to convert different positions of their balance sheets into cash or sales. German firms will typically try to turn their accounts payable and inventories into sales as fast as possible because these will actually lead to higher revenues. Instead of ROA, EBIT/TA has a more powerful impact on German insolvent firms. In essence, it measures operating performance and true productivity of firms assets on whose earning power firms existence is based. Of course, only earnings of a firm cannot tell the entire story. High earnings are good but an increase of earnings does not mean that the net profit margin of a firm is improving. For instance, if a firm has costs that have increased at a greater rate than sales, it leads to a lower profit margin. This is an indication that costs need to be under better control. Therefore, net profit margin is also very useful when analyzing German bankruptcy data. In our study the liquidity ratio CASH/TA is only inferior to activity and profitability ratios when explaining German bankruptcies. Its strong explanatory power may result because the sample used in this study is mainly composed of private firms and this might not be true for public firms used in previous studies. The leverage ratio TL/TA also has powerful influence on the identification of German bankruptcies. This metric used to measure firm's financial risk by determining how much of its assets have been financed by debt. This is a very broad ratio as it includes short- and long-term liabilities (debt) as well as all types of both tangible and intangible assets. The higher a firm's degree of leverage is, the more the firm is considered risky. A firm with high leverage is more vulnerable to downturns in the business cycle because the firm must continue to service its debt regardless of how bad sales are. The incremental inventories provided by the Creditreform database also contain useful information for studying German insolvent firms.
+To summarize our results, a German firm is most likely to go bankrupt when it has high turnover, low profits, lower cash flows, is highly leveraged and has high percentage of changing inventories. Although these results are similar to those of previous studies the discovery of significant effects for activity ratio and incremental inventories for predicting defaults in Germany is new.
+6 Relation to the CAPM
+6.1 Empirical Records of the CAPM
+The classical studies by Fama & MacBeth (1973) provided supporting evidence for the CAPM. Based on the cross-sectional regression tests on stocks
+29
+
+of New York Stock Exchange (NYSE) between 1926-1968 they argued that there is a positive linear correlation between the risk and expected return. While Black, Jensen & Scholes (1972) adopted time series to study the stocks of all listed firms on the NYSE between 1931-1965; they found that the regression results are not the same as the theory predicted, that is, the relation between the risk and return is lower than that predicted by the CAPM.
+In fact, the strict assumptions of the CAPM such as the same expectation for all investors, the equilibrium and efficiency of the capital market and its one-period characteristics appear to be justifiable in applications. Researchers therefore attempted to relax these assumptions, including the pricing theory of Mayers (1972) that many non-marketable assets exist, intertemporal version of the CAPM (ICAPM) of Merton (1973), consumptionoriented CAPM (CCAPM) of Breeden (1979), and the three-factor model of Fama & French (1993) for expected returns which provided stronger explanatory power. However, there were fewer important studies related to the relaxation of the assumptions of the CAPM. Some analysts chose to abandon the assumptions of the CAPM, the most important of which is the arbitrage pricing theory (APT) of Ross (1976). Some included the information variables into the analysis and focused on the investigation of investor's behavior. Roll (1997) even argued that because the tests use proxies, not the true market portfolio, we learn nothing about the CAPM.
+Because the original CAPM and its extensions adopt the linear parametric model to measure the risk and says that the expected return is the positive linear function of the beta coefficient, we refer to this research period as linear parametric research phase. However, due to the poor explanatory power of these traditional linear parametric models, presently the researchers try to adopt such new methods as nonlinear models, chaos analysis, semiand nonparametric estimation, and systematic simulation to explore the relationship between return and risk and understand the behavior of the stock market. For example, Fama & French (1996) found that the linear relationship between risk (beta) and individual stock returns breaks down over shorter periods of time. The drastic decrease of stock price in 1987 and high correlation of time series also clearly revealed that there is a nonlinear effect of risk on return. The nonlinear dynamic pricing models include ARCH, GARCH and EGARCH and so on. Some financial analysts proposed the concept of the pricing kernel which is similar to black box but give up the assumption of positive relationship between return and risk behind the CAPM (Franke, Stapleton & Subrahmanyam, 1999).
+30
+
+6.2 An Investigation of the CAPM
+
+As described above, some findings confirm the CAPM; and some seem to suggest that the CAPM needs to be augmented with nonlinear terms. Even so, due to its simplicity and veracity in many important applications, the CAMP is still widely used in the investment community. We think, till now, all previous empirical investigation can not prove the CAPM to be invalid, but propose the challenge for its perfections. Does the CAPM really work? We are also interested in investigating the validity of the CAPM. In this paper, we employ the nonparametric Nadaraya-Watson estimator to estimate the return-risk function (see (H¨ardle & Simar, 2003) and (H¨ardle, Mu¨ller, Sperlich & Werwatz, 2004) for more details about NW estimator). Predicted scores are obtained from an SVM for classification using the best eight ratios shown in the above section for one random selected subsample. We apply Support Vector Machine for Regression to predict the profitability, NI/TA and EBIT/TA, the representatives of expected return for the same subsample.
+To predict the profitability it is necessary to choose the appropriate predictors among 28 ratios used in above analysis (except for the one used as the response). The validation and predictor selection procedure are the same as for the SVM for classification companies into solvent and insolvenct. The normalized mean square error (NMSE), also known as the generalization error, is employed as the selection criterion instead of the median of the AR or CIER. NMSE measures the deviation between actual and predicted value out of sample and out of time. Smaller values of these metrics indicate higher performance accuracy in predicting the profitability. Thus, at each stage, we choose the predictor that produces the lowest NMSE among all candidates. The expression for the NMSE is described below.
+
+NMSE
+
+=
+
+MSE V ar(y)
+
+=
+
+i=1
+
+i=1 n(yi - y^i)2/n n(yi - y¯i)2/(n -
+
+1)
+
+,
+
+(20)
+
+where yi is the actual profitability ratio, y¯i is its mean value, y^i is the predicted profitability value, and n is the number of observations.
+In the case of predicting NI/TA, as shown in Figure 9 (a), the first selected predictor is x2 (NI/SALE) which results in the lowest value of NMSE, 52.53%, the next excellent predictors corresponding to each stage of two, three and four inputs are x22 (INV/SALE), x13 (DEBT/TA) and x23 (AR/SALE) which lead to falling NMSE values, 48.84%, 48.83% and 48.73%, respectively. Thus, the SVM for regression with four predictors, x2, x22, x13, and x23, can predict the future values of NI/TA best, any additional predictor will produce higher NMSE. Based on these predicted NI/TA
+
+31
+
+Figure 9: The analysis of the relationship between expected returns and risk scores.
+values, we use the nonparametric Nadaraya-Watson estimator to preliminarily smooth the return-risk line (similar to the security market line) which is represented by the red line in Figure 9 (b). This fitting line appears to be linear which indicates the linear relationship between return and risk does exist. Then we use the usual OLS to obtain the intercept and slope of this function, that is E[Return] = 0.03816 + 0.001047RiskScore.
+The SVM for regression to predict EBIT/TA ratio best includes such three ratios as x3 (OI/TA), x15 (CASH/TA) and x13 (DEBT/TA), the corresponding NMSE values of which are 50.49%, 47.60% and 44.97%, respectively, as shown in Figure 9 (c). In Figure 9 (d), the red return-risk line firstly obtained from Nadaraya-Watson estimator is also linear and the fitted form secondly achieved from OLS, E[Return] = 0.04762 + 0.0007056RiskScore, indicates that it has significant positive slope, although less than that in Figure 9 (b). In fact, we also directly use the parametric OLS to try to achieve the fitting line, but its slope is negative although the line is still linear. This denotes that the CAPM's empirical problems may not reflect
+32
+
+theoretical failings but be caused by the methods to test it. The above nonparametric evidence confirms the accuracy of the CAPM
+again: there is a linear positive relationship between the expected return and the risk which indicates that the risk is still the significant factor to influence the expected return, although not only one. The higher the firm's default risk, the more expected return the investor has to demand. If this expected return does not meet or beat the required return, then the investment should not be undertaken.
+7 Conclusions
+We use a discrimination technique, the Support Vector Machine for classification, to analyze the German bankrupt company database spanned from 1996 through 2002. The identifying ability of a nonlinear and nonparametric SVM is compared with that of the benchmark logit model with regard to three performance metrics (AR, CIER and misclassification error) on the basis of bootstrapped subsamples. The evidence from empirical results consistently shows that a rating model based on SVM significantly outperforms the traditional linear parametric logit model in predicting default probabilities of German firms out of sample and out of time. The sensitivity of the SVM to the penalty parameter C and Gaussian kernel coefficient r are also examined according to box plots and 2-dimension visualization. It is found that the discriminating ability of the SVM seems to be more sensitive to r than C values. Thus, the appropriate trade-off values of C and r should be chosen firstly for bankruptcy analysis.
+According to our empirical results there are eight accounting ratios that are powerful predictors related to bankrupty. It turns out that activity ratios such as account payable and inventory turnover play the most important role in predicting the default probabilities. The percentage of incremental inventories provided by the Creditreform database also contains useful information for German bankruptcy analysis. These findings are new and somewhat different from the other default risk studies. Consistent with previous research, the profitability ratios, e.g. OI/TA, EBIT/TA and net profit margin, are also powerful predictors related to German insolvency. Other results are also similar to previous research, e.g. that liquidity and leverage ratios have also important effects the probability of default for German companies.
+Finally, we apply the nonparametric Nadaraya-Watson estimator, different from the usual parametric methods, to estimate the expected return-risk line, in which the expected profitability (NI/TA and EBIT/TA) is predicted by the SVM for regression using the preselected predictors. Our evidence
+33
+
+does confirm the accuracy of the CAPM: the higher the firm's default risk, the more expected return the investor has to demand; there is a positive linear relationship between expected returns and risk.
+References
+Aghion, P. and P. Bolton, 1992: An "incomplete contracts" approach to financial contracting. Review of Economic Studies, 59(3), 473­494.
+Altman, E., 1968: Financial ratios, discriminant analysis and the prediction of corporate bankruptcy. The Journal of Finance, 23(4), 589­609.
+Altman, E., R. Haldeman, and P. Narayanan, 1977: Zeta analysis: a new model to identify bankruptcy risk of corporations. Journal of Banking and Finance 29­54.
+Ayer, M., H. D. Brunk, G. M. Ewing, W. T. Reid, and E. Silverman, 1955: An empirical distribution function for sampling with incomplete information. The Annals of Mathematical Statistics, 26, 641­647.
+Back, B., T. Laitinen, and K. Sere, 1994: Neural networks and bankruptcy prediction. paper presented at the 17th annual congress of the european accounting association, Venice, Italy, 1994. Abstarct in Collected Abstracts of the 17th Annual Congress of the European Accounting Association 116.
+Back, B., T. Laitinen, K. Sere, and M. Wezel, 1996: Choosing bankruptcy predictors using discriminant analysis, logit analysis, and genetic algorithms. Technical Report 40, TUCS Research Group.
+Barlow, R. E., J. M. Bartholomew, J. M. Bremmer, and H. D. Brunk, 1972: Statistical Inference Under Order Restrictions. John Wiley & Sons, New York, NY.
+Beaver, W., 1966: Financial ratios as predictors of failures. empirical research in accounting: Selected studies. Journal of Accounting Research 71­111. supplement to vol. 5.
+Black, F., M. C. Jensen, and M. Scholes, 1972: The Capital Asset Pricing Model: Some Empirical Tests. Studies in the Theory of Capital Markets. Praeger, New York, NY, 79­121.
+Breeden, D. T., 1979: An intertemporal asset pricing model with stochastic consumption and investment opportunities. Journal of Financial Economics, 7, 265­296.
+34
+
+Chakrabarti, B. and R. Varadachari, 2004: Quantitative methods for default probability estimation ­ a first step towards basel ii. i-flex solutions.
+Collins, R. and R. Green, 1982: Statistical methods for bankruptcy prediction. Journal of Economics and Business, 34(4), 349­354.
+Deng, N. Y. and Y. J. Tian, 2004: New Methods in Data Mining: Support Vector Machine. Science Press.
+Efron, B. and R. Tibshirani, 1993: An Introduction to the Bootstrap. Chapman /& Hall, New York, NY.
+Falkenstein, E., A. Boral, and L. Carty, 2000: Riskcalc for private companies: Moody's default model.
+Fama, E. F. and K. R. French, 1993: Common risk factors in the returns on stocks and bonds. Journal of Financial Economics, 33(1), 3­56.
+Fama, E. F. and K. R. French, 1996: The capm is wanted, dead or alive. Journal of Finance, 51(5), 1947­1958.
+Fama, E. F. and J. D. MacBeth, 1973: Risk, return, and equilibrium: Empirical tests. Journal of Political Economy, 81(3), 607­636.
+Fitzpatrick, P., 1932: A comparison of the ratios of successful industrial enterprises with those of failed companies.
+Franke, G., R. C. Stapleton, and M. G. Subrahmanyam, 1999: When are options overpriced? the black-scholes model and alternative characterisations of the pricing kernel. European Finance Review, 3, 79­102.
+H¨ardle, W., R. A. Moro, and D. Sch¨afer, 2005: Predicting Bankruptcy with Support Vector Machines. Statistical Tools for Finance and Insurance. Springer Verlag, Berlin.
+H¨ardle, W., R. A. Moro, and D. Sch¨afer, 2007: Graphical Data Representation in Bankruptcy Analysis. Handbook for Data Visualization. Springer Verlag, Berlin.
+H¨ardle, W., M. Mu¨ller, S. Sperlich, and A. Werwatz, 2004: Nonparametric and semiparametric models. Springer, Heidelberg.
+H¨ardle, W. and L. Simar, 2003: Applied Multivariate Statistical Analysis. Springer, Berlin.
+35
+
+Haykin, S., 1999: Neural Networks: A Comprehensive Foundations. Prentice Hall, New Jersey.
+Herrity, J. V., S. C. Keenan, J. R. Sobehart, and E. G. Falkenstein, 1999: Measuring private firm default risk. Moody's Investors Service Special Comment.
+Horowitz, J. L., 2001: The Bootstrap, volume 5. Elsevier Science B. V.
+Keenan, S. C. and J. R. Sobehart, 1999: Performance measures for credit risk models. Research Report #1-10-10-99, Moody's Risk Management Services.
+Khandani, B., M. Lozano, and L. Carty, 2001: Moody's riskcalc for private companies: The german model. Rating Methodology, Moody's Investors Service.
+Lennox, C., 1999: Identifying failing companies: A re-evaluation of the logit, probit and da approaches. Journal of Economics and Business, 51, 347­364.
+Lintner, J., 1965: The valuation of risk assets and the selection of risky investments in stock portfolios and capital budgets. Revies of Economics and Statistics, 47(1), 13­37.
+Lo, A. W., 1986: Logit versus discriminant analysis: A specification test and application to corporate bankruptcies. Journal of Econometrics, 31(2), 151­178.
+Mammen, E., 1991: Estimating a smooth monotone regression function. Anals of Statistics, 19, 724­740.
+Markowitz, H., 1959: Portfolio Selection: Efficient Diversification of Investments. Cowles Foundation Monograph No. 16. John Wiley & Sons, New York, NY.
+Mayers, D., 1972: Non-Marketable Assets and Capital Market Equilibrium Under Uncertainty. Studies in the Theory of Capital Markets. Praeger Publishers, 223­247.
+Merton, R. C., 1973: An intertemporal capital asset pricing model. Econometrica, 41(5), 867­887.
+Merwin, C., 1942: Financing small corporations in five manufacturing industries, 1926-36. National Bureau of Economic Research.
+36
+
+Myers, S., 1977: Determinants of corporate borrowing. Journal of Financial Economics, 5(2), 147­175.
+Ohlson, J., 1980: Financial ratios and the probabilistic prediction of bankruptcy. Journal of Accounting Research 109­131.
+Platt, H., M. Platt, and J. Pedersen, 1994: Bankruptcy discrimination with real variables. Journal of Business, Finance and Accounting, 21(4), 491­ 510.
+Ramser, J. and L. Foster, 1931: A demonstration of ratio analysis. bulletin no. 40. Bureau of Business Research, University of Illinois, Urbana, Ill.
+Roll, R., 1997: A critique of the asset pricing theory's tests. part i: On past and potential testability of the theory. Journal of Financial Economics, 4(2), 129­176.
+Ross, S. A., 1976: The arbitrage theory of capital asset pricing. Journal of Economic Theory, 13(3), 341­360.
+Serrano, C., B. Martin, and J. L. Gallizo, 1993: Artificial neural networks in financial statement analysis: Ratios versus accounting data. Technical report, paper presented at the 16th Annual Congress of the European Accounting Association, Turku, Finland, April 28th-30th.
+Sharpe, W. F., 1964: Capital asset prices: A theory of market equilibrium under conditions of risk. Journal of Finance, 19(3), 425­442.
+Sobehart, J., S. Keenan, and R. Stein, 2001: Benchmarking quantitative default risk models: A validation methodology. Algo Research Quarterly, 4(1 and 2).
+Tikhonov, A. N., 1963: On solving ill-posed problem and method regularization. Doklady Akademii Nauk USSR, (153), 501­504.
+Tikhonov, A. N. and V. Y. Arsenin, 1977: Solution of Ill-posed Problems. W. H. Winston, Washington, DC.
+Vapnik, V., 1979: Estimation of Dependencies Based on Empirical Data. Nauka, Moscow.
+Vapnik, V., 1995: The Nature of Statistical Learning Theory. Springer, New York, NY.
+Vapnik, V., 1997: Statistical Learning Theory. Wiley, New York, NY.
+37
+
+Wilson, R. L. and R. Sharda, 1994: Bankruptcy prediction using neural networks. Decision Support Systems, (11), 545­557.
+Winakor, A. and R. Smith, 1935: Changes in the financial structure of unsuccessful industrial corporations. bulletin no. 51. Bureau of Business Research, University of Illinois, Urbana, Ill.
+38
+
+SFB 649 Discussion Paper Series 2006
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Calibration Risk for Exotic Options" by Kai Detlefsen and Wolfgang K. Härdle, January 2006.
+002 "Calibration Design of Implied Volatility Surfaces" by Kai Detlefsen and Wolfgang K. Härdle, January 2006.
+003 "On the Appropriateness of Inappropriate VaR Models" by Wolfgang Härdle, Zdenk Hlávka and Gerhard Stahl, January 2006.
+004 "Regional Labor Markets, Network Externalities and Migration: The Case of German Reunification" by Harald Uhlig, January/February 2006.
+005 "British Interest Rate Convergence between the US and Europe: A Recursive Cointegration Analysis" by Enzo Weber, January 2006.
+006 "A Combined Approach for Segment-Specific Analysis of Market Basket Data" by Yasemin Boztu and Thomas Reutterer, January 2006.
+007 "Robust utility maximization in a stochastic factor model" by Daniel Hernández­Hernández and Alexander Schied, January 2006.
+008 "Economic Growth of Agglomerations and Geographic Concentration of Industries - Evidence for Germany" by Kurt Geppert, Martin Gornig and Axel Werwatz, January 2006.
+009 "Institutions, Bargaining Power and Labor Shares" by Benjamin Bental and Dominique Demougin, January 2006.
+010 "Common Functional Principal Components" by Michal Benko, Wolfgang Härdle and Alois Kneip, Jauary 2006.
+011 "VAR Modeling for Dynamic Semiparametric Factors of Volatility Strings" by Ralf Brüggemann, Wolfgang Härdle, Julius Mungo and Carsten Trenkler, February 2006.
+012 "Bootstrapping Systems Cointegration Tests with a Prior Adjustment for Deterministic Terms" by Carsten Trenkler, February 2006.
+013 "Penalties and Optimality in Financial Contracts: Taking Stock" by Michel A. Robe, Eva-Maria Steiger and Pierre-Armand Michel, February 2006.
+014 "Core Labour Standards and FDI: Friends or Foes? The Case of Child Labour" by Sebastian Braun, February 2006.
+015 "Graphical Data Representation in Bankruptcy Analysis" by Wolfgang Härdle, Rouslan Moro and Dorothea Schäfer, February 2006.
+016 "Fiscal Policy Effects in the European Union" by Andreas Thams, February 2006.
+017 "Estimation with the Nested Logit Model: Specifications and Software Particularities" by Nadja Silberhorn, Yasemin Boztu and Lutz Hildebrandt, March 2006.
+018 "The Bologna Process: How student mobility affects multi-cultural skills and educational quality" by Lydia Mechtenberg and Roland Strausz, March 2006.
+019 "Cheap Talk in the Classroom" by Lydia Mechtenberg, March 2006. 020 "Time Dependent Relative Risk Aversion" by Enzo Giacomini, Michael
+Handel and Wolfgang Härdle, March 2006. 021 "Finite Sample Properties of Impulse Response Intervals in SVECMs with
+Long-Run Identifying Restrictions" by Ralf Brüggemann, March 2006. 022 "Barrier Option Hedging under Constraints: A Viscosity Approach" by
+Imen Bentahar and Bruno Bouchard, March 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "How Far Are We From The Slippery Slope? The Laffer Curve Revisited" by Mathias Trabandt and Harald Uhlig, April 2006.
+024 "e-Learning Statistics ­ A Selective Review" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, April 2006.
+025 "Macroeconomic Regime Switches and Speculative Attacks" by Bartosz Makowiak, April 2006.
+026 "External Shocks, U.S. Monetary Policy and Macroeconomic Fluctuations in Emerging Markets" by Bartosz Makowiak, April 2006.
+027 "Institutional Competition, Political Process and Holdup" by Bruno Deffains and Dominique Demougin, April 2006.
+028 "Technological Choice under Organizational Diseconomies of Scale" by Dominique Demougin and Anja Schöttner, April 2006.
+029 "Tail Conditional Expectation for vector-valued Risks" by Imen Bentahar, April 2006.
+030 "Approximate Solutions to Dynamic Models ­ Linear Methods" by Harald Uhlig, April 2006.
+031 "Exploratory Graphics of a Financial Dataset" by Antony Unwin, Martin Theus and Wolfgang Härdle, April 2006.
+032 "When did the 2001 recession really start?" by Jörg Polzehl, Vladimir Spokoiny and Ctlin Stric, April 2006.
+033 "Varying coefficient GARCH versus local constant volatility modeling. Comparison of the predictive power" by Jörg Polzehl and Vladimir Spokoiny, April 2006.
+034 "Spectral calibration of exponential Lévy Models [1]" by Denis Belomestny and Markus Reiß, April 2006.
+035 "Spectral calibration of exponential Lévy Models [2]" by Denis Belomestny and Markus Reiß, April 2006.
+036 "Spatial aggregation of local likelihood estimates with applications to classification" by Denis Belomestny and Vladimir Spokoiny, April 2006.
+037 "A jump-diffusion Libor model and its robust calibration" by Denis Belomestny and John Schoenmakers, April 2006.
+038 "Adaptive Simulation Algorithms for Pricing American and Bermudan Options by Local Analysis of Financial Market" by Denis Belomestny and Grigori N. Milstein, April 2006.
+039 "Macroeconomic Integration in Asia Pacific: Common Stochastic Trends and Business Cycle Coherence" by Enzo Weber, May 2006.
+040 "In Search of Non-Gaussian Components of a High-Dimensional Distribution" by Gilles Blanchard, Motoaki Kawanabe, Masashi Sugiyama, Vladimir Spokoiny and Klaus-Robert Müller, May 2006.
+041 "Forward and reverse representations for Markov chains" by Grigori N. Milstein, John G. M. Schoenmakers and Vladimir Spokoiny, May 2006.
+042 "Discussion of 'The Source of Historical Economic Fluctuations: An Analysis using Long-Run Restrictions' by Neville Francis and Valerie A. Ramey" by Harald Uhlig, May 2006.
+043 "An Iteration Procedure for Solving Integral Equations Related to Optimal Stopping Problems" by Denis Belomestny and Pavel V. Gapeev, May 2006.
+044 "East Germany's Wage Gap: A non-parametric decomposition based on establishment characteristics" by Bernd Görzig, Martin Gornig and Axel Werwatz, May 2006.
+045 "Firm Specific Wage Spread in Germany - Decomposition of regional differences in inter firm wage dispersion" by Bernd Görzig, Martin Gornig and Axel Werwatz, May 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+046 "Produktdiversifizierung: Haben die ostdeutschen Unternehmen den Anschluss an den Westen geschafft? ­ Eine vergleichende Analyse mit Mikrodaten der amtlichen Statistik" by Bernd Görzig, Martin Gornig and Axel Werwatz, May 2006.
+047 "The Division of Ownership in New Ventures" by Dominique Demougin and Oliver Fabel, June 2006.
+048 "The Anglo-German Industrial Productivity Paradox, 1895-1938: A Restatement and a Possible Resolution" by Albrecht Ritschl, May 2006.
+049 "The Influence of Information Costs on the Integration of Financial Markets: Northern Europe, 1350-1560" by Oliver Volckart, May 2006.
+050 "Robust Econometrics" by Pavel Cízek and Wolfgang Härdle, June 2006. 051 "Regression methods in pricing American and Bermudan options using
+consumption processes" by Denis Belomestny, Grigori N. Milstein and Vladimir Spokoiny, July 2006. 052 "Forecasting the Term Structure of Variance Swaps" by Kai Detlefsen and Wolfgang Härdle, July 2006. 053 "Governance: Who Controls Matters" by Bruno Deffains and Dominique Demougin, July 2006. 054 "On the Coexistence of Banks and Markets" by Hans Gersbach and Harald Uhlig, August 2006. 055 "Reassessing Intergenerational Mobility in Germany and the United States: The Impact of Differences in Lifecycle Earnings Patterns" by Thorsten Vogel, September 2006. 056 "The Euro and the Transatlantic Capital Market Leadership: A Recursive Cointegration Analysis" by Enzo Weber, September 2006. 057 "Discounted Optimal Stopping for Maxima in Diffusion Models with Finite Horizon" by Pavel V. Gapeev, September 2006. 058 "Perpetual Barrier Options in Jump-Diffusion Models" by Pavel V. Gapeev, September 2006. 059 "Discounted Optimal Stopping for Maxima of some Jump-Diffusion Processes" by Pavel V. Gapeev, September 2006. 060 "On Maximal Inequalities for some Jump Processes" by Pavel V. Gapeev, September 2006. 061 "A Control Approach to Robust Utility Maximization with Logarithmic Utility and Time-Consistent Penalties" by Daniel Hernández­Hernández and Alexander Schied, September 2006. 062 "On the Difficulty to Design Arabic E-learning System in Statistics" by Taleb Ahmad, Wolfgang Härdle and Julius Mungo, September 2006. 063 "Robust Optimization of Consumption with Random Endowment" by Wiebke Wittmüß, September 2006. 064 "Common and Uncommon Sources of Growth in Asia Pacific" by Enzo Weber, September 2006. 065 "Forecasting Euro-Area Variables with German Pre-EMU Data" by Ralf Brüggemann, Helmut Lütkepohl and Massimiliano Marcellino, September 2006. 066 "Pension Systems and the Allocation of Macroeconomic Risk" by Lans Bovenberg and Harald Uhlig, September 2006. 067 "Testing for the Cointegrating Rank of a VAR Process with Level Shift and Trend Break" by Carsten Trenkler, Pentti Saikkonen and Helmut Lütkepohl, September 2006. 068 "Integral Options in Models with Jumps" by Pavel V. Gapeev, September 2006. 069 "Constrained General Regression in Pseudo-Sobolev Spaces with Application to Option Pricing" by Zdenk Hlávka and Michal Pesta, September 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+070 "The Welfare Enhancing Effects of a Selfish Government in the Presence of Uninsurable, Idiosyncratic Risk" by R. Anton Braun and Harald Uhlig, September 2006.
+071 "Color Harmonization in Car Manufacturing Process" by Anton Andriyashin, Michal Benko, Wolfgang Härdle, Roman Timofeev and Uwe Ziegenhagen, October 2006.
+072 "Optimal Interest Rate Stabilization in a Basic Sticky-Price Model" by Matthias Paustian and Christian Stoltenberg, October 2006.
+073 "Real Balance Effects, Timing and Equilibrium Determination" by Christian Stoltenberg, October 2006.
+074 "Multiple Disorder Problems for Wiener and Compound Poisson Processes With Exponential Jumps" by Pavel V. Gapeev, October 2006.
+075 "Inhomogeneous Dependency Modelling with Time Varying Copulae" by Enzo Giacomini, Wolfgang K. Härdle, Ekaterina Ignatieva and Vladimir Spokoiny, November 2006.
+076 "Convenience Yields for CO2 Emission Allowance Futures Contracts" by Szymon Borak, Wolfgang Härdle, Stefan Trück and Rafal Weron, November 2006.
+077 "Estimation of Default Probabilities with Support Vector Machines" by Shiyi Chen, Wolfgang Härdle and Rouslan Moro, November 2006.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

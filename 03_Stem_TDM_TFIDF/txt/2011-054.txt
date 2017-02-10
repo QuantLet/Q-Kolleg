@@ -1,0 +1,1211 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2011-054
+TVICA Time Varying Independent
+Component Analysis and Its Application to
+Financial Data
+Ray-Bing Chen* Ying Chen** Wolfgang K. Härdle***
+* National Cheng Kung University, Taiwan ** National University of Singapore, Singapore *** Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+TVICA { Time Varying Independent Component Analysis and Its Application to Financial Data£
+Ray-Bing Cheny, Ying Chenzand Wolfgang K. Hardlex
+August 19, 2011
+Abstract
+Source extraction and dimensionality reduction are important in analyzing high dimensional and complex nancial time series that are neither Gaussian distributed nor stationary. Independent component analysis (ICA) method can be used to factorize the data into a linear combination of independent components, so that the high dimensional problem is converted to a set of univariate ones. However conventional ICA methods implicitly assume stationarity or stochastic homogeneity of the analyzed time series, which leads to a low accuracy of estimation in case of a changing stochastic structure. A time varying ICA (TVICA) is proposed here. The key idea is to allow the ICA lter to change over time, and to estimate it in so-called local homogeneous intervals. The question of how to identify these intervals is solved by the LCP (local
+£Acknowledgement: This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 \Economic Risk" and the Berkeley{NUS Risk Management Institute at the National University of Singapore.
+yDepartment of Statistics, National Cheng Kung University, Taiwan zDepartment of Statistics and Applied Probability, Risk Management Institute, National University of Singapore, Singapore xLadislaus von Bortkiewicz Chair of Statistics, C.A.S.E. Center for Applied Statistics & Economics, Humboldt-Universitat zu Berlin, Germany
+1
+
+change point) method. Compared to a static ICA, the dynamic TVICA provides good performance both in simulation and real data analysis. The data example is concerned with independent signal processing and deals with a portfolio of highly traded stocks.
+JEL code: C14; C58; G17
+Keywords: Adaptive Sequential Testing; Independent Component Analysis; Local Homogeneity; Signal Processing; Realized Volatility.
+1 Introduction
+Source extraction and dimensionality reduction are among the primary goals of multivariate nancial time series analysis, which helps to extract features and to nd latent relations of risk drivers from high dimensional and complex portfolios. With increasing dimension and larger piles of data, attainment of these goals can be challenging.
+Conventional statistical methods based on Gaussianity and stationarity do the job of simultaneous dimension reduction and stochastic factor identication. Principal component analysis and factor analysis are the tools here. The assumption of stationarity and Gaussianity is questionable though for the stochastic description of nancial data. The Gaussian distribution cannot be used to mark tail dependence of risk factors and it fails in providing the empirical facts like heavy tailedness, volatility clustering and intertemporal dependence of cross moments of order higher than 2. The practical need to retrieve the main driving stochastic factors is accentuated though in risk management and many other elds of applications and must be dealt with even without distributional assumptions. Although an eigenvalue decomposition
+2
+
+of returns' covariance yields only uncorrelated factors, see e.g. Jollie (2002), Hardle and Simar (2012), together with the Gaussian distributional assumption, the factors are independent. Hence well-developed univariate methods can be applied to each independent (but actually uncorrelated) factor, without considering the dependence among the components anymore. This is one of the primary reasons why Gaussianity has been widely adopted though deviating from the empirical facts.
+A recently developed multivariate statistical method, Independent Component Analysis (ICA), is dierent from the conventional approaches. ICA extracts Independent Components (ICs) using a linear lter but does not project onto the eigenvectors of the covariance matrix as PCA does. Instead, the independent factors are estimated via an optimization problem, in which the statistical cross dependence between the extracted ICs is minimized. While PCA maximizes the variance of the projected data under orthogonality constraints, ICA directly attacks the independence of the projected factor components. For the Gaussian case they coincide of course. A rich set of ICA algorithms exists e.g. FastICA proposed by Hyvarinen and Oja (1997) and other methods in Hyvarinen, Karhunen and Oja (2001). The dimensionality reduction feature of ICA is that it actually converts a high dimensional problem to a set of univariate ones, and all components are (at least approximately) independent. This technique has been implemented in stock returns analysis by Back and Weigend (1998), in risk management by Chen, Hardle and Spokoiny (2010), in high frequency analysis by Kouontchou and Maillet (2007), and in an intertemporal GARCH context by Wu, Yu and Li (2006). All these works demonstrate a nice performance of the ICA method, with applications to nancial data that are not Gaussian distributed.
+One essential assumption though is common to these papers: the observed series as well as the ICs are stationary and the linear lter is the same for the entire time series. As a consequence, the dynamics of cross dependence is constant over time which in
+3
+
+light of the ever occurring turbulences in nancial markets is questionable. In order to demonstrate how the performance of ICA is aected, if the stationarity assumption is violated, consider three ICs, each normal-inverse Gaussian (NIG) distributed (a heavy-tailed distribution, see Barndor-Nielsen (1997) for more details). The NIG distributional parameters are actually calibrated from the empirical distribution of three ICs estimated for the log returns of Home Depot (HD), Hewlett-Packard (HPQ) and IBM. We present more returns later in our real data section. Two ICA lters,
+A1 and A2 are used for generating a realistic example series, corresponding to two
+dierent time periods: 3rd September 2008 to 31th August 2009 (a period with market turbulence), and 30th July 2004 to 29th December 2006 (a relatively quiet period):
+
+01
+0:6 13:0 6:2
+
+0  0:1
+
+0:8
+
+1
+5:3
+
+A1
+
+=
+
+10 3
+
+B B B
+
+3:8
+
+C
+
+2:7
+
+13:0
+
+C C
+
+;
+
+and
+
+A2
+
+=
+
+10 3
+
+B B B
+
+C
+
+7:0
+
+1:9
+
+1:6
+
+C C
+
+:
+
+@A
+
+@A
+
+7:9 5:9 4:8
+
+0:1 4:2 1:1
+
+The three NIG distributed ICs, Zt P IR3 produce the observed series Xt = AtZt, in
+which At = A1 for the rst 300 observations and At = A2 for the rest. Figure 1
+displays the theoretical values of the ICs and the errors of the estimated ICs using either a Time Varying ICA method or a static ICA method. The static ICA assumes that the lter is constant over the whole time period, while the Time Varying ICA (TVICA) reacts to the change point of the lter and respectively estimates ICs based on separated locally homogenous samples. Apparently, the TVICA method benets from adapting to local inhomogeneity and its error process therefore has a much narrower spread than that of the static ICA. The RMSE (root mean square errors) of the estimated ICs also indicates a good performance of the TVICA in terms of
+accuracy, with values of 0:886 (static) and 0:201 (time varying) respectively. When
+considering only the time period after change, the dierence becomes even larger,
+
+4
+
+IC1 5
+
+Error Series 1 (TVICA) 5
+
+Error Series 1 (static) 5
+
+00 0
+
+-5 0
+5
+
+200
+
+400
+
+IC2
+
+600
+
+-5 0
+5
+
+200
+
+400
+
+Error Series 2 (TVICA)
+
+600
+
+-5 0
+5
+
+200
+
+400
+
+Error Series 2 (static)
+
+600
+
+00 0
+
+-5 0
+5
+
+200
+
+400
+
+IC3
+
+600
+
+-5 0
+5
+
+200
+
+400
+
+Error Series 3 (TVICA)
+
+600
+
+-5 0
+5
+
+200
+
+400
+
+Error Series 3 (static)
+
+600
+
+00 0
+
+-5 0
+
+200
+
+400
+
+600
+
+-5 0
+
+200
+
+400
+
+600
+
+-5 0
+
+200
+
+400
+
+600
+
+Figure 1: Demonstration based on three simulated series Xt = AtICt, where At = A1 for t = 1; : : : ; 300 and changes to A2 after then. From left to right it displays the
+theoretical values of the ICs, the errors of the recovered ICs that are estimated over the separated locally homogeneous samples (TVICA) or over the whole sample (static ICA). The TVICA has a much narrower error spread than the static ICA.
+
+with values of 1:196 (static) and 0:160 (time varying).
+The above (reality driven) example makes it clear that one not only needs a non-Gaussian low dimensional factor extraction but also a technique that locally (in time) identies a \trust interval" over which one can safely do ICA. The importance of identifying such an interval of approximate stationarity is often under-evaluated. Improving the quality of IC extraction for varying intervals, when dynamics changes over time, is the aim here. The little demonstration above indicates that the TVICA method is preferred in the case. The question is of course how to identify the locally homogeneous intervals in practice! Matteson and Tsay (2009) gave an answer by allowing the mixing matrix to vary over time via a smooth function of some transition variables. This idea is similar to time-varying models proposed in the volatility and
+
+5
+
+co-volatility literature, see e.g. Baillie and Morana (2009), Scharth and Medeiros (2009). Also it resembles time variation models incorporating changes via MarkovSwitching or mixture multiplicative error specications that have been proposed by e.g. Hamilton and Susmel (1994), So, Lam and Li (1998), Lanne (2006). These techniques though take a globally given mechanism for this time variation, in contrast to e.g. Mercurio and Spokoiny (2004) using a local change point approach. The approach is dierent from the existing ones in the sense that it is data-driven and applicable for various kinds of breaks (macroeconomic or political changes) with different magnitudes and abrupt or smooth types. Neither prior information (on say states of the market) nor distributional assumption is required. It motivates us to develop a local estimation approach for ICA.
+Here a time varying ICA (TVICA) framework is put into action, where the mixing matrix (linear lter) is allowed to change over time without imposement of a global structure. For each time point we determine a \trust interval" by conducting a sequence of tests on a structural change. The selection is controlled by a set of critical values. In this selected trust interval one performs ICA. The TVICA method is completely a data driven approach for lter and homogeneity determination.
+The remainder of the paper is structured as follows. The next section presents in detail the time varying (constrained) ICA approach and the estimation procedure. Section 3 investigates the performance of the proposed approach along with a simulation study, and the real data analysis is reported in Section 4. Section 5 summarizes our ndings and discusses an outlook to future work.
+6
+
+2 How TVICA works
+
+Suppose that there are p assets with log returns Xt = fx1(t); : : : ; xp(t)gb : The aim is
+to factorize the nancial returns into a linear combination of independent components
+Zt = fz1(t); : : : ; zp(t)gb. The TVICA approach is based on:
+
+Xt = AtZt
+
+(1)
+
+where At is a p ¢ p (time varying) matrix. In the static ICA approach, Xt in (1) is
+assumed to be stationary and At = A = const. i.e. to be time homogeneous. In the TVICA approach, the linear lter At is time dependent and the estimation of ICs is
+customized under Local Homogeneity for any time point of interest.
+Local homogeneity means that, for any particular time point t there exists a past
+time interval It = [t   mt; t], over which the linear lter At is approximately constant, i.e. As % A, V s P It. Given t and its past information, the challenge is of course
+to determine It (or mt) { the \trust interval of local homogeneity". In order to rise
+to this challenge, the Local Change Point (LCP) detection approach of Mercurio and Spokoiny (2004) is applied. Note that the LCP approach is data-driven and nests the above mentioned \smooth transition" and \regime switching" techniques used in earlier literature. Based on the identied trust interval, TVICA can provide more accurate performance than using a constant ICA lter.
+
+2.1 The LCP method
+In this section, we present the LCP detection procedure to identify the interval of
+local homogeneity at time point t. The estimation of the TVICA is carried out via
+the (quasi) maximum likelihood method by treating the linear lter or its inverse 7
+
+as unknown parameter. Suppose for a moment that an interval of a constant lter
+(homogeneity) It = [t   mt; t] is given at time point t, where mt indicates the length
+of the interval. Then with pdf fj(zj) of IC zj, j = 1; : : : ; p, the pdf of X, according
+to Jacobian transformation, is:
+
+fX(x1;
+
+:
+
+:
+
+:
+
+;
+
+xpjBt)
+
+=
+
+(Yp
+
+)
+fj (zj )
+
+¢
+
+jdet
+
+Btj;
+
+i=1
+
+where Bt is the inverse of At. With Bt = (b1t; : : : ; bpt)b, this gives:
+
+fX(x1; : : : ; xpjBt) = Yp fj(bbjtX) ¢ jdet Btj:
+j=1
+
+(2)
+
+The log-likelihood function on the interval It is:
+
+L(It; Bt) = Xt Xp logffj(bjbtXs)g + (mt + 1) log jdet Btj;
+ s=t mt j=1
+
+(3)
+
+and the MLE is denoted as Bet.
+Relaxing this situation of a constant (static) lter to local homogeneity on It means that Bt (or At) does not deviate too much from being constant in It. The
+deviation of this constant parameter is measured by a small modeling bias (SMB). The SMB quanties the divergence of a time varying model relative to a static model, for details see Spokoiny (2011), Hardle, Panov, Spokoiny and Wang (2012). Take now
+a family of nested intervals, I0 & I1 & ¡ ¡ ¡ & IK 1 & IK (the subscript t is omitted
+here for simplication of notation), the longer the length of intervals, the smaller the variance of the estimator but the higher the bias. The LCP approach selects the longest interval of local homogeneity that has the smallest variance (a trust interval) given an SMB bound.
+
+8
+
+The identication of the trust interval at time t is done via a sequential algorithm.
+At the rst step, the interval I0 is accepted as a trust interval. Next for an interval Ik,
+k = 1; : : : ; K, the procedure is to sequentially screen a subinterval Jk = Ik n Ik 1 = [t   mk; t   mk 1) and check for a possible change point { an indication of non-
+homogeneity { in the interval with \new" information. The interval Ik is accepted if every point in Jk is tested to be insignicant as a location of change point. One continues this way until a change point is detected or the longest interval IK is reached.
+
+More specically in the k-th step, given Jk as the testing interval we choose I = [tH; tHH] to be a superset of Jk that includes some neighboring observations of Jk. Then
+for each point t P Jk, we split the interval I into two sub-intervals, with IH = [tH; t) and IHH = [t; tHH]. Note that I = IH S IHH and IH T IHH = Y. Figure 2 demonstrates the relation
+of the intervals used in the testing procedure. Let LI(B) denote the log-likelihood
+
+t/
+Interval I /
+
+Interval I //
+
+t //
+
+Interval Jk = Ik / Ik-1
+
+t - mK  t - mk
+
+t - mk -1
+
+ t - m2 t - m1 t
+
+Figure 2: Local change point detection procedure.
+
+function for the observations in I. The LCP method employs a likelihood ratio test
+at all t P Jk to examine \a possible change point" over the whole interval Jk:
+
+f g  TI;t
+
+=
+
+max
+BHH;BH
+
+LIHH(BHH) + LIH(BH)
+
+max B
+
+LI
+
+(B):
+
+(4)
+
+The maximum (over t) of (4) is the proper statistic:
+
+Tk = mtPaJkx TI;t
+9
+
+(5)
+
+If Tk is greater than a critical value k, the null hypothesis of local homogeneity on
+Ik is rejected. The critical values fkg for k = 1; : : : ; K are computed via Monte
+Carlo simulation, since the distributional properties of (5) are (even asymptotically) unknown. The details are described in Section 2.3. The formal denition of the LCP algorithm is as follows:
+1. Initialization: The null shouldn't be rejected on I0. Denote the initial homogeneous estimate by Bbt(0) = B .et(0)
+2. Set k = 1. While Tk k and k K, update the present homogeneous estimate by Bbt(k) = Bet(k) and set k = k + 1.
+3. Final Estimate: Bbt = Bbtk; which is actually the MLE over the longest interval
+of local homogeneity.
+It is worth mentioning that the numerical complexity of the LCP algorithm is not high. In the computation for a simulation data including 10 time series, with 610 sample points for each and a family of 6 nested intervals (Section 3), it takes about 10 minutes on a PC with 2.67GHz Intel(R) Core(TM) i7 CPU.
+2.2 Finding ICs in a selected interval
+Given an identied interval of local homogeneity, i.e. Bt = B, (quasi) maximum
+likelihood estimation (MLE) is used to obtain ICs. For the MLE approach, the Kullback-Leibler (KL) divergence measures the dierence between two joint density
+functions of X, fX(x1; : : : ; xpjBt) under independence assumption, see (2), and pX
+10
+
+given the observations:
+
+KL fpXkfX(x1; : : : ; xpjBt)g
+
+=
+
+Z
+
+pX
+
+log
+Z
+
+fX(x1;
+
+pX :::;
+
+xpjBt)
+
+dX
+
+= HX   pX log fX(x1; : : : ; xpjBt) dX;
+
+where HX = R pX log pXdX. The ICs are obtained via minimizing the KL divergence
+with respect to Bt. Note that H(X) doesn't depend on Bt. Hence minimizing the
+KL divergence is equivalent to maximizing R pX log fX(x1; : : : ; xpjBt) dX, where the
+latter is proportional to the log-likelihood function in (3).
+
+Given that nancial time series have heavy-tailed marginal distributions, one considers:
+
+log fj(zj)
+
+=
+
+
+
+ 
+
+2
+
+log
+
+cosh(zj
+
+)
+
+=
+
+
+
+ 
+
+2
+
+log
+
+
+
+1 2
+
+fexp(zj)
+
++
+
+
+exp( zj)g
+
+;
+
+(6)
+
+where
+
+
+
+is
+
+a
+
+normalizing
+
+constant.
+
+Take
+
+the
+
+logarithmic
+
+derivative
+
+gj (zj )
+
+=
+
+@ @zj
+
+log
+
+fj (zj )
+
+:
+
+gj (zj )
+
+=
+
+ 2
+
+tanh(zj
+
+)
+
+=
+
+ 
+
+2fexp(2zj)   1g
+exp(2zj) + 1
+
+;
+
+V j = 1; : : : ; p;
+
+(7)
+
+For the Gaussian case gj(x) =  x'(x)='(x) =  x , is a linear function. From (7)
+one see that gj attens out and thus models heavy tails. Hyvarinen and Oja (1999)
+claim that a small misspecication of the density (6) doesn't aect the consistency of the ML estimator, and therefore we adopt the particular selection.
+
+It is worth mentioning that a pre-whitening process is normally conducted before implementing ICA. The variances of ICs are not identiable according to the denition of ICA. Without loss of generality, the variances of ICs are set to be one by whitening the observations. It is easy to show that the linear lter of the pre-whitened series
+
+11
+
+will be an orthonormal matrix. This feature will help to select parameters of the TVICA method.
+
+2.3 Selection of Hyperparameters
+
+The TVICA method is driven by a small set of \adjustable screws" or hyperparameters that we present here.
+
+Set
+
+of
+
+intervals:
+
+The
+
+family
+
+of
+
+intervals
+
+f gI K k k=0
+
+is
+
+either
+
+given
+
+or
+
+selected
+
+as:
+
+Ik = [t   mk; t];
+
+where mk = m0ak with a pre-specied initial length m0 and a multiplier a > 1. The coecient a controls the increasing length of the trust intervals. The starting value m0 should be suciently small to ensure very brief local homogeneous intervals. A practicable choice of a and m0 is discussed later in the simulation section of this
+paper. We may however already state here that the proposed algorithm is only weakly sensitive to the choice of this interval sequence.
+Critical values: The critical values fkg are calculated under the null, i.e. a ho-
+mogeneous constant lter B£. They are calculated from a stability condition, to be described below. This involves an additional parameter  that controls the error of
+rst kind, i.e. a false alarm see (8) below.
+Under the null (constant lter), one generates independent series and mixes them
+with a constant lter matrix A£ or its inverse B£ = A£ 1. The MLE of lter over the shortest interval I0 of the sample is used here, as the interval is a priori assumed
+to be time homogeneous. It is interesting to mention that ICA conducts a prewhitening process to avoid non-uniqueness of ICs, which makes the lter's scaling
+
+12
+
+free but doesn't change the underlying pattern of homogeneity or non-homogeneity. Therefore, the selection of the constant lter is not crucial for detecting change point. Later we will demonstrate that the method is stable with respect to the selection
+of A£. Under the produced globally homogeneous situation, every interval is locally homogeneous and the longest interval IK is the optimal choice. The aim here is to compute the critical values so that the adaptive estimate Bbt that is driven by the
+computed critical values doesn't deviate much from the constant lter, or simply, the SMB condition is satised.
+For any r > 0, the tted log likelihood with Bt = B£ can be used to measure the
+divergence of the MLE Bet(k) for t P Ik:
+j j j   jEB£ L(Ik; B ;et(k) B£) r = EB£ L(Ik; B )et(k) L(Ik; B£) r;
+
+and the largest divergence among all the intervals is denoted as:
+
+j jRr(B£)
+
+=
+
+max
+kK
+
+EB£
+
+L(Ik;
+
+B ;et(k)
+
+B£)
+
+r:
+
+The parameter r species the loss function under the null. A choice of r = 0:5 for example corresponds to the `1 loss and it provides a stable and robust performance in the monte carlo simulation. For a given value r, Rr(B£) can be computed straight-
+forwardly.
+
+The constant is in practice unknown. We here mimic the situation by replacing
+it with the adaptive estimate Bbt. Under the null of local homogeneity, the modeling
+bias is required to be bounded:
+
+j jEB£ L(IK; Bet(K); Bbt) r Rr(B£); t P IK;
+
+(8)
+
+13
+
+where Bbt depends on the critical values 1; : : : ; K: The parameter  > 0 is the test
+level parameter. Its selection reects the expectation and preference of users. A
+small value of  indicates that one expects a small divergence of the estimate to a
+constant lter (the null), which leads to relatively large critical values and a rather
+conservative procedure for possible time variation. Increasing  would result in a
+decrease of the critical values and an increase of the sensitivity of the method to the changes of lter in the underlying process. It might therefore be interpreted as a \false alarm" indicator.
+
+To calculate the critical values, we do the calibration in a sequential way. Notice that the sequential homogeneity tests accumulate uncertainty in estimation due to the increase in the degrees of freedom and therefore the probability of an interval being homogeneous decreases. To take this into account, it is suggested to adjust the
+hyperparameter  for an individual level of test at each step k = 1; : : : ; K, by e.g. assigning increasing weights k=K to increase the sensitivity to changes. In particular, the kth-step adaptive estimate Bbt(k) on the interval Ik satises:
+
+j j PEB£ L(Ik; B ;et(k) Bbt(k)) r
+
+k K
+
+Rr(B
+
+£);
+
+t
+
+Ik:
+
+(9)
+
+where
+
+Bb(k) k
+
+depends
+
+on
+
+the
+
+critical
+
+values
+
+1;
+
+:
+
+:
+
+:
+
+;
+
+k:
+
+How does it work in detail? At the initial step k = 0, we set 0 = I by accepting
+the shortest interval. To specify the next critical value 1, we set the values of 2; : : : ; K to be innity. Then 1 is selected as the minimum value to satisfy (9):
+
+PEB£
+
+
+L(Ik;
+
+n
+B ;et(k)
+
+Bbt(k)(1;
+
+ )or 2
+
+1
+K
+
+Rr(B
+
+£
+
+);
+
+t
+
+Ik;
+
+k = 1; : : : ; K:
+
+We then continue to select k given 1; : : : ; k 1 and set k+1 = ¡ ¡ ¡ = K = I,
+
+14
+
+k = 2; : : : ; K. The value of k is determined such that:
+
+PEB£
+
+
+L(I`;
+
+n
+B ;et(`)
+
+Bbt(`)(1;
+
+:
+
+:
+
+:
+
+;
+
+ )or k
+
+kRr(B£) K
+
+;
+
+t
+
+I`;
+
+` = k; : : : ; K:
+
+It is worth mentioning here that the LCP procedure is robust w.r.t. variation of these hyperparameters. In the simulation study of Section 3, we give evidence for this claim.
+
+3 Simulation
+This section investigates the performance of the TVICA method in various scenarios. In particular, we assess its detection power under homogeneity and non-homogeneity (nonstationarity) with dierent kinds of change point. As long as the underlying processes are stationary without change point, LCP should select the longest interval in the estimation of ICs. If at least one change point exists, LCP must detect the change point. It is worth emphasizing that the proposed method is not to identify the exact location of all possible change points. Instead, it is to select, for any particular time point, the longest interval before the occurrence of the most recent change point. The ICs are then safely estimated over the identied interval of local
+homogeneity. Since the LCP procedure relies on hyperparameters (r; ), that have to
+be pre-determined, we also analyze the impact of the hyperparameters with various values. It turns out that they have little inuence on the performance of TVICA.
+The setup of the simulation scenarios is practical. We use 10 components of the DJ30 index to generate the simulation processes. The 10 stocks are The Home Depot (HD), Hewlett-Packard (HPQ), IBM, Intel (INTC), Johnson & Johnson (JNJ), JPMorgan Chase (JPM), Kraft Foods (KFT), Coca-Cola (KO), McDonald's (MCD)
+15
+
+and 3M (MMM). The data spans from 14th January 2010 to 28th October 2010, over which ICA is conducted for the daily log returns as described in Sec 2.2. The obtained ICs are taken to be NIG distributed since this type of distribution works well in nancial applications. Accordingly, 10 independent NIG distributed series are generated, with 610 sample points for each. The simulation processes are obtained
+by mixing these independent sources with time dependent linear lters At in dierent
+scenarios. There are 1000 repetitions for each scenario.
+
+{ Scenario HOMO is a homogeneous case, where the linear lter is set to be an identity matrix for all the points. In this simplest case, where the simulated series are independent and homogeneous, the longest interval is the optimal selection.
+{ Scenario JPLF includes a sudden change, with At jumping from A to an identity matrix at t = 251. The matrix A is estimated based on the above mentioned
+real data with 10 stocks.
+{ Scenario JPEM also includes a sudden change at t = 251. Instead of a change of
+the whole lter matrix, only one element of the lter changes. More specically, the (2,1){element of the linear lter changes from 3 to 0 such that the linear lter becomes an identity matrix.
+
+{ Scenario SLEM refers to the type of smooth changes. As an illustration, the
+(2; 1)-component of the linear lter is dened as:
+
+8
+
+>>>< 3;
+
+t 220;
+
+   A(2;1) t
+
+=
+
+>>:>
+
+3(1
+0;
+
+(t
+
+220))=160;
+
+220 < t < 380;
+t ! 380.
+
+(10)
+
+16
+
+The set of the time intervals is dened with m0 = 200, a = 1:25 and K = 5:
+I0 = 200; I1 = 250; I2 = 313; I3 = 391; I4 = 488; I5 = 610;
+which corresponds to investment horizons from one year to 2.5 years. The parameters
+r and  in the LCP procedure are assigned to be either 0:1; 0:5 or 1. Totally there are 9 combinations of (r; ). The computation of critical values are based on generated
+homogeneous series, with 610 sample points for each. We repeat the generation 5000
+times. Moreover, when screening a possible change point in the interval Jk = Ik=Ik 1,
+a superset is set to be an interval that also includes the neighboring 25 observations
+of Jk. The critical values for dierent sets of hyperparameters are displayed in Figure 3. For any set of (r; ), The critical values are decreasing w.r.t. interval length,
+corresponding to the fact that for long intervals, the null of local homogeneity tends to be rejected. Moreover, the set of critical values shifts downside for a large value of
+, which reects an expectation of non-homogeneity and the method is hence sensitive
+to change point.
+The TVICA is conducted for dierent sets of (r; ) in dierent scenarios. The
+detection power is measured by the ratio of rejecting the null of local homogeneity over 1000 replications. We summarize how much and where the null is rejected. In particular, a value of 0 means the null is not rejected at all, which indicates a perfect local homogeneity. On the contrary, a ratio of 100% means the null is completely rejected. In the latter case, we are curious where the most recent change point is and respectively report the ratio at each interval. The results are reported in Table 1. Under the scenario of homogeneity (Scenario HOMO), the ratios are lower than
+10%, if  < 1. For  = 1, the error of rst kind is up to 26:8%, underlining our earlier comment on the role of . This false alarm will encourage a selection of a relatively
+short interval, in which the variance of estimators may be large but the modeling bias
+17
+
+130 120 110 100
+
+(r, )=(1.0,1.0) (r, )=(1.0,0.5) (r, )=(1.0,0.1) (r, )=(0.5,1.0) (r, )=(0.5,0.5) (r, )=(0.5,0.1) (r, )=(0.1,1.0) (r, )=(0.1,0.5) (r, )=(0.1,0.1)
+
+Critical Values
+
+90
+
+80
+
+70 1 (250)
+
+2 (313)
+
+3 (391) k (Interval's length)
+
+4 (488)
+
+5 (610)
+
+Figure 3: Critical values with parameters r = 1; 0:5; 0:1 and  = 1; 0:5; 0:1: The set of intervals is dened with m0 = 200, a = 1:25 and K = 5. The length of intervals is
+listed in the parentheses. The computations are based on the generated independent
+
+series, with 610 sample points for each series and with 5000 replications.
+
+is still small { the main concern of our study. Therefore the impact of false alarm is not serious. Under a scenario with change point(s), the ratios are 100% for all sets
+of (r; ). The location of the change point is nicely detected. For Scenario JPLF and
+JPEM with just one change point at t = 251, that is t P J3 = I3=I2 = [219; 298), the
+ratios in I3 are above 99%. For Scenario SLEM with the (2,1){element of the lter matrix slowly changing over J3, J2 = I2=I1 and part of I1, see (10), the total ratios in I3 and I2 is above 99%. For variation of ; the ratios have been reallocated between the
+intervals, however it doesn't aect much the selection of intervals. It just reect the users' expectation and preference on homogeneity vs non-homogeneity. In general, the TVICA method works well and can select the interval of local homogeneity reasonably.
+Moreover, the performance of the TVICA method is very stable across r, given  is
+xed.
+
+18
+
+r = 0:1
+
+r = 0:5
+
+r = 1:0
+
+ @ I1 I2 I3 I4 I1 I2 I3 I4 I1 I2 I3 I4
+
+HOMO
+
+| 0.6 |
+
+| 0.6 |
+
+| 0.7 |
+
+0:1
+
+JPLF JPEM
+
+{ {
+
+{ 100 { { { 99.2 0.8 {
+
+{ 100 { { { 99.4 0.6 {
+
+{ 100 { { 99.4 0.6
+
+SLEM { 5.9 93.1 1.0 { 6.8 92.4 0.8 { 7.9 91.3 0.8
+
+HOMO
+
+| 4.9 |
+
+| 5.9 |
+
+| 8.3 |
+
+0:5
+
+JPLF JPEM
+
+0.1 {
+
+{ 99.9 { 0.1 0.1 99.5 0.4 {
+
+0.1 99.8 { 0.1 0.2 99.5 0.3 {
+
+0.1 99.8 { 0.2 99.6 0.2
+
+SLEM 0.2 32.4 67.4 { 0.2 34.4 65.4 { 0.2 36.1 63.7 {
+
+HOMO
+
+| 15.3 |
+
+| 20.3 |
+
+| 26.8 |
+
+1:0
+
+JPLF JPEM
+
+0.2 {
+
+0.4 99.4 { 0.2 0.4 99.5 0.1 {
+
+0.4 99.4 0.6 99.4
+
+{ 0.2 0.7 99.1 { { 0.8 99.2
+
+{ {
+
+SLEM 0.2 49.5 50.3 { 0.2 52.6 47.2 { 0.4 56.4 43.2 {
+
+Table 1: The ratio of rejection (in percentage) of the LCP detection tests over 1000 replications. The denition of the scenarios is given in the text. Scenario HOMO is a homogeneous case, while the other scenarios include change points occurring at
+either the 3rd interval for Scenario JPLF and JPEM, or over part of I1, J2 = I2=I1 and J3 = I3=I2: The results show the TVICA method works well with a strong detection
+power.
+4 Real Data Analysis
+
+In this section, we implement TVICA to the log returns of a portfolio with 10 stocks traded at NYSE: HD, HPQ, IBM, INTC, JNJ, JPM, KFT, KO, MCD, and MMM. Recall that the objective of our study is to safely retrieve independent signals out of complex time series that are neither Gaussian distributed nor stationary. We here attack the following questions. Does the proposed method detect a reasonable interval of local homogeneity given a particular time point? Are the signals that are estimated over the identied interval (approximately) independent? We consider here two time points, 1st August 2007 and 28th October 2010, which are respectively before and after the recent global nancial crisis from 2008 to 2010. Using the same set of
+intervals in the simulation study, that is, m0 = 200, a = 1:25 and K = 5, the task is
+to detect the most recent change point, if exists, over two periods [1st March 2005,
+19
+
+1st August 2007] and [30th May 2008, 28th October 2010], with 610 observations for each.
+
+The rst period corresponds to a relatively stationary (stochastically homogenous) period, during which no inuential economic or nancial events are observed. To justify, we assign a set of equal weights to the 10 stocks and recursively compute realized volatility for the point 1st August 2007:
+
+v
+
+ r ;et
+
+=
+
+u u t
+
+1
+
+XT
+
+2
+t
+
+m  t=T m+1
+
+200
+
+m
+
+610;
+
+where rt denotes the return of the equally weighted portfolio. We start with 200
+historical observations { the shortest interval, and continuously including one more, up to all the 610 observations { the longest interval in the computation. Figure 4
+displays the realized volatility (dashed line) w.r.t. m, the length of the sample. The values are quite stable around 0:030, which indicates a stationarity over the whole
+period. Hence, the longest interval could be a reasonable selection.
+
+The second period [30th May 2008, 28th October 2010] instead involves the stock market crash in 2008. Again, we recursively compute the realized volatility of the equally weighted portfolio over the period, see Figure 4. Apparently, the volatility
+process is not constant. It shifts from about 0:045, around the interval I3, or when
+more than 391 historical observations are considered. It is interesting to see whether the TVICA method can detect the possible change and identify a reasonable interval of local homogeneity.
+
+In our study, the hyperparameters (r; ) are set to be (0:5; 0:5) and (0:1; 0:1) as
+both provided good power for the scenario of homogeneity in the simulation study.
+In the computation of critical values, the hypothetically homogeneous B£ is set to be
+
+20
+
+0.09 0.08
+
+2007/08/01 2010/10/28
+
+0.07 0.06
+
+I
+1
+
+I2
+
+I
+3
+
+I
+4
+
+I5
+
+volatility
+
+0.05
+
+0.04
+
+0.03
+
+0.02 200
+
+250
+
+313
+
+391 length of intervals
+
+488
+
+610
+
+Figure 4: Realized volatility recursively computed for two days 1st August 2007 and
+28th October 2010. The set of intervals with m0 = 200, a = 1:25 and K = 5 is
+marked in the plot to highlight the underlying pattern across the intervals.
+
+either the MLE in the shortest interval or an identity matrix. Table 2 reports the critical values as well as test statistics for every interval. For the 1st August 2007, the test statistics are insignicant so the null of local homogeneity is not rejected over the whole time period of [1st March 2005, 1st August 2007]. In other words, one can safely implement ICA in the time period. On the contrary, for the 28th October
+2010, the null is rejected at the interval I3, and the interval [2009=08=05; 2010=10=28]
+is identied to be homogenous. The result is consistent to the above volatility analysis,
+in which a structure change initiates around the interval I3.
+For the two cases, the sets of critical values are close for dierent B£, which justies the selection of B£ is not crucial for detecting change point. Moreover, the
+critical values vary a little across the hyperparameters. However, the testing results are identical. It supports our claim that the proposed method is stable to variation of the hyperparameters.
+
+21
+
+(r; ) B£
+I1 I2 I3 I4 I5
+
+2005/03/01-2007/08/01
+
+CV
+
+(0:5; 0:5)
+
+(0:1; 0:1)
+
+MLE Identity MLE Identity
+
+107.23 102.84 122.37 120.89
+
+98.40
+
+98.45 117.43 113.21
+
+93.15
+
+92.35 112.30 108.44
+
+89.64
+
+88.81 109.53 105.57
+
+86.28
+
+85.74 106.82 103.01
+
+TI
+74.36 76.62 66.86 77.52 72.79
+
+2008/05/30-2010/10/28
+
+CV
+
+(0:5; 0:5)
+
+(0:1; 0:1)
+
+MLE Identity MLE Identity
+
+108.87 105.85 126.51 123.74
+
+101.71
+
+98.67
+
+116.86 113.95
+
+96.32
+
+94.92
+
+113.91 110.05
+
+92.59
+
+91.57
+
+111.18 107.80
+
+88.72
+
+88.21
+
+108.99 105.85
+
+TI
+69.81 81.97
+265.35 469.99 205.60
+
+Table 2: The critical values and the test statistic for two experiments. The set of
+
+intervals for testing is computed with respect
+
+dtoeBne£deqausamls 0th=e
+
+200, MLE
+
+a = 1:25 and K = 5.
+in the shortest interval
+
+The CVs are or an identity
+
+matrix. The hyperparameters are set to be (r; ) = (0:5; 0:5) and (r; ) = (0:1; 0:1).
+
+The critical value computations are based on the generate 10 independent series, with
+
+610 sample points for each series and with 5000 replications.
+
+Moreover, we use higher-order (4th order) cross-cumulants as a measure of statistical independence:
+
+cum(zi; zj; zk; zl) = E(zizjzkzl)   E(zizj) E(zkzl)   E(zizk) E(zjzl)   E(zizl) E(zjzk);
+
+where z¡ denotes the obtained (independent) signal process. If the signals are independent, the cross-cumulants are zero when i; j; k; l are not equal simultaneously. As
+a comparison, we also implement a static ICA over the longest interval (610 observations) and a dynamic PCA over the interval of local homogeneity that is identied in the TVICA method for the two points. The cross-cumulants are computed. Figure 5 displays the boxplots of all the cross-cumulants of the signals by using the TVICA, the static ICA and the dynamic PCA. For both the stationary and nonstationary cases, all the cross-cumulants balance around zero, with means closing to 0. But the dynamic PCs and the static ICs have wider spreads and more outliers, which attributes to either the gaussianity assumption or the stationarity assumption.
+
+22
+
+0.6 Stationary Case: 2007/08/01
+0.5
+
+Nonstationary Case: 2010/10/28 0.4
+
+Fourth Order Cumulants Fourth Order Cumulants
+
+0.4 0.3
+0.3 0.2
+0.2
+0.1 0.1
+
+00
+-0.1 -0.1
+-0.2
+-0.3 -0.2
+
+-0.4 -0.3
+
+Time-Varying ICs/Static ICs
+
+Dynamic PCs
+
+Time Varying ICs Dynamic PCs
+
+Static ICs
+
+Figure 5: Boxplots of the fourth order cross-cumulants of the time varying ICs, the
+
+dynamic PCs and the static ICs (applicable for nonstationary case 2010/10/28).
+
+5 Conclusion and discussion
+
+We proposed the TVICA method to extract independent sources of high dimensional and complex nancial time series that are neither Gaussian distributed nor stationary. We allow the ICA linear lter to change over time, and estimate it in more precisely intervals of homogeneity. These \trust" intervals with an approximately constant linear lter are identied via a local change point detection approach. This technique doesn't require the specication of the type, magnitude or stochastic models of change.
+Several hyperparameters need to be adjusted. In our simulation study based on real data scenarios, however, we demonstrate that the procedure is robust w.r.t. the choice of the parameters. The TVICA method is easy to implement both under homogeneity and in a situation with dierent kinds of changes. The obtained ratio of rejecting the null of homogeneity is reasonable and the location of change(s) has been nicely detected. We also conducted the real data analysis. The proposed method de-
+23
+
+tected the intervals of homogeneity that consist of the facts in real life. It is interesting that the method indicates an access of a new homogenous state of nancial markets after the recent global nancial crisis, though with a possibly dierent perspective on structure.
+Although our study pays attention to just extracting independent sources, extensions of the TVICA method to explicitly account for other important data characteristics and other applications such as risk management and forecasting, are straightforward. Due to independence of the linear ltered sources, univariate models can be adopted for each series of the independent sources.
+References
+Back, A. and Weigend, A. (1998). A rst application of independent component analysis to extracting structure from stock returns, International Journal of Neural Systems 8: 473{484.
+Baillie, R. T. and Morana, C. (2009). Modelling long memory and structural breaks in conditional variances: An adaptive FIGARCH approach, Journal of Economics Dynamics and Control 33: 1577{1592.
+Barndor-Nielsen, O. (1997). Normal inverse gaussian distributions and stochastic volatility modelling, Scandinavian Journal of Statistics 24: 1{13.
+Chen, Y., Hardle, W. and Spokoiny, V. (2010). GHICA risk analysis with GH distributions and independent components, Journal of Empirical Finance 17: 255{269.
+Hamilton, J. D. and Susmel, R. (1994). Autoregressive conditional heteroskedasticity and changes in regime, Journal of Econometrics 64: 307{333.
+24
+
+Hardle, W., Panov, V., Spokoiny, V. and Wang, W. (2012). Modern Mathematical statistics, Exercises and Solutions, Springer-Verlag Berlin Heidelberg New York. in print.
+Hardle, W. and Simar, L. (2012). Applied Multivariate Statistical Analysis, 4th edn, Springer-Verlag Berlin Heidelberg New York.
+Hyvarinen, A., Karhunen, J. and Oja, E. (2001). Independent Component Analysis, John Wiley & Sons, Inc.
+Hyvarinen, A. and Oja, E. (1997). A fast xed-point algorithm for independent component analysis, Neural Computation 9: 1483{1492.
+Hyvarinen, A. and Oja, E. (1999). Independent component analysis: Algorithms and applications, Neural Networks 13: 411{430.
+Jollie, I. T. (2002). Principal component analysis, Springer-Verlag Berlin Heidelberg New York.
+Kouontchou, P. and Maillet, B. (2007). ICA-based high frequency VaR for risk management, ESANN'2007 proceedings - European Symposium on Articial Neural Networks, Bruges, Belgium.
+Lanne, M. (2006). A mixture multiplicative error model for realized volatility, Journal of Financial Econometrics 4: 594{616.
+Matteson, D. S. and Tsay, R. S. (2009). Independent component analysis for multivariate nancial time series. working paper, submitted.
+Mercurio, D. and Spokoiny, V. (2004). Statistical inference for time-inhomogeneous volatility models, Ann. Statist. 12: 577{602.
+25
+
+Scharth, M. and Medeiros, M. C. (2009). Asymmetric eects and long memory in the volatility of dow jones stocks, International Journal of Forecasting 25: 304{327.
+So, M. K. P., Lam, K. and Li, W. K. (1998). A stochastic volatility model with markov switching, Journal of Business & Economic Statistics 16: 244{253.
+Spokoiny, V. (2011). Mathematical statistics, Springer-Verlag Berlin Heidelberg New York. forthcoming.
+Wu, E., Yu, P. and Li, W. (2006). Value at risk estimation using independent component analysis-generalized autoregressive conditional heteroscedasticity (ICAGARCH) models, International Journal of Neural Systems 16: 371{382.
+26
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Localising temperature risk" by Wolfgang Karl Härdle, Brenda López Cabrera, Ostap Okhrin and Weining Wang, January 2011.
+002 "A Confidence Corridor for Sparse Longitudinal Data Curves" by Shuzhuan Zheng, Lijian Yang and Wolfgang Karl Härdle, January 2011.
+003 "Mean Volatility Regressions" by Lu Lin, Feng Li, Lixing Zhu and Wolfgang Karl Härdle, January 2011.
+004 "A Confidence Corridor for Expectile Functions" by Esra Akdeniz Duran, Mengmeng Guo and Wolfgang Karl Härdle, January 2011.
+005 "Local Quantile Regression" by Wolfgang Karl Härdle, Vladimir Spokoiny and Weining Wang, January 2011.
+006 "Sticky Information and Determinacy" by Alexander Meyer-Gohde, January 2011.
+007 "Mean-Variance Cointegration and the Expectations Hypothesis" by Till Strohsal and Enzo Weber, February 2011.
+008 "Monetary Policy, Trend Inflation and Inflation Persistence" by Fang Yao, February 2011.
+009 "Exclusion in the All-Pay Auction: An Experimental Investigation" by Dietmar Fehr and Julia Schmid, February 2011.
+010 "Unwillingness to Pay for Privacy: A Field Experiment" by Alastair R. Beresford, Dorothea Kübler and Sören Preibusch, February 2011.
+011 "Human Capital Formation on Skill-Specific Labor Markets" by Runli Xie, February 2011.
+012 "A strategic mediator who is biased into the same direction as the expert can improve information transmission" by Lydia Mechtenberg and Johannes Münster, March 2011.
+013 "Spatial Risk Premium on Weather Derivatives and Hedging Weather Exposure in Electricity" by Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+014 "Difference based Ridge and Liu type Estimators in Semiparametric Regression Models" by Esra Akdeniz Duran, Wolfgang Karl Härdle and Maria Osipenko, March 2011.
+015 "Short-Term Herding of Institutional Traders: New Evidence from the German Stock Market" by Stephanie Kremer and Dieter Nautz, March 2011.
+016 "Oracally Efficient Two-Step Estimation of Generalized Additive Model" by Rong Liu, Lijian Yang and Wolfgang Karl Härdle, March 2011.
+017 "The Law of Attraction: Bilateral Search and Horizontal Heterogeneity" by Dirk Hofmann and Salmai Qari, March 2011.
+018 "Can crop yield risk be globally diversified?" by Xiaoliang Liu, Wei Xu and Martin Odening, March 2011.
+019 "What Drives the Relationship Between Inflation and Price Dispersion? Market Power vs. Price Rigidity" by Sascha Becker, March 2011.
+020 "How Computational Statistics Became the Backbone of Modern Data Science" by James E. Gentle, Wolfgang Härdle and Yuichi Mori, May 2011.
+021 "Customer Reactions in Out-of-Stock Situations ­ Do promotion-induced phantom positions alleviate the similarity substitution hypothesis?" by Jana Luisa Diels and Nicole Wiebach, May 2011.
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+022 "Extreme value models in a conditional duration intensity framework" by Rodrigo Herrera and Bernhard Schipp, May 2011.
+023 "Forecasting Corporate Distress in the Asian and Pacific Region" by Russ Moro, Wolfgang Härdle, Saeideh Aliakbari and Linda Hoffmann, May 2011.
+024 "Identifying the Effect of Temporal Work Flexibility on Parental Time with Children" by Juliane Scheffel, May 2011.
+025 "How do Unusual Working Schedules Affect Social Life?" by Juliane Scheffel, May 2011.
+026 "Compensation of Unusual Working Schedules" by Juliane Scheffel, May 2011.
+027 "Estimation of the characteristics of a Lévy process observed at arbitrary frequency" by Johanna Kappus and Markus Reiß, May 2011.
+028 "Asymptotic equivalence and sufficiency for volatility estimation under microstructure noise" by Markus Reiß, May 2011.
+029 "Pointwise adaptive estimation for quantile regression" by Markus Reiß, Yves Rozenholc and Charles A. Cuenod, May 2011.
+030 "Developing web-based tools for the teaching of statistics: Our Wikis and the German Wikipedia" by Sigbert Klinke, May 2011.
+031 "What Explains the German Labor Market Miracle in the Great Recession?" by Michael C. Burda and Jennifer Hunt, June 2011.
+032 "The information content of central bank interest rate projections: Evidence from New Zealand" by Gunda-Alexandra Detmers and Dieter Nautz, June 2011.
+033 "Asymptotics of Asynchronicity" by Markus Bibinger, June 2011. 034 "An estimator for the quadratic covariation of asynchronously observed
+Itô processes with noise: Asymptotic distribution theory" by Markus Bibinger, June 2011. 035 "The economics of TARGET2 balances" by Ulrich Bindseil and Philipp Johann König, June 2011. 036 "An Indicator for National Systems of Innovation - Methodology and Application to 17 Industrialized Countries" by Heike Belitz, Marius Clemens, Christian von Hirschhausen, Jens Schmidt-Ehmcke, Axel Werwatz and Petra Zloczysti, June 2011. 037 "Neurobiology of value integration: When value impacts valuation" by Soyoung Q. Park, Thorsten Kahnt, Jörg Rieskamp and Hauke R. Heekeren, June 2011. 038 "The Neural Basis of Following Advice" by Guido Biele, Jörg Rieskamp, Lea K. Krugel and Hauke R. Heekeren, June 2011. 039 "The Persistence of "Bad" Precedents and the Need for Communication: A Coordination Experiment" by Dietmar Fehr, June 2011. 040 "News-driven Business Cycles in SVARs" by Patrick Bunk, July 2011. 041 "The Basel III framework for liquidity standards and monetary policy implementation" by Ulrich Bindseil and Jeroen Lamoot, July 2011. 042 "Pollution permits, Strategic Trading and Dynamic Technology Adoption" by Santiago Moreno-Bromberg and Luca Taschini, July 2011. 043 "CRRA Utility Maximization under Risk Constraints" by Santiago MorenoBromberg, Traian A. Pirvu and Anthony Réveillac, July 2011.
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2011
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+044 "Predicting Bid-Ask Spreads Using Long Memory Autoregressive Conditional Poisson Models" by Axel Groß-Klußmann and Nikolaus Hautsch, July 2011.
+045 "Bayesian Networks and Sex-related Homicides" by Stephan Stahlschmidt, Helmut Tausendteufel and Wolfgang K. Härdle, July 2011.
+046 "The Regulation of Interdependent Markets", by Raffaele Fiocco and Carlo Scarpa, July 2011.
+047 "Bargaining and Collusion in a Regulatory Model", by Raffaele Fiocco and Mario Gilli, July 2011.
+048 "Large Vector Auto Regressions", by Song Song and Peter J. Bickel, August 2011.
+049 "Monetary Policy, Determinacy, and the Natural Rate Hypothesis", by Alexander Meyer-Gohde, August 2011.
+050 "The impact of context and promotion on consumer responses and preferences in out-of-stock situations", by Nicole Wiebach and Jana L. Diels, August 2011.
+051 "A Network Model of Financial System Resilience", by Kartik Anand, Prasanna Gai, Sujit Kapadia, Simon Brennan and Matthew Willison, August 2011.
+052 "Rollover risk, network structure and systemic financial crises", by Kartik Anand, Prasanna Gai and Matteo Marsili, August 2011.
+053 "When to Cross the Spread: Curve Following with Singular Control" by Felix Naujokat and Ulrich Horst, August 2011.
+054 ,,TVICA - Time Varying Independent Component Analysis and Its Application to Financial Data" by Ray-Bing Chen, Ying Chen and Wolfgang K. Härdle, August 2011
+SFB 649, Spandauer Str. 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

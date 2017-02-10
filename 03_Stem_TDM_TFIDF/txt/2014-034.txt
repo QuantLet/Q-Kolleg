@@ -1,0 +1,2381 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2014-034
+Risky Linear Approximations
+Alexander Meyer-Gohde*
+* Humboldt-Universität zu Berlin, Germany This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Risky Linear Approximations
+Alexander Meyer-Gohde
+This Version: July 3, 2014 Abstract
+I construct risk-corrected approximations of the policy functions of DSGE models around the stochastic steady state and ergodic mean that are linear in the state variables. The resulting approximations are uniformly more accurate than standard linear approximations and capture the dynamics of asset pricing variables such as the expected risk premium missed by standard linear approximations. The algorithm is fast and reliable, requiring only the solution of linear equations using standard perturbation output. I examine the joint macroeconomic and asset pricing implications of a real business cycle model with stochastic trends and recursive preferences. The method is able to estimate risk aversion under these preferences using the Kalman filter, where a standard linear approximation provides no information and alternative methods require computationally intensive particle filters subject to sampling variation.
+JEL classification: C61, C63, E17
+Keywords: DSGE; Solution methods; Ergodic mean; Stochastic steady state; Perturbation
+I am grateful to Martin Andreasen, Michael Burda, Martin Kliem, and Hong Lan, as well as participants of the 2013 CFE and research seminars at HU Berlin for useful discussions and suggestions. I am thankful for the research assistance provided by Tobias Ko¨nig. This research was supported by the DFG through the SFB 649 "Economic Risk". Any and all errors are entirely my own.
+Humboldt-Universita¨t zu Berlin, Institut fu¨r Wirtschaftstheorie II, Spandauer Straße 1, 10178 Berlin, Germany; Tel.: +49-30-2093 5720; Fax: +49-30-2093 5696; E-Mail: alexander.meyer-gohde@wiwi.hu-berlin.de
+
+1 Introduction
+What are the effects of small shock realizations in economies subject to risk? There is a growing
+consensus that standard linear approximations around the deterministic steady state are insufficient
+to address this question satisfactorily in a variety of settings, such as for conditional asset pricing,
+under recursive utility, for welfare comparisons, etc., where precautionary motives play a signif-
+icant role in economic decision making.1 At fault is the certainty equivalence of standard linear
+approximations around the deterministic steady state that makes them invariant to the moments of
+the distribution of exogenous shocks (i.e., to risk).
+I reconcile the linear framework with risk by constructing approximations of the policy functions
+of DSGE models that are linear in states but that account for risk in the points and slopes used to
+construct the linear approximation; I call these risky linear approximations.2 I construct two differ-
+ent approximations, one around the stochastic steady state and one around the ergodic mean. The
+method can be used profitably in estimation. Due to the linearity in states and under the assumption
+of normally distributed shocks, the Kalman filter is operational for the risky linear approximation. I
+find the risky linear approximation using the Kalman filter is as equally successful as standard per-
+turbation particle filter3 estimation--both with the state space and nonlinear moving average policy
+function representations4--in identifying parameters outside the reach of standard linear approxima-
+tions. The advantage, then, is that the risky linear approximation, by employing the Kalman filter, is
+1Kim and Kim (2003) provide an insightful example, where blind application of linear approximations leads to the spurious results that autarky is to be preferred over risk sharing given risk averse utility.
+2I construct only risky linear approximations and not second, third, or higher order risky approximations as standard DSGE perturbations, see, e.g., Jin and Judd (2002), provide the appropriate, in the sense of Taylor's theorem, local polynomial approximation of the policy function using derivatives calculated at the deterministic steady state. The risky linear approximation I derive uses some derivatives from a given order and discards others. This price is worth paying for maintaining linearity in states, which resuscitates the linear toolbox of DSGE analysis including the Kalman filter for estimation, while incorporating the nonlinearities associated with risk. It is less clear what the gain over a standard perturbation would be for higher order risky approximations.
+3See Ferna´ndez-Villaverde and Rubio-Ram´irez (2007) and Ferna´ndez-Villaverde, Guerro´n-Quintana, RubioRam´irez, and Uribe (2011) for details on particle filtering in DSGE models as well as applications to risk.
+4See Jin and Judd (2002), Schmitt-Grohe´ and Uribe (2004), Kim, Kim, Schaumburg, and Sims (2008), Lombardo (2010) and Lan and Meyer-Gohde (2013c)
+1
+
+several orders of magnitude faster and is not subject to the sampling variation that the particle filter
+faces when identification is weak.
+I apply the method to a real business cycle model with risk sensitivity, using Epstein and Zin
+(1989) and Weil (1990) recursive preferences, and long run risk following Bansal and Yaron (2004).
+The risky linear approximations match the stochastic steady state, ergodic mean, and impulse responses reported in previous nonlinear studies.5 I assess the accuracy of the risky linear approxima-
+tion using Euler equation errors and find a uniform improvement over the standard linear approxi-
+mation. As risk aversion is increased, allowing risk to play a greater role in the utility maximiza-
+tion problem, the risky linear approximation demonstrates accuracy in the vicinity of the stochastic
+steady state and ergodic mean that is comparable to second and third order perturbations. I find that
+US post war data on consumption, output, and the risk premium leads the likelihood function to
+favor higher levels of risk aversion with the posterior mode at about 30. The likelihood function,
+however, is rather flat in this dimension and fully nonlinear approximations employing the particle
+filter suffer from sampling variation that impedes reliable inference and are four orders of magnitude
+slower; for standard linear approximations, the likelihood function is entirely flat in the dimension
+of risk aversion and the posterior is identical to the prior.
+The method I propose here is not the first method to employ a risk correction as opposed to a standard nonlinear method (higher order perturbation or global solution method such as projection),6
+but it is different in two important respects. First, it is the first method to work solely with deriva-
+tive information from a standard perturbation and known moments of the exogenous process--no
+5The stochastic steady state derived here is identical to that of Lan and Meyer-Gohde (2013b), the ergodic mean identical to that of Lan and Meyer-Gohde (2013a) and Andreasen, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2013), and the impulse responses to those that would result from the method of Lan and Meyer-Gohde (2013c)
+6Kim and Kim (2003) as well as Collard and Juillard (2001b) and Collard and Juillard (2001a) are early DSGE bias reduction or risk correction techniques. Coeurdacier, Rey, and Winant (2011) uses a second order approximation to the equilibrium conditions to solve for the stochastic steady state in a portfolio problem, de Groot (2013) extends this to general settings as a matrix quadratic problem. Juillard (2011) and Kliem and Uhlig (2013) use iterative techniques, solving for implied stochastic steady states given an approximated solution and then recalculating the approximation at the new implied stochastic steady state. Evers (2012) solves for the stochastic steady state implied by a risk perturbation of the equilibrium conditions and then solves for a perturbation in the states of these perturbed equilibrium conditions.
+2
+
+reevaluation of derivatives or recalculation of policy rules are required to construct the approximation. The resulting equations are linear in the unknown coefficients of my approximation, entirely avoiding fixed point or other recursive algorithms with unknown convergence properties. Second, my approximation allows for the approximation around the ergodic mean as well as around the stochastic steady state--competing methods can provide only the latter. Both of these two features are accomplished by working implicitly with the unknown policy function instead of the model equilibrium conditions.
+The remainder of the paper is organized as follows. In section 2, I lay out the model class and assumptions underlying the local, risk corrected procedure behind risky linear approximations before I derive the approximations in section 3. In section 4, I present the real business cycle model with recursive preferences and long run risk. I analyze two calibrated versions of the real business cycle model in terms of accuracy in section 5. In section 6, I assess the likelihood properties of the risky linear approximation relative to particle filters and standard linearizations and estimate risk aversion and long run risk using post war US data. Section 7 concludes.
+2 DSGE Model: Assumptions and Local Approximation
+I begin by introducing a general class of models, a system of nonlinear second order expectational difference equations.
+2.1 Model Class
+I will analyze a family of discrete-time rational expectations models given by (1) 0 = Et[ f (yt+1, yt, yt-1, t)] f : Rny × Rny × Rny × Rne  Rny is a ny-dimensional vector-valued function collecting the equilibrium conditions that describe the model; yt  Rny is the vector of ny endogenous and exogenous variables;7
+7As well as subsidiary definitions to bring a model into the form of (1). Nonlinearity or serial correlation in exogenous processes can be captured by including the processes themselves in the vector yt and including functions in f that specify the nonlinearity or correlation pattern. For the model of section 4, the subsidiary definitions Ute Et [Ut+1] and
+3
+
+and t  Rne the vector of ne exogenous shocks,8 where ny and ne are positive integers (ny, ne  N). The auxiliary parameter   R scales the risk in the model.9 The stochastic model version of
+
+(1) corresponds to  = 1 and  = 0 represents the deterministic version of the model. Indexing
+
+solutions by  yields
+
+(2) yt = g(yt-1, t, ), y : Rny × Rne × R  Rny
+
+That  scales risk can be by writing out the integral and probability density function behind the
+
+expectations operator in the model, (1), giving
+
+(3)
+
+0=
+
+f (yt+1, yt, yt-1, t)  (t+1) dt+1 =
+
+
+f (yt+1, yt, yt-1, ~t) 
+
+
+~t+1 
+
+d~t+1
+
+where  is the support and  the probability density function of t+1 and the second equality follows
+
+upon defining ~t t. Letting  go to zero collapses the entire distribution  (·), and this can be
+
+rewritten as
+
+(4)
+
+0 = lim 0
+
+f (yt+1, yt, yt-1, ~t) 
+
+
+~t+1 
+
+d~t+1 = f (yt+1, yt, yt-1, 0)
+
+the deterministic counterpart of (1).
+
+2.2 Local Approximations and Points of Expansion
+
+The starting point and point of expansion for local approximations to the solution of DSGE models is the deterministic steady state, defined as follows
+
+Definition 2.1. Deterministic Steady State
+Let ydet  Rny define a fixed point of (2) given by
+(5) ydet = g(ydet, 0, 0)
+Mte Et [Mt+1] are required to capture the nonlinearities over the conditional expectations while conforming to the class in (1).
+8This model class encompasses competitive equilibria and dynamic programming problems, as well as models with finitely many heterogenous agents, see Judd and Mertens (2012). Nonlinearity or serial correlation in exogenous processes can be captured by including the processes themselves in the vector yt and including functions in f that specify the nonlinearity or correlation pattern.
+9My formulation follows Adjemian, Bastani, Juillard, Mihoubi, Perendia, Pfeifer, Ratto, and Villemot's (2011) Dynare, Anderson, Levin, and Swanson's (2006) PerturbationAIM and Juillard (2011). Jin and Judd's (2002) or SchmittGrohe´ and Uribe's (2004) model classes can be rearranged to fit (1). Furthermore, my scaling of all t, future, past, and present, follows Lombardo (2010).
+4
+
+i.e., a fixed point of (2) in the absence of both risk ( = 0) and shocks (t = 0).
+
+The deterministic steady state y is recovered by solving the for a fixed point of (4), the determin-
+
+istic version of (1) in the absence of risk and shocks, 0 = f (y, y, y, 0).
+
+Standard DSGE perturbation then constructs a Taylor series expansion of the policy function,
+
+(2), up to some, say M'th, order around the deterministic steady state, given by10
+
+(6)
+
+yt 
+
+M
+
+1 j!
+
+M- 
+
+j
+
+1 i!
+
+ gz j i i
+
+(zt
+
+-
+
+z)[
+
+j]
+
+j=0 i=0
+
+where
+
+(7)
+
+gz ji
+
+D j+i ztj-1
+
+i
+
+{y(,
+
+zt)}
+
+ Rny×nzj ,
+
+with nz = ny + n
+
+is the partial derivative of the vector function y with respect to the state vector zt
+
+yt-1 t  j
+
+times and the perturbation parameter  i times11 evaluated at the deterministic steady state using the
+
+notation outlined in appendix A.2.
+
+The deterministic steady state is the fixed point for the deterministic,  = 0, model but not
+
+the stochastic,  = 1, model. This manifests itself in the Taylor series (6) as the constant terms
+
+M i=1
+
+1 i!
+
+gi
+
+i
+
+that
+
+move
+
+the
+
+Taylor
+
+series
+
+away
+
+from
+
+the
+
+deterministic
+
+steady
+
+state.
+
+The
+
+deterministic
+
+steady state is neither a fixed point of the stochastic model and nor of the Taylor series approximation
+
+of the stochastic,  = 1, model for M  2, when  corrects for the second moment of risk.
+
+The stochastic steady state is the steady state of the stochastic model, incorporating risk into its
+
+definition in the following
+
+Definition 2.2. Stochastic Steady State
+Let ystoch  Rny define a fixed point of (2) given by
+(8) ystoch = g(ystoch, 0, 1)
+i.e., a fixed point of (2) in the presence of risk ( = 1) but in the absence of shocks (t = 0).
+10The assumptions that validate this expansion will be introduced in section 2.3. See Lan and Meyer-Gohde (Forthcoming) for a derivation of this multivariate Taylor series approximation.
+11As the perturbation parameter also scales t, I should say this is the partial derivative with respect to the third argument and write g[1 2] j3i  Rny×nzj , but I choose not to do so as not to overload the notation. The complete, direct and indirect, derivative of yt with respect to , D{yt}, in my notation is given by D{yt} = yt + y
+5
+
+That is, the fixed point in the state space in the absence of shocks, but while expecting future
+
+shocks with a known probability distribution. Solving for an approximation of the stochastic steady
+
+state is not trivial using the state space formulation of the policy function, see Coeurdacier, Rey,
+
+and Winant (2011), Juillard (2011), and de Groot (2013), and the definition in (8) is not directly useful. The difficulty arises as ystoch is defined only implicitly in (8) and the method of solving 0 =
+
+f (y, y, y, 0) to recover the deterministic steady state is not available as the presence of risk requires
+
+the integral over the probability distribution of future shocks embodied by the expectations operator
+
+be maintained in (1). Alternatively, one could examine an alternative nonlinear moving average
+
+representation of the policy function that results upon inverting or recursively substitution the state
+
+space policy function (2).12 Approximated out to some, say M'th, order around the deterministic
+
+steady state as13
+
+(9)
+
+M1 yt  m!
+
+
+
+···
+
+
+
+M-m 
+
+
+
+1 n!
+
+yn
+
+i1
+
+i2
+
+···im
+
+n
+
+(t-i1
+
+
+
+t-i2
+
+
+
+·
+
+·
+
+·
+
+
+
+t-im )
+
+m=0 i1=0 i2=0 im=0 n=0
+
+where yni1···imn is the derivative of yt with respect to the m'th fold Kronecker products of exogenous
+
+innovations i1, i2, ... and im periods ago and with respect to the perturbation parameter, , n times.
+
+The stochastic steady state now follows by letting the history of shocks be equal to zero at all dates
+
+(i.e., letting yt converge to its fixed point), but letting  = 1 to correct for risk to M'th order, yielding
+
+(10)
+
+ystoch 
+
+M
+
+1 n! yn
+
+n=0
+
+as an approximation of the stochastic steady state.
+
+Although not a fixed point, the ergodic mean of yt will be a useful point to construct a local
+
+approximation around for estimation, defined as
+
+Definition 2.3. Ergodic Mean
+12See Lan and Meyer-Gohde (2013c) for solving and analyzing DSGE models with nonlinear moving averages and Aruoba, Bocola, and Schorfheide (2013) for an empirical application of Volterra series to macroeconomic time series. Again the the assumptions that validate this expansion will be introduced in section 2.3.
+13See Lan and Meyer-Gohde (2013b) for the mapping between the partial derivatives gzji and yni1i2···im .
+
+6
+
+Let ymean  Rny be a vector such that (11) ymean E yt = E g(yt-1, t, 1) being the unconditional expectation of (2) in the presence of uncertainty ( = 1) and shocks (t).
+
+This point is particulary advantageous in empirical applications as it is likely to be associated
+
+with a high probability density. Again, the definition in (11) is not directly useful, as calculating the
+
+mean requires integration over the endogenous variables through the unknown policy function. The
+
+nonlinear moving average formulation proves advantageous again, requiring only knowledge of the
+
+moments of exogenous variables to give an approximation of the ergodic mean
+
+(12)
+
+ymean
+
+M1 E yt  m!
+
+
+
+···
+
+
+
+M-m 
+
+
+
+1 n!
+
+yn
+
+i1
+
+i2
+
+···im
+
+n
+
+E
+
+t-i1  t-i2  · · ·  t-im
+
+m=0 i1=0 i2=0 im=0 n=0
+
+to calculate the mean.
+
+In section 3, I will calculate risky linear approximations around the stochastic steady state and
+
+the ergodic mean, approximating these points and the derivatives of the policy function at these
+
+points through implicit differentiation of the policy function (2) at the deterministic steady state.
+
+That is, I will derive the points and slopes for the risky linear approximation jointly using a new
+
+method and I will compare the results with those presented here in (10) and (12). Before I derive
+
+these risky linear approximations, I will layout the assumptions necessary to validate the procedure.
+
+2.3 Assumptions and Validity of Risky Linear Approximation
+
+I will present assumptions for the local approximation of the model in (1) around the deterministic steady state and for this approximation to be valid at the stochastic steady state and ergodic mean. Then I will show how these assumptions validate the methodology that I will use in the next section of constructing a local approximation of the stochastic or "risky" model around the stochastic steady state or ergodic mean by using derivative information from the deterministic model evaluated at the deterministic steady state.
+
+7
+
+Assumption 2.4. Assumptions I impose the following assumptions in my analysis
+
+1. Local Analyticity: the functions f in (1) and g in (2) are locally analytic around the deterministic steady state (yt-1 = y, t = 0,  = 0) with a domain of convergence that contains the stochastic steady state and ergodic mean
+
+2. Local Stability: the eigenvalues of gy evaluated at the deterministic steady state (yt-1 = y, t = 0,  = 0) are all inside the unit circle.
+
+3. Exogenous Moments: the elements of t are i.i.d. with E [t] = 0 and E t[m] finite m  M,
+where t[m] is the m'th fold Kronecker product of t with itself: t  t · · ·  t
+m times
+The first assumption ensures that the functions involved are smooth at least in the region of
+
+interest and that the true policy function has an infinite order Taylor series representation that remains
+
+valid as the state space moves to the stochastic steady state and ergodic mean. The second that the
+
+solution is locally stable at the deterministic steady state. The third that that the exogenous process
+
+is defined at least out to the order of approximation.14
+
+From the assumption of local analyticity for g, yt has the Taylor series representation
+
+(13)
+
+
+yt =
+
+1 j!
+
+ 
+
+
+
+
+
+1 i!
+
+gz
+
+j
+
+i
+
+i
+
+yt-1 - y
+
+t [ j]
+
+j=0 i=0
+
+Thus, increasing the approximation order in the standard perturbation brings the approximation
+
+closer to the true policy function in the sense that an infinite order perturbation will recover the
+
+true policy function. Local analyticity of f and g and of the existence of finite moments validates
+
+the standard DSGE perturbation practice of successively differentiating f deliver equations that the
+
+coefficients, gzji, in (13) solve.15
+14Jin and Judd (2002) would additionally require bounded support for the exogenous process. Kim, Kim, Schaumburg, and Sims (2008) offer skepticism regarding the necessity of a boundedness assumption.
+15Additionally, Lan and Meyer-Gohde (Forthcoming) prove that assumptions 2.4 are sufficient to guarantee the solvability of DSGE perturbations; that is, that successively differentiating f delivers equations that can be uniquely solved to deliver the coefficients, gzji , in (13).
+
+8
+
+The assumption of local stability in addition to that of local analyticity for g ensures that the
+
+policy function can be inverted, at least locally, as
+
+(14)
+
+yt =
+
+
+
+1 m!
+
+
+
+···
+
+
+
+ 
+
+
+
+1 n!
+
+yn
+
+i1···im
+
+n
+
+
+
+(t-i1
+
+
+
+·
+
+·
+
+·
+
+
+
+t-im )
+
+m=0 i1=0 im=0 n=0
+
+delivering a infinite nonlinear moving average or Volterra series representation.16
+
+The assumption that analyticity holds over a domain larger than the deterministic steady state
+
+ensures that the Taylor series representation in (13) remains valid beyond the immediate vicinity
+
+of the deterministic steady state. This assumption is crucial. Analyticity in  from zero to one
+
+connects the deterministic and stochastic models, enabling our use of the derivatives of g at  = 0
+
+to approximate the stochastic,  = 1, model. In this stochastic model, both the fixed point--the
+
+stochastic steady state, (8)--and average value--the ergodic mean, (11)--of the policy function are
+
+generically different from the deterministic steady state. As such, virtually any policy experiment or
+
+simulation will leave the vicinity of the deterministic steady state. Hence, for standard perturbations
+
+to be applicable in settings useful for analysis, they must maintain their validity in a region of the
+
+state space that contains the deterministic steady state, stochastic steady state, and ergodic mean, as
+
+well as in the perturbation parameter, , over the deterministic and stochastic models.
+
+In this case, both the stochastic steady state
+
+(15)
+
+ystoch =
+
+
+
+1 j!
+
+ 
+
+
+
+
+
+1 i!
+
+gz
+
+j i
+
+
+
+ystoch -y
+
+j=0 i=0
+
+0 [ j]
+
+and the ergodic mean
+
+(16)
+
+E
+
+yt
+
+=
+
+
+
+1 m!
+
+
+
+···
+
+
+
+ 
+
+
+
+1 n!
+
+yn
+
+i1
+
+···im
+
+
+
+E
+
+t-i1  · · ·  t-im
+
+m=0 i1=0 im=0 n=0
+
+are recoverable from the implicit function theorem, requiring only derivatives of g evaluated at the
+
+deterministic steady state as enter the Taylor series (13) and the moments of t. Furthermore, due to the analyticity assumed in a domain containing both the ergodic mean and the stochastic steady
+
+state, the policy function is analytic at these points as well, ensuring its infinite differentiability there
+
+as well. If the function is infinitely differentiable at a point, it is certainly once differentiable there
+16See Lan and Meyer-Gohde (2013c) and Sandberg (1983).
+
+9
+
+as well. Thus, the stochastic steady state and the ergodic mean and the first derivative of the policy
+function at these points can be recovered using derivative information at the deterministic steady state and the moments of the exogenous shocks of the model. Now I shall proceed to do exactly that and assemble the points and slopes into linear approximations.
+3 Risky Linear Approximations
+Now I will define a risky linear approximation, that is, an approximation that is linear in the states, yt-1 and t, but corrected to arbitrary order for risk, i.e., out to the desired moments of the distribution of the exogenous shocks t in (1). The correction for risk is accomplished by expanding the policy function nonlinearly in , the index that scales risk. Expanding to first order in  corrects for the first moment of t,17 to second order in  corrects for the second moment of t, and so forth.
+I will write such a  dependent or risky linear approximation as (17) yt  y() + yy() (yt-1 - y()) + y()t where y() is a  dependent or risky point for yt and yy() and y() are the  dependent or risky first derivatives of yt at this risky point. I shall consider two risky points, the stochastic steady state and the ergodic mean.
+From standard DSGE perturbation, I have derivative information at the deterministic steady state. I will now show that the first derivatives, yy() and y(), will depend on the risky point, y(), and that my two choices for the risky point, the stochastic steady state and the ergodic mean, along with these first derivatives at these points can be obtained from derivative information obtained at the deterministic steady state.
+17As the shock is assumed mean zero, this correction does not alter the policy functions compared with their deterministic counterparts. See Schmitt-Grohe´ and Uribe (2004) and Lan and Meyer-Gohde (Forthcoming).
+10
+
+3.1 Risky Points of Approxiamtion
+3.1.1 Stochastic Steady State
+
+The first point around which I will construct a linear approximation is the stochastic steady state.
+
+The stochastic and deterministic steady states can be embedded implicitly in a -dependent steady
+
+state
+
+(18) y () = g(y () , 0, )
+
+Here,  = 1 gives the stochastic and  = 0 the deterministic steady state. A Taylor expansion of
+
+y () around the  = 0 deterministic steady state can be written as
+
+(19)
+
+y () =
+
+
+
+1 i!
+
+yi
+
+(0)
+
+i
+
+i=0
+
+Using the Taylor expansion in , the stochastic steady state can be approximated by solving sets
+
+of linear equations with inhomogeneous constants collecting lower order terms and standard DSGE
+
+perturbation output, as I summarize in the following
+
+Proposition 3.1.  Approximation of the Stochastic Steady State Let assumption 2.4 hold, the stochastic steady state in (8) as represented by (19) can be approximated in  using only derivative information from standard perturbations--gzji in (6)--around the deterministic steady state.
+
+Proof. See appendix A.3.
+
+To capture the effect of the first two moments of the exogenous processes (i.e., that of the vari-
+
+ance of the mean zero growth shocks in the model of section 4) on the stochastic steady state, a
+
+second order approximation in  evaluated at  = 1 is needed.
+
+(20)
+
+y
+
+()
+
+=
+
+y
+
++
+
+y
+
+(0)
+
++
+
+1 2 y2
+
+(0)
+
++
+
+O(3)
+
+This second order in  approximation of the stochastic steady state is given in closed form by the
+
+following
+
+11
+
+Corollary 3.2. Second Order  Approximation of the Stochastic Steady State
+
+The stochastic steady state in (8) can be approximated to second order in  as
+
+(21)
+
+ystoch  y + 1 2
+
+-1
+Iny - gy g2
+
+Proof. See appendix A.4.
+
+The value reported in (21) is identical to the value reported in Lan and Meyer-Gohde (2013b) derived using a second-order nonlinear moving average. 3.1.2 Ergodic Mean
+
+The second point around which I would like to be able to construct a linear approximation is the
+
+ergodic mean. The ergodic mean and the deterministic steady state can be embedded implicitly in a
+
+-dependent point
+
+(22) y () E g(yt-1, t, )
+
+Here,  = 1 gives the ergodic mean and  = 0 the deterministic steady state. Due to the singularity
+
+induced by  = 0, which turns off the stochastics in the model, the steady state coincides with the
+
+mean in this deterministic setting, which I exploit to extrapolate from the deterministic steady state
+
+to the ergodic mean. A Taylor expansion of y () around the  = 0 deterministic steady state is
+
+(23)
+
+y () =
+
+
+
+1 i!
+
+yi
+
+(0)
+
+i
+
+i=0
+
+Using the Taylor expansion in , the ergodic can be approximated by solving sets of linear
+
+equations with inhomogeneous constants collecting lower order terms, standard DSGE perturbation
+
+output, and the given moments of the exogenous driving force, as I summarize in the following
+
+Proposition 3.3.  Approximation of the Ergodic Mean Let assumption 2.4 hold, the ergodic mean in (11) as represented by (23) can be approximated in  using derivative information from standard perturbations--gzji in (6)--evaluated at the deterministic steady state and the given finite moments of the exogenous driving force.
+
+12
+
+Proof. See appendix A.5.
+
+Discarding terms of order higher than two in (23) and evaluating at  = 1 give an approximation
+
+of the ergodic mean that captures the effects of the first two moments of the exogenous processes
+
+(i.e., that of the variance of the mean zero growth shocks in the model of section 4)
+
+(24)
+
+y
+
+()
+
+=
+
+y
+
++
+
+y
+
+(0)
+
++
+
+1 2 y2
+
+(0)
+
++
+
+O(3)
+
+In terms of the derivatives of the standard perturbation at the deterministic steady state, (7), and
+
+moments of t, the ergodic mean is give out to second order by the following
+
+Corollary 3.4. Second Order  Approximation of the Ergodic Mean
+
+The ergodic mean in (11) can be approximated to second order in  as
+
+(25)
+
+ymean  y + 1 2
+
+-1
+Iny - gy
+
+g2 +
+
+g2 +
+
+In2y - gy[2] -1 g [2]
+
+E
+
+t[2]
+
+Proof. See appendix A.6.
+
+The value reported in (25) is identical to the value reported in Lan and Meyer-Gohde (2013a) using a second nonlinear moving average and in Andreasen, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2013) using a second order pruned state space approximation.18
+
+3.2 Risky First Derivatives
+
+Given a risky point from above, I need only to calculate the first derivatives with respect to states and shocks in order to complete the construction of the risky linear approximation in (17).
+The first derivatives with respect to states and shocks around a risky point, y() from above, are given by
+
+Definition 3.5. First Derivatives at a  Adjusted Point
+18See also Kim, Kim, Schaumburg, and Sims (2008) for second order pruning and Lombardo (2010) for a theoretical justification of state space pruning. Lan and Meyer-Gohde (2013b) provide an overview and comparison of pruning in the literature.
+
+13
+
+The derivatives of yt with respect to yt-1 and t at a risky point, y() are (26) yy() gy(y(), 0, ), y() g(y(), 0, )
+
+The first derivatives are  dependent functions, both directly and indirectly through the risky
+
+point of approximation, y(), chosen. Here,  = 1 gives the first derivatives at the risky point of
+
+approximation and  = 0 at the deterministic steady state. Taylor expansions of yy() and y()
+
+around the  = 0 deterministic steady state can be written as
+
+(27)
+
+yy() =
+
+
+
+1 i!
+
+yyi
+
+(0)
+
+i,
+
+y() =
+
+
+
+1 i!
+
+yi
+
+(0)
+
+i
+
+i=0 i=0
+
+As was the case with the two risky points considered above, the first derivatives at these points
+
+depend only on standard output from perturbation algorithms: derivatives of the policy function at
+
+the deterministic steady state and the moments (through the derivatives of the risky ergodic mean)
+
+of the exogenous shocks, t, as I summarize in the following
+
+Proposition 3.6.  Approximation of the First Derivatives The first derivatives in (26) can be approximated in  using only derivative information from standard perturbations--gzji in (6)--evaluated at the deterministic steady state and the derivative information in  from the chosen risky point of approximation.
+
+Proof. See appendix A.8.
+
+Approximating out to second order in  as above for the risky points of approximation to adjust
+
+the first derivatives for the first two moments of the the distribution of the exogenous shocks, t, and
+
+evaluating at  = 1 gives the following
+
+(28)
+
+yy
+
+()
+
+=
+
+yy
+
++
+
+yy
+
+(0)
+
++
+
+1 2 yy2
+
+(0)
+
++
+
+O(3),
+
+y
+
+()
+
+=
+
+y
+
++
+
+y
+
+(0)
+
++
+
+1 2 y2
+
+(0)
+
++
+
+O(3)
+
+In terms of the derivatives of the standard perturbation at the deterministic steady state, (7), and
+
+derivatives of the chosen risky point of approximation, the first derivatives can be written to second
+
+order as
+
+14
+
+Corollary 3.7. Second Order  Approximation of the First Derivatives The first derivatives in (26) can be approximated to second order in  as
+11 (29) yy(1)  gy + 2 gy2 y2(0)  Iny + g2y , y(1)  g + 2 gy y2(0)  Ine + g2
+Proof. See appendix A.8.
+
+With the risky first derivatives in hand, the risky linear approximation in (17) can be constructed by choosing either the approximation of the stochastic steady state or of the ergodic mean and calculating the associated first derivatives. Before I turn to an application of the approximation in an economic model, I will address the theoretical validity of the approximation.
+3.2.1 Relation to Perturbation First Derivatives
+
+Here, I examine the relationship of the risky points and slopes derived above with standard perturba-
+
+tion output. I show that the risky first derivatives correctly recover the first derivatives of the Taylor
+
+series evaluated at the risky points above out to a given order in .19 These derivatives differ from
+
+those used in Andreasen, Ferna´ndez-Villaverde, and Rubio-Ram´irez's (2013) pruning algorithm,
+
+which give risky derivatives evaluated at the deterministic steady state.
+
+Differentiate the Taylor series representation of the standard perturbation in (6) with respect to
+
+the state vector zt to yield
+
+Dzt yt 
+
+M
+
+(
+
+j
+
+1 -
+
+1)!
+
+M- 
+
+j
+
+1 i!
+
+gz
+
+j i
+
+ i
+
+(zt - z)[ j-1]  Inz
+
+j=1 i=0
+
+(30)
+
+M-1
+
+
+1 j!
+
+M- j-1 
+
+
+
+1 i!
+
+gz
+
+j+1
+
+i
+
+i
+
+(zt - z)[ j]  Inz
+
+j=0 i=0
+
+Evaluated at the deterministic steady state, zt = z, the foregoing collapses to
+
+(31)
+
+Dzt yt
+
+
+
+M-1
+
+1 i!
+
+gzi
+
+i
+
+i=0
+
+For M = 3, the first derivative from a third order perturbation approximation, setting  to one and
+
+19When the risky point is the stochastic steady state, the first derivatives recover the risky derivatives used in Lan and Meyer-Gohde's (2013b) recursive formulation of Lan and Meyer-Gohde's (2013c) nonlinear moving average.
+
+15
+
+recalling that terms first order in  are zero,20 is 1
+(32) Dzt yt  gz + 2 gz2 The last term, gzi, is the time varying risk correction that enters at third order in the pruning algo-
+rithm of Andreasen, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2013) and matched perturbation of
+
+Lombardo (2010).21
+
+Of primary interest here are the derivatives at the risky points of interest derived in section 2.
+
+Recall, (19) and (23), that the risky points can be expressed as Taylor series in ; i.e.,
+
+(33)
+
+y () =
+
+
+
+1 i!
+
+yi
+
+(0)
+
+i
+
+i=0
+
+setting yt = y () and t = 0, in the first derivative of the Taylor series representation of the policy
+
+function from (30) yields
+
+(34)
+
+Dzt yt
+
+
+
+M-1
+
+1 j!
+
+M- j-1
+
+1 i!
+
+gz
+
+j+1i
+
+i
+
+ 
+
+ 
+
+y () - 0
+
+y
+
+[ j]
+
+
+
+ Inz 
+
+j=0 i=0
+
+For a second order in  approximations of the points of interest derived explicitly in section 2, this
+
+expression becomes
+
+Dzt yt
+
+M-1
+
+
+1 j!
+
+M- 
+
+j-1
+
+1 i!
+
+gz j+1i
+
+ i
+
+ 
+
+1 2
+
+y2
+
+(0)
+
+2
+
+0
+
+[ j]   Inz 
+
+j=0 i=0
+
+(35)
+
+M-1
+
+
+1 j!
+
+M- 
+
+j-1
+
+1 i!
+
+gz j+1i
+
+ 
+
+ 
+
+1 2
+
+y2
+
+(0)
+
+0
+
+[ j]   Inz  i+2 j
+
+j=0 i=0
+
+Discarding terms in  of order higher than two in order to obtain a second order in  approximation
+
+of the matrix of first derivatives at the risky point of interest gives
+
+(36)
+
+1 Dzt yt  gz + 2 gz2 + gz2
+
+y2 0
+
+ Inz
+
+or in terms of derivatives with respect to yt-1 and t separately
+
+(37)
+
+11 Dyt-1 yt  gy + 2 gy2 + gy2 y2  Iny , Dt yt  g + 2 g2 + gy y2  Ine
+
+which are identical to the results presented in section 3.2. The risky derivatives derived in section
+
+3.2 with my implicit risk adjustment procedure provide the correct derivatives at the chosen risky
+20See Jin and Judd (2002), Schmitt-Grohe´ and Uribe (2004), and Lan and Meyer-Gohde (Forthcoming). 21See Lan and Meyer-Gohde (2013b) for a detailed comparison of these and other pruning algorithms.
+
+16
+
+point of interest up to the chosen order in .
+4 Long Run Risk and the Real Business Cycle
+
+I will examine a canonical real business cycle model in the spirit of Kydland and Prescott (1982) with
+
+two differentiating features to emphasize the role of risk: recursive--or risk-sensitive--preferences
+
+and long run risk. I follow Epstein and Zin (1989), Weil (1990), and others by replacing the con-
+
+tinuation value of household utility with a power certainty equivalent to introduce risk sensitivity
+
+and to disentangle risk aversion and the inverse elasticity of intertemporal substitution. I confront
+
+agents with long run real risk in the form of stochastic trends in productivity,22 which adds risk to the
+
+growth of consumption, making the stochastic driving force of model welfare relevant in the sense of
+
+Lucas (1987). My choice of model is very similar to the model used in the numerical study of Cal-
+
+dara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012), where I have replaced their stochastic
+
+volatility with long run risk.23
+
+The social planner maximizes the expected discounted lifetime utility of a representative house-
+
+hold given recursively24 by
+
+(38)
+
+1-
+
+Ut = max Ct ,Lt
+
+(1 - )
+
+Ct (1 - Lt)1-
+
+
+
++  Et Ut1+-1
+
+ 1 1- 
+
+where Ct is consumption, Lt labor,   (0, 1) the discount factor,  a labor supply parameter, 
+
+governs risk aversion,25 and
+
+1-
+
+(39)
+
+
+
+=
+
+1
+
+-
+
+1 
+
+where  is the elasticity of intertemporal substitution (IES). Thus, these recursive preferences dis-
+
+22See, e.g., Bansal and Yaron (2004) in an endowment and Rudebusch and Swanson (2012) in a production model. 23As I will be examining linear approximations, I would only be able to capture the precautionary effects or average
+effects of stochastic volatility and would miss the time varying effects of changes in conditional heteroskedasticity. One could conceivably move the approximation towards the conditionally normal one used in Justiniano and Primiceri
+(2008), to retain some of the advantages of linearity, but this is beyond the scope of this paper. 24See Epstein and Zin (1989) and Weil (1990). Backus, Routledge, and Zin (2005) provide a detailed overview of
+these and other preferences that deviate from standard expected utility. 25In the presence on an adjustable labor margin, the standard measure of risk aversion does not directly apply, see
+Swanson (2012a). Swanson (2012b) presents measures of risk aversion under recursive preferences in the presence of a labor margin. I maintain the misnomer of referring to  as risk aversion for expositional ease.
+
+17
+
+entangle the IES and risk aversion. The social planner faces the resource constraint
+
+(40)
+
+Ct + Kt = Kt-1
+
+eZt Lt
+
+1-
++ (1 - ) Kt-1
+
+with Kt being capital,  its output elasticity and  its depreciation rate, and Zt a random walk with
+
+drift productivity process given by
+
+(41) at Zt - Zt-1 = a + t, t  N (0, 1)
+
+with  the standard deviation of at and a the drift.
+
+The first order conditions are the intratemporal condition
+
+(42)
+
+1 -  Ct  1 - Lt
+
+= (1 - ) e(1-)Zt Kt-1Lt-
+
+and the intertemporal condition
+
+(43)
+
+1 = Et Mt+1 Kt-1 eZt+1 Lt+1 1- + 1 - 
+
+where the pricing kernel is given by
+
+(44)
+
+Mt+1
+
+Ut/Ct+1 =  Ct
+
+Ut/Ct
+
+Ct+1
+
+1-
+Ct+1 (1 - Lt+1)1- 
+1-
+Ct (1 - Lt)1- 
+
+ 
+
+Et
+
+Ut1+-1 [Ut+1 ]1-
+
+1- 
+
+1 
+
+The presence of Ut+1 in the pricing kernel necessitates the inclusion of the value function evaluated
+
+at the optimum, where I recycle the notation Ut,
+
+(45)
+
+ 1- 1 1-
+Ut = (1 - ) Ct (1 - Lt)1-  +  Et Ut1+-1 
+
+along with the first order conditions, the resource constraint (40), and the exogenous driving force
+
+(41) to characterize an equilibrium. With the stochastic trend in the model, I detrend all variables (apart from Lt and Mt) with xt Xt/eZt; the value function is detrended slightly differently, ut Ut/eZt.26 I reexpress all macroeconomic variables through a log transformation x^t = ln(xt) so that
+deviations in these variables from any given value can be interpreted as percentage deviations and a linear approximation of x^t gives a log linear approximation.27
+Additionally, I will examine two conditional asset pricing variables to measure shifts in the
+26See appendix A.1 for the detrended model. 27See, e.g., Uhlig (1999).
+
+18
+
+pricing of risk. First, the ex ante risk premium
+
+(46) er pt = Et rtk+1 - rtf
+
+where the risk-free rate, rtf , is given by rtf
+
+1 Et [Mt+1]
+
+and
+
+the
+
+return
+
+on
+
+capital,
+
+rtk,
+
+is
+
+given
+
+by
+
+rtf
+
+ Kt--11
+
+eZt Lt
+
+1-
++ 1 - ; and second, the (squared) conditional market price of risk
+
+Et (Mt+1 - Et [Mt+1])2
+
+(47)
+
+cmprt =
+
+Et [Mt+1]2
+
+I will take the square of the usual conditional market price of risk--conditional standard deviation
+
+over conditional mean--to maintain differentiability at the deterministic steady state, necessary for
+
+the application of the perturbation methods to which I will turn to later. Finally, I will include the ex
+
+post risk premium
+
+(48) r pt = rtk - rtf-1
+
+as an observable counterpart to the ex ante version above.
+
+5 Accuracy of the Risky Linear Approximation
+
+I now apply the risky linear approximation to two calibrated versions of the neoclassical growth model of section 4. I begin by assessing the accuracy of the risky linear approximation by examining the Euler equation errors and comparing the results to standard linear and higher order perturbation solutions.
+5.1 Calibration
+In table 1, I report the parameter values common to both calibrations I consider here. The calibration for these parameters largely follows Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012) and reflects standard observations on the post war US economy:  is set to match the labor share of national income;  to reflect an annual interest rate of about 3.5 %; the value of  induces work to occupy roughly one third of the time endowment; and  aligns the model in the deterministic steady state to the investment output ratio. The value of a is set to match the average postwar growth rate
+
+19
+
+of output.
+[Table 1 about here.]
+In table 2, I report the baseline calibration in the first three columns. Here, I set risk aversion, , to 5, following the baseline parameterization of Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012). The elasticity of intertemporal substitution (IES) and the standard deviation of technology growth shocks are set to match the standard deviations of log consumption and output growth for the third order nonlinear moving average perturbation solution of the model.28 This value for the IES lies in the range of 0.5 to 1.5 examined in Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012), reflecting conservative bounds on the parameter advocated in the literature.
+[Table 2 about here.]
+The extreme calibration can be found in the last three columns of table 2. Risk aversion, , is equal to 40, following Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao (2012). The IES and the standard deviation of technology growth shocks are again set to match the standard deviations of log consumption and output growth for the third order in perturbation solution of the model. When calibrating to the two macro data sets, the values for the IES and the standard deviation of technology growth shocks remain virtually unchanged, reflecting the well known result--see, e.g., Tallarini (2000)--that macro series are driven primarily by the IES and not risk aversion.
+5.2 Euler Equation Errors
+Following Judd and Guu (1997) and Judd (1998), I use the unit-free Euler equation residuals as a measure of accuracy.29 I will assess the accuracy of the risky linear approximation at the approximated stochastic steady state.30
+28Thus, this nonlinear moving average representation as opposed to the state space representation of the policy function admits closed form calculation of the theoretical moments, see Lan and Meyer-Gohde (2013a).
+29See also Aruoba, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2006) and Caldara, Ferna´ndez-Villaverde, RubioRam´irez, and Yao (2012) for applications of this measure to assess the accuracy of varying solution methods.
+30The results are virtually unchanged with the alternative, the ergodic mean.
+20
+
+The Euler equation error expressed as a fraction of time t consumption is given by (49)
+
+Et
+
+
+
+(ct+1
+
+eat+1
+
+)
+
+1- 
+
+-1
+
+EEE(kt-1, t) =
+
+(1-)(1-)
+
+1-Lt+1
+
+
+
+1-Lt
+
+(vt+1eat+1 )1-
+
+1-
+
+1 
+
+[ ]Et (vt+1eat+1 )1-
+
+ct
+
+kt-1 (eat+1 Lt+1)1- + 1 - 
+
+1
+
+
+
+1- 
+
+-1
+
+-1
+
+Here, the value of, say, 1E - 2 implies a $1 mistake for each $100 spent and the value of 1E - 3
+
+implies a $1 mistake for each $1000 and so forth. This is a function of the state, kt-1 and shock, t.
+
+In figure 1, I plot the Euler equation errors with the current shock set to zero and examine how this
+
+error depends on the endogenous state, kt-1.
+
+[Figure 1 about here.]
+
+In figure 1a, the Euler equation errors for the baseline calibration can be found. The risky linear approximation uniformly improves on the linear approximation, while lagging behind the second and third order perturbation. In general, higher order perturbations improve the accuracy of the approximation. In the vicinity of the steady states,31 this improvement is more than one order of magnitude. In sum, the risky linear approximation, while still linear in states and shocks, is uniformly more accurate than the standard linear approximation.
+The Euler equation errors for the extreme calibration are depicted in figure 1b. As the importance of risk in the underlying nonlinear system is increased through the increase in risk aversion in the extreme calibration, so does the relative performance of the risky linear approximation. Now the risky linear approximation is two orders of magnitude more accurate than the standard linear approximation over a broad vicinity surrounding the steady states.32 Furthermore, the risky linear approximation is roughly comparable to higher order approximations despite its linearity in states and shocks.
+Thus, for small shock realizations and values of the state, capital, close to the stochastic steady
+31Under the baseline calibration, the stochastic and determinisitic steady states are nearly the same. 32Now the difference between the stochastic and deterministic steady states can be discerned visually, with the minimum of the risky linear approximation, the stochastic steady state, to the right of the minimum of the standard linear approximation, the deterministic steady state.
+21
+
+state, I conclude that the risky linear approximation of the previous sections outperforms the standard linear approximation and performs favorably compared with higher order perturbations.
+5.3 Impulse Response Analysis
+Having established the satisfactory accuracy of the risky linear approximation, I will turn to its structural predictions in the form of impulse response functions. A significant advantage of the linearity in states and shocks of the approximation is that an impulse response is a straightforward concept. Whereas nonlinear methods must take a stance regarding the specific assumptions regarding a generalized impulse response,33 the risky linear approximation and its standard linear approximation require no such discussion.
+[Figure 2 about here.]
+In figure 2, the impulses of selected macroeconomic and financial variables with respect to a one standard deviation shock to the growth rate of technology are plotted. Figure 2a contains the impulses of consumption and capital to a growth rate shock. Impulse responses from the risky linear (here the stochastic steady state version), standard linear, and third order nonlinear moving average approximations are indistinguishable up to numerical rounding. Consumption and capital, both detrended, fall in response to the shock as the capital stock and consumption catch up to the accelerated growth path. Figure 2b contains the impulses of the expected risk premium and the conditional market price of risk. The standard linear approximation fails to capture the movement in these conditional asset pricing variables, while the risky linear approximation put forth in previous sections here matches, up to numerical rounding, the impulses generated by the full nonlinear third order moving average approximation of Lan and Meyer-Gohde (2013c).
+33See Lan and Meyer-Gohde (2013c) and Andreasen, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2013) and the specific assumptions therein.
+22
+
+6 Estimation using Risky Linear Approximations
+I begin by exploring the properties of the likelihood function for the risky linear approximation in a Monte Carlo experiment and then turn to the Bayesian estimation of risk aversion and the standard deviation of technology growth rate shocks using US post war data. I find the risky linear approximation using the Kalman filter meets or exceeds the computationally intensive particle filter routines for third-order state space and nonlinear moving average perturbations while successfully identifying risk aversion. I find that the posterior of the risky linear approximation using US post war data on consumption and output growth and the excess return calls for higher risk aversion that posited by the prior, whereas the likelihood function for standard linear approximation is entirely flat in the dimension of risk aversion and the likelihood function for the third order perturbations suffer sufficiently from sampling variation to prevent reliable inference.
+6.1 Monte Carlo Study of Estimation Properties
+Here, I study the ability of the risky linear approximation to estimate deep parameters beyond the reach of standard linear approximations and compare the efficiency with which it is able to do such with perturbation-based particle filters that enjoy relative solution efficiency advantages over alternative nonlinear methods--see, e.g., Aruoba, Ferna´ndez-Villaverde, and Rubio-Ram´irez (2006), though Ferna´ndez-Villaverde and Rubio-Ram´irez (2007) note that perturbation is neither required for nor necessarily the preferred method for taking every model to the particle filter.
+For the estimation exercise, I generate two 10, 000 period series of yt, one for each calibration in section 5.1, using a third order nonlinear moving average. I then estimate parameters one at a time, holding all other parameters constant, using different solution methods. The methods I will compare are the risky linear method, conventional linearization, third order state space perturbation, and the third order nonlinear moving average used to generate the data. I will present the results for risk aversion, , and the standard deviation of growth shocks, .
+23
+
+The risky linear method maintains linearity in states and shocks, which, given the assumed normality of growth rate shocks, enables the use of the Kalman filter. Here, I choose the ergodic mean of section 3.1.2 as the risky point so that the mean of the risky linear approximation coincides with the approximation, in , of the ergodic mean of the true nonlinear model. The standard linearization is also estimated with the Kalman filter. The standard approach for the two nonlinear perturbations, nonlinear moving average and standard state space, is to estimate using a sequential importance sampler with resampling, i.e., the particle filter, see Ferna´ndez-Villaverde and Rubio-Ram´irez (2007), which simulates the entire distributions of the unobservable states.Unfortunately, the particle filter can be very demanding computationally, precluding its use currently in many policy relevant models.34 I set the number of particles in the filter to be 40, 000 and add measurement noise accounting for 1% of the variance of yt to operationalize a version of the particle filter following, e.g. Bidder and Smith (2012).
+[Figure 3 about here.]
+In figure 3 the likelihood function, normalized relative to the maximum likelihood value for each method, of risk aversion, , and the standard deviation of technology growth shocks, , are plotted for the baseline calibration. The standard linear approximation is a certainty equivalent approximation and changes in risk aversion, figure 3a, have no effect on the approximation: the likelihood function is entirely flat in this dimension. The risky linear approximation advocated in previous sections, however, is not certainty equivalent and correctly estimates the level of risk aversion in figure 3a. Both of the particle filter based policy functions correctly estimate the degree of risk aversion, but as can be seen in figure 3a, there is clearly sampling variation and the number of particles would clearly need to be increased past 40, 000 to operationalizes a numerical maximization routine. As can be gathered from the scale of the y axis in figure 3a, though, risk aversion of this small
+34van Binsbergen, Ferna´ndez-Villaverde, Koijen, and Rubio-Ram´irez (2012) provides a notable exception, yet due to the demands of the particle filter, they model inflation exogenously and are primarily concerned with the estimation exercise itself.
+24
+
+degree is only very weakly identified, placing high demands on the particle filters; the risky linear approximation, however, has no difficulties with this weak identification. All four of the methods correctly estimate the standard deviation of growth shocks, as can be seen in figure 3b. The likelihood cuts for both of the particle filter estimated perturbations coincide and the risky and standard linear approximations display slightly more dispersion than the perturbation methods.
+[Figure 4 about here.]
+The likelihood cuts, expressed relative to the maximum log likelihood value for each method, of risk aversion, , and the standard deviation of technology growth shocks, , are plotted in figure 4 for the extreme calibration. Again, the standard linear approximation is a certainty equivalent approximation and changes in risk aversion have no effect on the approximation as can be garnered from the entirely flat likelihood function figure 4a. Once again, the risky linear approximation advocated in previous sections, however, is not certainty equivalent and correctly estimates the level of risk aversion, albeit with slightly more dispersion relative to the particle based filters. Both of the particle filter based policy functions correctly estimate the level of risk aversion and nearly coincide in figure 4a. Note that sampling variation in the particle filters is not noticeable in figure 4a, as risk aversion is clearly more strongly identified as can be garnered from the scale of the y-axis. Turning to the standard deviation of growth shocks in figure 4b, the standard linear approximation clearly fails to correctly estimate this parameter. As the standard linearization does not capture risk aversion, it attributes the increase in risk sensitivity to an increase in risk itself. The risky linear approximation and the two particle filter based perturbations correctly estimate the standard deviation, with the risky linear approximation likelihood contour coinciding with that of the data-generating-process, the nonlinear moving average.
+Figures 5 and 6 display likelihood cuts under the baseline calibration for output growth-- log(Yt) - log(Yt-1)--and for the ex post risk premium (48). Output growth is an observable series, yet, as figure 5a indicates, this series is unable to reveal the degree of risk aversion. Risk in this
+25
+
+model is constant, as opposed to a model with say time varying volatility, and first differencing removes the constant correction for risk in the policy functions, eliminating the role for risk in the observable, as all approximations reflect with their flat likelihood surfaces.
+[Figure 5 about here.]
+The story is different with data generated by the ex post risk premium. Though not entirely driven by precautionary motives as is the unobservable ex ante risk premium, this measure reveals significant information on the level of risk aversion, as indicated by the curvature of the likelihood function in 6a. With the effect of increased risk sensitivity incorporated, all measures but the standard linear approximation agree upon a relative reduction of the source of constant risk, the standard deviation of growth shocks--see figure 6b.
+[Figure 6 about here.]
+In table 3 the different computation costs, measured in terms of computation time per likelihood evaluation.35 As can be seen, the risky linear was negligibly slower than the standard linear with the additional costs coming from the need to calculate the third order perturbation that delivers the higher order derivatives used to correct the linear terms for risk. Compared to the perturbation solutions that use the particle filter, the difference is striking. The risky linear method of the previous sections is four orders of magnitude faster than the particle filter based methods. This despite their similar performance in estimating the parameters and, as the presence of sampling variation implies, the choice of the number of particles appears to have been conservative.
+[Table 3 about here.]
+The estimation exercise provides strong evidence in favor of the risky linear approximation for use in estimation. It is meets or exceeds, when accounting for potential sampling variability with
+35Comparisons computed on an Intel Xeon E5-2690 with 16 cores at 2.90 GHz on Matlab R2013b. Approximately 61% of the processor resources were used by the particle filter at any given point in time during the calculations.
+26
+
+particle filters, higher order perturbation methods in identifying nonlinear parameters, like risk aversion, that standard linear approximations cannot identify while simultaneously maintaining the computational efficiency provided by the linear in state and shock framework.
+6.2 US Post-War Estimation of Risk and Risk Sensitivity
+I now turn to the estimation of risk and risk sensitivity using post war US data. While estimating, I take a Bayesian perspective following standard practice in the DSGE literature.36 Taking the results of the previous section into account, I shall include ex post risk premium along with consumption and output growth in the data set.37 I find that the risky linear approximation introduced here calls for more risk and risk aversion as is to be expected with the inclusion of the ex post risk premium in the data set. The particle filter based methods suffer from sampling variation close to the posterior mode, which makes estimation with my relatively flat prior infeasible.
+[Table 4 about here.]
+Table 4 contains the priors of the standard deviation of growth shocks and risk aversion. Both priors are relatively loose, with the prior on risk aversion centered roughly in between the two values of the calibrated model. The standard deviation of the growth shock has its prior mean and mode below the calibrated values but assigns substantial probability mass to the region around that value. Table 4 contains point estimates from the posterior from the risky and conventional linear approximations. The risky linear approximation favors more risk aversion and more risk than the standard linear approximation, whose estimate of risk aversion is entirely prior driven with prior and posterior modes coinciding and the likelihood function entirely flat along this dimension.
+[Figure 7 about here.]
+36See Smets and Wouters (2003) and Smets and Wouters (2007) for prominent and Del Negro, Schorfheide, Smets, and Wouters (2007) and An and Schorfheide (2007) for instructive examples of Bayesian estimation of DSGE models.
+37See appendix A.9 for details on the data series.
+27
+
+Figure 7 depicts the posterior as well as the likelihood using the risky linear approximation. The likelihood function, figure 7b, indicates that the data is informative in both dimensions using the risky linear approximation. While the likelihood and posterior, figure 7a, both favor a similar value for the standard deviation of growth rate shocks, , they differ substantially over the parameter controlling risk aversion, . As discussed also by, e.g., Tallarini (2000), production models with recursive utility can match the slope of the market line (or market price of risk) but require exorbitant levels of risk aversion to come close to the average risk premium, see table 5. The posterior tempers this tendency, yielding a modest outward shift in the distribution of risk aversion relative to the prior.
+[Figure 8 about here.]
+In figure 7, the posterior and likelihood using the standard linear approximation can be found. As was to be expected from the results of the preceding sections, the likelihood is flat along the dimension of the parameter controlling risk aversion. In other words, the precautionary component of the risk premium in the data is entirely ignored and risk aversion is completely prior driven.
+The posteriors and likelihoods for the nonlinear moving average perturbation can be found in figure 9.38 As was the case for two of the four sets of synthetic data from the calibrated models, sampling variation in the particle filter is visible here with the post war US data set with the dimension in the risk aversion parameter, , being most obviously impacted.39 This is not surprising, as the likelihood surface for the risky linear approximation indicates that this dimension of the likelihood function is nearly flat, especially for values of the standard deviation of growth shocks, , close to the mode. Nonetheless, for larger values of , a clear upward slope for larger values of  emerges, consistent with the model requiring more risk aversion to increase the risk premium.
+[Figure 9 about here.]
+38The results for the standard perturbation were essentially the same and have been omitted for brevity. 39For the figures here, I increased the number of particles to 100,000, which improved but as is clear from the figure did not eliminate the sampling variation of the particle filters.
+28
+
+Table 5 gives the asset pricing variable moments.40 As discussed above, the model does not match the magnitude of the empirical risk premium. The risky linear approximation is, however, able to bring the market price of risk from the pricing kernel (std(mt)/E[mt]) and the Sharpe ratio from the excess return on risky capital (E[rtk - r f ]/std(rtk - r f )) close to the empirical market price of risk as measured by the NYSE value weighted portfolio over the secondary market rate for three month Treasury bill.41 As the standard linear approximation does not generate a risk premium at all, its Sharpe ratio is zero, and the standard linear approximation produces a market price of risk that is half the size as generated by the risky linear approximation.
+[Table 5 about here.]
+Informing the estimation with the empirical risk premium along with consumption and output growth leads the posterior with the risky linear approximation to favor a higher level of risk aversion than under the prior. The conventional linear approximation is invariant to the level of risk aversion and so the likelihood function is unable to inform the posterior. As the likelihood function is rather flat in the dimension of risk aversion, full nonlinear estimation is infeasible as the particle filter suffers from a sampling variation large enough to mask the curvature in the likelihood function. Under the posterior mode estimates, the model's predictions of the market price of risk and the Sharpe ratio are brought closer to the observed market price of risk for the NYSE value weighted portfolio.
+7 Conclusion
+I have derived and analyzed a risky linear approximation of the policy function for DSGE models. The method solves linear equations in standard perturbation output, requiring neither fixed point nor
+40The macroeconomic variables remain essentially unchanged as on the risk aversion has been changed substantially and it is known, see Tallarini (2000) for example, that macroeconomic variables are virtually invariant to the level of risk aversion, holding the intertemporal elasticity of substitution constant. Tables with empirical as well as the posterior model based business cycle measures have thusly been relegated to appendix A.10.
+41A description of the post war US data used for the empirical values can be found in appendix A.9
+29
+
+other recursive methods, by operating implicitly with the unknown policy function instead of the equilibrium conditions of the model. This direct approach along with the minimal costs associated with standard perturbation methods allow me provide a certainty non equivalent method suitable for the estimation and analysis of policy relevant DSGE policy under risk without needed to turn to the particle filter or alternate algorithms with unknown convergence properties that correct for risk. Finally, the method presented is able to provide a risk corrected linear approximation around the ergodic mean as well as the stochastic steady state.
+In the chosen application, a risk-sensitive real business cycle model with long run risk, I find that the risky linear approximation is a uniform improvement over the standard linear approximation and, as risk becomes more important in the the model, the accuracy of the algorithm becomes comparable to second and third perturbations in the vicinity of the stochastic steady state despite being linear in states and shocks. The method produces impulse responses identical to those generated by a third order nonlinear moving average and is able to model the responses of conditional asset pricing variables to shocks, which are beyond the reach of standard linear approximations. Finally, in a estimation exercise, I show that the risky linear approximation estimated using the Kalman filter correctly identifies risk and risk aversion (here, different from the inverse elasticity of intertemporal substitution due to the recursive preferences) along with the particle filter estimations of standard perturbation and nonlinear moving average approximation. Thus, the risky linear approximation combines the efficiency in estimation (with the Kalman filter here being four orders of magnitude faster than the particle filter) of linear formulations with the information from nonlinear approximations needed to identify parameters such as the degree of risk aversion that are beyond the reach of standard linear approximations. Indeed, in the application to post war US data, the likelihood function is entirely flat in the dimension of risk aversion for a standard linear approximation and sufficiently flat for third order perturbations using the particle filter that sampling variation precludes reliable inference.
+30
+
+The method here could be extended using the change of variable transformations studied by Ferna´ndez-Villaverde and Rubio-Ram´irez (2006) to maximized the accuracy of the risky linear approximation. Likewise conditional linear approximations as applied by Justiniano and Primiceri (2008) to study volatility shifts in post war US data could be risk adjusted to capture the precautionary effects neglected in their work. Finally, the method developed here could be applied to policy relevant models that require capturing risk, e.g., to match financial market date, but whose size precludes the application of alternative nonlinear methods, e.g., the computational costs of the particle filter are too burdensome. In work in progress, Kliem and Meyer-Gohde (2013) apply the risky linear method developed here to estimate and analyze the effects of monetary policy in a medium scale DSGE macro finance model of the nominal term structure.
+31
+
+References
+Adjemian, S., H. Bastani, M. Juillard, F. Mihoubi, G. Perendia, J. Pfeifer, M. Ratto, and S. Villemot (2011): "Dynare: Reference Manual, Version 4," Dynare Working Papers 1, CEPREMAP.
+An, S., and F. Schorfheide (2007): "Bayesian Analysis of DSGE Models," Econometric Reviews, 26(2-4), 113­172.
+Anderson, G. S., A. Levin, and E. Swanson (2006): "Higher-Order Pertubation Solutions to Dynamic Discrete-Time Rational Expectations Models," Federal Reserve Bank of San Francisco Working Paper Series 2006-01.
+Andreasen, M. M., J. Ferna´ndez-Villaverde, and J. Rubio-Ram´irez (2013): "The Pruned StateSpace System for Non-Linear DSGE Models: Theory and Empirical Applications," NBER Working Papers 18983.
+Aruoba, S. B., L. Bocola, and F. Schorfheide (2013): "Assessing DSGE Model Nonlinearities," NBER Working Papers 19693.
+Aruoba, S. B., J. Ferna´ndez-Villaverde, and J. F. Rubio-Ram´irez (2006): "Comparing Solution Methods for Dynamic Equilibrium Economies," Journal of Economic Dynamics and Control, 30(12), 2477­2508.
+Backus, D. K., B. R. Routledge, and S. E. Zin (2005): "Exotic Preferences for Macroeconomists," in NBER Macroeconomics Annual 2004, Volume 19, NBER Chapters, pp. 319­414. National Bureau of Economic Research, Inc.
+Bansal, R., and A. Yaron (2004): "Risks for the Long Run: A Potential Resolution of Asset Pricing Puzzles," The Journal of Finance, 59(4), 1481­1509.
+Bidder, R. M., and M. E. Smith (2012): "Robust Animal Spirits," Journal of Monetary Economics, 59(8), 738­750.
+Caldara, D., J. Ferna´ndez-Villaverde, J. Rubio-Ram´irez, and W. Yao (2012): "Computing DSGE Models with Recursive Preferences and Stochastic Volatility," Review of Economic Dynamics, 15(2), 188­206.
+Coeurdacier, N., H. Rey, and P. Winant (2011): "The Risky Steady State," American Economic Review, 101(3), 398­401.
+Collard, F., and M. Juillard (2001a): "Accuracy of Stochastic Pertubation Methods: The Case of Asset Pricing Models," Journal of Economic Dynamics and Control, 25(6-7), 979­999.
+(2001b): "A Higher-Order Taylor Expansion Approach to Simulation of Stochastic Forward-Looking Models with an Application to a Nonlinear Phillips Curve Model," Computational Economics, 17(2-3), 125­39.
+de Groot, O. (2013): "Computing the Risky Steady State of DSGE Models," Economics Letters, 120(3), 566 ­ 569.
+32
+
+Del Negro, M., F. Schorfheide, F. Smets, and R. Wouters (2007): "On the Fit of New Keynesian Models," Journal of Business & Economic Statistics, 25(2), 123­143.
+Epstein, L. G., and S. E. Zin (1989): "Substitution, Risk Aversion, and the Temporal Behavior of Consumption and Asset Returns: A Theoretical Framework," Econometrica, 57(4), 937­69.
+Evers, M. P. (2012): "Solving Nonlinear Rational Expectations Models by Approximating the Stochastic Equilibrium System," Mimeo June.
+Ferna´ndez-Villaverde, J., P. A. Guerro´n-Quintana, J. Rubio-Ram´irez, and M. Uribe (2011): "Risk Matters: The Real Effects of Volatility Shocks," American Economic Review, 101(6), 2530­61.
+Ferna´ndez-Villaverde, J., and J. F. Rubio-Ram´irez (2006): "Solving DSGE Models with Perturbation Methods and a Change of Variables," Journal of Economic Dynamics and Control, 30(12), 2509­2531.
+(2007): "Estimating Macroeconomic Models: A Likelihood Approach," Review of Economic Studies, 74(4), 1059­1087.
+Jin, H.-H., and K. L. Judd (2002): "Pertubation Methods for General Dynamic Stochastic Models," Mimeo April.
+Judd, K. L. (1998): Numerical Methods in Economics. MIT Press, Cambridge, MA.
+Judd, K. L., and S.-M. Guu (1997): "Asymptotic Methods for Aggregate Growth Models," Journal of Economic Dynamics and Control, 21(6), 1025­1042.
+Judd, K. L., and T. M. Mertens (2012): "Equilibrium Existence and approximation of Incomplete Market Models with Substantial Heterogeneity," Mimeo March.
+Juillard, M. (2011): "Local Approximation of DSGE Models around the Risky Steady State," Mimeo October.
+Justiniano, A., and G. E. Primiceri (2008): "The Time-Varying Volatility of Macroeconomic Fluctuations," American Economic Review, 98(3), 604­41.
+Kim, J., S. Kim, E. Schaumburg, and C. A. Sims (2008): "Calculating and Using Second-Order Accurate Solutions of Discrete Time Dynamic Equilibrium Models," Journal of Economic Dynamics and Control, 32(11), 3397­3414.
+Kim, J., and S. H. Kim (2003): "Spurious Welfare Reversals in International Business Cycle Models," Journal of International Economics, 60(2), 471­500.
+Kliem, M., and A. Meyer-Gohde (2013): "Monetary Policy and the Term Structure of Interest Rates," mimeo.
+Kliem, M., and H. Uhlig (2013): "Bayesian estimation of a DSGE model with asset prices," Discussion Papers 37/2013, Deutsche Bundesbank, Research Centre.
+Kydland, F. E., and E. C. Prescott (1982): "Time to Build and Aggregate Fluctuations," Econometrica, 50(6), 1345­70.
+33
+
+Lan, H., and A. Meyer-Gohde (2013a): "Decomposing Risk in Dynamic Stochastic General Equilibrium," Mimeo October.
+(2013b): "Pruning in Perturbation DSGE Models," Mimeo June.
+(2013c): "Solving DSGE Models with a Nonlinear Moving Average," Journal of Economic Dynamics and Control, 37(12), 2643­2667.
+(Forthcoming): "Solvability of Perturbation Solutions in DSGE Models," Journal of Economic Dynamics and Control.
+Lombardo, G. (2010): "On Approximating DSGE Models by Series Expansions," Working Paper Series 1264, European Central Bank.
+Lucas, Jr., R. E. (1987): Models of Business Cycles. Basil Blackwell Ltd., Oxford, UK.
+Rudebusch, G. D., and E. T. Swanson (2012): "The Bond Premium in a DSGE Model with Long-Run Real and Nominal Risks," American Economic Journal: Macroeconomics, 4(1), 105­43.
+Sandberg, I. (1983): "Expansions for Discrete-Time Nonlinear Systems," Circuits, Systems and Signal Processing, 2(2), 179­192.
+Schmitt-Grohe´, S., and M. Uribe (2004): "Solving Dynamic General Equilibrium Models Using a Second-Order Approximation to the Policy Function," Journal of Economic Dynamics and Control, 28(4), 755­775.
+Smets, F., and R. Wouters (2003): "An Estimated Dynamic Stochastic General Equilibrium Model of the Euro Area," Journal of the European Economic Association, 1(5), 1123­1175.
+(2007): "Shocks and Frictions in US Business Cycles: A Bayesian DSGE Approach," American Economic Review, 97(3), 586­606.
+Swanson, E. T. (2012a): "Risk Aversion and the Labor Margin in Dynamic Equilibrium Models," American Economic Review, 102(4), 1663­91.
+(2012b): "Risk Aversion, Risk Premia, and the Labor Margin with Generalized Recursive Preferences," Working Paper Series 2012-17, Federal Reserve Bank of San Francisco.
+Tallarini, Jr., T. D. (2000): "Risk-Sensitive Real Business Cycles," Journal of Monetary Economics, 45(3), 507­532.
+Uhlig, H. (1999): "A Toolkit for Analysing Nonlinear Dynamic Stochastic Models Easily," in Computational Methods for the Study of Dynamic Economies, ed. by R. Marimon, and A. Scott, chap. 3, pp. 30­61. Oxford University Press.
+van Binsbergen, J. H., J. Ferna´ndez-Villaverde, R. S. Koijen, and J. Rubio-Ram´irez (2012): "The Term Structure of Interest Rates in a DSGE Model with Recursive Preferences," Journal of Monetary Economics, 59(7), 634­648.
+Weil, P. (1990): "Nonexpected Utility in Macroeconomics," The Quarterly Journal of Economics, 105(1), 29­42.
+34
+
+A Appendix
+A.1 Detrended Model
+
+Detrending with xt (A-1)
+
+Xt/eZt (ut Ut/eZt ) gives
+1-
+ut = (1 - ) ct (1 - Lt)1-  +  Et (ut+1eat )1-
+
+ 1 1- 
+
+(A-2)
+
+ct + kt = e-at kt-1L1t - + (1 - ) e-at kt-1
+
+(A-3) (A-4) (A-5)
+
+1 = Et Mt+1 e(1-)at+1 kt-1L1t+-1 + 1 - 
+
+Mt+1 = 
+
+
+
+1- 
+
+-1
+
+c et+1 at+1
+
+ct
+
+1 - Lt+1 1 - Lt
+
+(1-)(1-)
+
+
+
+
+
+(ut+1 eat+1 )1- Et (ut+1eat+1)1-
+
+1-
+
+1 
+
+
+
+1 -  ct  1 - Lt
+
+= (1 - ) e-at kt-1L-t 
+
+A.2 Matrix Derivatives
+
+That is
+
+(A-6) (A-7)
+
+gz ji
+
+D j+i ztj-1i
+
+{y(,
+
+zt
+
+)}
+
+
+
+
+
+ z1,t-1
+
+...
+
+ [ j]
+znz,t-1
+
+ 
+
+[i]   yt
+
+
+
+= 
+
+ z1,t-1
+
+...
+
+ [ j] znz,t-1
+
+ 
+
+i   yt
+
+where the second line follows as  is a scalar. The terms
+
+M- j i=0
+
+1 i!
+
+yz
+
+j
+
+i
+
+i
+
+in (6) collect all the
+
+coefficients associated with the j'th fold Kronecker product of the state vector, (zt - z). Higher
+
+orders of  in gzji correct the Taylor series coefficients for uncertainty by successively opening the
+
+coefficients to higher moments in the distribution of future shocks.42 I will take the availability of
+
+these standard perturbation Taylor series as given.43
+
+With f and y both being vector-valued functions that take vectors as arguments, their partial
+
+derivatives form hypercubes. I use the method of Lan and Meyer-Gohde (2013c) that differentiates
+
+conformably with the Kronecker product, allowing us to maintain standard linear algebraic struc-
+42A similar interpretation can be found in Judd and Mertens (2012) for univariate expansions and in Lan and MeyerGohde (2013c) for expansions in infinite sequences of innovations.
+43See Jin and Judd (2002) and Lan and Meyer-Gohde (Forthcoming) for more on whether these coefficients can indeed be recovered by standard DSGE perturbations.
+
+35
+
+tures to derive our results.
+
+Definition A.1. Matrix Derivatives
+
+Let A(B) : Rs×1  Rp×q be a matrix-valued function that maps an s × 1 vector B into an p × q matrix
+
+A(B), the derivative structure of A(B) with respect to B is defined as
+
+(A-8)
+
+AB DB{A}
+
+ b1
+
+...
+
+ bs
+
+A
+
+where bi denotes i'th row of vector B; n'th derivatives are
+
+(A-9)
+
+ABn D(nB)n{A}
+
+ b1
+
+...
+
+ [n] bs
+
+A
+
+Details of the associated calculus that generalizes familiar chain and product rules as well as Taylor approximations to multidimensional settings can be found in Lan and Meyer-Gohde (2013c) and Lan and Meyer-Gohde (Forthcoming).
+
+A.3 Proof of Proposition 3.1
+
+Successive differentiation of (18) yields equations recursively linear in yi taking as given lower order terms of the form yi and derivatives of g with respect to yt-1 and . For solvability, following the implicit function theorem, the matrix gy, the first derivative of the policy function at the deterministic steady state with respect to endogenous variables, must have all eigenvalues inside the unit circle; this holds under local saddle stability of (1).
+
+A.4 Proof of Corollary 3.2
+
+For a second-order (in ) approximation of the stochastic steady state, differentiate y () = g(y () , 0, )
+
+at  = 0 once for (A-10)
+
+y(0) = gyy(0) + g =
+
+-1
+I - gy g = 0
+
+and twice for (A-11)
+
+y(0) = gy2 y(0)[2] + 2gyy + gyy(0) + g2 =
+
+-1
+I - gy g2
+
+36
+
+Thus, up to second order in , the stochastic steady state is
+
+(A-12)
+
+ystoch  y + 1 2
+
+-1
+I - gy g2
+
+as claimed in corollary 3.2.
+
+A.5 Proof of Proposition 3.3
+
+Successive differentiation of (2) with respect to  evaluated at the deterministic steady state gives recursive equations Diyt that depend on lower order derivatives of Diyt,44 derivatives of the g function evaluated at the deterministic steady state, and the exogenous vector t. Successive differentiation of (22) yields equations recursively linear in yi taking as given lower order terms of the form yi, derivatives of the g function evaluated at the deterministic steady state, and expectations of terms involving Diyt and t. For solvability both of the expectations of Diyt and of derivatives of (22), following the implicit function theorem, the matrix gy, the first derivative of the policy function at the deterministic steady state with respect to endogenous variables, must have all eigenvalues inside the unit circle; this holds under local saddle stability of (1). Under this condition and if the moments of t exists and are finite, the terms involving expectations and the derivatives of (22), yi, can be solved uniquely from the given moments of t and derivative information of the g function evaluated at the deterministic steady state.
+
+A.6 Proof of Corollary 3.4
+
+For a second-order (in ) approximation of the ergodic mean, differentiate y () = E g(yt-1, t, )
+
+at yt-1 = y (0) and  = 0 once for
+
+(A-13)
+
+y(0) = E
+
+gyD{yt-1} + gt + g
+
+=
+
+-1
+I - gy g = 0
+
+and twice for
+
+(A-14)
+
+y(0) = E gyD2{yt-1} + gy2D{yt-1}[2] + 2gyt  D{yt-1}
+
+44Di yt denotes the i'th order derivative of yt with respect to . The alternative notation, yi , refers to the i'th derivative of yt with respect to its third argument, i.e., the "direct" derivative with respect to , neglecting derivatives involving  that enter through the term t that are included in the notation Di yt.
+
+37
+
+(A-15)
+
++2gyD{yt-1} + 2gt + g2t [2] + g2
+
+(A-16)
+
+=
+
+-1
+I - gy
+
+gy2 E
+
+D{yt-1}[2]
+
++ g2 E
+
+t[2]
+
++ g2
+
+(A-17)
+
+=
+
+-1
+Iny - gy
+
+g2 +
+
+g2 +
+
+Iny2 - gy[2] -1 g[2]
+
+E
+
+t [2]
+
+where the last line follows from E D{yt}[2] = E
+
+[2]
+gyD{yt-1} + gt + g
+
+= gy[2]E
+
+D{yt-1}[2] +
+
+g[2]E t [2] Thus, up to second order in , the ( = 1) ergodic mean is
+
+ymean  y + 1 2
+
+-1
+Iny - gy
+
+g2 +
+
+g2 +
+
+In2y - gy [2] -1 g [2]
+
+E
+
+t [2]
+
+as claimed in corollary 3.4.
+
+A.7 Proof of Proposition 3.6
+
+Successive differentiation of (26) yields yyi and yi as functions of derivatives of g with respect to yt-1 and  as well as derivatives of the chosen risky point of approximation y().
+A.8 Proof of Corollary 3.7
+
+For a second-order (in ) approximation of yy(), differentiate yy() = gy(y(), 0, ) once for
+
+(A-18)
+
+yy(0) = gy2 y(0)  Iny + gy = 0
+
+and twice for
+
+(A-19)
+
+yy(0) = gy2 y(0)  Iny + g2y
+
+Thus, up to second order in , the ( = 1) derivative in y is
+
+1 yy(1)  gy + 2
+
+gy2
+
+y(0)  Iny
+
++ g2y
+
+as
+
+was
+
+claimed
+
+in
+
+corollary
+
+3.7.
+
+Analogous
+
+derivations
+
+follow
+
+for
+
+y()
+
+
+
+y(0)+y
+
+(0)+
+
+1 2
+
+y
+
+(0)2.
+
+A.9 Data
+
+I use post-war US macroeconomic and asset pricing data to calibrate the model in section 5 and to estimate risk aversion and the standard deviation of technology growth shocks in section 6.
+All series are quarterly. Investment is defined as the sum of the National Income and Product
+
+38
+
+Accounts (NIPA) measures of Personal Consumption Expenditures on Durable Goods, Private Nonresidential Fixed Investment, and Private Residential Fixed Investment; Consumption as the sum of the NIPA measures of Personal Consumption Expenditures on Nondurable Goods and Services; Output is Gross Domestic Product (GDP) expressed at an annual rate; Hours are measured by Hours Worked by Full-Time and Part-Time Employees, interpolated to a quarterly series by the growth rate of Civilian Noninstitutional Population series. Investment, Consumption, and Output are expressed in real per capita terms by deflating by the Civilian Noninstitutional Population series and the chain-type GDP deflator.
+The risky return is the return on the NYSE value weighted portfolio from the CRSP dataset and the risk-free return is secondary market rate for the three month Treasury bill. Both returns have been deflated by the implicit deflator of the Personal Consumption Expenditures Nondurables and Services series.
+A.10 Business Cycle Tables
+Table 6 summarizes the first two moments of output, consumption, investment, and hours. [Table 6 about here.]
+Table 7 summarizes the first two moments of output, consumption, investment, and hours from the model of section 4 evaluated at the posterior mode with the risky linear approximation.
+[Table 7 about here.]
+39
+
+Table 1: Common Calibration
+Parameter a     Value 0.46% 0.0196 0.357 0.991 0.3
+a--1948:3-2013:2 average output growth Remaining values from Caldara, Ferna´ndezVillaverde, Rubio-Ram´irez, and Yao (2012)
+
+Table 2: Baseline and Extreme Calibration
+
+Baseline
+
+Extreme
+
+Parameter  
+
+ 
+
+
+
+Value 5 1.008 1.12625% 40 1.0085 1.1269%
+
+ and --Caldara, Ferna´ndez-Villaverde, Rubio-Ram´irez, and Yao's (2012) baseline and extreme values  and --1948:3-2013:2 average output and consumption growth volatilities
+
+Table 3: Computational Costs: Monte Carlo Estimation
+
+Method
+
+Linear Risky Linear 3rd Order Pert. 3rd Order Pert. (pruned)
+
+Evaluation Time 0.44
+
+0.47
+
+430
+
+690
+
+in seconds, per likelihood evaluation
+
+Table 4: Priors and Posteriors
+
+Type Mean Mode Standard Deviation Domain
+Risky Linear Mode Standard Linear Mode
+
+ Priors Shifted Gamma
+20 14.737
+10 (1, ) Posteriors 29.296 14.737
+
+
+Inverse Gamma 0.22% 0.11% 0.6% (0, )
+1.0032% 0.9911%
+
+40
+
+Table 5: Asset Return Properties
+
+Empirical
+
+Risky Linear Standard Linear
+
+Return rk rf rk - r f
+Market Price of Risk
+Sharpe Ratio
+
+Mean 2.14 0.26 1.88
+
+Std. Dev. 8.25 0.62 8.25
+
+0.2283
+
+Mean Std. Dev. 0.5003 0.0801 0.4980 0.0767 0.0023 0.0212
+0.2004 0.1072
+
+0.5502 0.0758 0.5502 0.0726 0.000 0.0217
+0.1049 0.0000
+
+All returns are measured as real quarterly percentage returns. A description of the post war US data used for the empirical values can be found in appendix A.9. The model based numbers were derived using the posterior mode from the risky linear model, see table 4
+
+Table 6: Business Cycle Data, 1948:2-2013:2
+
+Variable
+ ln Yt  ln Ct  ln It  ln Nt ln Nt ln Ct - ln Yt ln It - ln Yt
+
+Mean
+0.458 0.497 0.420 0.328 119.993
+-- --
+
+Std. Dev.
+0.988 0.565 2.527 1.188 2.786 5.956 7.328
+
+Relative Std. Dev.
+1.000 0.572 2.558 1.202 2.820 6.029 7.418
+
+Autocorrelations 123 0.381 0.266 0.046 0.257 0.205 0.074 0.335 0.249 0.043 -0.020 -0.010 -0.008 0.999 0.998 0.997 0.990 0.979 0.965 0.962 0.911 0.843
+
+Cross Corr. w ln Yt 1.000 0.531 0.662 0.388 -0.141 -0.173 0.129
+
+All data was retrieved from the Federal Reserve Economic Data (FRED) database of the Federal Reserve Bank of St. Louis.
+
+Table 7: Business Cycle Properties, Posterior Mode
+
+Variable
+
+Mean
+
+Std. Dev.
+
+Relative Std. Dev.
+
+Autocorrelations 123
+
+ ln Yt  ln Ct  ln It  ln Nt ln Nt ln Ct - ln Yt ln It - ln Yt
+
+0.46 0.46 0.46
+0 -1.035
+-- --
+
+0.863 0.515 1.712 0.231 0.864 1.341 3.203
+
+1.000 0.596 1.983 0.268 1.001 1.553 3.710
+
+0.0083 0.0665 -0.0156 -0.0237 0.9643 0.9643 0.9643
+
+0.0080 0.0641 -0.0150 -0.0229 0.9303 0.9303 0.9303
+
+0.0078 0.0619 -0.0145 -0.0221 0.8980 0.8980 0.8980
+
+Compare with the empirical moments in table 6.
+
+Cross Corr. w ln Yt 1.000 0.992 0.996 0.984 0.308 -0.308 0.308
+
+41
+
+Euler Equation Error (Log 10)
+
+-3
+
+-4
+
+-5
+
+-6
+
+-7
+Standard Linear -8 2 Order Perturbation
+3 Order Perturbation Risky Linear
+-9 6 6.5 7 7.5 8 8.5 9 9.5 Capital
+(a) Baseline Calibration
+
+-2.5 -3
+-3.5 -4
+-4.5 -5
+-5.5 -6
+-6.5 -7 6
+
+Standard Linear 2 Order Perturbation 3 Order Perturbation Risky Linear
+6.5 7 7.5 8 8.5 9 9.5 Capital
+(b) Extreme Calibration
+Figure 1: Euler Equation Errors
+
+Euler Equation Error (Log 10)
+
+42
+
+% Deviations from Steady-State % Deviations from Steady-State
+
+x 10-3 0
+
+Impulse Response of ct to a Shock in ea
+
+-2
+Risky Linear -4 Standard Linear
+3 Order NLMA
+-6 -5 0 5 10 15 20 25 30 35 40 Quarters since Shock Realization 0 Impulse Response of kt to a Shock in ea
+
+-0.005 -0.01
+
+Risky Linear Standard Linear 3 Order NLMA
+
+-0.015 -5 0 5 10 15 20 25 30 35 40 Quarters since Shock Realization
+
+(a) Macroeconomic Variables
+
+Deviations from Steady-State Deviations from Steady-State
+
+x 10-6 6 4 2
+
+Impulse Response of erpt to a Shock in ea
+Risky Linear Standard Linear 3 Order NLMA
+
+0 -5 0
+x 10-7 6 4 2
+
+5 10 15 20 25 30 35 40 Quarters since Shock Realization
+Impulse Response of cmprt to a Shock in ea
+Risky Linear Standard Linear 3 Order NLMA
+
+0 -5 0 5 10 15 20 25 30 35 40
+Quarters since Shock Realization
+(b) Asset Pricing Variables
+Figure 2: Impulse Response Functions
+
+43
+
+1.0001
+
+1
+
+0.9999
+
+0.9998
+
+0.9997
+
+0.9996 0.9995
+
+3 Order Perturbation 3 Order NLMA Risky Linear Standard Linear
+
+0.9994 1 2 3 4 5 6 7 8 9 10
+
+(a) Risk Aversion ()
+
+1 0.98
+
+3 Order Perturbation 3 Order NLMA Risky Linear Standard Linear
+
+0.96
+
+0.94
+
+0.92
+
+0.9 0.005 0.01 0.015 0.02 0.025 0.03
+(b) Growth Shock Std. Dev. ()
+Figure 3: Likelihood Cuts: Baseline Calibration
+
+0.035
+
+44
+
+1.005 1
+0.995 0.99
+0.985 0.98
+0.975 0.97
+0.965 0
+
+3 Order Perturbation 3 Order NLMA Risky Linear Standard Linear
+10 20 30 40 50 60 70
+(a) Risk Aversion ()
+
+80
+
+1 0.98
+
+3 Order Perturbation 3 Order NLMA Risky Linear Standard Linear
+
+0.96
+
+0.94
+
+0.92
+
+0.9 0.005 0.01 0.015 0.02 0.025 0.03
+(b) Growth Shock Std. Dev. ()
+Figure 4: Likelihood Cuts: Extreme Calibration
+
+0.035
+
+45
+
+1.0001 1
+
+3 Order Perturbation 3 Order NLMA Risky Linear Standard Linear
+
+0.9999 1 2 3 4 5 6 7 8 9 10 (a) Risk Aversion ()
+
+1 0.98
+
+3 Order Perturbation 3 Order NLMA Risky Linear Standard Linear
+
+0.96
+
+0.94
+
+0.92
+
+0.9 0.006 0.008 0.01 0.012 0.014 0.016 0.018 0.02 0.022 0.024
+(b) Growth Shock Std. Dev. ()
+Figure 5: Likelihood Cuts: Baseline Calibration, Data on Yt
+
+46
+
+1
+0.8
+0.6
+0.4 3 Order Perturbation
+0.2 3 Order NLMA Risky Linear Standard Linear
+0 1 2 3 4 5 6 7 8 9 10 (a) Risk Aversion ()
+1
+0.9
+0.8
+0.7 3 Order Perturbation
+0.6 3 Order NLMA Risky Linear Standard Linear
+0.5 0.005 0.01 0.015 0.02 0.025 0.03 0.035 0.04 0.045 0.05
+(b) Growth Shock Std. Dev. ()
+Figure 6: Likelihood Cuts: Baseline Calibration, Data on rpt
+47
+
+100 90 80 70 60 50 40 30 20 10
+0.004 0.006 0.008 0.01 0.012 0.014 0.016 0.018 0.02
+(a) Posterior
+100 90 80 70 60 50 40 30 20 10
+0.004 0.006 0.008 0.01 0.012 0.014 0.016 0.018 0.02
+(b) Likelihood
+Figure 7: Risky Linear Estimation Results x-axis: ; y-axis: 
+48
+
+100 90 80 70 60 50 40 30 20 10
+0.004 0.006 0.008 0.01 0.012 0.014 0.016 0.018 0.02
+(a) Posterior
+100 90 80 70 60 50 40 30 20 10
+0.004 0.006 0.008 0.01 0.012 0.014 0.016 0.018 0.02
+(b) Likelihood
+Figure 8: Standard Linear Estimation Results x-axis: ; y-axis: 
+49
+
+100 90 80 70 60 50 40 30 20 10
+0.004 0.006 0.008 0.01 0.012 0.014 0.016 0.018 0.02
+(a) Posterior
+100 90 80 70 60 50 40 30 20 10
+0.004 0.006 0.008 0.01 0.012 0.014 0.016 0.018 0.02
+(b) Likelihood
+Figure 9: Third Order Nonlinear Moving Average Estimation Results x-axis: ; y-axis: 
+50
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Principal Component Analysis in an Asymmetric Norm" by Ngoc Mai Tran, Maria Osipenko and Wolfgang Karl Härdle, January 2014.
+002 "A Simultaneous Confidence Corridor for Varying Coefficient Regression with Sparse Functional Data" by Lijie Gu, Li Wang, Wolfgang Karl Härdle and Lijian Yang, January 2014.
+003 "An Extended Single Index Model with Missing Response at Random" by Qihua Wang, Tao Zhang, Wolfgang Karl Härdle, January 2014.
+004 "Structural Vector Autoregressive Analysis in a Data Rich Environment: A Survey" by Helmut Lütkepohl, January 2014.
+005 "Functional stable limit theorems for efficient spectral covolatility estimators" by Randolf Altmeyer and Markus Bibinger, January 2014.
+006 "A consistent two-factor model for pricing temperature derivatives" by Andreas Groll, Brenda López-Cabrera and Thilo Meyer-Brandis, January 2014.
+007 "Confidence Bands for Impulse Responses: Bonferroni versus Wald" by Helmut Lütkepohl, Anna Staszewska-Bystrova and Peter Winker, January 2014.
+008 "Simultaneous Confidence Corridors and Variable Selection for Generalized Additive Models" by Shuzhuan Zheng, Rong Liu, Lijian Yang and Wolfgang Karl Härdle, January 2014.
+009 "Structural Vector Autoregressions: Checking Identifying Long-run Restrictions via Heteroskedasticity" by Helmut Lütkepohl and Anton Velinov, January 2014.
+010 "Efficient Iterative Maximum Likelihood Estimation of HighParameterized Time Series Models" by Nikolaus Hautsch, Ostap Okhrin and Alexander Ristig, January 2014.
+011 "Fiscal Devaluation in a Monetary Union" by Philipp Engler, Giovanni Ganelli, Juha Tervala and Simon Voigts, January 2014.
+012 "Nonparametric Estimates for Conditional Quantiles of Time Series" by Jürgen Franke, Peter Mwita and Weining Wang, January 2014.
+013 "Product Market Deregulation and Employment Outcomes: Evidence from the German Retail Sector" by Charlotte Senftleben-König, January 2014.
+014 "Estimation procedures for exchangeable Marshall copulas with hydrological application" by Fabrizio Durante and Ostap Okhrin, January 2014.
+015 "Ladislaus von Bortkiewicz - statistician, economist, and a European intellectual" by Wolfgang Karl Härdle and Annette B. Vogt, February 2014.
+016 "An Application of Principal Component Analysis on Multivariate TimeStationary Spatio-Temporal Data" by Stephan Stahlschmidt, Wolfgang Karl Härdle and Helmut Thome, February 2014.
+017 "The composition of government spending and the multiplier at the Zero Lower Bound" by Julien Albertini, Arthur Poirier and Jordan RoulleauPasdeloup, February 2014.
+018 "Interacting Product and Labor Market Regulation and the Impact of Immigration on Native Wages" by Susanne Prantl and Alexandra SpitzOener, February 2014.
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasrecahrcwhaws assupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+019 "Unemployment benefits extensions at the zero lower bound on nominal interest rate" by Julien Albertini and Arthur Poirier, February 2014.
+020 "Modelling spatio-temporal variability of temperature" by Xiaofeng Cao, Ostap Okhrin, Martin Odening and Matthias Ritter, February 2014.
+021 "Do Maternal Health Problems Influence Child's Worrying Status? Evidence from British Cohort Study" by Xianhua Dai, Wolfgang Karl Härdle and Keming Yu, February 2014.
+022 "Nonparametric Test for a Constant Beta over a Fixed Time Interval" by Markus Reiß, Viktor Todorov and George Tauchen, February 2014.
+023 "Inflation Expectations Spillovers between the United States and Euro Area" by Aleksei Netsunajev and Lars Winkelmann, March 2014.
+024 "Peer Effects and Students' Self-Control" by Berno Buechel, Lydia Mechtenberg and Julia Petersen, April 2014.
+025 "Is there a demand for multi-year crop insurance?" by Maria Osipenko, Zhiwei Shen and Martin Odening, April 2014.
+026 "Credit Risk Calibration based on CDS Spreads" by Shih-Kang Chao, Wolfgang Karl Härdle and Hien Pham-Thu, May 2014.
+027 "Stale Forward Guidance" by Gunda-Alexandra Detmers and Dieter Nautz, May 2014.
+028 "Confidence Corridors for Multivariate Generalized Quantile Regression" by Shih-Kang Chao, Katharina Proksch, Holger Dette and Wolfgang Härdle, May 2014.
+029 "Information Risk, Market Stress and Institutional Herding in Financial Markets: New Evidence Through the Lens of a Simulated Model" by Christopher Boortz, Stephanie Kremer, Simon Jurkatis and Dieter Nautz, May 2014.
+030 "Forecasting Generalized Quantiles of Electricity Demand: A Functional Data Approach" by Brenda López Cabrera and Franziska Schulz, May 2014.
+031 "Structural Vector Autoregressions with Smooth Transition in Variances ­ The Interaction Between U.S. Monetary Policy and the Stock Market" by Helmut Lütkepohl and Aleksei Netsunajev, June 2014.
+032 "TEDAS - Tail Event Driven ASset Allocation" by Wolfgang Karl Härdle, Sergey Nasekin, David Lee Kuo Chuen and Phoon Kok Fai, June 2014.
+033 "Discount Factor Shocks and Labor Market Dynamics" by Julien Albertini and Arthur Poirier, June 2014.
+034 "Risky Linear Approximations" by Alexander Meyer-Gohde, July 2014
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

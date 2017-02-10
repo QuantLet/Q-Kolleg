@@ -1,0 +1,765 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2017-003
+FRM: a Financial Risk Meter based on penalizing tail
+events occurrence
+Lining Yu* Wolfgang Karl Härdle*
+Lukas Borke* Thijs Benschop*
+*Humboldt-Universität zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+FRM: a Financial Risk Meter based on penalizing tail events occurrence 
+
+Lining Yu
+
+Wolfgang Karl Ha¨rdle Thijs Benschop ¶
+January 19, 2017
+
+Lukas Borke §
+
+Abstract
+In this paper we propose a new measure for systemic risk: the Financial Risk Meter (FRM). This measure is based on the penalization parameter () of a linear quantile lasso regression. The FRM is calculated by taking the average of the penalization parameters over the 100 largest US publicly traded financial institutions. We demonstrate the suitability of this risk measure by comparing the proposed FRM to other measures for systemic risk, such as VIX, SRISK and Google Trends. We find that mutual Granger causality exists between the FRM and these measures, which indicates the validity of the FRM as a systemic risk measure. The implementation of this project is carried out using parallel computing, the codes
+are published on www.quantlet.de with keyword FRM. The visualization and the up-to-date FRM can be found on http://frm.wiwi.hu-berlin.de/.
+Keywords: Systemic Risk, Quantile Regression, Value at Risk, Lasso, Parallel Computing
+Financial support from the Deutsche Forschungsgemeinschaft (DFG) via SFB 649 "O¨ konomisches Risiko", IRTG 1792 "High-Dimensional Non-Stationary Times Series" and Sim Kee Boon Institute for Financial Economics, Singapore Management University are gratefully acknowledged.
+Research associate at Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. - Center for Applied Statistics and Econometrics, IRTG 1792, Humboldt-Universit¨at zu Berlin, Unter den Linden 6, 10099 Berlin, Germany. Email: yulining@wiwi.hu-berlin.de.
+Professor at Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. - Center for Applied Statistics and Econometrics, Humboldt-Universit¨at zu Berlin, Unter den Linden 6, 10099 Berlin, Germany. Email: haerdle@wiwi.hu-berlin.de.
+§Research associate at Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. - Center for Applied Statistics and Econometrics, Humboldt-Universita¨t zu Berlin, Unter den Linden 6, 10099 Berlin, Germany. Email: lukas.borke@hu-berlin.de.
+¶Research associate at Ladislaus von Bortkiewicz Chair of Statistics, C.A.S.E. - Center for Applied Statistics and Econometrics, Humboldt-Universit¨at zu Berlin, Unter den Linden 6, 10099 Berlin, Germany. Email: thijs.benschop@hu-berlin.de.
+1
+
+JEL: C21, C51, G01, G18, G32, G38.
+1. Introduction
+Systemic risk is dangerous for the stability of financial markets, since the bankruptcy of one firm may have an impact on the stability of other firms too. There are various definitions of systemic risk. One of the most popular definitions is introduced in Schwarcz (2008). He defined systemic risk as a trigger event, such as an economic shock or institutional failure, causing a chain of bad economic consequences, sometimes referred to as domino effect. This definition indicates that interlinkages and interdependencies in a system or market are very crucial for controlling systemic risk. The financial crisis in 2008 is an example. After the bankruptcy of Lehman Brothers, several more financial cooperations bankrupted as a result of their interlinkages with Lehman Brothers. Consequently, there has been a surge in the interest in measuring and controlling systemic risk since the 2008 crisis, which has led to an increase in the research on this topic.
+Several methodologies for measuring systemic risk have been proposed. Adrian and Brunnermeier (2016) proposed CoVaR, the value at risk of financial institutions conditional on the other institutions being under distress, which uses two linear quantile regressions. Hautsch et al. (2015) refined this algorithm by introducing linear quantile lasso regression with a fixed penalization parameter  for each company to select the relevant risk drivers. Fan et al. (2016) and Ha¨rdle et al. (2016) use a nonlinear Single Index Model (SIM) combined with a variable selection technique to select the risk factors. We are inspired by the early version of the work of Fan et al. (2016)1. In their application, they use data on 200 financial companies and 7 macro variables to estimate the CoVaR. During the estimation procedure, they generate the time-varying penalization parameter . This series has a striking pattern: the higher values correspond to the financial crises and the lower values correspond to financial stable periods. This observation has led to the idea to use the penalization parameter  itself as a measure for systemic risk. The time-varying feature of  is specific to Fan et al. (2016) and different from Hautsch et al. (2015), who applied a fixed  for each firm, but not time varying.
+Fan et al. (2016) provide the  series for single companies. In contrast, we would like to see the behavior of  for all firms. H¨ardle et al. (2016) compare the linear quantile lasso model and SIM, and conclude that SIM is better than the linear model, but that the linear quantile lasso model is also valid in terms of backtesting. The problem is that the SIM algorithm is computationally intensive and time-consuming. Ha¨rdle et al. (2016)
+1Their slides are available from https://www.wiwi.hu-berlin.de/de/professuren/quantitativ/ statistik/members/personalpages/wh/talks/20130314FanHaeWanZhuYuQRandSIM.pdf
+2
+
+generated  series for 100 firms with less than 300 observations each. The application of SIM is not realistic for large datasets with more than thousand observations. Since linear quantile lasso is easier to apply and time saving, we decided to apply linear quantile lasso regression to compute our risk measure. In the application, we estimate the 's for all firms individually and take the average over all firms.
+We use log return data from the 100 largest US publicly traded financial institutions as well as 6 macro variables. Our model is based on daily log returns of these financial institutions. The time period under consideration runs from April 5, 2007 until September 23, 2016 and covers several documented financial crises (2008, 2011). We observe that the pattern of this risk measure is more precise and robust to measure financial risk than the  series of a single firm. The shape and volatility of the series correspond to the market volatility and financial events with a large impact on systemic risk are clearly visible. Therefore, we propose this series as a new measure for systemic risk and call it Financial Risk Meter (FRM). The webpage of the FRM was released in the end of 2014 and updated weekly since. Currently, Zbonakova et al. (2016) apply linear quantile lasso regression to analyze the behavior of the  series. They find that  is sensitive to the changes of volatility, which provide the theoretical evidence for the FRM to be a systemic risk measure, as high volatility indicates high risk.
+In this paper we introduce the methodology of the FRM, describe the risk levels, the computational implementation as well as the visualization of the webpage. To show the suitability of the FRM we compare it with other systemic risk measures, such as VIX (see Hallett, 2009), SRISK (see Brownlees and Engle, 2016) as well as the Google trends of key words related to financial crises (see Preis et al., 2013). We find that the FRM and these risk measures mutually Granger cause, which indicates the validity of the FRM as a systemic risk measure.
+The remainder of this paper is organized as follows. In Section 2 the methodology used to construct our FRM, which is quantile lasso modeling, is presented. Section 3 presents the data, computational challenge and the visualization of the results. Section 4 shows the validity of our FRM as a measure for financial risk by comparing with other financial risk measures, Section 5 concludes, the financial institutions applied in this paper is listed in Section 6 Appendix. All the R programs for this paper can be found on www.quantlet.de.
+2. FRM methodology and estimation
+In this section we describe the methodology and algorithm used to compute the proposed FRM, which is the average over the series of the selected penalization term  for the
+3
+
+companies under consideration. Since the penalization parameters are computed based on an L1-norm (LASSO) quantile linear regression, this regression framework is introduced first. Within this framework, the penalization parameter  is exogenous. Since the FRM consists of the selected penalization parameter, we subsequently discuss the method used to select . We use the generalized approximate cross-validation criterion (GACV) proposed by Yuan and Lin (2006) to determine the optimal . The determination of the penalization parameter is pivotal to the methodology of the FRM.
+
+2.1. Linear Quantile Lasso Regression Model
+
+Following Ha¨rdle et al. (2016), we introduce the quantile lasso regression model. Let m be the number of macro variables describing the state of the economy, k the number of firms under consideration, j  {1, . . . , k}. Then p = k + m - 1 represents the number of covariates. t  {1, . . . , T } is the time point with T the total number of observations (days). s is the index of moving window, s  {1, . . . , (T - n)}, where n is the length of window size. Then the quantile lasso regression is defined as:
+
+Xjs,t = js + Asj,,t js + sj,t,
+
+(1)
+
+where Ajs,t d=ef
+
+Mts-1 X-s j,t
+
+, Mts-1 the m dimensional vector of macro variables, X-s j,t is the
+
+p - m dimensional vector of log returns of all other firms except firm j at time t and
+
+in moving window s, js is a constant term and js is a p × 1 vector defined for moving
+
+window s.
+
+The regression is performed using L1-norm quantile regression proposed by Li and Zhu (2008), which is defined as:
+
+min
+js ,js
+
+s+n
+n-1  Xjs,t - js - Asj,,t js + js
+t=s
+
+js 1
+
+,
+
+(2)
+
+where sj is the penalization parameter, and the check function  (u) is defined as:  (u) = |u|c|1(u  0) -  |,
+
+where c = 1 corresponds to quantile regression. The L1-norm quantile linear regression can be used to select relevant covariates (other firms and macro state variables) for each firm.
+
+4
+
+2.2. Penalization Parameter 
+
+Since Equation (2) has a L1 loss function and an L1-norm penalty term, the optimization problem is an L1-norm quantile regression estimation problem. The choice of the penalization parameter sj is crucial. There are several options to select js, e.g. with the Bayesian Information Criterion (BIC) or using the Generalized Approximate Cross-
+Validation criterion (GACV). Yuan (2006) conducted simulations and concluded that GACV outperforms BIC in terms of statistical efficiency. Therefore, we determine js with the GACV criterion in the FRM model and set sj as the solution of the following minimization problem:
+
+min GACV (js) = min
+
+s+n t=s
+
+
+
+Xjs,t - js - Ajs,t js
+
+,
+
+n - df
+
+where df is a measure of the effective dimensionality of the fitted model. df is the trace of the hat matrix with the t, o entry (js - Ajs,t js)/Xjs,o, and o  {1, . . . , T }. The advantage of GACV is that it also works for p > n, which can be important for the FRM
+if the moving window size is small.
+
+To compute the FRM, we perform the regression analysis as described above and select the optimal penalization parameter sj, for each firm j using GACV. This yields a lambda series for each firm. The average of these j's constitutes our proposed risk measure. The Financial Risk Meter is defined as the average lambdas over the set of k firms for all
+windows:
+
+F RM d=ef 1 k
+
+k
+
+j
+
+j=1
+
+3. Computational challenges and visualization
+
+3.1. Data
+
+To compute the FRM, we use data from 100 US publicly traded financial institutions as well as six macro variables. The selection of financial companies is based on the NASDAQ company list2 and based on the market capitalization. The selected companies are the 100 US publicly traded financial institutions with the largest market capitalization, see Table 13 in Appendix.
+
+2See the NASDAQ webpage: industry.aspx?industry=Finance
+
+http://www.nasdaq.com/screening/companies-by-
+
+5
+
+0.2 0.4 0.6 0.8 1.0
+
+Initially, we used data on the 200 US publicly traded financial institutions with the largest market capitalization to compute the FRM. However, the smaller companies in this set change regularly over the time period under consideration (2007-2016) due to, for instance, bankruptcies. This leads to issues with automatic downloading of the data and therefore we use only 100 firms. Figure 1 shows the cumulative market capitalization of US financial firms. The x-axis represents the firms ordered by market capitalization and the y-axis the cumulative market capitalization. We observe that the largest 100 firms cover more than 85% of the total market capitalization of all companies in the US financial market and are therefore can restrict our analysis to 100 firms. Furthermore, the results of estimating the FRM based on 100 or 200 firms are very similar if the moving window size is the same. Figure 2 plots both FRM series with the window size n = 126, the shape and the trends of them are similar.
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq q q q q q q q q q q q q q q q q q q q q q q q q q q q q
+0 100 200 300 400 500 600 700
+Figure 1: The x-axis represents the number of firms ordered by market capitalization and the y-axis the percentage of total market capitalization.
+FRM per cap
+6
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+2008
+
+2010
+
+2012
+
+2014
+
+2016
+
+Figure 2: FRM with 100 firms (black) and FRM with 200 firms (grey), moving window size n = 126.
+FRM compare nf
+
+We select six macro state variables to represent the general state of the economy: 1) the implied volatility index, VIX from Yahoo Finance; (2) the changes in the three-month Treasury bill rate from the Federal Reserve Bank of St. Louis; (3) the changes in the slope of the yield curve corresponding to the yield spread between the ten-year Treasury rate and the three-month bill rate from the Federal Reserve Bank of St. Louis; (4) the changes in the credit spread between BAA-rated bonds and the Treasury rate from the Federal Reserve Bank of St. Louis; (5) the daily S&P500 index returns from Yahoo Finance, and (6) the daily Dow Jones US Real Estate index returns from Yahoo Finance.
+To compute the FRM we use the algorithm as described in Section 2 and with parameter  = 0.05, i.e. at the tail level. To find the optimal window size, n, we have to make a trade-off. We find that the lasso selection technique performs worse if the window size is too small. Since we use daily data, the moving window size should be larger than 50, so that the estimation for each window is more precise. The results of using different window sizes (we have considered window sizes n = 63 (one quarter) and n = 126 (half a year)) are shown in Figure 3. The larger the window size, the more lagged, but also the smoother the plot is. Cross correlation can be used to determine the time delay of a time series, which we apply here for the estimate of the FRM with n = 63 and the FRM with n = 126. In Figure 4 and Table 1, the largest autocorrelation between FRM with
+7
+
+n = 63 and the lagged FRM with n = 126 is 0.967 from lag -29 to lag -22. We conclude that the FRM with n = 63 leads the FRM n = 126 by at least 22 periods. From all the preceding we set the moving window size to n = 63.
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+2008
+
+2010
+
+2012
+
+2014
+
+2016
+
+Figure 3: FRM with different moving window size, n = 63 (black) and n = 126 (grey), both series are scaled into the interval [0,1], from July 6, 2007 until September 23, 2016.
+FRM compare ws
+FRM100_63 & FRM100_126
+
+cross-correlation 0.0 0.2 0.4 0.6 0.8 1.0
+
+-30 -20 -10
+
+0
+
+10 20 30
+
+Lag
+
+Figure 4: Cross correlation between FRM with n = 63 and FRM with n = 126, where the number of firms is 100.
+
+FRM compare ws
+
+8
+
+Lag -30 -29 -28 -27 -26 -25 -24 -23 -22 -21
+Cross correlation 0.963 0.964 0.964 0.964 0.964 0.964 0.964 0.964 0.964 0.963
+Table 1: Cross correlation between the estimates of the FRM with n = 63 and FRM with n = 126.
+For each firm we have 2, 386 daily observations and 105 covariates (99 firms and 6 macrostate variables). The FRM is the average of the 's computed for the 100 individual firms. The 's for the individual firms are more volatile and less smooth than the average over 100 firms and therefore robuster to reflect the impact from financial events on systemic risk. Figure 5 illustrates this by plotting the  of firm Wells Fargo (the largest firm by market capitalization) and the FRM.
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+2008
+
+2010
+
+2012
+
+2014
+
+2016
+
+Figure 5: FRM (black) and  of Wells Fargo (grey), both series are scaled into interval [0,1], from April 5, 2007 until September 23, 2016.
+FRM compare of
+
+3.2. Computational challenges
+We wrote a script to automatically download the data from Yahoo Finance and Federal Reserve Bank of St. Louis. The R package quantmod is used. More details and the script are available from Quantnet ( FRM download data ) . The L1-norm quantile regression used to generate the  series is computationally intensive and therefore time-consuming, if applied sequentially for a large number of firms, see
+9
+
+for instance the code from Quantnet ( FRM lambda series). Therefore, we consider parallel computing in R to reduce the computation time. R offers several algorithms for performance computing, such as lapply, mclapply, parLapply, for and foreach3. For our purposes the foreach loops is the fastest solution, which we use for implementation.
+We use the doParallel and foreach packages in R as developed and proposed by Calaway et al. (2015) and Weston and Calaway (2015). Since we have 100 financial firms and for each firm we have to do the moving window estimation, we use the foreach loops twice: the first loop is for the 100 financial firms with the second loop nested in the first loop to perform the moving window estimation. The speed of computation is increased considerably, the script is available from Quantnet: FRM parallel compute.
+Without the use of parallel computing, i.e. using a processor with four cores for each moving window, it requires around two minutes to generate the FRM estimate for one day. The Research Data Center (RDC) of Humboldt-Universita¨t zu Berlin has provided access to there multi-core servers. Their servers have respectively 24, 32, and 40 cores. By using these servers combined with parallel computing, the average computation time is reduced approximately 12 seconds to obtain a daily value for the FRM. The FRM webpage is updated weekly, which takes only 1 minute to generate the FRM series for five working days.
+3.3. Visualization
+To implement the visualization of the FRM, we use the JavaScript library D3.js (DataDriven Documents). The D3.js library allows to create dynamic graphs. Figure 6 illustrates this and more examples are available on the FRM webpage: http://frm.wiwi.huberlin.de/. There are two time varying graphs on the FRM webpage. The upper one is the overview of the full FRM series. While the y-axis represents the value of the FRM, the x-axis represents time. The lower graph serves as an interface tool for the upper one. By selecting a time horizon in the lower graph, the upper graph zooms in on the FRM series in this time frame.
+3.3.1. Descriptive statistics
+Figure 6 shows the FRM series from April 5, 2007 through September 23, 2016. The FRM has no theoretical upper bound. In the time frame under consideration, the maximum value is 0.075, which occurred on December 15, 2008 and the mean value is 0.021. We observe several peaks in the FRM series, which correspond to crises and other events in
+3The webpage http://www.parallelr.com/r-with-parallel-computing/ provides an overview.
+10
+
+Figure 6: The graph of Financial Risk Meter (FRM).
+FRM parallel compute
+these periods. Two peaks correspond to the financial crises in 2008 and 2010. The peak in the first quarter of 2009 is at the height of the Great Recession: 800 thousand jobs were lost and the unemployment rate rose to 7.8% in the US, which was the highest since June 1992. Another peak around the fourth quarter of 2011 coincides with the decline in stock markets in August 2011, which was due to fears of contagion of the European sovereign debt crisis to Spain and Italy. Therefore, the peaks of FRM series identify financial events and their impact on financial and systemic risk. The minimum of the FRM series in the time period under consideration is observed in August 26, 2014, with a value of 0.009. This was a relatively stable period. In this sense, we conclude that the higher value of FRM indicates of higher systemic risk for the US financial market.
+3.3.2. Risk levels
+We divide risk into five levels with different classifications and colors. The levels of risk are defined as different intervals of quantiles of the FRM. These quantiles are computed based on the past values of the FRM. The color codes are similar to those used by the US
+11
+
+Homeland Security Advisory System for the terrorism threat advisory scale. As shown in Figure 7, we have five levels of risk with five color codes. The current risk level is determined by the quantile based on all past FRM observations into which the current  falls. Table 2 presents the risk levels as well as the colors, descriptions and quantiles of the risk levels. As an example, on September 23, 2016 the value of FRM was 0.013. Since the maximum of FRM series up to that date was 0.075, the quantile level of the risk measure on September 23, 2016 was 17.3%. Since this is less than the 20%-quantile, we classify the risk on that day as low risk of crisis in the financial market with color green. On the website the current risk level is marked with a cross as shown in Figure 7 for this example.
+Figure 7: Risk levels of FRM
+12
+
+Color Risk level description
+
+FRM quantile
+
+Green Low risk of crisis in the financial market.
+
+<20
+
+The incidence of a crisis is less likely than usual.
+
+Blue General risk of crisis in the financial market.
+
+20-40
+
+There is no specific risk of a crisis.
+
+Yellow Elevated risk of crisis in the financial market.
+
+40-60
+
+The incidence of a crisis is somewhat higher than usual.
+
+Orange High risk of crisis in the financial market.
+
+60-80
+
+A crisis might occur very soon.
+
+Red Severe risk of a crisis in the financial market.
+
+>80
+
+A financial crisis is imminent or happening right now.
+Table 2: Risk levels, color codes and quantiles for FRM
+
+4. Causality of FRM and other systemic risk measures
+Zbonakova et al. (2016) analyze the factors affecting the value of lambda and summarize that lambda depends on three major factors: the variance of the error term, the correlation structure of the covariates and the number of non-zero coefficients of the model. Since high volatility indicates high risk in finance and the number of non-zero coefficients is related to the connectedness of the financial firms, they provide more theoretical evidence for the FRM as a risk measure. In their application, they find the co-integration relationship between ^ and other systemic risk measures. We extend their idea and use Granger causality analysis to validate our FRM as a systemic risk measure. We select three measures: VIX (see Hallett, 2009), SRISK (see Brownlees and Engle, 2016) as well as the Google trends of the key word "financial crisis" (see Preis et al., 2013).
+For the causality analysis we first need to introduce the Vector Autoregression (VAR)
+13
+
+model briefly. Lu¨tkepohl (2005) proposes the VAR(P) model as follows:
+
+yt =  + A1yt-1 + A2yt-2 + · · · + AP yt-P + ut,
+
+(3)
+
+where yt d=ef (y1t, . . . , yKt) , Ai are fixed (K × K) coefficient matrices, ut is a K dimensional process. The coefficients could be estimated by applying multivariate least squares
+
+estimation. In order to perform the Granger causality test, the vector of endogenous
+
+variables yt is split into two subvectors y1t and y2t with dimensions (K1 × 1) and (K2 × 1) and K = K1 + K2. Then the VAR(P) model can be rewritten as follows:
+
+   
+
+ 
+
+y1t
+
+1
+
+A11,1 A12,1
+
+y1,t-1
+
+yt
+
+=
+
+ 
+
+= 
+
++ 
+
+ +···  
+
+y2t
+
+2
+
+A21,1 A22,1
+
+y2,t-1
+
+
+A11,P +
+ A21,P
+
+   
+
+A12,P
+
+y1,t-P
+
+u1t
+
+ + 
+
+   
+
+A22,P
+
+y2,t-P
+
+u2t
+
+(4)
+
+The null hypothesis of the Granger causality test is that the subvector y1t does not Granger-cause y2t, which is defined as A21,i = 0 for i = 1, 2, . . . , P . The alternative hypothesis states that the subvector y1t Granger-causes y2t and is defined as:  A21,i = 0 for i = 1, 2, . . . , P . The test statistic follows an F distributions with P K1K2 and KJ - n degrees of freedom, where J is the sample size and n equals the total number
+of parameters in the above VAR(P) model.
+
+4.1. FRM versus VIX
+The VIX series represents the market volatility which can be interpreted as a measure for systemic risk (Hallett, 2009). For reasons of comparability, we standardize these two series by setting the lowest value in the sample to zero and the highest to one. Figure 8 plots the standardized FRM series (thick black line) and the VIX series (thin red line). The plot clearly shows that both indicators move in the same direction, where the VIX series is more volatile. We also get some evidence of some financial events by observing the corresponding volatility levels of the FRM and VIX. For example, in the end of 2008 there is a sharp upward trend of FRM, whereas the upward trends dominates VIX as well, which corresponds to the bankruptcy of Lehman Brothers on September 15, 2008. Both FRM and VIX have higher values between 2008 and 2010, which corresponds to the time period of the financial crises. After 2013 the values of FRM are relative stable at a low level, while there is similar pattern of VIX, which shows signs of the slow recovery of
+14
+
+the global economy from the recession.
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+2008
+
+2010
+
+2012
+
+2014
+
+2016
+
+Figure 8: Scaled FRM (thick black line) and VIX (thin red line)
+
+FRM VIX
+
+Before we perform the Granger causality test, we should test for stationarity of both time series with the Augmented Dickey-Fuller (ADF) test. The null hypothesis of the ADF test is the presence of a unit root in the time series. The results of the test are shown in Table 3. For the FRM series, the p value is larger than 0.05, so we cannot reject the null hypothesis, i.e. the FRM series has a unit root and is non-stationary. We reject the null hypothesis for the VIX series with a p value smaller than 0.05 and conclude that the VIX series is stationary. We do not need to consider the co-integration problem, since only if both series are non-stationary, we should take into account the co-integration. There is a trade-off between using the original data and the transformed (differenced) data to find the causality relationship. Sims (1980) prefers to use the original data. He argues that VAR with non-stationary variables may provide important insights, if one is interested in the nature of relationships between variables. Brooks (2014) also states that differencing will destroy information on any long-run relationships between the series. However, other people argue that the original non-stationary data might lead to untrusted estimation, see Yule (1926) and Granger and Newbold (1974). In our case, we consider both the original data and transformed data.
+Firstly, we consider the original data. We choose the VAR order according to four criteria: the Akaike information criterion (AIC), the Hannan-Quinn information criterion (HQ), the Schwarz criterion (SC) and the Prediction Error Criterion (FPE), see Table 4. While
+15
+
+HQ and SC suggest an order 3 VAR process, AIC and FPE suggest an order 20 process. We fit both VAR models with order 3 and order 20. Next, we check the autocorrelation of the residuals to decide the optimal order. Four tests are carried out: the asymptotic Portmanteau Test, the adjusted Portmanteau Test, the Breusch-Godfrey LM test and the Edgerton-Shukur F test. The null hypothesis of these tests is that there is no first order autocorrelation among residuals. Choosing order 3 and 20 leads to the rejection of all these tests (cf. Table 5). Subsequently we try the other orders and find that with order 11 both the Breusch-Godfrey LM test and the Edgerton-Shukur F tests are passed. Therefore, we select order 11. The autocorrelation function of the residuals is plotted in Figure 9. Table 6 shows the results of the Granger causality test. All p values are smaller than 0.05 which indicates that the null hypothesis is rejected. Therefore, FRM Granger causes VIX, and also VIX Granger causes FRM.
+Next, we consider the transformed series. Since FRM is non-stationary, we take the first difference. The transformed series is called as DFRM. In Table 3 we see that DFRM is stationary. Then the same procedure as before is performed. While HQ suggests an order 8 process, SC suggest an order 5, and AIC and FPE both suggest an order 19 (cf. Table 4). After checking the four tests for autocorrelation of the residuals, we conclude that the optimal order is 19. Although it does not pass the autocorrelation test, the p value is close to the critical value 0.05, and the autocorrelation function confirms this result (cf. Table 5 and Figure 10). The result of the Granger causality test is summarized in Table 6. We find that all p values are significantly smaller than 0.05, which indicates that the null hypothesis is rejected. Therefore we conclude that DFRM Granger causes VIX, and also VIX Granger causes DFRM.
+
+Series p values FRM 0.28 VIX 0.01 DFRM 0.01
+Table 3: p values of ADF test for stationarity
+
+FRM VIX
+
+16
+
+Model
+
+AIC HQ SC FPE
+
+FRM and VIX 20 3 3 20
+
+DFRM and VIX 19 8 5 19
+
+Table 4: Suggested order for VAR process by different criteria
+
+Model
+
+Order VAR PT (asymptotic) PT (adjusted)
+
+BG
+
+ES
+
+FRM and VIX
+
+3 < 2.2 × 10-16 < 2.2 × 10-16 1.1 × 10-07 1.0 × 10-07
+
+11
+
+2.5 × 10-07
+
+2.0 × 10-07 1.6 × 10-01 1.7 × 10-01
+
+20 < 2.2 × 10-16 < 2.2 × 10-16 3.1 × 10-08 4.1 × 10-08
+
+5
+
+2.2 × 10-16
+
+2.2 × 10-16 3.2 × 10-08 3.1 × 10-08
+
+DFRM and VIX
+
+8
+
+6.7 × 10-12
+
+4.9 × 10-12 1.4 × 10-06 1.5 × 10-06
+
+11
+
+2.3 × 10-09
+
+1.8 × 10-09 1.5 × 10-03 1.7 × 10-03
+
+19
+
+1.7 × 10-03
+
+1.6 × 10-03 5.5 × 10-08 7.2 × 10-08
+
+Table 5: p values of model selection tests
+
+Cause Effect p values FRM VIX 4.0 × 10-08 VIX FRM 6.1 × 10-11 DFRM VIX 6.6 × 10-11 VIX DFRM 8.7 × 10-13
+Table 6: p vlaues of Granger causality test
+
+FRM VIX
+
+17
+
+FRM
+
+FRM & VIX
+
+0.0 0.4 0.8
+
+0.0 0.4 0.8
+
+0 5 15 25
+VIX & FRM
+
+0 5 15 25
+VIX
+
+0.0 0.4 0.8
+
+0.0 0.4 0.8
+
+-30 -20 -10 0
+
+0 5 15 25
+
+Figure 9: Autoregression functions of FRM and VIX
+
+DFRM
+
+DFRM & VIX
+
+FRM VIX
+
+0.0 0.4 0.8
+
+0.0 0.4 0.8
+
+0 5 15 25
+VIX & DFRM
+
+0 5 15 25
+VIX
+
+0.0 0.4 0.8
+
+0.0 0.4 0.8
+
+-30 -20 -10 0
+
+0 5 15 25
+
+Figure 10: Autoregression functions of DFRM and VIX
+
+18
+
+FRM VIX
+
+4.2. FRM versus SRISK
+SRISK is a macro-finance measure of systemic risk (Acharya et al., 2012; Brownlees and Engle, 2016). Our data on SRISK for the US are obtained from V-Lab4. We also standardize SRISK, so that both series are comparable on the same scale. Figure 11 plots the standardized FRM series (thick black line) and the SRISK series (thin blue line). We see that there is a peak in the first quarter of 2008 for SRISK, but afterwards FRM and SRISK have similar patterns. Especially during the beginning of 2010 and the beginning of 2012, the two series have a similar shape.
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+2008
+
+2010
+
+2012
+
+2014
+
+2016
+
+Figure 11: Scaled FRM (thick black line) and SRISK (thin blue line)
+FRM SRISK
+
+We perform the same procedure as in section 4.1. The results of the ADF test for the SRISK series in Table 7 show that the series is non-stationary. Since the FRM series is neither stationary, we consider the co-integration of them. From Granger (1988) we know that if both series are co-integrated, then there must be Granger causality between them in at least one way. We perform the Engle Granger 2-step test for co-integration, which is suitable for bivariate time series. In the first step, the linear regression of FRM on SRISK is carried out, i.e. FRM is the explanatory variable and SRISK the response variable. In the second step, we test the residuals of the aforementioned linear regression. If these residuals are stationary, then there is co-integration of FRM and SRISK. The null hypothesis of this test is that the residuals are non-stationary. The result of this test are summarized in Table 8. We conclude that FRM and SRISK are co-integrated, in
+4See the Systemic Risk Analysis Welcome Page: https://vlab.stern.nyu.edu/welcome/risk/
+19
+
+other words, FRM Granger causes SRISK. If we regress SRISK on FRM, i.e. SRISK is the explanatory variable and FRM the response variable, we also conclude that SRISK and FRM are co-integrated, which indicates that SRISK Granger causes FRM. We thus conclude that there is mutual causality between FRM and SRISK.
+
+Variables p-values
+
+FRM
+
+0.48
+
+SRISK 0.10
+
+Table 7: p values of ADF test for stationarity for FRM and SRISK
+
+Explanatory (Cause) Response (Effect) Value of test-statistic Critical value at 5%
+
+FRM
+
+SRISK
+
+-3.1
+
+-1.95
+
+SRISK
+
+FRM
+
+-2.7
+
+-1.95
+
+Table 8: Results of Engle Granger 2-step co-integration test
+
+FRM SRISK
+
+4.3. FRM versus Google Trends
+Finally, we analyze the relationship between FRM and Google Trends (GT) for the keyword "financial crisis". Google Trends provides data on the search volume of particular words and phrases relative to the total search volume. This can be disaggregated by countries. If a keyword is more frequently searched for, this might indicate a particular interest. Preis et al. (2013) analyzed the data related to finance from Google Trends, and find that Google Trends data did not only reflect the current state of the stock markets, but may have also been able to forecast certain future trends. We use Google Trends for the keyword "financial crisis", assuming that more people will search for this term if they feel the risk for a financial crisis is high. The Google Trends data are weekly data. To allow for comparison with the FRM we apply cubic interpolation to estimate daily data from the weekly Google Trends series. This series is compared with the daily FRM series. Figure 12 plots both the daily FRM series as well as the cubic interpolated Google Trends daily series. Both series are standardized to the interval zero-one for comparison.
+20
+
+We observe some co-movement between both series.
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+2008
+
+2010
+
+2012
+
+2014
+
+2016
+
+Figure 12: Scaled FRM (thick black line) and Google Trends (thin green line)
+FRM GT
+
+The ADF test shows that the GT series is stationary (cf. Table 9). We perform two tests for the relationship between the two series. Firstly, we consider the original data of FRM, then we consider the transformed data. We perform four criteria to find the optimal order of VAR model. As the results in Table 10 show, all the criteria suggest an order 20 VAR process. Therefore, we apply an order 20 VAR model. Next, the autocorrelation of the residuals is tested. Although none of the tests can be passed (cf. Table 11), we have no better choice for the order than 20. The autocorrelation function of residuals are plotted in Figure 13. Table 12 shows the results of the Granger causality test. All p values are significantly smaller than 0.05, which indicates that the null hypothesis is rejected. Therefore, FRM Granger causes GT, and GT Granger causes FRM.
+For the first differenced FRM, i.e. DFRM, the same procedure is used. In Table 10 all the criteria suggest an order 20 VAR process. The result of the autocorrelation tests are presented in Table 10. Although none of the tests is passed, we still use order 20. The autocorrelation function of the residuals is shown in Figure 14. Table 12 shows the results of the Granger causality test. All p values are significantly smaller than 0.05, which indicates that the null hypothesis is rejected. Therefore, DFRM Granger causes GT, and GT Granger causes DFRM.
+
+21
+
+Variables p-values
+
+FRM
+
+0.48
+
+GT 0.01
+
+DFRM 0.01
+
+Table 9: p values of ADF test for stationarity for FRM and GT
+
+Model
+
+AIC HQ SC FPE
+
+FRM and GT 20 20 20 20
+
+DFRM and GT 20 20 20 20
+
+Table 10: Suggested order for VAR process by different criteria
+
+Model
+
+Order PT (asymptotic) PT (adjusted)
+
+BG
+
+ES
+
+FRM and GT 20
+
+< 2.2 × 10-16 < 2.2 × 10-16 < 2.2 × 10-16 < 2.2 × 10-16
+
+DFRM and GT 20
+
+< 2.2 × 10-16 < 2.2 × 10-16 < 2.2 × 10-16 < 2.2 × 10-16
+
+Table 11: p values of model selection tests
+
+Cause Effect p-values
+
+FRM GT
+
+1.1 × 10-10
+
+GT FRM 2.1 × 10-12
+
+DFRM GT
+
+6.8 × 10-11
+
+GT DFRM 4.1 × 10-10
+
+Table 12: p values of Granger causality test
+
+22
+
+FRM GT
+
+FRM
+
+FRM & GT
+
+-0.2 0.2 0.6 1.0
+
+-0.2 0.2 0.6 1.0
+
+0 5 15 25
+GT & FRM
+
+0 5 15 25
+GT
+
+-0.2 0.2 0.6 1.0
+
+-0.2 0.2 0.6 1.0
+
+-30 -20 -10 0
+
+0 5 15 25
+
+Figure 13: Autoregression functions of FRM and GT
+
+DFRM
+
+DFRM & GT
+
+FRM GT
+
+-0.2 0.2 0.6 1.0
+
+-0.2 0.2 0.6 1.0
+
+0 5 15 25
+GT & DFRM
+
+0 5 15 25
+GT
+
+-0.2 0.2 0.6 1.0
+
+-0.2 0.2 0.6 1.0
+
+-30 -20 -10 0
+
+0 5 15 25
+
+Figure 14: Autoregression functions of DFRM and GT
+
+23
+
+FRM GT
+
+5. Conclusion
+In this paper we propose and develop a measure for systemic risk in financial markets: the Financial Risk Meter (FRM). The FRM is a measure for systemic risk based on the penalty term  of the linear quantile lasso regression, which is defined as the average of the  series over the 100 largest US publicly traded financial institutions. The implementation is carried out by using parallel computing. The risk levels are classified by five levels. The empirical result shows that our Financial Risk Meter can be a good indicator for trends in systemic risk. Compared with other systemic risk measures, such as VIX, SRISK, Google Trends with the keyword "financial crisis", we find that the FRM and VIX, FRM and SRISK, FRM and GT mutually granger cause one another, which means that our FRM is a good measure of systemic risk for the US financial market. All the codes of FRM are published on www.quantlet.de with keyword FRM. The up-to-date FRM can be found on http://frm.wiwi.hu-berlin.de/.
+24
+
+6. Appendix: Financial Institutions
+
+25
+
+WFC JPM BAC C AIG GS USB AXP MS BLK MET PNC BK SCHW COF PRU TRV CME CB MMC BBT ICE STT AFL CINF
+
+Wells Fargo & Company J P Morgan Chase & Co Bank of America Corporation Citigroup Inc. American International Group, Inc. Goldman Sachs Group, Inc. U.S. Bancorp American Express Company Morgan Stanley BlackRock, Inc. MetLife, Inc. PNC Financial Services Group, Inc. (The) Bank Of New York Mellon Corporation (The) The Charles Schwab Corporation Capital One Financial Corporation Prudential Financial, Inc. The Travelers Companies, Inc. CME Group Inc. Chubb Corporation Marsh & McLennan Companies, Inc. BB&T Corporation Intercontinental Exchange Inc. State Street Corporation Aflac Incorporated Cincinnati Financial Corporation
+
+AON ALL BEN STI MCO PGR AMP AMTD HIG TROW NTRS MTB FITB IVZ L EFX PFG RF MKL FNF LNC CBG KEY NDAQ CACC
+
+Aon plc Allstate Corporation Franklin Resources, Inc. SunTrust Banks, Inc. Moody's Corporation Progressive Corporation Ameriprise Financial Services, Inc. TD Ameritrade Holding Corporation Hartford Financial Services Group, Inc. T. Rowe Price Group, Inc. Northern Trust Corporation M&T Bank Corporation Fifth Third Bancorp Invesco Plc Loews Corporation Equifax, Inc. Principal Financial Group Inc Regions Financial Corporation Markel Corporation Fidelity National Financial, Inc. Lincoln National Corporation CBRE Group, Inc. KeyCorp The NASDAQ OMX Group, Inc. Credit Acceptance Corporation
+
+CNA HBAN SEIC ETFC AMG RJF UNM NYCB Y SBNY CMA AJG TMK WRB AFG SIVB EWBC ROL ZION AIZ PACW AFSI ORI PBCT FCNCA
+
+CNA Financial Corporation Huntington Bancshares Incorporated SEI Investments Company E*TRADE Financial Corporation Affiliated Managers Group, Inc. Raymond James Financial, Inc. Unum Group New York Community Bancorp, Inc. Alleghany Corporation Signature Bank Comerica Incorporated Arthur J. Gallagher & Co. Torchmark Corporation W.R. Berkley Corporation American Financial Group, Inc. SVB Financial Group East West Bancorp, Inc. Rollins, Inc. Zions Bancorporation Assurant, Inc. PacWest Bancorp AmTrust Financial Services, Inc. Old Republic International Corporation People's United Financial, Inc. First Citizens BancShares, Inc.
+
+BRO ERIE OZRK WTM SNV ISBC MKTX LM CBSH BOKF EEFT DNB WAL EV CFR MORN THG UMPQ CNO FHN WBS PB PVTB SEB MTG
+
+Brown & Brown, Inc. Erie Indemnity Company Bank of the Ozarks White Mountains Insurance Group, Ltd. Synovus Financial Corp. Investors Bancorp, Inc. MarketAxess Holdings, Inc. Legg Mason, Inc. Commerce Bancshares, Inc. BOK Financial Corporation Euronet Worldwide, Inc. Dun & Bradstreet Corporation Western Alliance Bancorporation Eaton Vance Corporation Cullen/Frost Bankers, Inc. Morningstar, Inc. The Hanover Insurance Group, Inc. Umpqua Holdings Corporation CNO Financial Group, Inc. First Horizon National Corporation Webster Financial Corporation Prosperity Bancshares, Inc. PrivateBancorp, Inc. Seaboard Corporation MGIC Investment Corporation
+
+26
+
+Table 13: The list of 100 financial companies used to estimate FRM in our sample.
+
+References
+Acharya, V., Engle, R., and Richardson, M. (2012). Srisk as a macro-finance measure of systemic risk. https://bfi.uchicago.edu/sites/default/files/file uploads/%234.pdf. Accessed: 2016-12-16.
+Adrian, T. and Brunnermeier, M. K. (2016). CoVaR. American Economic Review, 106(7):1705­1741.
+Brooks, C. (2014). Introductory Econometrics for Finance. Cambridge University Press.
+Brownlees, C. T. and Engle, R. F. (2016). SRISK: A Conditional Capital Shortfall Measure of Systemic Risk. The Review of Financial Studies.
+Calaway, R., Weston, S., and Tenenbaum, D. (2015). Package doparallel. https://cran.rproject.org.
+Fan, Y., Ha¨rdle, W. K., Wang, W., and Zhu, L. (2016). Composite Quantile Regression for the Single-Index Model. Journal of Business economics and statistics.
+Granger, C. (1988). Some recent development in a concept of causality. Journal of Econometrics, 39(1):199 ­ 211.
+Granger, C. and Newbold, P. (1974). Spurious regressions in econometrics. Journal of Econometrics, 2(2):111­120.
+Hallett, N. (2009). Taming Risk­A guide for Traders. The Disciplined Trader.
+Ha¨rdle, W., Wang, W., and Yu, L. (2016). TENET: Tail-Event driven NETwork risk. Journal of Econometrics, 192(2):499­513.
+Hautsch, N., Schaumburg, J., and Schienle, M. (2015). Financial network systemic risk contributions. Review of Finance, 19(2):685­738.
+Li, Y. and Zhu, J. (2008). L1-norm quantile regression. Journal of Computational and Graphical Statistics, 17(1).
+Lu¨tkepohl, H. (2005). New Introduction to Multiple Time Series Analysis. Springer.
+Preis, T., Moat, H. S., and Stanley, H. E. (2013). Quantifying trading behavior in financial markets using google trends. Scientific Reports, 3:1684.
+27
+
+Schwarcz, S. L. (2008). Systemic risk. Georgetown Law Journal, 97(1):193­249. Sims, C. A. (1980). Macroeconomics and reality. Econometrica, 48(1):1­48. Weston, S. and Calaway, R. (2015). Getting started with doparallel and foreach.
+https://cran.r-project.org. Yuan, M. (2006). Gacv for quantile smoothing splines. Computational statistics and data
+analysis, 50(3):813­829. Yuan, M. and Lin, Y. (2006). Model selection and estimation in regression with grouped
+variables. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 68(1):49­67. Yule, G. U. (1926). Why do we sometimes get nonsense-correlations between time-series?­ A study in sampling and the nature of time-series. Journal of the Royal Statistical Society, 89(1):1­63. Zbonakova, L., Ha¨rdle, W. K., and Wang, W. (2016). Time Varying Quantile Lasso. SFB 649 Discussion Paper 2016-047, Sonderforschungsbereich 649, Humboldt Universita¨t zu Berlin, Germany.
+28
+
+SFB 649 Discussion Paper Series 2017
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Fake Alpha" by Marcel Müller, Tobias Rosenberger and Marliese UhrigHomburg, January 2017.
+002 "Estimating location values of agricultural land" by Georg Helbing, Zhiwei Shen, Martin Odening and Matthias Ritter, January 2017.
+003 "FRM: a Financial Risk Meter based on penalizing tail events occurrence" by Lining Yu, Wolfgang Karl Härdle, Lukas Borke and Thijs Benschop, January 2017.
+SFSBF6B4694, 9S,pSapnadnaduaeureSrtrSatßraeß1e, 1D,-D10-1107187B8eBrleinrlin htthpt:t/p/:/s/fbs6fb4694.w9.iwwiiw.hiu.h-bue-brleinrl.idne.de
+ThTishrisesreasercahrcwhawsassupsuppoprtoerdtebdybtyhethDeeDuetsucthseche ForFsocrhsuchnugnsgesgmeeminesicnhsachftatfht rtohuroguhgthhethSeFSBF6B4694"9Ec"oEnconmoimc RicisRki"s.k".
+
+

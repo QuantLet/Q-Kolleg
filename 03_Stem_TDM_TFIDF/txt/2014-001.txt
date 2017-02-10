@@ -1,0 +1,1775 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2014-001
+Principal Component Analysis in an
+Asymmetric Norm
+Ngoc Mai Tran* Maria Osipenko** Wolfgang Karl Härdle**
+* University of California at Berkeley, USA ** Humboldt-Universität zu Berlin, Germany This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Principal Component Analysis in an Asymmetric Norm 
+Ngoc Mai Tran1, Maria Osipenko2, and Wolfgang Karl Ha¨rdle3
+1Department of Statistics, University of California at Berkeley, USA. 2Collaborative Research Center 649: Economic Risk, Humboldt-Universita¨t zu Berlin, Berlin, Germany. 3C.A.S.E.- Center for Applied Statistics & Economics,
+Humboldt-Universita¨t zu Berlin, Berlin, Germany. Lee Kong Chian School of Business, Singapore Management University,
+Singapore.
+Abstract Principal component analysis (PCA) is a widely used dimension reduction tool in the analysis of many kind of high-dimensional data. It is used in signal processing, mechanical ingeneering, psychometrics, and other fields under different names. It still bears the same mathematical idea: the decomposition of variation of a high dimensional object into uncorrelated factors or components. However, in many of the above applications, one is interested in capturing the tail variables of the data rather than variation around the mean. Such applications include weather related event curves, expected shortfalls, and speeding analysis among others. These are all high dimensional tail objects which one would like to study in a PCA fashion. The tail character though requires to do the dimension reduction in an asymmetric norm rather than the classical L2-type orthogonal projection. We develop an analogue of PCA in an asymmetric norm. These norms cover both quantiles and expectiles, another tail event measure. The difficulty is that there is no natural basis, no `principal components', to the k-dimensional subspace found. We propose two definitions of principal components and provide algorithms based on iterative least squares. We prove upper bounds on their convergence times, and compare their performances in a simulation study. We apply the algorithms to a Chinese weather dataset with a view to weather derivative pricing.
+Keywords: principal components; asymmetric norm; dimension reduction; quantile; expectile.
+JEL Classification: C38, C61, C63.
+This research was supported by Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+1
+
+1 Introduction
+When data come as curves without known functional form, the statistician faces immediately the need for dimension reduction. The conventional and widely used tool for such high dimensional curve data is principal component analysis (PCA). The basic principle of this technique is to treat the curves as random variations around a mean curve, and then orthogonalize the covariance operator into eigenfunctions and corresponding (random) loadings. The focus of this principle is on studying the variation around a mean curve. Loadings on (interpretable) eigenfunctions would then represent specific variations around the average. PCA or more generally functional PCA (FPCA) has been successfully applied in many fields such as gene expression measurements, weather, natural hazard, and environment studies, demographics, etc, see Jolliffe (2004), Crambes et al. (2009), and Chen and Mu¨ller (2012). One of the first applications is in Ramsay and Silverman (2005). They considered temperature curves recorded daily over a year at multiple stations in an area. The premise is that there are only a few principal components influencing the average temperature, and that the temperature curve from each station is well-approximated on average by a specific linear combinations of these factors. PCA approximates the mean of the data by a nested sequence of optimal subspaces of small dimensions. Thus the optimal subspace of dimension k comes with a natural basis, consisting of uncorrelated random curves (vectors), the principal components, playing the role of the factors aforementioned. Due to the nested structure of the optimal subspaces, one can compute the first few components using a greedy algorithm. The first principal component can be computed efficiently using iterative partial least squares.
+In many of the above applications, one is not only interested in the variation around an average curve, but rather in features of the data that are expressible as scale (variance) or tail related functional data. In pricing of financial products where volatility is relevant, for example, the variation of the scale of risk factors is at the core of fair pricing. If one would like to construct weather derivatives or forecasts for the above FPCA example on temperature curves, one needs not only to know the variation across stations, but also the changing scale of the temperature curves, Campbell and Diebold (2005), Benth and Benth (2012), and H¨ardle and L´opez Cabrera (2012). In climatological science, one is interested in the extremes of certain natural phenomena like drought or rainfall. A tail indicator like a quantile of a conditional distribution when indexed by an explanatory variable also constitutes a curve. Therefore, such a quantile curve collection may also be treated in an FPCA context. Yet another tail-describing curve is the expectile function. Like the quantile curve, it can be represented via a solution with respect to an asymmetric norm. Expectiles have as well numerous application areas, especially in the calculation of risk measures of a financial asset or a portfolio. Taylor (2008) shows how a widely accepted risk measure such as expected shortfall can be assessed via expectiles. Kuan et al. (2009) apply this tail measure in an autoregressive risk management context.
+In this paper, we develop an analogue of PCA for quantiles and expectiles. The later, proposed by Newey and Powell (1987), is an analogue of the mean for quantiles. The quantile to level  of a distribution with cdf F , assuming F is invertible, is defined as q = F -1( ). It is also the solution to the following optimization problem:
+q = arg min E X - q ,1 qR
+2
+
+where X is a random variable in R with distribution F , and
+
+x
+
+ ,
+
+is
+
+the
+
+asymmetric
+
+norm:
+
+x
+
+ ,
+
+=
+
+|I (x
+
+
+
+0)
+
+-
+
+ ||x|,
+
+ = 1.
+
+(1)
+
+Given Xi  F, i = 1, . . . , n, one may formulate the estimation of the unknown quantile in a location model:
+
+Xi = q + i,
+
+(2)
+
+with the  -quantile of the cdf of  being zero. A natural estimate of q in (2) is:
+
+n
+
+q^ = arg min
+
+Xi - q ,1.
+
+qR
+
+i=1
+
+(3)
+
+The estimator as written in (3) can be defined for Rp-valued vectors, if the asymmetric norm is taken by applying (1) coordinatewise and then summing over the coordinates. Given this extension it can be used to analyse curves data when discretized on a regular grid as mensioned in Kneip and Utikal (2001).
+Formulation (3) yields a statistical interpretation. In fact, if the noise i in (2) follows a so-called asymmetric Laplace distribution ALD( ), which has cdf proportional to the functional exp(- · ,1), then (3) can be interpreted as a quasi maximum likelihood estimation of equation (2). Putting  = 2 in (1) yields, via (3), a quasi likelihood interpretation based on an asymmetric normal distribution. Both cases  = 1 and  = 2 for  = 0.5 are indicators for a certain tail index. This paper aims to shed some light on how to create suitable subspace decompositions for such collections of tail index curves.
+As noted in Guo et al. (2013), the first step in this problem corresponds to doing lowrank matrix approximation with weighted L1 and L2 norm, respectively, where the weights are sign-sensitive (see Section 1). Based on a proposal of Schnabel (2011) an iterative weighted least squares algorithm for expectiles is employed where the weights are updated in each iteration. This algorithm is guaranteed to converge, although not necessarily to the global minimum as we shall show below. Thus one can at least find a locally optimal kdimensional subspace that best approximates a given quantile or expectile curve (vector). The difficulty is that the weight matrix is not of rank one, hence there is no natural basis, no `principal components', to the k-dimensional subspace found. While this is a known problem in weighted low-rank matrix approximation, see Srebro and Jaakkola (2003), this problem has not been addressed before.
+Furthermore, the definition of an optimal  -expectile subspace employed in Guo et al. (2013) is not invariant under linear transformations of the data. That is, if one changes the basis of the data, the optimal  -expectile subspace in the new basis is not necessarily a linear transform of that expressed in the old basis. This means one has to fix a basis for the data before computing the optimal  -expectile subspace. This restricts the usefulness of this method to applications where there is a natural basis, such as in the Chinese weather dataset, where yearly temperature is expressed as a vector of 365 daily temperatures. Here one would be interested in capturing extreme daily temperature as opposed to extreme temperature expressed in a Fourier basis. However, in many other applications, invariance under change of basis is an important feature of PCA.
+The contributions of our paper is two fold. After defining the basic concepts in the next section 2, we, first, work with the formulation in Guo et al. (2013) in section 3 and propose two natural bases, hence two definitions of principal components for the optimal
+
+3
+
+subspace found. Second, in section 4 we propose an alternative definition of principal components for quantiles and expectiles, closely related to the definition of principal directions for quantiles of Fraiman and Pateiro-Lo´pez (2012). This definition satisfies many nice properties, such as invariance under translations and linear transformations of the data. In particular, it returns the usual PCA basis under elliptically symmetric distributions. We then provide algorithms to compute the three versions of principal components aforementioned, based on iterative weighted least squares in section 5. We prove upper bounds on their convergence times in section 5.2 and compare their performances in a simulation study in section 6. In section 7 of our paper, we show an application to a Chinese weather dataset with a view to pricing weather derivatives. The last section summarizes our findings.
+
+2 Quantiles and expectiles
+
+2.1 Definitions
+
+We now set up notations and recall the definitions of quantile and expectile. In the next
+
+two sections we specify the main optimization problems in Rp.
+
+For y  Rp, define y+ d=ef max(0, y), y- d=ef max(0, -y) coordinatewise. For   (0, 1),
+
+let · 1 denote the L1-norm in Rp, that is, y 1 =
+
+p j=1
+
+|yj |.
+
+Define the asymmetric
+
+L1-norm in Rp via
+
+p
+y ,1 =  y+ 1 + (1 -  ) y- 1 = |yj| · { I(yj  0) + (1 -  )I(yj < 0)} .
+j=1
+
+Similarly, let
+
+·
+
+2 denote the L2-norm in Rp,
+
+y
+
+2 2
+
+=
+
+p j=1
+
+yj2.
+
+Define the asymmetric
+
+L2-norm in Rp via
+
+y
+
+2 ,2
+
+=
+
+
+
+y+
+
+2 2
+
++
+
+(1
+
+-
+
+
+
+)
+
+y-
+
+22.
+
+When  = 1/2, we recover a constant multiple of the L1 and L2-norms. These belong to the class of asymmetric norms with sign-sensitive weights, and have appeared in ap-
+
+proximation theory, Cobza¸s (2013). Some properties we use in this paper are the fact that these norms are convex, and their unit balls restricted to a given orthant in Rp are weighted simplices for the · ,1 norm, and axis-aligned ellipsoids for the · ,2 norm. In
+other words, they coincide with the unit balls of axis-aligned weighted L1 and L2 norms. Let Y  Rp be a random variable with cdf F . The  -quantile q (Y )  Rp of FY is the
+solution to the following optimization problem
+
+q (Y ) = argmin E Y - q ,1.
+qRp
+Similarly, the  -expectile e (Y )  Rp of FY is the solution to
+e (Y ) = argmin E Y - e 2,2. eRp
+Since the asymmetric L1 and L2 norms are convex, the solution exists and is unique, assuming that E(Y ) is finite. This definition guarantees that the  -quantile q (Y ) is unique even when the cdf F is not invertible.
+
+4
+
+2.2 Properties
+
+We collect some mathematical properties of quantiles and expectiles here. These will be useful for proving theorems in future sections. For convenience we shall suppress the dependence on Y where possible. We shall state the next proposition for the one-dimensional case, that is, Y  R. Analogous results in higher dimensions hold coordinatewise.
+
+Proposition 2.1 (Properties of expectile Newey and Powell (1987)). Let Y  R be a random variable. Let F be its cdf, G be its first partial moment, defined as
+
+x
+G(x) = u dF (u).
+-
+
+Assume that G(x) <  for all x  R
+
+· For   (0, 1), e (Y + t) = e (Y ) + t for t  R.
+
+· For   (0, 1),
+
+e (sY ) =
+
+se (Y ) for s  R, s > 0 -se1- (Y ) for s  R, s < 0
+
+· e = e (Y ) is the  -quantile of the distribution function T , i.e.  = T (e ) where
+
+G(x) - xF (x)
+
+T (x) = 2{G(x) - xF (x)} + {x -
+
+ -
+
+u
+
+dF
+
+(u)}
+
+.
+
+(4)
+
+Corollary 2.1. Suppose Y  Rp has a symmetric distribution about 0, and it belongs to the location-scale family. Then for   (0, 1), e (Y ) = -e1- (Y ), and
+
+e (sY + t) = se (Y ) + t for all s  R, t  Rp. In particular, if Y  N(µ, 2), Z  N(0, 1), then
+
+e (Y ) = ||e (Z) + µ.
+
+Suppose the cdf F is differentiable. Then q (Y ) = F -1( ). Let Fn-1 : (0, 1)  R and F -1 : (0, 1)  R denote the empirical and population quantile function, respectively. A
+
+classical result of empirical process theory in van der Vaart and Wellner (1996, §2) states
+
+that
+
+n(Fn-1 - F -1)(t) L
+
+-W 0 F (F -1) (t),
+
+t  (0, 1)
+
+where W 0 denotes the Brownian bridge on [0, 1], and the convergence takes place over the Skorokhod space D([0, 1]). Now, the last point of Proposition 2.1 states that the expectile is indeed the quantile of a function T . Thus, one may suspect that the expectile process also satisfies a similar statement. Indeed, we now make this concrete.
+
+Theorem 2.1. Let F be a differentiable cdf which defines a distribution with mean zero, variance 2. Let e : (0, 1)  R,   e be the expectile function. Let Fn, en be the empirical versions. Then for any 0 <  < 1,
+
+ n(en
+
+-
+
+e)
+
+L
+
+E,
+
+5
+
+where the convergence takes place over D([, 1 - ]), E is a stochastic process on [, 1 - ], whose marginals are normally distributed with mean 0 and variance
+
+for   [, 1 - ].
+
+Var{E( )}
+
+=
+
+E{ (Y [ {1
+
+- -
+
+e )+ + (1 -  )(e - Y )+}2 F (e )} + (1 -  )F (e )]2
+
+(5)
+
+For example, if  = 1/2, then e1/2,n and e1/2 are just the empirical and population mean, and Var{E(1/2)} = 2. Thus we recover the classical central limit theorem. We
+first give an overview of the proof. We shall prove convergence for the inverse process
+of e,n and e , which is Tn(e ) and T (e ) as defined in Proposition 2.1. Then we invoke the result of Doss and Gill (1992) to show that the expectile process itself must also converge to a stochastic process E . Finally, to derive the marginal distribution of E with e being the solution of a convex optimization problem. Thus its asymptotic properties, in particular, its limit in distribution, can be derived involving a theorem of Hjort and
+Pollard (2011). Applying theresult of Hjort and Pollard can only give finite dimensional convergence of the process n(e,n - e ). On the other hand, it is possible to derive Theorem 2.1 using the result of Doss and Gill alone, however, the computation for the second moment of E is quite messy. Thus we choose to only derive the second moment properties of the process E .
+
+Proof. Note that the inverse process of e,n and e are Tn : R  [0, 1], e  Tn(e ) and T : R  [0, 1], e  T (e ) as defined by (4) in Proposition 2.1. To be clear,
+
+Tn(x)
+
+=
+
+Gn(x) - xFn(x) 2{Gn(x) - xFn(x)} + (x
+
+-
+
+, µn)
+
+where Gn(x) =
+
+x -
+
+u
+
+dFn(u)
+
+is
+
+the
+
+empirical
+
+version
+
+of
+
+G,
+
+and
+
+µn
+
+=
+
+ -
+
+udFn(u)
+
+is
+
+the empirical mean. By Newey and Powell (1987), the functions Tn, T are both distri-
+
+bution functions, andthus they are non-decreasing cadlag functions. We claim that the stochastic processes n(Tn - T ) converges to some stochastic process in the Skorokhod space D([-, ]). Indeed, note that the processes n(Gn - G) and n(Fn - F ) both converge to some process on D([-, ]). Similarly, assuming µ = 0, nµn converges
+
+to the normal distribution with mean 0, variance 2. The numerator of the fraction n{Tn(x) - T (x)} is
+
+ n{Gn(x)
+
+-
+
+G(x)}x
+
+-
+
+ n{Fn(x)
+
+-
+
+F
+
+(x)}x2
+
+-
+
+ nµn{G(x)
+
+-
+
+xF
+
+(x)}.
+
+Since F has finite second moment, |G(x) - xF (x)| is uniformly bounded for large x. Thus the above expression converges in distribution uniformly in x. Now, the denominator of the fraction Tn(x) - T (x) is
+
+[2{G(x) - xF (x)} + x][2{Gn(x) - xFn(x)} + (x - µn)],
+
+which converges a.s. for all x to [2{G(x) - xF (x)} + x]2, which is bounded away from 0. Thus the process n(Tn - T ) converges in D([-, ]).
+
+By Doss and Gill (1992), this implies that the inverse processes Tn-1 = en, T -1 = e must
+
+satisfy
+
+ n(en
+
+-
+
+e)
+
+L
+
+E
+
+6
+
+where the convergence takes place over D([, 1 - ]), E is a stochastic process on [, 1 -
+
+]. Finally, to derive the marginal distribution of E with e being the solution of a convex optimization problem with differentiable objective function. Thus the asymptotic
+
+properties of the empirical estimator e,n, and in particular, its limit in distribution, can be derived using the theorem of Hjort and Pollard (2011, Theorem 2). Explicitly, in their
+
+notation, fix   [, 1 - ], and let g (y, t) =
+
+y-t
+
+2 ,2
+
+=  (y - t)+2 + (1 -  )(t - y)+2
+
+be
+
+our objective function. Differentiate with respect to t, we find
+
+g (y, t) = 2{- (y - t)+ + (1 -  )(t - y)+}, g (y, t) = 2{ I(y  t) + (1 -  )I(y < t)}.
+
+Define K = Eg (Y, t)2 = 4E{ (Y - e )+ + (1 -  )(e - Y )+}2, and
+
+J = E{g (Y, e )} = E2{ I(y  t) + (1 -  )I(y < t)} = 2[ {1 - F (e )} + (1 -  )F (e )].
+
+Now, since g is a convex differentiable function, as t  e ,
+
+E{g (Y, t)
+
+-
+
+g (Y, e )}
+
+=
+
+1 2
+
+E{g
+
+(Y
+
+,
+
+e
+
+)}(e
+
+-
+
+t)2
+
++
+
+O(|t|2).
+
+ Therefore, by Hjort and Pollard (2011, Theorem 2), n{e,n - e } converges to a normal distribution with mean 0 and variance J-1KJ-1, which in our case simplifies to (5). 2
+
+3 Principal components as error minimizers
+There are multiple, equivalent ways to define standard PCA, which generalize to different definitions of principal components for quantiles and expectiles. We focus on two formulations: minimizing the residual sum of squares, and maximizing the variance capture.
+
+3.1 Review of PCA
+
+Suppose we observe n vectors Y1, . . . , Yn  Rp with edf Fn. Write Y for the n × p
+
+data matrix. PCA solves for the k-dimensional affine subspace that best approximates
+
+Y1, . . . , Yn in L2-norm. In matrix terms, we are looking for the constant m  Rp and the matrix Ek, the rank-k matrix that best approximates Y - 1(m) in the Frobenius norm.
+
+That is,
+
+(mk, Ek) =
+
+argmin
+
+Y - 1m
+
+-E
+
+2 1/2,2
+
+.
+
+mRp,ERn×p:rank(E)=k
+
+(6)
+
+As written, m is not well-defined: if (m, E) is a solution, then (m + c, E - 1c ) is another
+equivalent solution for any c in the column space of E. Geometrically, this means we can
+express the affine subspace m + E with respect to any chosen point m. It is intuitive
+to choose m to be the best constant in this affine subspace that approximates Y . By a least squares argument, the solution is mk = E(Y ). That is, it is independent of k and coincides with the best constant approximation to Y . Thus, it is sufficient to assume E(Y ) = m  0, and consider the optimization problem in (6) without the constant term.
+Suppose Y is full rank and the eigenvalues of its covariance matrix are all distinct. Again by least squares argument, for 1  k < p, the column space of Ek is contained in the column space of Ek+1, and Ek+1 - Ek is the optimal rank-one approximation of
+
+7
+
+Y - Ek. This has two implications. Firstly, there exists a natural basis for Ek. Indeed, there exists a unique ordered sequence of orthonormal vectors v1, v2, . . . , vp  Rp such that E1 = U1V1 ,E2 = U2V2 , and so on, where the columns of Vk are the first k vi's. The vi's are called the principal components, or factors. For fixed k, Vk is the component, or factor matrix, and Uk is the loading.
+Secondly, a greedy algorithm reduces computing the components v1, v2, . . . to computing the first component, in other words, solving (6) for k = 1. Every rank-one matrix E  Rn×p has a unique decomposition E = U V for U  Rn×1, V  Rp×1 with V V = 1.
+Thus, solving (6) is equivalent to an unconstrained minimization problem over the pair
+of matrices (U, V ) with objective
+
+J(U, V ) = Y - U V
+
+2 1/2,2
+
+=
+
+(Yij -
+
+UilVjl)2.
+
+i,j l
+
+For fixed U , J is a quadratic in the entries of V , and vice versa. Since all local minima of J are global, see Srebro and Jaakkola (2003), J can be efficiently minimized using an iterative least squares algorithm, leading to an efficient method for performing PCA for small k in large datasets.
+
+3.2 Analogues for expectiles
+
+We now generalize the above definition of PCA to handle expectiles. The quantiles case follows similarly, and algorithms for L1 matrix factorization can also be adapted to this case. Recall that we are looking for the best k-dimensional affine subspace which minimizes the asymmetric L2-norm. The analogue of (6) is the following low-rank matrix approximation problem
+
+(mk, Ek) =
+
+argmin
+
+Y - 1m - E 2,2.
+
+mRp,ERn×p:rank(E)=k
+
+(7)
+
+Again, we may define m to be the best constant approximation to Y on the affine subspace
+determined by (m, E). For a fixed affine subspace, such a constant is unique, and is the
+coordinatewise  -expectile of the residuals Y - E. However, the expectile is not additive for  = 1/2. Thus in general, the column space of Ek is not a subspace of the column space Ek+1, the constant mk depends on k, and is not equal to the  -expectile e (Y ).
+Let us fix k and consider the problem of computing mk and Ek. Write a rank-k matrix E as E = U V , where U  Rn×k, V  Rp×k. Adjoin U with an all-1 column to form U~ , and adjoin m to the corresponding column of V to form V~ . Thus 1m + E = U~ V~ . Equation (7) is an unconstrained minimization problem over the pair of (adjoined) matrices (U~ , V~ )
+with minimization objective
+
+J(U~ , V~ , W ) = Y - U~ V~
+
+2 ,2
+
+=
+
+wij(Yij - mj -
+
+UilVjl)2.
+
+i,j l
+
+where the weights wij are sign-dependent: wij =  if Yij - mj - l UilVlk > 0, wij = 1 -  otherwise.
+This objective function is not jointly convex in U~ and V~ . However, for fixed U~ , in
+each coordinate ij, it is the asymmetric L2-norm of a linear combination in the entries
+
+8
+
+of V~ , and hence convex. Similarly, J is convex in U~ for fixed V~ . Therefore, an iterative weighted least squares solution with weight update at each step is guaranteed to converge to a critical point of J (cf. Proposition 5.1). This algorithm (cf Algorithm 1) is called asymmetric weighted least squares (LAWS), see Newey and Powell (1987) and Schnabel (2011). While there are local minima, we find that the algorithm often finds the global minimum quite quickly, supporting similar observations in the literature for fixed weight matrix [wij], as in Srebro and Jaakkola (2003).
+For k > 1, the decomposition E = U V is not unique: for any k × k matrix R, the matrix (U R, V (R )-1) is another equivalent factorization. To specify a unique solution we need a choice for V . This is one of the unaddressed issues in Guo et al. (2013), and certainly a key difficulty. While there are algorithms to solve for (mk, Ek) for fixed k, there is no natural basis for Ek which reveals information on Ej for j < k. Hence, we do not have a direct analogue for principal components for  -expectiles.
+To furnish a principal components basis for Ek based on LAWS, we propose two algorithms: TopDown and BottomUp. These are two definitions, described as algorithms, which output is a nested sequence of subspaces, each approximating Ej for j = 1, . . . , k. They lead to two different definitions of principal components.
+Definition 3.1. Given data Y  Rn×p and an integer k  1, the first k TopDown principal components are the outputs of the TopDown algorithm with input (Y, k). The first k BottomUp principal components are the outputs of the BottomUp algorithm with input (Y, k).
+In TopDown, one first finds Ek. Then for j = 1, 2, . . . , k - 1, one finds Ej, the best j-dimensional subspace approximation to Y - mk, subjected to Ej-1  Ej  Ek. This defines a nested sequence of subspace E1  E2  . . .  Ek-1  Ek, and hence a basis for Ek, such that Ej is an approximation of the best j-dimensional subspace approximation to Y -mk contained in Ek. We solve (7) since (mk, Ek) is the true minimizer in dimension k, and thus we knew the optimal constant term.
+In BottomUp, one first finds E1. Then for j = 2, . . . , k, one finds (mj, Ej), the optimal j-dimensional affine subspace approximation to Y , subjected to Ej-1  Ej. In each step we re-estimate the constant term. Again, we obtain a nested sequence of subspaces E1  E2  . . .  Ek, and constant terms m1, . . . , mk, where (mj, Ej) is an approximation to the best affine j-dimensional subspace approximation to Y .
+When  = 1/2, that is, when doing usual PCA, both algorithms correctly recover the principal components. For  = 1/2, they can produce different output. Interestingly, both in simulations and in practice, their outputs are not significantly different (see Sections 6 and 7). See Section 5 for a formal description of the TopDown and BottomUp algorithms and computational bounds on their convergence times.
+3.3 Statistical properties
+Even for  = 1/2, the objective function J(U, V ) is not simultaneously convex in both U and V , but it is a convex function when either one of the two arguments is kept fixed. By the same argument, one can show that the same property holds for J(U, V, W ). That is, if U is kept fixed, then J(U, V, W ) (which is now a function of V only, as W is a function of U and V) is convex in V . Similarly, if V is kept fixed, then J(U, V, W ) is a convex function
+9
+
+in U . Applying the result of Hjort and Pollard (2011), we see that in each iteration, Vn(t+1) differs from V (t+1) by a term of order O(n-1/2). Thus, if the total number of iterations is small, one can prove consistency of the iterative least squares algorithm. We are not able to obtain a theoretical bound on the total number of iterations. In practice this does indeed seem to be small.
+
+4 Principal components as maximizers of captured variance
+
+4.1 Review of PCA
+
+Again, suppose we observe n vectors Y1, . . . , Yn  Rp. The first principal component  is the unit vector in Rp which maximizes the variance of the data projected onto the subspace spanned by . That is,
+
+n
+
+ = argmax Var( Yi : 1  i  n) = argmax n-1 ( Yi -  Y )2,
+
+Rp, =1
+
+Rp, =1
+
+i=1
+
+(8)
+
+where  Y = the projection
+
+n-1 of
+
+n i=1
+
+
+
+Yi
+
+the mean
+
+= Y¯
+
+ Y¯ onto
+
+is the mean of the projected the subspace spanned by .
+
+data, or equivalently, Given that the first
+
+principal component is 1, the second principal component 2 is the unit vector in Rp which maximizes the variance of the residual Yi - (1) Y¯ - 1(1) Yi, and so on. In this formulation, the data does not have to be pre-centered. The sum (1) Y¯ + (2) Y¯ + . . . + (k) Y¯ is the overall mean Y¯ projected onto the subspace spanned by the first k principal components. For the benefit of comparison to Theorem 4.1, let us reformulate
+
+PCA as an optimization problem. Define
+
+n
+C = n-1 (Yi - Y¯ )(Yi - Y¯ ) .
+i=1
+Then  is the solution to the following optimization problem.
+
+(9)
+
+maximize  C subject to   = 1.
+
+The principal component is not necessarily unique: if the covariance matrix is the identity,
+for example, then any unit vector  would solve (8), and thus there is no unique princi-
+pal component. In the discussions that follows, we implicitly assume that the principal component  is unique. In other words, C has a unique largest eigenvalue.
+
+4.2 An analogue for expectiles
+
+Let Y  R be a random variable with cdf F . We define its  -variance to be
+
+Var (Y ) = E
+
+Y
+
+- e
+
+2 ,2
+
+=
+
+min E
+eR
+
+Y
+
+-e
+
+2 ,2
+
+where e = e (Y ) is the  -expectile of Y . When  = 1/2, this reduces to the usual definition of variance. The following are immediate from Proposition 2.1
+
+10
+
+Proposition 4.1 (Properties of  -variance). Let Y  R be a random variable. For   (0, 1), the following statements hold.
+
+· Var (Y + c) = Var (Y ) for c  R
+
+· Var (sY ) = s2Var (Y ) for s  R, s > 0.
+
+· Var (-Y ) = Var1- (Y )
+
+Proof. The first two follow directly from corresponding properties for e . We shall prove that last assertion. Recall that e (-Y ) = -e1- (Y ). Thus
+
+Var (-Y ) = E
+
+-Y
+
+- e (-Y )
+
+2 ,2
+
+=E
+
+- {Y
+
+- e1- (Y )}
+
+2 ,2
+
+=E
+
+Y
+
+- e1- (Y )
+
+2 1-,2
+
+= Var1- (Y ).
+
+2
+
+If   Rp is a unit vector, that is,   = 1, then we define
+
+Var ( Yi : 1  i  n) = Var ( Yi : 1  i  n).
+
+That is, the  -variance of n vectors which are multiples of  is just the  -variance of the coefficients, which is a sequence of real numbers. Thus, the direct generalization of (8) would be
+
+ = argmax Var ( Yi : 1  i  n) = argmax Var ( Yi : 1  i  n)
+
+Rp, =1
+
+Rp, =1
+
+n
+
+= argmax n-1 ( Yi - µ )2wi
+
+Rp, =1
+
+i=1
+
+(10) (11)
+
+where µ  R is the  -expectile of the sequence of n real numbers  Y1, . . .  Yn, and
+
+p
+wi =  if Yijj > µ , and wi = 1 -  otherwise.
+j=1
+
+(12)
+
+Definition 4.1. Suppose we observe Y1, . . . , Yn  Rp. The first principal expectile component (PEC)  is the unit vector in Rp that maximizes the  -variance of the data projected on the subspace spanned by . That is,  solves (11).
+
+`The' principal expectile component is not necessarily unique. In classical PCA, the first principal component is only unique if and only if the covariance matrix has a unique maximal eigenvalue. Even then, under this assumption, the principal component is only unique up to sign. That is, if  is the principal component, then - is also a principal component. Principal expectile component, on the other hand, are sign-sensitive in general, unless if the distribution of Y is symmetric, or if  = 1/2. We make this observation concrete below, which is a Corollary of Proposition 4.1.
+
+Corollary 4.1. For   (0, 1), random variable Y  Rp, suppose  is a first  -PEC of Y . Then
+- = 1- ,
+that is, - is also a first (1 -  )-PEC of Y . Furthermore, if the distribution of Y is symmetric about 0, that is, Y =L -Y , then - is also a first  -PEC of Y .
+
+11
+
+Proof. By Proposition 4.1, Var ( Y ) = Var1- {(- )Y }. Thus if  solves (10) for  , then (- ) solves (10) for 1 -  . If the distribution of Y is symmetric about 0, then
+
+Var ( Y ) = Var1- { (-Y )} = Var ( Y ). In this case - = 1- is another  -PEC of Y .
+
+2
+
+Like in classical PCA, the other components are defined based on the residuals, and
+
+thus by definition, they are orthogonal to the previously found components. Therefore
+
+one obtains a nested sequence of subspace which captures the tail variations of the data.
+
+By replacing the
+
+·
+
+2 ,2
+
+norm
+
+with
+
+the
+
+· ,1 norm, one can define the analogue of
+
+principal component for quantiles. The analogue of  -variance is the  -deviation
+
+Dev (Y ) = E
+
+Y
+
+- q (Y )
+
+,1
+
+=
+
+min
+qRp
+
+E
+
+Y
+
+-q
+
+,1.
+
+The  -deviation is linear rather than quadratic with respect to constants, that is, Dev (cY ) = cDev (Y ) for c > 0, we consider vectors in the L1 unit ball rather than the L2 unit ball. Define the  -deviance of n vectors which are multiples of a vector   Rp to be the
+ -deviance of the coefficients. That is,
+
+Dev ( Yi : 1  i  n) = Dev ( Yi : 1  i  n)
+This leads to the optimization problem
+ = argmax Dev ( Yi : 1  i  n). Rp: j |j |=1
+Definition 4.2. The first principal quantile component  is the L1-unit vector in Rp that maximizes the  -deviation captured by the data projected on the subspace spanned by .
+Generalizing principal components to quantiles via its interpretation as variance maximizer is not new. Fraiman and Pateiro-Lo´pez (2012) define the first principal quantile direction  to be the one that maximizes the L2 norm of the  -quantile of the centered data, projected in the direction . That is,  is the solution of
+
+max  q (Y - EY ) 1/2,2.
+Rp: =1
+Their definition works for random variables in arbitrary Hilbert spaces. Kong and Mizera (2012) proposed the same definition but without centering Y at EY . These authors used the principal directions computed to study quantile level sets of distributions in small dimensions. Compared to these work, our definition is very natural, can be extended to Hilbert spaces, and in the case of expectile, satisfies many `nice' properties, some of which are shared by the principal directions of Fraiman and Pateiro-L´opez (2012). For example, the PEC coincides with the classical PC when the distribution of Y is elliptically symmetric.
+Proposition 4.2. [Properties of principal expectile component] Let Y  Rp be a random variable, (Y ) its unique first principal expectile component.
+
+12
+
+1. For any constant c  Rp,  (Y + c) = (Y ). In words, the PEC is invariant under translations of the data.
+
+2. If B  Rp×p is an orthogonal matrix, then (BY ) = B(Y ). In words, the PEC respects change of basis.
+
+3. If the distribution of Y is elliptically symmetric about some point c  Rp, that is, there exists an invertible p × p real matrix A such that BA-1(Y - c) =L A-1(Y - c)
+for all orthogonal matrix B, then  (Y ) = 1/2(Y ). In this case, the PEC coincides with the classical PC regardless of  .
+
+4. If the distribution of Y is spherically symmetric about some point c  Rp, that is, B(Y - c) =L Y - c for all orthogonal matrix B, then all directions are principal.
+
+Proof. By the first part of Proposition 4.1:
+
+Var { (Yi + c) : i = 1, . . . , n} = Var ( Yi +  c : i = 1, . . . , n) = Var ( Yi : i = 1, . . . , n).
+This proves the first statement. For the second, note that
+
+Var ( BYi : i = 1, . . . , n) = Var {(B ) Yi : i = 1, . . . , n}.
+
+Thus if  is the first  -PEC of Y , then (B )-1 is the first  -PEC of BY . But B is orthogonal, that is, (B )-1 = B. hence B is the  -PEC of BY . This proves the second statement. For the third statement, by statement 1, we can assume c  0. Thus Y = AZ where BZ =L Z for all orthogonal matrices B. Write A in its singular value decomposition
+A = U DV , where D is a diagonal matrix with positive values Dii = di for i = 1, . . . p, and U and V are p × p orthogonal matrices. Choosing B = V -1 gives
+
+(Y ) =  (U DZ) = U  (DZ).
+
+Now, by Proposition 4.1, since dj  0 for all j,
+p
+Var ( DZ) = Var ( djZjj) = j2d2j Var (Zj).
+j=1 j
+
+Since j j2 = 1, Var ( DZ) lies in the convex hull of the p numbers d2j Var (Zj) for j = 1, . . . p. Therefore, it is maximized by setting  to be the unit vector along the axis j with maximal dj2Var (Zj). But Z =L BZ for all orthogonal matrices B, thus Zj =L Zk, hence Var (Zj) = Var (Zk) for all indices j, k = 1, . . . , p. Thus Var ( DZ) is maximized
+
+when  is the unit vector along the axis j with maximal dj. This is precisely the axis with maximal singular value of A, and hence is also the direction of the (classical) principal
+
+component of DZ. This proves the claim. The last statement follows immediately from
+
+the third statement.
+
+2
+
+To compute the principal expectile component  , one needs to optimize the righthand side of (11) over all unit vectors . Although this is a differentiable function in ,
+optimizing it is a difficult problem, since µ also depends on , and does not have a closed
+form solution. However, in certain situations, for given weights wi, not only µ but also  have closed form solutions.
+
+13
+
+Theorem 4.1. Consider (11). Suppose we are given the true weights wi, which are either
+
+ or 1 -  . Let + = {i  {1, . . . , n} : wi =  } denote the set of observations Yi with
+
+`positive' labels, and - = {i  {1, . . . , n} : wi = 1 -  } denote its complement. Let n+
+
+and n- be the sizes of the respective sets. Define an estimator e^  Rp of the  -expectile
+
+via
+
+ e^ =
+
+i+ Yi + (1 -  ) i- Yi .  n+ + (1 -  )n-
+
+(13)
+
+Define
+
+  
+
+   1-  
+
+C = n
+
+(Yi - e^ )(Yi - e^ )
+
++ n
+
+(Yi - e^ )(Yi - e^ ) .
+
+i+
+
+ i-
+
+
+
+(14)
+
+Then  is the solution to the following optimization problem.
+
+maximize  C  subject to  Yi >  e^  i  +
+  = 1.
+
+(15)
+
+In particular, the PEC is the constrained classical PC of a weighted version of the covariance matrix of the data, centered at a constant possibly different from the mean.
+
+Proof. Since the weights are the true weights coming from the true principal expectile component , clearly  satisfies the constraint in (15). Now suppose  is another vector in this constraint set. Then  e^ is exactly µ , the  -expectile of the sequence of n real
+numbers  Y1, . . . ,  Yn. Therefore, the quantity we need to maximize in (11) reads
+
+1 n
+
+n
+
+(
+
+Yi - µ )2wi =
+
+ n
+
+(
+
+Yi - 
+
+e^
+
+)2
+
++
+
+1
+
+- n
+
+
+
+( Yi -  e^ )2
+
+i=1 i+
+
+i-
+
+ 1-
+
+= n
+
+ (Yi - e^ )(Yi - e^ )  + n
+
+ (Yi - e^ )(Yi - e^ ) 
+
+i+
+
+i-
+
+=  C .
+
+Thus the optimization problem above is indeed an equivalent formulation of (11), which
+
+was used to define  . Finally, the last observation follows by comparing the above with
+
+the optimization formulation for PCA, see the paragraph after (9). Indeed, when  = 1/2,
+
+e^1/2 = Y¯ , C1/2 = C, and we recover the classical PCA.
+
+2
+
+Since e^ is a linear function in the Yi, (15) defines a system of linear constraints in the entries of Yi and  . Thus for each fixed sign sets (+, -), there exist (not necessarily unique) local optima (+, -). There are 2n possible sign sets, one of which corresponds to the global optima  that we need. It is clear that finding the global optimum  by enumerating all possible sign sets is intractable. However, in many situations, the
+constraint in (15) is inactive. That is, the largest eigenvector of C satisfies (15) for free. In such situations, we call  a stable solution. Just like classical PCA, stable solutions are unique for matrices C with unique principal eigenvalue. More importantly, we have
+an efficient algorithm for finding stable solutions, if they exist.
+
+14
+
+Definition 4.3. For some given sets of weights w = (wi), define e (w) via (13), C (w) via (14). Let  (w) be the largest eigenvector of C (w). If  (w) satisfies (15), we say that  (w) is a locally stable solution with weight w.
+To find locally stable solutions, one can solve (8) using iterative reweighted least squares: first initialize the wi's, compute estimators µ (w) and  (w) ignoring the constraint (15), update the weights via (12), and iterates. At each step of this algorithm, one finds the principal component of a weighted covariance matrix with some approximate weight. Since there are only finitely many possible weight sets, the algorithm is guaranteed to converge to a locally stable solution if it exists. In particular, if the true solution to (8) is stable, then for appropriate initial weights, the algorithm will find this value. We call this algorithm PrincipalExpectile. We give a formal description of this algorithm in Section 5.
+
+4.3 Statistical properties
+
+We now prove consistency of local maximizers of (8). The main theorem in this section is the following.
+
+Theorem 4.2. Fix  > 0. Let Yn be the empirical version of Y , a random variable in Rp with finite second moment, distribution function F . Suppose  =  is a unique global solution to (8) corresponding to Y . Then for sufficiently large n, for any sequence of global solutions n corresponding to Yn, we have
+n F--a.s. 
+in Rp as n  .
+
+For the proof, we first need the following lemma.
+
+Lemma 4.1. Let Yn be the empirical version of Y , a random variable in Rp with finite second moment and distribution function F . Then uniformly over all   Rp with   =
+1, and uniformly over all   (0, 1),
+
+Var (Yn ) F--a.s. Var (Y ).
+
+Proof. Since Yn is the empirical version of Y and the set of all unit vectors   Rp,   = 1
+
+is compact, by the Cramer-Wold theorem, Yn  L Y  uniformly over all such unit
+
+vectors   Rp. It then follows that e and Var , which are completely determined by the
+
+distribution function, also converge F - a.s. uniformly over all .
+
+2
+
+Proof of Theorem 4.2. Let Sp-1 denote the unit sphere in Rp. Equip Rp with the Euclidean norm · . Define the map VY : Sp-1  R, VY () = Var (Y ). Fix > 0. We
+shall prove that there exists a  > 0 such that the global minimum of VYn is necessarily within -distance of .
+Since VY is continuous, Sp-1 is compact, and  is unique, there exists a sufficiently
+small  > 0 such that
+
+|VY () - VY ()| <   -  < 
+
+15
+
+for   Sp-1. In particular, if  -  > , then
+VY () + < VY ().
+By Lemma 4.1, VYn  VY as n   uniformly over Sp-1. In particular, there exists a large N such that for all n > N ,
+|VYn() - VY ()| < /6 for all   Sp-1. Thus for   Sp-1 such that  -  > ,
+VYn() - VY () > - /6 = 5 /6.
+Meanwhile, since VY is continuous, one can choose = /6, and thus obtain  such that |VY () - VY ()| < /6   -  <  .
+Then, for  such that  -  <  ,
+VYn() - VY ()  |VYn() - VY ()| + |VY () - VY ()| < /6 + /6 = /3. So far we have shown that if  -  > , then VYn() is at least 5 /6 bigger than VY (). Meanwhile, if  -  <  , then VYn() is at most /3 bigger than VY (). Thus the global minimum n of VYn necessarily satisfy n -  < . This completes the proof. 2
+
+5 Algorithms
+
+5.1 TopDown and BottomUp
+
+We now describe how iterative weighted least squares can be adapted to implement TopDown and BottomUp. We start with a description of the asymmetric weighted least squares (LAWS) algorithm of Newey and Powell Newey and Powell (1987). The basic algorithm outputs a subspace without the affine term, and needs to be adapted. See Guo et al. (2013) for a variation with smoothing penalty and spline basis.
+
+Proposition 5.1. The LAWS algorithm is well-defined, and is a gradient descent algorithm. Thus it converges to a critical point of the optimization problem (6).
+
+Proof. First, we note that the steps in the algorithm are well-defined. For fixed W and V ,
+
+J(U, V, W ) is a quadratic in the entries of U . Thus the global minimum on line 8 has an
+
+explicit solution, see Srebro and Jaakkola (2003); Guo et al. (2013). A similar statement
+
+applies to line 9.
+
+As noted in Section 3.2, J(U, V, W ) is not jointly convex in U and V , but as a function
+
+in U for fixed V , it is a convex, continuously differentiable, piecewise quadratic function.
+
+The statement holds for J(U, V, W ) as a function in V for fixed U . Hence lines 8 and 9
+
+is one step in a Newton-Raphson algorithm on J(U, V, W ) for fixed V . Similarly, lines
+
+10 and 11 is one step in a Newton-Raphson algorithm on J(U, V, W ) for fixed U . Thus
+
+the algorithm is a coordinatewise gradient descent on a coordinatewise convex function,
+
+hence converges.
+
+2
+
+16
+
+Algorithm 1 Asymmetric weighted least squares (LAWS)
+1: Input: data Y  Rn×p, positive integer k < p 2: Output: E^k, an estimator of Ek, expressed in product form E^k = U^ V^ , where U^ 
+Rn×k, V^  Rp×k.U^ , V^ are unique up to multiplication by an invertible matrix.
+3: procedure LAWS(Y, k) 4: Set V (0) to be some rank-k p × k matrix. 5: Set W (0)  Rn×p to be 1/2 everywhere.
+6: Set t = 0.
+7: repeat 8: Update U : Set U (t+1) = argminURn×k J (U, V (t), W (t)). 9: Update W : Set Wi(jt+1) =  if Yij - l Ui(lt+1)Vl(kt) > 0, Wi(jt+1) = 1 -  otherwise. 10: Update V : Set V (t+1) = argminV Rk×p J (U (t+1), V, W (t+1)). 11: Update W : Set Wi(jt+1) =  if Yij - l Ui(lt+1)Vl(kt+1) > 0, Wi(jt+1) = 1 - 
+otherwise.
+12: Set t = t + 1 13: until U (t+1) = U (t), V (t+1) = V (t), W (t+1) = W (t). 14: return E^k = U (t)(V (t)) .
+15: end procedure
+
+If some columns of U or V are pre-specified, one can run LAWS and not update these
+columns in lines 8 and 10. Thus one can use LAWS to find the optimal affine subspace by writing 1m + E = U~ V~ with the first column of U~ constrained to be 1. Similarly, we
+can use this technique to solve the constrained optimization problems:
+
+· Find a rank-k approximation Ek whose span contains a given subspace of dimension r<k
+
+· Solution: Constrain the first r columns of V (0) to be a basis of the given subspace.
+
+· Find a rank-k approximation whose span lies within a given subspace of dimension r > k.
+
+· Solution: Let B  Rn×r be a basis of the given subspace. Then the optimization
+
+problem becomes
+
+min Y - BU V
+U Rr×k,V Rp×k
+
+2 ,2
+
+.
+
+One can then apply the LAWS algorithm with variables U and V .
+
+· Find a rank-k approximation whose span contains a given subspace of dimension r < k, and is contained in a given subspace of dimension R > k.
+
+· Solution: Combine the previous two solutions.
+
+With these tools, we now define the two algorithms, TopDown and BottomUp.
+
+The TopDown algorithm requires the weights wij and the loadings on previous principal components to be re-evaluated when finding the next principal component. A variant
+
+of the algorithm would be to keep the weights wij. In this case, the algorithm is still well-defined. However, it will produce a different basis matrix U^ , since the estimators are
+
+no longer optimal in the
+
+·
+
+2 ,2
+
+norm.
+
+17
+
+Algorithm 2 TopDown 1: Input: data Y  Rn×p, positive integer k < p 2: Output: E^k, an estimator of Ek, expressed in product form E^k = U^ V^ , where U^  Rn×k, V^  Rp×k are unique. 3: procedure TopDown(Y, k) 4: Use LAWS(Y,k) to find m^ k, E^k. Write E^k = U V for some orthonormal basis U . 5: Use LAWS to find U^1, the vector which spans the optimal subspace of dimension 1 contained in U . 6: Use LAWS to find U^2, where (U^1, U^2) spans the optimal subspace of dimension 1 contained in U and contains the span of U^1 7: Repeat the above step until obtains U^ . 8: Obtain V^ through the constraint E^k = U^ V^ . 9: return m^ k, E^k, U^ , V^ . 10: end procedure
+Algorithm 3 BottomUp 1: Input: data Y  Rn×p, positive integer k < p 2: Output: E^k, an estimator of Ek, expressed in product form E^k = U^ V^ , where U^  Rn×k, V^  Rp×k are unique. 3: procedure BottomUp(Y, k) 4: Use LAWS to find E^1. Let U^1 be the basis vector. 5: Use LAWS to find U^2 such that (U^1, U^2) is the best two-dimensional approximation to Y , subjected to containing U^1. 6: Repeat the above step until obtains U^ . We obtain V^ and E^k in the last iteration. return E^k, U^ , V^ . 7: end procedure
+5.2 Performance bounds of TopDown and BottomUp
+We now show that the dependence on k only grows polylog in n. Thus both TopDown and BottomUp are fairly efficient algorithms even for large k.
+Theorem 5.1. For fixed V of dimension k, LAWS requires at most O{log(p)k} iterations, O{npk2 log(p)k} flops to estimate U .
+In other words, if V has converged, LAWS needs at most O{npk2 log(p)k} flops to estimate U . The role of U and V are interchangeable if we transpose Y . Thus if U has converged, LAWS needs at most O{npk2 log(n)k} to estimate V . We do not have a bound for the number of iterations needed until convergence. In practice this seem to be of order log of n and p. For the proof of Theorem 5.1 we need the following two lemmas.
+Lemma 5.1. If Y1, . . . , Yn  R are n real numbers, then LAWS finds their  -expectile e in O{log(n)} iterations.
+Proof. Given the weights w1, . . . , wn, that is, given which Yi's are above and below e , the  -expectile e is a linear function in the Yi as we saw in (13). As shown in Proposition 5.1, LAWS is equivalent to a Newton-Raphson algorithm on a piecewise quadratic function.
+18
+
+Since the points Yi's are ordered, it takes O{log(n)} to learn their true weights. Thus the
+
+algorithm converges in O{log(n)} iterations.
+
+2
+
+Lemma 5.2. An affine line in Rp can intersect at most 2p orthants.
+
+Proof. Recall that an orthant of Rp is a subset of Rp where the sign of each coordinate is constrained to be either nonnegative or nonpositive. There are 2p orthants in Rp. Let f () = Y + v be our affine line,   R, Y, v  Rp. Let sgn : Rp  {±1}p denote the sign
+
+function. Now, sgn{f (0)} = sgn(Y ), sgn{f ()} = sgn(v), and sgn{f ()} is a monotone
+
+increasing function in . As   , sgn{f ()} goes from sgn(Y ) to sgn(v) one bit flip at
+
+a time. Thus there are at most p flips, that is, the half-line f () for   [0, ) intersects
+
+at most p orthants. By a similar argument, the half-line f () for   (-, 0) intersects
+
+at most p other orthants. This concludes the proof.
+
+2
+
+Corollary 5.1. An affine subspace of dimension k in Rp can intersect at most O(pk) orthants.
+
+Proof. Fix any basis, say 1, . . . , k. By Lemma 5.2, 1 can intersect at most 2p orthants.
+
+For each orthant of 1, varying along 2 can yield at most another 2p orthants. The proof
+
+follows by induction. (This is a rather liberal bound, but it is of the correct order for k
+
+small relative to p).
+
+2
+
+Proof of Theorem 5.1. By Corollary 5.1, it is sufficient to consider the case k = 1. Fix V
+
+of dimension 1. Since U, V are column matrices, we write them in lower case letters u, v.
+
+Solving for each ui is a separate problem, thus we have n separate optimization problem,
+
+and it is sufficient to prove the claim for each i for i = 1, . . . , n.
+
+Fix an i. As ui varies, Yi - mi - uiv defines a line in Rp. The weight vector (wi1, . . . , wip)
+
+only depend on which coordinates are the orthant of Rp in which Yi - mi - uiv is in. The
+
+later is equivalently to determining the weight of the p points
+
+.Yi-mi vi
+
+By Lemma 5.1, it
+
+takes O{log(p)} for LAWS to determine the weights correctly. Thus LAWS takes at most
+
+O{log(p)} iterations to converge, since each iteration involves estimating w, then v. Each
+
+iteration solves a weighted least squares, thus take O(npk2). Hence for fixed v, LAWS
+
+can estimate u after at most O{npk2 log(p)} flops for k = 1. This concludes the proof
+
+for fixed v. By considering the transposed matrix Y , we see that the role of u and v are
+
+interchangeable. The conclusion follows similarly for fixed u.
+
+2
+
+5.3 PrincipalExpectile
+In this section we describe the PrincipalExpectile algorithm. This algorithm is used to compute the principal expectile component defined in Section 4. We shall describe the case k = 1, that is, the algorithm for computing the first principal expectile component only. To obtain higher order components, one iterates the algorithm over the residuals Yi - ^1(^1 Yi + µ^1), where µ^1 is the  -expectile of the loadings ^1 Yi.
+For n observations Y1, . . . , Yn, there are at most 2n possible labels for the Yi's, and hence the algorithm has in total 2n possible values for the wi's. Thus either Algorithm 4 converges to a point which satisfies the properties of the optimal solution that Theorem 4.1 prescribes, or that it iterates infinitely over a cycle of finitely many possible values
+
+19
+
+Algorithm 4 PrincipalExpectile
+1: Input: data Y  Rn×p. 2: Output: a vector ^, an estimator of the first principal expectile component of Y .
+3: procedure PrincipalExpectile(Y ) 4: Initialize the weights wi(0) 5: Set t = 0.
+6: repeat 7: Let +(t) be the set of indices i such that wi(t) =  , and -(t) be the complement. 8: Compute e(t) as in equation (13) with sets +(t), -(t). 9: Compute C(t) as in equation (14) with sets +(t), -(t). 10: Set (t) to be the largest eigenvector of Ct (Ct ) 11: Set µ(t) to be the  -expectile of ((t)) Yi 12: Update wi: set wi(t+1) =  if ((t)) Yi > µ(t), and set wi(t+1) = 1 -  otherwise. 13: Set t = t + 1 14: until wit = wi(t+1) for all i. 15: return ^ = (t).
+16: end procedure
+
+of the wi's. In particular, the true solution is a fixed point, and thus fixed points always exist. In practice, we find that the algorithm converges very quickly, and can get stuck in a finite cycle of values. In this case, one can jump to a different starting point and restart the algorithm. Choosing a good starting value is important in ensuring convergence. Since the  -variance is a continuous function in  , we find that in most cases, one can choose a good starting point by performing a sequence of such computations for a sequence of  starting with  = 1/2, and set the initial weight to be that induced by the previous run of the algorithm for a slightly smaller (or larger)  .
+
+6 Simulation
+
+To study the finite sample properties of the proposed algorithms we do a simulation study. We follow the simulation setup of Guo et al. (2013), that is, we simulate the data Yij, i = 1, . . . , n, j = 1, . . . , p as
+
+Yij = µ(tj) + f1(tj)1i + f2(tj)2i + ij,
+
+(16)
+
+where tj's are equidistant on [0,1], µ(t) =1 + t + exp{-(t - 0.6)2/0.05} is the mean function, f1(t) = 2 sin(2t) and f2(t) = 2 cos(2t) are principal component curves, and ij is a random noise. We consider different settings 1 and 2 each with five error scenarios:
+
+1. 1i  N(0, 36) and 2i  N(0, 9) are simulated independently across i with (1) iid errors drawn from N(0, 2), (2) iid errors from t(5), (3) independent heteroscedastic
+errors from N{0, µ(tj)2}, (4) errors from logN(0, 2) and (5) errors from a sum of two uniforms U (0, 2) where 2=0.5.
+
+20
+
+2. 1i  N(0, 16) and 2i  N(0, 9) are simulated independently across i with (1) iid errors drawn from N(0, 2), (2) iid errors from t(5), (3) independent heteroscedastic errors from N{0, µ(tj)2}, (4) errors from logN(0, 2) and (5) errors from a sum of two uniforms U (0, 2) where 2=1.
+Note that the settings imply different ratios of coefficient-to-coefficient-to-noise variations. In the setting 1 scenario (1) we have a ratio 36:9:0.5, whereas in the setting 2 scenario (1) we have 16:9:1. Apart from standard Gaussian errors, we also consider "fat tailed" errors, heteroscedastic and skewed errors. We study the performance of the algorithms for three sample sizes: (i) small n=20, p=100; (ii) medium n=50, p=150; (iii) large n=100, p=200.
+For every single case we repeat the simulation 500 times and record the mean computing times, the mean of the average mean squared error (MSE), its standard deviation, and convergence ratio for each algorithm. We label the run of the algorithm as unconverged whenever after 30 iterations and 50 restarts from a random starting point the algorithms fail to converge.
+Convergence statistics are reported in Table 1 and computational time records are in Table 2. The results on the MSEs for both simulation settings are presented in Tables 3 and 4 respectively. For the ease of notation we write BUP for BottomUp, TD for TopDown and PEC for PrincipalExpectile.
+The results for the settings 1 and 2 differ in the magnitude of the average MSE but there is no substantial qualitative difference in relative performance of the algorithms. BUP performs the worst of the three algorithms in terms of its MSE in all scenarios. TD and PEC are comparable in terms of their MSEs. PEC shows robustness against skewness and fat tails in the error distribution since it produces the lowest MSEs in scenarios (2) and (4). Yet TD tends to slightly outperform PEC in medium and large samples by errors close to iid normal or normal heteroscedastic; by small sample sizes PEC outperforms TD in all scenarios but (5).
+Figures 1 and 2 illustrate the difference in the quality of component estimation for the 95% expectile when coefficient-to-coefficient-to-noise variation ratio changes (setting 1 versus setting 2 respectively). The results are shown for the error scenario (1) and small sample size. We observe that as the ratio changes from 36:9:0.5 (setting 1, Figure 1) to 16:9:1 (setting 2, Figure 2) the variability of the estimators of both component functions increases. The overall mean of the estimators remains very close to the true component functions.
+
+sample  /rate 0.900 0.950 0.975
+
+small BUP TD 0.02 0.00 0.18 0.03 0.43 0.22
+
+PEC 0.24 0.22 0.21
+
+medium BUP TD PEC 0.01 0.00 0.23 0.05 0.00 0.26 0.23 0.04 0.25
+
+BUP 0.00 0.06 0.17
+
+large TD 0.00 0.00 0.00
+
+PEC 0.20 0.21 0.24
+
+Table 1: Nonconvergence rates of the algorithms by 500 simulation runs
+
+PEC is the fastest algorithm as shown in Table 2. For large sample and high expectile level it is more than three times faster than TD and more than five times faster than BUP. Although the fastest from considered algorithms the PEC is considerably slower than the
+
+21
+
+classical PCA routins with the average computational times 0.002 seconds for small, 0.005 seconds for medium, and 0.023 seconds for large sample (computed by function prcomp in package stats of statistical script language R).
+
+sample  /sec 0.900 0.950 0.975
+
+small BUP TD 1.24 0.70 1.64 1.13 2.36 2.05
+
+PEC 0.57 0.55 0.56
+
+medium BUP TD PEC 2.91 1.59 1.39 4.01 2.68 1.57 5.56 4.59 1.56
+
+BUP 7.53 10.53 14.62
+
+large TD 4.02 6.88 10.96
+
+PEC 2.71 3.03 3.54
+
+Table 2: Average time in seconds for convergence of the algorithms by 500 simulations
+
+The major draw back of PEC is the relative low convergence rate: for all sample sizes only around 80% of algorithm runs were convergent. In 20% cases the algorithm keeps iterating between two sets of weights which possibly indicates an adverse sample geometry, i.e. that two eigevalues of the scaled covariance matrix are too close to each other. TD, on the contrary, converges almost always in medium and large sample sizes.
+We conclude that whenever the error distribution is fat-tailed or skewed, or by small samples PEC is likely produce more reliable results in terms of its MSE, whereas by errors close to normal and moderate or large samples TD is likely to produce smaller MSEs.
+
+7 Application to Chinese Weather Data
+
+Weather derivatives (WDs) are financial instruments written on weather indices as underlyings and are designed to trade with weather related risks. Temperature derivatives are WDs written on a temperature index such as the average temperature recorded at a prespecified weather station. As for financial derivatives risk factors of temperature are at the core of temperature derivative pricing. In this section we study the risk factors of temperature using daily average temperature data of 159 weather stations in China reported by Chinese Meteorological Administration for the years 1957 to 2009. We refer to this dataset as the Chinese weather dataset.
+To conduct the analysis of the temperature risk factors which are relevant for pricing temperature derivatives we follow the well established methodology of Benth et al. (2007). That is, let Tit denote the average temperature at station i, i = 1, 2, . . . , n in time t. We consider each station i separately and using the whole time series of the average temperatures from 1957 to 2009 we fit the following model:
+
+Tit = Xit + it
+
+it = ai + bit + ci sin(2t/365) + di cos(2t/365) + gi sin(t/365) + hi cos(t/365) (17)
+
+10
+
+Xit =
+
+ij Xi,t-j + it
+
+j=1
+
+We fit the model (17) to the temperature data of 159 stations and obtain the estimated residuals ^it.
+
+22
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+0 0.5 1 0 0.5 1
+0 0.5 1 0 0.5 1
+0 0.5 1 0 0.5 1
+Figure 1: Estimated component functions (solid gray) by 500 simulation runs for simulation setting 1 scenario 1 small sample size and 95% expectile. The rows from the top to the bottom show respectively results produced by BUP, TD and PEC. Left panel corresponds to the first component function, right panel - to the second. The true functions are shown as solid black curves. The overall mean across simulation runs is shown as dashed black curve. The later can not be distinguished from the true curve.
+23
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+-2 -1 0 1 2
+
+0 0.5 1 0 0.5 1
+0 0.5 1 0 0.5 1
+0 0.5 1 0 0.5 1
+Figure 2: Estimated component functions (gray) by 500 simulation runs for simulation setting 2 scenario 1 small sample size and 95% expectile. The rows from the top to the bottom show respectively results produced by BUP, TD and PEC. Left panel corresponds to the first component function, right panel - to the second. The true functions are shown as solid black curves. The overall mean across simulation runs is shown as dashed black curve. The later can not be distinguished from the true curve.
+24
+
+scenario (1) (2) (3) (4) (5)
+
+ 0.900 0.950 0.975 0.900 0.950 0.975 0.900 0.950 0.975 0.900 0.950 0.975 0.900 0.950 0.975
+
+n=20, p=100
+
+BUP
+
+TD PEC
+
+0.2762 0.1216 0.1123
+
+(0.1997) (0.0097) (0.0111)
+
+0.3619 0.1568 0.1334
+
+(0.2199) (0.0123) (0.0181)
+
+0.5064 0.2053 0.1601
+
+(0.2977) (0.0154) (0.0276)
+
+0.7092 0.5421 0.3147
+
+(0.2382) (0.1096) (0.0685)
+
+1.105 0.7847 0.3854
+
+(0.4453) (0.1646) (0.0988)
+
+1.6066 1.1158 0.4709
+
+(0.7968) (0.2106) (0.1413)
+
+0.4146 0.2300 0.2215
+
+(0.2413) (0.0195) (0.0236)
+
+0.6261 0.2966 0.2792
+
+(0.6313) (0.0246) (0.0369)
+
+0.8051 0.3885 0.3516
+
+(0.4516) (0.0312) (0.0527)
+
+0.9162 0.8041 0.2226
+
+(0.2432) (0.1532) (0.0588)
+
+1.4972 1.2869 0.2725
+
+(0.4494) (0.2337) (0.0713)
+
+2.3371 1.9727 0.3331
+
+(1.0034) (0.2835) (0.0979)
+
+0.0343 0.0091 0.0368
+
+(0.0224) (0.0007) (0.0013)
+
+0.1225 0.0110 0.0409
+
+(1.1145) (0.0008) (0.0020)
+
+0.0776 0.0135 0.0474
+
+(0.3266) (0.0011) (0.0034)
+
+n=50, p=150
+
+BUP
+
+TD PEC
+
+0.1339 0.0538 0.0632
+
+(0.1099) (0.0033) (0.0029)
+
+0.2323 0.0705 0.0727
+
+(0.2076) (0.0045) (0.0044)
+
+0.3583 0.0944 0.0874
+
+(0.2989) (0.0060) (0.0075)
+
+0.3382 0.2714 0.1494
+
+(0.1223) (0.0727) (0.0117)
+
+0.5789 0.4440 0.1819
+
+(0.2664) (0.1675) (0.0192)
+
+0.9956 0.7033 0.2309
+
+(0.6936) (0.2629) (0.0341)
+
+0.1829 0.1019 0.1270
+
+(0.1070) (0.0065) (0.0066)
+
+0.3538 0.1335 0.1622
+
+(1.1684) (0.0088) (0.0097)
+
+0.4879 0.1789 0.2109
+
+(0.3736) (0.0118) (0.0167)
+
+0.4854 0.4510 0.1077
+
+(0.1093) (0.0597) (0.0089)
+
+0.9127 0.8092 0.1296
+
+(0.4895) (0.1187) (0.0142)
+
+1.5522 1.3387 0.1629
+
+(0.7483) (0.1999) (0.0248)
+
+0.0298 0.0038 0.0315
+
+(0.0261) (0.0002) (0.0004)
+
+0.0351 0.0044 0.0345
+
+(0.0398) (0.0003) (0.0007)
+
+0.0455 0.0052 0.0397
+
+(0.0658) (0.0003) (0.0012)
+
+n=100, p=200
+
+BUP
+
+TD PEC
+
+0.0698 0.0297 0.0459
+
+(0.0552) (0.0015) (0.0014)
+
+0.1312 0.0394 0.051
+
+(0.1415) (0.0020) (0.0019)
+
+0.2157 0.0536 0.0594
+
+(0.2314) (0.0027) (0.0035)
+
+0.1866 0.1548 0.0932
+
+(0.0522) (0.0217) (0.0050)
+
+0.3316 0.2680 0.1101
+
+(0.1144) (0.0575) (0.0075)
+
+0.5780 0.4641 0.1358
+
+(0.2227) (0.1175) (0.0132)
+
+0.0962 0.0562 0.0942
+
+(0.0510) (0.0029) (0.0032)
+
+0.1603 0.0746 0.1208
+
+(0.1135) (0.0039) (0.0045)
+
+0.2665 0.1016 0.1568
+
+(0.2234) (0.0052) (0.0077)
+
+0.2876 0.2763 0.0697
+
+(0.0498) (0.0247) (0.0042)
+
+0.5585 0.5280 0.0812
+
+(0.1595) (0.0554) (0.0069)
+
+1.2223 0.9421 0.0995
+
+(1.4707) (0.1110) (0.0117)
+
+0.0244 0.0021 0.0296
+
+(0.0238) (0.0001) (0.0002)
+
+0.0285 0.0023 0.0322
+
+0.0254 (0.0004) (0.0004)
+
+0.0360 0.0027 0.0366
+
+(0.0309) (0.0001) (0.0006)
+
+25
+
+Table 3: average MSE and its standard deviation in brackets by 500 simulation runs for the first setting 1.
+
+scenario (1) (2) (3) (4) (5)
+
+ 0.900 0.950 0.975 0.900 0.950 0.975 0.900 0.950 0.975 0.900 0.950 0.975 0.900 0.950 0.975
+
+n=20, p=100
+
+BUP
+
+TD PEC
+
+0.4484 0.2436 0.1988
+
+(0.2671) (0.0195) (0.0238)
+
+0.7021 0.314 0.2418
+
+(0.4611) (0.0246) (0.0386)
+
+0.9218 0.4116 0.2945
+
+(0.5578) (0.0312) (0.0546)
+
+0.7424 0.5427 0.3186
+
+(0.2933) (0.1099) (0.0762)
+
+1.1483 0.7855 0.3920
+
+(0.5078) (0.1643) (0.1096)
+
+1.7083 1.1095 0.4805
+
+(0.8614) (0.1744) (0.1493)
+
+0.6616 0.4613 0.4093
+
+(0.2625) (0.0392) (0.0486)
+
+1.0027 0.5948 0.5229
+
+(0.5055) (0.0495) (0.0802)
+
+1.465 0.7811 0.6719
+
+(0.8018) (0.0627) (0.1154)
+
+5.4073 5.2042 1.0318
+
+(2.1503) (1.9812) (0.9534)
+
+8.7171 8.0696 1.4256
+
+(2.8223) (2.3418) (1.4550)
+
+13.419 11.635 2.0054
+
+(5.1223) (1.6721) (2.2733)
+
+0.1135 0.0365 0.0572
+
+(0.0755) (0.0027) (0.0041)
+
+0.1430 0.0440 0.0651
+
+(0.1214) (0.0034) (0.0060)
+
+0.2489 0.0540 0.0769
+
+(0.6091) (0.0042) (0.0099)
+
+n=50, p=150
+
+BUP
+
+TD PEC
+
+0.2053 0.1077 0.1002
+
+(0.1273) (0.0066) (0.0058)
+
+0.3681 0.1411 0.119
+
+(0.3066) (0.0090) (0.0091)
+
+0.5957 0.1890 0.1483
+
+(0.4751) (0.0121) (0.0152)
+
+0.3560 0.2716 0.1502
+
+(0.1695) (0.0728) (0.0123)
+
+0.6656 0.4437 0.1832
+
+(0.6719) (0.1658) (0.0185)
+
+1.1714 0.7048 0.2342
+
+(0.9716) (0.2652) (0.0323)
+
+0.2993 0.2041 0.2200
+
+(0.1163) (0.0131) (0.0134)
+
+0.4979 0.2675 0.2875
+
+(0.3671) (0.0177) (0.0215)
+
+0.8605 0.3587 0.3831
+
+(0.8004) (0.0237) (0.0338)
+
+3.3226 3.2871 0.4075
+
+(1.1548) (1.0106) (0.1258)
+
+6.5227 6.2094 0.5143
+
+(1.9576) (1.5846) (0.1540)
+
+11.202 9.8804 0.7372
+
+(4.0968) (1.8550) (0.5037)
+
+0.0923 0.0153 0.0394
+
+(0.0878) (0.0009) (0.0011)
+
+0.1197 0.0177 0.0434
+
+(0.1033) (0.0010) (0.0018)
+
+0.1538 0.0209 0.0499
+
+(0.1272) (0.0013) (0.0031)
+
+n=100, p=200
+
+BUP
+
+TD PEC
+
+0.1109 0.0595 0.0660
+
+(0.0924) (0.0030) (0.0027)
+
+0.2075 0.0788 0.0761
+
+(0.2346) (0.0039) (0.0039)
+
+0.3364 0.1074 0.0925
+
+(0.3565) (0.0053) (0.0067)
+
+0.2047 0.1549 0.0935
+
+(0.1886) (0.0218) (0.0050)
+
+0.3805 0.2684 0.1103
+
+(0.3563) (0.0581) (0.0075)
+
+0.6974 0.4648 0.1368
+
+(0.5981) (0.1192) (0.0126)
+
+0.1684 0.1126 0.1540
+
+(0.1880) (0.0058) (0.0066)
+
+0.3031 0.1494 0.2042
+
+(0.4360) (0.0077) (0.0090)
+
+0.5173 0.2036 0.2724
+
+(0.6708) (0.0103) (0.0156)
+
+2.0358 2.0686 0.2295
+
+(0.6044) (0.5259) (0.1632)
+
+4.5541 4.4481 0.2939
+
+(1.4193) (1.0287) (0.3150)
+
+8.9280 8.3663 0.3889
+
+(2.4679) (2.7240) (0.3161)
+
+0.0561 0.0083 0.0333
+
+(0.0628) (0.0004) (0.0005)
+
+0.0896 0.0093 0.0356
+
+(0.0938) (0.0005) (0.0008)
+
+0.1145 0.0107 0.0396
+
+(0.1042) (0.0006) (0.0013)
+
+26
+
+Table 4: average MSE and its standard deviation in brackets by 500 simulation runs for the simulation setting 2.
+
+It is crucial to study these risk factors ^it for the pricing of WDs since the later relies heavily on the distributional properties of it, frequently it are assumed to be Gaussian, Benth et al. (2007) and Alaton et al. (2002). The findings of Campbell and Diebold (2005) reveal the importance of modeling conditional variances beside conditional means to capture the distributional features of temperature. We go beyond this and look at the scale factors in the tails of the it's.
+To eliminate possible year-specific level and scale effects in it for different years, we average and demean the ^it day-wise (the 29th February was droped from the data) over all years, and presmooth them using 24 Fourier series.
+We run the algorithms to estimate a collection of 159 expectile curves for the weather stations at each of the levels 5%, 50% and 95% with respect to days of a year from 1 to 365. We estimate first two principal component functions. As we show in Table 5 they already explain large portion of the sample variation.
+
+-1.0 -0.5 0.0 0.5 1.0
+
+=0.05 BUP
+
+=0.95 TD
+
+PEC
+
+J FMAMJ J ASOND
+
+Figure 3: Averaged and smoothed residuals of temperature on 159 stations (gray) and the estimated constants by the algorithms. The horizontal axis features the months from January to December.
+
+The estimation results of the three proposed algorithms are rather similar. On Figures 3 and 4 we present the estimated constant terms and the estimated two principal component functions for  = 0.05 and  = 0.95. The figures reveal that i. the estimators for the constant term produced by different algorithms are rather close to each other; ii. the estimators of the principal component functions do not show major difference between the algorithms eighter; iii. BUP and TD principal components are particularly close to each other.
+
+27
+
+-0.2 -0.1 0.0 0.1 0.2 -0.2 -0.1 0.0 0.1 0.2
+
+=0.05 BUP
+
+=0.95 TD
+
+PEC
+
+=0.05 BUP
+
+=0.95 TD
+
+PEC
+
+J FMAMJ J ASOND
+
+J FMAMJ J ASOND
+
+Figure 4: Left: the estimated first component function for the residuals of temperature. Right: the estimated second component function. The horizontal axis of all graphs features the months from January to December.
+
+The obtained first and second components indicate changes in the temperature distribution from lighter to heavier tails and the other way around within a typical year. A positive score on the first component would mean lighter than average tails of the temperature distribution in spring and fall, and heavier than average tails in winter and summer. Similar, a positive score on the second component would indicate lighter than average tails of the temperature distribution in February, March, April, July, August, and September, and heavier than average tails during the rest of the year.
+
+-0.2 -0.1 0.0 0.1 0.2 -0.2 -0.1 0.0 0.1 0.2
+
+=0.05
+
+=0.95
+
+=0.5
+
+=0.05
+
+=0.95
+
+=0.5
+
+J FMAMJ J ASOND
+
+J FMAMJ J ASOND
+
+Figure 5: Left panel: the estimated first PEC for  = {0.05, 0.5, 0.95}. Right panel: the estimated second PEC for  = {0.05, 0.5, 0.95}.The horizontal axis of the graphs features the months from January to December abbreviated with the first letter.
+
+28
+
+BUP TD PEC  = 0.05 0.89 0.89 0.86  = 0.50 0.82 0.82 0.82  = 0.95 0.89 0.90 0.87
+Table 5: Proportion of the explained variance by K = 2 for different  -levels and each of the algorithms in the temperature residuals curves
+In Figure 5 we show the principal component functions for  = {0.05, 0.5, 0.95} obtained by PrincipalExpectile. We observe that the estimated principal component functions vary with  and exhibit differences to the classical PCA where  = 0.5. By applying Proposition 4.2(3) to PEC, we conclude that the distribution of the considered temperature residuals is rather not an elliptically symmetric one. Thus, the normality assumption for pricing WDs on temperature as needed in the technology presented by Benth et al. (2007) might be violated for this data.
+8 Summary
+We proposed two definitions of principal components in an asymmetric norm and provided consistent algorithms based on iterative least squares. We derived the upper bounds on their convergence times as well as other useful properties of the resulting principal components in an asymmetric norm.
+The algorithms TopDown and BottomUp minimize the projection error in a  -asymmetric norm, and PrincipalExpectile algorithm maximizes the  -variance of the lowdimensional projection. The later algorithm was shown to share 'nice' properties of PCA as invariance under translations and changes of basis, moreover, it coincides with classical PCA for elliptically symmetric distributions.
+Using simulations we compared finite sample performance of the proposed algorithms. All algorithms appear to produce similar results. Overall performance of PrincipalExpectile and TopDown was very satisfactory in terms of the MSE, PrincipalExpectile showed robustness to 'fat-tails' and skewness of the data distribution.
+We applied the algorithms to a Chinese weather dataset with a view to weather derivative pricing. Using a commonly accepted model for temperature of Benth et al. (2007), we estimated the first two principal component functions of the temperature residuals as functions of days of a year. The resulting component functions indicate relative changes in the tails of the temperature distribution from light to heavier and vice versa. Our further results question the validity of the normality assumption on the temperature residuals which is frequently used for pricing temperature based derivatives.
+The proposed algorithms appear to be a good way to study extremes of multivariate data. They are easy to compute, relatively fast and their results are easy to interpret.
+References
+Alaton, P., B. Djehiche, and D. Stillberger (2002): "On Modelling and Pricing Weather Derivatives," Applied Mathematical Finance, 1, 1­20.
+29
+
+Benth, F., J. Benth, and S. Koekebakker (2007): "Putting a price on temperature," Scandinavian Journal of Statistics, 34, 746­767.
+Benth, J. and F. Benth (2012): "A critical view on temperature modelling for application in weather derivatives markets," Energy Economics, 34, 592­602.
+Campbell, S. and F. Diebold (2005): "Weather forecasting for weather derivatives," Journal of the American Statistical Association, 100, 6­16.
+Chen, K. and H.-G. Mu¨ller (2012): "Conditional Quantile analysis when covariates are functions, with application to growth data," Journal of the Royal Statistical Society: Series B (Statistical Methodology), 874, 67­89.
+Cobza¸s, S¸. (2013): Functional analysis in asymmetric normed spaces, Springer.
+Crambes, C., A. Kneip, and S. P. (2009): "Smooth splines estimators for functional linear regression," Annals of Statistics, 37, 35­72.
+Doss, H. and R. Gill (1992): "An Elementary Approach to Weak Convergence for Quantile Processes, With Applications to Censored Survival Data," Journal of the American Statistical Association, 87, pp. 869­877.
+Fraiman, R. and B. Pateiro-Lo´pez (2012): "Quantiles for finite and infinite dimensional data," Journal of Multivariate Analysis, 108, 1­14.
+Guo, M., L. Zhou, W. Ha¨rdle, and J. Huang (2013): "Functional Data Analysis for Generalized Quantile Regression," Statistics and Computing, doi: 10.1007/s11222013-9425-1, 1­14.
+Ha¨rdle, W. and B. Lo´pez Cabrera (2012): "The Implied Market Price of Weather Risk," Applied Mathematical Finance, 19, 59­95.
+Hjort, N. and D. Pollard (2011): "Asymptotics for minimisers of convex processes," arXiv preprint arXiv:1107.3806.
+Jolliffe, I. (2004): Principal component analysis, Springer.
+Kneip, A. and K. Utikal (2001): "Inference for Density Families Using Functional Principal Component Analysis," Journal of the American Statistical Association, 96, 519­532.
+Kong, L. and I. Mizera (2012): "Quantile tomography: using quantiles with multivariate data," Statistica Sinica, 22, 1589­1610.
+Kuan, C.-M., J.-H. Yeh, and Y.-C. Hsu (2009): "Assessing value at risk with CARE, the Conditional Autoregressive Expectile models," Journal of Econometrics, 150, 261­ 270.
+Newey, W. and J. Powell (1987): "Asymmetric least squares estimation and testing," Econometrica, 819­847.
+Ramsay, J. and B. Silverman (2005): Functional data analysis, Springer, New York.
+30
+
+Schnabel, S. (2011): "Expectile smoothing: new perspectives on asymmetric least squares. An application to life expectancy," Ph.D. thesis, Utrecht University.
+Srebro, N. and T. Jaakkola (2003): "Weighted low-rank approximations," in Machine Learning International Workshop, vol. 20, 720.
+Taylor, J. (2008): "Estimating Value at Risk and Expected Shortfall Using Expectiles," Journal of Financial Econometrics, 6, 231­252.
+van der Vaart, A. and J. Wellner (1996): Weak Convergence and Empirical Processes: With Applications to Statistics, Springer Series in Statistics, Springer.
+31
+
+SFB 649 Discussion Paper Series 2014
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Principal Component Analysis in an Asymmetric Norm" by Ngoc Mai Tran, Maria Osipenko and Wolfgang Karl Härdle, January 2014.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

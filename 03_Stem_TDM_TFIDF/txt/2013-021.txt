@@ -1,0 +1,1872 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2013-021
+Econometrics of cojumps in high-
+frequency data with noise
+Markus Bibinger* Lars Winkelmann**
+* Humboldt-Universit‰t zu Berlin, Germany ** Freie Universit‰t Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+Econometrics of co-jumps in high-frequency data with noise
+Markus Bibinger1a, Lars Winkelmann1b
+aInstitut fu®r Mathematik, Humboldt-Universita®t zu Berlin, Unter den Linden 6, 10099 Berlin, Germany bInstitut fu®r Statistik und O® konometrie, Freie Universita®t Berlin, Boltzmannstraﬂe 20, 14195 Berlin, Germany
+Abstract
+We establish estimation methods to determine co-jumps in multivariate high-frequency data with nonsynchronous observations and market microstructure noise. The ex-post quadratic covariation of the signal part, which is modeled by an Ito^-semimartingale, is estimated with a locally adaptive spectral approach. Locally adaptive thresholding allows to disentangle the co-jump and continuous part in quadratic covariation. Our estimation procedure implicitly renders spot (co-)variance estimators. We derive a feasible stable limit theorem for a truncated spectral estimator of integrated covariance. A test for common jumps is obtained with a wild bootstrap strategy. We give an explicit guideline how to implement the method and test the algorithm in Monte Carlo simulations. An empirical application to intra-day tick-data demonstrates the practical value of the approach. Keywords: co-jumps, covolatility estimation, jump detection, microstructure noise, non-synchronous observations, quadratic covariation, spectral estimation, truncation JEL classification: C14, G32, E58
+1. Introduction
+Last years have seen a tremendous increase in intra-day trading activities. High-frequent trading stimulated a new angle on financial modeling arousing great interest in the field of statistics of ultra high-frequency data (UHF-data). Asset prices recorded as UHF-data are almost close to continuoustime observations and thus foster statistical inference for continuous-time price models. Demanding absence of arbitrage leads to models in which asset prices are described by semimartingales, see Delbaen and Schachermayer (1994), Imkeller and Perkowski (2013) and references therein. These include recent price models allowing for stochastic volatility and leverage. Though there is an ongoing discussion if log-prices can be more accurately modeled by pure jump-type or continuous semimartingales, there is a broad consensus that (large) jumps occur as responses to news flow in the markets. Our main focus is on relevant news that affect various markets and assets simultaneously and may come from policy announcements or macroeconomic data releases. We detect such co-jumps from UHF-data accounting for market microstructure and non-synchronous trading. For portfolio and risk
+1Financial support from the Deutsche Forschungsgemeinschaft via CRC 649 `O® konomisches Risiko', HumboldtUniversita®t zu Berlin, is gratefully acknowledged.
+1
+
+management, it is essential to understand (co-)jumps dynamics in UHF-data to distinguish between idiosyncratic and systemic risk. The presented approach provides access to study concerted or distinct reactions of different assets to events by quantifying and locating co-jumps. This is of key interest in various applications, e. g. to study default contagion. To this end, we present a locally adaptive spectral approach to draw statistical inference on the quadratic covariation of a multi-dimensional Ito^-semimartingale from discrete UHF-data. Our method allows to separately estimate co-jumps and integrated covariance (sometimes called integrated covolatility), both disentangled from microstructure frictions, in an efficient way. It relies on a convenient combination of the spectral estimator by Bibinger and Reiﬂ (2013) to cope with noise and truncation methods in the vein of Mancini (2009) and Jacod (2008)
+In the one-dimensional case various estimation methods for the integrated volatility from discretely observed semimartingales with jumps have been developed. In this context, let us mention the important contributions by Barndorff-Nielsen and Shephard (2006), Jiang and Oomen (2008), Bollerslev et al. (2008), Mancini (2009), Jacod (2008), Fan and Wang (2007), Podolskji and Ziggel (2010) and Curci and Corsi (2012). A®it-Sahalia and Jacod (2009) have established a test for the presence of jumps. An overview and an empirical comparison is given in Theodosiou and Zikes (2011). In contrast to the one-dimensional case, there is scant literature on the multivariate setup yet. An important step for considering co-jumps in a multi-dimensional framework and extending truncation methods has been laid by Jacod and Todorov (2009) and Gobbi and Mancini (2012). However, their estimators are designed for non-perturbed observations. One main contribution of this article is to develop a tractable estimator for more complex models taking market microstructure into account. Under noise perturbation the identification and localization of (co-)jumps is more challenging, since the principle that large returns represent (large) jumps in the efficient log-price is not valid due to the impact of microstructure. Inference on the volatility of a continuous semimartingale under noise contamination can be pursued using smoothing techniques. Several approaches have been invented, prominent ones by Zhang (2006), Barndorff-Nielsen et al. (2008), Jacod et al. (2009) and Xiu (2010) in the one-dimensional setting and generalizations for a noisy non-synchronous multi-dimensional setting by A®it-Sahalia et al. (2010), Barndorff-Nielsen et al. (2011), Park and Linton (2012), Christensen et al. (2011) and Bibinger and Reiﬂ (2013), among others. A recent advance towards the estimation of the integrated covariance of a semimartingale with jumps has been given in Jing et al. (2012). In contrast to the majority of previous approaches, our main focus is on estimating co-jumps instead of concentrating only on the continuous part of quadratic covaration.
+One building block for our approach is the spectral estimator by Bibinger and Reiﬂ (2013). It relies on a locally quasi-parametric estimation technique in the Fourier domain. Structural results about the information content inherent in the statistical experiments by Bibinger et al. (2013) show that it can even attain the minimum asymptotic variance. Non-synchronicity is proved to be asymptotically negligible in combination with noise at the slower optimal convergence rate. In the light of these findings,
+2
+
+and differently to preceding methods as Christensen et al. (2011) and Jing et al. (2012), we construct our estimators with equispaced blocks equally for all components to average noisy observations. This reduces the estimator's variance. Moreover, in the presence of co-jumps this attribute, that no interpolations are pursued to deal with non-synchronicity, is at the same time advantageous, since returns with jumps can not be considered more than once which could crucially complicate a co-jump estimator's distribution. An approach combining the spectral estimator and block-wise truncation provides an estimator for integrated covariances in the presence of (co-)jumps. Consequently, we estimate co-jumps by taking the difference of the non-truncated and truncated estimator. We obtain a feasible central limit theorem for the truncated estimator allowing for confidence. Finally, a locally adaptive thresholding strategy involving pre-estimated spot covariances renders an effective finite-sample approach. Furthermore, a co-jump localization procedure in the spirit of Lee and Mykland (2008) is feasible. In order to derive a test for the presence of co-jumps, we adopt a strategy related to the wild bootstrap principle by Wu (1986), compare Podolskji and Ziggel (2010) who have constructed a test for jumps of one-dimensional semimartingales.
+The article is arranged in six sections. In the next section, we introduce the statistical model and fix the notation. Theoretical results are given in Section 3, where we also carry out the construction of the estimation approach. In Section 4, we pursue the asymptotic theory for the test for co-jumps based on the wild bootstrap idea. Section 5 comes up with an implementation of the econometric estimation procedure for UHF-data ≠ adjusted to finite sample issues and discussing some practical features. In Section 6 we investigate our approach in a simulation study and show its applicability in an empirical example. Section 7 concludes. Technical proofs are postponed to the Appendix.
+
+2. Theoretical setup
+
+We consider prices recorded as UHF-data from d individual assets. The evolution of hypothetic underlying continuous-time log-price processes are driven by a d-dimensional Ito^-semimartingale
+
+tt
+
+t
+
+t
+
+Xt = X0 + bs ds + s dWs +
+
+((s, x))(µ - )(ds, dx) +
+
+Ø((s, x))µ(ds, dx)
+
+00
+
+0 Rd
+
+0 Rd
+
+= Ct + Jt , t  R+,
+
+(1)
+
+on a suitable filtered probability space (, F, (Ft), P) with a right-continuous and complete filtration. The first three addends are composed to the continuous part (Ct)t0 with W being a d-dimensional standard Wiener process and t is the stochastic instantaneous volatility process. The jump part (Jt)t0 is decomposed in a finite sum of large jumps and compensated small jumps using a truncation function . The Poisson random measure µ on (R+ ◊ Rd) is compensated by its intensity measure (ds, dx) = ds  (dx) with a -finite measure  on Rd endowed with the Borelian -algebra. If (Rd) =  the process is said to have infinite activity. The truncation function  : Rd  Rd, Ø(z) = z - (z), separates small and large jumps. A predictable function  is used to shift the cut-off
+
+3
+
+in time and alternatively a transition measure s can be incorporated to write (x)dss(dx) instead of ((s, x))(ds, dx). Our notation follows Jacod (2012) and Jacod and Todorov (2009), among others, and we refer to Jacod (2012) for background information on semimartingales. The structural assumption is accomplished by the following restrictions on the characteristics of the semimartingale.
+Assumption (H). The drift is a d-dimensional (Ft)-adapted locally bounded process, the volatility  is a d ◊ d -dimensional (Ft)-adapted continuous Ito^-semimartingale whose drift and volatility are locally bounded and sup,s,x (s, x) /(x) is locally bounded for a deterministic non-negative function  satisfying
+
+(r(x)  1)(dx) <  ,
+Rd
+for r = 2, or in some case for specified r  (0, 2], as stated below.
+
+(2)
+
+The smallest possible r such that (2) holds is sometimes called the generalized Blumenthal-Getoor index, also referred to as jump activity index of semimartingales. The quadratic covariation of the semimartingale X is the sum of the integrated covariance matrix s = ss and the co-jumps:
+
+T
+[X, X]T = t dt + (Xs - Xs-)(Xs - Xs-) = [C, C]T + [J, J ]T .
+0 sT
+
+(3)
+
+The co-jumps [J, J]T =
+
+T 0
+
+Rd (s, x)(s, x)
+
+µ(ds, dx) are written in (3) as a sum of all common
+
+jumps, where Xs- = limts,t<s Xt. Quadratic covariation is of pivotal importance to quantify risk
+
+in financial economics and is the target of inference in this article. We consider a general discrete
+
+observation setup including non-synchronous sampling schemes and market microstructure.
+
+Assumption 1. A d-dimensional semimartingale X of the type (1) is discretely and non-synchronously observed on [0, T ] at observation times ti(p), 0  i  np, p = 1, . . . , d. The observations are cor-
+rupted with additive microstructure noise:
+
+Yi(p) = Xt((ipp)) +
+
+(p) i
+
+,
+
+0
+
+
+
+i
+
+
+
+np
+
+.
+
+The microstructure noise is given as a discrete-time process, mutually independent for all components, for which the observation errors are assumed to be i. i. d. and independent of X. Furthermore, the errors are centered and fourth moments exist.
+
+We write iY (p) = Yi(p) - Yi(-p1), 1  i  np, p = 1, . . . , d for the increments of Y (p) and
+
+Var
+
+(p) i
+
+= p2, 0  i  np, p = 1, . . . , d, for the variance of the observation errors. Denote the
+
+number of observations of the least frequently traded asset by nmin = minp np. Quantities depending
+
+on nmin or some np are often indexed with n in the sequel.
+
+4
+
+Assumption 2. Suppose that there exist differentiable distribution functions Fp : [0, T ]  [0, T ], p =
+1, . . . , d, with Fp(0) = 0, Fp(T ) = 1 and Fp > 0, such that the sampling times in Assumption 1 are generated by the quantile transformations t(ip) = Fp-1(iT /np), 0  i  np, p = 1, . . . , d.
+
+We emphasize that we treat observation schemes which are deterministic or random and indepen-
+
+dent of the process Y . A theory embedding endogenous random sampling calls for further mathemati-
+
+cal concepts, just developed for simpler models, see Fukasawa and Rosenbaum (2012) and references
+
+therein. Assumption 1 comprises standard assertions on the noise as in related literature. An exten-
+
+sion to m-dependence and mixing errors can be attained similar as in A®it-Sahalia et al. (2011). For
+
+notational convenience, we restrict ourselves to an usual i. i. d. assumption. Since we shall concentrate
+
+on the non-synchronous setup, we simply assume the componentwise noise processes to be mutually
+
+independent. An extension to E
+
+(p) (q) iv
+
+= pq if t(ip) = tv(q), at synchronous observation times is
+
+direct as for the synchronous framework in Bibinger and Reiﬂ (2013).
+
+We write an bn to express that an = O(bn) and bn = O(an) for deterministic, and an = Op(bn)
+and bn = Op(an) for random sequences. -P denotes convergence in probability on (, F , P); and st denotes weak and F-stable weak convergence, respectively. See Jacod and Protter (1998) for
+
+the notion of stable weak convergence..
+
+3. Spectral estimation of co-jumps and (integrated) covariance
+
+3.1. Construction and discussion of the estimators
+
+In this section we develop the spectral co-jump estimator. It is based on the spectral covariance
+
+estimator by Bibinger and Reiﬂ (2013) as one building block and truncation to disentangle co-jumps
+
+and the continuous part. We briefly recapitulate the spectral covariance estimation approach. Thereto
+
+consider an orthonormal system of specific sine functions with support on the blocks [khnT, (k + 1)hnT ], k = 0, . . . , hn-1 - 1, with hn-1  N, and spectral frequencies j  1:
+
+
+
+j k (t)
+
+=
+
+2hn j T
+
+sin
+
+jh-n 1T -1(t - khnT )
+
+1[khnT,(k+1)hnT ](t), j  1 , k = 0, . . . , h-n 1 - 1 .
+
+(4)
+
+The functions (4) are weight functions providing spectral statistics for each frequency j localized on h-n 1 blocks:
+
+np
+
+Sj(kp) =
+
+iY (p)jk
+
+i=1
+
+ti(p) + t(i-p)1 2
+
+, j  1, p = 1, . . . , d, k = 0, . . . , hn-1 - 1.
+
+(5)
+
+With weights wjpk,q  0 satisfying j1 wjpk,q = 1 for all k, the oracle spectral estimator is defined as
+
+SPECV(np,T,q)(Y
+
+)
+
+h-n 1-1 Jn
+= hn
+k=0 j=1
+
+wjpk,q
+
+2j2 hn2
+
+Sj(kp)Sj(kq)
+
+-
+
+p,q p2 npFp(khnT )
+
+hn-1 -1
+= k X(p), X(q) ,
+k=0
+
+(6)
+
+5
+
+with a spectral cut-off frequency Jn  nhn for (p, q)  {1, . . . , d}2 and
+
+k X(p), X(q)
+
+=
+
+Jn j=1
+
+wjpk,q
+
+2j2 hn
+
+Sj(kp)Sj(kq)
+
+-
+
+p,q p2 npFp(khnT )
+
+,
+
+(7)
+
+with p,q being Kronecker's delta, i. e. 1 if p = q and 0 else. In the presence of co-jumps, we prove
+
+that the spectral estimator consistently estimates the entire quadratic covariation (3).
+
+The spectral approach relies on the idea to design an estimator for a locally parametric model in which
+
+a continuous martingale is observed discretely with noise and the covolatility matrix is constant over
+
+small blocks. The estimator can be understood as a localized generalized method of moments. The weights wjpk,q are thus specified by block-wise Fisher informations, which depend on khnT , minimizing the variance of the oracle estimator (6). Plugging-in the pre-estimated instantaneous t, t  [0, T ], renders the final locally adaptive spectral estimator. Note that the standardization in (6) 2j2h-n 2
+slightly differs from the one in Bibinger and Reiﬂ (2013) which is for equidistant synchronous obser-
+
+vations whereas we consider non-synchronous sampling here. Local adaptivity constitutes one of the
+
+main merits compared to previous methods with globally fixed tuning parameters for smoothing, and
+
+makes the estimator more flexible and efficient for time-varying (co-)volatility processes.
+
+We the
+
+act in the following generality, since we
+
+as if the noise variances p2, p = 1, can always estimate noise variances
+
+..., with
+
+d, were known what does not faster convergence rates np
+
+harm by
+
+np
+(p2) = (2np)-1
+
+iY (p)
+
+2
+
+np-1
+
+or (Øp2) = -n-p 1
+
+iY (p)i+1Y (p) .
+
+i=1 i=1
+
+(8)
+
+The estimator in (6) has originally been designed to estimate the integrated covariance of continuous (semi)martingales X = C, J = 0, and estimates the total quadratic covariation in the presence of co-jumps. One way to separately estimate the integrated covariance matrix is a truncated spectral estimator:
+
+hn-1 -1
+
+1TSPECVn(p,T,q)(Y, un) =
+
+k X(p), X(q)
+
+k=0
+
+{|k [X (p) ,X (q) ]|un }
+
+=
+
+h-n 1-1 k=0
+
+ hn
+
+Jn j=1
+
+wjpk,q
+
+2j2 hn2
+
+Sj(kp)Sj(kq)
+
+-
+
+p,q p2 npFp(khnT )
+
+
+
+1
+
+, {|k [X (p) ,X (q) ]|un }
+
+(9)
+
+with a truncation cut-off un = c hn,   (0, 1), c > 0. Consequently, the spectral estimator of co-jumps is derived as the difference by the non-truncated and the truncated SPECV:
+
+SPECJ(np,T,q)(Y, un) = SPECVn(p,T,q)(Y ) - TSPECVn(p,T,q)(Y, un)
+
+h-n 1-1
+
+1=
+
+k[X(p), X(q)]
+
+.
+{|k [X (p) ,X (q) ]|>un }
+
+k=0
+
+(10)
+
+6
+
+In contrast to co-jumps, the continuous part contributes quadratic covariations of order hn on blocks with shrinking lengths hn. Therefore, we can truncate with a global threshold hn for some   (0, 1). For finite-sample applications it will be crucial to find a more sensitive thresholding rule pursued in
+Section 5 below.
+For an adaptive fully data-driven estimator, we require pilot estimates of the oracle weights
+
+wjpk,q =
+
+4j4h-n 4 np nq
+
+~p2
+
+~q2
+
++
+
+Jn r=1
+
+4r4h-n 4 np nq
+
+~p2~q2
+
+((kphqn)T )2 + (kphpn)T k(qhqn)T + + ((kphqn)T )2 + (kphpn)T k(qhqn)T
+
+2j2h-n 2 (npnq )1/2
+
+(kphpn)T ~q2 + (kqhqn)T ~p2
+
++ 2r2h-n 2
+(npnq )1/2
+
+k(phpn)T ~q2 + k(qhqn)T
+
+-1
+~p2
+
+-1
+
+.
+
+For X = C, J = 0, nonparametric estimates of the spot covariances (tpq), t  [0, T ], can be obtained by local averages of the estimates k[X(p), X(q)] which are approximately hn(kphqn)T . Bibinger and
+Reiﬂ (2013) proposed to use only the first frequency, j = 1, and average over a set Kt of Kpilot adjacent blocks containing t. For semimartingales  with hn nm-1in/2, Kpilot nm1/i4n, the root mean squared error is of order O(n-m1in/8). Uniform loss in t is bounded by (see Bibinger and Reiﬂ (2013))
+
+E sup |^ (tpq) - (tpq)| = O (nmin/ log nmin)-1/8 .
+t[0,T ]
+
+Truncation can eliminate jumps in the spot covariance estimator in the same way as for our truncated integrated covariance estimator. For this purpose we can use again a cut-off un = c hn with   (0, 1), c > 0, and estimate the spot covariance by
+
+^ (tpq) = Kp-il1ot
+
+2h-n 2
+
+kKt
+
+S1(pk)S1(qk)
+
+-
+
+p,q p2 npFp(khnT )
+
+1. {|k [X (p) ,X (q) ]|un }
+
+(11)
+
+The estimators using only one single frequency which are close to usual block-wise pre-averages can already attain optimal rates, yet in practice spot estimators involving more frequencies, which we introduce in Section 5 below achieved a higher efficiency. We plug in these piecewise constant estimates in the oracle weights together with the estimated rescaled local noise variances ~p = p(Fp(khnT ))-1/2 with the given observation times distributions and (8). We keep to the same notation for the adaptive estimators as for the oracle ones and from this point only refer to the fully adaptive estimators. The weights slightly differ from Bibinger and Reiﬂ (2013) again, since we focus on a more general non-synchronous setup. Still, blocks are chosen equally along all asset processes which minimizes the estimator's variance. This is owed to a fundamental property of underlain statistical experiments that non-synchronicity is asymptotically immaterial in a combination with microstructure noise established in Bibinger et al. (2013).
+
+7
+
+3.2. Asymptotic properties of the estimators
+In this section, we find consistency results for spectral estimators of integrated covariance, entire quadratic covariation and co-jumps. We establish a stable central limit theorem for the truncated estimator and integrated covariance and provide a feasible version allowing for confidence.
+
+Theorem 1. On Assumption (H) on the signal process X, Assumption 1 on the observation model and Assumption 2 on the observation times design, we derive the following asymptotic results for the estimators (6), (9) and (10) under high-frequency asymptotics as nmin  , hn  0. The spectral estimator (6) is consistent for the quadratic covariation:
+
+SPECV(np,T,q)(Y ) - [X(p), X(q)]T -P 0 .
+
+(12a)
+
+The truncated spectral estimator consistently estimates the integrated covariance (covolatility):
+
+TSPECV(np,T,q)(Y, un) - [C(p), C(q)]T -P 0 ,
+
+(12b)
+
+and the spectral co-jumps estimator consistently estimates the jump part of quadratic covariation:
+
+SPECJn(p,T,q)(Y, un) - [J (p), J (q)]T -P 0 .
+
+(12c)
+
+Theorem 2. If, additionally to the Assumptions of Theorem 1, (2) holds with r < 1, for Jn   and hn np log np, np nq,  > (2 - r)-1, the following pairwise central limit theorem applies:
+
+np1/4 TSPECV(np,T,q)(Y, un) - [C(p), C(q)]T st N (0, AVAR) ,
+
+(13)
+
+with the asymptotic variance (see Bibinger and Reiﬂ (2013) for discussion)
+
+T
+
+AVAR =
+
+~p(s)~q(s) 2(A2s - Bs)Bs
+
+0
+
+◊ As + A2s - Bs - sgn(As2 - Bs) As -
+
+-1
+As2 - Bs ds ,
+
+(14)
+
+As =
+
+(spp)
+
+~q (s) ~p(s)
+
++
+
+(sqq)
+
+~p(s) ~q (s)
+
+, Bs = 4((spp)(sqq) + (s(pq))2) ,
+
+where ~p(s) = p/(Fp(s))1/2, ~q(s) = q/((Fq(s))1/2(nq/np)).
+
+For the proof of consistency in Appendix A.2, we will establish the convergence
+
+SPECV(np,T,q)(C) - TSPECVn(p,T,q)(C + J, un) -P 0 ,
+
+(15)
+
+stating that the truncation asymptotically eliminates the impact of jumps on the spectral covariation
+
+8
+
+estimation and is thus eligible to estimate the two parts of quadratic covariation separately. If we can show on the assertion that jumps are of finite variation that the error in (15) is Op(nm-1in/4), the central limit theorem (13) follows from the case without jumps and Bibinger (2013). We conjecture that for SPECV(np,T,q)(Y ) a central limit theorem holds with a second addend in the asymptotic variance due to a cross term by jumps and increments from the continuous part, but we do not focus on the exact asymptotic distribution of SPECV(np,T,q)(Y ) here, which requires a mathematically challenging analysis on its own.
+It is known that the speed of convergence in (13) is optimal for integrated covariance estimation in a
+latent observation model. Moreover, the restriction to a jump component where (2) holds with r < 1
+to prove a CLT (13) is natural, since the analogous assertion is already needed in Jacod (2008) for
+truncated realized variance in the simpler one-dimensional non-noisy observation experiment, where
+the rate is of course faster. For a discussion on optimality for this setup we refer to Jacod and Reiﬂ
+(2012). Presumably, analogous reasoning with slower rate applies to the sequences of statistical exper-
+iments we consider. From our point of view this fact underlines the barriers in disentangling variation
+of small jumps and a continuous component. Yet, our focus is rather to separate co-jumps of larger
+magnitude and for this purpose truncation appears to be well-suited.
+A feasible central limit theorem which affords confidence intervals is obtained implicitly, since the weights are determined via local Fisher informations wjpk,q  Ijpk,q which are block-wise inverse variances. A consistent estimator of the overall variance
+
+h-n 1-1
+
+
+Jn
+
+-1
+
+Var SPECVn(p,T,q)(C) =
+
+hn2  Ijpk,q
+
+k=0 j=1
+
+is directly derived from the pre-estimated weights:
+
+h-n 1-1
+
+
+Jn
+
+-1
+
+min (np, nq)-1/2AVAR =
+
+h2n  I^jpk,q .
+
+k=0 j=1
+
+Corollary 3.1. On Assumptions (H), 1 and 2, if (2) holds with r < 1,  > (2 - r)-1, and for 
+hn nmin, we have a feasible central limit theorem:
+
+min (np, nq)1/4
+
+-1/2
+AVAR
+
+TSPECV(np,T,q)(Y, un) - [C(p), C(q)]T
+
+N (0, 1) .
+
+(16)
+
+In particular, Corollary 3.1 is valid in a more general setting than Theorem 2, because we can allow for different speeds np = O(nq), when standardizing with the estimated variance. At the same time, the feasible limit theorem (16) is most appealing to practitioners to draw confidence for the estimates from the normal distribution.
+
+9
+
+4. A bootstrap-type test for co-jumps
+
+In Theorem 2 a central limit theorem for the truncated spectral integrated covariance estimator has been established which directly includes an asymptotic distribution free test for the hypothesis that the integrated covariance equals zero. A central limit theorem for the SPECJ which could render a test for the presence of co-jumps is not available which comes from the fact that under high-frequency asymptotics as nmin  , we can estimate co-jumps with asymptotically vanishing variance at rate nm1/i4n. One way to derive a test for finite-sample applications can be achieved adopting the wild bootstraptype approach used by Podolskji and Ziggel (2010) for a similar testing problem in a one-dimensional setup. It is founded on the principle that if we disturb the addends of SPECJ by multiplication with suitable external independent random variables, we can approach an asymptotic distribution of the manipulated SPECJ which hinges on the distribution of those external random variables and the underlying process. Note that while in the one-dimensional framework the test by Podolskji and Ziggel (2010) is one possible testing procedure and others are available (e. g. by ratios of power variations, see A®it-Sahalia and Jacod (2009)), at least for the non-noisy case, alternative tests for our general multi-dimensional framework are not available to the best of our knowledge. Generalizations of tests as the one by A®it-Sahalia and Jacod (2009) are not obvious. In the sequel we construct a test dedicated to the decision problem
+
+nTo cj,p,q = {|t  Xt() has no common jumps (Xs(p) - Xs(-p))(Xs(q) - Xs(-q)) = 0 on [0, T ]}
+
+against the alternative
+
+cTj,p,q = {|t  Xt() has co-jumps on [0, T ]} .
+For this purpose we define exogenous random variables k, k = 0, . . . , h-n 1 - 1, on a canonical orthogonal extension of (, F , (Ft) , P) denoted by , F , P . The test statistic, incorporating the structure of the SPECJ and the exogenous randomization is
+
+h-n 1-1
+
+T n(Y ) = min(np, nq)1/4
+
+1 1k[X(p), X(q)]
+
++
+{|k [X (p) ,X (q) ]|>un }
+
+k
+
+{|k [X (p) ,X (q) ]|un }
+
+. (17)
+
+k=0
+
+We employ i. i. d. random variables k, k = 0, . . . , h-n 1 - 1:
+
+P (k = -) = 0.5 = P (k = ) .
+
+A useful rewriting of (17) with k = 1 - ~k, is:
+
+hn-1 -1
+
+T n(Y ) = min (np, nq)1/4
+
+k[X(p), X(q)]
+
+k=0
+
+11 - ~k {|k[X(p),X(q)]|un}
+
+.
+
+(18)
+
+10
+
+We refer to Podolskji and Ziggel (2010) who use a related statistic as (18) for a discussion about the choice of randomization. It is crucial that the distribution is symmetric and the two-atomic nature makes the analysis simple. We will use  = 0.1 below in Section 6 for our applications.
+
+Theorem 3. For the test statistic (17) the central limit theorem
+
+ h-n 1-1 Tsnt(Y ) = T n(Y ) min (np, nq)1/2
+k=0
+
+k[X(p), X(q)]
+
+-1/2 2 Var (k)
+
+N(0, 1)
+
+(19)
+
+applies on the hypothesis no cj,p,q and T n(Y ) P-P  on cj,p,q. Furthermore, when np stable central limit theorem is valid
+
+nq, a
+
+T n(Y ) st N 0, Var (k) AVAR +[X(p), X(q)]T2
+
+(20)
+
+with the asymptotic variance AVAR from (14) above.
+
+From Theorem 3, we can deduce critical values or p-values by
+
+P
+
+
+
+
+P
+
+Tno cj,p,q (Tsnt(Y ) > q1-)   ;
+
+P
+
+
+
+
+P
+
+cTj,p,q (Tsnt(Y ) > q1-)  1
+
+for level 0    1 with the quantiles q of a standard normal distribution.
+
+5. An econometric co-jump estimation and localization approach
+
+The high-frequency asymptotic theory for the estimator (9) allows to plug in a constant threshold un = c hn for any   (0, 1) and constant c > 0 to filter out jumps in the path of X. Yet, a major task towards an applicable implementation is to set up an adequate finite-sample truncation rule. In
+the following we make use of the fact that the asymptotic magnitude of quadratic covariation from the continuous part is known, i. e. maxk |k C(p), C(q) | 2 log(hn-1) ∑ hn. The vital point is that the increase of quadratic covariation locally hinges on the spot covariance. Therefore, we propose a
+locally adaptive truncation estimator:
+
+h-n 1-1
+
+TSPECVn(p,T,q)(Y, un) =
+
+1k X(p), X(q)
+
+, {|k [X (p) ,X (q) ]|un (t)}
+
+k=0
+
+hn-1 -1
+
+SPECJ(np,T,q)(Y, un) =
+
+1k X(p), X(q)
+
+, {|k [X (p) ,X (q) ]|>un (t)}
+
+k=0
+
+(21a) (21b)
+
+with a time-varying truncation cut-off function un(t) = ct hn2 log(h-n 1), and ct will be chosen as absolute value of a data-driven spot covariance estimator. Motivated by the locally parametric ap-
+
+11
+
+∑ Set a priori threshold un = 2 log Kn ∑ Kn-1, Kn = hn-1, and choose Kpilot, Jn. Calculate piecewise constant spot covariance estimator
+
+Jn
+
+^ (kphqn)T = Kp-il1ot
+
+Jn-12j2h-n 2
+
+mKk j=1
+
+Sj(mp)Sj(mq) - p,qBmp
+
+1 {|m [X (p) ,X (q) ]|un }
+
+where Bmp = (1/2hn)
+
+np v=1
+
+(v
+
+Y
+
+(p))2
+
+mhntv(p)(m+1)hn (t(vp) - tv(p-)1)2 ,
+
+m = 0, . . . , hn-1 - 1, Kk = {k - Kpilot/2  0, . . . , k + Kpilot/2  (h-n 1 - 1)}.
+
+∑ Determine block-wise weights
+
+I^j(kpq) =
+
+^ (kphqn)T
+
+2
++
+
+^ (kphpn)T ^ (kqhqn)T
+
++
+
+h-n 44j4BkpBkq
+
++
+
+hn-22j2
+
+Bkp^ k(qhqn)T + Bkq^ k(phpn)T
+
+,
+
+w^j(pkq) = I^j(kpq)/
+
+Jn
+I^l(kpq)
+l=1
+
+.
+
+∑ Plug in estimated weights in estimators (9) and (10) with a block-wise varying threshold
+
+un(k) = ^ k(phqn)T Kn-1 2 log Kn, 0  k  Kn .
+
+Algorithm 1: Algorithm for the estimation procedure.
+
+proximation as above, we build the spot estimator and locally adaptive threshold block-wise:
+un(k) = ^ (kphqn)T hn2 log(h-n 1), k = 0, . . . , hn-1 - 1 .
+For local thresholding from noisy data, it will be crucial to incorporate local spot covariance estimates. Compared to locating jumps for each asset separately from the quadratic variation estimates, this also factors in correlations. The procedure now works as follows: We evaluate block-wise spectral statistics with constant weights and obtain a nonparametric spot estimator by local averaging and truncation. Then, we calculate the spectral estimators with adaptively chosen weights and locally adaptive threshold. For an illustration of the thresholding procedure see Figure 1 in the simulation study in Section 6 below. The method at the same time allows for sequential block-wise testing for co-jumps in the fashion as Lee and Mykland (2008) suggested for a one-dimensional non-noisy setup. However, differently as in the absence of noise, we can assign co-jumps only to certain blocks and not more exactly to observation time instants. Under noise, for particular increments we may not infer that there is a jump if the increment is large, since most large increments are induced by the microstructure. However, the noise is smoothed out when taking spectral statistics on blocks. Large products of blockstatistics relate to co-jumps. Instead of using only the first frequency for spot estimators, it will be convenient to employ pilot estimators summing up spectral statistics with frequencies 1  j  Jpilot,n with some spectral cut-off frequency Jpilot,n > 1. Since we do not know local Fisher informations for
+
+12
+
+the weights, we simply use equal weights Jp-il1ot,n for the pilot estimator:
+
+Jpilot,n
+
+^ (tpq) = Kp-il1ot
+
+Jp-il1ot,n  2 j 2 hn-2
+
+kKt j=1
+
+Sj(kp)Sj(kq)
+
+-
+
+p,q p2 npFp(khnT )
+
+1. {|k [X (p) ,X (q) ]|un }
+
+(22)
+
+The truncation cut-off is un = 2 log(hn-1) hn. Crucial tuning parameters are the bin-widths hn and Kpilot for smoothing. The spectral cut-off can be chosen of order Jpilot,n = Jn log n, with a constant of proportionality which we have chosen in practice between 3 and 10. By the growth behavior
+
+wjk
+
+ 
+
+ hn nmin
+
+-1
+
+if j
+
+
+
+ hn nmin
+
+3 j-4 if j
+
+ h nmin  h nmin
+
+of the weights, we find this to be an accurate choice and also if Jn is not too large that constant weights Jp-il1ot,n for the pilot estimator are suitable. The exact number of blocks hn-1 within a reasonable range will not affect the estimates much and the estimator is quite robust to different choices.
+We emphasize that the bias of the local parametric approximation does not depend at all on hn and the number of blocks K = hn-1  N. We recommend to use 30  K  100 for daily estimation of UHF-data. In principle it is also possible to take different block lengths adapted to the volatility paths,
+e. g. equispaced in tick-time for d = 1 or refresh times for d > 1, but the differences have been rather
+small in our applications.
+We summarize the algorithm for the implementation of the estimation procedure concisely in Algo-
+rithm 1.
+
+6. Simulation study and an empirical example
+In this section, we apply the implemented estimation procedure to several scenarios and suitable model specifications to reveal its finite-sample properties and accuracy. In each scenario we analyze spectral estimators, but accentuate different aspects. We highlight the estimators' applicability in an empirical data example using UHF-data from stock and bond markets. For the simulation study it is informative to restrict to the two-dimensional case, d = 2, and T = 1. We begin with a concise description of the implemented scenarios.
+6.1. Description of scenarios ∑ Scenario 1: A completely parametric setup where
+1 1/2 = ,
+1/2 1
+is constant and with a constant drift b = 0.1 and a fixed number of jumps permits to track the estimators' quality in a simple setting. X(1) and X(2) are observed at times ti(p), 0  i 
+13
+
+30000, p = 1, 2, where ti(p) are order statistics of uniformly drawn points on [0, 1]. The signal is corrupted by i. i. d. noise which is in both components normally centered distributed with standard deviation  = 0.001. For the jump part we simulate two common jumps and one separate jump in X(1) and X(2), respectively. Jump times are uniformly distributed on [0, 1], and jump heights are normally distributed with expectation 1 and standard deviation 0.5.
+∑ Scenario 2: Our main focus is on the time-varying nonparametric case. For an example of deterministic volatility functions, set
+
+t(1) = 0.1 - 0.08 ∑ sin (t), t  [0, 1] , t(2) = 0.15 - 0.07 ∑ sin ((6/7) ∑ t), t  [0, 1] ,
+t = 0.5 + 0.01 ∑ sin (t), t  [0, 1] ,
+
+where the volatilities are higher at opening and end of the observed interval and the correlation is rather persistent and only slowly varying, which mimics some basic realistic features. The noise is in both components i. i. d. normally centered distributed with  = 0.001. We add deterministic jumps to the continuous part, i. e. at times t = 19/60, 49/60 of X(1) with jump size L1 and at time t = 19/60 of X(2) of size L2. We implement synchronous equidistant sampling times i/30000, 0  i  30000 and the drift equals zero. Note that fixed jump arrival times violate the standard structural Assumption (H). Yet, it allows to investigate the localization accuracy of the method. The results are not affected by the specified chosen jump times above.
+∑ Scenario 3: A realistic complex stochastic volatility model with serial dependence in noise and Poisson observation schemes. We add a coupled compound Poisson jump measure to simulate random jumps with normally distributed jump sizes. The underlying observation times design is generated from a homogenous Poisson model with E [n1] = E [n2] = 30000, using the times generated on [0, 1]. The Poisson sampling is independent from the process Y . The stochastic volatility model emulates the one by Barndorff-Nielsen et al. (2011). Hence, the signal part of simulated log-prices follow a bivariate factor model
+
+dXt(p) = µ(p) dt + (p) t(p)dBt(p) + (1 - ((p))2) t(p) dWt(p), p = 1, 2,
+
+(23)
+
+where Bt = (Bt(1), Bt(2)) is a two-dimensional standard Brownian motion and Wt is a twodimensional standard Brownian Motion independent of Bt. The spot variance functions follow Ornstein-Uhlenbeck processes
+
+t(p) = exp 0(p) + 1(p) t(p) dt(p) = (p) t(p) dt + dBt(p),
+
+where p = 1, 2.
+
+(24)
+
+14
+
+Accordingly, the leverage between Xt(p) and t(p) is (p) and the correlation between Xt(1) and Xt(2) is constant (1 - (1)2) (1 - (2)2). In the following we use equal parameters µ = µ(1) = µ(2) for both components, analogously for , 0, 1. We normalize as in BarndorffNielsen et al. (2011), such that 0 = 12/ (2) which implies E 01(s(p))2 ds = 1. We use an Euler discretization scheme and for the OU processes t(l) we exploit the fact that an exact discretization is available. The starting values of t(p), p = 1, 2, are generated from its stationary distribution, i.e. 0(p)  N 0, (-2)-1 , p = 1, 2.
+We disturb the signal process X by non-i. i. d. microstructure noise generated from a martingale
+difference model,
+Yj(p) = Xt(j(pp)) + j(p), j = 1, . . . , np, p = 1, 2,
+where the noise is conditionally on the signal distributed according to
+
+(p) j
+
+Xt(j(pp)) , t((jpp))  N  (jp-)1, (j(p))2
+
+with (j(p))2 = 2
+
+1 np
+
+np
+(i(p))4,
+i=1
+
+where  gives the so-called signal-to-noise ratio. This implies that the noise variance increases with the volatility of the signal (see Bandi and Russell (2006), among others). We fix the parameter configuration µ = 0.03, 0 = -5/16, 1 = 1/8,  = -1/40 as in BarndorffNielsen et al. (2011) and  = 0.1 and  = 0.005. The jumps are generated by a Poisson process with two expected common jumps and two expected idiosyncratic jumps in each component. The jumps sizes are normally distributed with expectation and standard deviation parameter /10.
+
+∑ Data example: We investigate comovements of UHF-data on German stocks index futures (FDAX) and futures on 10 year German Government bonds (FGBL, price notation). The data is provided by the derivatives trading platform EUREX. We analyze 252 trading days from January 2008 to December 2008, which represents a crucial period of the global financial crisis. The focus is on trading hours from 9:00 to 17:00 CET resulting in approx. 10000 to 30000 ticks per day. For each future we filter the data with the same most frequently traded maturity (typically next ahead). Observation times are non-synchronous and the stylized facts of the data indicate microstructure effects. As commonly known for most financial data there are also features which are not perfectly accordant to the additive noise model (as zero returns).
+
+In any example we implement the adaptive spectral estimators according to Algorithm 1 and do not
+use oracle weights in the simulations. We use piecewise constant spectral pilot estimators for  employing constant weights Jp-il1ot. For the simulations, we set Jpilot = J = 35, use 30 blocks, smooth over K = 7 adjacent blocks for the spot estimators and run 1000 Monte Carlo iterations. For
+
+15
+
+Table 1: Simulation results of Scenario 1.
+SPECJ(1,2) = 2.04 ± 1.11 TSPECV(1,2) = 0.50 ± 0.11 SPECJ(1,1) = 3.83 ± 1.95 TSPECV(1,1) = 0.98 ± 0.13 SPECJ(2,2) = 3.85 ± 1.93 TSPECV(2,2) = 0.98 ± 0.13
+Note. Rounded sample means ± standard deviations from 1000 MC iterations.
+the data example we set K = 24, the spectral cut-off J = 35 and utilize the same adaptive truncation rule as for our simulations.
+6.2. Results 6.2.1. Results and interpretation of Scenario 1
+In order to approve the eligibility of our spectral co-jumps estimator to estimate the jump part in quadratic covariation, we compare estimates with the theoretically expected values in this simple setup with fixed numbers of jumps in each component and a parametric covariance matrix. For the evaluation of the fluctuation of jump heights by the N(1, 1/4)-distribution, note that for X = 1 + Z with Z  N(0, 1/4), we have
+E X2 = E (1 + Z)2 = 1 + E Z2 = 5/4 ,
+Var X2 = Var 1 + 2 ∑ Z + Z2 = 4 ∑ Var(Z) + Var(Z2) = 4 ∑ 1/4 + 2/16 = 9/8 . Thus, E[J (1), J (2)]T = 2 and E[J (1), J (1)]T = E[J (2), J (2)]T = 3.75. The quadratic covariation of randomly generated jumps has a theoretical standard deviation of ca. 1.06 and the variations of ca. 1.84, respectively, and we expect the simulated ones to be slightly larger. Table 1 lists the Monte Carlo results which are quite close to their theoretical counterparts. For the truncated integrated covariance estimator, the finite sample variance under non-synchronous sampling is slightly larger than suggested from (14).
+6.2.2. Results and interpretation of Scenario 2 The known integrated covariance equals 0.00269 here and integrated variances 0.00301 and
+0.01048, respectively. We consider four configurations:
+M1 L1 = 0.1 and L2 = 0.1, where jumps are very large compared to Brownian increments (more than 100 times larger on average).
+M2 L1 = 0.05 and L2 = 0.1.
+M3 L1 = 0.05 and L2 = 0.05.
+16
+
+Figure 1: Block-wise estimated k[X(1), X(2)] in Scenario 2, setup M1 (left) and M4 (right).
+Note. Thresholding for L1 = 0.1 (left) and L1 = 0.01 (right). Marked by a circle are spectral statistics which exceed the threshold and are ascribed to a co-jump.
+M4 L1 = 0.01 and L2 = 0.1, where the jumps of X(1) are not of much larger magnitude as increments from the continuous part, but still for X(2).
+It is particularly interesting how the pilot estimates can mimic the paths of the spot variances and the covariance. The pilot estimators for M1 are illustrated in Figure 2. The performance of the spot estimators is quite remarkable and can mimic the functions satisfactorily, not only for the MC-averages but in any iteration. Figure 1 visualizes the estimation procedure of the spectral estimators (9) and (10). For each block the estimated increase of quadratic covariation (in a local parametric model simply hnkhnT ) is componentwise compared to the local threshold |^ khnT |hn 2 log(h-n 1). We give an overview on the estimation results of the spectral estimators in Table 2. We also investigate the wild
+Figure 2: Estimated and true spot (co-)variances in Scenario 2.
+Note. Block-wise MC-averages. Spot variances of X(1) and X(2) (left, middle) and covariance (right).
+17
+
+Table 2: Simulation results for Scenario 2.
+
+SPECJ(1,2) SPECJ(1,1) SPECJ(2,2) TSPECV(1,2) TSPECV(1,1) TSPECV(2,2)
+Tsnt 1%-power
+5%-power
+10%-power
+sensitivity
+
+M1 107 ± 4.5 206 ± 4.5 106 ± 6.4 26 ± 5.4 28.7 ± 2.7 101 ± 5.9 29.5 ± 1.3
+1.00 1.00 1.00 1.00
+
+M2 53 ± 3.6 51 ± 3.9 106 ± 6.1 26 ± 4.5 31 ± 1.3 102 ± 5.9 22.9 ± 1.3
+1.00 1.00 1.00 1.00
+
+M3 26 ± 6.5 51 ± 4.0 26.1 ± 5.9 27 ± 6.6 30 ± 3.2 105 ± 6.6 14.8 ± 3.6
+0.96 0.96 0.97 0.96
+
+M4 8 ± 7.0 10 ± 5.2 106 ± 6.2 30 ± 6.2 32 ± 3.1 102 ± 5.7 5.1 ± 4.6
+0.77 0.77 0.78 0.76
+
+Note. Spectral estimators of quadratic (co)variation and (co)jumps (mean and standard deviation) times 104; test characteristics.
+
+bootstrap test and list the results for the test statistics with empirical powers to certain test levels. The portion of detected co-jumps is given in the last row of Table 2. Concerning specificity we have 328, 80, 95 and 18 mistakenly detected co-jumps in the 1000 iterations in configuration M1, M2, M3 and M4, respectively. Most of them (319, 67, 69, 16) are located on block 25 (when one of both processes exhibits a jump).
+6.2.3. Results and interpretation of Scenario 3 We implement the stochastic volatility model with expected jumps sizes  = i/10, i = 0, . . . , 10.
+The estimators perform well in this realistic model which harms some of our technical assumptions on which theoretical asymptotic results are proved. In Figure 3 the power of the  = 0.01/0.05/0.1-level co-jump test from Section 4 is depicted for fixed expected number of observations for different values of . As the jumps sizes increase the power increases so long as jumps are very large compared to continuous part increments. Table 3 gives the root mean square errors (RMSE) of the SPECJ and the TSPECV. For increasing  (mean and standard deviation of jumps), the variance of SPECJ increases naturally. The RMSE of TSPECV(1,2) slightly increases with , whereas the RMSE for the onedimensional estimators are slightly larger for moderate jump sizes. All truncated estimators exhibit the smallest RMSE in absence of jumps. Altogether, simulation results are promising and we conclude that the spectral approach provides an efficient method to draw inference on co-jumps and quadratic covariation, even in complex models accounting for various dependencies.
+6.2.4. Results and interpretation of data example Figure 4 depicts SPECJ (black) and TSPECV (gray) estimates for each trading day. As economic
+intuition suggests, on most days the integrated covariance (gray) of bond and stock prices is negative. Interestingly, such a prevailing negative relation of common jumps (black) is not evident from Figure 4. The direction of co-jumps appears unsystematic. However, after applying the co-jump test, the
+18
+
+Table 3: Simulation RMSEs in Scenario 3.
+
+ TSPECV(1,2) TSPECV(1,1) TSPECV(2,2) SPECJ(1,2) SPECJ(1,1) SPECJ(2,2)
+
+10 0.052
+
+0.032
+
+0.033
+
+1.42 1.35 1.41
+
+9 0.049
+
+0.030
+
+0.031
+
+1.16 1.11 1.14
+
+8 0.048
+
+0.033
+
+0.033
+
+0.93 0.79 0.91
+
+7 0.044
+
+0.037
+
+0.035
+
+0.66 0.73 0.53
+
+6 0.041
+
+0.036
+
+0.033
+
+0.51 0.45 0.54
+
+5 0.040
+
+0.040
+
+0.032
+
+0.33 0.32 0.33
+
+4 0.039
+
+0.049
+
+0.052
+
+0.21 0.18 0.21
+
+3 0.039
+
+0.060
+
+0.063
+
+0.12 0.12 0.13
+
+2 0.036
+
+0.060
+
+0.063
+
+0.07 0.10 0.11
+
+1 0.033
+
+0.062
+
+0.064
+
+0.06 0.06 0.03
+
+0 0.023
+
+0.024
+
+0.025
+
+0
+
+0
+
+0
+
+Note. Root mean square errors of truncated spectral estimators (TSPECV) of quadratic (co)variation and (co-)jump estimators (SPECJ)
+
+picture becomes clearer. On a 5% significance level, co-jumps occur on 19 days (7.5%), where only 3 days display positive co-jumps.
+7. Conclusion
+In this article we present a novel ex-post approach to test for and estimate co-jumps in multivariate high-frequency data which can cope with market microstructure and non-synchronous trading. Our estimation method brings together the efficient spectral covariance estimator by Reiﬂ (2011) and Bibinger and Reiﬂ (2013) and the concept of truncation. The spectral estimator attains substantial efficiency gains for time-varying volatility matrices compared to previous methods by its local adaptivity. We derive new estimators for the spot covariances and variances which we employ for choosing weights and the threshold locally on blocks. Block-wise estimates of quadratic covariation exceeding this threshold are ascribed to co-jumps. A feasible limit theorem for integrated covariance estimation is established. We investigate the performance of the invented estimation techniques in various simulation scenarios and an empirical example. The performance of our spot (co)variance estimators is remarkable and from our perspective they are worth further consideration in empirical work. Our approach paves the way for an efficient and rigorous analysis of the covariance structure and co-jump risks for applications in empirical finance. One important application we have in mind where inference on co-jumps takes a vital role is analyzing the impact of news announcements, see e. g. Lahaye et al. (2011). Our approach provides a capable and insightful tool which permits to expose co-jumps that appear nearterm to events and quantifying their significance, magnitude and pairwise directions (concerted or contrast reaction).
+
+19
+
+Figure 3: Power of the test for the presence of co-jumps in Scenario 3.
+Note. For fixed expected number of observation times power increases for larger jump heights. Figure 4: Spectral estimates of co-jumps and covolatility for FDAX and FGBL.
+Note. TSPECV (gray) and SPECJ (black) estimates for integrated covariance and co-jumps between FDAX and FGBL for trading days in 2008,  and ◊ mark significance on 5% and 10% level, respectively.
+20
+
+Acknowledgement
+Financial support from the Deutsche Forschungsgemeinschaft via CRC 649 `O® konomisches Risiko', Humboldt-Universita®t zu Berlin, is gratefully acknowledged. Data has been provided by the `Research Data Center' of CRC 649.
+
+Appendix A. Proofs
+
+Appendix A.1. Some estimates and preliminaries
+Throughout the proofs K denotes a generic constant and Kp denotes a generic constant dependent on some p. Considering a finite time span [0, T ], we can reinforce our structural Assumption (H) replacing local boundedness by uniform boundedness. This is standard in the strand of literature on statistics for semimartingales and based on a localization procedure provided in Jacod (2012), Lemma 6. 6 in Section 6. 3.
+Assumption (SH). We have Assumption (H) and, moreover, with some constant  for all (, s, x)  (, R+, Rd):
+
+max { bs() , s() , Xs() , (s, x) /(x)}   .
+
+We decompose the semimartingale X which shall satisfy this structural Assumption in the continuous part C and jump part J and separate (co-)jumps with norm bounded from above by  and larger jumps:
+
+tt
+
+Jt = J ()t +
+
+((s, x))(µ - )(ds, dx) +
+
+Ø((s, x))µ(ds, dx) ,
+
+0 Rd\A
+
+0 Rd
+
+with A = {z  Rd|(z)  } and later let   0. The strengthened boundedness assertion from Assumption (SH) is crucial for the following essential standard estimates which are used frequently in the sequel:
+
+p  1, s, t  0 : E Cs+t - Cs p Fs  Kptp/2 ,
+
+(A.1a)
+
+p  1, s, t  0 : E
+
+J ()s+t - J ()s p Fs
+
+(s+t)
+
+p
+
+ Kp E
+
+(2(z)  1)µ(d, dx) 2
+
+s A
+
+
+
+Kpt(
+
+p 2
+
+1)
+
+(
+
+p 2
+
+1)
+
+,
+
+(A.1b)
+
+21
+
+p  1, s, t  0 : E
+
+Cs+t - Cs - (s(Ws+t - Ws)) p Fs
+
+ Kp E
+p
+ Kp t 2 E
+
+s+t p
+ - s 2 d 2 Fs
+s
+sup (  - s p) Fs
+ [s,s+t]
+
+ Kptp ,
+
+(A.1c)
+
+s, t  0 : E Js+t - Js - (J ()s+t - J ()s) Fs  Kt-r ,
+
+(A.1d)
+
+with r  (0, 2] from Assumption (H) in (A.1d) and  = A 2(x)  1 (dx). If we suppose (2), we have the bound
+
+  K(2-r) .
+
+(A.1e)
+
+The estimates above are concluded by Burkholder-Davis-Gundy inequalities, Ho®lder inequality and Doob inequality and we refer to Jacod (2012), among others, for a detailed proof.
+
+Appendix A.2. Proof of Theorems 1 and 2
+The proof falls into three major parts, namely an approximation with a synchronous observation scheme, consistency of the SPECV for quadratic covariation and a bound for the difference of TSPECV(X) and SPECV(C). An essential ingredient of the analysis below is the result that we can work under a synchronous sampling design. For a continuous martingale observed in noise this fundamental result has been established in Bibinger et al. (2013) by virtue of an asymptotic equivalence in Le Cam's sense of the experiment with discrete non-synchronous observations and a continuous-time white noise experiment. Here, we show explicitly that on Assumptions 1 and 2, the approximation error for the signal part is asymptotically negligible. Note that the functions Fp, Fq are considered in the noise part.
+
+Lemma 1. On Assumptions (H), 1 and 2, we can work under synchronous sampling, i. e. it holds that
+
+hn-1 -1
+
+Jn
+
+np
+
+nq
+
+hn 2j2h-n 2 vX(p)jk(tØv(p)) iX(q)jk(tØi(q))
+
+k=0 j=1
+
+v=1
+
+i=1
+
+h-n 1-1
+
+Jn
+
+np
+
+= hn 2j2hn-2
+
+k=0 j=1
+
+v=1
+
+Xt(v(pp))
+
+-
+
+X (p)
+tv(p-)1
+
+np
+j k (tØv(p) )
+v=1
+
+Xt(v(qp))
+
+-
+
+X (q)
+tv(p-)1
+
+jk(tØ(vp)) + Op(1) .
+
+Proof. Consider for (p, q)  {1, . . . , d}2, vt(p) = t(vp) - tv(p-)1, with the previous-tick and next-tick functions
+
+t+(p)(s) = min tv(p), 0  v  np|t(vp)  s , p = 1, . . . , d,
+
+(A.2a)
+
+22
+
+t-(p)(s) = max tv(p), 0  v  np|t(vp)  s , p = 1, . . . , d,
+
+(A.2b)
+
+and the mid-times the approximation
+
+tØv(p)
+
+=
+
+tv(p-)1 + 2
+
+t(vp)
+
+,1
+
+
+
+v
+
+
+
+np, p
+
+=
+
+1, . . . , d,
+
+(A.2c)
+
+Xt(v(pp))
+
+-
+
+X (p)
+t(vp-)1
+
+jk(tØ(vp)) =
+
+Xt((vpp))
+
+-
+
+X (p)
+t-(q) (tv(p) )
+
++
+it(q)v t(p)
+
+Xt(i(pq))
+
+-
+
+X (p)
+ti(-q)1
+
++
+
+X - X(p)
+t+(q) (tv(p-)1 )
+
+(p) tv(p-)1
+
+j k (tØv(p) )
+
+it(q)v t(p)
+
+Xt(i(pq))
+
+-
+
+X (p)
+ti(-q)1
+
+jk(tØ(iq)) +
+
+Xt((vpp))
+
+-
+
+X (p)
+t-(q) (tv(p) )
+
+j k (u(vq) )
+
++
+
+X - X(p)
+t+(q) (t(vp-)1 )
+
+(p) tv(p-)1
+
+jk(u~v(q)) ,
+
+where uv(q) = (1/2)(t(+q)(tv(p)) - t-(q)(tv(p))) and u~v(q) = (1/2)(t(+q)(tv(p-)1) - t-(q)(tv(p-)1)). Since
+
+jk(t) - jk(s) jk((t + s)/2)(t - s)
+
+for small (t - s), in particular the term is asymptotically at most of order nm-1i/n2 for (t - s) nm-1in. By the estimate with jk above and (A.1a), (A.1b) and (A.1d), we can bound the approximation error
+
+h-n 1-1
+
+Jn
+
+np
+
+nq
+
+hn 2j2h-n 2 vX(p)jk(tØv(p)) iX(q)jk(tØ(iq))
+
+k=0 j=1
+
+v=1
+
+i=1
+
+hn-1 -1
+
+Jn
+
+np
+
+= hn 2j2hn-2
+
+k=0 j=1
+
+v=1
+
+Xt(v(pp))
+
+-
+
+X (p)
+tv(p-)1
+
+np
+j k (tØ(vp) )
+v=1
+
+Xt(v(qp))
+
+-
+
+X (q)
+tv(p-)1
+
+j k (tØv(p) )
+
+hn-1 -1
+
+Jn
+
++
+
+2j2 hn
+
+np
+
+k=0 j=1 v=1
+
+Xt(v(pp))
+
+-
+
+X (p)
+t(vp-)1
+
+X - Xit(q)vt(p)
+
+(q) ti(q)
+
+(q) ti(-q)1
+
+jk(tØ(iq)) - jk(tØ(vp))
+
++
+
+X - X(q)
+t+(q) (tv(p-)1 )
+
+(q) t(vp-)1
+
+(jk(u~v(q)) - jk(tØv(p))) +
+
+Xt((vqp))
+
+-
+
+X (q)
+t-(q) (tv(p) )
+
+jk(uv(q)) - jk(tØv(p))
+
+in the last addend which is asymptotically negligible.
+
+Next, we establish the asymptotic properties of our estimators. We can restrict to a subset of  on
+
+23
+
+which there is at most one large co-jump between two adjacent observation times, i. e. for
+
+
+ Uni,,(p,q) =   t such that
+
+
+t (p,q)
+
+(s, x) ((s, x)) µ(ds, dx)
+ti(-p)1 A
+
+> 0,
+
+ti(p)
+
+(p,q)
+
+
+
+
+
+(s, x) ((s, x)) µ(ds, dx)
+
+> 0 , 1  i  np,
+
+t A
+
+
+
+we can work on the complement of (
+
+np i=1
+
+Uni,,(p,q)
+
+)(
+
+nq i=1
+
+Uni,,(q,p))
+
+
+
+
+
+as
+
+nmin
+
+
+
+.
+
+The
+
+same
+
+rea-
+
+soning can be further extended to blocks [khnT, (k +1)hnT ), k = 0, . . . , h-n 1 -1, as hn  0. Denote
+
+{S1(p,q), . . . , SN(p(,qT))} the finite set of arrival times of large co-jumps1, each one located on a different
+
+block. We augment this set for given nmin and fixed number of blocks h-n 1 to {S1(p,q), . . . , Sh(p-n,q1)} by
+
+adding mid-times for blocks without large co-jump. With Lemma 1, we deduce
+
+hn-1 -1
+
+Jn
+
+E SPECV(np,T,q)(Y ) =
+
+hn 2j2hn-2wjpk,q
+
+k=0 j=1
+
+E
+
+Sj(kp)Sj(kq)
+
+- p,qp2 npFp(khnT )
+
+h-n 1-1 Jn
+
+np
+
+np
+
+=
+
+hn 2j2hn-2wjpk,qE
+k=0 j=1
+
+i=1
+
+Xt((ipp))
+
+-
+
+X (p)
+ti(-p)1
+
+j k (tØi(p) )
+i=1
+
+Xt(i(qp))
+
+-
+
+X (q)
+ti(-p)1
+
+j k (tØi(p) )
+
+h-n 1-1
+
+Jn
+
+np
+
+= hn 2j2hn-2wjpk,q (ti(p) - t(i-p)1)2jk(tØ(ip))
+
+k=0 j=1
+
+i=1
+
+ ◊ (kphqn)T +
+
+(Sk(p,q), x) (Sk(p,q), x)
+Rd\A
+
+(p,q)
+
+µ(Sk(p,q), dx)
+
+ + O(1)
+
++ O(1)
+
+h-n 1-1
+= hn
+k=0
+
+(kphqn)T +
+
+(Sk(p,q), x))
+Rd
+
+- [X(p), X(q)]T as   0 .
+
+(Sk(p,q), x)
+
+(p,q)
+
+µ(Sk(p,q), dx)
+
++ O(1)
+
+By the bound (A.1b) and since   0 for   0, the term by small jumps becomes asymptotically
+
+negligible. We have used that
+
+i tij2k 
+
+T 0
+
+2jk(t) dt
+
+=
+
+h2n-2j-2.
+
+By
+
+standard
+
+bounds,
+
+the
+
+variance of SPECV is of order n-m1i/n2. Thus, we conclude that the SPECV is a consistent estimator for
+
+the quadratic covariation. Eventually, the proof that
+
+SPECV(np,T,q)(C) - TSPECVn(p,T,q)(C + J, un) = OP (1) ,
+
+and the stronger claim that the difference is OP (nm-1i/n4) on a reinforced assertion on the jump activity is
+
+1Technically, this means we first consider co-jumps  A and then letting   0, one may think of finitely many large co-jumps triggering the quadratic covariation here.
+
+24
+
+related to the strategy of proof pursued for truncated power variations in A®it-Sahalia and Jacod (2010). It relies on bounds for the increments from the continuous part, the small jumps and the probability to have co-jumps which exceed a certain threshold. Thereto, consider
+
+SPECV(np,T,q)(C) - TSPECVn(p,T,q)(C + J, un)
+
+hn-1 -1
+= k(p,q) ,
+k=0
+
+(A.3)
+
+with k(p,q) = k[C(p), C(q)] in case of truncation, when k[C(p), C(q)] are the statistics (7) with latent observations of the continuous part C, and -k[J (p), J (q)] - k[C(p), J (q)] - k[J (p), C(q)] using analogous notation, else. We make a case differentiation:
+∑ k[X(p), X(q)] > un, truncation: k(p,q) = k[C(p), C(q)] and either |k[C(p), C(q)]| > un/2 or |k[J (p), J (q)]| > un/2, since the variance of k[X(p), X(q)] is of order hn2 .
+≠ k[C(p), C(q)] > un/2: For the truncation exponent   (0, 1), there exists an integer N0 with N0(1 -  ) > 1/2 and
+
+k(p,q)
+
+ 2N0
+
+k[C(p), C(q)]
+
+ k[C(p), C(q)] N0    2N0
+un
+
+k[C(p), C(q)] N0+1 uNn 0
+
+= Op hnn-m1i/n4
+
+by (A.1a). ≠ k[C(p), C(q)]  un/2: Then k[J (p), J (q)] > un/2 and hence
+
+k(p,q)  2N0 k[C(p), C(q)]
+
+k[J (p), J (q)] un
+
+N0
+= Op hnnm-1i/n4
+
+what readily follows by (A.1b) and (A.1d). ∑ k[X(p), X(q)]  un, no truncation:
+
+≠ k[C(p), C(q)] > un/2: With N0 as above, we obtain that
+
+k(p,q) = k[J (p), J (q)] + k[C(p), J (q)] + k[J (p), C(q)]
+
+ ◊ 2N0 
+
+k[C(p), C(q)] un
+
+N0 
+
+=
+
+Op
+
+hnn-m1i/n4
+
+.
+
+≠ k[C(p), C(q)]  un/2: Finally, we employ the estimates (A.1b), (A.1d) and (A.1e) to bound the absolute difference in the remaining case when there is no truncation and the
+25
+
+continuous part is not of exceptionally large magnitude.
+
+k[J (p), J (q)] + k[C(p), J (q)] + k[J (p), C(q)]
+
+ k[J (p), J (q)]  un + Op hnn-m1i/n4
+
+1-
+hnun
+
+r 2
+
+with the index r from Assumption (H). That the cross terms of continuous and jump part
+are asymptotically negligible is immediate by Cauchy-Schwarz and our usual estimates. The claim follows by applying (A.1b) and (A.1d) with  = un1/2. We need to ensure that
+
+ (1
+
+-
+
+r 2
+
+)
+
+>
+
+1/2
+
+and thus that 1 >  > (2 - r)-1 and r < 1 to imply that un1-r/2 = Op(nm-1i/n4).
+
+From the preceding analysis we obtain under the last restriction on the jump activity that
+
+(A.4)
+
+SPECV(np,T,q)(C) - TSPECV(np,T,q)(C + J, un)
+
+h-n 1-1
+= k(p,q) = Op
+k=0
+
+nm-1i/n4
+
+.
+
+Appendix A.3. Proof of Theorem 3 Suppose the hypothesis nTo cj,p,q holds true (no co-jumps on [0, T ]). Naturally, we have
+
+Aun = {  Tno cj,p,q| |k[X(p), X(q)]|  un k}  Tno cj,p,q
+
+(A.5)
+
+as nmin   and Aun  . By the typical standard argument we may in the sequel work on Aun. Thus consider the conditional test statistic given Y :
+
+h-1-1
+
+T~n(Y ) = min (np, nq)1/4
+
+k[X(p), X(q)]k .
+
+k=0
+
+Conditional on the path of Y satisfying our assumptions (bounded moments), on , F , P by the i. i. d. property of the k, 0  k  h-n 1 - 1, and
+
+E T~n(Y )|F = 0 ,
+
+Var T~n(Y )|F
+
+h-1-1
+= min (np, nq)1/2
+
+k[X(p), X(q)]
+
+2 Var (k) ,
+
+k=0
+
+26
+
+a central limit theorem is quickly derived by virtue of the fulfilled Lyapunov condition with higher moments. We now have conditionally on F that
+
+ hn-1-1 T~n(Y ) min (np, nq)1/2
+k=0
+
+k[X(p), X(q)]
+
+-1/2 2 Var (k)
+
+N(0, 1) .
+
+On our original probability space (, F , P) (here restricted to Aun), we have convergence in proba-
+
+bility of min (np, nq)1/2
+
+h-1-1 k=0
+
+2
+k[X(p), X(q)] . In particular, if np  nq,
+
+h-n 1-1
+min (np, nq)1/2
+
+k[X(p), X(q)]
+
+2
+-P AVAR +[X(p), X(q)]2T ,
+
+k=0
+
+since the asymptotic variance of the truncated spectral estimator equals the one of SPECV(np,T,q)(C) on nTo cj,p,q which has been deduced in Bibinger and Reiﬂ (2013) and relies on the independence between blocks of the Brownian parts. The external nature of the k, 0  k  hn-1 - 1, defined on an
+orthogonal extension , F , P of (, F , (Ft), P), ensures that by Slutsky's lemma we obtain
+
+ h-n 1-1 T n(Y ) min (np, nq)1/2
+k=0
+
+-1/2 k[X(p), X(q)] 2 Var (k)
+
+N(0, 1) .
+
+(A.6)
+
+We have exploited the stable central limit theorem for the spectral estimator on Tno cj,p,q here. We remark that the latter weak convergence is even stable with respect to F which implies the stable
+central limit theorem
+
+T n(Y ) st N 0, Var (k) AVAR +[X(p), X(q)]2T .
+
+For the proof of the latter we refer to (65) and (66) on page 18 of Podolskji and Ziggel (2010), since
+it is along the same lines and the same argument applies as for their wild bootstrap-type statistics.
+Again, the external nature of the k plays a key role and implies stability. Now suppose cTj,p,q. By virtue of Theorem 2, (12a), we have
+
+SPECJ(np,T,q) -P (Xs(p) - Xs(-p))(Xs(q) - Xs(-q)) = [J (p), J (q)]T .
+sT
+
+Therefore,
+
+hn-1 -1
+
+min (np, nq)1/4
+
+1k X (p), X (q) {|k[X(p),X(q)]|>un} = Op
+
+k=0
+
+min (np, nq)1/4
+
+,
+
+(A.7)
+
+27
+
+and the same order applies to the first addend of the left-hand side of Tsnt(Y ) in (19). For the second addend of the left-hand side in (19), we infer for
+
+hn-1-1 =
+k=0
+
+k X(p), X(q)
+
+2 -1/2 h-n 1-1
+
+Var(k)
+
+1k X(p), X(q)
+k=0
+
+{|k [X (p) ,X (q) ]|un } k
+
+that E [] = 0, Var () < 1. Thereby the assertion of Theorem 3 follows from (A.6) and (A.7).
+
+References
+A®it-Sahalia, Y., Fan, J., Xiu, D., 2010. High-frequency estimates with noisy and asynchronous financial data. Journal of the American Statistical Association 105 (492), 1504≠1516.
+A®it-Sahalia, Y., Jacod, J., 2009. Testing for jumps in a discretely observed process. Annals of Statistics 37 (1), 184≠222.
+A®it-Sahalia, Y., Jacod, J., 2010. Is brownian motion necessary to model high frequency data? Annals of Statistics 38 (5), 3093≠3128.
+A®it-Sahalia, Y., Zhang, L., Mykland, P. A., 2011. Ultra high frequency volatility estimation with dependent microstructure noise. Journal of Econometrics 160, 160≠165.
+Bandi, F. M., Russell, J. R., 2006. Separating microstructure noise from volatility. Journal of Financial Economics 79 (3), 655 ≠ 692.
+Barndorff-Nielsen, O. E., Hansen, P. R., Lunde, A., Shephard, N., 2008. Designing realised kernels to measure the ex-post variation of equity prices in the presence of noise. Econometrica 76 (6), 1481≠1536.
+Barndorff-Nielsen, O. E., Hansen, P. R., Lunde, A., Shephard, N., 2011. Multivariate realised kernels: consistent positive semi-definite estimators of the covariation of equity prices with noise and nonsynchronous trading. Journal of Econometrics 162 (2), 149≠169.
+Barndorff-Nielsen, O. E., Shephard, N., 2006. Measuring the impact of jumps in multivariate price processes using bipower covariation. Working paper, Nuffield College, Oxford University.
+Bibinger, M., 2013. A functional stable limit theorem for the spectral covolatility estimator. preprint. URL http://www.math.hu-berlin.de/~bibinger/FCLT
+Bibinger, M., Hautsch, N., Malec, P., Reiﬂ, M., 2013. Estimating the quadratic covariation matrix from noisy observations: Local method of moments and efficiency. preprint, HU Berlin. URL http://arxiv.org/abs/1303.6146
+
+28
+
+Bibinger, M., Reiﬂ, M., 2013. Spectral estimation of covolatility from noisy observations using local weights. Scandinavian Journal of Statistics, forthcoming.
+Bollerslev, T., Law, T. H., Tauchen, G., 2008. Risk, jumps, and diversification. Journal of Econometrics 144, 234≠256.
+Christensen, K., Podolskij, M., Vetter, M., 2011. On covariation estimation for multivariate continuous ito^ semimartingales with noise in non-synchronous observation schemes. CREATES research paper 2011-53.
+Curci, G., Corsi, F., 2012. Discrete sine transform for multi-scales realized volatility measures. Quantitative Finance 12 (2), 263≠279.
+Delbaen, F., Schachermayer, W., 1994. A general version of the fundamental theorem of asset pricing. Mathematische Annalen 300 (1), 463≠520.
+Fan, J., Wang, Y., 2007. Multi-scale jump and volatility analysis for high-frequency data. Journal of the American Statistical Association 102 (480), 1349≠1362.
+Fukasawa, M., Rosenbaum, M., 2012. Central limit theorems for realized volatility under hitting times of an irregular grid. Stochastic processes and their applications 122 (12), 3901≠3920.
+Gobbi, F., Mancini, C., 2012. Identifying the brownian covariation from the co-jumps given discrete observations. Econometric Theory 28 (2), 249≠273.
+Imkeller, P., Perkowski, N., 2013. The existence of dominating local martingale measures. Preprint.
+Jacod, J., 2008. Asymptotic properties of realized power variations and related functionals of semimartingales. Stochastic Processes and their Applications 118 (4), 517≠559.
+Jacod, J., 2012. Statistics and high frequency data. Proceedings of the 7th Se¥minaire Europe¥en de Statistique, La Manga, 2007: Statistical methods for stochastic differential equations, edited by M. Kessler, A. Lindner and M. S¯rensen.
+Jacod, J., Li, Y., Mykland, P. A., Podolskij, M., Vetter, M., 2009. Microstructure noise in the continous case: the pre-averaging approach. Stochastic Processes and their Applications 119, 2803≠2831.
+Jacod, J., Protter, P., 1998. Asymptotic error distributions for the euler method for stochastic differential equations. The Annals of Probability 26, 267≠307.
+Jacod, J., Reiﬂ, M., 2012. A remark on the rates of convergence for integrated volatility estimation in the presence of jumps. preprint.
+Jacod, J., Todorov, V., 2009. Testing for common arrivals of jumps for discretely observed multidimensional processes. Annals of Statistics 37 (4), 1792≠1838.
+29
+
+Jiang, G. J., Oomen, R. C., 2008. Testing for jumps when asset prices are observed with noise a swap variance approach. Journal of Econometrics 144 (2), 352≠370.
+Jing, B.-Y., Li, C.-X., Liu, Z., 2012. On estimating the integrated co-volatility using noisy high frequency data with jumps. preprint, WISE Xiamen.
+Lahaye, J., Laurent, S., Neely, C. J., 2011. Jumps, cojumps and macro announcements. Journal of Applied Econometrics 26, 893≠921.
+Lee, S., Mykland, P. A., 2008. Jumps in finacial markets: A new nonparametric test and jump dynamics. Review of Financial Studies 21, 2535≠2563.
+Mancini, C., 2009. Non-parametric threshold estimation for models with stochastic diffusion coefficient and jumps. Scandinavian Journal of Statistics 36 (4), 270≠296.
+Park, S., Linton, O., 2012. Estimating the quadratic covariation matrix for an asynchronously observed continuous time signal masked by additive noise. FMG Discussion Papers 703.
+Podolskji, M., Ziggel, D., 2010. New tests for jumps in semimartingale models. Statistical Inference for Stochastic Processes 13 (1), 15≠41.
+Reiﬂ, M., 2011. Asymptotic equivalence for inference on the volatility from noisy observations. Annals of Statistics 39 (2), 772≠802.
+Theodosiou, M., Zikes, F., 2011. A comprehensive comparison of alternative tests for jumps in asset prices. working paper, CENTRAL BANK OF CYPRUS.
+Wu, C. F. J., 1986. Jackknife, bootstrap, and other resampling methods in regression analysis. Annals of Statistics 14, 1261≠1295.
+Xiu, D., 2010. Quasi-maximum likelihood estimation of volatility with high frequency data. Journal of Econometrics 159, 235≠250.
+Zhang, L., 2006. Efficient estimation of stochastic volatility using noisy observations: A multi-scale approach. Bernoulli 12 (6), 1019≠1043.
+30
+
+SFB 649 Discussion Paper Series 2013
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+
+001
+002 003 004 005 006
+007
+008 009
+010 011 012
+013 014
+015 016
+017
+018 019
+
+"Functional Data Analysis of Generalized Quantile Regressions" by
+Mengmeng Guo, Lhan Zhou, Jianhua Z. Huang and Wolfgang Karl H‰rdle, January 2013. "Statistical properties and stability of ratings in a subset of US firms" by
+Alexander B. Matthies, January 2013. "Empirical Research on Corporate Credit-Ratings: A Literature Review" by Alexander B. Matthies, January 2013. "Preference for Randomization: Empirical and Experimental Evidence" by
+Nadja Dwenger, Dorothea K¸bler and Georg Weizs‰cker, January 2013. "Pricing Rainfall Derivatives at the CME" by Brenda LÛpez Cabrera, Martin Odening and Matthias Ritter, January 2013. "Inference for Multi-Dimensional High-Frequency Data: Equivalence of
+Methods, Central Limit Theorems, and an Application to Conditional Independence Testing" by Markus Bibinger and Per A. Mykland, January 2013.
+"Crossing Network versus Dealer Market: Unique Equilibrium in the Allocation of Order Flow" by Jutta Dˆnges, Frank Heinemann and Tijmen R. DaniÎls, January 2013. "Forecasting systemic impact in financial networks" by Nikolaus Hautsch,
+Julia Schaumburg and Melanie Schienle, January 2013. "`I'll do it by myself as I knew it all along': On the failure of hindsightbiased principals to delegate optimally" by David Danz, Frank H¸ber,
+Dorothea K¸bler, Lydia Mechtenberg and Julia Schmid, January 2013. "Composite Quantile Regression for the Single-Index Model" by Yan Fan, Wolfgang Karl H‰rdle, Weining Wang and Lixing Zhu, February 2013. "The Real Consequences of Financial Stress" by Stefan Mittnik and Willi
+Semmler, February 2013. "Are There Bubbles in the Sterling-dollar Exchange Rate? New Evidence from Sequential ADF Tests" by Timo Bettendorf and Wenjuan Chen, February 2013.
+"A Transfer Mechanism for a Monetary Union" by Philipp Engler and Simon Voigts, March 2013. "Do High-Frequency Data Improve High-Dimensional Portfolio
+Allocations?" by Nikolaus Hautsch, Lada M. Kyj and Peter Malec, March 2013. "Cyclical Variation in Labor Hours and Productivity Using the ATUS" by Michael C. Burda, Daniel S. Hamermesh and Jay Stewart, March 2013.
+"Quantitative forward guidance and the predictability of monetary policy ≠ A wavelet based jump detection approach ≠" by Lars Winkelmann, April 2013.
+"Estimating the Quadratic Covariation Matrix from Noisy Observations: Local Method of Moments and Efficiency" by Markus Bibinger, Nikolaus Hautsch, Peter Malec and Markus Reiss, April 2013. "Fair re-valuation of wine as an investment" by Fabian Y.R.P. Bocart
+and Christian M. Hafner, April 2013. "The European Debt Crisis: How did we get into this mess? How can we get out of it?" by Michael C. Burda, April 2013.
+
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+SFB 649 Discussion Paper Series 2013
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+020 "Disaster Risk in a New Keynesian Model" by Maren Brede, April 2013. 021 "Econometrics of co-jumps in high-frequency data with noise" by Markus
+Bibinger and Lars Winkelmann, May 2013.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

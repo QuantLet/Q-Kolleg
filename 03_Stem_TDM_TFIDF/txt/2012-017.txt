@@ -1,0 +1,1136 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2012-017
+Option calibration of exponential LÈvy models:
+Implementation and empirical results
+Jakob Sˆhl* Mathias Trabs*
+* Humboldt-Universit‰t zu Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universit‰t zu Berlin Spandauer Straﬂe 1, D-10178 Berlin
+
+Option calibration of exponential L¥evy models: Implementation and empirical results
+
+Jakob So®hl
+
+Mathias Trabs
+
+Humboldt-Universita®t zu Berlin
+
+February 24, 2012
+
+Abstract
+Observing prices of European put and call options, we calibrate exponential L¥evy models nonparametrically. We discuss the implementation of the spectral estimation procedures for L¥evy models of finite jump activity as well as for self-decomposable L¥evy models and improve these methods. Confidence intervals are constructed for the estimators in the finite activity case. They allow inference on the behavior of the parameters when the option prices are observed in a sequence of trading days. We compare the performance of the procedures for finite and infinite jump activity based on real option data.
+Keywords: European option ∑ Jump diffusion ∑ Self-decomposability ∑ Confidence sets ∑ Nonlinear inverse problem ∑ Spectral cut-off
+MSC (2010): 60G51 ∑ 62G15 ∑ 91B25
+JEL Classification: C14 ∑ G13
+1 Introduction
+Exponential L¥evy models are frequently used for the purpose of pricing and hedging. They take jumps of the price process into account and they allow to model heavy tails in the returns appropriately. Moreover, they are capable of reproducing not only the volatility smile but also the fact that it becomes more pronounced for shorter maturities. While recovering these stylized facts, the structure of exponential L¥evy models is at the same time easy enough to allow robust calibration procedures.
+The calibration has mainly focused on parametric models, cf. Barndorff-Nielsen (1998); Eberlein, Keller, and Prause (1998); Carr, Geman, Madan, and Yor (2002) and references therein. First nonparametric calibration procedures for finite activity L¥evy models were proposed by Cont and Tankov (2004b) as well as Belomestny and Reiﬂ (2006a). In these approaches no parametrization is assumed and thus the model misspecification is reduced. Recently, the spectral calibration procedure of the latter authors was studied further in two directions. The asymptotic confidence sets constructed by S®ohl (2012) allow a more accurate statistical inference in the exponential L¥evy model while the method of Trabs (2011) extends the spectral calibration to the infinite activity case, more precisely to self-decomposable L¥evy processes.
+The aim of this work is to discuss the practical application of the spectral calibration method to option data. We show how the procedure can be improved by changing some details of the originally proposed method by Belomestny and Reiﬂ (2006b) and by Trabs (2011). Furthermore,
+We thank Denis Belomestny and Markus Reiﬂ for helpful comments and discussions. This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+1
+
+we construct from the asymptotic results by So®hl (2012) confidence sets which allow a deep insight into the behavior of the estimation procedure. These considerations are demonstrated by several simulations from the model by Merton (1976) and from the variance gamma model, introduced by Madan and Seneta (1990) and Madan, Carr, and Chang (1998).
+Exponential L¥evy models are studied in a wide rage of pricing problems, for instance by Asmussen, Avram, and Pistorius (2004); Cont and Voltchkova (2005); Ivanov (2007) and references therein. For their application, it is necessary to control the statistical errors in the calibration procedures, see Cont (2006). In general, there are two types of errors. The misspecification is the deviation from the model, while the calibration error is the deviation within the model. The approach of nonparametric calibration has the advantage that it reduces the error due to misspecification. The remaining calibration error can then be assessed by means of the confidence intervals. Nonparametric confidence intervals have also been constructed by Figueroa-L¥opez (2011). They are based on high frequency observations of a L¥evy process, whereas our confidence intervals are for the calibration of the risk neutral measure and are based on the observations of option prices and not on historical data.
+We use real data of vanilla options on the German DAX index to compare the finite activity model to the self-decomposable one. It will turn out that both models achieve a good calibration in the sense that the residuals between the given data and the calibrated model are rather small. In view of studies of Carr et al. (2002) and A®it-Sahalia and Jacod (2009), which indicate that a pure jump model should have a Blumenthal-Getoor index which is positive or even greater than one, this is surprising since the finite variation self-decomposable model has a Blumenthal-Getoor index equal to zero. Applying the calibration to a sequence of trading days, we obtain the evolution of the model parameters in time.
+This paper is organized as follows: In Section 2 we state the model and the general estimation method. This is made precise for the finite activity case and the self-decomposable case in Sections 3 and 4, respectively. Simulations are contained therein. In Section 5 the confidence intervals are constructed and their performance is assessed in simulations. In Section 6 we apply the methods to real data and discuss our results. The appendix contains the proof of a corollary and a detailed documentation of our implementation.
+
+2 Model and estimation principle
+
+Denoting the risk-less interest rate by r  0 and the initial value by S0 > 0, the price of a stock is given by
+St = S0ert+Xt
+where Xt is a L¥evy process with characteristic triplet (2, , ) such that eXt is a martingale. Furthermore, we assume the jump part of Xt to be of finite variation. Therefore, E[eXt ] = 1, t  0, implies the martingale condition
+
+2 ++
+
+
+(ex - 1)( dx) = 0.
+
+2 -
+
+(1)
+
+So far, nonparametric calibration methods exist in two different setups:
+
+(FA) Xt has a finite activity, that is  :=  L1 < , with an absolutely continuous jump measure (Cont and Tankov, 2004b; Belomestny and Reiﬂ, 2006a; So®hl, 2012).
+
+(SD) Xt is self-decomposable with  = 0. Especially,  can be characterized by a k-function via ( dx) = k(x)/|x| dx, x  R \ {0}, where k is increasing on R- and decreasing on R+. Additionally,  := k(0+) + k(0-) <  is assumed (Trabs, 2011).
+
+Throughout we measure the time t in years. Typical parametric submodels of (FA) and (SD) are given by Examples 1 and 2, respectively. We will use them to study the performance of estimation methods in simulations.
+
+2
+
+Example 1 (Merton model). Merton (1976) introduced the first exponential L¥evy model. Therein, the jumps are normally distributed with intensity  > 0:
+
+(x) =   exp 2v
+
+(x - )2 -
+2v2
+
+,
+
+x  R.
+
+A realistic choice of the parameters is  = -0.1, v = 0.2 and  = 5. Together with the volatility  = 0.1 this determines the drift  = 0.379 using the martingale condition (1).
+
+Example 2 (Variance gamma model). Let (Wt) be a standard Brownian motion and (Gt) an independent Gamma process with mean rate one and variance rate  that is Gt  (t/, 1/). Madan and Seneta (1990) defined the variance gamma process with parameters ,  and  as the
+time changed Brownian motion with drift Xt = Gt + WGt , t  0. The characteristic function and the k-Function of (Xt) are given by
+
+t(u) = (1 + iu + 2u2/2)-t/ and
+
+kV G(x)
+
+=
+
+1 
+
+ex/m
+
+1{x<0}(x)
+
++
+
+1 
+
+e-x/p
+
+1{x0}
+
+(x),
+
+u, x  R
+
+with p/m := 22/4 + 2/2 ± /2, respectively. In our simulations we use the parameters  = 1.2,  = 0.2 and  = -0.15. The value of  = 0.141 is again given by the martingale condition. These choices imply  = kV G(0+) + kV G(0-) = 10.
+Let us fix a maturity T > 0, define the negative log-moneyness x := log(K/S0)-rT and denote call and put prices by C(x, T ) = S0E[(eXT - ex)+] and P(x, T ) = S0E[(ex - eXT )+], respectively. In terms of the option function
+
+O(x) :=
+
+S0-1C(x, T ), S0-1P(x, T ),
+
+x  0, x < 0,
+
+our observations are given by
+
+Oj = O(xj) + jj, j = 1, . . . , N,
+
+(2)
+
+with noise levels j > 0 and independent, centered errors j, satisfying Var(j) = 1 as well as supj E[j4] < . The observation errors are due to the bid-ask spread and other market frictions. To estimate the L¥evy triplet, we apply the L¥evy-Khintchine representation of the characteristic
+function T (u) := E[eiuXT ]. The pricing formula of Carr and Madan (1999)
+
+FO(u) :=
+
+
+
+eiuxO(x) dx
+
+=
+
+1
+
+-
+
+T (u
+
+-
+
+i) ,
+
+- u(u - i)
+
+(3)
+
+and the martingale condition (1) yield
+
+(u) := 1 log(1 + iu(1 + iu)F O(u)) = - 2 u2 + i(2 + )u + (eiux - 1)ex(x) dx. (4) T2
+Interpolating (xj, Oj)j=1,...,N , we obtain empirical versions O~ and ~ of the option function and the characteristic exponent, respectively. While the theoretical results (Belomestny and Reiﬂ, 2006a; Trabs, 2011) concentrate on a linear interpolation of the observation, an additional smoothing by using B-splines of degree two might improve the estimators. In Section 3.2 we provide simulations with both interpolation methods to investigate the practical influence.
+Given ~, we can estimate the characteristics of the process from the spectral representation. Regularization of the procedure is achieved by cutting off frequencies larger than the regularization parameter U > 0. Since (FA) and (SD) need to be considered separately, the precise estimators are given in the Sections 3 and 4. Note that in both cases correction steps are necessary to satisfy
+
+3
+
+the shape restriction of  and the martingale condition (1) (see Appendix B.2 for details). If the latter one would be violated, the right-hand side of the pricing formula (3) could have a singularity at zero and thus we could not apply the inverse Fourier transform to obtain an option function from the calibration.
+A critical question is the choice of the regularization parameter U . To circumvent the problem in simulations, we use an oracle cut-off value, that is the risk minimizing U . To calibrate real data, we employ a simple least squares approach. From theoretical consideration a penalty term, as used by Belomestny and Reiﬂ (2006b), is necessary to avoid an over-fitting. Nevertheless, our practical experience with this method shows that the above mentioned correction steps, which are not included in the theory, lead to an auto-penalization: Owing to the Fourier techniques, a rigorous fit leads to high fluctuations of the estimator of the nonparametric part and thus the correction has a significant effect which in turn worsens the fit. Therefore, the least squares choice of tuning parameter works well at least for small noise levels. Additionally, an upper bound for the cut-off value excludes estimations with a too high variance (cf. Section 5).
+
+3 The finite activity case
+
+3.1 The estimators
+
+In the (FA) framework we deduce from (4) the identity
+
+(u) = 2 u2 + i(2 + )u + (2/2 +  - ) + F µ(u) with µ(x) := ex(x). 2
+
+The estimators of the parameters are defined by Belomestny and Reiﬂ (2006a) as follows:
+
+U
+
+^2 :=
+
+Re(~(u))wU (u)du,
+
+-U
+
+U
+^ := -^2 + Im(~(u))wU (u)du,
+-U
+
+^ := ^2 + ^ - 2
+
+U
+Re(~(u))wU (u)du,
+-U
+
+(5) (6) (7)
+
+with suitable weight functions wU , wU and wU . We propose to choose the weight functions differently to the weight functions used by Belomestny and Reiﬂ (2006b). The idea is that the noise is particularly high in the high frequencies and thus it is desirable to assign less weight to the high frequencies. A smooth transition of the weight functions to zero at the cut off-value improves the numerical results significantly. Therefore, we would like the weight function and its first two derivatives to be zero at the cut-off value. With the side conditions on the weight functions this leads to the following polynomials:
+
+wU (u)
+
+:=
+
+c U3
+
+(2s + 1)
+
+u U
+
+2s
+- 4(2s + 3)
+
+u U
+
+2s+2
++ 6(2s + 5)
+
+u U
+
+2s+4
+
+- 4(2s + 7)
+
+u
+
+2s+6
++ (2s + 9)
+
+u
+
+2s+8
+
+,
+
+UU
+
+wU (u)
+
+:=
+
+c U2
+
+u
+
+2s+1
+-3
+
+u 2s+3 +3
+
+u
+
+2s+5
+-
+
+u 2s+7
+
+,
+
+U U UU
+
+wU (u)
+
+:=
+
+c U
+
+(2s + 3)
+
+u U
+
+2s
+- 4(2s + 5)
+
+u U
+
+2s+2
++ 6(2s + 7)
+
+u U
+
+2s+4
+
+- 4(2s + 9)
+
+u
+
+2s+6
++ (2s + 11)
+
+u
+
+2s+8
+
+,
+
+UU
+
+where all three functions are extended continuously by zero outside [-U, U ], c, c and c are normalization constants and s reflects the a priori knowledge about the smoothness of . The gain
+
+4
+
+of the new weight functions is discussed in Section 3.2. Using the shifted 
+
+ (u)
+
+:=
+
+1 T
+
+log (1 - u(u
+
++ i)FO(u + i))
+
+to estimate the jump density, we apply the idea from Belomestny and Reiﬂ (2006b) owing to a better numerical behavior. Therefore, we define the estimator
+
+^(x) := F -1
+
+~ (u)
+
++
+
+^2 2
+
+u2
+
+-
+
+i^u
+
++
+
+^
+
+wU (u) (x)
+
+(8)
+
+with the empirical version ~ of  and a flat top kernel wU whose support is [-U, U ]:
+
+wU (u) := w
+
+u U
+
+
+
+1, |u|  0.05,
+
+
+
+with
+
+ w(u) := exp
+
+- exp(-(|u|-0.05)-2) (|u|-1)2
+
+,
+
+0.05 < |u| < 1,
+
+ 0, |u|  1.
+
+(9)
+
+3.2 Simulations I
+Let us first describe the setting of all of our simulations. In view of the higher concentration of European options at the money, the design points {x1, . . . , xN } are sampled deterministically from a normal distribution with mean zero and variance 1/2. The observations Oj are computed from the characteristic function T using the fast Fourier transform. The additive noise consists of independent, normal and centered random variables with variance | O(xj)|2 for some relative noise level  > 0. By choosing the sample size N and the deviation parameter  , we determine the noise level of the observations. According to the existing theoretical results, it is well measured by the quantity
+ := 3/2 + 1/2  l with  := max (xj - xj-1),
+j=2,...,N
+which takes the interpolation error and the stochastic error into account. The interest rate and time to maturity are set to r = 0.06 and T = 0.25, respectively.
+Using the Merton model with the parameters of Example 1, we investigate the practical influence of two aspects of the procedure, which are mentioned above. The interpolation of the data (xj, Oj) with linear B-splines is compared to the use of quadratic B-splines. The latter preprocessing is an additional smoothing of the data which achieves significant gains for higher noise levels. The other point of interest is the choice of the weight functions. Since it is known from the theory that the noise affects mainly the high frequencies, the polynomial weight functions greatly reduce the variance of the estimator. These improvements are illustrated in Figure 1: In the case of ^ we calculate the RMSE from 500 Monte-Carlo iterations with and without quadratic splines and polynomial weight functions, respectively. This is done for different noise levels, whereby  decreases from 0.03 to 0.015 and N increases from 50 to 400, simultaneously.
+
+4 The self-decomposable framework
+
+4.1 Construction of the estimators
+
+Recall that  = 0 is assumed in the (SD) setting. While the Blumenthal-Getoor index is zero in this case the parameter  describes the degree of activity of the process on a finer scale. The exponential scaled k-function ke(x) := sgn(x)exk(x), x  R, which is the counterpart of µ in the (FA) case, will be the natural object to estimate. To calibrate the self-decomposable model, we need a different representation of  than before because of the infinite activity of these processes. Trabs (2011, Prop. 3.2) showed for u = 0
+
+(u)
+
+=
+
+s-2
+D(u) + iu -  log(|u|) +
+
+ij (j
+
+- 1)!j uj
+
++ (u)
+
+=
+
+iu + i
+
+j=1
+
+u
+F ke(v) dv,
+0
+
+(10)
+
+5
+
+Figure 1: RMSE of ^ for different noise levels with 500 Monte-Carlo iterations in each case. Usage of the linear and quadratic spline interpolation as well as usage of the weight function of Belomestny and Reiﬂ (2006a) and the polynomial weight.
+
+where s is the smoothness of k away from zero, j := k(j)(0+)+k(j)(0-), j = 1, . . . , s, the function D is constant on the real half lines and the remainder  satisfies us-1(u)  < . Owing to the
+polynomial decay of , estimators of  and  can be defined analogously to Section 3:
+
+^ := ^ :=
+
+U
+Im(~(u))wU (u) du,
+-U
+U
+Re(~(u))wU (u) du.
+-U
+
+The weight functions are chosen such that they filter the coefficients of interest (cf. Trabs, 2011, Ass. 3). Choosing wU and wU as polynomials, these integral conditions lead to a system of linear equations which determines the coefficients in the polynomials. Since the smoothness s is not
+known to the practitioner, the weights should satisfy the condition for some upper bound smax. In practice the choice smax = 6 and
+
+wU
+
+(u)
+
+=
+
+U
+
+-2w1
+
+(
+
+u U
+
+),
+
+wU
+
+(u)
+
+=
+
+U
+
+-1w1 (
+
+u U
+
+),
+
+w1 (u)
+
+=
+
+135135 1536
+
+- 45u5 + 560u7 - 1890u9 + 2376u11 - 1001u13 ,
+
+w1 (u)
+
+=
+
+1 1024
+
+4729725u6 - 56756700u8 + 187297110u10
+
+- 231891660u12 + 96621525u14
+
+works fine. The estimation of the nonparametric object ke relies on the equation  = i + iF ke, which follows from (10). Hence, we need an empirical version of  , too. Instead of the estimator proposed by Trabs (2011), we define
+
+k^e(x) :=
+
+F -1 (-^ - i~ (u))F Wk(u/U ) (x), F -1 (-^ - i~ (u))F Wk(-u/U ) (x),
+
+x > 0, x<0
+
+with a one-sided kernel function Wk that satisfies Assumption 1. We assume
+(i) supp Wk  [0, ),
+
+6
+
+RMSE RMISE
+
+N 
+^(RMSE) ^ (RMSE) k^e (RMISE)
+
+50 0.01 0.0014 0.4196
+0.5930
+
+100 0.01 0.0004 0.6669
+0.4980
+
+100 0.05 0.0074 2.0231
+0.4754
+
+Table 1: RMSE and RMISE using 1000 Monte-Carlo simulations of the variance gamma model.
+
+(ii) Wk = 1, xlWk(x) dx = 0 for l = 1, . . . , s - 1 and x2s-1Wk(x)  L1(R), (iii) |u|2T Ø+4|F Wk(u)| <  for some upper bound Ø of the true .
+
+Since we know the position of the jump of ke, the application of a one-side kernel function allows to estimate the k-function on the whole real line. The asymptotic analysis of Trabs (2011)
+carries over to this estimator as it is shown by the following corollary. Its proof is postponed to Appendix A. Recall the definitions of the Sobolev-type class Gs(R, Ø) and Hs(R, Ø) from Def. 4.1 and Def. 4.4 in Trabs (2011).
+
+Corollary 1. Assume s  1, R, Ø > 0 and the conditions on  and  from Thm. 4.5 in Trabs (2011). Furthermore, let ^ be an estimator of  satisfying supP EP [|^-|2]1/2 (2s+1)/(2s+2T Ø+5). Using the cut-off value U := -2/(2s+2T Ø+5), we obtain
+
+sup
+
+EP [
+
+k^e - ke
+
+2 L2
+
+]1/2
+
+P Hs (R,Ø )
+
+2s/(2s+2T Ø+5).
+
+Remark. For Ø  (5s-1)/(2T ) the above defined estimator ^ satisfies the assumed asymptotic risk bound of Thm. 4.2 in Trabs (2011) and thus the corollary, restricted to P  Gs(R, Ø)  Hs(R, Ø), is applicable to the proposed procedure.
+The condition (iii) in Assumption 1 is a smoothness condition on Wk. To be adaptive in , we construct the kernel as Wk(x) = P (x)w(2x - 1)  C(R) with a polynomial P (x) of degree m + 1. The coefficients of P are given by an (m + 1) dimensional system of linear equations, defined by Property (ii), which can be solved numerically. Rearrangement of k^e ensures the necessary monotonicity of a k-function.
+
+4.2 Simulations II
+We simulate the variance gamma model from Example 2 and with the observation setting described in Section 3.2. The behavior of the proposed method for different noise regimes is shown in Table 1. As one expects from the theory,  can be estimated better than . In the realistic setting of 100 observations with one percent noise, the error of  and  lay below three and seven percent, respectively. The one-sided kernel achieves good results for k^e(x) even for small x  R, indicated by Figure 2. However, there are still problems at zero. This emphasizes the importance of an separate estimator of .
+
+5 Confidence intervals
+
+S®ohl (2012) shows asymptotic normality of the estimators in the (FA) setup. These result may be used to construct confidence intervals. By (2.8) in So®hl (2012) it holds
+
+^2
+
+:=
+
+^2
+
+- 2
+
+=
+
+2 U2
+
+1 0
+
+Re(F µ(U u))w1 (u)du
+
++
+
+2 U2
+
+1
+Re(~(U u))w1 (u)du
+0
+
+(11)
+
+with ~ = ~ - . The first term is the deterministic approximation error and the second term is the stochastic error. The choice of the cut-off value U allows a trade-off between these two errors.
+
+7
+
+Figure 2: Estimated functions ke (left) and k (right) in a simulation of the variance gamma model with N = 100 and  = 0.01.
+
+In order to construct confidence intervals, the cut-off value U is chosen such that the approximation error is asymptotically negligible. The term ~(U u) is a logarithm, whose linearization at one
+we call LN,U (u). We denote by RN,U (u) the remainder of this linearization. The stochastic error
+may then be decomposed as
+
+2 U2
+
+1 0
+
+Re(~(U u))w1 (u)du
+
+=
+
+2 U2
+
+1 0
+
+Re(LN,U (u))w1 (u)du
+
++
+
+2 U2
+
+1
+Re(RN,U (u))w1 (u)du.
+0
+
+With an appropriate choice of the cut-off value the second part of the stochastic error is asymp-
+totically negligible. We will call the first part in the decomposition the linearized stochastic error.
+Confidence intervals may be constructed in two different ways. One can derive confidence intervals
+either from the asymptotic variance or from the finite sample variance of the linearized stochastic
+errors. We will follow the second approach. Nevertheless, the confidence intervals are asymptotic
+in the sense that the remainder term of the stochastic errors and the approximation error are
+considered as negligible.
+We assume that the noise levels of the observations (2) are given by the values j = (xj), j = 1, . . . , N , of some function  : R  R+. The observation points are assumed to be the quantiles xj = H-1(j/(n + 1)), j = 1, . . . , N , of a distribution with a c.d.f. H : R  [0, 1] and p.d.f. h. For the definition of the confidence intervals we need the generalized noise level
+
+(x) = (x)/ h(x),
+
+(12)
+
+which incorporates the noise of the observations as well as the density of the observations. Instead of assuming that the observation points are given by the quantiles of h one may also assume that the observation points are sampled randomly from the density h.
+For 2 we calculate the finite sample variance s22 of the linearized stochastic errors using Re(z)2 = Re(|z|2 + z2)/2 and (6.17) from S®ohl (2012)
+
+s22
+
+=
+
+4 U4E
+
+2 = U 4 Re
+
+12
+Re(LN,U (u))w1 (u)du
+0
+12
+E LN,U (u)w1 (u)du +
+0
+
+12
+LN,U (u)w1 (u)du
+0
+
+8
+
+4 = N T 2e2T (2/2+-)
+
+11
+Re fU (u)fU (v)F -1( (y + )2)(U (u - v))eT 2U2(u2+v2)/2dudv
+00
+
+11
+
++ Re
+
+fU (u)fU (v)F -1( (y + )2)(U (u - v))eT 2U2(u2+v2)/2dudv ,
+
+(13)
+
+00
+
+where  = T (2 + ) and fU (u) = w1 (u)(-u2 + iu/U ) exp(-T F µ(U u)). The confidence interval for  is based on the similar finite sample variance of the corresponding linearized stochastic error.
+The only difference in the calculation for  is that we use Im(z)2 = Re(|z|2 - z2)/2. We observe that ^(x) in (8) involves ~ instead of ~. Thus the confidence intervals for (x) are based on the linearization LN ,U (u) of ~ = ~ -  . The variance s2(x) of the linearized stochastic errors is
+
+s2(x)
+
+=
+
+U2 2 E
+
+12
+Re(LN ,U (u)e-ixUu)w1(u)du
+0
+
+U2 = 22 Re E
+
+12
+LN,U (u)e-ixUuw1(u)du +
+0
+
+12
+LN ,U (u)e-ixUuw1(u)du
+0
+
+U6 = N T 2e-2T 
+
+11
+Re gU (u)gU (v)F -1(e-2y (y + T )2)(U (u - v))eT 2U2(u2+v2)/2dudv
+00
+
+11
+
++ Re
+
+gU (u)gU (v)F -1(e-2y (y + T )2)(U (u - v))eT 2U2(u2+v2)/2dudv ,
+
+(14)
+
+00
+
+with gU (u) := w1(u)(u2 +iu/U ) exp(-T F (U u)-ixU u). The confidence interval for (0) is based on both the linearization LN,U multiplied by the weight function w1 as well as the linearization
+
+LN,U multiplied by w1
+
+1 -1
+
+v2wµ1 (v)dv/2
+
+-
+
+w1
+
+1 -1
+
+wµ1 (v)dv,
+
+cf.
+
+the
+
+definition
+
+of
+
+w0
+
+by
+
+S®ohl
+
+(2012).
+
+We denote by s^2 , s^, s^, s^(x) and s^(0) the estimated standard deviations which are obtained
+
+by substituting , , , µ and  by their respective estimators in (13), (14) and the analogous
+
+expressions. This yields feasible confidence intervals. For a level  > 0 the (1-)≠confidence
+
+intervals are then given by
+
+I2 := [^2 - s^2 q/2, ^2 + s^2 q/2], I := [^ - s^ q/2, ^ + s^ q/2] I := [^ - s^q/2, ^ + s^q/2], I(x) := [^(x) - s^(x)q/2, ^(x) + s^(x)q/2], I(0) := [^(x) - s^(0)q/2, ^(x) + s^(0)q/2],
+
+(15)
+
+where q denotes the (1 - )-quantile of the standard normal distribution. We examine the performance of the confidence intervals by simulations from the Merton model
+with parameters as in Example 1, with interest rate r = 0.06 and with maturity T = 0.25 as in Section 3.2. We sample N = 100 strike prices deterministically and take the relative noise level to be  = 0.01. To coincide with the theory, we interpolate the corresponding European call prices linearly and use the weight functions by Belomestny and Reiﬂ (2006b) with smoothness parameter s = 2. In the real data application in Section 6 take advantage of the above improvements. Upon fixing an upper bound of 28 for the cut-off values, we perform 1000 Monte Carlo iterations.
+Figure 3 illustrates the true L¥evy density, pointwise 95% confidence intervals and the first one hundred estimated L¥evy densities from the Monte Carlo simulation. The graph shows that the confidence intervals describe well the deviation of the estimated jump densities. The negative bias around zero might come from the smoothing which naturally tends to smooth out peaks, cf. (H®ardle, 1990, Chap. 5.3). The confidence interval I(0) is larger than indicated in Figure 3. By the smoothness of the estimated curves the larger variance of ^(0) leads to an increased variance of ^(x) in a neighborhood of zero. This is the second reason why deviation of the estimated curves is larger at zero. Figure 4 shows boxplots of ^(0) and ^(0.4), the true value, the theoretical 25% and 75% quantiles as well as the theoretical 2.5% and 97.2% quantiles based on the linearized
+
+9
+
+Figure 3: True L¥evy density (blue, solid), pointwise 95% confidence intervals (red, dotted) and 100 estimated L¥evy densities (grey) from a Monte Carlo simulation.
+
+Figure 4: Boxplots of ^(0) and ^(0.4) from 1000 Monte Carlo iterations with true value (blue), theoretical quantiles of the linearized stochastic error for 25% and 75% (red, solid) as well as for 2.5% and 97.5% (red, dashed).
+
+stochastic errors. We see that ^(0) has a negative bias and that the distribution of ^(0.4) fits well to the theoretical quantiles of the linearized stochastic errors.
+We asses the performance of the confidence intervals (15) with levels  = 0.5 and  = 0.05 for the parameters 2, , , (0) and (0.4) in a Monte Carlo simulation with 1000 iterations. We approximate the coverage probabilities of the confidence sets by the percentage of confidence intervals which contain the true value. Table 2 gives the approximate coverage probabilities from the Monte Carlo simulation.
+6 Empirical study
+We apply the calibration methods to a data set from the Deutsche Bo®rse database Eurex1. It consists of settlement prices of European put and call options on the DAX index from May 2008. Therefore, the prices are observed before the latest financial crises and thus the market activity is stable. The interest rate r is chosen for each maturity separately according to the put-call parity at the respective strike prices. The time to maturity T is measured in years. The number of our observations is given in Figure 5.
+6.1 Comparison of (FA) and (SD)
+Let us first focus on one (arbitrarily chosen) day. Hence, we calibrate the option prices of May 29, 2008, with all four different maturities to both, the (FA) and the (SD) setting. The results are summarized in Table 3 and Figure 6. Using the complete estimation of the models, we generate the corresponding option functions O^. They are graphically compared to the given data points and we calculate the residual sum of squares RSS = j(Oj - O^(xj))2. For all maturities both methods
+1provided through the SFB 649 "Economic Risk"
+10
+
+2 
+
+ (0) (0.4)
+
+ = 0.5 54% 47% 50% 49% 47%
+
+ = 0.05 97% 95% 91% 98% 95%
+
+Table 2: Approximate coverage probabilities of 1 -  confidence intervals from a Monte Carlo simulation with 1000 iterations.
+
+Figure 5: Number of observed prices of put and call options during May ,2008.
+yield good fits to the data. However, for longer maturities, especially the calibration of options with four months to maturity, minor problems occur in the (SD) calibration. The calibration at other trading days confirms this weakness of the (SD) method for larger T . This coincides with the asymptotic analysis of Trabs (2011) and Corollary 1 where longer maturities lead to slower convergence rates of the risk.
+Moreover, Figure 6 shows that the estimated option function O^ which results from the (SD) calibration does not exactly recover the peak of O. In all maturities and in both models the L¥evy density has more weight on the negative half line and thus there are more negative jumps than positive ones priced into the options. This coincides with the empirical findings in the literature (see e.g. Cont and Tankov, 2004a).
+In Table 3 we see a tendency that higher values of ^ in (FA) correspond to higher ^ in the (SD) model. The scatter plot in Figure 7 displays the pairs (^, ^) in the estimations of all trading days with maturity in July or August. Note that there are no more than 60 observations for each point and thus the stochastic error is relatively big. Nevertheless, the positive correlation between  and  is confirmed weakly and it is in line with the expectation that fluctuations of the stock are modeled by the diffusion part in the former model and by the infinitely high activity of the jump part in the latter one. The other way around, this relation shows that  is indeed a meaningful measure of the jump activity in the (SD) setting.
+6.2 (FA) across trading days
+The aim of this section is twofold. By considering more than one day we investigate the stability of the (FA) estimation procedure. Moreover, calibrating the model across the trading days in May, 2008, shows the development of the model along the time line and with small changes in the maturities. To profit from the higher observation number, we apply the calibration procedure for the (FA) case to the options with maturity in September and December.
+To apply the confidence intervals (15) of Section 5, we need the noise function from (12). By a rule of thumb we assume  to be 1% of the observed prices O(xj) (cf. Cont and Tankov, 2004a, p. 439), for j = 1, . . . , N . The density h of the strikes is estimated by a triangular kernel estimator, where the bandwidth is chosen by Silverman's rule of thumb.
+11
+
+Figure 6: Estimated jump density (left), k-function (center) as well as calibrated option functions in the (FA) (right, solid) and (SD) (right, dashed) setting and given data from May 29, 2008 (right, points).
+12
+
+(FA) (SD)
+
+N T ^ ^  ^ RSS ^  ^ RSS
+
+61 0.136 0.109 0.224
+3.498 0.003 0.337 25.313 0.006
+
+55 0.233 0.111 0.163
+1.716 0.007 0.297 30.084 0.006
+
+101 0.311 0.106 0.176
+1.862 0.005 0.378 36.123 0.021
+
+106 0.564 0.088 0.202
+2.805 0.006 0.227 16.557 0.014
+
+Table 3: Results of the estimations from option prices from May 29, 2008.
+
+Figure 7: Pairs (^, ^) estimated from options from each market day in May, 2008, with Maturity in July (red diamonds) and August (green circles) and regression line (black).
+The estimations of the parameters are displayed in Figure 8. Furthermore, the 95% confidence intervals for the December options are shown. The estimated volatility ^ fluctuates between 0.1 and 0.12. The confidence sets imply that there is no significant difference of the two maturities. Both ^ and ^ decrease for higher durations: On the one hand the curves of December lay significantly below the ones of September, on the other hand the graphs have a slight positive trend with respect to the time axis, which means with smaller time to maturity.
+Figure 9 displays the estimated jump densities. All jump measures have a similar shape which is in line with real data calibration of Belomestny and Reiﬂ (2006b). In contrast to Cont and Tankov (2004b) the densities are unimodal or have only minor additional modes in the tails, which may be artefacts of the spectral calibration method. The tails of ^ do not differ significantly, while the different heights reflect the development of the jump activities ^. Showing the point-wise confidence sets around ^(x) on a fine grid, Figure 10 confirms this suggestions. There is an obvious trend to small negative jumps in all data sets which is in line with the stylized facts of option pricing models.
+7 Conclusions
+To reduce the model misspecification it is reasonable to use a nonparametric model for option pricing. However, the nonlinear inverse problem, which occurs by calibrating the model, is more difficult to solve than parametric calibration problems and needs non-standard algorithms. We
+13
+
+Figure 8: At each market day in May, 2008, estimated 2 (top),  (center) and  (bottom) from options with maturities in September (dashed) and December (solid) and confidence intervals (dotted) for the latter ones.
+Figure 9: Estimation of  for maturity in September (left) and December (right). 14
+
+Figure 10: Empirical confidence sets (dotted) of ^(x) (solid) in the estimation from option prices of May 6, 2008, with maturity in December and estimated jump densities from May 2 to 12 with the same maturity (grey).
+
+could improve the existing spectral calibration procedures for the finite activity (FA) L¥evy model and the self-decomposable (SD) L¥evy model. Owing to the fast Fourier transform, the method is computationally fast and admits convincing results in simulations and real data applications. Determining the finite sample variances of the linearized estimators, we obtain confidence sets, which allow a precise analysis of the noise of the estimators.
+Our empirical investigations show that both models can be calibrated well to European option prices. However, (FA) is more suitable for longer maturities. Using the derived confidence sets, we can observe significant changes of the (FA) model over time. While the volatility has no systematic trend, the jump activities decrease for longer maturities and thus the L¥evy densities become flatter.
+To avoid misspecification of the model, we are convinced that the nonparametric approach should be pushed forward theoretically and in practice, in particular, in view the high number of available observations in highly liquid markets. Of further interest would be extensions of the method to models whose jump part is not of finite variation as well as the application to hedging and risk management problems.
+
+A Proof of Corollary 1
+
+W.l.o.g. it suffices to estimate the risk on R+. We decompose the risk to
+
+EP [
+
+k^e - ke
+
+2 L2
+
+(R+
+
+)
+
+]
+
+=
+
+EP
+
+F -1
+
+(-^
+
+-
+
+i~
+
+(u))F
+
+Wk
+
+(
+
+u U
+
+)
+
+2
+- ke
+L2 (R+ )
+
+2
+3 ke  (U Wk(U ∑) (x) - ke(x) dx + 3EP [| - ^|2] |U Wk(U x)|2 dx
+
+R+ R+
+
++ 3E
+
+F -1
+R+
+
+~ (u) -  (u)
+
+u F Wk( U )
+
+2
+(x) dx
+
+=:D + G + S.
+
+The deterministic error term D can be bounded exactly as in the proof of (Trabs, 2011, Thm 4.5) with  = 1 and use of the properties of the kernel Wk. The assumption on ^ and the choice of U
+
+15
+
+yield G U (4s+2)/(2s+2T Ø+5) = 4s/(2s+2T Ø+5). It remains to estimate the stochastic error term S. Applying Plancherel's equality, the bound of |~ -  | from (Trabs, 2011, p. 27) and the decay
+of F Wk, we obtain
+
+S  EP
+
+~ (u) -  (u)
+
+F
+
+Wk (
+
+u U
+
+)
+
+2 L2
+
+u4 R |(u)|2
+
+E |F (O~ - O)(u)|2
+
++E
+
+F x(O~ - O)(x) (u) 2
+
+(4 +   2)
+
+u2T Ø+4
+R
+
+u F Wk( U
+
+)
+
+2 du
+
+2U 2T Ø+5 = 4s/(2s+2T Ø+5).
+
+F Wk(
+
+u U
+
+)
+
+2
+
+du
+
+B Implementation in R
+
+B.1 Global parameters
+
+We give here a detailed description of our implementation of the calibration method for the finite activity case. Some global parameters to adjust the code and some auxiliary functions are necessary. These are namely Zeta needed for simulations, CFHat and ZetaHat to reproduce observations from the estimated model, the Fourier transform function FT and a continuous logarithm logc. The calibration itself is done in the function calibration documented in Section B.2. We use these functions either to calibrate simulations or to estimate real data in Section B.3.
+There are a few parameters to control the execution of the program:
+
+∑ model permits the values "Merton", "Kou" and "real data". In the first two cases observations will be simulated with the corresponding model. Picking the last value, the user has to supply the necessary data in the workspace of R before running the script (vector of strikes k, vector of option prices op, interest rate r and maturity T).
+
+∑ In case of simulations the user has to specify noiseLevel, the sampleSize and the number of Monte Carlo iterations in monteCarlo. Furthermore, design decides whether the observed strikes are sampled "deterministic" or "random".
+
+∑ The choice of the cut-off parameter U is adjusted by mode. In Belomestny and Reiﬂ (2006b) are three possibilities proposed which are (in modifications) also available in this implementation. Possible values for mode are:
+≠ "oracle": U  and U minimize the discrepancy between the estimators and the given values, separately for (2, , ) and .
+≠ "flat": The cut-offs correspond to points where the estimators stabilize:
+
+U  = argminU
+
+d dU ^U + U ,
+
+U = argminU U
+
+d
+
+dU ^U
+
+.
+L2
+
+ > 0,
+
+In our simulations and real data estimations we used  = 10-5. ≠ "PLS": The common cut-off U  solves
+
+N
+
+inf
+U
+
+|C(Ki; TU ) - Yi|2 + 
+i=1
+
+|^U (x)|2 dx
+R
+
+,
+
+ > 0,
+
+where C(K; TU ) is the price at strike K computed using Levy-triplet TU = (^U , ^U , ^U , ). In our simulations and real data estimations we use  = 0.
+
+16
+
+≠ "fix": The same cut-off values Ufix and UfixNu are used to estimate the parameters and the jump density, respectively.
+∑ If the variable linear is true then the observation will be interpolated linearly. Otherwise quadratic B-splines are used.
+∑ The smoothness of the jump density is set in parameter s (in the context of Belomestny and Reiﬂ (2006a) s implies a smoothness s = 2s of ).
+We remark that the library cobs is necessary to use this program. It provides the spline interpolation.
+B.2 The function calibration
+Given a vector of log-strikes sk and corresponding call-option prices snop this function performs the calibration of the model and returns the cut-off values U, U, the model parameters ^, ^, ^ and the estimated jump density ^ on a grid x. If a simulation is performed then also the quadratic L2-error of ^ is given back.
+c a l i b r a t i o n<-function ( sk , snop ) { ... # return l i s t (U=U, UNu=UNu, sigmaHat=sigmaHat , gammaHat=gammaHat , lambdaHat= lambdaHat , x=x , nuHat=nuHat , nuError2=nuError2 )
+}
+To approximate the O-function from the given discrete points (sk, snop), we switch from the log-scale to the normal one, because we can use the convexity of the function K  C(K, T ) = e-rT E[(ST - K)+] for the quadratic spline interpolation. Furthermore, we extrapolate the observations by adding boundary points whose position is set by extrapolation. To get an option value for the new strike near zero we use the slope of C(K, T ) in K at 0. In the case of quadratic spline interpolation the function cobs from package cobs is used to interpolate and evaluate the result on the logarithmic scale on a fine grid. We get the points (knew, opnew) and use the put-call parity to have a discrete version of the function k  O~(k - rT ).
+e x t r a p o l a t i o n<-0 . 0 0 5
+extraK<-rep ( 0 , length ( sK ) +2) extraK [ 1 ]<-e x t r a p o l a t i o n sK [ 1 ] extraK [ 2 : ( length ( sK ) +1) ]<-sK extraK [ length ( sK ) +2]<-sK [ length ( sK ) ] 1/ e x t r a p o l a t i o n
+extraOp<-rep ( 0 , length ( sK ) +2) extraOp [ 1 ]<-1-exp(- r T) extraK [ 1 ] extraOp [ 2 : ( length ( sK ) +1) ]<-snop extraOp [ length ( sK ) +2]<-0
+BI<-log ( extraK [ 1 ] ) BE<-log ( extraK [ length ( extraK ) ] ) knew<-seq ( BI , BE, length =2^12)
+if ( linear ){ OpofK <- approxfun ( extraK , extraOp , method=" l i n e a r " , r u l e =2, t i e s= mean) opnew <- OpofK ( exp ( knew ) )
+}else{
+17
+
+c s s<-c o b s ( extraK , extraOp , c o n s t r a i n t=" convex " , nknots=min( 1 0 0 , length ( sK ) -2) , d e g r e e =2)
+opnew<-predict ( c s s , exp ( knew ) ) [ , 2 ] }
+opnew<-opnew-pmax(0. ,1 - exp ( knew-r T) ) opnew<-pmax( 0 , opnew )
+We can now apply the Fourier transform to get first the estimate of v  ~T (v - i) = 1 + iv(1 + iv)FO~(v) and calculate then ~(v) = 1/T log(~(v - i)) by profiting from symmetry. Now we have (v, psi) and define L as the index where v has value 0.
+z<-FT( knew-r T, opnew ,TRUE) #x=k-rT , z=FO( v )
+v<-z $u p h i<-z$ f y 1 i v(1+1 i v )+1
+p s i<-rep ( 0 , length ( p h i ) ) p s i [ ( length ( v ) / 2 ) : length ( v ) ]<-1/T l o g c ( p h i [ ( length ( v ) / 2 ) : length ( v ) ] ) p s i [ 1 : ( length ( v ) /2-1) ]<-Re( p s i [ ( length ( v ) -1) : ( length ( v ) /2+1) ] ) -1 i Im
+( p s i [ ( length ( v ) -1) : ( length ( v )/2+1) ] )
+L<-length ( v ) /2
+In the following we calculate for numerous cut-off values U the estimators ^2, ^ and ^ and save each in sigma2HatCur, gammaHatCur and lambdaHatCur, respectively. The cut-off values are multiples of the mesh of v and their number is given by cutOffIterations. Since the calculation time in the "PLS"-mode is much longer than in the other modes but the picked cut-off is smaller in general we choose less iterations in "PLS". If the mode is "fix", only one iteration with the fixed cut-off suffices. Because of a large bias for small U we start with (v[2]-v[1])*11 and therefore end at (v[2]-v[1])*(10+cutOffIterations). Later we need bestError for the decision in the oracle-mode. With use of symmetry it is enough to calculate (v cut, psi cut) on the positive half-axis.
+i f (mode==" o r a c l e " | mode==" f l a t " ) c u t O f f I t e r a t i o n s<-130
+e l s e i f (mode=="PLS" ) c u t O f f I t e r a t i o n s<-90
+e l s e i f (mode==" f i x " ) c u t O f f I t e r a t i o n s<-1
+sigma2HatCur<-rep ( 0 , c u t O f f I t e r a t i o n s ) gammaHatCur<-rep ( 0 , c u t O f f I t e r a t i o n s ) lambdaHatCur<-rep ( 0 , c u t O f f I t e r a t i o n s ) b e s t E r r o r<--1 for ( i in 1: cutOffIterations ){
+i f (mode==" f i x " ) { UCur<-U f i x gridU<-round ( U f i x / ( v [2] - v [ 1 ] ) )
+}else{ UCur <- ( v [2] - v [ 1 ] )  ( i +10) gridU <- i +10
+} v cut<-v [ L : ( L+gridU ) ] p s i cut<-p s i [ L : ( L+gridU ) ] ...
+18
+
+}
+Within this loop we approximate the integrals in (5) - (7) with a composite trapezoidal rule and use the polynomial weight functions from above.
+w<-rep ( 1 , length ( p s i cut ) ) w [ length ( p s i cut ) ]<-0 . 5
+wFkt<-function ( x ) { ( 2  s +1)x ^ ( 2  s )-4 ( 2  s +3)x ^ ( 2  s +2)+6 ( 2  s +5)x ^ ( 2  s +4)-4 ( 2  s +7)x ^ ( 2  s +6)+(2 s +9)x ^ ( 2  s +8)}
+w e i g h t<-wFkt ( v cut/UCur ) w e i g h t [ length ( w e i g h t ) ] <- w e i g h t [ length ( w e i g h t ) ]-2sum(w w e i g h t ) sigma2HatCur [ i ]<-sum(w w e i g h t Re( p s i cut ) ) sigma2HatCur [ i ]<--2sigma2HatCur [ i ] /sum(wabs ( v cut ) ^{2} w e i g h t )
+wFkt<-function ( x ) {x ^ ( 2  s +1)-3x ^ ( 2  s +3)+3x ^ ( 2  s +5)-x ^ ( 2  s +7)} w e i g h t<-wFkt ( v cut/UCur ) gammaHatCur [ i ]<-sum(w w e i g h t Im( p s i cut ) ) gammaHatCur [ i ]<-gammaHatCur [ i ] /sum(w w e i g h t v cut )-sigma2HatCur [ i ]
+wFkt<-function ( x ) { ( 2  s +3)x ^ ( 2  s )-4 ( 2  s +5)x ^ ( 2  s +2)+6 ( 2  s +7)x ^ ( 2  s +4)-4 ( 2  s +9)x ^ ( 2  s +6)+(2 s +11)x ^ ( 2  s +8)}
+w e i g h t<-wFkt ( v cut/UCur ) w e i g h t [ length ( w e i g h t ) ] <- w e i g h t [ length ( w e i g h t ) ]-2sum(w w e i g h t v
+cut ^ 2 ) /v [ L+gridU ] ^ 2 lambdaHatCur [ i ]<-sum(wRe( p s i cut )  w e i g h t ) lambdaHatCur [ i ]<--lambdaHatCur [ i ] /sum(w w e i g h t )+gammaHatCur [ i ]+
+sigma2HatCur [ i ] /2
+The choice of U depends on the mode. In "oracle" in every iteration step we calculate the distance between the estimators and the true values as an error term and select the minimizing U . In the case of "fix" the cut-off is unique.
+i f (mode==" o r a c l e " ) { e r r o r<-1abs ( sigma2HatCur [ i ]- sigma ^ 2 )+1abs ( gammaHatCur [ i ]-gamma )+1abs ( lambdaHatCur [ i ]-lambda ) i f ( ( i ==1) | e r r o r <b e s t E r r o r ) { U<-UCur sigmaHat<-sqrt (pmax( 0 , sigma2HatCur [ i ] ) ) gammaHat<-gammaHatCur [ i ] lambdaHat<-lambdaHatCur [ i ] b e s t E r r o r<-e r r o r }
+} i f (mode==" f i x " ) {
+U<-UCur sigmaHat<-sqrt (pmax( 0 , sigma2HatCur [ i ] ) ) gammaHat<-gammaHatCur [ i ] lambdaHat<-lambdaHatCur [ i ] b e s t E r r o r<-e r r o r }
+After the loop and in case of the "flat"-mode we calculate a moving average of order two of the differences in the discrete curve U  ^U and select the minimum of these values with respect to a penalty for big U .
+i f (mode==" f l a t " ) {
+19
+
+d i f f<-d i f f ( sigma2HatCur [ 1 : length ( sigma2HatCur ) ] ) ma<-rep ( 0 , length ( d i f f ) ) maOrder<-2 for ( i in (1: length ( diff ) ) ){
+ma [ i ]<-sum( abs ( d i f f [max( i -maOrder , 1 ) : min( i+maOrder -1, length ( d i f f ) ) ] ) ) / (min( i+maOrder , length ( d i f f ) )-max( i -maOrder , 1 ) )
+}
+Us<-( v [2] - v [ 1 ] )  ( 1 0 + ( 1 : ( c u t O f f I t e r a t i o n s -1) ) ) a l p h a<-1 e-5 i<-which . min(ma+a l p h a Us ) U<-Us [ i ] sigmaHat<-sqrt (pmax( 0 , sigma2HatCur [ i ] ) ) gammaHat<-gammaHatCur [ i ] lambdaHat<-lambdaHatCur [ i ] }
+To estimate  as in (8) we first have to build ~:
+z<-FT( knew-r T, exp(-knew+r T) opnew ,TRUE) phiNu<-1-v ( v+1 i ) z$ f y psiNu<-rep ( 0 , length ( phiNu ) ) psiNu [ ( length ( v ) / 2 ) : length ( v ) ]<-1/T l o g c ( phiNu [ ( length ( v ) / 2 ) : length (
+v) ]) psiNu [ 1 : ( length ( v ) /2-1) ]<-Re( psiNu [ ( length ( v ) -1) : ( length ( v ) /2+1) ] ) -1
+i Im( psiNu [ ( length ( v ) -1) : ( length ( v ) /2+1) ] )
+As before we use a loop to calculate ^ for different cut-off values. Since we have a separate cut-off UNu in the cases of "oracle" and "flat", the number of iterations is restricted to the selected cutoff U of the three parameters (in that way we save calculations, because ^ needs smaller cut-offs in general). The resulting ^U are stored in a matrix nuHatCur. Furthermore, we initiate some auxiliary variables and the flatTopKernel, as defined in (9).
+i f (mode==" o r a c l e " | mode==" f l a t " ) c u t O f f I t e r a t i o n s<-max( c e i l i n g (U/ ( v [2] - v [ 1 ] ) ) , 2 0 ) -10
+nuHatCur<-matrix ( 0 , c u t O f f I t e r a t i o n s , length ( v ) ) n u E r r o r 2<--1 i f (mode==" o r a c l e " )
+nuError2Cur<-rep ( 0 , c u t O f f I t e r a t i o n s ) i f (mode=="PLS" )
+o b j e c t i v e<--1 f l a t T o p K e r n e l<-function ( x ) { ( abs ( x ) <=0.05)+(abs ( x )<1 & abs ( x ) >0.05) (
+exp(-exp(-(abs ( x ) -0.05) ^( -2) ) / ( abs ( x ) -1) ^2) ) } for ( i in 1: cutOffIterations ){
+i f (mode==" f i x " ) UCur<-UfixNu
+else UCur <- ( v [2] - v [ 1 ] )  ( i +10)
+... }
+The first step in this loop is to calculate ^U with an inverse Fourier transform as in (8). Depending on the mode we use the final estimators ^, ^ and ^ or the parameters per cut-off (since we have in the "PLS" mode a common cut-off). xCur denotes the grid on which the jump density is provided. It will be the same in every iteration step because it only depends on the grid v of psiNu.
+i f (mode==" o r a c l e " | mode==" f l a t " | mode==" f i x " ) {
+20
+
+lam<-lambdaHat fnuHat<-( psiNu -1 i gammaHatv+lam+sigmaHat ^2v ^{2}/ 2 ) 
+f l a t T o p K e r n e l ( v/UCur ) } e l s e i f (mode=="PLS" ) {
+lam<-lambdaHatCur [ i ] fnuHat<-( psiNu -1 i gammaHatCur [ i ] v+lam+sigma2HatCur [ i ] v ^{2}/ 2 ) 
+f l a t T o p K e r n e l ( v/UCur ) } f x y nu <- FT( v , fnuHat , n o I n v e r s e=FALSE) xCur <- f x y nu$u nuHatCur [ i , ] <- Re( f x y nu$ f y )
+Up to now the condition ^U  0 is not ensured and needs a correction of ^U . Referring to Belomestny and Reiﬂ (2006b), we seek for a  such that the integral R max{0, ^U (x) - } dx equals ^ or ^U , respectively. We approximate the difference between the integral and lam as a function eq of xi, approximate its root, using the secants method, and redefine ^U as the corrected version.
+wNu<-rep ( xCur [2] - xCur [ 1 ] , length ( xCur ) ) wNu [ 1 ]<-0 . 5 wNu [ 1 ] wNu [ length (wNu) ]<-0 . 5 wNu [ length (wNu) ]
+i f ( lam>0){ eq<-function ( x i ) {sum(wNu (pmax( 0 , nuHatCur [ i ,] - x i ) ) )-lam} x i 0<-0 f x i 0<-eq ( x i 0 ) x i 1<-1 f x i 1<-eq ( x i 1 ) while ( abs ( f x i 1 ) >0.001){ x i 2<-xi1 -( xi1 -x i 0 ) / ( f x i 1 -f x i 0 )  f x i 1 x i 0<-x i 1 x i 1<-max( 0 , x i 2 ) f x i 0<-f x i 1 f x i 1<-eq ( x i 1 )
+} }else
+x i 2<-0 nuHatCur [ i , ]<-pmax( 0 , nuHatCur [ i ,] - x i 2 )
+Now we are in position to do the mode depending choice of ^. In the "PLS" mode we also select the other three parameters. In "oracle" we calculate for every UCur the L2-distance to the true  and pick the cut-off UNu with the smallest one. In "fix"-mode there is only one estimation.
+i f (mode==" o r a c l e " ) { nuTrue<-Nu( xCur ) nuError2Cur [ i ]<-sum(wNu ( nuHatCur [ i ,] - nuTrue ) ^ 2 ) i f ( nuError2 <0 | nuError2Cur [ i ]< nuError2 ) { UNu<-UCur x<-xCur nuHat<-nuHatCur [ i , ] nuError2<-nuError2Cur [ i ] }
+} i f (mode==" f i x " ) {
+UNu<-UCur
+21
+
+x<-xCur nuHat<-nuHatCur [ i , ] i f ( model !=" r e a l data " ) {
+nuTrue<-Nu( xCur ) nuError2<-sum(wNu ( nuHatCur [ i ,] - nuTrue ) ^ 2 ) } }
+Still within the loop we deal with the "PLS" mode. Since it is driven by a least squares distance between the observations and the estimated model, we have to compute O from ^U , ^U , ^U and ^U . It is important that the martingale condition (1) holds for each U , otherwise the right-hand site of equation (3) can have a singularity. Therefore, we correct ^U and ^U simultaneously. Remark that this is not done in the other modes (and actually cannot be done before the calculation of ^ is finished). The option pricing of (kE, opE) itself is described in detail in section B.3. From all available strikes kE we chose the ones next to the given observations sk and get (kHat, opHat).
+i f (mode=="PLS" ) { beta<-( 0 . 5 sigma2HatCur [ i ]+gammaHatCur [ i ] ) / ( lambdaHatCur [ i ]-sum( wNuexp ( xCur ) nuHatCur [ i , ] ) ) lambdaHatCur [ i ]<-betalambdaHatCur [ i ] nuHatCur [ i , ]<-betanuHatCur [ i , ]
+vE<--2^9/2+(0:(2^9 -1) ) 2^9/(2^9 -1) yE<-sapply ( vE , function ( v ) { ZetaHat ( v , sigma2HatCur [ i ] ,
+gammaHatCur [ i ] , lambdaHatCur [ i ] , xCur , nuHatCur [ i , ] ) }) f x y<-FT( vE , yE , FALSE) kE<-f x y $u opE<-Re( f x y $ f y ) kHat<-rep ( 0 , length ( sk ) ) opHat<-rep ( 0 , length ( sk ) ) for ( j in (1: length ( sk ) ) ){
+index<-which . min( abs ( kE-sk [ j ] ) ) kHat [ j ]<-kE [ index ] opHat [ j ]<-opE [ index ] } ... }
+To penalize large second derivatives of , the second order differences of nuHatCur are provided in nuDeriv. The term to be minimized is given in objectiveCur. In every iteration step we check whether the new objective is smaller then the last best.
+nuDeriv<-d i f f ( nuHatCur [ i , ] , 2 ) wE<-rep ( xCur [2] - xCur [ 1 ] , length ( nuDeriv ) ) wE [ 1 ]<-0 . 5 wE [ 1 ] wE[ length (wE) ]<-0 . 5 wE[ length (wE) ] a l p h a<-0 #1e-8 o b j e c t i v e C u r<-sum( ( opHat-snop+pmax(0. ,1 - exp ( sk-r T) ) ) ^ 2 )+a l p h a 
+sum(wE ( nuDeriv/ ( xCur [2] - xCur [ 1 ] ) ^ 2 ) ^ 2 ) i f ( ! i s . nan( o b j e c t i v e C u r ) & ( o b j e c t i v e <0 | o b j e c t i v e C u r <o b j e c t i v e
+)){ U<-UCur UNu<-UCur sigmaHat<-sqrt (pmax( 0 , sigma2HatCur [ i ] ) ) gammaHat<-gammaHatCur [ i ] lambdaHat<-lambdaHatCur [ i ]
+22
+
+x<-xCur nuHat<-nuHatCur [ i , ] o b j e c t i v e<-o b j e c t i v e C u r i f ( model !=" r e a l data " ) {
+nuTrue<-Nu( xCur ) nuError2<-sum(wNu ( nuHat-nuTrue ) ^ 2 ) } }
+In the "flat" mode the choice of U is made at the end of the loop. We approximate the L2-norm of the derivative of the map U  ^U and select its minimum.
+i f (mode==" f l a t " ) { d e r i v a t i v U<-d i f f ( nuHatCur ) / ( v [2] - v [ 1 ] ) d e r i v a t i v L 2<-rep ( 0 , length ( d e r i v a t i v U [ , 1 ] ) ) for ( i in (1: length ( derivativU [ , 1 ] ) ) ) d e r i v a t i v L 2 [ i ]<-sum(wNu d e r i v a t i v U [ i , ] ^ 2 ) i<-which . min( d e r i v a t i v L 2 ) UNu<-( v [2] - v [ 1 ] )  ( i +10) x<-xCur nuHat<-nuHatCur [ i , ] i f ( model !=" r e a l data " ) { nuTrue<-Nu( xCur ) nuError2<-sum(wNu ( nuHat-nuTrue ) ^ 2 ) }
+}
+Now we have all estimators and can return the results.
+
+B.3 Option pricing from L¥evy triplet
+
+Given values of , ,  and  we want to provide the O-function. This happens in two situations
+
+of the script. On the one hand we simulate observations from a specific model and apply the
+
+calibration to the noised data and on the other hand, we have to calculate option prices from the
+
+estimated parameters in the least squares method. In (Cont and Tankov, 2004b, p. 361 et seq.) a
+
+good description of this option pricing can be found.
+
+We define the function
+
+(v) := eivrT T (v - i) - 1 iv(1 + iv)
+
+which is implemented as Zeta(v) and ZetaHat(v, sigma2Hat, gammaHat, lambdaHat, x, nuHat), respectively. Then O as function of log-strike k is obtained by inverse Fourier transform of . Hence, we evaluate  on a discrete grid x to get pairs of log-strikes and option prices (k, op). Because of the FFT algorithm a finer grid x leads to a larger limits of k and the other way around a higher range of x implies a smaller mesh of k.
+
+A<-2 ^ 1 0 M<-12 N<-2^M l<-0 : ( N-1) D e l t a<-A/ (N-1) x<--A/2+ l  D e l t a y<-Zeta ( x ) f x y<-FT( x , y , FALSE) k<-f x y $u op<-Re( f x y $ f y )+pmax(0. ,1 - exp ( k-r T) )
+
+23
+
+For simulations we noise and sample all pairs (k,op) and apply the calibration procedure in every Monte Carlo iteration step. Here the sampling is done according to a normal distribution centered at at-the-money strikes. Depending on design, the strikes a distributed deterministic or random.
+for ( mi in 1 : monteCarlo ) { nop<-op+rnorm( length ( op ) , 0 , ( n o i s e L e v e l abs (Re( f x y $ f y ) ) ) )
+M1<-round ( length ( op ) / 2 )-which . min( abs ( op [ 1 : round ( length ( op ) / 2 ) ]-10^(-6) ) )
+M2<-which .max( op )+M1 M1<-which .max( op )-M1
+i f ( d e s i g n=="random" ) { prob<-exp(-(k [M2:M1]- r T) ^ 2 ) prob<-prob/sum( prob ) i n d sub<-sort ( sample (M2: M1, s a m p l e S i z e , prob=prob ) ) sk<-k [ i n d sub ] snop<-nop [ i n d sub ]
+} e l s e i f ( d e s i g n==" d e t e r m i n i s t i c " ) { q u a n t i l s<-qnorm( c ( 1 : s a m p l e S i z e ) / ( s a m p l e S i z e +1) , 0 , 2 ^ ( - 0 . 5 ) ) i n d sub<-sapply ( q u a n t i l s , function ( x ) {which . min( abs ( k-r T-x ) ) } ) sk<-k [ i n d sub ] snop<-nop [ i n d sub ]
+} snop<-snop+pmax(0. ,1 - exp ( sk-r T) ) ... }
+References
+A®it-Sahalia, Y. and J. Jacod (2009). Estimating the degree of activity of jumps in high frequency data. Ann. Statist. 37 (5A), 2202 ≠ 2244.
+Asmussen, S., F. Avram, and M. R. Pistorius (2004). Russian and American put options under exponential phase-type L¥evy models. Stochastic Processes and their Applications 109 (1), 79 ≠ 111.
+Barndorff-Nielsen, O. E. (1998). Processes of normal inverse gaussian type. Finance Stoch 2, 41≠68.
+Belomestny, D. and M. Reiﬂ (2006a). Spectral calibration of exponential L¥evy models. Finance Stoch 10, 449≠474.
+Belomestny, D. and M. Reiﬂ (2006b). Spectral calibration of exponential L¥evy models [2]. SFB 649 Discussion Paper 2006-035, Sonderforschungsbereich 649, Humboldt Universit®at zu Berlin, Germany. Available at http://sfb649.wiwi.hu-berlin.de/papers/pdf/SFB649DP2006-035.pdf.
+Carr, P., H. Geman, D. B. Madan, and M. Yor (2002). The fine structure of asset returns: An empirical investigation. J. Bus. 75 (2), 305≠332.
+Carr, P. and D. B. Madan (1999). Option valuation using the fast Fourier transform. J. Comput. Finance 2, 61≠73.
+Cont, R. (2006). Model uncertainty and its impact on the pricing of derivative instruments. Math. Finance 16 (3), 519≠547.
+24
+
+Cont, R. and P. Tankov (2004a). Financial modelling with jump processes. Chapman & Hall / CRC Press.
+Cont, R. and P. Tankov (2004b). Non-parametric calibration of jump-diffusion option pricing models. J. Comput. Finance 7 (3), 1≠49.
+Cont, R. and E. Voltchkova (2005). Integro-differential equations for option prices in exponential L¥evy models. Finance and Stochastics 9, 299≠325.
+Eberlein, E., U. Keller, and K. Prause (1998). New insights into smile, mispricing and value at risk: The hyperbolic model. J. Bus. 71, 371≠406.
+Figueroa-L¥opez, J. (2011). Sieve-based confidence intervals and bands for L¥evy densities. Bernoulli 17 (2), 643≠670.
+H®ardle, W. (1990). Applied nonparametric regression. Cambridge University Press. Ivanov, R. V. (2007). On the Pricing of American Options in Exponential L¥evy Markets. Journal
+of Applied Probability 44 (2), 409≠419. Madan, D. B., P. P. Carr, and E. C. Chang (1998). The variance gamma process and option
+pricing. Europ. Finance Rev. 2 (1), 79≠105. Madan, D. B. and E. Seneta (1990). The variance gamma (VG) model for share market returns.
+J. Bus. 63, 511≠524. Merton, R. C. (1976). Option pricing when underlying stock returns are discontinuous. J. Finan.
+Econ. 3 (1-2), 125 ≠ 144. So®hl, J. (2012). Confidence sets in nonparametric calibration of exponential L¥evy models. SFB
+649 Discussion Paper 2012-012, Sonderforschungsbereich 649, Humboldt Universit®at zu Berlin, Germany. Available at http://sfb649.wiwi.hu-berlin.de/papers/pdf/SFB649DP2012-012.pdf. Trabs, M. (2011). Calibration of self-decomposable L¥evy models. SFB 649 Discussion Paper 2011-073, Sonderforschungsbereich 649, Humboldt Universit®at zu Berlin, Germany. Available at http://sfb649.wiwi.hu-berlin.de/papers/pdf/SFB649DP2011-073.pdf.
+25
+
+SFB 649 Discussion Paper Series 2012
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "HMM in dynamic HAC models" by Wolfgang Karl H‰rdle, Ostap Okhrin and Weining Wang, January 2012.
+002 "Dynamic Activity Analysis Model Based Win-Win Development Forecasting Under the Environmental Regulation in China" by Shiyi Chen and Wolfgang Karl H‰rdle, January 2012.
+003 "A Donsker Theorem for LÈvy Measures" by Richard Nickl and Markus Reiﬂ, January 2012.
+004 "Computational Statistics (Journal)" by Wolfgang Karl H‰rdle, Yuichi Mori and J¸rgen Symanzik, January 2012.
+005 "Implementing quotas in university admissions: An experimental analysis" by Sebastian Braun, Nadja Dwenger, Dorothea K¸bler and Alexander Westkamp, January 2012.
+006 "Quantile Regression in Risk Calibration" by Shih-Kang Chao, Wolfgang Karl H‰rdle and Weining Wang, January 2012.
+007 "Total Work and Gender: Facts and Possible Explanations" by Michael Burda, Daniel S. Hamermesh and Philippe Weil, February 2012.
+008 "Does Basel II Pillar 3 Risk Exposure Data help to Identify Risky Banks?" by Ralf Sabiwalsky, February 2012.
+009 "Comparability Effects of Mandatory IFRS Adoption" by Stefano Cascino and Joachim Gassen, February 2012.
+010 "Fair Value Reclassifications of Financial Assets during the Financial Crisis" by Jannis Bischof, Ulf Br¸ggemann and Holger Daske, February 2012.
+011 "Intended and unintended consequences of mandatory IFRS adoption: A review of extant evidence and suggestions for future research" by Ulf Br¸ggemann, Jˆrg-Markus Hitz and Thorsten Sellhorn, February 2012.
+012 "Confidence sets in nonparametric calibration of exponential LÈvy models" by Jakob Sˆhl, February 2012.
+013 "The Polarization of Employment in German Local Labor Markets" by Charlotte Senftleben and Hanna Wielandt, February 2012.
+014 "On the Dark Side of the Market: Identifying and Analyzing Hidden Order Placements" by Nikolaus Hautsch and Ruihong Huang, February 2012.
+015 "Existence and Uniqueness of Perturbation Solutions to DSGE Models" by Hong Lan and Alexander Meyer-Gohde, February 2012.
+016 "Nonparametric adaptive estimation of linear functionals for low frequency observed LÈvy processes" by Johanna Kappus, February 2012.
+017 "Option calibration of exponential LÈvy models: Implementation and empirical results" by Jakob Sˆhl und Mathias Trabs, February 2012.
+SFB 649, Spandauer Straﬂe 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+

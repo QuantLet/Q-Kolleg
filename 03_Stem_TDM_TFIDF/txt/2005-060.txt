@@ -1,0 +1,1074 @@
+BERLIN
+
+SFB 6 4 9 E C O N O M I C R I S K
+
+SFB 649 Discussion Paper 2005-060
+Portfolio Value at Risk Based on Independent Components Analysis
+Ying Chen* ** Wolfgang Härdle* Vladimir Spokoiny* **
+* CASE - Center for Applied Statistics and Economics, Humboldt-Universität zu Berlin
+** Weierstraß - Institute for Applied Analysis and Stochastics, Mohrenstrasse 39, 10117 Berlin, Germany
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+http://sfb649.wiwi.hu-berlin.de ISSN 1860-5664
+SFB 649, Humboldt-Universität zu Berlin Spandauer Straße 1, D-10178 Berlin
+
+Portfolio Value at Risk Based On Independent Components Analysis
+Ying Chen1,2, Wolfgang H¨ardle1 and Vladimir Spokoiny1,2
+1 CASE - Center for Applied Statistics and Economics Humboldt-Universit¨at zu Berlin
+Wirtschaftswissenschaftliche Fakulta¨t Spandauerstrasse 1, 10178 Berlin, Germany 2 Weierstraß - Institute fu¨r Angewandte Analysis und Stochastik Mohrenstrasse 39, 10117 Berlin, Germany
+Abstract
+Risk management technology applied to high dimensional portfolios needs simple and fast methods for calculation of Value-at-Risk (VaR). The multivariate normal framework provides a simple off-the-shelf methodology but lacks the heavy tailed distributional properties that are observed in data. A principle component based method (tied closely to the elliptical structure of the distribution) is therefore expected to be unsatisfactory. Here we propose and analyze a technology that is based on Independent Component Analysis (ICA). We study the proposed ICVaR methodology in an extensive simulation study and apply it to a high dimensional portfolio situation. Our analysis yields very accurate VaRs.
+Keywords: independent component analysis, Value-at-Risk
+JEL code: C14, C15, C32, C53, G20
+Acknowledgement: This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+1 Introduction
+
+The Value-at-Risk (VaR) calculation of large portfolios is a challenging task - both numerically and statistically. VaR indicates the possible loss over a given time horizon at a risk level a. From a statistical point of view, it is the a-quantile of the joint distribution of the portfolio's risk factors which are modeled heteroscedastically:
+
+xt = t1/2t,
+
+(1)
+
+where xt  IRd is the risk factor vector, e.g. the (log) returns of d individual financial instruments. The matrix t denotes the corresponding time-dependent covariance and t is the d-dimensional standardized residual vector. The portfolio VaR calculation becomes technically difficult for high dimensionality of the portfolio.
+
+In order to solve this and other numerical problems, portfolio variations are typically mapped into a conditional multivariate normal framework such as RiskMetrics launched by J.P. Morgan. Recall that, Gaussian distributed residuals or devolatilized returns t = t-1/2xt are independent after devolatilization; the joint density of the residuals is the product of d marginals. In this sense, the portfolio VaR calculation is simplified and only covariance based. Many well developed covariance estimation methodologies in a high dimensional space have been easily applied in practice, for example, the Constant Conditional Correlation (CCC) model proposed by Bollerslev (1990) and the subsequent Dynamic Conditional Correlation (DCC) model proposed by Engle (2002), Engle and Sheppard (2001). The simplicity of this kind of covariance based methodology nevertheless bears a risk of modeling bias since, among other things, the assumed conditional Gaussian marginals are unable to mimic the heavy tailedness of financial time series observed in markets. This issue has been addressed in a variety of papers. For example, Jaschke and Jiang (2002) have studied the conditional Gaussian distribution fits to VaR that deliver satisfactory estimates at a moderate (e.g. 95%) confidence level but underestimate VaRs at more extreme levels such as 99%.
+
+The tail problems are evident from Figure 1, where we compare the marginal density estimations of devolatilized returns of foreign exchange rates, the German Mark to the US Dollar (DEM/USD), from 1979-12-01 to 1994-04-01. In order to mimic the empirical distributional behavior of the real data, we assume 3 different distributional types. The RiskMetrics (left panel) and t(15)-deGARCH (right panel) methods fit the devolatilized returns, based on a GARCH(1,1) volatility process: ^t2 = 1.65  10-6 + 0.07x2t-1 + 0.89^t2-1, by the normal and Student-t with degrees of freedom 15 distributions. The GHADA (middle panel) technique assumes that the devolatilized returns follow a time stationary Generalized Hyperbolic (GH) distributional mechanism based on locally constant volatilities, see Chen, H¨ardle and Jeong (2005) and Mercurio and Spokoiny (2004) for details. The nonparametric
+
+1
+
+kernel density estimations (solid lines) corresponding to the devolatilized return processes are considered as benchmarks. According to the graphical comparison, the GHADA technique is superior to the other two techniques since the empirical GH density coincides to the benchmark, especially in the tails. The t-deGARCH technique shows although a better tail fit compared to the RiskMetrics, it still deviates from the benchmark. This small comparison provides evidence that the normally distributional assumption is unreliable and will lead to low accuracy of univariate and portfolio VaR calculations.
+
+RiskMetrics
+0.00
+
+GHADA(1,1.74,-0.02,0.78,0.01)
+0.00
+
+t(15)-deGARCH
+0.00
+
+-2.50
+
+-2.50
+
+-2.50
+
+-5.00
+
+-2.50
+
+2.50 5.00
+
+-5.00
+
+-2.50
+
+2.50 5.00
+
+-5.00
+
+-2.50
+
+2.50 5.00
+
+-7.50
+
+-7.50
+
+-7.50
+
+-10.00
+
+-10.00
+
+-10.00
+
+Fig. 1: Graphical comparison of density estimations based on the devolatilized DEM/USD returns from 1979-12-01 to 1994-04-01 (3719 observations). The nonparametrical kernel density estimations are considered as benchmarks. The RiskMetrics based density estimation is the dotted curve on the left panel whereas the t(15)-deGARCH based estimation is displayed on the right. The corresponding GARCH(1,1) process is: ^t2 = 1.65  10-6 + 0.07x2t-1 + 0.89^t2-1. The GHADA technique with the local constant volatility process and the GH(1, 1.74, -0.02, 0.78, 0.01) density estimation is displayed on the middle panel. Data source: FEDC(sfb649.wiwi.hu-berlin.de).
+ICVaRdemusd.xpl
+
+The weak performance of the normal assumption motivates us to search for a different approach solving the technical problems of portfolio VaR calculations. An "ideal" situation is, as mentioned before, that the residuals t are independent. Since based on the independence, the estimation of the joint distribution can be converted to marginals' estimations.
+In the context of sound engineering, signal detection from unknown filters and sources is treated by a method called Independent Component Analysis (ICA). This engineering method is designed for detection of blind folded signals and retrieves out of a high dimensional time series stochastically independent source components. A tutorial on ICA can be found in Hyva¨rinen and Oja (1999) and a variety of numerical techniques to uncover Independent Components (ICs) are discussed in Hyva¨rinen, Karhunen and Oja (2001). Pro-
+2
+
+moted by the success in engineering, ICA has been applied in different areas such as brain imaging (Duann, Jung, Kuo, Yeh, Makeig, Hsieh and Sejnowski, 2002) and telecommunication study (Ristaniemi, Raju and Karhunen, 2002). An early implementation of ICA in financial time series is given in Back and Weigend (1998), drawing comparisons of ICs and principal components (PCs) applied to 28 Japanese stocks from 1986 to 1989. Few contributions however exist for the application of ICA in risk management.
+The first aim of this paper is to bring together the lines of thought of the engineering signal processing literature and newer statistical insights on the high dimensional VaR calculations. We coin the name ICVaR owing to the ICA technology. Given a trading strategy bt  IRd, the portfolio return Rt  IR is:
+
+Rt = bt xt.
+
+(2)
+
+Note that the ICVaR technique does not rely on a direct joint density estimation of the
+
+high dimensional returns xt  IRd such as xt = t1/2t. Instead the ICVaR procedure
+
+in a first step applies a linear transformation to xt, i.e. a nonsingular matrix W yields
+
+(approximately) ICs yt  IRd:
+
+xt = W -1yt
+
+(3)
+
+The matrix W is different from the Mahalanobis transformation cov(x)-1/2 - that creates ICs in the Gaussian regime - only in the case of non-Gaussian marginals as we will see later. The second ICVaR step concerns the fit of each IC univariately:
+
+yt = diag(1t, · · · , dt)t = Dt1/2t or equivalently: yjt = jtjt, j = 1, · · · , d,
+
+(4)
+
+where the covariance Dt of the ICs is diagonal due to independence and t are cross independent shocks. Based on the ICA, the high-dimensional VaR problem is now converted to simpler univariate VaR calculations. Given the discussion above on fitting VaR this opens a wide avenue of alternative VaR determination.
+The second purpose of this paper is to compare the proposed ICVaR technique with the industry standard RiskMetrics and the most-often used t-deGARCH method. As discussed before, the RiskMetrics often gives underestimated VaRs, an inevitable cost of the Gaussian assumption. On the contrary, the Students-t distribution can better mimic the heavy tailed distributional behavior of financial risk factor than the RiskMetrics, but it is hard to reflect the leptokurtic scenario exactly, as illustrated in Figure 1. In this paper, we show how high accuracy can be reached by the ICVaR compared to the RiskMetrics and t-deGARCH methods in real data analysis.
+The methodological contribution of the study unfolds in Section 2 where the ICA method
+
+3
+
+is discussed. The simulation study is presented in Section 3. Further we apply the ICVaR to exchange rate portfolios with different artificial trading strategies. The ICVaR predicts risk levels precisely and outperforms the RiskMetrics and t-deGARCH methods. Finally we conclude our study in Section 5. All algorithms and figures can be recalculated by following the net linked indicator below the figures.
+
+2 ICVaR Methodology
+
+2.1 Basic model
+
+The proposed ICVaR methodology consists of 2 main steps: searching for Independent Components (ICs) based on a linear transformation and modeling the univariate volatility and stochastic distribution.
+
+Rt = bt xt = bt W -1yt = bt W -1Dt1/2t.
+
+(5) (6) (7)
+
+The idea of the ICA is that risk factors xt  IRd can be represented by a linear combination of d-dimensional ICs. The linear transformation matrix W is assumed to be nonsingular. Due to the independence property of ICs, the covariance Dt must be a diagonal matrix and the elements of the stochastic vector t are cross independent. Furthermore, it fulfills that E[t|Ft-1] = 0 and Var [t|Ft-1] = Id.
+
+From a statistical viewpoint, this projection technique is desirable since the d-dimensional portfolio is decomposed to univariate and independent risk factors through a simple linear transformation. Recall that, the joint density (f ) and the covariance of any linear transformed ICs such as xt = W -1yt are analytically computable:
+
+d
+
+fy =
+
+fyj ,
+
+j=1
+
+fx = abs(|W |)fy(W x),
+
+t,y = Dt t,x = W -1DtW -1 .
+
+In the second step of the proposed ICVaR, the diagonal elements of Dt and each component of t are estimated univariately since the matrix manipulation is equivalent to:
+
+yjt = jtjt, j = 1, · · · , d,
+
+(8)
+
+where jt is the square root of the j-th diagonal element of Dt and jt is the univariate stochastic term with E[jt|Ft-1] = 0 and Var [jt|Ft-1] = 1. There are various univariate models that estimate the volatility and approximate the distribution of the stochastic term.
+
+4
+
+Here we focus on the IC identification step. For the fit of the marginal IC factors we refer to the GHADA technique as in Chen et al. (2005), where one estimates the local constant volatility adaptively in a homogeneous interval and fits the devolatilized returns in the GH distributional framework. An alternative approach is given by the t-deGARCH setup. It could be used to estimate the heteroscedastic volatility process and the Student-t could be applied to pick up the heavy-tailedness of j.
+
+After these two steps, we compute the quantile of portfolio risk by Monte Carlo simulation or analytical methods e.g. saddle point approximation, see Iyengary and Mazumdar (1998). For the ease of presentation, we concentrate in this paper on the simulation methodology. In particular, we generate d-dimensional samples of the fitted distributions with sample size M , from which we calculate the daily empirical a-quantile of the portfolio variations. The simulation will repeat N times and the average value of the empirical quantiles is considered as the portfolio VaR at level a:
+
+VaRa,t
+
+=
+
+1 N
+
+N
+F^a-,t1(Rt(n))
+n=1
+
+=
+
+1 N
+
+N
+F^a-,t1{bt
+n=1
+
+W^ -1D^ t1/2^(tn)},
+
+where F^a-,t1 denotes the empirical quantile function of Rt.
+
+2.2 ICA: Properties and Estimation
+
+Since ICA is a relatively new technique in this context, we present a small pedagogical illustration of its usage.
+
+Example: Generate 3 independent GH random variables GH(y; 1, 2, 0, 1, 0), GH(y; 1, 1.7, 0, 0.5, 0) and GH(y; 1, 1.5, 0, 1, 0) as sources. The first distributional parameter specifies the subclass of the random variables. With the value of 1, they are hyperbolic (HYP) distributed. The other four parameters control the location, scale, asymmetry and likeliness of extreme events, see Prause (1999). These source components have mean (-0.02, 0.05, -0.00) and standard deviation (SD) (0.83, 0.92, 0.99) respectively. The linear transformation matrix is the estimate based on 3 real German stocks' returns: ALLIANZ, BASF and BAYER from 1974-01-02 to 1996-12-30 (Data source: FEDC at sfb649.wiwi.hu-berlin.de).
+
+ 1.31 0.14 0.18
+
+W -1
+
+=
+
+
+
+ 
+
+-0.42
+
+-1.26
+
+-1.25
+
+ 
+
+10-2
+
+
+
+
+
+-0.03 0.41 -0.49
+
+(9)
+
+5
+
+The time series xt = W -1yt are analyzed by the ICA. The covariance of xt is
+
+ 13.66
+
+
+
+cov(x) =  
+
+6.04
+
+
+
+6.49
+
+6.04 15.54 11.64
+
+ 6.49
+
+11.64
+
+ 
+
+10-5,
+
+
+
+
+
+16.07
+
+(10)
+
+which is comparable to W -1DtW -1 . Recall that in the Gaussian framework, the Mahalanobis transformation delivers independent variables:
+
+ 0.91
+
+cov(x)-1/2
+
+ =
+
+
+-0.09
+
+
+
+-0.12
+
+-0.09 1.03
+-0.41
+
+ -0.12
+
+-0.41
+
+ 
+
+102
+
+
+
+
+
+1.04
+
+(11)
+
+which is clearly distinct from
+
+ 0.79
+
+
+
+W
+
+=
+
+ 
+
+-0.11
+
+
+
+-0.15
+
+0.10 -0.44 -0.38
+
+ 0.03
+
+1.08
+
+ 
+
+102
+
+
+
+
+
+-1.10
+
+(12)
+
+indicated by (9). Figure 2 provides an illustration of this procedure. The top row contains the 3 independent source signals yt. The middle row displays the time series xt = W -1yt. One sees the scale changes and different random patterns display. The last row of Figure 2 shows the ICs estimated by the ICA method. The time series on the top and the bottom look familiar but the sign and the ordering may change as displayed in the figure; The first estimated IC displays the similar movement as the third generated IC. Furthermore, the third estimated IC has a mirror pattern of the second true IC.
+Scale identification In fact, the scales of yt and W are not identifiable. Given a matrix C = diag(c1, · · · , cd) with cj = 0, the new ICs (Cyt) with the transformation (W -1C-1) also fulfill (3). In order to avoid the identification problem, it is suggested to prewhiten xt and assume yt to be standardized. The Mahalanobis transformation cov(x)-1/2 does the prewhitening job. It is not hard to see that W becomes then an orthogonal matrix. Denote by x~t - the prewhitened xt and yt = W~ x~t the corresponding ICs. W = W~ cov(x)-1/2 is then the linear transformation for the original observations. For notational convenience, we assume from now on that xt has been prewhitened.
+Order identification Furthermore, the order of the ICs is ambiguous. Given a permutation matrix P , the ICs (P yt) fulfill (3) with a new transformation (W -1P -1) as well.
+
+6
+
+6.00 3.00 0.00 -3.00
+
+IC1: GH(1,2,0,1,0)
+
+6.00 3.00 0.00 -3.00
+
+IC2: GH(1,1.7,0,0.5,0)
+
+6.00 3.00 0.00 -3.00
+
+IC3: GH(1,1.5,0,1,0)
+
+0.08 0.04 0.00 -0.04
+
+250 500 x1
+
+750 1000
+0.08 0.04 0.00 -0.04
+
+250 500 x2
+
+750 1000
+0.08 0.04 0.00 -0.04
+
+250 500 x3
+
+750 1000
+
+7
+
+6.00 3.00 0.00 -3.00
+
+250 500 Estimated IC1
+
+750
+
+1000
+6.00 3.00 0.00 -3.00
+
+250 500 750 Estimated IC2
+
+1000
+6.00 3.00 0.00 -3.00
+
+250 500 750 Estimated IC3
+
+1000
+
+250 500 750 1000
+
+250 500 750 1000
+
+250 500 750 1000
+
+Fig. 2: Simulation: on the top are time plots of 3 independent GH variables. The mixed variables xt = W -1yt are displayed on the middle row where the linear transformation matrix W is estimated based on 3 German stocks' returns: ALLIANZ, BASF and BAYER from 1974-01-02 to 1996-12-30. The time series of the estimated ICs are displayed on the bottom.
+ICVaRsim.xpl
+
+IC is necessarily non-Gaussian Given a d-dimensional standardized Gaussian vector xt and an orthogonal matrix W , the joint pdfs of xt and yt are in fact identical and unrelated with W :
+
+fx
+
+=
+
+|2
+
+Id
+
+|-
+
+1 2
+
+exp
+
+-x x 2
+
+= fx(W -1y)| det W -1|
+
+=
+
+|2
+
+Id
+
+|-
+
+1 2
+
+exp
+
+-y y 2
+
+= fy.
+
+The third condition is although strict, it is naturally fulfilled in financial applications, where financial time series, even after devolatilization, display heavy tailed behavior.
+
+How can we estimate the linear transformation matrix W after we have prewhitened the non-Gaussian variables? Independence of the components of a random vector y  IRd
+can be measured by the mutual information:
+
+d
+I(W, y) = I(W, fy) = H(yj) - H(y)
+j=1
+d
+= H(yj) - H(x) - log | det(W )|
+j=1
+
+(13)
+
+where H(y) = H(fy) = - fy(u) log fy(u)du is the entropy of the vector y with a joint
+
+pdf fy. If the components of y are independent, then the mutual information will reach
+
+its minimum with a value of 0. Therefore, the IC searching is identical to minimizing (13)
+
+w.r.t. W . Since H(x) is fixed given the data, and further the matrix W is orthogonal after
+
+prewhitening, this problem is equivalent to minimizing the term
+
+d j=1
+
+H
+
+(yj
+
+).
+
+Now
+
+we
+
+use:
+
+d dd
+min H(yj) = min H(wjx)  minH(yj)
+j=1 j=1 j=1
+argminH(yj) = argmaxJ(wj, yj)
+
+(14) (15)
+
+to estimate wj, the j-th row of W . J(wj, yj) = H{N(0, 1)} - H(yj) is the negentropy of the IC yj for j = 1, · · · , d. By replacing the original optimization problem with changes of the objective function in (14), it leads to some loss in the W estimation but extensively speeds up the estimation procedure. The negentropy is always nonnegative, since given the same variance, the Gaussian random variable has the largest entropy, Cover and Thomas (1991). Therefore, the negentropy is considered as a non-Gaussian measure and widely used in Projection Pursuit (PP), see Jones and Sibson (1987). Furthermore, the PP methods of searching non-Gaussian direction can be applied in the IC identification as well. Nevertheless, compared to the cumulant based PP method, the entropy or negentropy is less sensitive to outliers and therefore preferable.
+
+8
+
+A question however raises at this stage, i.e. the marginal pdfs of the ICs in the entropy or the negentropy are unknown. A distributional free approximation of the univariate negentropy has been proposed by Hyva¨rinen (1998):
+
+J(wj, yj)  C {E{G(yj)} - E[G{N(0, 1)}]}2
+
+where
+
+C
+
+is
+
+a
+
+constant
+
+and
+
+G
+
+is
+
+an
+
+even
+
+function,
+
+e.g.
+
+G(yj )
+
+=
+
+1 
+
+log cosh(yj),
+
+1    2.
+
+The estimation of the linear transformation matrix in the ICA is estimated by:
+
+w^j = argmax {E{G(wjX)} - E[G{N(0, 1)}]}2 s.t. W W = Id
+
+(16) (17)
+
+Based on the Kuhn-Tucker condition and the Newton's method, Hyv¨arinen and Oja (1999) have proposed the FastICA algorithm. Hyva¨rinen (1999) has shown that the estimates based on the FastICA algorithm are consistent.
+FastICA algorithm: set j = 1
+
+1. Choose an initial vector wj of unit norm, W = (w1, · · · , wd) . 2. Let wj(n) = E{g(wj(n-1)x)x} - E{g (wj(n-1)x)}wj(n-1), where g denotes the first deriv-
+ative of G(yj) and g the second derivative. In practice, the sample mean is applied for E[·].
+3. Orthogonalization: wj(n) = wj(n) - k=j(wj(n) wk)wk. 4. Normalization: wj(n) = wj(n)/||wj(n)||, || · || denotes the norm. 5. If not converged, i.e. ||wj(n) - wj(n-1)|| = 0, go back to 2.
+6. Set j = j + 1. For j  d, go back to step 1.
+
+3 Simulation Study
+The reliability of the proposed ICVaR depends on the linear transformation matrix estimation and the univariate modeling on the ICs estimated. In order to fit the local distributions of ICs, we apply the GHADA technique due to its good performance in the simulation and empirical studies in Chen et al. (2005). The target of the simulation study here is to search for ICs and compare the marginal densities of the estimated and generated ICs.
+In particular, we pursue an experiment to check the validation of the FastICA approach with Normal Inverse Gaussian (NIG) distributed ICs, where the NIG distribution is a subclass of the GH distribution with the fixed parameter  = -0.5, see Barndorff-Nielsen
+9
+
+and Blæsild (1981). We generate d = 50 NIG samples with T = 1000 observations, i.e. yj  NIG(j, j, j, µj) for j = 1, · · · , 50. Without loss of generality, we set µj = 0 and j = 1. The parameter j is uniformly distributed in [1, 2] and  fulfills the condition:
+
+Var [yj] =
+
+1 j2 j2 - j2 j2 - j2
+
+=
+
+1,
+
+such that the generated ICs have unit variances. Furthermore, the sign of  is chosen
+arbitrarily. Table 1 shows the distributional parameters of the generated ICs. The linear transformation matrix W -1 is obtained via the Jordan decomposition of a square matrix, whose elements are standard normally distributed. The mixed time series xt = W -1yt are analyzed by the ICA.
+
+We apply the FastICA algorithm to the transformed time series xt and estimate the NIG parameters of each estimated IC. We order the 50 estimated independent series to minimize the mean absolute error (MAE) of the marginal pdfs between the estimated and generated ICs. Overlapping is avoided in the ordering:
+
+MAEj
+
+=
+
+1 T
+
+T =1000
+|f (y^jt) - f (yjt)|.
+t=1
+
+The largest two MAEs are 0.09 (ICest 20) and 0.04 (ICest 17), indicating the worst cases of IC searching. In this case, it is expected to get accurate VaR estimations based on these fits.
+
+4 Empirical Study
+In this section, we analyze foreign exchange rate portfolios with artificial and time-invariant trading strategies. Since the position of these individual risk factors are constant in time, one can simply use the historical simulation approach where the portfolio returns are considered as the single risk factor. It speeds up VaR computations without losing the portfolio's dependence information. However in practice, it may slow down the calculation as the trading strategies changes, see Jorion (2001). Three VaR models are evaluated: the proposed ICVaR approach based on the multivariate risk factors, the RiskMetrics and tdeGARCH methodologies based on the univariate portfolio returns. In the RiskMetrics and t-deGARCH frameworks, we apply the GARCH(1,1) setup to estimate the dependence structure of real data and assume that the devolatilized returns are Gaussian or Student-t distributed. The degrees of freedom (df) of the Student-t distribution are selected by the maximum likelihood method.
+The foreign exchange market, or "Forex" market, is by far the largest financial market in
+
+10
+
+ICest ^
+
+^ IC 
+
+ MAE
+
+1 1.89 0.63 23 1.39 0.61 0.63
+
+2 1.76 0.60 25 1.97 1.19 1.57
+
+3 1.45 -0.51 30 1.06 -0.21 0.32
+
+4 1.64 0.42 36 1.22 0.43 0.52
+
+5 2.11 -0.67 13 1.31 -0.53 0.70
+
+6 2.05 -0.62 28 1.39 -0.61 0.93
+
+7 1.73 -0.41 50 1.60 -0.83 0.76
+
+8 1.62 0.45 7 1.15 0.35 0.45
+
+9 1.27 0.16 6 1.96 1.17 1.58
+
+10 1.51 0.43 27 1.51 -0.74 2.33
+
+11 2.44 1.33 38 1.27 0.49 0.98
+
+12 1.65 -0.25 26 1.35 -0.57 0.79
+
+13 2.58 -1.35 10 1.89 -1.11 1.69
+
+14 1.60 0.15 24 1.54 0.77 0.98
+
+15 1.52 -0.03 20 1.04 0.18 0.67
+
+16 2.14 -1.00 1 1.72 -0.94 3.09
+
+17 2.20 0.64 3 1.75 0.97 4.07
+
+18 1.44 0.48 15 1.40 0.63 2.28
+
+19 1.44 -0.40 33 1.70 0.93 3.22
+
+20 1.90 -0.54 39 1.72 0.95 9.73
+
+21 1.57 0.39 11 1.63 0.86 0.72
+
+22 1.80 -0.56 12 1.78 -1.00 0.84
+
+23 1.69 0.20 46 1.69 0.92 1.09
+
+24 1.76 -0.27 5 1.39 0.62 1.53
+
+25 1.50 0.26 19 1.69 -0.92 1.38
+
+ICest ^
+
+^ IC 
+
+ MAE
+
+26 1.84 0.60 2 1.92 1.14 2.56
+
+27 1.82 -0.18 16 1.57 -0.80 2.56
+
+28 1.30 -0.37 8 1.17 -0.37 0.32
+
+29 1.34 0.13 17 1.06 0.21 0.68
+
+30 2.02 -0.39 44 1.54 0.77 2.73
+
+31 3.05 0.80 35 1.78 1.00 3.27
+
+32 1.79 -0.45 32 1.34 -0.57 0.77
+
+33 1.58 0.08 4 1.24 0.46 0.88
+
+34 1.59 0.35 47 1.45 0.67 0.74
+
+35 2.00 -0.33 34 1.43 -0.66 1.18
+
+36 1.63 -0.06 31 1.85 1.07 1.37
+
+37 1.81 0.29 29 1.93 1.15 1.29
+
+38 1.49 -0.01 22 1.66 -0.89 2.97
+
+39 2.39 -0.30 42 1.53 -0.76 1.27
+
+40 1.52 -0.22 21 1.39 0.62 1.48
+
+41 2.32 -0.001 41 1.70 0.93 3.37
+
+42 2.87 0.30 9 1.50 0.73 1.37
+
+43 2.27 0.24 14 1.28 0.50 1.13
+
+44 2.44 0.46 43 1.87 1.09 1.39
+
+45 1.88 -0.07 18 1.44 -0.67 1.23
+
+46 2.22 0.13 37 1.39 0.62 1.24
+
+47 1.79 0.26 49 1.45 -0.68 1.41
+
+48 3.03 0.75 40 1.95 1.17 2.37
+
+49 3.31 -0.18 48 1.50 -0.73 1.49
+
+50 3.77 0.29 45 1.53 0.76 1.52
+
+Tab. 1: ML estimators ^j and ^j of the estimated ICs, the parameters of the true ICs and the MAE (unit: 10-2).
+ICVaRsimpdfcomp.xpl ICVaRsimgechoice.xpl
+
+11
+
+Time Series Mean SD
+
+Skewness Kurtosis 1 2
+
+DEM/USD 0.00 0.7110-2
+
+-0.13
+
+4.94 0.02 0.01
+
+GBP/USD 0.00 0.6910-2
+
+-0.01
+
+5.64 0.08 0.01
+
+IC1 -0.02 1.00
+
+-0.62
+
+8.71 0.07 0.02
+
+IC2 0.01 1.00
+
+-0.08
+
+5.19 0.05 0.01
+
+Tab. 2: Descriptive statistics of the log returns and the two estimated indpendent processes of the DEM/USD and GBP/USD rates. ICVaRfxdescriptive.xpl
+
+the world with trading volumes surpassing USD 1.5 trillion on some days. The very active buying and selling of traders make it further the most liquid financial market. Here we consider portfolios including two exchange rates: DEM/USD and the British Pound to the US Dollar (GBP/USD) from 1979-12-01 to 1994-04-01. We forecast VaRs one-day-ahead w.r.t. four artificial trading strategies, i.e. b1 = (1, 1) , b2 = (1, 2) , b3 = (-1, 2) and b4 = (-2, 1) . For example, b1 means holding one unit DEM/USD and one unit GBP/USD forward contracts.
+
+The data is available at FEDC (sfb649.wiwi.hu-berlin.de). Each time series consists of 3721 observations. Table 2 summarizes the statistical properties of the original data and the estimated ICs based on the linear transformation. These four time series are all centered around 0, approximately symmetric but distinctly non-Gaussian indicated by their large kurtoses. The temporal correlations are very small; The ACF plots show that the serial correlations decay at the very beginning lags, indicating a weak stationarity of the four series, see Figure 3. On the other hand, the cross correlation of the two exchange returns is over 0.77, referring a strongly linear dependence between them. Applying the FastICA algorithm, we estimate the linear transformation matrix and its inverse:
+
+
+
+
+
+
+
+W^ =  207.93
+
+-213.63 ,
+
+W^ -1 = 
+
+2.30 6.71  10-3
+
+77.72 73.29
+
+-2.44 6.53
+
+(18)
+
+We then implement the GHADA approach to fit the distributional feature of each estimated IC. Figure 4 shows the adaptive volatility series based on the two ICs. The well-known volatility clustering is reflected and volatility jumps appear. These jumps happen in most cases at different time and have individual influences on the return processes. The estimated HYP and NIG parameters of the devolatilized ICs are reported in Table 3. In the Monte Carlo simulation to find the empirical quantiles of the portfolios, we generate d = 2 samples with M = 10, 000 observations. The daily empirical quantiles at 3 risk levels a = 5%, 1% and 0.5% are the average values of N = 100 repetitions. We redo the simulation for the last T = 1000 days. The daily means and standard deviations of the 3 empirical quantiles given
+
+12
+
+ACF plot of DEM/USD
+
+ACF plot of GBP/USD
+
+acf*E-2 05
+
+acf*E-2 -2 0 2 4
+
+0 5 10 15 20 25 30 0 5 10 15 20 25 30 lag lag
+
+ACF plot of IC1
+
+ACF plot of IC2
+
+acf*E-2 -2 0 2 4
+
+acf*E-2 05
+
+5 10 15 20 25 30 lag
+
+5 10 15 20 25 30 lag
+
+Fig. 3: ACF plots of the log returns of the DEM/USD (left) and the GBP/USD (right) are displays on the top. Below are the ACF plots of the estimated IC series: IC1 (left) and IC2 (right). ICVaRfxdescriptive.xpl
+
+different trading strategies and two GH subclasses (HYP and NIG) are reported in Table 4 to Table 7. The largest standard deviation of daily empirical quantiles is underlined in each category. The values are small due to the large sample size, indicating efficient estimation of the daily quantiles.
+The backtesting results based on the ICVaR, the RiskMetrics and t-deGARCH methodologies are reported in Table 8. The dfs of the Student-t fits are 16, 16, 13 and 14 w.r.t. different trading strategies. Based on two likelihood ratio tests: LR1 for risk level and LR2 for exceedances clustering (Jorion, 2001), the proposed ICVaR model is superior to the other two candidates. In the risk level test (LR1), the NIG fit performs even better than the HYP fit. In the RiskMetrics framework, the exceedances happen minimal 2.6 times and maximal 23 times more than the expected risk level, e.g. for the trading strategy b = (1, 1) . In some cases, the underestimation is even over 25 times. Compared to the RiskMetrics, the t-deGARCH method improves the VaR forecasting as the extreme risk levels such as 0.5% are considered. However both models are rejected everywhere in the two tests at 99% level, meaning unreliable predictions. Exemplary graphical illustrations of the VaR time plot are displayed in Figure 5 to Figure 6.
+13
+
+Y 123
+
+Y 0.5 1 1.5 2
+
+Y*E-2 -15 -10 -5 0 5
+
+FX Adaptive Vola of IC1
+5 10 15 20 25 30 35 X*E2
+FX Adaptive Vola of IC2
+5 10 15 20 25 30 35 X*E2
+Fig. 4: Adaptive volatility processes of the FX ICs. ICVaRfxdescriptive.xpl
+VaR plot (hyp-alpha = 0.0050)
+5 10 X*E2
+Fig. 5: VaR time plots of the exchange rate portfolio with trading strategy b4 = (-2, 1) and risk level a = 0.5% . The one-day-ahead predicted VaRs are based on the HYP distribution. The dots are the real portfolio returns, the RiskMetrics (red) and the t-deGARCH (green) forecasts are displayed as solid line and circles while the ICVaR is displayed as a straight line. The exceendances w.r.t. the risk management models are displayed as cross on the bottom (from the top are the exceedances w.r.t. the ICVaR, the t-deGARCH and the RiskMetrics). ICVaRfxVaRplot.xpl
+14
+
+Y*E-2 -15 -10 -5 0 5
+
+VaR plot (nig-alpha = 0.0050)
+5 10 X*E2
+Fig. 6: VaR time plots of the exchange rate portfolio with trading strategy b4 = (-2, 1) and risk level a = 0.5% . The one-day-ahead predicted VaRs are based on the NIG distribution. The dots are the real portfolio returns, the RiskMetrics (red) and the t-deGARCH (green) forecasts are displayed as solid line and circles while the ICVaR is displayed as a straight line. The exceendances w.r.t. the risk management models are displayed as cross on the bottom (from the top are the exceedances w.r.t. the ICVaR, the t-deGARCH and the RiskMetrics). ICVaRfxVaRplot.xpl
+15
+
+GH Type Time Series ^
+
+^ ^
+
+µ^
+
+HYP
+
+IC1 1.71 -0.17 0.55 0.12
+
+HYP
+
+IC2 1.77 0.02 0.71 -0.01
+
+NIG IC1 1.22 -0.18 1.10 0.13
+
+NIG IC2 1.37 0.03 1.28 -0.02
+
+5 Conclusion
+
+Tab. 3: GH parameters of the ICs. ICVaRfxdescriptive.xpl
+
+In this paper, we proposed an easy and fast multivariate risk management model. The study is mainly based on the ICA. Instead of estimating the joint density and covariance of high dimensional returns, the searching of ICs transfers the calculation to unidimensional studies. In the empirical study, the proposed ICVaR is superior to the RiskMetrics and t-deGARCH methods, above all in the risk level controlling. In addition, in the ICVaR methodology, the joint distribution of portfolio does not rely on trading strategy and therefore can be further applied to calculate VaRs as the investing positions change. Moreover, the ICVaR approach can be easily applied to calculate and forecast other risk measures such as expected shortfall.
+
+References
+Back, A. and Weigend, A. (1998). A first application of independent component analysis to extracting structure from stock returns, International Journal of Neural Systems 8: 473­484.
+Barndorff-Nielsen, O. and Blæsild, P. (1981). Hyperbolic distribution and ramifications: Contributions to theory and applications, in C. Taillie, P. Patil and A. Baldessari (eds), Statistical Distributions in Scientific Work, Vol. 4, D. Reidel, pp. 19­44.
+Bollerslev, T. P. (1990). Modelling the coherence in short-run nominal exchange rates: A multivariate generalized ARCH model, Review of Economics and Statistics 72 pp. 498­ 505.
+Chen, Y., Ha¨rdle, W. and Jeong, S. (2005). Nonparametric risk management with generalized hyperbolic distributions, SFB 649, discussion paper 2005-001, http://sfb649.wiwi.hu-berlin.de/, submitted to JASA.
+Cover, T. and Thomas, J. (1991). Elements of Information Theory, John Wiley & Sons.
+Duann, J., Jung, T., Kuo, W., Yeh, T., Makeig, S., Hsieh, J. and Sejnowski, T. (2002). Single-trial variability in event-related bold signals, NeuroImage 15: 823­835.
+16
+
+HYP Day
+1 2 · 424 425 426 597 · 999 1000
+
+a 5% mean SD% -0.01 0.01 -0.01 0.01
+·· -0.03 0.07 -0.03 0.06 -0.03 0.04 -0.03 0.06
+·· -0.01 0.02 -0.01 0.02
+
+a 1% mean SD% -0.02 0.04 -0.01 0.04
+·· -0.06 0.15 -0.06 0.14 -0.05 0.11 -0.06 0.16
+·· -0.02 0.04 -0.02 0.04
+
+a 0.5% mean SD% -0.02 0.06 -0.02 0.05
+·· -0.07 0.21 -0.07 0.22 -0.06 0.18 -0.06 0.22
+·· -0.02 0.06 -0.02 0.07
+
+NIG Day
+1 2 · 423 425 426 607 · 622 1000
+
+a 5% mean SD% -0.01 0.02 -0.01 0.01
+·· -0.04 0.06 -0.04 0.06 -0.03 0.05 -0.04 0.06
+·· -0.03 0.07 -0.01 0.02
+
+a 1% mean SD% -0.02 0.05 -0.02 0.04
+·· -0.07 0.15 -0.07 0.14 -0.06 0.12 -0.06 0.15
+·· -0.06 0.12 -0.02 0.05
+
+a 0.5% mean SD% -0.02 0.06 -0.02 0.06
+·· -0.07 0.23 -0.07 0.24 -0.06 0.18 -0.07 0.21
+·· -0.07 0.18 -0.02 0.07
+
+17
+
+Tab. 4: Descriptive statistics of daily empirical quantile estimates: b = (1, 1) , MC simulation with M = 10000, N = 100, T = 1000. ICVaRmcqstat.xpl
+
+HYP Day
+1 2 · 424 425 597 · 999 1000
+
+a 5% mean SD% -0.01 0.02 -0.01 0.02
+·· -0.05 0.10 -0.05 0.10 -0.05 0.09
+·· -0.01 0.03 -0.02 0.03
+
+a 1% mean SD% -0.03 0.06 -0.02 0.05
+·· -0.09 0.23 -0.10 0.21 -0.09 0.24
+·· -0.03 0.07 -0.03 0.06
+
+a 0.5% Day mean -0.03 0.09 -0.03 0.08
+·· -0.10 0.31 -0.10 0.33 -0.10 0.33
+·· -0.03 0.08 -0.03 0.10
+
+NIG SD%
+1 2 · 325 423 424 · 597 1000
+
+a 5% mean SD% -0.01 0.02 -0.01 0.02
+·· -0.06 0.11 -0.06 0.11 -0.06 0.10
+·· -0.05 0.09 -0.02 0.03
+
+a 1% mean SD% -0.03 0.06 -0.03 0.06
+·· -0.10 0.22 -0.10 0.25 -0.10 0.22
+·· -0.10 0.22 -0.03 0.08
+
+a 0.5%
+
+-0.03 -0.03
+· -0.11 -0.11 -0.11
+· -0.10 -0.04
+
+0.09 0.09
+· 0.30 0.32 0.32
+· 0.34 0.11
+
+Tab. 5: Descriptive statistics of daily empirical quantile estimates: b = (1, 2) , MC simulation with M = 10000, N = 100, T = 1000. ICVaRmcqstat.xpl
+
+HYP Day
+1 2 · 601 607 611 613 · 999 1000
+
+a 5% mean SD% -0.01 0.01 -0.01 0.01
+·· -0.03 0.05 -0.04 0.06 -0.03 0.06 -0.03 0.05
+·· -0.01 0.01 -0.01 0.01
+
+a 1% mean SD% -0.01 0.03 -0.01 0.03
+·· -0.06 0.15 -0.06 0.13 -0.06 0.13 -0.06 0.15
+·· -0.01 0.03 -0.01 0.03
+
+a 0.5% mean SD% -0.01 0.04 -0.01 0.05
+·· -0.06 0.22 -0.07 0.18 -0.06 0.20 -0.07 0.20
+·· -0.01 0.04 -0.01 0.04
+
+NIG Day
+1 2 · 601 606 607 613 · 999 1000
+
+a 5% mean SD% -0.01 0.01 -0.01 0.01
+·· -0.03 0.05 -0.03 0.06 -0.04 0.07 -0.04 0.06
+·· -0.01 0.01 -0.01 0.01
+
+a 1% mean SD% -0.01 0.03 -0.01 0.03
+·· -0.06 0.15 -0.06 0.15 -0.07 0.13 -0.06 0.12
+·· -0.01 0.03 -0.01 0.03
+
+a 0.5% mean SD% -0.02 0.05 -0.02 0.05
+·· -0.07 0.19 -0.07 0.23 -0.07 0.19 -0.07 0.18
+·· -0.01 0.04 -0.01 0.05
+
+18
+
+Tab. 6: Descriptive statistics of daily empirical quantile estimates: b = (-1, 2) , MC simulation with M = 10000, N = 100, T = 1000. ICVaRmcqstat.xpl
+
+HYP Day
+1 2 · 607 608 612 · 999 1000
+
+a 5% mean SD% -0.01 0.01 -0.01 0.01
+·· -0.04 0.06 -0.03 0.05 -0.03 0.05
+·· -0.01 0.01 -0.01 0.01
+
+a 1% mean SD% -0.01 0.03 -0.01 0.03
+·· -0.06 0.13 -0.06 0.13 -0.06 0.14
+·· -0.01 0.03 -0.01 0.03
+
+a 0.5% mean SD% -0.01 0.04 -0.01 0.05
+·· -0.07 0.18 -0.06 0.19 -0.07 0.21
+·· -0.01 0.04 -0.01 0.04
+
+NIG Day
+1 2 · 601 605 612 · 999 1000
+
+a 5% mean SD% -0.01 0.01 -0.01 0.01
+·· -0.03 0.06 -0.04 0.06 -0.04 0.07
+·· -0.01 0.01 -0.01 0.01
+
+a 1% mean SD% -0.01 0.03 -0.01 0.03
+·· -0.06 0.15 -0.06 0.14 -0.07 0.14
+·· -0.01 0.02 -0.01 0.03
+
+a 0.5% mean SD% -0.02 0.04 -0.02 0.05
+·· -0.07 0.22 -0.07 0.19 -0.07 0.19
+·· -0.01 0.04 -0.02 0.04
+
+Tab. 7: Descriptive statistics of daily empirical quantile estimates: b = (-2, 1) , MC simulation with M = 10000, N = 100, T = 1000. ICVaRmcqstat.xpl
+
+b (1,1) (1,1) (1,1) (1,2) (1,2) (1,2) (-1,2) (-1,2) (-1,2) (-2,1) (-2,1) (-2,1)
+
+a(10-2) 5 1 0.5 5 1 0.5 5 1 0.5 5 1 0.5
+
+ICVaR (HYP fit) n/T % LR1 LR2
+6.7 5.52 *27.60 1.9 6.47 *16.29 0.9 2.59 5.58 6.8 6.16 *27.23 1.6 3.07 *10.51 0.9 2.59 0.00 6.4 3.80 *38.56 1.4 1.43 *11.14 1.2 *7.06 *11.86 6.5 4.34 *22.35 1.6 3.07 0.00 0.9 2.59 0.00
+
+ICVaR (NIG fit) n/T % LR1 LR2
+5.8 1.28 *28.82 1.4 1.43 *11.14 0.7 0.71 0.00 5.4 0.32 *30.50 1.4 1.43 *11.14 0.8 1.52 0.00 5.5 0.51 *28.17 1.2 0.37 *11.86 1.1 5.38 *15.84 5.0 0.00 *20.34 1.1 0.09 0.00 0.8 1.52 0.00
+
+RiskMetrics Method n/T % LR1 LR2
+10.8 *53.95 *19.84 5.5 *99.59 *21.70 5.0 *142.33 *23.44
+10.9 *55.63 *24.78 5.3 *92.67 *22.37 4.7 *128.43 *21.77
+12.0 *75.40 *35.66 6.0 *117.58 *25.86 4.4 *114.93 *18.33
+12.7 *89.18 *18.41 5.6 *103.12 *14.79 4.2 *106.16 2.40
+
+t-deGARCH Method n/T % LR1 LR2
+11.0 *57.33 *26.05 5.3 *92.67 *22.37 4.2 *106.16 *18.96
+11.0 *57.33 *24.48 4.9 *79.30 *23.81 4.4 *114.93 *22.83
+12.0 *75.40 *35.66 5.5 *99.59 *23.40 3.2 *65.54 *20.90
+12.7 *89.18 *18.41 4.7 *72.87 4.49 3.2 *65.54 5.54
+
+19
+
+Tab. 8: Backtesting of the VaR forecast of the exchange portfolios: MC simulation with M = 10000, N = 100, T = 1000. * indicates the model is rejected at 99% level. ICVaRfxVaRplot.xpl
+
+Engle, R. (2002). Dynamic conditional correlation - a simple class of multivariate GARCH models, Journal of Business and Economic Statistics, 20(3) pp. 339­350.
+Engle, R. and Sheppard, K. (2001). Theoretical and empirical properties of dynamic conditional correlation multivariate GARCH, NBER Working Paper 8554.
+Hyv¨arinen, A. (1998). New Approximations of Differential Entropy for Independent Component Analysis and Projection Pursuit, MIT Press, pp. 273­279.
+Hyv¨arinen, A. (1999). Fast and robust fixed-point algorithms for independent component analysis, Neural Networks 10: 626­634.
+Hyv¨arinen, A. and Oja, E. (1999). Independent component analysis: Algorithms and applications, Neural Networks 13: 411­430.
+Hyva¨rinen, A., Karhunen, J. and Oja, E. (2001). Independent Component Analysis, John Wiley & Sons, Inc.
+Iyengary, S. and Mazumdar, M. (1998). A saddle point approximation for certain multivariate tail probabilities, SIAM Journal on Scientific Computing, 19(4) pp. 1234­1244.
+Jaschke, S. and Jiang, Y. (2002). Approximating value at risk in conditional Gaussian models, in W. H¨ardle, T. Kleinow and G. Stahl (eds), Applied Quantitative Finance, Springer Verlag.
+Jones, M. and Sibson, R. (1987). What is projection pursuit?, Journal of the Royal Statistical Society, A 150(1) pp. 1­36.
+Jorion, P. (2001). Value at Risk, McGraw-Hill. Mercurio, D. and Spokoiny, V. (2004). Statistical inference for time-inhomogeneous volatil-
+ity models, Ann. Statist. 12: 577­602. Prause, K. (1999). The generalized hyperbolic model: Estimation, financial derivatives and
+risk measures, dissertation. Ristaniemi, T., Raju, K. and Karhunen, J. (2002). Jammer mitigation in DS-CDMA using
+independent component analysis, In Proc. of the IEEE Int. Conf. on Communications.
+20
+
+SFB 649 Discussion Paper Series
+For a complete list of Discussion Papers published by the SFB 649, please visit http://sfb649.wiwi.hu-berlin.de.
+001 "Nonparametric Risk Management with Generalized Hyperbolic Distributions" by Ying Chen, Wolfgang Härdle and Seok-Oh Jeong, January 2005.
+002 "Selecting Comparables for the Valuation of the European Firms" by Ingolf Dittmann and Christian Weiner, February 2005.
+003 "Competitive Risk Sharing Contracts with One-sided Commitment" by Dirk Krueger and Harald Uhlig, February 2005.
+004 "Value-at-Risk Calculations with Time Varying Copulae" by Enzo Giacomini and Wolfgang Härdle, February 2005.
+005 "An Optimal Stopping Problem in a Diffusion-type Model with Delay" by Pavel V. Gapeev and Markus Reiß, February 2005.
+006 "Conditional and Dynamic Convex Risk Measures" by Kai Detlefsen and Giacomo Scandolo, February 2005.
+007 "Implied Trinomial Trees" by Pavel Cízek and Karel Komorád, February 2005.
+008 "Stable Distributions" by Szymon Borak, Wolfgang Härdle and Rafal Weron, February 2005.
+009 "Predicting Bankruptcy with Support Vector Machines" by Wolfgang Härdle, Rouslan A. Moro and Dorothea Schäfer, February 2005.
+010 "Working with the XQC" by Wolfgang Härdle and Heiko Lehmann, February 2005.
+011 "FFT Based Option Pricing" by Szymon Borak, Kai Detlefsen and Wolfgang Härdle, February 2005.
+012 "Common Functional Implied Volatility Analysis" by Michal Benko and Wolfgang Härdle, February 2005.
+013 "Nonparametric Productivity Analysis" by Wolfgang Härdle and Seok-Oh Jeong, March 2005.
+014 "Are Eastern European Countries Catching Up? Time Series Evidence for Czech Republic, Hungary, and Poland" by Ralf Brüggemann and Carsten Trenkler, March 2005.
+015 "Robust Estimation of Dimension Reduction Space" by Pavel Cízek and Wolfgang Härdle, March 2005.
+016 "Common Functional Component Modelling" by Alois Kneip and Michal Benko, March 2005.
+017 "A Two State Model for Noise-induced Resonance in Bistable Systems with Delay" by Markus Fischer and Peter Imkeller, March 2005.
+018 "Yxilon ­ a Modular Open-source Statistical Programming Language" by Sigbert Klinke, Uwe Ziegenhagen and Yuval Guri, March 2005.
+019 "Arbitrage-free Smoothing of the Implied Volatility Surface" by Matthias R. Fengler, March 2005.
+020 "A Dynamic Semiparametric Factor Model for Implied Volatility String Dynamics" by Matthias R. Fengler, Wolfgang Härdle and Enno Mammen, March 2005.
+021 "Dynamics of State Price Densities" by Wolfgang Härdle and Zdenk Hlávka, March 2005.
+022 "DSFM fitting of Implied Volatility Surfaces" by Szymon Borak, Matthias R. Fengler and Wolfgang Härdle, March 2005.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+023 "Towards a Monthly Business Cycle Chronology for the Euro Area" by Emanuel Mönch and Harald Uhlig, April 2005.
+024 "Modeling the FIBOR/EURIBOR Swap Term Structure: An Empirical Approach" by Oliver Blaskowitz, Helmut Herwartz and Gonzalo de Cadenas Santiago, April 2005.
+025 "Duality Theory for Optimal Investments under Model Uncertainty" by Alexander Schied and Ching-Tang Wu, April 2005.
+026 "Projection Pursuit For Exploratory Supervised Classification" by EunKyung Lee, Dianne Cook, Sigbert Klinke and Thomas Lumley, May 2005.
+027 "Money Demand and Macroeconomic Stability Revisited" by Andreas Schabert and Christian Stoltenberg, May 2005.
+028 "A Market Basket Analysis Conducted with a Multivariate Logit Model" by Yasemin Boztu and Lutz Hildebrandt, May 2005.
+029 "Utility Duality under Additional Information: Conditional Measures versus Filtration Enlargements" by Stefan Ankirchner, May 2005.
+030 "The Shannon Information of Filtrations and the Additional Logarithmic Utility of Insiders" by Stefan Ankirchner, Steffen Dereich and Peter Imkeller, May 2005.
+031 "Does Temporary Agency Work Provide a Stepping Stone to Regular Employment?" by Michael Kvasnicka, May 2005.
+032 "Working Time as an Investment? ­ The Effects of Unpaid Overtime on Wages, Promotions and Layoffs" by Silke Anger, June 2005.
+033 "Notes on an Endogenous Growth Model with two Capital Stocks II: The Stochastic Case" by Dirk Bethmann, June 2005.
+034 "Skill Mismatch in Equilibrium Unemployment" by Ronald Bachmann, June 2005.
+035 "Uncovered Interest Rate Parity and the Expectations Hypothesis of the Term Structure: Empirical Results for the U.S. and Europe" by Ralf Brüggemann and Helmut Lütkepohl, April 2005.
+036 "Getting Used to Risks: Reference Dependence and Risk Inclusion" by Astrid Matthey, May 2005.
+037 "New Evidence on the Puzzles. Results from Agnostic Identification on Monetary Policy and Exchange Rates." by Almuth Scholl and Harald Uhlig, July 2005.
+038 "Discretisation of Stochastic Control Problems for Continuous Time Dynamics with Delay" by Markus Fischer and Markus Reiss, August 2005.
+039 "What are the Effects of Fiscal Policy Shocks?" by Andrew Mountford and Harald Uhlig, July 2005.
+040 "Optimal Sticky Prices under Rational Inattention" by Bartosz Makowiak and Mirko Wiederholt, July 2005.
+041 "Fixed-Prize Tournaments versus First-Price Auctions in Innovation Contests" by Anja Schöttner, August 2005.
+042 "Bank finance versus bond finance: what explains the differences between US and Europe?" by Fiorella De Fiore and Harald Uhlig, August 2005.
+043 "On Local Times of Ranked Continuous Semimartingales; Application to Portfolio Generating Functions" by Raouf Ghomrasni, June 2005.
+044 "A Software Framework for Data Based Analysis" by Markus Krätzig, August 2005.
+045 "Labour Market Dynamics in Germany: Hirings, Separations, and Job-toJob Transitions over the Business Cycle" by Ronald Bachmann, September 2005.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+046 "Paternal Uncertainty and the Economics of Mating, Marriage, and Parental Investment in Children" by Dirk Bethmann and Michael Kvasnicka, September 2005.
+047 "Estimation and Testing for Varying Coeffcients in Additive Models with Marginal Integration " by Lijian Yang, Byeong U. Park, Lan Xue and Wolfgang Härdle, September 2005.
+048 "Zeitarbeit in Deutschland: Trends und Perspektiven" by Michael C. Burda and Michael Kvasnicka, September 2005.
+049 "Courtesy and Idleness: Gender Differences in Team Work and Team Competition" by Radosveta Ivanova-Stenzel and Dorothea Kübler, September 2005.
+050 "Do Factor Shares Reflect Technology?" by Benjamin Bental and Domonique Demougin, September 2005.
+051 "Optimal investments for risk- and ambiguity-averse preferences: A duality approach" by Alexander Schied, September 2005.
+052 "Relational Contracts and Job Design" by Anja Schöttner, September 2005.
+053 "Explicit characterization of the super-replication strategy in financial markets with partial transaction costs" by Imen Bentahar and Bruno Bouchard, October 2005.
+054 "Aid Effectiveness and Limited Enforceable Conditionality" by Almuth Scholl, August 2005.
+055 "Limited Enforceable International Loans, International Risk Sharing and Trade" by Almuth Scholl, August 2005.
+056 "Stock Markets and Business Cycle Comovement in Germany before World War I: Evidence from Spectral Analysis" by Albrecht Ritschl and Martin Uebele, November 2005.
+057 "An empirical test of theories of price valuation using a semiparametric approach, reference prices, and accounting for heterogeneity" by Yasemin Boztu and Lutz Hildebrandt, November 2005.
+058 "Integrable e-lements for Statistics Education" by Wolfgang Härdle, Sigbert Klinke and Uwe Ziegenhagen, December 2005.
+059 "What does the Bank of Japan do to East Asia?" by Bartosz Makowiak, December 2005.
+060 "Portfolio Value at Risk Based On Independent Components Analysis" by Ying Chen, Wolfgang Härdle and Vladimir Spokoiny, December 2005.
+SFB 649, Spandauer Straße 1, D-10178 Berlin http://sfb649.wiwi.hu-berlin.de
+This research was supported by the Deutsche Forschungsgemeinschaft through the SFB 649 "Economic Risk".
+
+
