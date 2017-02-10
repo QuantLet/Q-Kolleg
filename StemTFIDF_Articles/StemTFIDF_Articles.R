@@ -25,7 +25,7 @@ library(tm)
 
 ### 1. Read all .txt files into a large list                       #####
   # Read strings from .txt into R-session:
-  mytxts = list.files("03_Stem_TDM_TFIDF/txt", pattern = "*.txt",
+  mytxts = list.files("StemTFIDF_Articles", pattern = "*.txt",
                       full.names = T)
   abstractlist = lapply(mytxts, function(textdoc){
     paste0(scan(textdoc, what = character(), fileEncoding = "latin1"),  
@@ -45,4 +45,4 @@ library(tm)
  
 ### 3. Create a TF/IDF matrix & save result in .Rdata format       #####
   TF = small_dtm(corpus, threshold = 0.995, weighting = weightTf)
-  save(TF, file = "04_Analysis/Articles_TFIDF.Rdata")
+  save(TF, file = "TopicModelling_Articles/Articles_TFIDF.Rdata")

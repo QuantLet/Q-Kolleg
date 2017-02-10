@@ -1,6 +1,6 @@
 library(tm)
 
-load("03_Stem_TDM_TFIDF/Abstracts_raw.Rdata")   # Opens as abstr_info
+load("StemTFIDF_Abstracts/Abstracts_raw.Rdata")   # Opens as abstr_info
 
 ########################################################################
 
@@ -59,6 +59,6 @@ load("03_Stem_TDM_TFIDF/Abstracts_raw.Rdata")   # Opens as abstr_info
   
 #### 3. Save data in .Rdata for further analysis                  #####
   
-  save(TDM, file = "04_Analysis/Abstract_TDMs.Rdata")
-  save(abstr_info, file = "04_Analysis/Abstract_infotable.Rdata")
-  
+  save(TDM, file = "Textmining_Abstracts/Abstract_TDMs.Rdata")
+  save(abstr_info, file = "Textmining_Abstracts/Abstract_infotable.Rdata")
+  save(abstr_info, file = "TopicModelling_Articles/Abstract_infotable.Rdata")

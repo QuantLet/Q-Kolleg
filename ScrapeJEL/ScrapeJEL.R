@@ -6,7 +6,16 @@ library(XML)
 library(koRpus)
 library(tm)
 
-#####  Define functions:
+########################################################################
+
+### 0. Functions for this script
+### 1. Scrape JEL codes and description from Wikipedia
+### 2. Clean, reformat and save the scraped information
+
+########################################################################
+
+
+#### 0. Functions for this script
 
   ## Clean the html text for second and third hierarchy JEL-codes:
   ## Third hierarchy is e.g. A13
@@ -41,7 +50,7 @@ library(tm)
   }
 
   
-###### Scrape JEL codes & descriptions from wikipedia:
+#### 1. Scrape JEL codes and description from Wikipedia
   
   # Scrape the three levels of the JEL-code hierarchy:
   wiki = POST("https://en.wikipedia.org/wiki/JEL_classification_codes")
@@ -93,8 +102,8 @@ library(tm)
   JEL = JEL[order(JEL)]
   
 
-####### Getting the data clean and in a workable format:
-
+#### 2. Clean, reformat and save the scraped information
+  
   # Get the data in the right shape and format (2 columns, 20 rows):
   JEL = str_split_fixed(JEL, " – ", 2)
   JEL[,1] = substr(JEL[,1], 0, 1)
@@ -107,5 +116,5 @@ library(tm)
   colnames(JEL) = c("code", "descr")
   
 
-######## Save the JEL description in a .Rdata-file
-  save(JEL, file = "03_Stem_TDM_TFIDF/JEL_descr_raw.Rdata")
+  # Save the JEL description in a .Rdata-file
+  save(JEL, file = "StemJEL/JEL_raw.Rdata")

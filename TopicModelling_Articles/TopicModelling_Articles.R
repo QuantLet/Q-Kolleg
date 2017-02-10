@@ -1,9 +1,9 @@
 library(topicmodels)
 library(tm)
 
-load(file = "04_Analysis/Abstract_infotable.Rdata")  # loads as abstr_info
-load(file = "04_Analysis/JEL_descr.Rdata")           # loads as JEL
-load(file = "04_Analysis/Articles_TFIDF.Rdata")      # loads as TF
+load(file = "TopicModelling_Articles/Abstract_infotable.Rdata")  # loads as abstr_info
+load(file = "TopicModelling_Articles/JEL_descr.Rdata")           # loads as JEL
+load(file = "TopicModelling_Articles/Articles_TFIDF.Rdata")      # loads as TF
 
 ########################################################################
 
@@ -59,4 +59,4 @@ keep.letter = function(x){gsub("[^[:alpha:]]", "", x)}
   
 #### 3. Save the LDA output                                        #####
   
-  save(lda.output, file = "04_Analysis/lda_output.Rdata")
+  save(lda.output, file = "TopicModelling_Articles/lda_output.Rdata")

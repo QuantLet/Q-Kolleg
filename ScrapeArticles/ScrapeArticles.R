@@ -39,16 +39,16 @@ library(httr)
   table_info = table_info[[1]]
 
   # Some page specific manipulations:
-  table_info = table_info[-nrow(table_info), ]
-  colnames(table_info) = c("number", "title", "authors", "projectcode", 
-                           "date", "jel", "abstract", "download", 
-                           "quantlets", "empty")
-  cols = ncol(table_info)
-  table_info = table_info[, -((cols-3):cols)]
-  table_info = lapply(table_info, str_replace_all, "\r\n", "")
+  table_info           =   table_info[-nrow(table_info), ]
+  colnames(table_info) =   c("number", "title", "authors", "projectcode", 
+                              "date", "jel", "abstract", "download", 
+                              "quantlets", "empty")
+  cols                 = ncol(table_info)
+  table_info           = table_info[, -((cols-3):cols)]
+  table_info           = lapply(table_info, str_replace_all, "\r\n", "")
 
   # date in date format
-  table_info$date = as.Date(table_info$date, format="%d.%m.%Y")
+  table_info$date      = as.Date(table_info$date, format="%d.%m.%Y")
   
   
 #### 2. Scrape & save CRC 649 papers (PDF)                        #####
@@ -57,10 +57,9 @@ library(httr)
   fromhere = paste0("https://sfb649.wiwi.hu-berlin.de/papers/pdf/SFB649DP", 
                     table_info$number, ".pdf", sep = "")
   
-  # Create a directory where the PDF articles can be saved:
-  setwd("02_PDF_to_txt")
-  if(!("PDFs" %in% list.files())){dir.create("PDFs")}
-  setwd("PDFs")
+  # Set the directory to the location where the PDFs should be saved:
+  setwd("PDF_2_TXT")
+  
   
   # Download papers from all valid links, ignore invalid ones:
   for(i in 1:length(fromhere)){

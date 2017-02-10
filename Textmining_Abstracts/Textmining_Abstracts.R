@@ -1,7 +1,7 @@
 library(cluster)
 
-load("04_Analysis/Abstract_TDMs.Rdata")      # Opens as "TDM"
-load("04_Analysis/Abstract_infotable.Rdata") # Opens as "abstr_info"
+load("Textmining_Abstracts/Abstract_TDMs.Rdata")      # Opens as "TDM"
+load("Textmining_Abstracts/Abstract_infotable.Rdata") # Opens as "abstr_info"
 
 
 ########################################################################
@@ -78,7 +78,7 @@ load("04_Analysis/Abstract_infotable.Rdata") # Opens as "abstr_info"
       pca.man(as.matrix(TDM[[x]]), tau = 0.3)})
     
     # PCA plot for TF-IDF matrix and Screeplot
-    png("04_Analysis/PCA_Visualization_TFIDF.png")
+    png("Textmining_Abstracts/Textmining_Abstracts.png")
       par(mfrow = c(1, 2))
       plot(pca[[5]], type = "l", 
          main = paste0("Screeplot, 10% explained by first ", pca[[5]]$idx," PC"))
@@ -87,7 +87,7 @@ load("04_Analysis/Abstract_infotable.Rdata") # Opens as "abstr_info"
     dev.off()
     
     # Hierarchical Ward clustering
-    png("04_Analysis/Hier_Ward_Visual.png")
+    png("Textmining_Abstracts/Textmining_Abstracts-1.png")
       par(mfrow = c(1, 2))
       plot(group[[5]], hang = -1, cex = .6, xlab = "")
       rect.hclust(group[[5]], k = 4, border = 1:4)
@@ -96,7 +96,7 @@ load("04_Analysis/Abstract_infotable.Rdata") # Opens as "abstr_info"
     dev.off()
     
     # K-means
-    png("04_Analysis/Kmeans_Visual.png")
+    png("Textmining_Abstracts/Textmining_Abstracts-2.png")
       par(mfrow = c(1,1))
       plot(pca[[5]]$x[,c(1,2)], col =  kfit[[5]], 
          main = "PC1 vs PC2 on TF-IDF (color: k-means clusters)")
@@ -104,7 +104,7 @@ load("04_Analysis/Abstract_infotable.Rdata") # Opens as "abstr_info"
     #kmeans_fit[[5]]
     
     # Silhouette information 
-    png("04_Analysis/Silhouette_info.png")
+    png("Textmining_Abstracts/Textmining_Abstracts.png-3.png")
       par(mfrow = c(2,1))
       plot(silhouette(cutree(group[[5]],4),d[[5]])[,3], 
            main="Silhouette hierarchical clustering", col=cutree(group[[5]],4))

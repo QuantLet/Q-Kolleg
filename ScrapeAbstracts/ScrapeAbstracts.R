@@ -40,7 +40,7 @@ library(tm)
   colnames(abstr_info) = c("number", "title", "authors", "projectcode", 
                         "date", "jel", "abstract", "download", 
                         "quantlets", "empty")
-  cols = ncol(abstr_info)
+  cols       = ncol(abstr_info)
   abstr_info = abstr_info[, -((cols-3):cols)]
   abstr_info = lapply(abstr_info, str_replace_all, "\r\n", "")
   
@@ -52,7 +52,7 @@ library(tm)
   # Get the URLs and parse them
   fromhere = paste0("http://sfb649.wiwi.hu-berlin.de/fedc/DP_abstract.php?id=SFB649DP", 
                      abstr_info$number, ".pdf")
-  doc = lapply(fromhere, function(x){htmlParse(x, encoding = "Latin-1")})
+  doc      = lapply(fromhere, function(x){htmlParse(x, encoding = "Latin-1")})
   
   # Get the body of the HTML-files
   plain.text = lapply(doc, totext)
@@ -60,8 +60,8 @@ library(tm)
   plain.text = lapply(plain.text, function(x){gsub("\n|Abstract:", "", x)})
 
   # Combine the abstract texts with the paper information
-  abstr_info$abstracts <- unlist(plain.text)
+  abstr_info$abstracts = unlist(plain.text)
   
   # Save the object in the 4_Analysis subfolder
-  save(abstr_info, file = "03_Stem_TDM_TFIDF/Abstracts_raw.Rdata")
+  save(abstr_info, file = "StemTFIDF_Abstracts/Abstracts_raw.Rdata")
   
