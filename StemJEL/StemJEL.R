@@ -34,7 +34,7 @@ load("StemJEL/JEL_raw.Rdata") # opens as JEL
 
   
 ### 2. TFIDF for the JEL descriptions:
-  JEL.TFIDF = small_dtm(corpus, weighting = weightTf)
+  JEL.TF = small_dtm(corpus, weighting = weightTf)
 
 
 ### 3. Save data in .Rdata for further analysis

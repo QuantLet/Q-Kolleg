@@ -2,8 +2,9 @@
 
 ### 0. Load data and packages
 ### 1. Run the LDA
-### 2. Provide some insight in LDA output
-### 3. Calculate topic distribution for Testdata based on LDA output
+### 2. Get the major terms in every topic to .txt
+### 3. Calculate posterior for CRC papers
+### 4. Calculate posterior for JEL descriptions
 
 #####################################################################
 
@@ -15,48 +16,31 @@
   # Traindata (Derivation is omitted, due to copyright issues)
   load(file = "TopicModelling_Articles/AEA_TF.Rdata")  # Traindata
   load(file = "TopicModelling_Articles/CRC_TF.Rdata")  # Testdata
-
+  load(file = "TopicModelling_Articles/JEL_TF.Rdata")  # JEL.TF
+  
   
 ### 1. Run the LDA
   
   k = 20
   # Running LDA for k topics  
   lda.output = LDA(Traindata, k = k, method = "Gibbs") 
-  save(lda.output, file = "TopicModelling_Articles/lda_output.Rdata") 
-  
-### 2. Provide some insight in LDA output:
+  save(lda.output, file = "TopicModelling_Analysis/lda_output.Rdata") 
 
-  # Overview of allocation of topics and terms per topic 
-  lda.topics = as.matrix(topics(lda.output)) 
+    
+### 2. Get the major terms in every topic to .txt
+  
   lda.terms  = as.matrix(terms(lda.output, 10)) 
+  write.csv(lda.terms, file = "TopicModelling_Analysis/lda_terms.txt")
   
-  write.csv(lda.terms, file = "TopicModelling_Articles/lda_terms.txt")
-  lda.terms = read.csv2("TopicModelling_Articles/lda_terms.txt", 
-                         header = T, stringsAsFactors = F, sep = ",")
-  lda.terms = lda.terms[,-1]
   
-  # Number of documents assigned to every topic, decreasing order: 
-  table(lda.topics)[order(table(lda.topics), decreasing = T)] 
-
-  # The total loadings per topic for Traindata:
-  topic_proportions = colSums(lda.output@gamma)/sum(lda.output@gamma)
+### 3. Calculate posterior for CRC 649 papers (AKA Traindata)
   
-### 3. Calculate topic distribution for Testdata based on LDA output
-  
-  # Find the topics that the descriptions will be assigned to by LDA: 
   CRC.posterior = posterior(lda.output, Testdata) 
-  save(CRC.posterior, file = "TopicModelling_Articles/CRC_posterior.Rdata")
+  save(CRC.posterior, file = "TopicModelling_Analysis/CRC_posterior.Rdata")
   
-  CRC.topics = apply(CRC.posterior$topics, 1, which.max) 
-
-
-### 4. Calculate topic distribution for JEL descriptions based on LDA output:
-  load("TopicModelling_Articles/JEL_TF.Rdata")
   
-  JEL.posterior = posterior(lda.output, corpus)
-  JEL.topics = apply(JEL.posterior$topic, 1, which.max)
+### 4. Calculate posterior for JEL descriptions:
   
-  Corpus(VectorSource(JEL[,2]))
-  
-  JEL
+  JEL.posterior = posterior(lda.output, JEL.TF)
+  save(JEL.posterior, file = "TopicModelling_Analysis/JEL_posterior.Rdata")
   
