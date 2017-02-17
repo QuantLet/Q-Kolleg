@@ -6,6 +6,8 @@ library(XML)
 library(koRpus)
 library(tm)
 
+#####################################################################
+
 ## 0. Functions for the script
 ## 1. Scrape table-info from CRC 649 page
 ## 2. Scrape & save abstracts of CRC 649 papers
@@ -21,6 +23,7 @@ library(tm)
 
 
 ### 1. Get the table-info from the CRC 649 page:  ###
+
   drc = POST("https://sfb649.wiwi.hu-berlin.de/fedc/discussionPapers_formular_content.php",
               body = list(filterTypeName = "filterTypeName:AUTHORS",
                           filteryear = "all",
@@ -46,7 +49,8 @@ library(tm)
   
   # date in date format
   abstr_info$date = as.Date(abstr_info$date, format="%d.%m.%Y")
-  
+
+
 ### 2. Scrape & save the abstracts of RDC-papers  ###
   
   # Get the URLs and parse them

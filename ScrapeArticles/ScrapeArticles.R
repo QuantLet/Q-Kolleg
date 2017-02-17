@@ -24,9 +24,9 @@ library(httr)
 
 #### 1. Get the table-info from the CRC 649 page:                  #####
   
-  drc = POST("https://sfb649.wiwi.hu-berlin.de/fedc/discussionPapers_formular_content.php",
-           body = list(filterTypeName = "filterTypeName:AUTHORS",
-                       filteryear = "all",
+  drc = POST("target_url.php",
+           body = list(firstsearch = "allauthors",
+                       sec.second = "allyears",
                        B1 = "Search"), encode = "form")
   table_info = read_html(drc) %>%
     html_nodes("body") %>%

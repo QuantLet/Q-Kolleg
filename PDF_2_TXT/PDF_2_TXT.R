@@ -2,6 +2,9 @@
 #   1) Requires installation of pdftotext
 #   2) When running the script, select the location of pdftotext
 #   3) Translation from PDF to txt takes a while (5 - 10 minutes)
+#   4) The American Economic Association papers have been omitted from
+#         this code. The textmining procedure is also ommited. The TFIDF
+#         matrix may be found under "TopicModelling_Articles/AEA_TFIDF"
 
 ########################################################################
 
@@ -11,7 +14,7 @@
 
 ########################################################################
 
-setwd("02_PDF_to_txt/PDFs")
+setwd("PDF_to_TXT")
 
 ### 1. Identify pdftotext locations                                #####
   pdf2txt.path <- file.choose()
@@ -33,19 +36,18 @@ setwd("02_PDF_to_txt/PDFs")
 
   
 ### 3. Move the .txt-converted files to another folder
-  ## Move the .txt files to another directory: 3_txt_to_dataframes/txt
+  ## Move the .txt files to another directory: StemTFIDF_Articles
     # Get the full names of the .txt-converted files:
     oldpath = getwd()
     fromhere = list.files(oldpath, pattern = "*.txt", full.names = T)
     
     # Move two folders down in the path and create a folder called txt
     basepath = dirname(dirname(oldpath))
-    newpath = paste0(basepath, "/03_Stem_TDM_TFIDF/txt")
-    if(!("txt" %in% list.files(dirname(newpath)))){dir.create(newpath)}
-      
+    newpath = paste0(basepath, "/StemTFIDF_Articles")
+    
     # Create another vector with new location full names
     tohere = paste0(newpath, "/", mytxts)
     
     # Migrate the .txt files to the new location
     file.rename(fromhere, tohere)
-  
+    # NOTE: The .txt-files for the AEA articles have been omitted
